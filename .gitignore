@@ -1,0 +1,12 @@
+documents
+node_modules
+uploads
+coverage
+temp
+update.zip
+daemon
+access.log
+index.html
+npm-debug.log
+debug.log
+public/js/include.js*

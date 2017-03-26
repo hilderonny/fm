@@ -1,0 +1,10 @@
+<md-list class="lines-beetween-items">
+    <md-list-item ng-repeat="subFolder in folder.folders | orderBy: 'name'" ng-click="selectFolder(subFolder)" ng-class="selectedFolder === subFolder ? 'active' : false" aria-label="{{subFolder.name}}">
+        <md-icon md-svg-src="/css/icons/material/Folder.svg"></md-icon>
+        <p ng-bind="subFolder.name"></p>
+    </md-list-item>
+    <md-list-item ng-repeat="document in folder.documents | orderBy: 'name'" ng-click="selectDocument(document)" ng-class="selectedDocument === document ? 'active' : false" aria-label="{{document.name}}">
+        <md-icon md-svg-src="/css/icons/material/Document.svg"></md-icon>
+        <p ng-bind="document.name"></p>
+    </md-list-item>
+</md-list>

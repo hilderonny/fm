@@ -1,0 +1,10 @@
+<md-list class="lines-beetween-items">
+    <md-list-item ng-repeat="permission in userGroup.permissions | orderBy: 'key'" ng-click="selectPermission(permission)" ng-class="{active:selectedPermission == permission}" aria-label="{{permission.key}}">
+        <md-icon ng-if="!permission.canRead && !permission.canWrite" md-svg-src="/css/icons/material/Cancel.svg"></md-icon>
+        <md-icon ng-if="permission.canRead && !permission.canWrite" md-svg-src="/css/icons/material/Search.svg"></md-icon>
+        <md-icon ng-if="permission.canWrite" md-svg-src="/css/icons/material/Edit.svg"></md-icon>
+        <p>
+            <span translate="{{ permission.key }}"></span>
+        </p>
+    </md-list-item>
+</md-list>

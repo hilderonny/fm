@@ -1,0 +1,44 @@
+<md-card ng-cloak ng-controller="AdministrationAdministratorCardController" style="background-image:url(/css/icons/office/User.svg);">
+
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" translate>CLIENTS_NEWADMINISTRATOR</span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+    </md-button>
+
+    <md-card-content>
+
+        <form name="administratorsForm" layout="column">
+
+            <md-input-container flex>
+                <label translate>CLIENTS_USERNAME</label>
+                <input ng-model="administrator.name" name="name" ng-required="true" ng-change="serverErrors['name'] = []">
+                <div ng-messages="administratorsForm.name.$error">
+                    <div ng-message="required" translate>CLIENTS_PLEASEPROVIDEUSERNAME</div>
+                    <div ng-message="nameInUse" translate>CLIENTS_USERNAMEINUSE</div>
+                </div>
+                <div class="server-errors" ng-if="serverErrors" ng-repeat="serverError in serverErrors['name']">
+                    <div>{{serverError}}</div>
+                </div>
+            </md-input-container>
+
+            <md-input-container flex>
+                <label translate>CLIENTS_PASSWORD</label>
+                <input type="password" name="pass" ng-model="administrator.pass">
+            </md-input-container>
+
+
+            <md-card-actions layout="row" layout-align="end center">
+                <md-button class="md-raised md-accent" ng-click="createAdministrator()" ng-disabled="administratorsForm.$invalid"><span translate>CLIENTS_CREATE</span></md-button>
+            </md-card-actions>
+
+            <md-card-content translate>CLIENTS_CREATEADMINDESCRIPTION</md-card-content>
+
+        </form>
+    </md-card-content>
+
+</md-card>

@@ -1,0 +1,30 @@
+<md-card ng-cloak ng-controller="AdministrationSettingSetListCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" translate>SETTINGS_SETTINGS</span>
+        </md-card-title-text>
+    </md-card-title>
+    
+    <md-card-content>
+
+        <md-list ng-cloak>
+
+            <ng-repeat ng-repeat="settingSet in settingSets">
+
+                <md-subheader><span translate="{{ settingSet.type }}"></span></md-subheader>
+
+                <md-list-item ng-repeat="settingSetItem in settingSet.items" ng-click="selectSettingSetItem(settingSetItem)" ng-class="{active: selectedSettingSetItem === settingSetItem}" aria-label="{{ settingSetItem.title }}">
+                    <md-icon md-svg-src="/css/icons/material/{{settingSetItem.icon}}.svg" aria-label="{{ settingSetItem.title }} "></md-icon>
+                    <p><span translate="{{ settingSetItem.title }}"></span></p>
+                </md-list-item>
+
+                <md-divider></md-divider>
+                
+            </ng-repeat>
+
+        </md-list>
+        
+    </md-card-content>
+
+</md-card>

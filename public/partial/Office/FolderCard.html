@@ -1,0 +1,55 @@
+<md-card ng-cloak ng-controller="OfficeFolderCardController" style="background-image:url(/css/icons/office/Document.svg);">
+
+    <md-card-title flex="none" class="withfab">
+        <md-card-title-text>
+            <span class="md-headline" ng-if="!isNewFolder && !isRootFolder" ng-bind="folderName"></span>
+            <span class="md-headline" ng-if="isRootFolder" translate>FOLDERS_ROOTFOLER</span>
+            <span class="md-headline" ng-if="isNewFolder" translate>FOLDERS_NEW_FOLDER</span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-fab-speed-dial md-direction="down" class="md-scale" ng-if="!isNewFolder">
+        <md-fab-trigger>
+            <md-button class="md-fab md-accent" aria-label="MENU">
+                <md-tooltip md-direction="left"><span translate>FOLDERS_MORE_ACTIONS</span></md-tooltip>
+                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
+            </md-button>
+        </md-fab-trigger>
+        <md-fab-actions>
+            <md-button class="md-fab md-raised md-mini" ng-click="newFolder()" aria-label="ADD FOLDER">
+                <md-tooltip md-direction="left"><span translate>FOLDERS_CREATE_NEW_FOLDER</span></md-tooltip>
+                <md-icon md-svg-src="/css/icons/material/Add Folder.svg"></md-icon>
+            </md-button>
+            <md-button class="md-fab md-raised md-mini" aria-label="UPLOAD FILE">
+                <md-tooltip md-direction="left"><span translate>FOLDERS_UPLOAD_DOCUMENT</span></md-tooltip>
+                <md-icon md-svg-src="/css/icons/material/Upload.svg"></md-icon>
+                <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadFile(this)" />
+            </md-button>
+        </md-fab-actions>
+    </md-fab-speed-dial>
+
+    <md-button class="md-icon-button close" ng-if="!isRootFolder" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+    </md-button>
+
+    <md-tabs flex ng-if="!isNewFolder && !isRootFolder">
+        <md-tab>
+            <md-tab-label><span translate>FOLDERS_CONTENT</span></md-tab-label>
+            <md-tab-body><md-card-content ng-include="'partial/Office/FolderCardContentTab.html'"></md-card-content></md-tab-body>
+        </md-tab>
+        <md-tab>
+            <md-tab-label><span translate>FOLDERS_DETAILS</span></md-tab-label>
+            <md-tab-body><ng-include src="'partial/Office/FolderCardDetailsTab.html'"></ng-include></md-tab-body>
+        </md-tab>
+    </md-tabs>
+
+    <md-card-content ng-if="isRootFolder" ng-include="'partial/Office/FolderCardContentTab.html'"></md-card-content>
+
+    <ng-include flex ng-if="isNewFolder" src="'partial/Office/FolderCardDetailsTab.html'"></ng-include>
+
+    <div class="progress-panel" ng-if="isUploading">
+        <md-progress-circular md-mode="{{uploadMode}}" value="{{uploadProgress}}"></md-progress-circular>
+        <span>{{uploadProgress}} %</span>
+    </div>
+
+</md-card>

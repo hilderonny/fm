@@ -1,0 +1,18 @@
+<md-card-content>
+
+    <form name="folderForm" layout="column">
+
+        <md-input-container flex>
+            <label translate>FOLDERS_NAME</label>
+            <input ng-model="folder.name" name="name">
+        </md-input-container>
+
+
+        <md-card-actions layout="row" layout-align="end center">
+            <md-button class="md-raised md-accent" ng-if="isNewFolder" ng-click="createFolder()"><span translate>FOLDERS_CREATE</span></md-button>
+            <md-button class="md-raised md-accent" ng-if="!isNewFolder" ng-click="saveFolder()"><span translate>FOLDERS_SAVE</span></md-button>
+            <md-button class="md-raised md-warn" ng-if="!isNewFolder" ng-click="deleteFolder()"><span translate>FOLDERS_DELETE</span></md-button>
+        </md-card-actions>
+
+    </form>
+</md-card-content>

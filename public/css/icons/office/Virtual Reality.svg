@@ -1,0 +1,13 @@
+﻿<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 48 48" style="enable-background:new 0 0 48 48;" xml:space="preserve" width="48" height="48">
+<path style="fill:#FFB74D;" d="M43,13H5c0-2.664,2.337-5,5-5h28C40.663,8,43,10.336,43,13z"/>
+<rect x="19" y="30" style="fill:#AA290B;" width="10" height="7"/>
+<path style="fill:#FB8C00;" d="M6,40h11c1.133,0,2.151-0.649,2.595-1.655l2.159-5.895C22.143,31.569,23.024,31,24,31&#10;&#9;s1.857,0.569,2.246,1.45l2.16,5.896C28.849,39.351,29.867,40,31,40h11c2.209,0,4-1.791,4-4V16c0-2.209-1.791-4-4-4H6&#10;&#9;c-2.209,0-4,1.791-4,4v20C2,38.209,3.791,40,6,40z"/>
+<g>
+	<circle style="fill:#BF360C;" cx="35" cy="26" r="5"/>
+	<circle style="fill:#BF360C;" cx="13" cy="26" r="5"/>
+</g>
+<g>
+	<path style="fill:none;stroke:#FF8A65;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" d="&#10;&#9;&#9;M11.586,24.586c0.781-0.781,2.047-0.781,2.828,0"/>
+	<path style="fill:none;stroke:#FF8A65;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" d="&#10;&#9;&#9;M33.586,24.586c0.781-0.781,2.047-0.781,2.828,0"/>
+</g>
+</svg>

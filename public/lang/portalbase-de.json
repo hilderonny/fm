@@ -1,0 +1,22 @@
+{
+    "SETTINGS_CHANGES_SAVED" : "Änderungen gespeichert",
+    "SETTINGS_CHECK_FOR_UPDATES" : "Updates suchen",
+    "SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE" : "Installieren",
+    "SETTINGS_FILE_UPLODAED" : "Datei hochgeladen",
+    "SETTINGS_INVALID_LICENSEKEY" : "Der Lizenzschlüssel ist ungültig. Es können daher keine Updates installiert werden.",
+    "SETTINGS_LICENSE" : "Lizenz",
+    "SETTINGS_LICENSEKEY" : "Lizenzschlüssel",
+    "SETTINGS_LICENSESERVER" : "Lizenz-Server",
+    "SETTINGS_LOCAL_VERSION" : "Lokale Version",
+    "SETTINGS_MANUAL_UPDATE" : "Manuelles Update",
+    "SETTINGS_MISSING_LICENSESERVER" : "Bitte geben Sie die Adresse eines Lizenz-Servers ein",
+    "SETTINGS_PORTALSETTINGS" : "Portaleinstellungen",
+    "SETTINGS_SAVE" : "Speichern",
+    "SETTINGS_UPDATE_IN_PROGRESS" : "Update wird installiert",
+    "SETTINGS_UPDATES" : "Updates",
+    "SETTINGS_UPLOAD_UPDATE" : "Update hochladen",
+    "SETTINGS_VERSION_ON_SERVER" : "Version auf Lizenzserver",
+    "SETTINGS_WAIT_FOR_UPDATE_COMPLETION" : "Der Update-Vorgang wurde gestartet. Bitte warten Sie zwei Minuten bis das Update installiert wurde und laden Sie dann die Seite neu!",
+    "SETTINGSET_CLIENT_GENERAL" : "Mandanteneinstellungen",
+    "SETTINGSET_PORTAL_GENERAL" : "Portaleinstellungen"
+}

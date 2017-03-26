@@ -1,0 +1,644 @@
+/* Diese Datei enthält Stilvorgaben, die in local.css überschrieben werden können */
+
+/* Allgemeine Vorgaben für Desktop und Mobil */
+button > md-progress-circular {
+    margin:auto;
+}
+
+md-card {
+    position:relative;
+    width: 360px;
+    min-width: 360px;
+    flex: 0 0 360px;
+    display: flex;
+    transform-origin: bottom left;
+    transform: rotate(0deg);
+    border:none;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+md-card.fullwidth:first-child {
+    flex: 1;
+}
+
+md-card.relative {
+    position: relative;
+}
+
+md-card > button.md-fab {
+    position:absolute;
+    top:10px;
+    right:10px;
+}
+
+
+md-card > md-fab-speed-dial {
+    position:absolute;
+    top:16px;
+    right:18px;
+}
+
+md-card > md-fab-speed-dial button.md-fab {
+    margin: 0;
+}
+
+md-card  button.close {
+    position: absolute;
+    top: -10px;
+    right: -16px;
+    transform: scale(0.75);
+}
+
+md-card > md-card-content {
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background-color: rgba(255,255,255,0.97);
+}
+
+md-card-content > md-grid-list {
+    height:100%;
+}
+
+md-card-title, md-card > ng-include {
+    background-color: rgba(255,255,255,0.97);
+}
+
+md-card-title.withfab {
+    padding-right:80px;
+}
+
+md-card-title-text {
+    width: 100%;
+}
+
+md-card-title-text > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+md-icon {
+    color: black;
+    opacity: 0.6;
+}
+
+md-input-container {
+    margin-bottom:8px;
+}
+
+md-input-container .md-errors-spacer {
+    min-height: 0;
+}
+
+md-tabs:not(.md-no-tab-content):not(.md-dynamic-height) {
+    min-height: initial;
+}
+
+md-tab-content > div {
+    height:100%;
+    display:flex;
+    flex-direction: column;
+}
+
+md-list.lines-beetween-items md-list-item {
+    border-bottom:1px solid #e0e0e0;
+}
+
+md-list.activities-3 h3 {
+    flex: 1 1 50%;
+}
+
+md-list.activities-3 h4 {
+    flex: 1 1 25%;
+}
+
+md-list.activities-3 p {
+    flex: 1 1 25%;
+    text-align: right;
+}
+
+md-list.hierarchy {
+    padding:0;
+}
+
+md-list.hierarchy > md-list-item {
+    padding:0;
+}
+
+md-list.hierarchy > md-list-item > div {
+    width:100%;
+    cursor: pointer;
+}
+
+md-list.hierarchy > md-list-item, md-list.hierarchy > md-list-item::before {
+    min-height: initial;
+}
+
+md-list.hierarchy > md-list-item > div > md-icon {
+    padding-right:4px;
+}
+
+md-list.hierarchy > md-list-item > div > img {
+    margin:auto 4px auto 0;
+    height:24px;
+    opacity: 0.6;
+}
+
+md-list.hierarchy > md-list-item > div > p {
+    flex: 1 1 100%;
+    margin:0;
+    padding:7px 0;
+}
+
+md-list.hierarchy > md-list-item > ng-include {
+    width: 100%;
+    padding-left:24px;
+}
+
+md-list.lines-beetween-items md-list-item:last-child {
+    border-bottom:none;
+}
+
+md-list-item._md-button-wrap > div.md-button:first-child {
+    padding:0 0 0 8px;
+}
+
+md-list-item .md-list-item-inner > md-icon:first-child:not(.md-avatar-icon) {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+md-list-item > md-icon:first-child:not(.md-avatar-icon), md-list-item .md-list-item-inner > md-icon:first-child:not(.md-avatar-icon) {
+    margin-right: 8px;
+}
+
+md-list-item > p, md-list-item > .md-list-item-inner > p, md-list-item .md-list-item-inner > p, md-list-item .md-list-item-inner > .md-list-item-inner > p {
+    line-height: normal;
+    padding: 4px 0;
+}
+
+md-list-item.active, md-list-item > div.active {
+    background-color: lightgrey;
+}
+
+md-list-item.strikethrough h3, md-list-item.strikethrough h4, md-list-item.strikethrough p {
+    color:#bbbbbb;
+    text-decoration: line-through;
+}
+
+md-sidenav {
+    display: flex;
+}
+
+md-sidenav > div {
+    color:rgba(0,0,0,0.54);
+    padding:4px;
+    text-align: center;
+    font-size: 14px;
+}
+
+md-tabs {
+    background-color: rgba(255,255,255,0.95);
+}
+
+md-toolbar.transparent {
+    background-color: transparent;
+    color: black;
+}
+
+md-toolbar.portal {
+    background-color: red;
+}
+
+md-toolbar button.lang {
+    opacity: 0.3;
+}
+
+md-toolbar button.lang.active, md-toolbar button.lang:hover {
+    opacity: 1;
+}
+
+:focus {
+    outline:0;
+}
+
+#babylonCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+}
+
+#cardcanvas {
+    overflow:auto; /* auto required to have horizontal scrollbars */
+}
+
+#dashboard {
+    overflow: auto;
+    height: 100%;
+}
+
+#dashboard > div {
+    align-self: center;
+    text-align: center;
+    margin: 0 auto;
+}
+
+#dashboard .md-button {
+    width:200px;
+    height:200px;
+    display: inline-block;
+    background-color: white;
+}
+
+#dashboard .md-button md-icon {
+    display: block;
+    height: 120px;
+    width: 120px;
+    font-size: 120px;
+    opacity: 1;
+}
+
+#fullscreenToggleImg {
+    position: absolute;
+    top:5px;
+    right:5px;
+    z-index: 100;
+    width: initial;
+}
+
+#webcamVideo {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    z-index: 1;
+}
+
+.document-preview {
+    background: #ddd;
+    flex: 1;
+}
+
+.document-preview > span {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fileupload {
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    padding-left: 100%;
+    cursor:pointer;
+}
+
+.md-fab .fileupload {
+    height: 100px;
+    padding-left: 100px;
+}
+
+.login-dialog {
+    padding: 18px 42px;
+    position: relative;
+}
+
+.login-dialog::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-top: 100px solid red;
+    border-left: 100px solid transparent;
+    z-index:1;
+}
+
+.login-dialog::after {
+    content: "BETA";
+    display: block;
+    color: white;
+    text-align: center;
+    position: absolute;
+    top: 24px;
+    right: 10px;
+    font-weight: bold;
+    transform: rotate(45deg);
+    z-index: 2;
+}
+
+.login-dialog > .version {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    bottom: 0;
+    color: rgba(0,0,0,0.3);
+    font-size: 10px;
+}
+
+.login-logo, .sidenav-logo {
+    display: flex;
+    padding: 10px;
+    max-width: 360px;
+}
+
+.login-logo img, .sidenav-logo img {
+    width: 100%;
+    height: 100%;
+}
+
+.md-list-item-text {
+    display: flex;
+    flex: 1;
+}
+
+.progress-panel {
+    background-color: rgba(255,255,255,0.9);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 150;
+}
+
+.progress-panel > * {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.server-errors {
+    font-size: 12px;
+    color: rgb(221,44,0);
+}
+
+.share-link {
+    word-break: break-all;
+}
+
+.sidenav-logo img {
+    cursor: pointer;
+}
+
+/** Handsets portrait **/
+
+@media (max-width: 599px) {
+    md-card {
+        width: 100%;
+        flex-basis: 100%;
+        margin: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        opacity: 0.9999; /** https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ **/
+        transform: rotate(90deg);
+        border: 1px solid black;
+        transition: all 250ms;
+    }
+
+    md-card.willclose {
+        transform-origin: bottom right;
+        transform: rotate(-90deg);
+    }
+
+    md-list.activities-3 h3 {
+        margin:0;
+        flex: 1;
+        line-height: initial;
+    }
+
+    md-list.activities-3 h4 {
+        font-weight: normal;
+    }
+
+    md-list.activities-3 p {
+        color: #cccccc;
+        text-align: left;
+    }
+
+    .login-dialog {
+        border: none;
+        box-shadow: none;
+        padding: 0 30px;
+    }
+
+    .md-list-item-text {
+        flex-direction: column;
+        margin: 5px 0;
+    }
+
+    .md-list-item-text > * {
+        margin:0;
+        flex: 1;
+        text-align: left;
+        line-height: initial;
+        font-size: 14px;
+    }
+
+    .md-subhead {
+        font-size: 14px;
+    }
+
+    #cardcanvas {
+        overflow: hidden;
+    }
+
+    #dashboard .md-button {
+        width: 160px;
+        height: 160px;
+    }
+}
+
+/* Anpassungen speziell für Desktop, nutzt den Platz besser aus */
+@media (min-width: 600px) {
+    md-sidenav {
+        width: 240px;
+        max-width: 240px;
+    }
+
+    .md-toolbar-tools {
+        height: initial;
+        min-height: 30px;
+        max-height: initial;
+    }
+
+    .md-button.md-icon-button {
+        height: initial;
+        min-height: initial;
+        padding: 4px;
+        margin-left: 2px;
+        margin-right: 2px;
+        width: initial;
+        line-height: initial;
+    }
+
+    .md-subheader .md-subheader-inner {
+        padding: 4px 8px;
+    }
+
+    md-list-item::before, md-list-item .md-list-item-inner::before {
+        min-height: initial;
+    }
+
+    md-list-item, md-list-item .md-list-item-inner {
+        height:initial;
+        min-height: initial;
+    }
+
+    #cardcanvas md-list-item > p, md-list-item > .md-list-item-inner > p, md-list-item .md-list-item-inner > p, md-list-item .md-list-item-inner > .md-list-item-inner > p {
+        font-size:14px;
+        padding:0;
+    }
+
+    #cardcanvas md-list-item._md-button-wrap > div.md-button:first-child {
+        line-height: initial;
+        min-height: initial;
+    }
+
+    md-card {
+        margin: 0px;
+        box-shadow: initial;
+        border: 1px solid rgba(0, 0, 0, 0.14) !important;
+        border-radius: initial;
+        flex: 0 0 320px;
+        width:320px;
+        min-width: 320px;
+    }
+
+    md-card > md-fab-speed-dial {
+        top:10px;
+        right:10px;
+    }
+
+    .md-button.md-fab {
+        width: 36px;
+        height: 36px;
+        margin: initial;
+    }
+
+    md-card md-card-title {
+        padding: 8px;
+    }
+
+    md-card-title.withfab {
+        padding-right: 60px;
+    }
+
+    md-card-title.withfab .md-headline {
+        line-height:36px;
+    }
+
+    .md-headline {
+        font-size: 18px;
+        line-height: initial;
+    }
+
+    md-card md-card-content {
+        padding: 0 6px 6px 6px;
+    }
+
+    md-list {
+        padding:4px 0;
+    }
+
+    md-card button.close {
+        padding:0;
+        top: -9px;
+        right: -11px;
+    }
+
+    md-tabs-canvas {
+        height:24px;
+    }
+
+    md-pagination-wrapper {
+        height:initial;
+    }
+
+    .md-tab {
+        font-size:12px;
+        line-height: 18px;
+        padding: 3px 8px;
+    }
+
+    .md-button.md-fab.md-mini {
+        line-height: 20px;
+        width: 30px;
+        height: 30px;
+        min-height: 30px;
+    }
+
+    .md-button.md-fab.md-mini md-icon {
+        height: 20px;
+        width: 20px;
+        min-height: 20px;
+        min-width: 20px;
+    }
+
+    .md-button {
+        min-height: initial;
+        min-width: initial;
+        line-height: 22px;
+        font-size: 12px;
+    }
+
+    md-sidenav .md-button {
+        min-height: 36px;
+    }
+
+    md-tabs-canvas.md-paginated {
+        margin: 0 24px;
+    }
+
+    md-tabs-wrapper md-prev-button, md-tabs-wrapper md-next-button {
+        width:24px;
+    }
+
+    md-list-item .md-list-item-inner > md-icon:first-child:not(.md-avatar-icon) {
+        margin-top:0;
+        margin-bottom: 0;
+    }
+
+    .md-list-item-text > * {
+        padding:0;
+        margin:0 1px;
+        line-height: 24px;
+    }
+
+    .md-list-item-text h3 {
+        font-size:16px;
+    }
+
+    .md-list-item-text h4 {
+        font-size:14px;
+        font-weight: normal;
+    }
+
+    .md-list-item-text p {
+        font-size:12px;
+    }
+
+    md-list.hierarchy > md-list-item > div > md-icon {
+        padding-right: 0px;
+    }
+
+    md-list.hierarchy > md-list-item > ng-include {
+        padding-left: 20px;
+    }
+}

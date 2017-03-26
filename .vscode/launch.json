@@ -1,0 +1,63 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Debug Server Side",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/app.js",
+            "stopOnEntry": false,
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": null,
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "internalConsole",
+            "sourceMaps": true,
+            "outDir": null
+        },
+        {
+            "name": "Debug Client Side",
+            "type": "chrome",
+            "request": "launch",
+            "url":"http://localhost",
+            "webRoot":"${workspaceRoot}",
+            
+            
+            "console": "internalConsole",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "./*": "${workspaceRoot}/*"
+            }
+            
+        },
+        {
+            "name": "Testen",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": [ "test/**/*.js" ],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": null,
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "test",
+                "MONGO_TEST_DB": "localtestdb",
+                "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+            },
+            "console": "internalConsole",
+            "sourceMaps": false,
+            "outDir": null
+        }
+    ]
+}

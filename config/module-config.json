@@ -1,0 +1,290 @@
+{
+    "modules" : {
+
+        "base": {
+            "api" : [ "login", "menu", "permissions", "usergroups", "users", "relations", "settingsets" ],
+            "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
+            "public" : [
+                "css/base.css",
+                "css/logo_avorium_komplett.svg",
+                "css/icons/material/Cancel.svg",
+                "css/icons/material/Delete.svg",
+                "css/icons/material/Edit.svg",
+                "css/icons/material/Exit.svg",
+                "css/icons/material/Menu.svg",
+                "css/icons/material/Menu black.svg",
+                "css/icons/material/Plus Math.svg",
+                "css/icons/material/User.svg",
+                "css/icons/material/User Group Man Man.svg",
+                "css/icons/material/Search.svg",
+                "css/icons/material/Settings.svg",
+                "css/icons/office/Cancel.svg",
+                "css/icons/office/Delete.svg",
+                "css/icons/office/Edit.svg",
+                "css/icons/office/Exit.svg",
+                "css/icons/office/Menu.svg",
+                "css/icons/office/Plus Math.svg",
+                "css/icons/office/User.svg",
+                "css/icons/office/User Group Man Man.svg",
+                "css/icons/office/Search.svg",
+                "css/icons/office/Settings.svg",
+                "partial/Administration/PermissionCard.html",
+                "partial/Administration/SettingSetListCard.html",
+                "partial/Administration/UserCard.html",
+                "partial/Administration/UsergroupCard.html",
+                "partial/Administration/UsergroupCardDetailsTab.html",
+                "partial/Administration/UsergroupCardPermissionsTab.html",
+                "partial/Administration/UsergroupCardUsersTab.html",
+                "partial/Administration/UsergrouplistCard.html",
+                "partial/Administration/UserlistCard.html",
+                "partial/Administration/UserSettingsCard.html",
+                "_index.html",
+                "chat.html"
+            ],
+            "root" : [ "app.js", "package.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js" ],
+            "include" : [
+                "node_modules/angular/angular.min.js",
+                "node_modules/angular-aria/angular-aria.min.js",
+                "node_modules/angular-animate/angular-animate.min.js",
+                "node_modules/angular-material/angular-material.min.js",
+                "node_modules/angular-messages/angular-messages.min.js",
+                "node_modules/moment/min/moment.min.js",
+                "node_modules/angular-moment/angular-moment.min.js",
+                "node_modules/angular-sanitize/angular-sanitize.min.js",
+                "node_modules/angular-translate/dist/angular-translate.min.js",
+                "node_modules/angular-translate/dist/angular-translate-loader-partial/angular-translate-loader-partial.min.js",
+                "node_modules/moment/locale/de.js",
+                "node_modules/moment/locale/bg.js",
+                "public/js/AppSetup.js",
+                "public/js/Utils.js",
+                "public/js/MainController.js",
+                "public/js/Administration/PermissionCardController.js",
+                "public/js/Administration/SettingSetListCardController.js",
+                "public/js/Administration/UserCardController.js",
+                "public/js/Administration/UsergroupCardController.js",
+                "public/js/Administration/UsergrouplistCardController.js",
+                "public/js/Administration/UserlistCardController.js",
+                "public/js/Administration/UserSettingsCardController.js"
+            ],
+            "languages" : [ "en", "de", "bg", "ar" ],
+            "menu": [
+                {
+                    "title": "MENU_ADMINISTRATION",
+                    "items": [
+                        { "mainCard": "Administration/SettingSetListCard", "icon": "Settings", "title": "MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS" },
+                        { "mainCard": "Administration/UserlistCard", "icon": "User", "title": "MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER" },
+                        { "mainCard": "Administration/UsergrouplistCard", "icon": "User Group Man Man", "title": "MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP" }
+                    ]
+                }
+            ],
+            "utils": [ "apiHelper", "constants" ],
+            "settingsets" : [
+                { "mainCard": "Administration/UserSettingsCard", "title": "SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER" }
+            ]
+        },
+
+        "activities": {
+            "api" : [ "activities" ],
+            "public" : [
+                "css/icons/material/Planner.svg",
+                "css/icons/office/Planner.svg",
+                "partial/Office/ActivityCard.html",
+                "partial/Office/ActivityCardDetailsTab.html",
+                "partial/Office/ActivityList.html",
+                "partial/Office/CalendarCard.html"
+            ],
+            "include" : [
+                "public/js/Office/ActivityCardController.js",
+                "public/js/Office/CalendarCardController.js"
+            ],
+            "languages" : [ "en", "de" ],
+            "menu": [
+                {
+                    "title": "MENU_OFFICE",
+                    "items": [
+                        { "mainCard": "Office/CalendarCard", "icon": "Planner", "title": "MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY" }
+                    ]
+                }
+
+            ]
+        },
+
+        "clients": {
+            "api" : [ "clients", "clientmodules" ],
+            "public" : [
+                "css/icons/material/Add User Male.svg",
+                "css/icons/material/Briefcase.svg",
+                "css/icons/material/Module.svg",
+                "css/icons/office/Add User Male.svg",
+                "css/icons/office/Briefcase.svg",
+                "css/icons/office/Module.svg",
+                "partial/Administration/AdministratorCard.html",
+                "partial/Administration/ClientCard.html",
+                "partial/Administration/ClientModuleCard.html",
+                "partial/Administration/ClientListCard.html"
+            ],
+            "include" : [
+                "public/js/Administration/AdministratorCardController.js",
+                "public/js/Administration/ClientCardController.js",
+                "public/js/Administration/ClientModuleCardController.js",
+                "public/js/Administration/ClientListCardController.js"
+            ],
+            "languages" : [ "en", "de", "bg" ],
+            "menu": [
+                {
+                    "title": "MENU_PORTAL",
+                    "items": [
+                        { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "MENU_ADMINISTRATION_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT" }
+                    ]
+                }
+            ]
+        },
+
+
+        "documents": {
+            "api" : [ "documents", "extractdocument", "folders" ],
+            "public" : [
+                "css/icons/material/Add Folder.svg",
+                "css/icons/material/Document.svg",
+                "css/icons/material/Download.svg",
+                "css/icons/material/Folder.svg",
+                "css/icons/material/Upload.svg",
+                "css/icons/office/Add Folder.svg",
+                "css/icons/office/Document.svg",
+                "css/icons/office/Download.svg",
+                "css/icons/office/Folder.svg",
+                "css/icons/office/Upload.svg",
+                "partial/Office/DocumentCard.html",
+                "partial/Office/FolderCard.html",
+                "partial/Office/FolderCardContentTab.html",
+                "partial/Office/FolderCardDetailsTab.html"
+            ],
+            "include" : [
+                "public/js/Office/DocumentCardController.js",
+                "public/js/Office/FolderCardController.js"
+            ],
+            "languages" : [ "en", "de", "ar" ],
+            "menu": [
+                {
+                    "title": "MENU_OFFICE",
+                    "items": [
+                        { "mainCard": "Office/FolderCard", "icon": "Document", "title": "MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT" }
+                    ]
+                }
+            ]
+        },
+
+        "fmobjects": {
+            "api" : [ "fmobjects" ],
+            "public" : [
+                "css/icons/material/Cottage.svg",
+                "css/icons/material/Sort Down.svg",
+                "css/icons/material/Sort Right.svg",
+                "css/icons/office/Cottage.svg",
+                "css/icons/office/Sort Down.svg",
+                "css/icons/office/Sort Right.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_AREA.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg",
+                "partial/BIM/FmobjectCard.html",
+                "partial/BIM/FmobjectCardDetails.html",
+                "partial/BIM/FmObjectList.html",
+                "partial/BIM/HierarchyCard.html",
+                "partial/BIM/HierarchyCardLevel.html"
+            ],
+            "include" : [
+                "public/js/BIM/FmobjectCardController.js",
+                "public/js/BIM/HierarchyCardController.js"
+            ],
+            "languages" : [ "en", "de" ],
+            "menu": [
+                {
+                    "title": "MENU_BIM",
+                    "items": [
+                        { "mainCard": "BIM/HierarchyCard", "icon": "Cottage", "title": "MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT" }
+                    ]
+                }
+            ]
+        },
+
+        "licenseserver" : {
+            "api" : [ "portalmodules", "portals", "triggerUpdate", "update" ],
+            "public" : [
+                "css/icons/material/Server.svg",
+                "css/icons/office/Server.svg",
+                "css/icons/material/Module.svg",
+                "css/icons/office/Module.svg",
+                "partial/LicenseServer/PortalCard.html",
+                "partial/LicenseServer/PortalModuleCard.html",
+                "partial/LicenseServer/PortalListCard.html"
+            ],
+            "include" : [
+                "public/js/LicenseServer/PortalCardController.js",
+                "public/js/LicenseServer/PortalModuleCardController.js",
+                "public/js/LicenseServer/PortalListCardController.js"
+            ],
+            "languages" : [ "en", "de" ],
+            "menu" : [
+                {
+                    "title": "MENU_LICENSESERVER",
+                    "items": [
+                        { "mainCard": "LicenseServer/PortalListCard", "icon": "Server", "title": "MENU_LICENSESERVER_PORTALS", "permission" : "PERMISSION_LICENSESERVER_PORTAL" }
+                    ]
+                }
+            ],
+            "utils": [ "app-packager" ]
+        },
+
+        "portalbase" : {
+            "api" : [ "portalmanagement" ],
+            "public" : [
+                "css/icons/material/Settings.svg",
+                "css/icons/office/Settings.svg",
+                "partial/Administration/PortalSettingsCard.html",
+                "partial/Administration/PortalSettingsCardLicenseTab.html",
+                "partial/Administration/PortalSettingsCardUpdatesTab.html"
+            ],
+            "include" : [
+                "public/js/Administration/PortalSettingsCardController.js"
+            ],
+            "languages" : [ "en", "de" ],
+            "settingsets" : [
+                { "mainCard": "Administration/PortalSettingsCard", "title": "SETTINGSET_PORTAL_GENERAL", "type": "SETTINGSET_TYPE_PORTAL", "icon": "Server", "permission": "PERMISSION_SETTINGS_PORTAL" }
+            ]
+        },
+
+        "ronnyseins" : {
+            "api" : [ "markers" ],
+            "public" : [
+                "css/icons/userlocation.png",
+                "css/icons/material/Collapse.svg",
+                "css/icons/material/Expand.svg",
+                "css/icons/material/Virtual Reality.svg",
+                "css/icons/office/Virtual Reality.svg",
+                "css/icons/material/World Map.svg",
+                "css/icons/office/World Map.svg",
+                "partial/ronnyseins/AugmentedRealityCard.html",
+                "partial/ronnyseins/GoogleMapsCard.html"
+            ],
+            "include" : [
+                "node_modules/babylonjs/babylon.js",
+                "public/js/ronnyseins/AugmentedRealityCardController.js",
+                "public/js/ronnyseins/GoogleMapsCardController.js"
+            ],
+            "menu" : [
+                {
+                    "title": "MENU_LAB",
+                    "items": [
+                        { "mainCard": "ronnyseins/AugmentedRealityCard", "icon": "Virtual Reality", "title": "MENU_LAB_AUGMENTEDREALITY" },
+                        { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "World Map", "title": "MENU_LAB_GOOGLEMAPS" }
+                    ]
+                }
+            ]
+        }
+        
+    }
+}

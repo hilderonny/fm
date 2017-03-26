@@ -1,0 +1,45 @@
+<md-card ng-cloak ng-controller="AdministrationPermissionCardController" style="background-image:url('/css/icons/office/Edit.svg');">
+
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" ng-hide="isNewPermission" translate="{{ permissionKey }}"></span>
+            <span class="md-headline" ng-if="isNewPermission" translate>PERMISSIONS_NEW_PERMISSION</span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+    </md-button>
+
+    <md-card-content>
+
+        <form layout="column">
+
+            <md-input-container flex>
+                <label translate>PERMISSIONS_FEATURE</label>
+                <md-select ng-model="permission.key">
+                    <md-option ng-value="permissionKey" ng-repeat="permissionKey in allPermissionKeys | orderBy: 'permissionKey'">
+                        <span translate="{{ permissionKey }}"></span>
+                    </md-option>
+                </md-select>
+            </md-input-container>
+
+            <md-input-container flex>
+                <md-checkbox ng-model="permission.canRead"><span translate>PERMISSIONS_READ</span></md-checkbox>
+            </md-input-container>
+
+            <md-input-container flex>
+                <md-checkbox ng-model="permission.canWrite"><span translate>PERMISSIONS_WRITE</span></md-checkbox>
+            </md-input-container>
+
+            <md-card-actions layout="row" layout-align="end center">
+                <md-button class="md-raised md-accent" ng-if="isNewPermission" ng-click="createPermission()"><span translate>PERMISSIONS_CREATE</span></md-button>
+                <md-button class="md-raised md-accent" ng-hide="isNewPermission" ng-click="savePermission()"><span translate>PERMISSIONS_SAVE</span></md-button>
+                <md-button class="md-raised md-warn" ng-hide="isNewPermission" ng-click="deletePermission()"><span translate>PERMISSIONS_DELETE</span></md-button>
+            </md-card-actions>
+
+        </form>
+
+    </md-card-content>
+
+</md-card>

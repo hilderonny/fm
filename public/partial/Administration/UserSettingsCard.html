@@ -1,0 +1,40 @@
+<md-card ng-cloak ng-controller="AdministrationUserSettingsCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" translate>SETTINGSET_USER_GENERAL</span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+    </md-button>
+
+    <md-card-content>
+
+        <form name="usersForm" layout="column">
+            <md-input-container flex>
+                <label ng-if="!isNewUser" translate>USERS_NEW_PASSWORD</label>
+                <input type="password" name="pass" ng-model="user.pass" ng-required="isNewUser" aria-label="USER PASSWORD">
+                <div ng-messages="usersForm.pass.$error">
+                    <div ng-message="required" translate>USERS_PLEASE_ENTER_PASSWORD</div>
+                </div>
+            </md-input-container>
+
+            <md-input-container flex>
+                <label translate>USERS_REPEAT_PASSWORD</label>
+                <input type="password" name="pass2" ng-model="user.pass2" ng-required="user.pass" compare-to="user.pass" aria-label="USER PASSWORD REPEAT">
+                <div ng-messages="usersForm.pass2.$error">
+                    <div ng-message="compareTo" translate>USERS_PASSWORDS_DO_NOT_MATCH</div>
+                </div>
+            </md-input-container>
+
+            <md-card-actions layout="row" layout-align="end center">
+                <md-button class="md-raised md-accent" ng-if="!isNewUser && canWriteUserDetails"  ng-click="saveUpdatedPassword()" ng-disabled="usersForm.$invalid"><span translate>SETTINGS_SAVE</span></md-button>
+            </md-card-actions>
+
+        </form>
+
+    </md-card-content>
+
+</md-card>

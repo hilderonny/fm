@@ -1,0 +1,40 @@
+<md-card ng-cloak ng-controller="AdministrationUsergroupCardController" style="background-image:url('/css/icons/office/User Group Man Man.svg');">
+    
+    <md-card-title flex="none" class="withfab">
+        <md-card-title-text>
+            <span class="md-headline" ng-if="!isNewUserGroup"><span ng-bind="userGroupName"></span></span>
+            <span class="md-headline" ng-if="isNewUserGroup" translate>USERGROUPS_NEW_USERGROUP</span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-button class="md-fab md-accent" ng-if="!isNewUserGroup" ng-click="newPermission()" aria-label="ADD PERMISSION">
+        <md-tooltip md-direction="left"><span translate>USERGROUPS_ADD_NEW_PERMISSION</span></md-tooltip>
+        <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+    </md-button>
+
+    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+    </md-button>
+
+    <md-tabs flex>
+        <md-tab>
+            <md-tab-label><span translate>USERGROUPS_DETAILS</span></md-tab-label>
+            <md-tab-body>
+                <ng-include src="'partial/Administration/UsergroupCardDetailsTab.html'"></ng-include>
+            </md-tab-body>
+        </md-tab>
+        <md-tab ng-if="!isNewUserGroup">
+            <md-tab-label><span translate>USERGROUPS_PERMISSIONS</span></md-tab-label>
+            <md-tab-body>
+                <md-card-content ng-include="'partial/Administration/UsergroupCardPermissionsTab.html'"></md-card-content>
+            </md-tab-body>
+        </md-tab>
+        <md-tab ng-if="!isNewUserGroup">
+            <md-tab-label><span translate>USERGROUPS_USERS</span></md-tab-label>
+            <md-tab-body>
+                <md-card-content ng-include="'partial/Administration/UsergroupCardUsersTab.html'"></md-card-content>
+            </md-tab-body>
+        </md-tab>
+    </md-tabs>
+
+</md-card>

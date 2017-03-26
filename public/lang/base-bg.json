@@ -1,0 +1,8 @@
+{
+    "LOGIN_FAILED_TITLE" : "Грешка",
+    "LOGIN_FAILED_CONTENT" : "Невалидно потребителско име. Загубена парола??",
+    "LOGIN_FAILED_AGAIN" : "Отново?",
+    "LOGIN_LOGIN" : "Вход",
+    "LOGIN_PASSWORD" : "Парола",
+    "LOGIN_USERNAME" : "Потребителско име"
+}

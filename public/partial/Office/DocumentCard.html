@@ -1,0 +1,56 @@
+<md-card ng-cloak ng-controller="OfficeDocumentCardController" style="background-image:url(/css/icons/office/Document.svg);">
+
+    <md-card-title flex="none" class="withfab">
+        <md-card-title-text>
+            <span class="md-headline" ng-bind="documentName"></span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-button class="md-fab md-accent" ng-click="downloadDocument()" aria-label="DOWNLOAD">
+        <md-tooltip md-direction="left"><span translate>DOCUMENTS_DOWNLOAD</span></md-tooltip>
+        <md-icon md-svg-src="/css/icons/material/Download.svg"></md-icon>
+    </md-button>
+
+    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+    </md-button>
+
+    <md-card-content>
+
+        <form name="documentForm" layout="column">
+
+            <md-input-container flex>
+                <label translate>DOCUMENTS_NAME</label>
+                <input ng-model="document.name" name="name">
+            </md-input-container>
+
+            <md-input-container flex>
+                <md-checkbox ng-model="document.isShared"><span translate>DOCUMENTS_IS_SHARED</span></md-checkbox>
+            </md-input-container>
+
+            <p ng-if="document.isShared">
+                <a href="/api/documents/share/{{document._id}}" ng-bind="documentUrl" target="_blank" class="share-link"></a>
+            </p>
+
+            <md-card-actions layout="row" layout-align="end center">
+                <md-button class="md-raised" ng-click="extractDocument()" ng-if="document.isExtractable">
+                    <md-tooltip md-direction="bottom"><span translate>DOCUMENTS_EXTRACT_TOOLTIP</span></md-tooltip>
+                    <span translate>DOCUMENTS_EXTRACT</span>
+                </md-button>
+                <md-button class="md-raised md-accent" ng-click="saveDocument()"><span translate>DOCUMENTS_SAVE</span></md-button>
+                <md-button class="md-raised md-warn" ng-click="deleteDocument()"><span translate>DOCUMENTS_DELETE</span></md-button>
+            </md-card-actions>
+
+        </form>
+
+        <div class="document-preview" ng-if="isPreviewable">
+            <span translate>DOCUMENTS_CLICK_TO_PREVIEW</span>
+        </div>
+        
+    </md-card-content>
+
+    <div class="progress-panel" ng-if="isExtracting">
+        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+    </div>
+
+</md-card>

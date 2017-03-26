@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <style>
+      * { box-sizing:border-box; margin:0;padding:0; }
+      html, body { width:100%; height:100%; overflow:hidden;font-family:sans-serif; }
+      .outputcontainer {
+          position:absolute;
+          top:0px;
+          left:0px;
+          bottom:1cm;
+          right:0px;
+          background:#82969a;
+          overflow:auto;
+      }
+      .inputcontainer {
+          position:absolute;
+          height:1cm;
+          left:0px;
+          bottom:0px;
+          right:0px;
+          background: #d1ebf0;
+          display:flex;
+      }
+      .inputcontainer > * {
+          margin:2px;
+          height:100%;
+          display:block;
+      }
+
+      #message {
+          flex:auto;
+          padding:2px;
+      }
+
+      #sendmessage {
+          padding:0 10px;
+      }
+
+      #discussion > li {
+          background:#eee;
+          border-radius:7px;
+          padding:5px;
+          margin:4px 33% 4px 4px;
+          list-style-type: none;
+      }
+
+      #discussion > li > strong {
+          margin-right:10px;
+      }
+
+      #discussion > li.isself {
+          margin:4px 4px 4px 33%;
+          background:#2266aa;
+          color:#fff;
+      }
+      #discussion > li.isself > strong {
+          display: none;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      var name;
+
+      var addMessage = function(ulTag, msg) {
+        var li = document.createElement('li');
+        if (msg.name === name) {
+          li.setAttribute('class', 'isself');
+        }
+        li.innerHTML = '<strong>' + msg.name + '</strong>' + msg.message;
+        ulTag.appendChild(li);
+      };
+
+      window.onload = function() {
+        var input = document.getElementById('message');
+        var messages = document.getElementById('discussion');
+        document.forms[0].onsubmit = function() {
+          var msg = { name: name, message: input.value };
+          socket.emit('message', msg);
+          addMessage(messages, msg);
+          input.value = '';
+          return false;
+        }
+        socket.on('message', function(msg){
+          addMessage(messages, msg);
+        });
+        name = prompt('Bitte Namen angeben:', '');
+        socket.emit('message', { name: name, message: 'hat den Chat betreten.' });
+        input.focus();
+      };
+
+    </script>
+</head>
+<body>
+    <div class="outputcontainer">
+        <ul id="discussion"></ul>
+    </div>
+    <form class="inputcontainer" id="inputform">
+        <input type="text" id="message" />
+        <button id="sendmessage">Send</button>
+    </form>
+    <script type="text/javascript">
+    /*
+        $(function () {
+            var chat = $.connection.chatHub;
+            var setLang = function () {
+                chat.server.setLang($('#lang').val());
+            };
+            chat.client.broadcastMessage = function (isself, name, message) {
+                var encodedName = $('<div />').text(name).html();
+                var encodedMsg = $('<div />').text(message).html();
+                $('#discussion').append('<li' + (isself ? ' class="isself"' : '') + '><strong>' + encodedName
+                    + '</strong>' + encodedMsg + '</li>');
+            };
+            $('#displayname').val(prompt('Enter your name:', ''));
+            $('#message').focus();
+            $.connection.hub.start().done(function () {
+                $('#lang').change(setLang);
+                $('#inputform').submit(function () {
+                    chat.server.send($('#displayname').val(), $('#lang').val(), $('#message').val().substr(0, 200));
+                    $('#message').val('').focus();
+                    return false;
+                });
+                setLang();
+            });
+        });*/
+    </script>
+</body>
+</html>

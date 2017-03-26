@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html ng-app="app"  dir="{{langDirection}}"  >
+    <head>
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+        <link rel="stylesheet" href="css/base.css">
+        <link rel="stylesheet" href="css/local.css">
+        <script src="js/include.js"></script>
+    </head>
+	<body ng-controller="MainController" ng-cloak layout="column">
+
+
+        <md-toolbar layout="row" ng-class="{transparent:!isLoggedIn,portal:isLoggedIn&&isPortal}" class="md-toolbar-tools">
+            <md-button ng-if="isLoggedIn" class="md-icon-button" ng-click="toggleLeftSidenav()" ng-hide="$mdMedia('gt-md')" aria-label="MENU">
+                <md-icon md-svg-src="/css/icons/material/Menu.svg"></md-icon>
+            </md-button>
+            <h1 ng-if="isLoggedIn" translate="{{title}}"></h1>
+            <span flex></span>
+            <md-button ng-repeat="language in languages" ng-class="{active:currentLanguage==language}" aria-label="{{language}}" class="md-icon-button lang" ng-click="setLang(language)" ng-bind="language"></md-button>
+        </md-toolbar>
+
+        <div ng-hide="isLoggedIn" layout-align="center center" layout="column" flex layout="row">
+            <form class="md-whiteframe-4dp login-dialog" ng-submit="doLogin()">
+
+                <md-content layout="column" class="md-padding">
+
+                    <div class="login-logo">
+                        <img ng-src="{{logo}}" />
+                    </div>
+
+                    <h1 translate>LOGIN_TITLE</h1>
+
+                    <md-input-container>
+                        <label translate="LOGIN_USERNAME"></label>
+                        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ng-model="username" />
+                    </md-input-container>
+
+                    <md-input-container>
+                        <label translate="LOGIN_PASSWORD"></label>
+                        <input type="password" ng-model="password" />
+                    </md-input-container>
+
+                    <div layout="row" layout-align="center right">
+                        <md-button type="submit" class="md-raised md-primary" ng-click="doLogin()" ng-disabled="isLoggingIn">
+                            <md-progress-circular ng-if="isLoggingIn" class="md-primary" md-diameter="20px"></md-progress-circular>
+                            <span ng-hide="isLoggingIn" translate>LOGIN_LOGIN</span>
+                        </md-button>
+                    </div>
+
+                </md-content>
+
+                <div class="version">###VERSION###</div>
+                
+            </form>
+
+        </div>
+
+        <div flex layout="row" ng-if="isLoggedIn">
+
+            <md-sidenav md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" class="md-whiteframe-4dp">
+
+                <md-content flex>
+
+                    <div class="sidenav-logo">
+                        <img ng-src="{{logo}}" ng-click="menuClick(null)" />
+                    </div>
+
+                    <md-list ng-cloak>
+
+                        <ng-repeat ng-repeat="menuItem in menu">
+
+                            <md-subheader ng-if="menuItem.items"><span translate="{{ menuItem.title }}"></span></md-subheader>
+                            <md-list-item ng-if="menuItem.items" ng-repeat="subMenuItem in menuItem.items" ng-click="menuClick(subMenuItem)" ng-class="{active: currentMenuItem === subMenuItem}" aria-label="{{ subMenuItem.title }}">
+                                <md-icon md-svg-src="/css/icons/material/{{subMenuItem.icon}}.svg" aria-label="{{ subMenuItem.title }} "></md-icon>
+                                <p><span translate="{{ subMenuItem.title }}"></span></p>
+                            </md-list-item>
+
+                            <md-list-item ng-if="!menuItem.items" ng-click="menuClick(menuItem)" ng-class="{active: currentMenuItem === menuItem}" aria-label="{{ menuItem.title }}">
+                                <md-icon md-svg-src="/css/icons/material/{{menuItem.icon}}.svg" aria-label="{{ menuItem.title }} "></md-icon>
+                                <p><span translate="{{ menuItem.title }}"></span></p>
+                            </md-list-item>
+
+                            <md-divider></md-divider>
+                            
+                        </ng-repeat>
+
+                    </md-list>
+
+                </md-content>
+
+                <div translate="LOGIN_LOGGED_IN_AS" translate-value-username="{{username}}"></div>
+            </md-sidenav>
+
+            <md-content flex layout="row" id="cardcanvas" ng-if="currentMenuItem"></md-content>
+
+            <md-content flex layout="row" id="dashboard" ng-if="!currentMenuItem">
+                <div>
+                    <ng-repeat ng-repeat="menuItem in menu">
+
+                        <md-button class="md-raised" ng-repeat="subMenuItem in menuItem.items" ng-click="menuClick(subMenuItem)" aria-label="{{ subMenuItem.title }}">
+                            <md-icon md-svg-src="/css/icons/office/{{subMenuItem.icon}}.svg"></md-icon>
+                            <span class="md-subhead" translate="{{ subMenuItem.title }}"></span>
+                        </md-button>
+                        
+                    </ng-repeat>
+                </div>
+            </md-content>
+
+        </div>
+
+    </body>
+</html>
