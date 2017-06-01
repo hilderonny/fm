@@ -116,6 +116,8 @@ describe('module-config.json', function() {
         var errors = [];
         var referencedFiles = collectModuleConfigReferencedFiles();
         var pathsToIgnore = [
+            '.git/',
+            '.gitignore',
             '.vscode/',
             'basetest.bat',
             'config/localconfig.json',
