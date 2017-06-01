@@ -62,6 +62,7 @@ var prepareIncludes = (fs) => {
 var init = () => {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
     var db = require('./middlewares/db');
+    var nocache = require('./middlewares/nocache');
     db.init();
     // Includes minifizieren
     var fs = require('fs');
@@ -75,16 +76,16 @@ var init = () => {
     app.use(require('compression')()); // Ausgabekompression
     app.set('json spaces', '\t'); // Ausgabe im Response verschönern
     app.use(db.handler); // Datenbankverbindung -> req.db
-    app.use(require('./middlewares/nocache')); // Disable caching
     app.use(require('./middlewares/extracttoken')); // Authentifizierung und Authorisierung -> req.user{_id}
     app.use(require('body-parser').json()); // JSON Request-Body-Parser -> req.body
     // Include APIs configured in module-config.json
     var apis = extractApisFromModuleConfig();
     apis.forEach((api) => {
-        app.use(api, require('.' + api));
+        app.use(api, nocache, require('.' + api));
     });
     app.use(express.static(__dirname + '/public')); // Statische Ressourcen im public-Verzeichnis, lädt bei root-Aufruf automatisch index.html
     app.use('/node_modules', express.static(__dirname + '/node_modules')); // Node Module als statische Verweise bereit stellen, damit angular geladen werden kann
+    app.use('/drafts', express.static(__dirname + '/drafts')); // Drafts for screenshots
 
     // SSL für HTTPS-Server vorbereiten, siehe https://franciskim.co/2015/07/30/how-to-use-ssl-https-for-express-4-x-node-js/
     var credentials = { 
@@ -92,8 +93,9 @@ var init = () => {
         cert: fs.existsSync('./pub.cert') ? fs.readFileSync('./pub.cert', 'utf8') : null
     };
 
-    var httpsPort = process.env.HTTPS_PORT || 443;
-    var httpPort = process.env.PORT || 80;
+    // Read ports from environment first, then from local config and finally define standard ports
+    var httpsPort = process.env.HTTPS_PORT || localConfig.httpsPort || 443;
+    var httpPort = process.env.PORT || localConfig.httpPort || 80;
 
     // Require erst hier, damit automatisches npm install auch die Chance hat, das Paket nachzuladen
     var https = require('https');
@@ -139,6 +141,10 @@ var init = () => {
         // HTTP Server als Modul exportieren, damit Tests damit laufen können
         module.exports = server;
     }
+
+    // Store time of start in cached localconfig to force reload of clients after server restart
+    localConfig.startTime = Date.now();
+    console.log(`Server started at ${localConfig.startTime}.`)
 };
 
 // Install required dependencies

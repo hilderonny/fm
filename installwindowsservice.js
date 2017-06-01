@@ -7,11 +7,13 @@
  * The update mechanism triggers restarts of the service after installing new versions 
  * of the app.
  */
+var localConfig = require('./config/localconfig.json');
 var Service = require('node-windows').Service;
+
 // Create a new service object
 var svc = new Service({
-    name:'Avorium FM',
-    description: 'Facility management portal',
+    name: localConfig.serviceName || 'Avorium FM',
+    description: localConfig.serviceDescription || 'Facility management portal',
     script: __dirname + '/keeprunning.js'
 });
 // Listen for the "install" event, which indicates the

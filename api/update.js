@@ -45,9 +45,9 @@ router.get('/download', (req, res) => {
             }
             var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
             var version = packageJson.version;
-            appPackager.pack(moduleNames, (buffer) => {
+            appPackager.pack(moduleNames, function doneCallback(buffer) {
                 return res.set({'Content-disposition': `attachment; filename=${portal.name} ${version}.zip`}).send(buffer);
-            });
+            }, version);
         });
     });
 });

@@ -8,7 +8,7 @@ var fs = require('fs');
  * Also removes devDependencies and scripts.
  */
 var handlePackageJson = (packageJson, version) => {
-    packageJson.version = packageJson.version.slice(0, packageJson.version.lastIndexOf('.') + 1) + version;
+    packageJson.version = version;
     delete packageJson.scripts;
     delete packageJson.devDependencies;
     return packageJson; 
@@ -43,7 +43,7 @@ var handleModuleConfig = (originalModuleConfigString, moduleNameList) => {
  * Calles doneCallback when the operation is completes with the ZIP file content as nodebuffer object.
  * @param version Version number to use in package.json
  * @throws Error when one of the requested module names does not exist.
- * @example require('/utils/app-packager').pack(['base','module1','module2'], doneCallback);
+ * @example require('/utils/app-packager').pack(['base','module1','module2'], doneCallback, version);
  * @see http://stuk.github.io/jszip/documentation/howto/write_zip.html
  */
 module.exports.pack = (moduleNameList, doneCallback, version) => {

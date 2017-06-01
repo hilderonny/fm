@@ -1,10 +1,4 @@
-app.controller('LicenseServerPortalModuleCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('licenseserver')) {
-        $translatePartialLoader.addPart('licenseserver');
-        $translate.refresh();
-    }
+app.controller('LicenseServerPortalModuleCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     // Click on Create-button to create a new portal module assignment
     $scope.createPortalModule = function() {
@@ -19,8 +13,8 @@ app.controller('LicenseServerPortalModuleCardController', function($scope, $http
             if ($scope.params.createPortalModuleCallback) {
                 $scope.params.createPortalModuleCallback(createdPortalModule);
             }
-            $translate(['PORTALS_MODULEASSIGNMENT_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.PORTALS_MODULEASSIGNMENT_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_PORTALS_MODULEASSIGNMENT_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_MODULEASSIGNMENT_CREATED).hideDelay(1000).position('bottom right'));
             });
         });
     }
@@ -35,23 +29,23 @@ app.controller('LicenseServerPortalModuleCardController', function($scope, $http
             if ($scope.params.savePortalModuleCallback) {
                 $scope.params.savePortalModuleCallback(savedPortalModule);
             }
-            $translate(['PORTALS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.PORTALS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_PORTALS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     }
 
     // Click on delete button to delete an existing portal module
     $scope.deletePortalModule = function() {
-        var portalModuleTranslationKey = 'MODULE_' + $scope.portalModule.module + '_NAME';
+        var portalModuleTranslationKey = 'TRK_MODULE_' + $scope.portalModule.module + '_NAME';
         $http.delete('/api/portalmodules/' + $scope.portalModule._id).then(function(response) {
             if ($scope.params.deletePortalModuleCallback) {
                 $scope.params.deletePortalModuleCallback();
             }
             utils.removeCardsToTheRightOf($element);
             utils.removeCard($element);
-            $translate(['PORTALS_MODULEASSIGNMENT_DELETED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.PORTALS_MODULEASSIGNMENT_DELETED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_PORTALS_MODULEASSIGNMENT_DELETED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_MODULEASSIGNMENT_DELETED).hideDelay(1000).position('bottom right'));
             });
         });
     }

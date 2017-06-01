@@ -18,17 +18,77 @@ var monk = require('monk');
 var apiHelper = require('../utils/apiHelper');
 
 // Get all users of the current client, maybe filtered by userGroupId
+// TODO: Testfälle anpassen
+/**
+ * Gibt eine Liste von Benutzern des Mandanten des angemeldeten Benutzers zurück.
+ * Wenn als Query-Parameter "userGroupId=IRGENDEINEID" angegeben ist, werden nur die Benutzer
+ * zurück gegeben, die der geforderten Benutzergruppe angehören.
+ * Wenn als Query-Parameter "joinUserGroup=true" angegeben ist, werden in der Property "userGroup"
+ * auch noch die Daten der Benutzergruppe der Benutzer zurück gegeben.
+ */
 router.get('/', auth('PERMISSION_ADMINISTRATION_USER', 'r', 'base'), (req, res) => {
     var clientId = req.user.clientId; // clientId === null means that the user is a portal user
-    var filter = { clientId: clientId };
-    if (req.query.userGroupId) {
+    // Aggregate-Pipeline: https://www.mongodb.com/blog/post/joins-and-other-aggregation-enhancements-coming-in-mongodb-3-2-part-1-of-3-introduction
+    var aggregateSteps = [
+        { $match: { clientId: clientId } } // Nur Benutzer des Mandanten des angemeldeten Benutzers
+    ];
+    if (req.query.userGroupId) { // Nur Benutzer einer bestimmten Benutzergruppe
         if (!validateId.validateId(req.query.userGroupId)) {
             return res.sendStatus(400);
         }
-        filter.userGroupId = monk.id(req.query.userGroupId);
+        aggregateSteps.push({ $match: { userGroupId: monk.id(req.query.userGroupId) } });
     }
-    req.db.get('users').find(filter, req.query.fields).then((docs) => {
-        res.send(docs);
+    if (req.query.joinUserGroup) { // Daten der Benutzergruppe einbinden
+        aggregateSteps.push({ $lookup: { 
+            from: 'usergroups',
+            localField: 'userGroupId',
+            foreignField: '_id',
+            as: 'userGroup'
+        } });
+    }
+    aggregateSteps.push({ $project: { pass: false } }); // Passwort niemals mit zurück geben // TODO: Test einbauen, ob Passwörter zurück kommen
+    req.db.get('users').aggregate(aggregateSteps).then((users) => {
+        res.send(users);
+    });
+});
+
+/**
+ * Liefert eine Liste von Terminen für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
+ * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
+ * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
+ * einfach eine leere Liste zurück gegeben.
+ * Zu jedem Benutzer wird in der Eigenschaft userGroup die Information über die zugehörige Benutzergruppe
+ * zurück gegeben. Passwörter werden nicht rausgegeben.
+ * @example
+ * $http.get('/api/users/forIds?ids=ID1,ID2,ID3')...
+ */
+router.get('/forIds', auth(false, false, 'base'), (req, res) => {
+    // Zuerst Berechtigung prüfen
+    auth.canAccess(req.user._id, 'PERMISSION_ADMINISTRATION_USER', 'r', 'base', req.db).then(function(accessAllowed) {
+        if (!accessAllowed) {
+            return res.send([]);
+        }
+        if (!req.query.ids) {
+            return res.send([]);
+        }
+        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
+        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
+        var aggregateSteps = [
+            { $match: { // Nur Benutzer des Mandanten des angemeldeten Benutzers
+                clientId: clientId, 
+                _id: { $in: ids } 
+            } },
+            { $lookup: { 
+                from: 'usergroups',
+                localField: 'userGroupId',
+                foreignField: '_id',
+                as: 'userGroup'
+            } }
+        ];
+        aggregateSteps.push({ $project: { pass: false } }); // Passwort niemals mit zurück geben // TODO: Test einbauen, ob Passwörter zurück kommen
+        req.db.get('users').aggregate(aggregateSteps).then((users) => {
+            res.send(users);
+        });
     });
 });
 

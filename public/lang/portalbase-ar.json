@@ -1,0 +1,20 @@
+{
+    "TRK_SETTINGS_CHANGES_SAVED" : "تم حفظ التعديلات",
+    "TRK_SETTINGS_CHECK_FOR_UPDATES" : "التحقق من وجود تحديثات",
+    "TRK_SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE" : "تثبيت",
+    "TRK_SETTINGS_FILE_UPLODAED" : "تم رَفَعَ الملف",
+    "TRK_SETTINGS_LICENSE" : "الترخيص",
+    "TRK_SETTINGS_LICENSEKEY" : "مفتاح الترخيص",
+    "TRK_SETTINGS_LICENSESERVER" : "خادم ترخيص",
+    "TRK_SETTINGS_LOCAL_VERSION" : "نسخة محلية",
+    "TRK_SETTINGS_MISSING_LICENSESERVER" : "يرجى إدخال عنوان خادم ترخيص",
+    "TRK_SETTINGS_PORTALSETTINGS" : "إعدادات البوابة الإلكترونية",
+    "TRK_SETTINGS_SAVE" : "حفظ",
+    "TRK_SETTINGS_UPDATE_IN_PROGRESS" : "جاري تثبيت التحديث",
+    "TRK_SETTINGS_UPDATES" : "تحديث",
+    "TRK_SETTINGS_UPLOAD_UPDATE" : "رَفَع التحديثات",
+    "TRK_SETTINGS_VERSION_ON_SERVER" : "نسخة على خادم الترخيص",
+    "TRK_SETTINGS_WAIT_FOR_UPDATE_COMPLETION" : "جاري التحديث... سوف تستغرق عملية التحديث حوالي دقيقتان. يرجى الإنتظار حتى الإنتهاء من عملية التحديث ومن ثم قم بإعادة تحميل الصفحة",
+    "TRK_SETTINGSET_PORTAL_GENERAL" : "إعدادات البوابة",
+    "TRK_MODULE_portalbase_NAME" : "البوابة- الوحدة الاساسية"    
+}

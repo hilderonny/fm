@@ -1,4 +1,4 @@
-app.controller('AdministrationUserSettingsCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translatePartialLoader, $translate, utils) {
+app.controller('AdministrationUserSettingsCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     
     // User clicks on close button
     $scope.closeCard = function() {
@@ -20,8 +20,8 @@ app.controller('AdministrationUserSettingsCardController', function($scope, $htt
             if ($scope.params.saveUserCallback) {
                 $scope.params.saveUserCallback(savedUser);
             }
-            $translate(['USERS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.USERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_USERS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     };

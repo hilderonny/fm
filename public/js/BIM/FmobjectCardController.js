@@ -1,8 +1,4 @@
 app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
-    
-    // Register translations
-    utils.registerTranslations('fmobjects');
-    utils.registerTranslations('activities'); // For relations
 
     $scope.types = [
         'FMOBJECTS_TYPE_PROJECT',
@@ -13,64 +9,9 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
         'FMOBJECTS_TYPE_AREA',
         'FMOBJECTS_TYPE_INVENTORY'
     ];
-
-    // When user wants to select an activity for the FM object
-    $scope.startAssignActivity = function() {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Office/CalendarCard', {
-            isSelection: true,
-            selectButtonText: 'FMOBJECTS_ASSIGN',
-            selectCallback: !$scope.params.isSelection ? function(selectedActivity) {
-                var relationToSend =  { 
-                    type1: 'fmObjects',
-                    type2: 'activities',
-                    id1: $scope.fmObject._id,
-                    id2: selectedActivity._id
-                };
-                $http.post('/api/relations', relationToSend).then(function() {
-                    $translate(['FMOBJECTS_ACTIVITY_ASSIGNED']).then(function(translations) {
-                        $mdToast.show($mdToast.simple().textContent(translations.FMOBJECTS_ACTIVITY_ASSIGNED).hideDelay(1000).position('bottom right'));
-                    });
-                    $scope.loadActivities();
-                    $scope.selectActivity(selectedActivity);
-                });
-            } : null,
-            closeCallback: function() {
-                $scope.activityListSelectedActivity = null;
-                utils.removeCardsToTheRightOf($element)
-            }
-        });
-        (event || window.event).stopPropagation(); // Prevent that card receives click event
-    };
-
-    // When user wants to select an assigned activity
-    $scope.selectActivity = function(activity) {
-        $scope.activityListSelectedActivity = activity;
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Office/ActivityCard', {
-            activityId: activity._id,
-            isSelection: true,
-            selectButtonText: 'FMOBJECTS_UNASSIGN',
-            selectCallback: $scope.canWriteFmObjects && !$scope.params.isSelection ? function(selectedActivity) {
-                $http.delete('/api/relations/?type1=fmObjects&type2=activities&id1=' + $scope.fmObject._id + '&id2=' + selectedActivity._id).then(function() {
-                    $translate(['FMOBJECTS_ACTIVITY_UNASSIGNED']).then(function(translations) {
-                        $mdToast.show($mdToast.simple().textContent(translations.FMOBJECTS_ACTIVITY_UNASSIGNED).hideDelay(1000).position('bottom right'));
-                    });
-                    $scope.loadActivities();
-                    $scope.activityListSelectedActivity = null;
-                    utils.removeCardsToTheRightOf($element);
-                });
-            } : null,
-            closeCallback: function() {
-                $scope.activityListSelectedActivity = null;
-                utils.removeCardsToTheRightOf($element)
-            }
-        });
-        (event || window.event).stopPropagation(); // Prevent that card receives click event
-    };
     
     // Click on Create-button to create a new FM object
-    $scope.createFmObject = function() {
+    $scope.createFmObject = function(event) {
         var fmObjectToSend =  { 
             name: $scope.fmObject.name, 
             type: $scope.fmObject.type, 
@@ -83,11 +24,12 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
             $scope.isNewFmObject = false;
             $scope.fmObject._id = createdFmObject._id;
             $scope.fmObjectName = $scope.fmObject.name; 
+            $scope.relationsEntity = { type:'fmobjects', id:createdFmObject._id };
             if ($scope.params.createFmObjectCallback) {
-                $scope.params.createFmObjectCallback(createdFmObject);
+                $scope.params.createFmObjectCallback(createdFmObject, event);
             }
-            $translate(['FMOBJECTS_FM_OBJECT_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.FMOBJECTS_FM_OBJECT_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_FMOBJECTS_FM_OBJECT_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_FM_OBJECT_CREATED).hideDelay(1000).position('bottom right'));
             });
         });
     };
@@ -106,20 +48,20 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
             if ($scope.params.saveFmObjectCallback) {
                 $scope.params.saveFmObjectCallback(savedFmObject);
             }
-            $translate(['FMOBJECTS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.FMOBJECTS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_FMOBJECTS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     };
 
     // Click on delete button to delete an existing FM object
     $scope.deleteFmObject = function() {
-        $translate(['FMOBJECTS_FM_OBJECT_DELETED', 'YES', 'NO']).then(function(translations) {
-            $translate('FMOBJECTS_REALLY_DELETE_FM_OBJECT', { fmObjectName: $scope.fmObjectName }).then(function(FMOBJECTS_REALLY_DELETE_FM_OBJECT) {
+        $translate(['TRK_FMOBJECTS_FM_OBJECT_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+            $translate('TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT', { fmObjectName: $scope.fmObjectName }).then(function(TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT) {
                 var confirm = $mdDialog.confirm()
-                    .title(FMOBJECTS_REALLY_DELETE_FM_OBJECT)
-                    .ok(translations.YES)
-                    .cancel(translations.NO);
+                    .title(TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT)
+                    .ok(translations.TRK_YES)
+                    .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/fmobjects/' + $scope.fmObject._id).then(function(response) {
                         if ($scope.params.deleteFmObjectCallback) {
@@ -127,7 +69,7 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.FMOBJECTS_FM_OBJECT_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_FM_OBJECT_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
@@ -141,17 +83,6 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
         }
         utils.removeCardsToTheRightOf($element);
         utils.removeCard($element);
-    };
-
-    // (Re-)loads activities of FM-Object
-    $scope.loadActivities = function() {
-        if (!$scope.canReadActivities) return;
-            $http.get('api/activities/byRelationId/' + $scope.params.fmObjectId).then(function (response) {
-            $scope.activityListActivities = response.data;
-            $scope.activityListShowName = true;
-            $scope.activityListShowType = true;
-            $scope.activityListShowDate = true;
-        });
     };
 
     // Loads the FM object details or prepares the empty dialog for a new FM object
@@ -172,13 +103,8 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
                 $scope.isNewFmObject = false;
                 $scope.fmObject = completeFmObject;
                 $scope.fmObjectName = completeFmObject.name; // Prevent updating the label when changing the input value 
-            })
-            .then(function() {
-                // Check activity permission
-                return $http.get('/api/permissions/canRead/PERMISSION_OFFICE_ACTIVITY');
-            }).then(function (response) {
-                $scope.canReadActivities = response.data;
-            }).then($scope.loadActivities); // Load activities
+                $scope.relationsEntity = { type:'fmobjects', id:completeFmObject._id };
+            });
         } else {
             // New FM object
             $scope.isNewFmObject = true;

@@ -16,8 +16,8 @@ app.controller('AdministrationPermissionCardController', function($scope, $http,
             if ($scope.params.createPermissionCallback) {
                 $scope.params.createPermissionCallback(createdPermission);
             }
-            $translate(['USERGROUPS_PERMISSION_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.USERGROUPS_PERMISSION_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_USERGROUPS_PERMISSION_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_PERMISSION_CREATED).hideDelay(1000).position('bottom right'));
             });
         });
     }
@@ -35,20 +35,21 @@ app.controller('AdministrationPermissionCardController', function($scope, $http,
             if ($scope.params.savePermissionCallback) {
                 $scope.params.savePermissionCallback(savedPermission);
             }
-            $translate(['USERGROUPS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.USERGROUPS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_USERGROUPS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     }
 
     // Click on delete button to delete an existing permission
     $scope.deletePermission = function() {
-        $translate(['USERGROUPS_PERMISSION_DELETED', 'YES', 'NO', $scope.permissionKey]).then(function(translations) {
-            $translate('USERGROUPS_REALLY_DELETE_PERMISSION', { permission: translations[$scope.permissionKey] }).then(function(USERGROUPS_REALLY_DELETE_PERMISSION) {
+        var permissionTranslationKey = 'TRK_' + $scope.permissionKey;
+        $translate(['TRK_USERGROUPS_PERMISSION_DELETED', 'TRK_YES', 'TRK_NO', permissionTranslationKey]).then(function(translations) {
+            $translate('TRK_USERGROUPS_REALLY_DELETE_PERMISSION', { permission: translations[permissionTranslationKey] }).then(function(TRK_USERGROUPS_REALLY_DELETE_PERMISSION) {
                 var confirm = $mdDialog.confirm()
-                    .title(USERGROUPS_REALLY_DELETE_PERMISSION)
-                    .ok(translations.YES)
-                    .cancel(translations.NO);
+                    .title(TRK_USERGROUPS_REALLY_DELETE_PERMISSION)
+                    .ok(translations.TRK_YES)
+                    .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/permissions/' + $scope.permission._id).then(function(response) {
                         if ($scope.params.deletePermissionCallback) {
@@ -56,7 +57,7 @@ app.controller('AdministrationPermissionCardController', function($scope, $http,
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.USERGROUPS_PERMISSION_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_PERMISSION_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
@@ -75,7 +76,7 @@ app.controller('AdministrationPermissionCardController', function($scope, $http,
     // Loads the permission details or prepares the empty dialog for a new permission
     // Params:
     // - $scope.params.permissionId : ID of the permission to load, when not set, a new permission is to be created
-    // - $scope.params.userGroupId : ID of the parent user group for new permissions
+    // - $scope.params.userGroupId : ID of the user group the permission belongs to
     // - $scope.params.createPermissionCallback : Callback function when a new permission was created. Gets the permission as parameter
     // - $scope.params.savePermissionCallback : Callback function when an existing permission was saved. Gets the updated permission as parameter
     // - $scope.params.deletePermissionCallback : Callback function when an existing permission was deleted. No parameters
@@ -83,7 +84,8 @@ app.controller('AdministrationPermissionCardController', function($scope, $http,
     $scope.load = function() {
         var loadPermissionList = function(existingPermission) {
             // Load all existing permissions for selecting in dropdown
-            $http.get('/api/permissions/list').then(function(response) {
+            var permissionParam = existingPermission ? '?selectedPermissionKey=' + existingPermission.key : '';
+            $http.get('/api/permissions/available/' + $scope.params.userGroupId + permissionParam).then(function(response) {
                 $scope.allPermissionKeys = response.data;
                 if (existingPermission) {
                     $scope.permission = existingPermission;

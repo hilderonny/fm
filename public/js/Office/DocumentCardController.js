@@ -1,10 +1,4 @@
-app.controller('OfficeDocumentCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('documents')) {
-        $translatePartialLoader.addPart('documents');
-        $translate.refresh();
-    }
+app.controller('OfficeDocumentCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     // Click on Download-document-button
     $scope.downloadDocument = function() {
@@ -20,20 +14,20 @@ app.controller('OfficeDocumentCardController', function($scope, $http, $mdDialog
             if ($scope.params.saveDocumentCallback) {
                 $scope.params.saveDocumentCallback(savedDocument);
             }
-            $translate(['DOCUMENTS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.DOCUMENTS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_DOCUMENTS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_DOCUMENTS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     }
 
     // Click on delete button to delete an existing document
     $scope.deleteDocument = function() {
-        $translate(['DOCUMENTS_DOCUMENT_DELETED', 'YES', 'NO']).then(function(translations) {
-            $translate('DOCUMENTS_REALLY_DELETE_DOCUMENT', { documentName: $scope.documentName }).then(function(DOCUMENTS_REALLY_DELETE_DOCUMENT) {
+        $translate(['TRK_DOCUMENTS_DOCUMENT_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+            $translate('TRK_DOCUMENTS_REALLY_DELETE_DOCUMENT', { documentName: $scope.documentName }).then(function(TRK_DOCUMENTS_REALLY_DELETE_DOCUMENT) {
                 var confirm = $mdDialog.confirm()
-                    .title(DOCUMENTS_REALLY_DELETE_DOCUMENT)
-                    .ok(translations.YES)
-                    .cancel(translations.NO);
+                    .title(TRK_DOCUMENTS_REALLY_DELETE_DOCUMENT)
+                    .ok(translations.TRK_YES)
+                    .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/documents/' + $scope.document._id).then(function(response) {
                         if ($scope.params.deleteDocumentCallback) {
@@ -41,7 +35,7 @@ app.controller('OfficeDocumentCardController', function($scope, $http, $mdDialog
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.DOCUMENTS_DOCUMENT_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_DOCUMENTS_DOCUMENT_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
@@ -57,8 +51,8 @@ app.controller('OfficeDocumentCardController', function($scope, $http, $mdDialog
             if ($scope.params.extractDocumentCallback) {
                 $scope.params.extractDocumentCallback(newBaseFolderContent);
             }
-            $translate(['DOCUMENTS_FILE_EXTRACTED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.DOCUMENTS_FILE_EXTRACTED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_DOCUMENTS_FILE_EXTRACTED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_DOCUMENTS_FILE_EXTRACTED).hideDelay(1000).position('bottom right'));
             });
         })
     }
@@ -93,6 +87,12 @@ app.controller('OfficeDocumentCardController', function($scope, $http, $mdDialog
             $scope.isPreviewable = [
                 'application/vnd.ms-pki.stl'
             ].indexOf(document.type) >= 0;
+            // Information über das Dokument für Verknüpfungen-Tab bereit stellen
+            $scope.relationsEntity = { type:'documents', id:document._id };
+            // Berechtigungen ermitteln
+            $http.get('/api/permissions/canWrite/PERMISSION_OFFICE_DOCUMENT').then(function(canWriteResponse) {
+                $scope.canWriteDocuments = canWriteResponse.data;
+            });
         });
     }
 

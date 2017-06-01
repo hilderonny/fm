@@ -1,10 +1,4 @@
-app.controller('AdministrationClientCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('clients')) {
-        $translatePartialLoader.addPart('clients');
-        $translate.refresh();
-    }
+app.controller('AdministrationClientCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     
     var createClientModuleCallback = function(createdClientModule) {
         $scope.clientModules.push(createdClientModule);
@@ -50,6 +44,7 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
             $scope.isNewClient = false;
             $scope.client._id = createdClient._id;
             $scope.clientName = $scope.client.name;
+            $scope.relationsEntity = { type:'clients', id:createdClient._id };
             if ($scope.params.createClientCallback) {
                 $scope.params.createClientCallback(createdClient);
             }
@@ -58,8 +53,8 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
                 $scope.clientModules = clientModulesResponse.data;
                 checkAvailableModules();
             });
-            $translate(['CLIENTS_CLIENTCREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.CLIENTS_CLIENTCREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_CLIENTS_CLIENTCREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENTCREATED).hideDelay(1000).position('bottom right'));
             });
         });
     };
@@ -75,20 +70,20 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
             if ($scope.params.saveClientCallback) {
                 $scope.params.saveClientCallback(savedClient);
             }
-            $translate(['CLIENTS_CHANGESSAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.CLIENTS_CHANGESSAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_CLIENTS_CHANGESSAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CHANGESSAVED).hideDelay(1000).position('bottom right'));
             });
         });
     };
 
     // Click on delete button to delete an existing client
     $scope.deleteClient = function() {
-        $translate(['CLIENTS_CLIENTDELETED', 'YES', 'NO']).then(function(translations) {
-            $translate('CLIENTS_REALLYDELETECLIENT', { clientName: $scope.clientName }).then(function(CLIENTS_REALLYDELETECLIENT) {
+        $translate(['TRK_CLIENTS_CLIENTDELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+            $translate('TRK_CLIENTS_REALLYDELETECLIENT', { clientName: $scope.clientName }).then(function(TRK_CLIENTS_REALLYDELETECLIENT) {
                 var confirm = $mdDialog.confirm()
-                    .title(CLIENTS_REALLYDELETECLIENT)
-                    .ok(translations.YES)
-                    .cancel(translations.NO);
+                    .title(TRK_CLIENTS_REALLYDELETECLIENT)
+                    .ok(translations.TRK_YES)
+                    .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/clients/' + $scope.client._id).then(function(response) {
                         if ($scope.params.deleteClientCallback) {
@@ -96,7 +91,7 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.CLIENTS_CLIENTDELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENTDELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
@@ -160,6 +155,7 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
                 $scope.isNewClient = false;
                 $scope.client = completeClient;
                 $scope.clientName = completeClient.name; // Prevent updating the label when changing the name input value
+                $scope.relationsEntity = { type:'clients', id:completeClient._id };
                 checkAvailableModules();
                 // client module assignments
                 $http.get('/api/clientmodules?clientId=' + $scope.client._id).then(function(clientModulesResponse) {

@@ -2,8 +2,8 @@
 
     <md-card-title flex="none">
         <md-card-title-text>
-            <span class="md-headline" ng-if="!isNewPortalModule" translate>PORTALS_EDIT_MODULEASSIGNMENT</span>
-            <span class="md-headline" ng-if="isNewPortalModule" translate>PORTALS_NEW_MODULEASSIGNMENT</span>
+            <span class="md-headline" ng-if="!isNewPortalModule" translate>TRK_PORTALS_EDIT_MODULEASSIGNMENT</span>
+            <span class="md-headline" ng-if="isNewPortalModule" translate>TRK_PORTALS_NEW_MODULEASSIGNMENT</span>
         </md-card-title-text>
     </md-card-title>
     
@@ -16,19 +16,19 @@
         <form layout="column">
 
             <md-input-container flex>
-                <label translate>PORTALS_MODULE</label>
+                <label translate>TRK_PORTALS_MODULE</label>
                 <md-select ng-model="portalModule.module">
                     <md-option ng-value="module" ng-repeat="module in modules | orderBy: 'module'">
-                        <span translate="MODULE_{{module}}_NAME"></span>
+                        <span translate="TRK_MODULE_{{module}}_NAME"></span>
                     </md-option>
                 </md-select>
             </md-input-container>
 
 
             <md-card-actions layout="row" layout-align="end center">
-                <md-button class="md-raised md-accent" ng-if="isNewPortalModule" ng-click="createPortalModule()"><span translate>PORTALS_CREATE</span></md-button>
-                <md-button class="md-raised md-accent" ng-if="!isNewPortalModule" ng-click="savePortalModule()"><span translate>PORTALS_SAVE</span></md-button>
-                <md-button class="md-raised md-warn" ng-if="!isNewPortalModule" ng-click="deletePortalModule()"><span translate>PORTALS_DELETE</span></md-button>
+                <md-button class="md-raised md-accent" ng-if="isNewPortalModule" ng-click="createPortalModule()"><span translate>TRK_PORTALS_CREATE</span></md-button>
+                <md-button class="md-raised md-accent" ng-if="!isNewPortalModule" ng-click="savePortalModule()"><span translate>TRK_PORTALS_SAVE</span></md-button>
+                <md-button class="md-raised md-warn" ng-if="!isNewPortalModule" ng-click="deletePortalModule()"><span translate>TRK_PORTALS_DELETE</span></md-button>
             </md-card-actions>
 
         </form>

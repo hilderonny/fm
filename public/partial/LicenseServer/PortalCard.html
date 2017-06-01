@@ -3,14 +3,25 @@
     <md-card-title flex="none" class="withfab">
         <md-card-title-text>
             <span class="md-headline" ng-hide="isNewPortal"><span ng-bind="portalName"></span></span>
-            <span class="md-headline" ng-if="isNewPortal" translate>PORTALS_NEW_PORTAL</span>
+            <span class="md-headline" ng-if="isNewPortal" translate>TRK_PORTALS_NEW_PORTAL</span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-button class="md-fab md-accent" ng-if="!isNewPortal && areModulesAvailable" ng-click="newModuleAssignment()" aria-label="ADD MODULE ASSIGNMEN">
-        <md-tooltip md-direction="left"><span translate>PORTALS_CREATE_NEW_MODULEASSIGNMENT</span></md-tooltip>
-        <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-    </md-button>
+    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewPortal">
+        <md-fab-trigger>
+            <md-button class="md-fab md-accent" aria-label="MENU">
+                <md-tooltip md-direction="left"><span translate>TRK_PORTALS_MORE_ACTIONS</span></md-tooltip>
+                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
+            </md-button>
+        </md-fab-trigger>
+        <md-fab-actions>
+            <md-button class="md-fab md-raised md-mini" ng-if="areModulesAvailable" ng-click="newModuleAssignment()" aria-label="ADD MODULE ASSIGNMEN">
+                <md-tooltip md-direction="left"><span translate>TRK_PORTALS_CREATE_NEW_MODULEASSIGNMENT</span></md-tooltip>
+                <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+            </md-button>
+            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        </md-fab-actions>
+    </md-fab-speed-dial>
     
     <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
         <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
@@ -22,30 +33,30 @@
             <form name="portalsForm" layout="column">
 
                 <md-input-container flex>
-                    <label translate>PORTALS_NAME</label>
+                    <label translate>TRK_PORTALS_NAME</label>
                     <input ng-model="portal.name" name="name">
                 </md-input-container>
 
                 <md-input-container flex>
-                    <md-checkbox ng-model="portal.isActive"><span translate>PORTALS_ACTIVE</span></md-checkbox>
+                    <md-checkbox ng-model="portal.isActive"><span translate>TRK_PORTALS_ACTIVE</span></md-checkbox>
                 </md-input-container>
 
                 <md-input-container flex ng-if="!isNewPortal">
-                    <label translate>PORTALS_LICENSEKEY</label>
+                    <label translate>TRK_PORTALS_LICENSEKEY</label>
                     <textarea ng-model="portal.licenseKey" rows="5" ng-readonly="true"></textarea>
                 </md-input-container>
 
-                <a href="/api/update/download?licenseKey={{portal.licenseKey}}" translate>PORTALS_DOWNLOAD_PACKAGE</a>
+                <a href="/api/update/download?licenseKey={{portal.licenseKey}}" translate>TRK_PORTALS_DOWNLOAD_PACKAGE</a>
 
 
                 <md-card-actions layout="row" layout-align="end center" ng-if="!isNewPortal">
-                    <md-button class="md-raised md-accent" ng-if="!isNewPortal" ng-click="generateNewLicenseKey()"><span translate>PORTALS_GENERATE_LICENSEKEY</span></md-button>
+                    <md-button class="md-raised md-accent" ng-if="!isNewPortal" ng-click="generateNewLicenseKey()"><span translate>TRK_PORTALS_GENERATE_LICENSEKEY</span></md-button>
                 </md-card-actions>
 
                 <md-card-actions layout="row" layout-align="end center">
-                    <md-button class="md-raised md-accent" ng-if="isNewPortal" ng-click="createPortal()" ng-disabled="portalsForm.$invalid"><span translate>PORTALS_CREATE</span></md-button>
-                    <md-button class="md-raised md-accent" ng-if="!isNewPortal" ng-click="savePortal()" ng-disabled="portalsForm.$invalid"><span translate>PORTALS_SAVE</span></md-button>
-                    <md-button class="md-raised md-warn" ng-if="!isNewPortal" ng-click="deletePortal()"><span translate>PORTALS_DELETE</span></md-button>
+                    <md-button class="md-raised md-accent" ng-if="isNewPortal" ng-click="createPortal()" ng-disabled="portalsForm.$invalid"><span translate>TRK_PORTALS_CREATE</span></md-button>
+                    <md-button class="md-raised md-accent" ng-if="!isNewPortal" ng-click="savePortal()" ng-disabled="portalsForm.$invalid"><span translate>TRK_PORTALS_SAVE</span></md-button>
+                    <md-button class="md-raised md-warn" ng-if="!isNewPortal" ng-click="deletePortal()"><span translate>TRK_PORTALS_DELETE</span></md-button>
                 </md-card-actions>
 
             </form>
@@ -54,20 +65,21 @@
 
     <md-tabs flex ng-if="!isNewPortal">
         <md-tab>
-            <md-tab-label><span translate>PORTALS_DETAILS</span></md-tab-label>
+            <md-tab-label><span translate>TRK_PORTALS_DETAILS</span></md-tab-label>
             <md-tab-body><ng-include src="'PortalsFormTemplate'"></ng-include></md-tab-body>
         </md-tab>
         <md-tab>
-            <md-tab-label><span translate>PORTALS_MODULES</span></md-tab-label>
+            <md-tab-label><span translate>TRK_PORTALS_MODULES</span></md-tab-label>
             <md-tab-body>
                 <md-list class="lines-beetween-items">
                     <md-list-item ng-repeat="portalModuleAssignment in portalModuleAssignments | orderBy: 'module'" ng-click="selectPortalModule(portalModuleAssignment)" ng-class="{active:selectedPortalModule == portalModuleAssignment}" aria-label="{{portalModuleAssignment.module}}">
                         <md-icon md-svg-src="/css/icons/material/Module.svg"></md-icon>
-                        <p translate="MODULE_{{portalModuleAssignment.module}}_NAME"></p>
+                        <p translate="TRK_MODULE_{{portalModuleAssignment.module}}_NAME"></p>
                     </md-list-item>
                 </md-list>
             </md-tab-body>
         </md-tab>
+        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
     </md-tabs>
 
     <ng-include flex ng-if="isNewPortal" src="'PortalsFormTemplate'"></ng-include>

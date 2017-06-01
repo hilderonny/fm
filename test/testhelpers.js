@@ -12,6 +12,7 @@ var hat = require('hat');
 var fs = require('fs');
 var path = require('path');
 var localConfig = require('../config/localconfig.json'); // http://stackoverflow.com/a/14678694
+var documentsHelper = require('../utils/documentsHelper');
 
 var dbObjects = {};
 
@@ -45,14 +46,15 @@ module.exports.cleanDatabase = () => {
     dbObjects = {};
     var promises = [
         'activities',
+        'clientmodules',
         'clients',
-        'relations',
         'documents',
         'fmobjects',
         'folders',
         'permissions',
-        'portals',
         'portalmodules',
+        'portals',
+        'relations',
         'usergroups',
         'users'
     ].map((key) => db.get(key).drop());
@@ -63,6 +65,8 @@ module.exports.cleanDatabase = () => {
  * Performs a login with the given credentials and returns a promise with the token as result
  */
 module.exports.doLoginAndGetToken = (username, password) => {
+    if (!username) throw new Error('Please provide an username');
+    if (username.split("_").length != 3) throw new Error(`The username must be of form <client>_<usergroup>_<user> or _<usergroup>_<user>. You provided "${username}"`);
     return new Promise((resolve, reject) => {
         superTest(server)
             .post('/api/login')
@@ -74,20 +78,12 @@ module.exports.doLoginAndGetToken = (username, password) => {
 };
 
 /**
- * Performs a login as admin/admin and returns a promise with the token as result
- */
-module.exports.doAdminLoginAndGetToken = () => {
-    return module.exports.doLoginAndGetToken('admin', 'test'); // The password is fixed set to 'test' in prepareUsers() below.
-};
-
-/**
  * Creates 3 clients and returns a promise without parameters.
  */
 module.exports.prepareClients = () => {
     return bulkInsert('clients', [
         { name: '0' },
-        { name: '1' },
-        { name: '2' }
+        { name: '1' }
     ]);
 };
 
@@ -127,13 +123,9 @@ module.exports.prepareUserGroups = () => {
     dbObjects.clients.forEach((client) => {
         userGroups.push({ name: client.name + '_0', clientId: client._id });
         userGroups.push({ name: client.name + '_1', clientId: client._id });
-        userGroups.push({ name: client.name + '_2', clientId: client._id });
     });
     // Add user groups for portal
     userGroups.push({ name: '_0', clientId: null });
-    userGroups.push({ name: '_1', clientId: null });
-    userGroups.push({ name: '_2', clientId: null });
-    userGroups.push({ name: 'admin', clientId: null });
     return bulkInsert('usergroups', userGroups);
 };
 
@@ -148,11 +140,8 @@ module.exports.prepareUsers = () => {
     var users = [];
     dbObjects.usergroups.forEach((userGroup) => {
         users.push({ name: userGroup.name + '_0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id });
-        users.push({ name: userGroup.name + '_1', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id });
-        users.push({ name: userGroup.name + '_2', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id });
         users.push({ name: userGroup.name + '_ADMIN0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id, isAdmin: true }); // Administrator
     });
-    users.push({ name: 'admin', pass: hashedPassword, clientId: null, userGroupId: dbObjects.usergroups[dbObjects.usergroups.length - 1]._id, isAdmin: true }); // Administrator
     return bulkInsert('users', users);
 };
 
@@ -164,13 +153,15 @@ module.exports.preparePermissions = () => {
     var permissions = [];
     dbObjects.usergroups.forEach((userGroup) => {
         permissions.push({ key: 'PERMISSION_ADMINISTRATION_CLIENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_ADMINISTRATION_PERMISSION', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_ADMINISTRATION_USERGROUP', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_BIM_FMOBJECT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_OFFICE_ACTIVITY', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_OFFICE_DOCUMENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_LICENSESERVER_PORTAL', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: 'PERMISSION_SETTINGS_CLIENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: 'PERMISSION_SETTINGS_PORTAL', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: 'PERMISSION_SETTINGS_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
     });
     return bulkInsert('permissions', permissions);
 };
@@ -198,6 +189,17 @@ module.exports.removeWritePermission = (userName, permissionKey) => {
 };
 
 /**
+ * Deletes the canRead and canWrite flags of a permission of the usergroup of the user with the given name.
+ */
+module.exports.removeAllPermissions = (userName, permissionKey) => {
+    return new Promise((resolve, reject) => {
+        return db.get('users').findOne({ name: userName }).then((user) => {
+            return db.get('permissions').findOneAndUpdate({ key: permissionKey, userGroupId: user.userGroupId }, { $set: { canRead: false, canWrite: false} }).then(resolve);
+        });
+    });
+};
+
+/**
  * Creates 3 portals
  * Two active and one not
  * 
@@ -205,8 +207,7 @@ module.exports.removeWritePermission = (userName, permissionKey) => {
 
 module.exports.preparePortals = () => {
     var portals = [{name: 'p1', isActive: true, licenseKey: 'LicenseKey1'},
-                   {name: 'p2', isActive: true, licenseKey: 'LicenseKey2'},
-                   {name: 'p3', isActive: false, licenseKey: 'LicenseKey3'}];
+                   {name: 'p2', isActive: false, licenseKey: 'LicenseKey2'}];
     return bulkInsert('portals', portals);
 };
 
@@ -242,7 +243,8 @@ module.exports.prepareActivities = () => {
         activities.push({
             date: now.toISOString(),
             clientId: user.clientId,
-            createdByUserId: user._id.toString(),
+            createdByUserId: user._id,
+            participantUserIds: [],
             name: user.name + '_0',
             type: 'Gewährleistung'
         });
@@ -250,7 +252,8 @@ module.exports.prepareActivities = () => {
         activities.push({
             date: now.toISOString(),
             clientId: user.clientId,
-            createdByUserId: user._id.toString(),
+            createdByUserId: user._id,
+            participantUserIds: [],
             name: user.name + '_1',
             type: 'Kundenbesuch'
         });
@@ -258,12 +261,26 @@ module.exports.prepareActivities = () => {
         activities.push({
             date: now.toISOString(),
             clientId: user.clientId,
-            createdByUserId: user._id.toString(),
+            createdByUserId: user._id,
+            participantUserIds: [],
             name: user.name + '_2',
             type: 'Wartung'
         });
     });
     return bulkInsert('activities', activities);
+};
+
+/**
+ * Fügt einen Benutzer einer Aktivität als Teilnehmer hinzu
+ */
+module.exports.addUserAsParticipantToActivity = function(userName, activitiyName) {
+    return new Promise((resolve, reject) => {
+        return db.get('users').findOne({ name: userName }).then((user) => {
+            return db.get('activities').findOneAndUpdate({ name: activitiyName }, { $addToSet: { 
+                participantUserIds: user._id
+            } }).then(resolve);
+        });
+    });
 };
 
 /**
@@ -274,11 +291,17 @@ module.exports.prepareActivities = () => {
 module.exports.prepareFmObjects = () => {
     var fmObjects = [];
     dbObjects.clients.forEach((client) => {
-        fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt' });
-        fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Liegenschaft' });
-        fmObjects.push({ name: client.name + '_2', clientId: client._id, type: 'Gebäude' });
+        fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt', path:',' });
+        fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Gebäude', path:',' });
     });
-    return bulkInsert('fmobjects', fmObjects);
+    return bulkInsert('fmobjects', fmObjects).then((insertedRootFmObjects) => {
+        var level1FmObjects = [];
+        insertedRootFmObjects.forEach((rootFmObject) => {
+            level1FmObjects.push({ name: rootFmObject.name + '_0', clientId: rootFmObject.clientId, type: 'Etage', path: rootFmObject.path + rootFmObject._id.toString() + ',', parentId: rootFmObject._id });
+            level1FmObjects.push({ name: rootFmObject.name + '_1', clientId: rootFmObject.clientId, type: 'Raum', path: rootFmObject.path + rootFmObject._id.toString() + ',', parentId: rootFmObject._id });
+        });
+        return bulkInsert('fmobjects', level1FmObjects);
+    });
 };
 
 /**
@@ -293,7 +316,6 @@ module.exports.prepareFolders = () => {
     dbObjects.clients.forEach((client) => {
         rootFolders.push({ name: client.name + '_0', clientId: client._id });
         rootFolders.push({ name: client.name + '_1', clientId: client._id });
-        rootFolders.push({ name: client.name + '_2', clientId: client._id });
     });
     // Add folder to portal
     rootFolders.push({ name: 'portalfolder', clientId: null });
@@ -302,14 +324,12 @@ module.exports.prepareFolders = () => {
         insertedRootFolders.forEach((insertedRootFolder) => {
             level1Folders.push({ name: insertedRootFolder.name + '_0', clientId: insertedRootFolder.clientId, parentFolderId: insertedRootFolder._id });
             level1Folders.push({ name: insertedRootFolder.name + '_1', clientId: insertedRootFolder.clientId, parentFolderId: insertedRootFolder._id });
-            level1Folders.push({ name: insertedRootFolder.name + '_2', clientId: insertedRootFolder.clientId, parentFolderId: insertedRootFolder._id });
         });
         return bulkInsert('folders', level1Folders).then((insertedLevel1Folders) => {
             var level2Folders = [];
             insertedLevel1Folders.forEach((insertedLevel1Folder) => {
                 level2Folders.push({ name: insertedLevel1Folder.name + '_0', clientId: insertedLevel1Folder.clientId, parentFolderId: insertedLevel1Folder._id });
                 level2Folders.push({ name: insertedLevel1Folder.name + '_1', clientId: insertedLevel1Folder.clientId, parentFolderId: insertedLevel1Folder._id });
-                level2Folders.push({ name: insertedLevel1Folder.name + '_2', clientId: insertedLevel1Folder.clientId, parentFolderId: insertedLevel1Folder._id });
             });
             return bulkInsert('folders', level2Folders);
         });
@@ -329,26 +349,12 @@ var createPath = (pathToCreate) => {
 }
 
 /**
- * Calculates the path where a document is stored and returns it.
- */
-var getDocumentPath = (document) => {
-    return path.join(
-        __dirname, 
-        '/../',
-        localConfig.documentspath,
-        document.clientId !== null ? document.clientId.toString() : '',
-        document._id.toString()
-    );
-};
-module.exports.getDocumentPath = getDocumentPath;
-
-/**
  * Creates a file for the all existing documents in documents/[clientId]/documentId with the document's ID as content
  */
 module.exports.prepareDocumentFiles = () => {
     return new Promise((resolve, reject) => {
         dbObjects.documents.forEach((document) => {
-            var filePath = getDocumentPath(document);
+            var filePath = documentsHelper.getDocumentPath(document._id);
             createPath(path.dirname(filePath));
             fs.writeFileSync(filePath, document._id.toString());
         });
@@ -364,7 +370,7 @@ module.exports.removeDocumentFiles = () => {
         db.get('documents').find().then((documents) => {
             documents.forEach((document) => {
                 var id = document._id.toString();
-                var filePath = getDocumentPath(document);
+                var filePath = documentsHelper.getDocumentPath(document._id);
                 if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
             });
             var documentsBasePath = path.join(
@@ -384,7 +390,7 @@ module.exports.removeDocumentFiles = () => {
 };
 
 /**
- * Creates 3 documents for each folder and additionally 3 documents for each client in the root folder
+ * Creates 2 documents for each folder and additionally 2 documents for each client in the root folder
  * The name schema is
  * [FolderName]_[IndexOfDocument]
  * [ClientName]_[IndexOfDocument]
@@ -394,13 +400,11 @@ module.exports.prepareDocuments = () => {
     dbObjects.folders.forEach((folder) => {
         documents.push({ name: folder.name + '_0', clientId: folder.clientId, parentFolderId: folder._id });
         documents.push({ name: folder.name + '_1', clientId: folder.clientId, parentFolderId: folder._id });
-        documents.push({ name: folder.name + '_2', clientId: folder.clientId, parentFolderId: folder._id });
     });
     // Documents in root folder
     dbObjects.clients.forEach((client) => {
         documents.push({ name: client.name + '_0', clientId: client._id });
         documents.push({ name: client.name + '_1', clientId: client._id });
-        documents.push({ name: client.name + '_2', clientId: client._id });
     });
     return bulkInsert('documents', documents);
 };
@@ -408,22 +412,16 @@ module.exports.prepareDocuments = () => {
 /**
  * Create a relation to each activity for each document in the database.
  */
-module.exports.prepareRelations = () => {
+module.exports.prepareRelations = function() {
     var relations = [];
-    dbObjects.documents.forEach((document) => {
-        dbObjects.activities.forEach((activity) => {
-            relations.push({ type1: 'documents', id1: document._id, type2: 'activities', id2: activity._id });
+    var keys = Object.keys(dbObjects);
+    keys.forEach(function(key1) {
+        keys.forEach(function(key2) {
+            relations.push({ type1: key1, id1: dbObjects[key1][0]._id, type2: key2, id2: dbObjects[key2][0]._id });
         });
     });
     return bulkInsert('relations', relations);
 };
-
-/**
- * Creates something ??? TODO
- */
-module.exports.prepareSettingSets = () => {
-    return new Promise((resolve, reject) => { resolve(); });
-}
 
 /**
  * Creates 3 documents for each folder

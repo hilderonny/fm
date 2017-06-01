@@ -51,7 +51,8 @@ var extractMenu = (moduleNames) => {
 router.get('/', auth(), (req, res) => {
     // Check module availability for the client of the user 
     req.db.get('clientmodules').find({ clientId: req.user.clientId }).then((clientmodules) => {
-        var clientModuleNames = clientmodules.map((clientModule) => clientModule.module);
+        // Distinguish between portal and client users
+        var clientModuleNames = req.user.clientId === null ? Object.keys(moduleConfig.modules) : clientmodules.map((clientModule) => clientModule.module);
         // Portal users have all modules available, all others must be filtered
         var clientMenu = extractMenu(req.user.clientId ? clientModuleNames : false);
         if (req.user.isAdmin) { // Admins will get all menu items available to their clients

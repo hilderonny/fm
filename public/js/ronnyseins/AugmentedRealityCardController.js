@@ -1,4 +1,4 @@
-app.controller('ronnyseinsAugmentedRealityCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translatePartialLoader, $translate, utils) {
+app.controller('ronnyseinsAugmentedRealityCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
 
     var lngFactor = 100000;
     var latFactor = 100000;

@@ -1,10 +1,4 @@
-app.controller('LicenseServerPortalCardController', function($scope, $http, $mdDialog, $element, $translatePartialLoader, $translate, $mdToast, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('licenseserver')) {
-        $translatePartialLoader.addPart('licenseserver');
-        $translate.refresh();
-    }
+app.controller('LicenseServerPortalCardController', function($scope, $http, $mdDialog, $element, $translate, $mdToast, utils) {
     
     var createPortalModuleCallback = function(createdPortalModule) {
         $scope.portalModuleAssignments.push(createdPortalModule);
@@ -52,6 +46,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
             $scope.portal._id = createdPortal._id;
             $scope.portal.licenseKey = createdPortal.licenseKey;
             $scope.portalName = $scope.portal.name;
+            $scope.relationsEntity = { type:'portals', id:createdPortal._id };
             if ($scope.params.createPortalCallback) {
                 $scope.params.createPortalCallback(createdPortal);
             }
@@ -60,8 +55,8 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
                 portalModulesResponse.data.forEach(function(portalModule) {
                     $scope.portalModuleAssignments.push(portalModule);
                 });
-                $translate(['PORTALS_PORTAL_CREATED']).then(function(translations) {
-                    $mdToast.show($mdToast.simple().textContent(translations.PORTALS_PORTAL_CREATED).hideDelay(1000).position('bottom right'));
+                $translate(['TRK_PORTALS_PORTAL_CREATED']).then(function(translations) {
+                    $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_PORTAL_CREATED).hideDelay(1000).position('bottom right'));
                 });
             });
         });
@@ -79,20 +74,20 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
             if ($scope.params.savePortalCallback) {
                 $scope.params.savePortalCallback(savedPortal);
             }
-            $translate(['PORTALS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.PORTALS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_PORTALS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     };
 
     // Click on delete button to delete an existing portal
     $scope.deletePortal = function() {
-        $translate(['PORTALS_PORTAL_DELETED', 'YES', 'NO']).then(function(translations) {
-            $translate('PORTALS_REALLY_DELETE_PORTAL', { portalName: $scope.portalName }).then(function(PORTALS_REALLY_DELETE_PORTAL) {
+        $translate(['TRK_PORTALS_PORTAL_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+            $translate('TRK_PORTALS_REALLY_DELETE_PORTAL', { portalName: $scope.portalName }).then(function(TRK_PORTALS_REALLY_DELETE_PORTAL) {
                 var confirm = $mdDialog.confirm()
-                    .title(PORTALS_REALLY_DELETE_PORTAL)
-                    .ok(translations.YES)
-                    .cancel(translations.NO);
+                    .title(TRK_PORTALS_REALLY_DELETE_PORTAL)
+                    .ok(translations.TRK_YES)
+                    .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/portals/' + $scope.portal._id).then(function(response) {
                         if ($scope.params.deletePortalCallback) {
@@ -100,7 +95,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.PORTALS_PORTAL_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_PORTAL_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
@@ -118,16 +113,16 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
 
     // User clicks on button to generate new license key
     $scope.generateNewLicenseKey = function() {
-        $translate(['PORTALS_REALLY_GENERATE_LICENSEKEY', 'PORTALS_CHANGES_SAVED', 'YES', 'NO']).then(function(translations) {
+        $translate(['TRK_PORTALS_REALLY_GENERATE_LICENSEKEY', 'TRK_PORTALS_CHANGES_SAVED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
             var confirm = $mdDialog.confirm()
-                .title(translations.PORTALS_REALLY_GENERATE_LICENSEKEY)
-                .ok(translations.YES)
-                .cancel(translations.NO);
+                .title(translations.TRK_PORTALS_REALLY_GENERATE_LICENSEKEY)
+                .ok(translations.TRK_YES)
+                .cancel(translations.TRK_NO);
             $mdDialog.show(confirm).then(function() {
                 $http.post('/api/portals/newkey/' + $scope.portal._id, {}).then(function(response) {
                     var updatedPortal = response.data;
                     $scope.portal.licenseKey = updatedPortal.licenseKey;
-                    $mdToast.show($mdToast.simple().textContent(translations.PORTALS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+                    $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
                 });
             });
         });
@@ -173,6 +168,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
                 $scope.isNewPortal = false;
                 $scope.portal = completePortal;
                 $scope.portalName = completePortal.name; // Prevent updating the label when changing the name input value
+                $scope.relationsEntity = { type:'portals', id:completePortal._id };
                 checkAvailableModules();
                 // portal module assignments
                 $http.get('/api/portalmodules?portalId=' + $scope.portal._id).then(function(portalModulesResponse) {

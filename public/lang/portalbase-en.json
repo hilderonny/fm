@@ -1,2 +1,20 @@
 {
+    "TRK_SETTINGS_CHANGES_SAVED" : "Changes saved",
+    "TRK_SETTINGS_CHECK_FOR_UPDATES" : "Check for updates",
+    "TRK_SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE" : "Install",
+    "TRK_SETTINGS_FILE_UPLODAED" : "Files uploaded successfully",
+    "TRK_SETTINGS_LICENSE" : "License",
+    "TRK_SETTINGS_LICENSEKEY" : "License key",
+    "TRK_SETTINGS_LICENSESERVER" : "License server",
+    "TRK_SETTINGS_LOCAL_VERSION" : "Local version",
+    "TRK_SETTINGS_MISSING_LICENSESERVER" : "Please input the URL of the license server",
+    "TRK_SETTINGS_PORTALSETTINGS" : "Portal settings",
+    "TRK_SETTINGS_SAVE" : "Save",
+    "TRK_SETTINGS_UPDATE_IN_PROGRESS" : "Update in progress",
+    "TRK_SETTINGS_UPDATES" : "Updates",
+    "TRK_SETTINGS_UPLOAD_UPDATE" : "Upload update",
+    "TRK_SETTINGS_VERSION_ON_SERVER" : "Version on license server",
+    "TRK_SETTINGS_WAIT_FOR_UPDATE_COMPLETION" : "The update process has been started. Please wait about 2 minutes until the update was installed and reload the page afterwards!",
+    "TRK_SETTINGSET_PORTAL_GENERAL" : "Portal settings",
+    "TRK_MODULE_portalbase_NAME" : "Portal base"
 }

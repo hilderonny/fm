@@ -30,9 +30,9 @@ describe('API login', function() {
         .send({ 'username' : 'admin', 'password' : 'wrong' })
         .expect(401, done);
     });
-    it('responds to POST with admin/test with 200 and token', function(done) { // The testhelper creates an admin/test user
+    it('responds to POST with 1_0_0/test with 200 and token', function(done) { // The testhelper creates an 1_0_0/test user
         request(server).post('/api/login')
-        .send({ 'username' : 'admin', 'password' : 'test' })
+        .send({ 'username' : '1_0_0', 'password' : 'test' })
         .expect(200)
         .end(function(err, res) {
             assert.ok(res.body.token, 'no token in response');

@@ -1,7 +1,7 @@
 app.controller('AdministrationUserCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.resetUserNameError = function() {
-        $scope.usersForm.name.$setValidity('nameInUse', true);
+        $scope.usersForm.un.$setValidity('nameInUse', true);
     }
 
     // Click on Create-button to create a new user
@@ -13,23 +13,23 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
             userGroupId: $scope.user.userGroup._id 
         };
         $http.post('/api/users', userToSend).then(function successCallback(response) {
+            if (response.status === 409) {
+                $scope.usersForm.un.$setValidity('nameInUse', false);
+                return;
+            }
             var createdUser = response.data;
             $scope.isNewUser = false;
             $scope.user._id = createdUser._id;
             $scope.user.pass = '';
             $scope.user.pass2 = '';
             $scope.userName = $scope.user.name;
+            $scope.relationsEntity = { type:'users', id:createdUser._id };
             if ($scope.params.createUserCallback) {
                 $scope.params.createUserCallback(createdUser);
             }
-            $translate(['USERS_USER_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.USERS_USER_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_USERS_USER_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_CREATED).hideDelay(1000).position('bottom right'));
             });
-        }, function errorCallback(response) {
-            // Username is in use by another one
-            if (response.status === 409) {
-                $scope.usersForm.name.$setValidity('nameInUse', false);
-            }
         });
     }
 
@@ -44,29 +44,30 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
         $http.put('/api/users/' + $scope.user._id, userToSend).then(function(response) {
             var savedUser = response.data;
             $scope.user.pass = '';
+            $scope.user.pass2 = '';
             $scope.userName = $scope.user.name;
             if ($scope.params.saveUserCallback) {
                 $scope.params.saveUserCallback(savedUser);
             }
-            $translate(['USERS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.USERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_USERS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         }, function errorCallback(response) {
             // Username is in use by another one
             if (response.status === 409) {
-                $scope.usersForm.name.$setValidity('nameInUse', false);
+                $scope.usersForm.un.$setValidity('nameInUse', false);
             }
         });
     }
 
     // Click on delete button to delete an existing user
     $scope.deleteUser = function() {
-        $translate(['USERS_USER_DELETED', 'YES', 'NO']).then(function(translations) {
-            $translate('USERS_REALLY_DELETE_USER', { userName: $scope.userName }).then(function(USERS_REALLY_DELETE_USER) {
+        $translate(['TRK_USERS_USER_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+            $translate('TRK_USERS_REALLY_DELETE_USER', { userName: $scope.userName }).then(function(TRK_USERS_REALLY_DELETE_USER) {
                 var confirm = $mdDialog.confirm()
-                    .title(USERS_REALLY_DELETE_USER)
-                    .ok(translations.YES)
-                    .cancel(translations.NO);
+                    .title(TRK_USERS_REALLY_DELETE_USER)
+                    .ok(translations.TRK_YES)
+                    .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/users/' + $scope.user._id).then(function(response) {
                         if ($scope.params.deleteUserCallback) {
@@ -74,7 +75,7 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.USERS_USER_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
@@ -109,6 +110,7 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
                     $scope.isNewUser = false;
                     $scope.user = completeUser;
                     $scope.userName = completeUser.name; // Prevent updating the label when changing the name input value
+                    $scope.relationsEntity = { type:'users', id:completeUser._id };
                     for (var i = 0; i < $scope.userGroups.length; i++) {
                         var userGroup = $scope.userGroups[i];
                         if (userGroup._id === completeUser.userGroupId) {

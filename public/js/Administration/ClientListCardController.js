@@ -1,10 +1,4 @@
-app.controller('AdministrationClientListCardController', function($scope, $http, $mdDialog, $element, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('clients')) {
-        $translatePartialLoader.addPart('clients');
-        $translate.refresh();
-    }
+app.controller('AdministrationClientListCardController', function($scope, $http, $mdDialog, $element, $translate, utils) {
 
     var saveClientCallback = function(savedClient) {
         $scope.selectedClient.name = savedClient.name;

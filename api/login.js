@@ -15,7 +15,8 @@ router.post('/', (req, res) => {
         }
         // Create token
         var token = jsonWebToken.sign({
-            userId: userInDatabase._id
+            userId: userInDatabase._id,
+            time: Date.now()
         }, localConfig.tokensecret, {
             expiresIn: '24h'
         });

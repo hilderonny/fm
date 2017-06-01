@@ -24,6 +24,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
     var createPermissionCallback = function(createdPermission) {
         $scope.userGroup.permissions.push(createdPermission);
         $scope.selectPermission(createdPermission);
+        checkCanAddPermission();
     };
     
     var savePermissionCallback = function(savedPermission) {
@@ -41,9 +42,16 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
                 break;
             }
         }
+        checkCanAddPermission();
     };
     var closePermissionCardCallback = function() {
         $scope.selectedPermission = false;
+    };
+
+    var checkCanAddPermission = function() {
+        $http.get('/api/permissions/available/' + $scope.userGroup._id).then(function(response) {
+            $scope.canAddPermission = response.data.length > 0;
+        });
     };
 
     // Click on Create-button to create a new userGroup
@@ -54,11 +62,13 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
             $scope.isNewUserGroup = false;
             $scope.userGroup._id = createdUserGroup._id;
             $scope.userGroupName = $scope.userGroup.name;
+            $scope.relationsEntity = { type:'usergroups', id:createdUserGroup._id };
+            checkCanAddPermission();
             if ($scope.params.createUserGroupCallback) {
                 $scope.params.createUserGroupCallback(createdUserGroup);
             }
-            $translate(['USERGROUPS_USERGROUP_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.USERGROUPS_USERGROUP_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_USERGROUPS_USERGROUP_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_USERGROUP_CREATED).hideDelay(1000).position('bottom right'));
             });
         });
     }
@@ -72,20 +82,20 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
             if ($scope.params.saveUserGroupCallback) {
                 $scope.params.saveUserGroupCallback(savedUsergroup);
             }
-            $translate(['USERGROUPS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.USERGROUPS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_USERGROUPS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     }
 
     // Click on delete button to delete an existing userGroup
     $scope.deleteUserGroup = function() {
-        $translate(['USERGROUPS_USERGROUP_DELETED', 'YES', 'NO']).then(function(translations) {
-            $translate('USERGROUPS_REALLY_DELETE_USERGROUP', { userGroupName: $scope.userGroupName }).then(function(USERGROUPS_REALLY_DELETE_USERGROUP) {
+        $translate(['TRK_USERGROUPS_USERGROUP_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+            $translate('TRK_USERGROUPS_REALLY_DELETE_USERGROUP', { userGroupName: $scope.userGroupName }).then(function(TRK_USERGROUPS_REALLY_DELETE_USERGROUP) {
                 var confirm = $mdDialog.confirm()
-                    .title(USERGROUPS_REALLY_DELETE_USERGROUP)
-                    .ok(translations.YES)
-                    .cancel(translations.NO);
+                    .title(TRK_USERGROUPS_REALLY_DELETE_USERGROUP)
+                    .ok(translations.TRK_YES)
+                    .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/usergroups/' + $scope.userGroup._id).then(function(response) {
                         if ($scope.params.deleteUserGroupCallback) {
@@ -93,7 +103,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.USERGROUPS_USERGROUP_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_USERGROUP_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
@@ -126,6 +136,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
         utils.removeCardsToTheRightOf($element);
         utils.addCard('Administration/PermissionCard', {
             permissionId: selectedPermission._id,
+            userGroupId: $scope.userGroup._id, // Also needed for API call
             savePermissionCallback: savePermissionCallback,
             deletePermissionCallback: deletePermissionCallback,
             closeCallback: closePermissionCardCallback
@@ -161,12 +172,14 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
                 $scope.isNewUserGroup = false;
                 $scope.userGroup = userGroup;
                 $scope.userGroupName = userGroup.name; // Prevent updating the label when changing the name input value
+                $scope.relationsEntity = { type:'usergroups', id:userGroup._id };
                 $http.get('/api/users/?fields=_id+name&userGroupId=' + $scope.params.userGroupId).then(function(usersResponse) {
                     userGroup.users = usersResponse.data;
                 });
-                $http.get('/api/permissions/?userGroupId=' + $scope.params.userGroupId).then(function(permissionsResponse) {
+                $http.get('/api/permissions/assigned/' + $scope.params.userGroupId).then(function(permissionsResponse) {
                     userGroup.permissions = permissionsResponse.data;
                 });
+                checkCanAddPermission();
             });
         } else {
             // New userGroup

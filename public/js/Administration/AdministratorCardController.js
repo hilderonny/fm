@@ -8,8 +8,8 @@ app.controller('AdministrationAdministratorCardController', function($scope, $ht
             clientId: $scope.params.clientId
         };
         $http.post('/api/clients/newadmin', administratorToSend).then(function successCallback(response) {
-            $translate(['CLIENTS_ADMINISTRATORCREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.CLIENTS_ADMINISTRATORCREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_CLIENTS_ADMINISTRATORCREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_ADMINISTRATORCREATED).hideDelay(1000).position('bottom right'));
                 $scope.closeCard();
             });
         }, function errorCallback(response) {

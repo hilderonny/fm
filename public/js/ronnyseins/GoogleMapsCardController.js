@@ -1,6 +1,6 @@
 var globablInitMap;
 
-app.controller('ronnyseinsGoogleMapsCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translatePartialLoader, $translate, utils) {
+app.controller('ronnyseinsGoogleMapsCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
 
     // Needs to be global to give the Maps API access via callback
     globalInitMap = function() {

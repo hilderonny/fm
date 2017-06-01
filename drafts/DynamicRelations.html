@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+        <link rel="stylesheet" href="/css/base.css">
+        <link rel="stylesheet" href="/css/local.css">
+        <script src="/node_modules/angular/angular.min.js"></script>
+        <script src="/node_modules/angular-aria/angular-aria.min.js"></script>
+        <script src="/node_modules/angular-animate/angular-animate.min.js"></script>
+        <script src="/node_modules/angular-material/angular-material.min.js"></script>
+        <script>
+var app = angular.module('app', ['ngMaterial'] );
+app.config(function($mdThemingProvider) { $mdThemingProvider.theme('default').primaryPalette('indigo').accentPalette('blue-grey');$mdThemingProvider.enableBrowserColor(); });
+
+app.controller('MainController', function($scope, $mdDialog, $mdPanel) {
+
+    $scope.cancel = $scope.ok = function() {
+        $scope.selectedEl = null; 
+        $mdDialog.hide();
+    };
+
+    $scope.openEl = function(el) { el.isOpen = true; };
+
+    $scope.closeEl = function(el) { el.isOpen = false; };
+
+    $scope.selectEl = function(el) { $scope.selectedEl = el; };
+
+    $scope.referenceTypes = [
+        ['/css/icons/material/Planner.svg', 'Termin', 'showActivitiesDialog'],
+        ['icons/Business.svg', 'Geschäftspartner', 'showBusinessPartnersDialog'],
+        ['/css/icons/material/Briefcase.svg', 'Mandant', 'showClientsDialog'],
+        ['/css/icons/material/Document.svg', 'Dokument', 'showDocumentsDialog'],
+        ['/css/icons/material/Folder.svg', 'Verzeichnis', 'showFoldersDialog'],
+        ['/css/icons/material/Cottage.svg', 'FM Objekt', 'showFmObjectsDialog'],
+        ['/css/icons/material/User.svg', 'Person', 'showPersonsDialog'],
+        ['/css/icons/material/Server.svg', 'Portal', 'showPortalsDialog'],
+        ['/css/icons/material/User Group Man Man.svg', 'Benutzergruppe', 'showUserGroupsDialog'],
+        ['/css/icons/material/User.svg', 'Benutzer', 'showUsersDialog']
+    ];
+
+    $scope.documents =  [
+        { name: 'Verzeichnis 1', icon: 'material/Folder', children: [
+            { name: 'Verzeichnis 11', icon: 'material/Folder', children: [
+                { name: 'Dokument 111', icon: 'material/Document' },
+                { name: 'Dokument 112', icon: 'material/Document' }
+            ] },
+            { name: 'Verzeichnis 12', icon: 'material/Folder', children: [
+                { name: 'Dokument 121', icon: 'material/Document' },
+                { name: 'Dokument 122', icon: 'material/Document' }
+            ] },
+            { name: 'Dokument 11', icon: 'material/Document' },
+            { name: 'Dokument 12', icon: 'material/Document' }
+        ] },
+        { name: 'Verzeichnis 2', icon: 'material/Folder', children: [
+            { name: 'Verzeichnis 21', icon: 'material/Folder', children: [
+                { name: 'Dokument 211', icon: 'material/Document' },
+                { name: 'Dokument 212', icon: 'material/Document' }
+            ] },
+            { name: 'Verzeichnis 22', icon: 'material/Folder', children: [
+                { name: 'Dokument 221', icon: 'material/Document' },
+                { name: 'Dokument 222', icon: 'material/Document' }
+            ] },
+            { name: 'Dokument 21', icon: 'material/Document' },
+            { name: 'Dokument 22', icon: 'material/Document' }
+        ] },
+        { name: 'Dokument 1', icon: 'material/Document' },
+        { name: 'Dokument 2', icon: 'material/Document' }
+    ];
+
+    $scope.folders = [
+        { name: 'Verzeichnis 1', icon: 'material/Folder', children: [
+            { name: 'Verzeichnis 11', icon: 'material/Folder'},
+            { name: 'Verzeichnis 12', icon: 'material/Folder'}
+        ] },
+        { name: 'Verzeichnis 2', icon: 'material/Folder', children: [
+            { name: 'Verzeichnis 21', icon: 'material/Folder'},
+            { name: 'Verzeichnis 22', icon: 'material/Folder'}
+        ] }
+    ];
+
+    $scope.fmObjects = [
+        { name: 'Gebäude 1', icon: 'fm/FMOBJECTS_TYPE_BUILDING', children: [
+            { name: 'Etage 11', icon: 'fm/FMOBJECTS_TYPE_LEVEL', children: [
+                { name: 'Raum 111', icon: 'fm/FMOBJECTS_TYPE_ROOM' },
+                { name: 'Raum 112', icon: 'fm/FMOBJECTS_TYPE_ROOM' }
+            ] },
+            { name: 'Etage 12', icon: 'fm/FMOBJECTS_TYPE_LEVEL', children: [
+                { name: 'Raum 121', icon: 'fm/FMOBJECTS_TYPE_ROOM' },
+                { name: 'Raum 122', icon: 'fm/FMOBJECTS_TYPE_ROOM' }
+            ] }
+        ] },
+        { name: 'Gebäude 2', icon: 'fm/FMOBJECTS_TYPE_BUILDING', children: [
+            { name: 'Etage 21', icon: 'fm/FMOBJECTS_TYPE_LEVEL', children: [
+                { name: 'Raum 211', icon: 'fm/FMOBJECTS_TYPE_ROOM' },
+                { name: 'Raum 212', icon: 'fm/FMOBJECTS_TYPE_ROOM' }
+            ] },
+            { name: 'Etage 22', icon: 'fm/FMOBJECTS_TYPE_LEVEL', children: [
+                { name: 'Raum 221', icon: 'fm/FMOBJECTS_TYPE_ROOM' },
+                { name: 'Raum 222', icon: 'fm/FMOBJECTS_TYPE_ROOM' }
+            ] }
+        ] }
+    ];
+
+
+    $scope.showSelectMenu = function(evt) {
+        var position = $mdPanel.newPanelPosition().relativeTo('.add-link-fab').addPanelPosition($mdPanel.xPosition.ALIGN_END, $mdPanel.yPosition.BELOW);
+        $mdPanel.open({
+            attachTo: angular.element(document.body),
+            controller: function () { this.parent = $scope; }, // https://github.com/angular/material/issues/1531#issuecomment-74640529
+            controllerAs: 'ctrl',
+            templateUrl: 'panelContent.html',
+            panelClass: 'select-type-menu',
+            position: position,
+            openFrom: evt,
+            clickOutsideToClose: true,
+            escapeToClose: true,
+            focusOnOpen: true,
+            zIndex: 2
+        }).then(function(panelRef) {
+            $scope.mdPanel = panelRef;
+        });
+    };
+
+    var showHierarchyDialog = function(templateUrl, preparationFunction) {
+        $scope.mdPanel.close();
+        var parentScope = $scope;
+        $mdDialog.show({
+            controller: function ($scope) { // https://github.com/angular/material/issues/1531#issuecomment-74640529
+                $scope.parentScope = parentScope;
+                preparationFunction($scope, parentScope);
+            },
+            controllerAs: 'ctrl',
+            templateUrl: templateUrl,
+            parent: angular.element(document.body),
+            clickOutsideToClose:true
+        });
+    };
+
+    var showListDialog = function(title, icon, firstLine, secondLine) {
+        $scope.mdPanel.close();
+        var parentScope = $scope;
+        $mdDialog.show({
+            controller: function ($scope) { // https://github.com/angular/material/issues/1531#issuecomment-74640529
+                $scope.parentScope = parentScope;
+                $scope.title = title;
+                $scope.icon = icon;
+                $scope.firstLine = firstLine;
+                $scope.secondLine = secondLine;
+            },
+            controllerAs: 'ctrl',
+            templateUrl: 'listDialog.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true
+        });
+    };
+
+    $scope.showActivitiesDialog = function() {
+        showListDialog('Termin auswählen', '/css/icons/material/Planner', 'Wartung Feuerlöscher avorium', '23.05.2017');
+    };
+
+    $scope.showBusinessPartnersDialog = function() {
+        showListDialog('Geschäftspartner auswählen', 'icons/Business', 'avorium Inh. Falk Wiegand', 'Coudraystraße 6, 99423 Weimar');
+    };
+
+    $scope.showClientsDialog = function() {
+        showListDialog('Mandant auswählen', '/css/icons/material/Briefcase', 'Mandant A', false);
+    };
+
+    $scope.showDocumentsDialog = function() {
+        showHierarchyDialog('documentsDialog.html', function(scope, parentScope) {
+            scope.document = { children: parentScope.documents };
+        });
+    };
+
+    $scope.showFoldersDialog = function() {
+        showHierarchyDialog('foldersDialog.html', function(scope, parentScope) {
+            scope.document = { children: parentScope.folders };
+        });
+    };
+
+    $scope.showFmObjectsDialog = function() {
+        showHierarchyDialog('fmObjectsDialog.html', function(scope, parentScope) {
+            scope.document = { children: parentScope.fmObjects };
+        });
+    };
+
+    $scope.showPersonsDialog = function() {
+        showListDialog('Person auswählen', '/css/icons/material/User', 'Max Mustermann', 'avorium, Inh. Falk Wiegand');
+    };
+
+    $scope.showPortalsDialog = function() {
+        showListDialog('Portal auswählen', '/css/icons/material/Server', 'Portal A', 'http://portal.domain.com');
+    };
+
+    $scope.showUserGroupsDialog = function() {
+        showListDialog('Benutzergruppe auswählen', '/css/icons/material/User Group Man Man', 'Benutzergruppe A', false);
+    };
+
+    $scope.showUsersDialog = function() {
+        showListDialog('Benutzer auswählen', '/css/icons/material/User', 'Benutzername 1', 'Benutzergruppe A');
+    };
+
+});
+
+
+        </script>
+    </head>
+	<body ng-app="app" ng-controller="MainController as ctrl" layout="column">
+
+        <md-toolbar layout="row" class="md-toolbar-tools">
+            <h1>Verknüpfungen</h1>
+        </md-toolbar>
+
+        <div flex layout="row">
+
+            <md-content flex layout="row">
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab">
+                        <md-card-title-text>
+                            <span class="md-headline">Entit&auml;t A</span>
+                        </md-card-title-text>
+                    </md-card-title>
+
+                    <md-button class="md-fab md-accent add-link-fab" ng-click="showSelectMenu($event)"><md-tooltip md-direction="left">Verknüpfung erstellen</md-tooltip><md-icon md-svg-src="/css/icons/material/Add Link.svg"></md-icon></md-button>
+                    
+                    <md-tabs flex md-selected="1">
+                        <md-tab>
+                            <md-tab-label>Details</md-tab-label>
+                            <md-tab-body>
+                            </md-tab-body>
+                        </md-tab>
+                        <md-tab>
+                            <md-tab-label>Verkn&uuml;pfungen</md-tab-label>
+                            <md-tab-body>
+                                <md-card-content>
+                                    <section>
+                                        <md-subheader>Termine</md-subheader>
+                                        <!-- http://stackoverflow.com/a/32532872 -->
+                                        <ng-include flex src="'simpleList.html'" ng-if="true" ng-init="icon='/css/icons/material/Planner';firstLine='Wartung Feuerlöscher avorium';secondLine='23.05.2017';"></ng-include>
+                                    </section>
+                                    <section>
+                                        <md-subheader>Geschäftspartner</md-subheader>
+                                        <ng-include flex src="'simpleList.html'" ng-if="true" ng-init="icon='icons/Business';firstLine='avorium Inh. Falk Wiegand';secondLine='Coudraystraße 6, 99423 Weimar';"></ng-include>
+                                    </section>
+                                    <section>
+                                        <md-subheader>Mandanten</md-subheader>
+                                        <ng-include flex src="'simpleList.html'" ng-if="true" ng-init="icon='/css/icons/material/Briefcase';firstLine='Mandant A';secondLine=false;"></ng-include>
+                                    </section>
+                                    <section>
+                                        <md-subheader>Dokumente</md-subheader>
+                                        <md-list class="lines-beetween-items">
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/material/Document.svg"></md-icon><div class="md-list-item-text multiline"><p>Dokument A mit langem Dateinamen.pdf</p><p>/ Verzeichnis / Unterverzeichnis / NochEinUnterverzeichnis</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/material/Folder.svg"></md-icon><div class="md-list-item-text multiline"><p>Verzeichnis B</p><p>/ Verzeichnis / Unterverzeichnis</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/material/Document.svg"></md-icon><div class="md-list-item-text multiline"><p>Dokument A mit langem Dateinamen.pdf</p><p>/ Verzeichnis / Unterverzeichnis / NochEinUnterverzeichnis</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/material/Folder.svg"></md-icon><div class="md-list-item-text multiline"><p>Verzeichnis B</p><p>/ Verzeichnis / Unterverzeichnis</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/material/Document.svg"></md-icon><div class="md-list-item-text multiline"><p>Dokument A mit langem Dateinamen.pdf</p><p>/ Verzeichnis / Unterverzeichnis / NochEinUnterverzeichnis</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/material/Folder.svg"></md-icon><div class="md-list-item-text multiline"><p>Verzeichnis B</p><p>/ Verzeichnis / Unterverzeichnis</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/material/Document.svg"></md-icon><div class="md-list-item-text multiline"><p>Dokument A mit langem Dateinamen.pdf</p><p>/ Verzeichnis / Unterverzeichnis / NochEinUnterverzeichnis</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/material/Folder.svg"></md-icon><div class="md-list-item-text multiline"><p>Verzeichnis B</p><p>/ Verzeichnis / Unterverzeichnis</p></div></md-list-item>
+                                        </md-list>
+                                    </section>
+                                    <section>
+                                        <md-subheader>FM Objekte</md-subheader>
+                                        <md-list class="lines-beetween-items">
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg"></md-icon><div class="md-list-item-text multiline"><p>Gebäude A</p><p>Gelände A</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_ROOM.svg"></md-icon><div class="md-list-item-text multiline"><p>Raum 123</p><p>Gelände B &raquo; Gebäude 43 &raquo; Etage 1</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg"></md-icon><div class="md-list-item-text multiline"><p>Feuerlöscher C</p><p>Gelände C &raquo; Schuppen</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg"></md-icon><div class="md-list-item-text multiline"><p>Gebäude A</p><p>Gelände A</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_ROOM.svg"></md-icon><div class="md-list-item-text multiline"><p>Raum 123</p><p>Gelände B &raquo; Gebäude 43 &raquo; Etage 1</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg"></md-icon><div class="md-list-item-text multiline"><p>Feuerlöscher C</p><p>Gelände C &raquo; Schuppen</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg"></md-icon><div class="md-list-item-text multiline"><p>Gebäude A</p><p>Gelände A</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_ROOM.svg"></md-icon><div class="md-list-item-text multiline"><p>Raum 123</p><p>Gelände B &raquo; Gebäude 43 &raquo; Etage 1</p></div></md-list-item>
+                                            <md-list-item ng-click="parentScope.selectEl()"><md-icon md-svg-src="/css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg"></md-icon><div class="md-list-item-text multiline"><p>Feuerlöscher C</p><p>Gelände C &raquo; Schuppen</p></div></md-list-item>
+                                        </md-list>
+                                    </section>
+                                    <section>
+                                        <md-subheader>Personen</md-subheader>
+                                        <ng-include flex src="'simpleList.html'" ng-if="true" ng-init="icon='/css/icons/material/User';firstLine='Max Mustermann';secondLine='avorium, Inh. Falk Wiegand';"></ng-include>
+                                    </section>
+                                    <section>
+                                        <md-subheader>Portale</md-subheader>
+                                        <ng-include flex src="'simpleList.html'" ng-if="true" ng-init="icon='/css/icons/material/Server';firstLine='Portal A';secondLine='http://portal.domain.com';"></ng-include>
+                                    </section>
+                                    <section>
+                                        <md-subheader>Benutzergruppen</md-subheader>
+                                        <ng-include flex src="'simpleList.html'" ng-if="true" ng-init="icon='/css/icons/material/User Group Man Man';firstLine='Benutzergruppe A';secondLine=false;"></ng-include>
+                                    </section>
+                                    <section>
+                                        <md-subheader>Benutzer</md-subheader>
+                                        <ng-include flex src="'simpleList.html'" ng-if="true" ng-init="icon='/css/icons/material/User';firstLine='Benutzername 1';secondLine='Benutzergruppe A';"></ng-include>
+                                    </section>
+                                </md-card-content>
+                            </md-tab-body>
+                        </md-tab>
+                    </md-tabs>
+                </md-card>
+
+                <script type="text/ng-template" id="simpleList.html">
+                    <md-list class="lines-beetween-items">
+                        <md-list-item ng-repeat="i in [0, 1, 2, 3, 4]" ng-click="parentScope.selectEl()">
+                            <md-icon md-svg-src="{{icon}}.svg"></md-icon>
+                            <p ng-if="!secondLine">{{firstLine}}</p>
+                            <div ng-if="secondLine" class="md-list-item-text multiline"><p>{{firstLine}}</p><p>{{secondLine}}</p></div>
+                        </md-list-item>
+                    </md-list>
+                </script>
+
+                <script type="text/ng-template" id="panelContent.html">
+                    <md-list class="context-menu" role="list">
+                        <md-list-item ng-repeat="typ in ctrl.parent.referenceTypes" ng-click="ctrl.parent[typ[2]]()"><md-icon md-svg-src="{{typ[0]}}"></md-icon><p>{{ typ[1] }}</p></md-list-item>
+                    </md-list>
+                </script>
+
+                <script type="text/ng-template" id="hierarchyList.html">
+                    <md-list class="hierarchy">
+                        <md-list-item flex layout="column" ng-repeat="document in document.children">
+                            <div flex layout="row" ng-class="{active:parentScope.selectedEl==document}">
+                                <md-icon ng-click="parentScope.openEl(document, $event)" ng-if="!document.isOpen && document.children.length > 0" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>
+                                <md-icon ng-click="parentScope.closeEl(document, $event)" ng-if="document.isOpen" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
+                                <md-icon ng-if="!document.children"></md-icon>
+                                <img ng-click="parentScope.selectEl(document, $event)" ng-src="/css/icons/{{document.icon}}.svg" />
+                                <p ng-bind="document.name" ng-click="parentScope.selectEl(document, $event)"></p>
+                            </div>
+                            <ng-include flex src="'hierarchyList.html'" ng-if="document.isOpen"></ng-include>
+                        </md-list-item>
+                    </md-list>
+                </script>
+
+                <script type="text/ng-template" id="listDialog.html">
+                    <md-dialog>
+                        <md-toolbar class="md-toolbar-tools">
+                            <h2>{{title}}</h2>
+                        </md-toolbar>
+                        <md-dialog-content>
+                            <div class="md-dialog-content">
+                                <ng-include flex src="'simpleList.html'"></ng-include>
+                            </div>
+                        </md-dialog-content>
+                        <md-dialog-actions layout="row">
+                            <span flex></span>
+                            <md-button class="md-raised md-accent" ng-click="parentScope.ok()">OK</md-button>
+                            <md-button class="md-raised" ng-click="parentScope.cancel()">Abbrechen</md-button>
+                        </md-dialog-actions>
+                    </md-dialog>
+                </script>
+
+                <script type="text/ng-template" id="documentsDialog.html">
+                    <md-dialog>
+                        <md-toolbar class="md-toolbar-tools">
+                            <h2>Dokument auswählen</h2>
+                        </md-toolbar>
+                        <md-dialog-content>
+                            <div class="md-dialog-content">
+                                <ng-include flex src="'hierarchyList.html'"></ng-include>
+                            </div>
+                        </md-dialog-content>
+                        <md-dialog-actions layout="row">
+                            <span flex></span>
+                            <md-button class="md-raised md-accent" ng-disabled="!parentScope.selectedEl" ng-click="parentScope.ok()">OK</md-button>
+                            <md-button class="md-raised" ng-click="parentScope.cancel()">Abbrechen</md-button>
+                        </md-dialog-actions>
+                    </md-dialog>
+                </script>
+
+                <script type="text/ng-template" id="foldersDialog.html">
+                    <md-dialog>
+                        <md-toolbar class="md-toolbar-tools">
+                            <h2>Verzeichnis auswählen</h2>
+                        </md-toolbar>
+                        <md-dialog-content>
+                            <div class="md-dialog-content">
+                                <ng-include flex src="'hierarchyList.html'"></ng-include>
+                            </div>
+                        </md-dialog-content>
+                        <md-dialog-actions layout="row">
+                            <span flex></span>
+                            <md-button class="md-raised md-accent" ng-disabled="!parentScope.selectedEl" ng-click="parentScope.ok()">OK</md-button>
+                            <md-button class="md-raised" ng-click="parentScope.cancel()">Abbrechen</md-button>
+                        </md-dialog-actions>
+                    </md-dialog>
+                </script>
+
+                <script type="text/ng-template" id="fmObjectsDialog.html">
+                    <md-dialog>
+                        <md-toolbar class="md-toolbar-tools">
+                            <h2>FM Objekt auswählen</h2>
+                        </md-toolbar>
+                        <md-dialog-content>
+                            <div class="md-dialog-content">
+                                <ng-include flex src="'hierarchyList.html'"></ng-include>
+                            </div>
+                        </md-dialog-content>
+                        <md-dialog-actions layout="row">
+                            <span flex></span>
+                            <md-button class="md-raised md-accent" ng-disabled="!parentScope.selectedEl" ng-click="parentScope.ok()">OK</md-button>
+                            <md-button class="md-raised" ng-click="parentScope.cancel()">Abbrechen</md-button>
+                        </md-dialog-actions>
+                    </md-dialog>
+                </script>
+
+            </md-content>
+        </div>
+    </body>
+</html>

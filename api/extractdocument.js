@@ -12,7 +12,7 @@ var upload = multer({ dest: 'uploads/' })
 var fs = require('fs');
 var path = require('path');
 var unzip = require('unzip');
-var localConfig = require('../config/localconfig.json'); // http://stackoverflow.com/a/14678694
+var documentsHelper = require('../utils/documentsHelper');
 
 var existingFolders;
 var newFoldersInDocumentFolder;
@@ -59,13 +59,11 @@ var extractDocumentIntoFolder = (db, zipDocument, finishCallback) => {
         if(entry.type === 'File') {
             // Create document
             prepareFolderStructure(db, parentFolderId, clientId, fileName, (parentFolderOfEntryId) => {
-                var filePath = zipDocument.filePath + '_' + fileIndex;
                 fileIndex = fileIndex + 1;
                 var mimeType = mime.lookup(path.extname(fileName));
                 var document = {
                     name: path.basename(fileName),
                     type: mimeType,
-                    filePath: filePath, 
                     clientId: clientId,
                     parentFolderId: parentFolderOfEntryId,
                     isExtractable: mimeType === 'application/x-zip-compressed' || mimeType === 'application/zip'
@@ -77,7 +75,9 @@ var extractDocumentIntoFolder = (db, zipDocument, finishCallback) => {
                     if (insertedDocument.parentFolderId === parentFolderId) {
                         newDocumentsInDocumentFolder.push(insertedDocument);
                     }
-                    entry.pipe(fs.createWriteStream(filePath));
+                    var documentPath = documentsHelper.getDocumentPath(insertedDocument._id);
+                    documentsHelper.createPath(path.dirname(documentPath));
+                    entry.pipe(fs.createWriteStream(documentPath));
                 });
             });
         }

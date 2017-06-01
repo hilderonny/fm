@@ -1,10 +1,4 @@
-app.controller('AdministrationClientModuleCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('clients')) {
-        $translatePartialLoader.addPart('clients');
-        $translate.refresh();
-    }
+app.controller('AdministrationClientModuleCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     // Click on Create-button to create a new client module assignment
     $scope.createClientModule = function() {
@@ -19,8 +13,8 @@ app.controller('AdministrationClientModuleCardController', function($scope, $htt
             if ($scope.params.createClientModuleCallback) {
                 $scope.params.createClientModuleCallback(createdClientModule);
             }
-            $translate(['CLIENTS_CLIENT_MODULE_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.CLIENTS_CLIENT_MODULE_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_CLIENTS_CLIENT_MODULE_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENT_MODULE_CREATED).hideDelay(1000).position('bottom right'));
             });
         });
     }
@@ -35,21 +29,21 @@ app.controller('AdministrationClientModuleCardController', function($scope, $htt
             if ($scope.params.saveClientModuleCallback) {
                 $scope.params.saveClientModuleCallback(savedClientModule);
             }
-            $translate(['CLIENTS_CHANGESSAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.CLIENTS_CHANGESSAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_CLIENTS_CHANGESSAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CHANGESSAVED).hideDelay(1000).position('bottom right'));
             });
         });
     }
 
     // Click on delete button to delete an existing client module
     $scope.deleteClientModule = function() {
-        var clientModuleTranslationKey = 'MODULE_' + $scope.clientModule.module + '_NAME';
-        $translate(['CLIENTS_CLIENT_MODULE_DELETED', 'YES', 'NO', clientModuleTranslationKey]).then(function(translations) {
-            $translate('CLIENTS_REALLY_DELETE_CLIENT_MODULE', { clientModule: translations[clientModuleTranslationKey] }).then(function(CLIENTS_REALLY_DELETE_CLIENT_MODULE) {
+        var clientModuleTranslationKey = 'TRK_MODULE_' + $scope.clientModule.module + '_NAME';
+        $translate(['TRK_CLIENTS_CLIENT_MODULE_DELETED', 'TRK_YES', 'TRK_NO', clientModuleTranslationKey]).then(function(translations) {
+            $translate('TRK_CLIENTS_REALLY_DELETE_CLIENT_MODULE', { clientModule: translations[clientModuleTranslationKey] }).then(function(TRK_CLIENTS_REALLY_DELETE_CLIENT_MODULE) {
                 var confirm = $mdDialog.confirm()
-                    .title(CLIENTS_REALLY_DELETE_CLIENT_MODULE)
-                    .ok(translations.YES)
-                    .cancel(translations.NO);
+                    .title(TRK_CLIENTS_REALLY_DELETE_CLIENT_MODULE)
+                    .ok(translations.TRK_YES)
+                    .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/clientmodules/' + $scope.clientModule._id).then(function(response) {
                         if ($scope.params.deleteClientModuleCallback) {
@@ -57,7 +51,7 @@ app.controller('AdministrationClientModuleCardController', function($scope, $htt
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.CLIENTS_CLIENT_MODULE_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENT_MODULE_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });

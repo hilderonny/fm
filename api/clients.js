@@ -24,6 +24,32 @@ router.get('/', auth('PERMISSION_ADMINISTRATION_CLIENT', 'r', 'clients'), (req, 
 });
 
 /**
+ * Liefert eine Liste von Mandanten für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
+ * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
+ * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
+ * einfach eine leere Liste zurück gegeben.
+ * @example
+ * $http.get('/api/clients/forIds?ids=ID1,ID2,ID3')...
+ */
+router.get('/forIds', auth(false, false, 'clients'), (req, res) => {
+    // Zuerst Berechtigung prüfen
+    auth.canAccess(req.user._id, 'PERMISSION_ADMINISTRATION_CLIENT', 'r', 'clients', req.db).then(function(accessAllowed) {
+        if (!accessAllowed) {
+            return res.send([]);
+        }
+        if (!req.query.ids) {
+            return res.send([]);
+        }
+        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
+        req.db.get('clients').find({
+            _id: { $in: ids }
+        }).then((clients) => {
+            res.send(clients);
+        });
+    });
+});
+
+/**
  * Get single client with given id
  */
 router.get('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'r', 'clients'), validateId, (req, res) => {

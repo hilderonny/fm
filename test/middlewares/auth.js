@@ -65,4 +65,15 @@ describe('MIDDLEWARE auth', function() {
         });
     });
 
+    it('reponds with 205 when the time in the login token is older than the last server start time', function() {
+        db.get('users').findOne({ name : '1_0_ADMIN0' }).then((userFromDatabase) => {
+            var req = { user: { _id: userFromDatabase._id.toString(), tokenTime: 0 }, db: db };
+            return require('../../middlewares/auth')()(req, { sendStatus: function(statusCode) {
+                assert.equal(statusCode, 205);
+            } }, function next() {
+                assert.fail('next() was called');
+            });
+        });
+    });
+
 });

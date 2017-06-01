@@ -3,22 +3,19 @@
     <md-card-title flex="none" class="withfab">
         <md-card-title-text>
             <span class="md-headline" ng-bind="activityName" ng-if="!isNewActivity"></span>
-            <span class="md-headline" ng-if="isNewActivity" translate>ACTIVITIES_NEW_ACTIVITY</span>
+            <span class="md-headline" ng-if="isNewActivity" translate>TRK_ACTIVITIES_NEW_ACTIVITY</span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-fab-speed-dial md-direction="down" class="md-scale" ng-if="canReadFmObjects && canWriteActivities && !params.isSelection">
+    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewActivity">
         <md-fab-trigger>
             <md-button class="md-fab md-accent" aria-label="MENU">
-                <md-tooltip md-direction="left"><span translate>ACTIVITIES_MORE_ACTIONS</span></md-tooltip>
+                <md-tooltip md-direction="left"><span translate>TRK_ACTIVITIES_MORE_ACTIONS</span></md-tooltip>
                 <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
             </md-button>
         </md-fab-trigger>
         <md-fab-actions>
-            <md-button class="md-fab md-raised md-mini" ng-click="startAssignFmObject()" ng-if="canReadFmObjects" aria-label="ASSIGN FM OBJECT">
-                <md-tooltip md-direction="left"><span translate>ACTIVITIES_ASSIGN_FMOBJECT</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Cottage.svg"></md-icon>
-            </md-button>
+            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
         </md-fab-actions>
     </md-fab-speed-dial>
 
@@ -28,17 +25,12 @@
 
     <md-tabs flex>
         <md-tab>
-            <md-tab-label><span translate>ACTIVITIES_DETAILS</span></md-tab-label>
+            <md-tab-label><span translate>TRK_ACTIVITIES_DETAILS</span></md-tab-label>
             <md-tab-body>
                 <ng-include src="'partial/Office/ActivityCardDetailsTab.html'"></ng-include>
             </md-tab-body>
         </md-tab>
-        <md-tab ng-if="!isNewActivity && canReadFmObjects">
-            <md-tab-label><span translate>ACTIVITIES_FMOBJECTS</span></md-tab-label>
-            <md-tab-body>
-                <md-card-content ng-include="'partial/BIM/FmObjectList.html'"></md-card-content>
-            </md-tab-body>
-        </md-tab>
+        <ng-include ng-if="!isNewActivity" src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
     </md-tabs>
 
 </md-card>

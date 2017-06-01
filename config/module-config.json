@@ -2,11 +2,12 @@
     "modules" : {
 
         "base": {
-            "api" : [ "login", "menu", "permissions", "usergroups", "users", "relations", "settingsets" ],
+            "api" : [ "login", "menu", "permissions", "usergroups", "users", "relations", "settingsets", "translations" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
             "public" : [
                 "css/base.css",
                 "css/logo_avorium_komplett.svg",
+                "css/icons/material/Add Link.svg",
                 "css/icons/material/Cancel.svg",
                 "css/icons/material/Delete.svg",
                 "css/icons/material/Edit.svg",
@@ -18,6 +19,7 @@
                 "css/icons/material/User Group Man Man.svg",
                 "css/icons/material/Search.svg",
                 "css/icons/material/Settings.svg",
+                "css/icons/office/Add Link.svg",
                 "css/icons/office/Cancel.svg",
                 "css/icons/office/Delete.svg",
                 "css/icons/office/Edit.svg",
@@ -38,10 +40,12 @@
                 "partial/Administration/UsergrouplistCard.html",
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
+                "partial/Core/RelationsMenu.html",
+                "partial/Core/RelationsTab.html",
                 "_index.html",
                 "chat.html"
             ],
-            "root" : [ "app.js", "package.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js" ],
+            "root" : [ "app.js", "package.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "config/localconfig.json.template" ],
             "include" : [
                 "node_modules/angular/angular.min.js",
                 "node_modules/angular-aria/angular-aria.min.js",
@@ -52,7 +56,7 @@
                 "node_modules/angular-moment/angular-moment.min.js",
                 "node_modules/angular-sanitize/angular-sanitize.min.js",
                 "node_modules/angular-translate/dist/angular-translate.min.js",
-                "node_modules/angular-translate/dist/angular-translate-loader-partial/angular-translate-loader-partial.min.js",
+                "node_modules/angular-translate/dist/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js",
                 "node_modules/moment/locale/de.js",
                 "node_modules/moment/locale/bg.js",
                 "public/js/AppSetup.js",
@@ -64,22 +68,24 @@
                 "public/js/Administration/UsergroupCardController.js",
                 "public/js/Administration/UsergrouplistCardController.js",
                 "public/js/Administration/UserlistCardController.js",
-                "public/js/Administration/UserSettingsCardController.js"
+                "public/js/Administration/UserSettingsCardController.js",
+                "public/js/Core/RelationsMenuController.js",
+                "public/js/Core/RelationsTabController.js"
             ],
             "languages" : [ "en", "de", "bg", "ar" ],
             "menu": [
                 {
-                    "title": "MENU_ADMINISTRATION",
+                    "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
-                        { "mainCard": "Administration/SettingSetListCard", "icon": "Settings", "title": "MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS" },
-                        { "mainCard": "Administration/UserlistCard", "icon": "User", "title": "MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER" },
-                        { "mainCard": "Administration/UsergrouplistCard", "icon": "User Group Man Man", "title": "MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP" }
+                        { "mainCard": "Administration/SettingSetListCard", "icon": "Settings", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS" },
+                        { "mainCard": "Administration/UserlistCard", "icon": "User", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER" },
+                        { "mainCard": "Administration/UsergrouplistCard", "icon": "User Group Man Man", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP" }
                     ]
                 }
             ],
-            "utils": [ "apiHelper", "constants" ],
+            "utils": [ "apiHelper", "configHelper", "constants" ],
             "settingsets" : [
-                { "mainCard": "Administration/UserSettingsCard", "title": "SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER" }
+                { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER" }
             ]
         },
 
@@ -97,12 +103,12 @@
                 "public/js/Office/ActivityCardController.js",
                 "public/js/Office/CalendarCardController.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "en", "de", "bg", "ar"],
             "menu": [
                 {
-                    "title": "MENU_OFFICE",
+                    "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/CalendarCard", "icon": "Planner", "title": "MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY" }
+                        { "mainCard": "Office/CalendarCard", "icon": "Planner", "title": "TRK_MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY" }
                     ]
                 }
 
@@ -129,12 +135,12 @@
                 "public/js/Administration/ClientModuleCardController.js",
                 "public/js/Administration/ClientListCardController.js"
             ],
-            "languages" : [ "en", "de", "bg" ],
+            "languages" : [ "en", "de", "bg","ar" ],
             "menu": [
                 {
-                    "title": "MENU_PORTAL",
+                    "title": "TRK_MENU_PORTAL",
                     "items": [
-                        { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "MENU_ADMINISTRATION_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT" }
+                        { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "TRK_MENU_ADMINISTRATION_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT" }
                     ]
                 }
             ]
@@ -163,12 +169,13 @@
                 "public/js/Office/DocumentCardController.js",
                 "public/js/Office/FolderCardController.js"
             ],
-            "languages" : [ "en", "de", "ar" ],
+            "languages" : [ "en", "de", "bg", "ar" ],
+            "utils": [ "documentsHelper" ],
             "menu": [
                 {
-                    "title": "MENU_OFFICE",
+                    "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/FolderCard", "icon": "Document", "title": "MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT" }
+                        { "mainCard": "Office/FolderCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT" }
                     ]
                 }
             ]
@@ -200,12 +207,12 @@
                 "public/js/BIM/FmobjectCardController.js",
                 "public/js/BIM/HierarchyCardController.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : ["en", "de", "bg", "ar"],
             "menu": [
                 {
-                    "title": "MENU_BIM",
+                    "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "BIM/HierarchyCard", "icon": "Cottage", "title": "MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT" }
+                        { "mainCard": "BIM/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT" }
                     ]
                 }
             ]
@@ -227,12 +234,12 @@
                 "public/js/LicenseServer/PortalModuleCardController.js",
                 "public/js/LicenseServer/PortalListCardController.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "en", "de", "bg", "ar" ],
             "menu" : [
                 {
-                    "title": "MENU_LICENSESERVER",
+                    "title": "TRK_MENU_LICENSESERVER",
                     "items": [
-                        { "mainCard": "LicenseServer/PortalListCard", "icon": "Server", "title": "MENU_LICENSESERVER_PORTALS", "permission" : "PERMISSION_LICENSESERVER_PORTAL" }
+                        { "mainCard": "LicenseServer/PortalListCard", "icon": "Server", "title": "TRK_MENU_LICENSESERVER_PORTALS", "permission" : "PERMISSION_LICENSESERVER_PORTAL" }
                     ]
                 }
             ],
@@ -251,9 +258,9 @@
             "include" : [
                 "public/js/Administration/PortalSettingsCardController.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "en", "de", "bg", "ar" ],
             "settingsets" : [
-                { "mainCard": "Administration/PortalSettingsCard", "title": "SETTINGSET_PORTAL_GENERAL", "type": "SETTINGSET_TYPE_PORTAL", "icon": "Server", "permission": "PERMISSION_SETTINGS_PORTAL" }
+                { "mainCard": "Administration/PortalSettingsCard", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "type": "SETTINGSET_TYPE_PORTAL", "icon": "Server", "permission": "PERMISSION_SETTINGS_PORTAL" }
             ]
         },
 
@@ -277,10 +284,10 @@
             ],
             "menu" : [
                 {
-                    "title": "MENU_LAB",
+                    "title": "TRK_MENU_LAB",
                     "items": [
-                        { "mainCard": "ronnyseins/AugmentedRealityCard", "icon": "Virtual Reality", "title": "MENU_LAB_AUGMENTEDREALITY" },
-                        { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "World Map", "title": "MENU_LAB_GOOGLEMAPS" }
+                        { "mainCard": "ronnyseins/AugmentedRealityCard", "icon": "Virtual Reality", "title": "TRK_MENU_LAB_AUGMENTEDREALITY" },
+                        { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "World Map", "title": "TRK_MENU_LAB_GOOGLEMAPS" }
                     ]
                 }
             ]

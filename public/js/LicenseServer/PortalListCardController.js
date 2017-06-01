@@ -1,10 +1,4 @@
-app.controller('LicenseServerPortalListCardController', function($scope, $http, $mdDialog, $element, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('licenseserver')) {
-        $translatePartialLoader.addPart('licenseserver');
-        $translate.refresh();
-    }
+app.controller('LicenseServerPortalListCardController', function($scope, $http, $mdDialog, $element, $translate, utils) {
 
     var savePortalCallback = function(savedPortal) {
         $scope.selectedPortal.name = savedPortal.name;

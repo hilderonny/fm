@@ -32,7 +32,7 @@ describe('API menu', function() {
 
     var compareMenuStructures = (menuFromApi, menuFromConfig) => {
         assert.strictEqual(menuFromApi.length, menuFromConfig.length, `Number of main menu entries differ (${menuFromApi.length} from API, ${menuFromConfig.length} in configuration)`);
-        // The structure mus be exactly the same, so simply iterate over it
+        // The structure must be exactly the same, so simply iterate over it
         for (var i = 0; i < menuFromConfig.length; i++) {
             var mainMenuFromApi = menuFromApi[i];
             var mainMenuFromConfig = menuFromConfig[i];
@@ -54,7 +54,8 @@ describe('API menu', function() {
             .then(testHelpers.prepareClients)
             .then(testHelpers.prepareClientModules)
             .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers);
+            .then(testHelpers.prepareUsers)
+            .then(testHelpers.preparePermissions);
     });
 
     it('responds to GET/ without authentication with 403', function() {
@@ -72,51 +73,116 @@ describe('API menu', function() {
         });
     });
 
-    xit('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', function(done) {
-    });
-
-
-    it('responds to GET/ with client admin user logged in with all menu items available to the users client', function(done) {
-        testHelpers.doLoginAndGetToken('0_0_ADMIN0', 'test').then((token) => { // X_Y_ADMINZ is always an admin
-            superTest(server).get(`/api/menu?token=${token}`).expect(200).end(function(err, res) {
-                var menuStructureFromApi = res.body;
-                // Module "ronnyseins" must not be in here, because it is never available to any client.
-                var userMenu = [
-                    {
-                        title: 'MENU_ADMINISTRATION',
-                        items: [
-                            { mainCard: 'Administration/SettingSetListCard', icon: 'Settings', title: 'MENU_ADMINISTRATION_SETTINGS' },
-                            { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'MENU_ADMINISTRATION_USERS' },
-                            { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'MENU_ADMINISTRATION_USERGROUPS' }
-                        ]
-                    },
-                    {
-                        title: 'MENU_OFFICE',
-                        items: [
-                            { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'MENU_OFFICE_ACTIVITIES'},
-                            { mainCard: 'Office/FolderCard', icon: 'Document', title: 'MENU_OFFICE_DOCUMENTS'}
-                        ]
-                    },
-                    {
-                        title: 'MENU_BIM',
-                        items: [
-                            { mainCard: 'BIM/HierarchyCard', icon: 'Cottage', title: 'MENU_BIM_FMOBJECTS'}
-                        ]
-                    },
-                    {
-                        title: 'MENU_LICENSESERVER',
-                        items: [
-                            { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'MENU_LICENSESERVER_PORTALS'}
-                        ]
-                    }
-                ];
-                compareMenuStructures(menuStructureFromApi, userMenu);
-                done();
+    it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', function(done) {
+        testHelpers.removeAllPermissions('_0_0', 'PERMISSION_BIM_FMOBJECT').then(function() {
+            testHelpers.doLoginAndGetToken('_0_0', 'test').then((token) => {
+                superTest(server).get(`/api/menu?token=${token}`).expect(200).end(function(err, res) {
+                    var menuStructureFromApi = res.body;
+                    var userMenu = [
+                        {
+                            title: 'TRK_MENU_ADMINISTRATION',
+                            items: [
+                                { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
+                                { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
+                            ]
+                        },
+                        {
+                            title: 'TRK_MENU_OFFICE',
+                            items: [
+                                { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
+                                { mainCard: 'Office/FolderCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                            ]
+                        },
+                        {
+                            title: 'TRK_MENU_PORTAL',
+                            items: [
+                                { mainCard: 'Administration/ClientListCard', icon: 'Briefcase', title: 'TRK_MENU_ADMINISTRATION_CLIENTS'}
+                            ]
+                        },
+                        {
+                            title: 'TRK_MENU_LICENSESERVER',
+                            items: [
+                                { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
+                            ]
+                        }
+                    ];
+                    compareMenuStructures(menuStructureFromApi, userMenu);
+                    done();
+                });
             });
         });
     });
 
-    xit('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', function(done) {
+
+    it('responds to GET/ with client admin user logged in with all menu items available to the users client', function(done) {
+        testHelpers.removeClientModule('0', 'fmobjects').then(function() { // Remove fmobjects module
+            testHelpers.doLoginAndGetToken('0_0_ADMIN0', 'test').then((token) => { // X_Y_ADMINZ is always an admin
+                superTest(server).get(`/api/menu?token=${token}`).expect(200).end(function(err, res) {
+                    var menuStructureFromApi = res.body;
+                    // Module "ronnyseins" must not be in here, because it is never available to any client.
+                    var userMenu = [
+                        {
+                            title: 'TRK_MENU_ADMINISTRATION',
+                            items: [
+                                { mainCard: 'Administration/SettingSetListCard', icon: 'Settings', title: 'TRK_MENU_ADMINISTRATION_SETTINGS' },
+                                { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
+                                { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
+                            ]
+                        },
+                        {
+                            title: 'TRK_MENU_OFFICE',
+                            items: [
+                                { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
+                                { mainCard: 'Office/FolderCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                            ]
+                        },
+                        {
+                            title: 'TRK_MENU_LICENSESERVER',
+                            items: [
+                                { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
+                            ]
+                        }
+                    ];
+                    compareMenuStructures(menuStructureFromApi, userMenu);
+                    done();
+                });
+            });
+        });
+    });
+
+    it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', function(done) {
+        testHelpers.removeClientModule('0', 'fmobjects').then(function() { // Remove fmobjects module
+            testHelpers.removeAllPermissions('0_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(function() {
+                testHelpers.doLoginAndGetToken('0_0_0', 'test').then((token) => {
+                    superTest(server).get(`/api/menu?token=${token}`).expect(200).end(function(err, res) {
+                        var menuStructureFromApi = res.body;
+                        var userMenu = [
+                            {
+                                title: 'TRK_MENU_ADMINISTRATION',
+                                items: [
+                                    { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
+                                    { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
+                                ]
+                            },
+                            {
+                                title: 'TRK_MENU_OFFICE',
+                                items: [
+                                    { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'}
+                                ]
+                            },
+                            {
+                                title: 'TRK_MENU_LICENSESERVER',
+                                items: [
+                                    { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
+                                ]
+                            }
+                        ];
+                        compareMenuStructures(menuStructureFromApi, userMenu);
+                        done();
+                    });
+                });
+            });
+        });
     });
 
 

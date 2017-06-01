@@ -15,9 +15,37 @@ var apiHelper = require('../utils/apiHelper');
 
 // Get all user groups of the current client
 router.get('/', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'base'), (req, res) => {
-    var clientId = req.user.clientId ? monk.id(req.user.clientId) : null; // clientId === null means that the user is a portal user
+    var clientId = req.user.clientId;
     req.db.get('usergroups').find({ clientId: clientId }, req.query.fields).then((docs) => {
         res.send(docs);
+    });
+});
+
+/**
+ * Liefert eine Liste von Terminen für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
+ * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
+ * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
+ * einfach eine leere Liste zurück gegeben.
+ * @example
+ * $http.get('/api/usergroups/forIds?ids=ID1,ID2,ID3')...
+ */
+router.get('/forIds', auth(false, false, 'base'), (req, res) => {
+    // Zuerst Berechtigung prüfen
+    auth.canAccess(req.user._id, 'PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'base', req.db).then(function(accessAllowed) {
+        if (!accessAllowed) {
+            return res.send([]);
+        }
+        if (!req.query.ids) {
+            return res.send([]);
+        }
+        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
+        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
+        req.db.get('usergroups').find({
+            _id: { $in: ids },
+            clientId: clientId
+        }).then((usergroups) => {
+            res.send(usergroups);
+        });
     });
 });
 

@@ -1,10 +1,4 @@
-app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('documents')) {
-        $translatePartialLoader.addPart('documents');
-        $translate.refresh();
-    }
+app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
     
     var createFolderCallback = function(createdFolder) {
         $scope.folder.folders.push(createdFolder);
@@ -64,6 +58,8 @@ app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, 
             $scope.folder.folders = [];
             $scope.folder.documents = [];
             $scope.folderName = $scope.folder.name;
+            // Information über neuen Ordner für Verknüpfungen-Tab bereit stellen
+            $scope.relationsEntity = { type:'folders', id:createdFolder._id };
             if ($scope.params.createFolderCallback) {
                 $scope.params.createFolderCallback(createdFolder);
             }
@@ -194,6 +190,15 @@ app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, 
         $scope.selectedDocument = selectedDocument;
     };
 
+    /**
+     * Ermittelt Berechtigungen für diverse Buttons vom Server
+     */
+    $scope.checkPermission = function() {
+        $http.get('/api/permissions/canWrite/PERMISSION_OFFICE_DOCUMENT').then(function(canWriteResponse) {
+            $scope.canWriteDocuments = canWriteResponse.data;
+        });
+    };
+
     // Loads the folder details or prepares the empty dialog for a new folder
     // Params:
     // - $scope.params.createNewFolder : When true, a new folder is to be created and folderId is ignored
@@ -212,6 +217,7 @@ app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, 
                 $scope.isNewFolder = false;
                 $scope.isRootFolder = true;
                 $scope.folder = rootFolder;
+                $scope.checkPermission();
             });
         } else {
             $scope.parentFolderId = $scope.params.parentFolderId;
@@ -224,6 +230,9 @@ app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, 
                     $scope.isRootFolder = false;
                     $scope.folder = folder;
                     $scope.folderName = folder.name;
+                    // Information über den geladenen Ordner für Verknüpfungen-Tab bereit stellen
+                    $scope.relationsEntity = { type:'folders', id:folder._id };
+                    $scope.checkPermission();
                 });
             } else {
                 // No folderId, create new folder

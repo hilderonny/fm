@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+        <link rel="stylesheet" href="/css/base.css">
+        <link rel="stylesheet" href="/css/local.css">
+        <script src="/node_modules/angular/angular.min.js"></script>
+        <script src="/node_modules/angular-aria/angular-aria.min.js"></script>
+        <script src="/node_modules/angular-animate/angular-animate.min.js"></script>
+        <script src="/node_modules/angular-material/angular-material.min.js"></script>
+        <script>
+            var app = angular.module('app', ['ngMaterial'] );
+            app.config(function($mdThemingProvider) { $mdThemingProvider.theme('default').primaryPalette('indigo').accentPalette('blue-grey');$mdThemingProvider.enableBrowserColor(); });
+            app.controller('MainController', function($scope, $rootScope) {});
+        </script>
+    </head>
+	<body ng-app="app" ng-controller="MainController" layout="column">
+
+        <md-toolbar layout="row" class="md-toolbar-tools"><h1>Module Business Partners (CRM)</h1></md-toolbar>
+
+        <div flex layout="row">
+            <md-content flex layout="row">
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Geschäftspartner</span></md-card-title-text></md-card-title>
+                    <md-button class="md-fab md-accent"><md-tooltip md-direction="left">Geschäftspartner erstellen</md-tooltip><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon></md-button>
+                    <md-card-content>
+                        <md-list class="lines-beetween-items">
+                            <md-list-item><md-icon md-svg-src="icons/Business.svg"></md-icon><p>Partner 1</p></md-list-item>
+                            <md-list-item class="active"><md-icon md-svg-src="icons/Business.svg"></md-icon><p>Partner 2</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="icons/Business.svg"></md-icon><p>Partner 3</p></md-list-item>
+                        </md-list>
+                    </md-card-content>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Partner 2</span></md-card-title-text></md-card-title>
+                    <md-fab-speed-dial md-direction="down" class="md-scale">
+                        <md-fab-trigger><md-button class="md-fab md-accent"><md-tooltip md-direction="left">More actions ...</md-tooltip><md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon></md-button></md-fab-trigger>
+                        <md-fab-actions>
+                            <md-button class="md-fab md-raised md-mini"><md-tooltip md-direction="left">Person zuordnen</span></md-tooltip><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon></md-button>
+                            <md-button class="md-fab md-raised md-mini"><md-tooltip md-direction="left">Geschäftsbeziehung erstellen</span></md-tooltip><md-icon md-svg-src="icons/Business.svg"></md-icon></md-button>
+                            <md-button class="md-fab md-raised md-mini"><md-tooltip md-direction="left">Adresse erstellen</span></md-tooltip><md-icon md-svg-src="icons/Map Marker.svg"></md-icon></md-button>
+                        </md-fab-actions>
+                    </md-fab-speed-dial>
+                    <md-tabs flex>
+                        <md-tab>
+                            <md-tab-label>Details</md-tab-label>
+                            <md-tab-body>
+                                <form layout="column">
+                                    <md-card-content layout="column">
+                                        <md-input-container flex><label>Name</label><input/></md-input-container>
+                                        <md-input-container flex><label translate>Industriezweig</label><md-select ng-model="dummy"></md-select></md-input-container>
+                                        <md-input-container flex><md-checkbox>Juristische Person</md-checkbox></md-input-container>
+                                        <md-input-container flex><label translate>Rolle</label><md-select ng-model="dummy"></md-select></md-input-container>
+                                        <md-card-actions layout="row" layout-align="end center">
+                                            <md-button class="md-raised md-accent">Hinzufügen</md-button>
+                                            <md-button class="md-raised md-accent">Speichern</md-button>
+                                            <md-button class="md-raised md-warn">Löschen</md-button>
+                                        </md-card-actions>
+                                    </md-card-content>
+                                </form>
+                            </md-tab-body>
+                        </md-tab>
+                        <md-tab>
+                            <md-tab-label>Personen</md-tab-label>
+                            <md-tab-body>
+                                <md-card-content>
+                                    <md-list class="lines-beetween-items">
+                                        <md-list-item class="active"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><div class="md-list-item-text multiline"><p>Person 1</p><p>Chef</p></div></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><div class="md-list-item-text multiline"><p>Person 2</p><p>Ingenieur</p></div></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><div class="md-list-item-text multiline"><p>Person 3</p><p>Sekretariat</p></div></md-list-item>
+                                    </md-list>
+                                </md-card-content>
+                            </md-tab-body>
+                        </md-tab>
+                        <md-tab>
+                            <md-tab-label>Adressen</md-tab-label>
+                            <md-tab-body>
+                                <md-card-content>
+                                    <md-list class="lines-beetween-items">
+                                        <md-list-item><md-icon md-svg-src="icons/Rating.svg"></md-icon><div class="md-list-item-text multiline"><p>Primärstraße 12</p><p>99085 Weimar</p></div></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="icons/Post Office.svg"></md-icon><div class="md-list-item-text multiline"><p>Poststraße 13</p><p>99085 Weimar</p></div></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="icons/Truck.svg"></md-icon><div class="md-list-item-text multiline"><p>Lieferstraße 14</p><p>99085 Weimar</p></div></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="icons/Purchase Order.svg"></md-icon><div class="md-list-item-text multiline"><p>Rechnungsstraße 15</p><p>99085 Weimar</p></div></md-list-item>
+                                    </md-list>
+                                </md-card-content>
+                            </md-tab-body>
+                        </md-tab>
+                        <md-tab>
+                            <md-tab-label>Geschäftsbeziehungen</md-tab-label>
+                            <md-tab-body>
+                                <md-card-content>
+                                    <md-list class="lines-beetween-items">
+                                        <md-list-item><md-icon md-svg-src="icons/Business.svg"></md-icon><div class="md-list-item-text multiline"><p>Geschäftspartner 1</p><p>Lieferent</p></div></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="icons/Business.svg"></md-icon><div class="md-list-item-text multiline"><p>Geschäftspartner 2</p><p>Auftraggeber</p></div></md-list-item>
+                                        <md-list-item class="active"><md-icon md-svg-src="icons/Business.svg"></md-icon><div class="md-list-item-text multiline"><p>Geschäftspartner 3</p><p>Wartungsfirma</p></div></md-list-item>
+                                    </md-list>
+                                </md-card-content>
+                            </md-tab-body>
+                        </md-tab>
+                    </md-tabs>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">(Neue) Personenzuordnung</span></md-card-title-text></md-card-title>
+                    <md-button class="md-fab md-accent"><md-tooltip md-direction="left">Person erstellen</md-tooltip><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon></md-button>
+                    <md-card-content>
+                        <form layout="column">
+                            <md-input-container flex><label>Person</label><md-select ng-model="dummy"></md-select></md-input-container>
+                            <md-input-container flex><label>Rolle</label><md-select ng-model="dummy"></md-select></md-input-container>
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-raised md-accent">Hinzufügen</md-button>
+                                <md-button class="md-raised md-accent">Speichern</md-button>
+                                <md-button class="md-raised md-warn">Löschen</md-button>
+                            </md-card-actions>
+                        </form>
+                    </md-card-content>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">(Neue) Geschäftsbeziehung</span></md-card-title-text></md-card-title>
+                    <md-button class="md-fab md-accent"><md-tooltip md-direction="left">Geschäftspartner erstellen</md-tooltip><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon></md-button>
+                    <md-card-content>
+                        <form layout="column">
+                            <md-input-container flex><label>Geschäftspartner</label><md-select ng-model="dummy"></md-select></md-input-container>
+                            <md-input-container flex><label>Beziehungstyp</label><md-select ng-model="dummy"></md-select></md-input-container>
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-raised md-accent">Hinzufügen</md-button>
+                                <md-button class="md-raised md-accent">Speichern</md-button>
+                                <md-button class="md-raised md-warn">Löschen</md-button>
+                            </md-card-actions>
+                        </form>
+                    </md-card-content>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">(Neue) Adresse</span></md-card-title-text></md-card-title>
+                    <md-card-content>
+                        <form layout="column">
+                            <md-input-container flex><label>Bezeichnung</label><input/></md-input-container>
+                            <md-input-container flex><label>Straße Hausnummer</label><input/></md-input-container>
+                            <md-input-container flex><label>Postleitzahl</label><input/></md-input-container>
+                            <md-input-container flex><label>Ort</label><input/></md-input-container>
+                            <md-input-container flex><label>Art der Adresse</label><md-select ng-model="dummy"><md-option ng-value="selected">Lieferadresse</md-option></md-select></md-input-container>
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-raised md-accent">Hinzufügen</md-button>
+                                <md-button class="md-raised md-accent">Speichern</md-button>
+                                <md-button class="md-raised md-warn">Löschen</md-button>
+                            </md-card-actions>
+                        </form>
+                    </md-card-content>
+                </md-card>
+
+
+
+            </md-content>
+        </div>
+    </body>
+</html>

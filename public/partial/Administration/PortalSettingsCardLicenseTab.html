@@ -3,22 +3,22 @@
     <md-card-content layout="column">
 
         <md-input-container flex>
-            <label translate>SETTINGS_LICENSESERVER</label>
+            <label translate>TRK_SETTINGS_LICENSESERVER</label>
             <input type="url" ng-model="settings.licenseServer" name="licenseServer" ng-required="true" ng-keydown="resetLicenseServerError()">
             <div ng-messages="portalSettingsForm.licenseServer.$error">
-                <div ng-message="required" translate>SETTINGS_MISSING_LICENSESERVER</div>
+                <div ng-message="required" translate>TRK_SETTINGS_MISSING_LICENSESERVER</div>
             </div>
         </md-input-container>
 
         <md-input-container flex>
-            <label translate>SETTINGS_LICENSEKEY</label>
+            <label translate>TRK_SETTINGS_LICENSEKEY</label>
             <textarea ng-model="settings.licenseKey" rows="5"></textarea>
         </md-input-container>
 
     </md-card-content>
 
     <md-card-actions layout="row" layout-align="end center">
-        <md-button class="md-raised md-accent" ng-click="saveSettings()" ng-disabled="portalSettingsForm.$invalid"><span translate>SETTINGS_SAVE</span></md-button>
+        <md-button class="md-raised md-accent" ng-click="saveSettings()" ng-disabled="portalSettingsForm.$invalid"><span translate>TRK_SETTINGS_SAVE</span></md-button>
     </md-card-actions>
 
 </form>

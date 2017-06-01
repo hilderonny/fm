@@ -1,13 +1,13 @@
-<md-card ng-cloak ng-controller="BIMHierarchyCardController" ng-click="selectFmObject(false)" style="background-image:url('/css/icons/office/Cottage.svg');">
+<md-card ng-cloak ng-controller="BIMHierarchyCardController" ng-click="selectFmObject(false, $event)" style="background-image:url('/css/icons/office/Cottage.svg');">
 
     <md-card-title flex="none" class="withfab">
         <md-card-title-text>
-            <span class="md-headline" translate>FMOBJECTS_FM_HIERARCHY</span>
+            <span class="md-headline" translate>TRK_FMOBJECTS_FM_HIERARCHY</span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-button class="md-fab md-accent" ng-click="newFmObject()" aria-label="ADD FM OBJECT" ng-if="canWriteFmObjects">
-        <md-tooltip md-direction="left"><span translate>FMOBJECTS_CREATE_NEW_FM_OBJECT</span></md-tooltip>
+    <md-button class="md-fab md-accent" ng-click="newFmObject($event)" aria-label="ADD FM OBJECT" ng-if="canWriteFmObjects">
+        <md-tooltip md-direction="left"><span translate>TRK_FMOBJECTS_CREATE_NEW_FM_OBJECT</span></md-tooltip>
         <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
     </md-button>
 

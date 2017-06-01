@@ -1,9 +1,9 @@
 <md-list class="lines-beetween-items activities-3">
-    <md-list-item ng-repeat="activity in activityListActivities | filter: activityListFilter ? activityListFilter : '' | orderBy: ['date','name']" ng-click="selectActivity(activity)" ng-class="{active:activityListSelectedActivity._id.toString() === activity._id.toString(),strikethrough:activity.isDone}" aria-label="{{activity.name}}">
+    <md-list-item ng-repeat="activity in activityListActivities | filter: activityListFilter ? activityListFilter : '' | orderBy: ['date','name']" ng-click="selectActivity(activity, $event)" ng-class="{active:activityListSelectedActivity._id.toString() === activity._id.toString(),strikethrough:activity.isDone}" aria-label="{{activity.name}}">
         <md-icon md-svg-src="/css/icons/material/Planner.svg"></md-icon>
         <div class="md-list-item-text">
             <h3 ng-bind="activity.name" ng-if="activityListShowName"></h3>
-            <h4 ng-if="activityListShowType" translate>{{activity.type}}</h4>
+            <h4 ng-if="activityListShowType" translate = "TRK_{{activity.type}}"></h4>
             <p ng-bind="activity.date | amDateFormat: 'L'" ng-if="activityListShowDate"></p>
         </div>
     </md-list-item>

@@ -1,6 +1,10 @@
 /**
  * CRUD API for relations between objects. These are no separate objects.
  * Relations are modelled in the corresponding objects in the relations-array.
+ * TODO: In separate Tabelle verschieben
+ * TODO: Update-Script, welches die Relationen aus den Objekten heraus nimmt und in die neue Tabelle verschiebt
+ * TODO: Löschen von Objekten soll auch Relationen löschen. Mechanismus ausdenken.
+ * TODO: Tests für allen möglichen Mist bauen
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
@@ -9,94 +13,81 @@ var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 
 /**
+ * Sucht alle Verknüpfungen zu einer Entität einer bestimmten ID und liefert diese als Liste
+ * zurück. Dabei ist egal, ob die Entität in type1 oder type2 definiert ist.
+ */
+router.get('/:entityType/:id', auth(false, false, 'base'), validateId, function(req, res) {
+    var entityType = req.params.entityType;
+    var id = monk.id(req.params.id);
+    req.db.get('relations').find({$or: [
+        { $and: [ { type1: entityType, id1: id } ] },
+        { $and: [ { type2: entityType, id2: id } ] }
+    ]}).then(function(relations) {
+        res.send(relations);
+    });
+});
+
+/**
  * Create a relation between two objects. Parameters:
  * type1: Name of the related object type 1 (e.g. 'activities') 
  * type2: Name of the related object type 2 (e.g. 'fmobjects')
  * id1: ID of the object of type type1 
- * id2: ID of the object of type type2 
+ * id2: ID of the object of type type2
+ * TODO: Alte Verknüpfungen aus Terminen und FM-Objekten raus nehmen 
  */  
 router.post('/', auth(false, false, 'base'), (req, res) => {
     var relation = req.body;
     if (!relation || !relation.type1 || !relation.type2 || !relation.id1 || !relation.id2 || !validateId.validateId(relation.id1) || !validateId.validateId(relation.id2)) {
         return res.sendStatus(400);
     }
+    relation.id1 = monk.id(relation.id1);
+    relation.id2 = monk.id(relation.id2);
     var clientId = req.user.clientId ? req.user.clientId.toString() : null;
+    // Prüfen, ob die Quell- und Zielobjekte existieren
     req.db.get(relation.type1).findOne(relation.id1).then((object1) => {
-        if (!object1) {
+        if (!object1) { // Quell-Objekt existiert nicht
             return res.sendStatus(404);
         }
+        //        
         var object1ClientId = object1.clientId ? object1.clientId.toString() : null;
-        if (object1ClientId !== clientId) {
+        if (object1ClientId !== clientId) { // Quell-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
             return res.sendStatus(403);
         }
         req.db.get(relation.type2).findOne(relation.id2).then((object2) => {
-            if (!object2) {
+            if (!object2) { // Ziel-Objekt existiert nicht
                 return res.sendStatus(404);
             }
             var object2ClientId = object2.clientId ? object2.clientId.toString() : null;
             if (object2ClientId !== clientId) {
-                return res.sendStatus(403);
+                return res.sendStatus(403); // Ziel-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
             }
-            object1.relations = object1.relations || [];
-            if (object1.relations.indexOf(relation.id2) < 0) {
-                object1.relations.push(relation.id2);
-            }
-            object2.relations = object2.relations || [];
-            if (object2.relations.indexOf(relation.id1) < 0) {
-                object2.relations.push(relation.id1);
-            }
-            req.db.update(relation.type1, object1._id, { $set: object1 }).then(() => {
-                req.db.update(relation.type2, object2._id, { $set: object2 }).then(() => {
-                    return res.sendStatus(200);
-                });
+            // Der Verknüpfung wird die ID des Mandanten des Benutzers angehängt, um beim Löschen die Zugehörigkeit zu prüfen
+            relation.clientId = req.user.clientId;
+            // Verknüpfung anlegen. Vorher gucken, ob es die nicht schon gibt
+            req.db.get('relations').find({$or: [
+                { $and: [ { type1: relation.type1, id1: relation.id1, type2: relation.type2, id2: relation.id2 } ] },
+                { $and: [ { type2: relation.type1, id2: relation.id1, type1: relation.type2, id1: relation.id2 } ] }
+            ]}).then(function(relations) {
+                if (relations.length > 0) {
+                    res.send(relations[0]);
+                } else {
+                    req.db.insert('relations', relation).then((insertedRelation) => {
+                        res.send(insertedRelation);
+                    });
+                }
             });
         });
     });
 });
 
 /**
- * Delete a relation between two objects. Parameters:
- * type1: Name of the related object type 1 (e.g. 'activities') 
- * type2: Name of the related object type 2 (e.g. 'fmobjects')
- * id1: ID of the object of type type1 
- * id2: ID of the object of type type2 
+ * Löscht eine Verknüpfung mit einer bestimmten ID
  */  
-router.delete('/', auth(false, false, 'base'), (req, res) => {
-    var relation = req.query;
-    if (!relation || !relation.type1 || !relation.type2 || !relation.id1 || !relation.id2 || !validateId.validateId(relation.id1) || !validateId.validateId(relation.id2)) {
-        return res.sendStatus(400);
-    }
-    var clientId = req.user.clientId.toString();
-    req.db.get(relation.type1).findOne(relation.id1).then((object1) => {
-        if (!object1) {
-            return res.sendStatus(404);
-        }
-        if (!object1.clientId || clientId !== object1.clientId.toString()) {
-            return res.sendStatus(403);
-        }
-        req.db.get(relation.type2).findOne(relation.id2).then((object2) => {
-            if (!object2) {
-                return res.sendStatus(404);
-            }
-            object1.relations = object1.relations || [];
-            var index1 = object1.relations.indexOf(relation.id2);
-            if (index1 < 0) {
-                return res.sendStatus(404);
-            } 
-            object1.relations.splice(index1, 1);
-            object2.relations = object2.relations || [];
-            var index2 = object2.relations.indexOf(relation.id1);
-            if (index2 < 0) {
-                return res.sendStatus(404);
-            } 
-            object2.relations.splice(index2, 1);
-            req.db.update(relation.type1, object1._id, { $set: object1 }).then(() => {
-                req.db.update(relation.type2, object2._id, { $set: object2 }).then(() => {
-                    return res.sendStatus(200);
-                });
-            });
-        });
+router.delete('/:id', auth(false, false, 'base'), validateId, validateSameClientId('relations'), function(req, res) {
+    req.db.remove('relations', req.params.id).then((result) => {
+        res.sendStatus(204);
     });
 });
+
 
 module.exports = router;

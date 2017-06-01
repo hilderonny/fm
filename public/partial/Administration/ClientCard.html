@@ -3,26 +3,27 @@
     <md-card-title flex="none" class="withfab">
         <md-card-title-text>
             <span class="md-headline" ng-hide="isNewClient"><span ng-bind="clientName"></span></span>
-            <span class="md-headline" ng-if="isNewClient" translate>CLIENTS_NEWCLIENT</span>
+            <span class="md-headline" ng-if="isNewClient" translate>TRK_CLIENTS_NEWCLIENT</span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-fab-speed-dial md-direction="down" class="md-scale" ng-if="!isNewClient">
+    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewClient">
         <md-fab-trigger>
             <md-button class="md-fab md-accent" aria-label="MENU">
-                <md-tooltip md-direction="left"><span translate>CLIENTS_MORE_ACTIONS</span></md-tooltip>
+                <md-tooltip md-direction="left"><span translate>TRK_CLIENTS_MORE_ACTIONS</span></md-tooltip>
                 <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
             </md-button>
         </md-fab-trigger>
         <md-fab-actions>
             <md-button class="md-fab md-raised md-mini" ng-click="newAdmin()" aria-label="ADD ADMIN">
-                <md-tooltip md-direction="left"><span translate>CLIENTS_CREATEADMIN</span></md-tooltip>
+                <md-tooltip md-direction="left"><span translate>TRK_CLIENTS_CREATEADMIN</span></md-tooltip>
                 <md-icon md-svg-src="/css/icons/material/Add User Male.svg"></md-icon>
             </md-button>
             <md-button class="md-fab md-raised md-mini" ng-click="addModule()" ng-if="areModulesAvailable" aria-label="ADD MODULE">
-                <md-tooltip md-direction="left"><span translate>CLIENTS_ADD_MODULE</span></md-tooltip>
+                <md-tooltip md-direction="left"><span translate>TRK_CLIENTS_ADD_MODULE</span></md-tooltip>
                 <md-icon md-svg-src="/css/icons/material/Module.svg"></md-icon>
             </md-button>
+            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
         </md-fab-actions>
     </md-fab-speed-dial>
     
@@ -36,15 +37,15 @@
             <form name="clientsForm" layout="column">
 
                 <md-input-container flex>
-                    <label translate>CLIENTS_NAME</label>
+                    <label translate>TRK_CLIENTS_NAME</label>
                     <input ng-model="client.name" name="name">
                 </md-input-container>
 
 
                 <md-card-actions layout="row" layout-align="end center">
-                    <md-button class="md-raised md-accent" ng-if="isNewClient" ng-click="createClient()" ng-disabled="clientsForm.$invalid"><span translate>CLIENTS_CREATE</span></md-button>
-                    <md-button class="md-raised md-accent" ng-if="!isNewClient" ng-click="saveClient()" ng-disabled="clientsForm.$invalid"><span translate>CLIENTS_SAVE</span></md-button>
-                    <md-button class="md-raised md-warn" ng-if="!isNewClient" ng-click="deleteClient()"><span translate>CLIENTS_DELETE</span></md-button>
+                    <md-button class="md-raised md-accent" ng-if="isNewClient" ng-click="createClient()" ng-disabled="clientsForm.$invalid"><span translate>TRK_CLIENTS_CREATE</span></md-button>
+                    <md-button class="md-raised md-accent" ng-if="!isNewClient" ng-click="saveClient()" ng-disabled="clientsForm.$invalid"><span translate>TRK_CLIENTS_SAVE</span></md-button>
+                    <md-button class="md-raised md-warn" ng-if="!isNewClient" ng-click="deleteClient()"><span translate>TRK_CLIENTS_DELETE</span></md-button>
                 </md-card-actions>
 
             </form>
@@ -53,20 +54,21 @@
 
     <md-tabs flex ng-if="!isNewClient">
         <md-tab>
-            <md-tab-label><span translate>CLIENTS_DETAILS</span></md-tab-label>
+            <md-tab-label><span translate>TRK_CLIENTS_DETAILS</span></md-tab-label>
             <md-tab-body><ng-include src="'ClientsFormTemplate'"></ng-include></md-tab-body>
         </md-tab>
         <md-tab>
-            <md-tab-label><span translate>CLIENTS_MODULES</span></md-tab-label>
+            <md-tab-label><span translate>TRK_CLIENTS_MODULES</span></md-tab-label>
             <md-tab-body>
                 <md-list class="lines-beetween-items">
                     <md-list-item ng-repeat="clientModule in clientModules | orderBy: 'module'" ng-click="selectClientModule(clientModule)" ng-class="{active:selectedClientModule == clientModule}" aria-label="{{clientModule.module}}">
                         <md-icon md-svg-src="/css/icons/material/Module.svg"></md-icon>
-                        <p translate="MODULE_{{clientModule.module}}_NAME"></p>
+                        <p translate="TRK_MODULE_{{clientModule.module}}_NAME"></p>
                     </md-list-item>
                 </md-list>
             </md-tab-body>
         </md-tab>
+        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
     </md-tabs>
 
     <ng-include flex ng-if="isNewClient" src="'ClientsFormTemplate'"></ng-include>

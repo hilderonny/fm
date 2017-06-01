@@ -46,12 +46,13 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             password: $scope.password
         }
         $http.post('/api/login', user).then(function (response) {
+            if (response.status !== 200) throw new Error(response.status); // Caught below
             // Set the token for all requests
             $http.defaults.headers.common['x-access-token'] = response.data.token;
             $scope.isLoggedIn = true;
             $scope.isPortal = response.data.clientId === null;
             if ($scope.isPortal) {
-                $scope.title = 'TITLE_PORTAL';
+                $scope.title = 'TRK_TITLE_PORTAL';
             }
             // Save login credentials in browser for future access
             localStorage.setItem("loginCredentials", JSON.stringify(user));
@@ -59,7 +60,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             $http.get('/api/menu').then(function (response) {
                 $scope.menu = response.data;
                 $scope.menu.push({
-                    "title": "MENU_LOGOUT",
+                    "title": "TRK_MENU_LOGOUT",
                     "icon": "Exit",
                     "action": function() {
                         localStorage.removeItem("loginCredentials");
@@ -70,17 +71,18 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             $scope.isLoggingIn = false;
             $scope.currentMenuItem = null;
         }).catch(function() {
+            localStorage.removeItem("loginCredentials"); // Delete login credentials to prevent login loop
             $scope.isLoggingIn = false;
             if (hideErrorMessage) {
                 return;
             }
-            $translate(['LOGIN_FAILED_TITLE', 'LOGIN_FAILED_CONTENT', 'LOGIN_FAILED_AGAIN']).then(function(translations) {
+            $translate(['TRK_LOGIN_FAILED_TITLE', 'TRK_LOGIN_FAILED_CONTENT', 'TRK_LOGIN_FAILED_AGAIN']).then(function(translations) {
                 $mdDialog.show(
                     $mdDialog.alert()
                         .clickOutsideToClose(true)
-                        .title(translations.LOGIN_FAILED_TITLE)
-                        .textContent(translations.LOGIN_FAILED_CONTENT)
-                        .ok(translations.LOGIN_FAILED_AGAIN)
+                        .title(translations.TRK_LOGIN_FAILED_TITLE)
+                        .textContent(translations.TRK_LOGIN_FAILED_CONTENT)
+                        .ok(translations.TRK_LOGIN_FAILED_AGAIN)
                 );
             });
         });
@@ -101,7 +103,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
         $rootScope.$emit('localeChanged', lang); // Tell the activity controller to update its date picker
     }
 
-    $scope.languages = [ 'de', 'en', 'ar']; // Define which languages are shown in menu
+    $scope.languages = [ 'de', 'en', 'bg', 'ar']; // Define which languages are shown in menu
 
     $scope.setLang($translate.proposedLanguage());
 

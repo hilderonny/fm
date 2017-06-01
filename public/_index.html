@@ -28,22 +28,22 @@
                         <img ng-src="{{logo}}" />
                     </div>
 
-                    <h1 translate>LOGIN_TITLE</h1>
+                    <h1 translate>TRK_LOGIN_TITLE</h1>
 
                     <md-input-container>
-                        <label translate="LOGIN_USERNAME"></label>
+                        <label translate="TRK_LOGIN_USERNAME"></label>
                         <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ng-model="username" />
                     </md-input-container>
 
                     <md-input-container>
-                        <label translate="LOGIN_PASSWORD"></label>
+                        <label translate="TRK_LOGIN_PASSWORD"></label>
                         <input type="password" ng-model="password" />
                     </md-input-container>
 
                     <div layout="row" layout-align="center right">
                         <md-button type="submit" class="md-raised md-primary" ng-click="doLogin()" ng-disabled="isLoggingIn">
                             <md-progress-circular ng-if="isLoggingIn" class="md-primary" md-diameter="20px"></md-progress-circular>
-                            <span ng-hide="isLoggingIn" translate>LOGIN_LOGIN</span>
+                            <span ng-hide="isLoggingIn" translate>TRK_LOGIN_LOGIN</span>
                         </md-button>
                     </div>
 
@@ -88,7 +88,7 @@
 
                 </md-content>
 
-                <div translate="LOGIN_LOGGED_IN_AS" translate-value-username="{{username}}"></div>
+                <div translate="TRK_LOGIN_LOGGED_IN_AS" translate-value-username="{{username}}"></div>
             </md-sidenav>
 
             <md-content flex layout="row" id="cardcanvas" ng-if="currentMenuItem"></md-content>

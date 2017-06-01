@@ -1,29 +1,29 @@
 <form name="portalSettingsUpdatesForm">
 
     <md-card-content layout="column" ng-if="updatesChecked">
-        <h4 translate>SETTINGS_VERSION_ON_SERVER</h4>
+        <h4 translate>TRK_SETTINGS_VERSION_ON_SERVER</h4>
         <p>{{versionOnServer}}</p>
-        <h4 translate>SETTINGS_LOCAL_VERSION</h4>
+        <h4 translate>TRK_SETTINGS_LOCAL_VERSION</h4>
         <p>{{localVersion}}</p>
     </md-card-content>
 
     <md-card-content layout="column" ng-if="updateInProgress">
-        <h4 translate>SETTINGS_UPDATE_IN_PROGRESS</h4>
-        <p translate>SETTINGS_WAIT_FOR_UPDATE_COMPLETION</p>
+        <h4 translate>TRK_SETTINGS_UPDATE_IN_PROGRESS</h4>
+        <p translate>TRK_SETTINGS_WAIT_FOR_UPDATE_COMPLETION</p>
     </md-card-content>
 
     <md-card-actions layout="row" layout-align="end center">
 
-        <md-button class="md-raised" ng-click="checkForUpdates()"><span translate>SETTINGS_CHECK_FOR_UPDATES</span></md-button>
+        <md-button class="md-raised" ng-click="checkForUpdates()"><span translate>TRK_SETTINGS_CHECK_FOR_UPDATES</span></md-button>
 
-        <md-button class="md-raised md-accent" ng-click="downloadAndInstallUpdate()" ng-if="updatesChecked"><span translate>SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE</span></md-button>
+        <md-button class="md-raised md-accent" ng-click="downloadAndInstallUpdate()" ng-if="updatesChecked"><span translate>TRK_SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE</span></md-button>
         
     </md-card-actions>
 
     <md-card-actions layout="row" layout-align="end center">
 
         <md-button class="md-raised" ng-click="downloadUpdate()" ng-disabled="portalSettingsForm.$invalid">
-            <span translate>SETTINGS_UPLOAD_UPDATE</span>
+            <span translate>TRK_SETTINGS_UPLOAD_UPDATE</span>
             <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadFile(this)" accept="application/zip" />
         </md-button>
         

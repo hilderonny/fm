@@ -2,7 +2,7 @@
 
     <md-card-title flex="none">
         <md-card-title-text>
-            <span class="md-headline" translate>CLIENTS_NEWADMINISTRATOR</span>
+            <span class="md-headline" translate>TRK_CLIENTS_NEWADMINISTRATOR</span>
         </md-card-title-text>
     </md-card-title>
 
@@ -15,11 +15,11 @@
         <form name="administratorsForm" layout="column">
 
             <md-input-container flex>
-                <label translate>CLIENTS_USERNAME</label>
+                <label translate>TRK_CLIENTS_USERNAME</label>
                 <input ng-model="administrator.name" name="name" ng-required="true" ng-change="serverErrors['name'] = []">
                 <div ng-messages="administratorsForm.name.$error">
-                    <div ng-message="required" translate>CLIENTS_PLEASEPROVIDEUSERNAME</div>
-                    <div ng-message="nameInUse" translate>CLIENTS_USERNAMEINUSE</div>
+                    <div ng-message="required" translate>TRK_CLIENTS_PLEASEPROVIDEUSERNAME</div>
+                    <div ng-message="nameInUse" translate>TRK_CLIENTS_USERNAMEINUSE</div>
                 </div>
                 <div class="server-errors" ng-if="serverErrors" ng-repeat="serverError in serverErrors['name']">
                     <div>{{serverError}}</div>
@@ -27,16 +27,16 @@
             </md-input-container>
 
             <md-input-container flex>
-                <label translate>CLIENTS_PASSWORD</label>
+                <label translate>TRK_CLIENTS_PASSWORD</label>
                 <input type="password" name="pass" ng-model="administrator.pass">
             </md-input-container>
 
 
             <md-card-actions layout="row" layout-align="end center">
-                <md-button class="md-raised md-accent" ng-click="createAdministrator()" ng-disabled="administratorsForm.$invalid"><span translate>CLIENTS_CREATE</span></md-button>
+                <md-button class="md-raised md-accent" ng-click="createAdministrator()" ng-disabled="administratorsForm.$invalid"><span translate>TRK_CLIENTS_CREATE</span></md-button>
             </md-card-actions>
 
-            <md-card-content translate>CLIENTS_CREATEADMINDESCRIPTION</md-card-content>
+            <md-card-content translate>TRK_CLIENTS_CREATEADMINDESCRIPTION</md-card-content>
 
         </form>
     </md-card-content>

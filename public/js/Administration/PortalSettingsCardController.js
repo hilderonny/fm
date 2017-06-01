@@ -1,10 +1,4 @@
-app.controller('AdministrationPortalSettingsCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    if (!$translatePartialLoader.isPartAvailable('portalbase')) {
-        $translatePartialLoader.addPart('portalbase');
-        $translate.refresh();
-    }
+app.controller('AdministrationPortalSettingsCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     // User clicks on close button
     $scope.closeCard = function() {
@@ -22,8 +16,8 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $h
             licensekey: $scope.settings.licenseKey 
         };
         $http.put('/api/portalmanagement/', settingsToSend).then(function(response) {
-            $translate(['SETTINGS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     };
@@ -72,8 +66,8 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $h
         xhr.onreadystatechange = function(e) { // https://developer.mozilla.org/de/docs/Web/API/XMLHttpRequest
             if (e.target.readyState === 4) {
                 $scope.isUploading = false;
-                $translate(['SETTINGS_FILE_UPLODAED']).then(function(translations) {
-                    $mdToast.show($mdToast.simple().textContent(translations.SETTINGS_FILE_UPLODAED).hideDelay(1000).position('bottom right'));
+                $translate(['TRK_SETTINGS_FILE_UPLODAED']).then(function(translations) {
+                    $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_FILE_UPLODAED).hideDelay(1000).position('bottom right'));
                 });
             }
         }

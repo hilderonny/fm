@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --slow 500 --timeout 900000 -R mocha-teamcity-reporter ./test/**/*.js",
-    "testlocal": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=localtestdb ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --slow 500 --timeout 5000 -R spec ./test/**/*.js",
+    "testlocal": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=localtestdb IGNORE_FAILED_TRANSLATION_TESTS=true ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --slow 500 --timeout 5000 -R spec ./test/**/*.js",
     "basetest": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=localtestdb ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --slow 500 --timeout 5000 -R spec ./test/*.js ./test/utils/*.js"
   },
   "author": "Ronny Hildebrandt",

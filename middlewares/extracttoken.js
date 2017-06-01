@@ -12,7 +12,10 @@ module.exports = (req, res, next) => {
     if (token) {
         jsonWebToken.verify(token, localConfig.tokensecret, (err, decoded) => {
             if (!err) {
-                req.user = { _id: decoded.userId }; // See api/login
+                req.user = {
+                    _id: decoded.userId,
+                    tokenTime: decoded.time // Used in auth for checking whether the token is older than the last server start
+                }; // See api/login
             }
             // Process request in any case, even if no token was provided
             next();

@@ -18,17 +18,7 @@ var multer  = require('multer')
 var upload = multer({ dest: 'uploads/' })
 var fs = require('fs');
 var path = require('path');
-var localConfig = require('../config/localconfig.json'); // http://stackoverflow.com/a/14678694
-
-var getFilePath = (document) => {
-    return path.join(
-        __dirname, 
-        '/../',
-        localConfig.documentspath,
-        document.clientId !== null ? document.clientId.toString() : '',
-        document._id.toString()
-    );
-};
+var documentsHelper = require('../utils/documentsHelper');
 
 var downloadDocument = (response, document) => {
     var options = {
@@ -36,7 +26,7 @@ var downloadDocument = (response, document) => {
             'Content-disposition': 'attachment; filename=' + document.name
         }
     }
-    return response.sendFile(getFilePath(document), options);
+    return response.sendFile(documentsHelper.getDocumentPath(document._id), options);
 };
 
 // Download a specific shared document without authentication 
@@ -54,6 +44,43 @@ router.get('/share/:id', validateId, (req, res) => {
     });
 });
 
+/**
+ * Liefert eine Liste von Dokumenten für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
+ * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
+ * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
+ * einfach eine leere Liste zurück gegeben.
+ * @example
+ * $http.get('/api/documents/forIds?ids=ID1,ID2,ID3')...
+ */
+router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
+    // Zuerst Berechtigung prüfen
+    auth.canAccess(req.user._id, 'PERMISSION_OFFICE_DOCUMENT', 'r', 'documents', req.db).then(function(accessAllowed) {
+        if (!accessAllowed) {
+            return res.send([]);
+        }
+        if (!req.query.ids) {
+            return res.send([]);
+        }
+        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
+        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
+        req.db.get('documents').aggregate([
+            { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
+                from: 'folders',
+                startWith: '$parentFolderId',
+                connectFromField: 'parentFolderId',
+                connectToField: '_id',
+                as: 'path'
+            } },
+            { $match: { // Find only relevant elements
+                _id: { $in: ids },
+                clientId: clientId
+            } }
+        ]).then(function(documents) {
+            res.send(documents);
+        });
+    });
+});
+
 // Get a specific document 
 router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validateId, validateSameClientId('documents'), (req, res) => {
     req.db.get('documents').findOne(req.params.id).then((document) => {
@@ -66,18 +93,6 @@ router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validat
     });
 });
 
-var createPath = (pathToCreate) => {
-    try {
-        fs.statSync(pathToCreate);
-        return; // Her we come only when the path exists
-    }
-    catch (err) {
-        // path does not exist, create it
-        createPath(path.dirname(pathToCreate));
-        fs.mkdirSync(pathToCreate);
-    }
-}
-
 // Create a document via file upload
 router.post('/', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), upload.single('file'), function(req, res) { // https://github.com/expressjs/multer
     var file = req.file;
@@ -87,17 +102,12 @@ router.post('/', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), upload.si
     var user = req.user;
     var clientId = user && user.clientId ? user.clientId.toString() : null;
     var parentFolderId = req.body.parentFolderId;
-    if (!parentFolderId) {
+    if (!parentFolderId || parentFolderId === 'undefined') {
         parentFolderId = null; // Assign to root folder, when no parent folder ID is given
     }
     if (parentFolderId !== null && !validateId.validateId(parentFolderId)) {
         return res.sendStatus(400); // ID has wrong length
     }
-    // Save file to documents path of client or directly in documents path for portal
-    var rootPath = path.join(__dirname, '/../');
-    var uploadPath = rootPath + file.path;
-    var relativeFileDirectory = clientId !== null ? path.join(localConfig.documentspath, clientId) : localConfig.documentspath;
-    var directoryToStore = path.join(rootPath, relativeFileDirectory);
     // Create document in database and assign user, client and parentFolderId
     var document = { 
         name: file.originalname,
@@ -113,17 +123,13 @@ router.post('/', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), upload.si
                 return res.sendStatus(400);
             }
             req.db.insert('documents', document).then((insertedDocument) => {
-                var filePath = path.join(directoryToStore, insertedDocument._id.toString());
-                createPath(directoryToStore);
-                fs.renameSync(path.join(rootPath, file.path), filePath);
+                documentsHelper.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
                 res.send(insertedDocument);
             });
         });
     } else {
         req.db.insert('documents', document).then((insertedDocument) => {
-            var filePath = path.join(directoryToStore, insertedDocument._id.toString());
-            createPath(directoryToStore);
-            fs.renameSync(path.join(rootPath, file.path), filePath);
+            documentsHelper.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
             res.send(insertedDocument);
         });
     }
@@ -171,7 +177,7 @@ router.delete('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), vali
 router.deleteDocument = (db, document) => {
     return new Promise((resolve, reject) => {
         // Remove file
-        var filePath = getFilePath(document);
+        var filePath = documentsHelper.getDocumentPath(document._id);
         fs.unlink(filePath, (err) => {
             // Remove relations from database
             db.get('relations').remove({ $or: [ { type1: 'documents', id1: document._id }, { type2: 'documents', id2: document._id } ] }).then(() => {

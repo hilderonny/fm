@@ -11,8 +11,19 @@ app.config(function($mdThemingProvider) {
 
 // Handle response errors by reloading the page
 app.config(['$httpProvider', function($httpProvider) { 
-    $httpProvider.interceptors.push(function() {
+    $httpProvider.interceptors.push(function() { // See https://docs.angularjs.org/api/ng/service/$http
         return {
+            'response': function(response) {
+              // Handle 205 status codes from server to force reloading of the 
+              // entire app after server restart
+              if (response.status === 205) {
+                // Reload from server without cache
+                location.reload(true); // See http://stackoverflow.com/a/5722855/5964970
+                return;
+              } else {
+                return response;
+              }
+            },
             'responseError': function(rejection) {
               // Darf nur auf Requests an APIs an den eigenen Server reagieren
               // Calls zu externen Systemen müssen durchgelassen werden und werden von
@@ -40,10 +51,12 @@ app.config(function($mdDateLocaleProvider) {
 });
 
 // Configure translation
-app.config(function($translateProvider, $translatePartialLoaderProvider) {
-  $translatePartialLoaderProvider.addPart('base'); // Needed every time for login and so.
-  $translateProvider.useLoader('$translatePartialLoader', {
-    urlTemplate: 'lang/{part}-{lang}.json'
+// TODO: Refactor to use /api/translations
+app.config(function($translateProvider) {
+  // https://angular-translate.github.io/docs/#/guide/12_asynchronous-loading
+  $translateProvider.useStaticFilesLoader({
+      prefix: '/api/translations/',
+      suffix: ''
   });
   $translateProvider.fallbackLanguage('en');
   $translateProvider.preferredLanguage('de');

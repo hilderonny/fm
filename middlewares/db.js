@@ -1,8 +1,9 @@
 /**
  * Middleware that opens a database connection and provides it as req.db in the request.
  */
+var localConfig = require('../config/localconfig.json');
  
-var dbFile = process.env.MONGO_TEST_DB  || 'db' ; 
+var dbFile = process.env.MONGO_TEST_DB  || localConfig.dbName || 'db' ; 
 var monkDb = require('monk')('localhost/' + dbFile);
 var bcryptjs = require('bcryptjs');
 var fs = require('fs');
@@ -46,7 +47,7 @@ var db = {
             console.log('Creating admin usergroup permissions ...');
             return monkDb.get('permissions').bulkWrite([
                 { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_CLIENT', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
-                { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_PERMISSION', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
+                { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_USERGROUP', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
                 { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_SETTING', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } }, // TODO: Remove
                 { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_USER', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
                 { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_USERGROUP', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
@@ -54,55 +55,6 @@ var db = {
                 { insertOne: { document: { key:'PERMISSION_SETTINGS_USER', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } }
             ]);
         });
-/*
-
-        userGroups.findOne({ name: 'admin'}).then((existingUserGroup) => {
-            if (!existingUserGroup) {
-                return userGroups.insert({ name: 'admin', clientId: null });
-            } else {
-                return new Promise((resolve, reject) => { resolve(existingUserGroup); });
-            }
-        }).then((existingAdminUserGroup) => {
-            return users.remove({name:'admin'});
-        }).then(() => {
-            return users.insert({name:'admin', pass: bcryptjs.hashSync('admin'), clientId: null});
-        });
-        monkDb.get('users').findOne({name:'admin'}).then((existingAdminUser) => {
-            if (!existingAdminUser) {
-                var newUser = { 
-                    name: 'admin',
-                    pass: bcryptjs.hashSync('admin'),
-                    clientId: null, // null means that the user is a portal user
-                    userGroupId: existingAdminUser._id
-                };
-            }
-        })
-        var users = monkDb.get('users');
-        users.count({ name: 'admin'}).then((count) => {
-            if (count < 1) {
-                var newUser = { 
-                    name: 'admin',
-                    pass: bcryptjs.hashSync('admin'),
-                    clientId: null // null means that the user is a portal user
-                };
-                // Check whether the admin user group exists and create one if not
-                var userGroups = monkDb.get('usergroups');
-                userGroups.findOne({ name: 'admin'}).then((userGroup) => {
-                    if (!userGroup) {
-                        userGroups.insert({ 
-                            name: 'admin',
-                            clientId: null // null means that the userGroup is a portal user
-                        }).then((insertedUserGroup) => {
-                            newUser.userGroupId = insertedUserGroup._id
-                            users.insert(newUser);
-                        });
-                    } else {
-                        newUser.userGroupId = userGroup._id
-                        users.insert(newUser);
-                    }
-                });
-            }
-        });*/
     },
     /**
      * Forwarding to monk.get() for referencing collections in the database. E.g. req.db.get('users').find(...);

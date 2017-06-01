@@ -1,8 +1,5 @@
 app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, $element, $mdToast, $mdPanel, utils) {
     
-    // Register translations
-    utils.registerTranslations('fmobjects');
-    
     // Event callbacks
     var saveFmObjectCallback = function(savedFmObject) {
         $scope.selectedFmObject.name = savedFmObject.name;
@@ -19,28 +16,29 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
             }
         }
     };
-    var createFmObjectCallback = function(createdFmObject) {
+    var createFmObjectCallback = function(createdFmObject, event) {
         var parentFmObject = $scope.selectedFmObject ? $scope.selectedFmObject: $scope.fmObject;
         createdFmObject.children = []; 
         parentFmObject.children.push(createdFmObject);
         prepareReferencesToParent(parentFmObject);
         if (!parentFmObject.isOpen) {
-            $scope.openFmObject(parentFmObject);
+            $scope.openFmObject(parentFmObject, event);
         }
-        $scope.selectFmObject(createdFmObject);
+        $scope.selectFmObject(createdFmObject, event);
     };
     var closeFmObjectCallback = function() {
         $scope.selectedFmObject = false;
     };
 
     // Click on Arrow button to open or close an hierarchy level
-    $scope.openFmObject = function(fmObject) {
+    $scope.openFmObject = function(fmObject, event) {
         fmObject.isOpen = !fmObject.isOpen;
         (event || window.event).stopPropagation(); // Prevent that card receives click event
     };
 
     // Click on level name or icon to select it or click on card to unselect all
-    $scope.selectFmObject = function(fmObject) {
+    // Passing events for Firefox: http://stackoverflow.com/a/30777938
+    $scope.selectFmObject = function(fmObject, event) {
         utils.removeCardsToTheRightOf($element);
         if (fmObject) {
             utils.addCard('BIM/FmobjectCard', {
@@ -58,7 +56,7 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
     };
 
     // Click on new FM object button opens detail dialog with new FM object data
-    $scope.newFmObject = function() {
+    $scope.newFmObject = function(event) {
         utils.removeCardsToTheRightOf($element);
         utils.addCard('BIM/FmobjectCard', {
             parentFmObjectId: $scope.selectedFmObject ? $scope.selectedFmObject._id : null,

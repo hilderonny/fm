@@ -3,63 +3,90 @@
     <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" ng-if="!isNewUser"><span ng-bind="userName"></span></span>
-            <span class="md-headline" ng-if="isNewUser" translate>USERS_NEW_USER</span>
+            <span class="md-headline" ng-if="isNewUser" translate>TRK_USERS_NEW_USER</span>
         </md-card-title-text>
     </md-card-title>
+
+    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewUser">
+        <md-fab-trigger>
+            <md-button class="md-fab md-accent" aria-label="MENU">
+                <md-tooltip md-direction="left"><span translate>TRK_USERS_MORE_ACTIONS</span></md-tooltip>
+                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
+            </md-button>
+        </md-fab-trigger>
+        <md-fab-actions>
+            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        </md-fab-actions>
+    </md-fab-speed-dial>
 
     <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
         <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
     </md-button>
 
-    <md-card-content>
+    <script type="text/ng-template" id="UsersFormTemplate">
 
-        <form name="usersForm" layout="column">
+        <md-card-content>
 
-            <md-input-container flex>
-                <label translate>USERS_NAME</label>
-                <input ng-model="user.name" name="name" ng-required="true" ng-keydown="resetUserNameError()">
-                <div ng-messages="usersForm.name.$error">
-                    <div ng-message="required" translate>USERS_PLEASE_ENTER_USERNAME</div>
-                    <div ng-message="nameInUse" translate>USERS_NAME_IN_USE</div>
-                </div>
-            </md-input-container>
+            <form name="usersForm" layout="column">
 
-            <md-input-container flex>
-                <label ng-if="!isNewUser" translate>USERS_NEW_PASSWORD</label>
-                <label ng-if="isNewUser" translate>USERS_PASSWORD</label>
-                <input type="password" name="pass" ng-model="user.pass" ng-required="isNewUser" aria-label="USER PASSWORD">
-                <div ng-messages="usersForm.pass.$error">
-                    <div ng-message="required" translate>USERS_PLEASE_ENTER_PASSWORD</div>
-                </div>
-            </md-input-container>
+                <md-input-container flex>
+                    <label translate>TRK_USERS_NAME</label>
+                    <input ng-model="user.name" name="un" ng-required="true" ng-keydown="resetUserNameError()">
+                    <div ng-messages="usersForm.un.$error">
+                        <div ng-message="required" translate>TRK_USERS_PLEASE_ENTER_USERNAME</div>
+                        <div ng-message="nameInUse" translate>TRK_USERS_NAME_IN_USE</div>
+                    </div>
+                </md-input-container>
 
-            <md-input-container flex>
-                <label translate>USERS_REPEAT_PASSWORD</label>
-                <input type="password" name="pass2" ng-model="user.pass2" ng-required="user.pass" compare-to="user.pass" aria-label="USER PASSWORD REPEAT">
-                <div ng-messages="usersForm.pass2.$error">
-                    <div ng-message="compareTo" translate>USERS_PASSWORDS_DO_NOT_MATCH</div>
-                </div>
-            </md-input-container>
+                <md-input-container flex>
+                    <label ng-if="!isNewUser" translate>TRK_USERS_NEW_PASSWORD</label>
+                    <label ng-if="isNewUser" translate>TRK_USERS_PASSWORD</label>
+                    <input type="password" name="p" ng-model="user.pass" ng-required="isNewUser" aria-label="USER PASSWORD">
+                    <div ng-messages="usersForm.p.$error">
+                        <div ng-message="required" translate>TRK_USERS_PLEASE_ENTER_PASSWORD</div>
+                    </div>
+                </md-input-container>
 
-            <md-input-container flex>
-                <md-checkbox ng-model="user.isAdmin"><span translate>USERS_ADMINISTRATOR</span></md-checkbox>
-            </md-input-container>
+                <md-input-container flex>
+                    <label translate>TRK_USERS_REPEAT_PASSWORD</label>
+                    <input type="password" name="pp" ng-model="user.pass2" ng-required="user.pass" compare-to="user.pass" aria-label="USER PASSWORD REPEAT">
+                    <div ng-messages="usersForm.pp.$error">
+                        <div ng-message="compareTo" translate>TRK_USERS_PASSWORDS_DO_NOT_MATCH</div>
+                    </div>
+                </md-input-container>
 
-            <md-input-container flex>
-                <label translate>USERS_USERGROUP</label>
-                <md-select ng-model="user.userGroup">
-                    <md-option ng-value="userGroup" ng-repeat="userGroup in userGroups | orderBy: 'name'" ng-bind="userGroup.name"></md-option>
-                </md-select>
-            </md-input-container>
+                <md-input-container flex>
+                    <md-checkbox ng-model="user.isAdmin"><span translate>TRK_USERS_ADMINISTRATOR</span></md-checkbox>
+                </md-input-container>
 
-            <md-card-actions layout="row" layout-align="end center">
-                <md-button class="md-raised md-accent" ng-if="isNewUser && canWriteUserDetails" ng-click="createUser()" ng-disabled="usersForm.$invalid"><span translate>USERS_CREATE</span></md-button>
-                <md-button class="md-raised md-accent" ng-if="!isNewUser && canWriteUserDetails" ng-click="saveUser()" ng-disabled="usersForm.$invalid"><span translate>USERS_SAVE</span></md-button>
-                <md-button class="md-raised md-warn" ng-if="!isNewUser && canWriteUserDetails" ng-click="deleteUser()"><span translate>USERS_DELETE</span></md-button>
-            </md-card-actions>
+                <md-input-container flex>
+                    <label translate>TRK_USERS_USERGROUP</label>
+                    <md-select ng-model="user.userGroup">
+                        <md-option ng-value="userGroup" ng-repeat="userGroup in userGroups | orderBy: 'name'" ng-bind="userGroup.name"></md-option>
+                    </md-select>
+                </md-input-container>
 
-        </form>
+                <md-card-actions layout="row" layout-align="end center">
+                    <md-button class="md-raised md-accent" ng-if="isNewUser && canWriteUserDetails" ng-click="createUser()" ng-disabled="usersForm.$invalid"><span translate>TRK_USERS_CREATE</span></md-button>
+                    <md-button class="md-raised md-accent" ng-if="!isNewUser && canWriteUserDetails" ng-click="saveUser()" ng-disabled="usersForm.$invalid"><span translate>TRK_USERS_SAVE</span></md-button>
+                    <md-button class="md-raised md-warn" ng-if="!isNewUser && canWriteUserDetails" ng-click="deleteUser()"><span translate>TRK_USERS_DELETE</span></md-button>
+                </md-card-actions>
 
-    </md-card-content>
+            </form>
+
+        </md-card-content>
+
+    </script>
+
+    <md-tabs flex ng-if="!isNewUser">
+        <md-tab>
+            <md-tab-label><span translate>TRK_USERS_DETAILS</span></md-tab-label>
+            <md-tab-body><ng-include src="'UsersFormTemplate'"></ng-include></md-tab-body>
+        </md-tab>
+        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
+    </md-tabs>
+
+    <ng-include flex ng-if="isNewUser" src="'UsersFormTemplate'"></ng-include>
+
 
 </md-card>

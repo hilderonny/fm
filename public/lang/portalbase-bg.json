@@ -1,0 +1,20 @@
+{
+    "TRK_SETTINGS_CHANGES_SAVED" : "промените са запазени",
+    "TRK_SETTINGS_CHECK_FOR_UPDATES" : "потърси актуализации",
+    "TRK_SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE" : "инсталирай",
+    "TRK_SETTINGS_FILE_UPLODAED" : "данните са успешно качени",
+    "TRK_SETTINGS_LICENSE" : "лиценз",
+    "TRK_SETTINGS_LICENSEKEY" : "лицензен ключ",
+    "TRK_SETTINGS_LICENSESERVER" : "лицензен сървър",
+    "TRK_SETTINGS_LOCAL_VERSION" : "локална версия",
+    "TRK_SETTINGS_MISSING_LICENSESERVER" : "Моля, въведете адреса на лицензния сървър.",
+    "TRK_SETTINGS_PORTALSETTINGS" : "настройки",
+    "TRK_SETTINGS_SAVE" : "запази промените",
+    "TRK_SETTINGS_UPDATE_IN_PROGRESS" : "инсталиране на актуализации",
+    "TRK_SETTINGS_UPDATES" : "актуализации",
+    "TRK_SETTINGS_UPLOAD_UPDATE" : "качване на актуализации",
+    "TRK_SETTINGS_VERSION_ON_SERVER" : "весия лицензен сървър",
+    "TRK_SETTINGS_WAIT_FOR_UPDATE_COMPLETION" : "Процесът на актиализация започна. Моля, изчакайте 2 минути до протичане на инсталацията и обновете страницата!",
+    "TRK_SETTINGSET_PORTAL_GENERAL" : "настройки",
+    "TRK_MODULE_portalbase_NAME" : "портал - основен модул"
+}

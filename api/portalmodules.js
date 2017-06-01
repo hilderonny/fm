@@ -84,8 +84,14 @@ router.post('/', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), 
         }
         delete portalModule._id; // Ids are generated automatically
         portalModule.portalId = portal._id; // Make it a real id
-        req.db.insert('portalmodules', portalModule).then((insertedPortalModule) => {
-            return res.send(insertedPortalModule);
+        // Prüfen, ob so eine Zuordnung schon existiert.
+        req.db.get('portalmodules').find(portalModule).then(function(existingAssignments) {
+            if (existingAssignments.length > 0) {
+                return res.sendStatus(409); // Diese Zuordnung gibt es schon
+            }
+            req.db.insert('portalmodules', portalModule).then((insertedPortalModule) => {
+                return res.send(insertedPortalModule);
+            });
         });
     });
 });

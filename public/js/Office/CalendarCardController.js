@@ -1,7 +1,4 @@
-app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations
-    utils.registerTranslations('activities');
+app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
     
     // Event callbacks
     var saveActivityCallback = function(savedActivity) {
@@ -58,7 +55,7 @@ app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog
     $scope.after30Days = after30Days.toISOString();
 
     // Click on activity in user list shows activity details
-    $scope.selectActivity = function(selectedActivity) {
+    $scope.selectActivity = function(selectedActivity, event) {
         utils.removeCardsToTheRightOf($element);
         utils.addCard('Office/ActivityCard', {
             activityId: selectedActivity._id,

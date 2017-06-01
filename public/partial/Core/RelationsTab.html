@@ -1,0 +1,20 @@
+<md-tab md-on-select="onTabSelected()">
+    <md-tab-label><span translate>TRK_RELATIONS_LINKS</span></md-tab-label>
+    <md-tab-body>
+        <md-card-content>
+            <section ng-repeat="relation in relationsArray() | orderBy:translateTitle">
+                <md-subheader><span translate="TRK_{{relation.title}}"></span></md-subheader>
+                <md-list class="lines-beetween-items">
+                    <md-list-item ng-repeat="item in relation.items | orderBy:'firstLine'" ng-click="onSelectElement(item)" ng-class="selectedElement === item ? 'active' : false">
+                        <md-icon md-svg-src="/css/icons/{{item.icon}}.svg"></md-icon><!-- TODO: Pfadangabe in Doku überarbeiten -->
+                        <p ng-if="!item.secondLine">{{item.firstLine}}</p>
+                        <div ng-if="item.secondLine" class="md-list-item-text multiline"><p>{{item.firstLine}}</p><p>{{item.secondLine}}</p></div>
+                        <md-button class="md-icon-button md-accent" aria-label="DELETE">
+                            <md-icon ng-click="onDeleteElement(item.relationId)" md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+                        </md-button>
+                    </md-list-item>
+                </md-list>
+            </section>
+        </md-card-content>
+    </md-tab-body>
+</md-tab>

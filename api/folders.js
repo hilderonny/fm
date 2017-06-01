@@ -40,6 +40,63 @@ router.get('/', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), (req, res)
     });
 });
 
+/**
+ * Gibt alle Verzeichnisse und Dokumente zurück. Wird für den Dialog
+ * zum Erstellen von Verknüpfungen verwendet
+ */
+router.get('/allFoldersAndDocuments', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), function(req, res) {
+    var clientId = req.user.clientId; // clientId === null means that the user is a portal user
+    req.db.get('folders').find({ clientId: clientId }).then((folders) => {
+        folders.forEach(function(folder) { // Um zwischen Verzeichnissen und Dokumenten zu unterscheiden
+            folder.type = 'folder';
+        })
+        req.db.get('documents').find({ clientId: clientId }).then((documents) => {
+            documents.forEach(function(document) { // Um zwischen Verzeichnissen und Dokumenten zu unterscheiden
+                document.type = 'document';
+            })
+            var allFoldersAndDocuments = folders.concat(documents);
+            return res.send(allFoldersAndDocuments);
+        });
+    });
+});
+
+/**
+ * Liefert eine Liste von Verzeichnissen für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
+ * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
+ * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
+ * einfach eine leere Liste zurück gegeben.
+ * @example
+ * $http.get('/api/folders/forIds?ids=ID1,ID2,ID3')...
+ */
+router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
+    // Zuerst Berechtigung prüfen
+    auth.canAccess(req.user._id, 'PERMISSION_OFFICE_DOCUMENT', 'r', 'documents', req.db).then(function(accessAllowed) {
+        if (!accessAllowed) {
+            return res.send([]);
+        }
+        if (!req.query.ids) {
+            return res.send([]);
+        }
+        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
+        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
+        req.db.get('folders').aggregate([
+            { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
+                from: 'folders',
+                startWith: '$parentFolderId',
+                connectFromField: 'parentFolderId',
+                connectToField: '_id',
+                as: 'path'
+            } },
+            { $match: { // Find only relevant elements
+                _id: { $in: ids },
+                clientId: clientId
+            } }
+        ]).then(function(folders) {
+            res.send(folders);
+        });
+    });
+});
+
 // Get a specific folder and its contained folders and documents
 router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validateId, validateSameClientId('folders'), (req, res) => {
     var id = monk.id(req.params.id);

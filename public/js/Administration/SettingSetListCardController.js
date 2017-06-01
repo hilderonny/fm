@@ -1,9 +1,4 @@
-app.controller('AdministrationSettingSetListCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translatePartialLoader, $translate, utils) {
-    
-    // Register translations for possible different  modules
-    if (!$translatePartialLoader.isPartAvailable('portalbase')) $translatePartialLoader.addPart('portalbase');
-    //if (!$translatePartialLoader.isPartAvailable('pierreseinoutlook')) $translatePartialLoader.addPart('pierreseinoutlook');
-    $translate.refresh();
+app.controller('AdministrationSettingSetListCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     
     var closeSettingSetCardCallback = function() {
         $scope.selectedSettingSetItem = false;

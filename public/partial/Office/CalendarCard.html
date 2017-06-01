@@ -2,12 +2,12 @@
 
     <md-card-title flex="none" class="withfab">
         <md-card-title-text>
-            <span class="md-headline" translate>ACTIVITIES_ACTIVITIES</span>
+            <span class="md-headline" translate>TRK_ACTIVITIES_ACTIVITIES</span>
         </md-card-title-text>
     </md-card-title>
 
     <md-button class="md-fab md-accent" ng-click="newActivity()" aria-label="ADD ACTIVITY" ng-if="canWriteActivities && !isCreateReference">
-        <md-tooltip md-direction="left"><span translate>ACTIVITIES_CREATE_NEW_ACTIVITY</span></md-tooltip>
+        <md-tooltip md-direction="left"><span translate>TRK_ACTIVITIES_CREATE_NEW_ACTIVITY</span></md-tooltip>
         <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
     </md-button>
 
@@ -17,37 +17,37 @@
 
     <md-tabs flex>
         <md-tab>
-            <md-tab-label><span translate>ACTIVITIES_OVERDUE</span></md-tab-label>
+            <md-tab-label><span translate>TRK_ACTIVITIES_OVERDUE</span></md-tab-label>
             <md-tab-body>
                 <md-card-content ng-controller="OfficeCalendarCardOverDueController" ng-include="'partial/Office/ActivityList.html'"></md-card-content>
             </md-tab-body>
         </md-tab>
         <md-tab>
-            <md-tab-label><span translate>ACTIVITIES_TODAY</span></md-tab-label>
+            <md-tab-label><span translate>TRK_ACTIVITIES_TODAY</span></md-tab-label>
             <md-tab-body>
                 <md-card-content ng-controller="OfficeCalendarCardTodayController" ng-include="'partial/Office/ActivityList.html'"></md-card-content>
             </md-tab-body>
         </md-tab>
         <md-tab>
-            <md-tab-label><span translate>ACTIVITIES_THIS_WEEK</span></md-tab-label>
+            <md-tab-label><span translate>TRK_ACTIVITIES_THIS_WEEK</span></md-tab-label>
             <md-tab-body>
                 <md-card-content ng-controller="OfficeCalendarCardThisWeekController" ng-include="'partial/Office/ActivityList.html'"></md-card-content>
             </md-tab-body>
         </md-tab>
         <md-tab>
-            <md-tab-label><span translate>ACTIVITIES_THIS_MONTH</span></md-tab-label>
+            <md-tab-label><span translate>TRK_ACTIVITIES_THIS_MONTH</span></md-tab-label>
             <md-tab-body>
                 <md-card-content ng-controller="OfficeCalendarCardThisMonthController" ng-include="'partial/Office/ActivityList.html'"></md-card-content>
             </md-tab-body>
         </md-tab>
         <md-tab>
-            <md-tab-label><span translate>ACTIVITIES_NEXT_7_DAYS</span></md-tab-label>
+            <md-tab-label><span translate>TRK_ACTIVITIES_NEXT_7_DAYS</span></md-tab-label>
             <md-tab-body>
                 <md-card-content ng-controller="OfficeCalendarCardNext7DaysController" ng-include="'partial/Office/ActivityList.html'"></md-card-content>
             </md-tab-body>
         </md-tab>
         <md-tab>
-            <md-tab-label><span translate>ACTIVITIES_NEXT_30_DAYS</span></md-tab-label>
+            <md-tab-label><span translate>TRK_ACTIVITIES_NEXT_30_DAYS</span></md-tab-label>
             <md-tab-body>
                 <md-card-content ng-controller="OfficeCalendarCardNext30DaysController" ng-include="'partial/Office/ActivityList.html'"></md-card-content>
             </md-tab-body>
