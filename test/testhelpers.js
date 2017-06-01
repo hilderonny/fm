@@ -443,3 +443,27 @@ module.exports.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject
         assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of ${name} ${apiObject._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
     });
 };
+
+/**
+ * TODO: Implement
+ */
+module.exports.prepareDynamicAttributes = function() {
+    var dynamicAttributes = [];
+    return bulkInsert('dynamicAttributes', dynamicAttributes);
+};
+
+/**
+ * TODO: Implement
+ */
+module.exports.prepareDynamicAttributeOptions = function() {
+    var dynamicAttributeOptions = [];
+    return bulkInsert('dynamicAttributeoptions', dynamicAttributeOptions);
+};
+
+/**
+ * TODO: Implement
+ */
+module.exports.prepareDynamicAttributeValues = function() {
+    var dynamicAttributeValues = [];
+    return bulkInsert('dynamicAttributevalues', dynamicAttributeValues);
+};
