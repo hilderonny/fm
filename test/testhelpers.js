@@ -455,7 +455,7 @@ module.exports.prepareDynamicAttributes = function() {
     dbObjects.users.forEach(function(user){
         var userAttribute = {modelName: 'users', 
                              name_en: 'gender',
-                             clienId: user.clientId,
+                             clientId: user.clientId,
                              type: 'picklist'};
         dynamicAttributes.push(userAttribute);
     });
@@ -463,12 +463,12 @@ module.exports.prepareDynamicAttributes = function() {
     dbObjects.documents.forEach(function(document){
         var documentBoolAttribute = {modelName: 'documents', 
                                     name_en: 'is secret',
-                                    clienId: document.clientId,
+                                    clientId: document.clientId,
                                     type: 'boolean'};
 
         var documentTextAttribute = {modelName: 'documents', 
                                     name_en: 'content description',
-                                    clienId: document.clientId,
+                                    clientId: document.clientId,
                                     type: 'text'}; 
 
         dynamicAttributes.push(documentBoolAttribute);
@@ -486,8 +486,8 @@ module.exports.prepareDynamicAttributeOptions = function() {
     var dynamicAttributeOptions = [];
     dbObjects.dynamicattributes.forEach(function(attribute){
         if (attribute.type == 'picklist') {
-            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'female', clienId: attribute.clienId});
-            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clienId: attribute.clienId});
+            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'female', clientId: attribute.clientId});
+            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clientId: attribute.clientId});
         }
     });
     return bulkInsert('dynamicattributeoptions', dynamicAttributeOptions);

@@ -30,42 +30,126 @@ describe('API dynamicattributes', function() {
 ////////////////////////// AUTHENTICATION ////////////////////////////////////    
 
     it('responds to GET/model/:modelName without authentication with 403', function() {
+        var modelName = 'users';
+         return superTest(server).get(`/api/dynamicattributes/model/${modelName}`).expect(403);
     });
 
-    xit('responds to GET/model/:modelName without read permission with 403', function() {
+    it('responds to GET/model/:modelName without read permission with 403', function() {
+        // Remove the corresponding permission
+        return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function() {
+            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
+                var modelName = 'users';
+                return superTest(server).get(`/api/dynamicattributes/model/${modelName}?token=${token}`).expect(403);
+            });
+        });
     });
 
-    xit('responds to GET/model/:modelName when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+    it('responds to GET/model/:modelName when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+        return testHelpers.removeClientModule('1', 'base').then(function(){
+            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                var modelName = 'users';
+                return superTest(server).get(`/api/dynamicattributes/model/${modelName}?token=${token}`).expect(403);
+            });
+        });
     });
 
-    xit('responds to GET/model/:modelName when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
+    it('responds to GET/model/:modelName when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
+        return testHelpers.removeClientModule('1', 'base').then(function(){
+            return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
+                var modelName = 'users';
+                return superTest(server).get(`/api/dynamicattributes/model/${modelName}?token=${token}`).expect(403);
+            });
+        });
     });
 
-    xit('responds to GET/:id without authentication with 403', function() {
+    it('responds to GET/:id without authentication with 403', function() {
+        return db.get('dynamicattributes').findOne({type: 'boolean'}).then(function(dynamicAttributeFromDB){
+            return superTest(server).get(`/api/dynamicattributes/${dynamicAttributeFromDB._id}`).expect(403);
+        });
     });
 
-    xit('responds to GET/:id without read permission with 403', function() {
+    it('responds to GET/:id without read permission with 403', function() {
+        return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function() {
+            return db.get('dynamicattributes').findOne({type: 'boolean'}).then(function(dynamicAttributeFromDB){
+                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                   return superTest(server).get(`/api/dynamicattributes/${dynamicAttributeFromDB._id}?token=${token}`).expect(403); 
+                });
+            });   
+        });
     });
 
-    xit('responds to GET/:id when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+    it('responds to GET/:id when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+        return testHelpers.removeClientModule('1', 'base').then(function(){
+            return db.get('dynamicattributes').findOne({type: 'boolean'}).then(function(dynamicAttributeFromDB){
+                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                   return superTest(server).get(`/api/dynamicattributes/${dynamicAttributeFromDB._id}?token=${token}`).expect(403); 
+                });
+            });    
+        });
     });
 
-    xit('responds to GET/:id when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
+    it('responds to GET/:id when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
+        return testHelpers.removeClientModule('1', 'base').then(function(){
+            return db.get('dynamicattributes').findOne({type: 'boolean'}).then(function(dynamicAttributeFromDB){
+                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
+                   return superTest(server).get(`/api/dynamicattributes/${dynamicAttributeFromDB._id}?token=${token}`).expect(403); 
+                });
+            });    
+        });
     });
 
-    xit('responds to GET/:id with an id of an existing dynamic attribute which does not belong to the same client as the logged in user with 403', function() {
+    it('responds to GET/:id with an id of an existing dynamic attribute which does not belong to the same client as the logged in user with 403', function() {
+        return db.get('clients').findOne({name: '0'}).then(function(clientFromDB){
+            return db.get('dynamicattributes').findOne({clientId: clientFromDB._id}).then(function(dynamicAttributeFromDB){
+                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                    return superTest(server).get(`/api/dynamicattributes/${dynamicAttributeFromDB._id}?token=${token}`).expect(403);
+                });
+            });
+        });
     });
 
-    xit('responds to GET/option/:id without authentication with 403', function() {
+    it('responds to GET/option/:id without authentication with 403', function() {
+        return db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(picklistAttributeFromDB){
+            return db.get('dynamicattributeoptions').find({dynamicAttributeId: picklistAttributeFromDB._id}).then(function(optionFromDB){
+                return superTest(server).get(`/api/dynamicattributes/option/${optionFromDB._id}`).expect(403);
+            });
+        });
     });
 
-    xit('responds to GET/option/:id without read permission with 403', function() {
+    it('responds to GET/option/:id without read permission with 403', function() {
+        return db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(picklistAttributeFromDB){
+            return db.get('dynamicattributeoptions').find({dynamicAttributeId: picklistAttributeFromDB._id}).then(function(optionFromDB){
+                return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function(){
+                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                        return superTest(server).get(`/api/dynamicattributes/option/${optionFromDB._id}`).expect(403);
+                    });
+                });
+            });
+        });        
     });
 
-    xit('responds to GET/option/:id when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+    it('responds to GET/option/:id when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+        return db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(picklistAttributeFromDB){
+            return db.get('dynamicattributeoptions').find({dynamicAttributeId: picklistAttributeFromDB._id}).then(function(optionFromDB){
+                return testHelpers.removeClientModule('1', 'base').then(function(){
+                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                        return superTest(server).get(`/api/dynamicattributes/option/${optionFromDB._id}`).expect(403);
+                    });
+                });
+            });
+        }); 
     });
 
-    xit('responds to GET/option/:id when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
+    it('responds to GET/option/:id when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
+        return db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(picklistAttributeFromDB){
+            return db.get('dynamicattributeoptions').find({dynamicAttributeId: picklistAttributeFromDB._id}).then(function(optionFromDB){
+                return testHelpers.removeClientModule('1', 'base').then(function(){
+                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
+                        return superTest(server).get(`/api/dynamicattributes/option/${optionFromDB._id}`).expect(403);
+                    });
+                });
+            });
+        });
     });
 
     xit('responds to GET/option/:id with an id of an existing dynamic attribute option which does not belong to the same client as the logged in user with 403', function() {
