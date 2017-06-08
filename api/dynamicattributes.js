@@ -96,7 +96,7 @@ router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CL
     var modelName = req.params.modelName;
     var entityId = req.params.id;
     // TODO: check Implementation
-    req.db.get(modelname).findOne(entityId).then(function(entityFromDB){
+    req.db.get(modelName).findOne(entityId).then(function(entityFromDB){
         res.send(entityFromDB);
     });
 });
