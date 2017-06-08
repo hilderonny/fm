@@ -1,6 +1,6 @@
 /**
     'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
-    'PERMISSION_LICENSESERVER_PORTAL', // Portale erstellen, ändern und löschen
+    'PERMISSION_LICENSESERVER_PORTAL', // Portale erstellen, ï¿½ndern und lï¿½schen
  * List of all possible collections (tables). Used for dependency deletions in clients API
  * and its tests
  */
@@ -9,6 +9,9 @@ module.exports.collections = [
     'clientmodules',
     'clients',
     'documents',
+    'dynamicattributes',
+    'dynamicattributeoptions',
+    'dynamicattributevalues',
     'fmobjects',
     'folders',
     'markers',

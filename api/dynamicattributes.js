@@ -16,7 +16,6 @@
  *  text_en,
  *  text_de,
  *  text_...,
- *  value
  * }
  * dynamicattributevalue {
  *  _id,
@@ -50,7 +49,10 @@ function validateModelName(req, res, next) {
  */
 router.get('/model/:modelName', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateModelName, (req, res) => {
     var modelName = req.params.modelName;
-    // TODO: Implement
+    // TODO: check Implementation
+    req.db.get('dynamicattributes').find({modelName: modelName}).then(function(dynamicattributes){
+        res.send(dynamicattributes);
+    });
 });
 
 /**
@@ -58,7 +60,11 @@ router.get('/model/:modelName', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_
  */
 router.get('/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
     var dynamicAttributeId = req.params.id;
-    // TODO: Implement
+    // TODO: check Implementation
+    req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(dynamicattribute){
+        // Database element is available here in every case, because validateSameClientId already checked for existence
+        res.send(dynamicattribute);
+    });
 });
 
 /**
@@ -66,7 +72,10 @@ router.get('/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIB
  */
 router.get('/option/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateId, validateSameClientId('dynamicattributeoptions'), (req, res) => {
     var dynamicAttributeOptionId = req.params.id;
-    // TODO: Implement
+    // TODO: check Implementation
+    req.db.get('dynamicattributeoptions').findOne(dynamicAttributeOptionId).then(function(attributeOption){
+        res.send(attributeOption);
+    });
 });
 
 /**
@@ -74,7 +83,10 @@ router.get('/option/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMI
  */
 router.get('/options/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
     var dynamicAttributeId = req.params.id;
-    // TODO: Implement
+    //TODO: check Implementation
+    req.db.get('dynamicattributeoptions').find({dynamicAttributeId: dynamicAttributeId}).then(function(attributeOptions){
+        res.send(attributeOptions);
+    });
 });
 
 /**
@@ -83,14 +95,17 @@ router.get('/options/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAM
 router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateModelName, validateId, validateSameClientId(), (req, res) => {
     var modelName = req.params.modelName;
     var entityId = req.params.id;
-    // TODO: Implement
+    // TODO: check Implementation
+    req.db.get(modelname).findOne(entityId).then(function(entityFromDB){
+        res.send(entityFromDB);
+    });
 });
 
 /**
  * Returns a list of all possible option types (currently only text, boolean and picklist)
  */
 router.get('/types', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), (req, res) => {
-    // TODO: Implement
+    res.send(constants.dynamicAttributeTypes);
 });
 
 /**
@@ -98,16 +113,35 @@ router.get('/types', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTR
  */
 router.post('/', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'w', 'base'), (req, res) => {
     var dynamicAttribute = req.body;
-    // TODO: Implement
+    // TODO: check Implementation
+    if (!dynamicAttribute || !dynamicAttribute.type || !dynamicAttribute.moduleName || !dynamicAttribute.name_en) {
+        return res.sendStatus(400);
+    }
+
+    // Ids are generated automatically
+    delete dynamicAttribute._id; 
+    dynamicAttribute.clientId = req.user.clientId; 
+
+     req.db.insert('dynamicattributes', dynamicAttribute).then(function(inserteddynamicAttribute){
+            return res.send(inserteddynamicAttribute);
+     });
 });
 
 /**
  * Creates a new option for a dynamic attribute of type picklist.
- * Required properties are dynamicattributeid and text_en. A value is optional.
+ * Required properties are dynamicattributeid and text_en. 
  */
 router.post('/option', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'w', 'base'), (req, res) => {
     var dynamicAttributeOption = req.body;
-    // TODO: Implement
+    // TODO: check Implementation
+    if(!dynamicAttributeOption || !dynamicAttributeOption.dynamicAttributeId || !dynamicAttributeOption.text_en) {
+        return res.sendStatus(400);
+    }
+    delete dynamicAttributeOption._id; // Ids are generated automatically
+    dynamicAttributeOption.clientId = req.user.clientId; 
+    req.db.insert('dynamicattributeoptions').then(function(inserteddynamicAttributeOption){
+        return res.send(inserteddynamicAttributeOption); 
+    });
 });
 
 /**
@@ -117,7 +151,17 @@ router.post('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_C
     var modelName = req.params.modelName;
     var entityId = req.params.id;
     var dynamicAttributeValues = req.body;
-    // TODO: Implement
+    // TODO: check implementation
+    req.db.get(modelName).findOne(entityId).then(function(existingEntityFromDB){
+        if(!existingEntityFromDB){
+            return res.sendStatus(403); 
+        }
+        else{
+            req.db.update(modelName, entityId, { $set: dynamicAttributeValues }).then((EntityWithInsertedAttributes) => {
+                return res.send(EntityWithInsertedAttributes);
+            });
+        }
+    });
 });
 
 /**
@@ -128,7 +172,19 @@ router.post('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_C
 router.put('/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'w', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
     var dynamicAttributeId = req.params.id;
     var dynamicAttribute = req.body;
-    // TODO: Implement
+    // TODO: cjeck implementation
+    delete dynamicAttribute._id;
+    delete dynamicAttribute.modelname;
+    delete dynamicAttribute.type;
+
+    if(Object.keys(dynamicAttribute).length < 1){
+        return res.sendStatus(400);
+    }
+
+    req.db.update('dynamicattributes', dynamicAttributeId, { $set: dynamicAttribute }).then((UpdatedAttribute) => {
+        return res.send(UpdatedAttribute);
+    }); 
+
 });
 
 /**
@@ -138,7 +194,13 @@ router.put('/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIB
 router.put('/option/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'w', 'base'), validateId, validateSameClientId('dynamicattributeoptions'), (req, res) => {
     var dynamicAttributeOptionId = req.params.id;
     var dynamicAttributeOption = req.body;
-    // TODO: Implement
+    // TODO: check implementation
+    // Dynamic attribute option is available here in every case, because validateSameClientId already checked for existence
+
+    delete dynamicAttributeOption.dynamicAttributeId;
+    req.db.update('dynamicattributeoptions', dynamicAttributeOptionId, { $set: dynamicAttributeOption }).then((EntityWithInsertedAttributes) => {
+            return res.send(EntityWithInsertedAttributes);
+    }); 
 });
 
 /**
@@ -159,6 +221,26 @@ router.put('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CL
 router.delete('/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'w', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
     var dynamicAttributeId = req.params.id;
     // TODO: Implement
+    req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(existingAttributeFromDB){
+        if(existingAttributeFromDB.type == 'picklist'){
+            //delete options
+            req.db.remove('dynamicattributeoptions', {dynamicAttributeId: dynamicAttributeId}).then(function(result){
+                //delete actual attribure
+                req.db.remove('dynamicattributes', {_id: dynamicAttributeId}).then(function(result){
+                   return res.sendStatus(204);
+                });
+            });
+        }
+        else{
+            //delete attribute values
+            req.db.remove('dynamicattributevalues', {dynamicAttributeId: dynamicAttributeId}).then(function(result){
+                //delete actual attribure
+                req.db.remove('dynamicattributes', {_id: dynamicAttributeId}).then(function(result){
+                   return res.sendStatus(204);
+                });
+            });
+        }
+    });
 });
 
 /**

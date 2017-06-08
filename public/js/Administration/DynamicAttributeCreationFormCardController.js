@@ -39,6 +39,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     });
 
 
+    //TODO have a look at UsergroupCardController.js
     //Loads dynamicAttribute details or prepares for an empty dialog for a new dynamicAttribute
     //Params:
     //... 
@@ -46,6 +47,13 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         //Switch between creation of a new dynamicAttribute and loading of an existing one
         if($scope.params.dynamicAttributeId){
             //Existing dynamicAttribute
+            $http.get().then(function(){
+                $scope.isNewAttribute = false;
+            });
+        }
+        else{
+            //new dynamicAttribute
+            $scope.isNewAttribute = true;
         }
     };*/
 
