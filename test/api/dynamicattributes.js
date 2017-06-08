@@ -17,17 +17,19 @@ describe('API dynamicattributes', function() {
         return testHelpers.cleanDatabase()
             .then(testHelpers.prepareClients)
             .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareDynamicAttributes)
-            .then(testHelpers.prepareDynamicAttributeOptions)
-            .then(testHelpers.prepareDynamicAttributeValues)
             .then(testHelpers.prepareUserGroups)
             .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions);
+            .then(testHelpers.preparePermissions)
+            .then(testHelpers.prepareFolders)
+            .then(testHelpers.prepareDocuments)
+            .then(testHelpers.prepareDynamicAttributes)
+            .then(testHelpers.prepareDynamicAttributeOptions)
+            .then(testHelpers.prepareDynamicAttributeValues);
     });
 
 ////////////////////////// AUTHENTICATION ////////////////////////////////////    
 
-    xit('responds to GET/model/:modelName without authentication with 403', function() {
+    it('responds to GET/model/:modelName without authentication with 403', function() {
     });
 
     xit('responds to GET/model/:modelName without read permission with 403', function() {

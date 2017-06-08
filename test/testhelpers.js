@@ -49,6 +49,9 @@ module.exports.cleanDatabase = () => {
         'clientmodules',
         'clients',
         'documents',
+        'dynamicattributes',
+        'dynamicattributeoptions',
+        'dynamicattributevalues',
         'fmobjects',
         'folders',
         'permissions',
@@ -445,25 +448,75 @@ module.exports.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject
 };
 
 /**
- * TODO: Implement
+ * Creates 3 dynamic  attributes (one for each currently existing type)
  */
 module.exports.prepareDynamicAttributes = function() {
     var dynamicAttributes = [];
-    return bulkInsert('dynamicAttributes', dynamicAttributes);
+    dbObjects.users.forEach(function(user){
+        var userAttribute = {modelName: 'users', 
+                             name_en: 'gender',
+                             clienId: user.clientId,
+                             type: 'picklist'};
+        dynamicAttributes.push(userAttribute);
+    });
+
+    dbObjects.documents.forEach(function(document){
+        var documentBoolAttribute = {modelName: 'documents', 
+                                    name_en: 'is secret',
+                                    clienId: document.clientId,
+                                    type: 'boolean'};
+
+        var documentTextAttribute = {modelName: 'documents', 
+                                    name_en: 'content description',
+                                    clienId: document.clientId,
+                                    type: 'text'}; 
+
+        dynamicAttributes.push(documentBoolAttribute);
+        dynamicAttributes.push(documentTextAttribute);
+    });
+    return bulkInsert('dynamicattributes', dynamicAttributes);
 };
 
 /**
- * TODO: Implement
+ * Creates 2 options (elements) for an attribute of type picklist;
+ *      attribute.modelName: 'users',
+ *      attribute.name_en: 'gender'
  */
 module.exports.prepareDynamicAttributeOptions = function() {
     var dynamicAttributeOptions = [];
-    return bulkInsert('dynamicAttributeoptions', dynamicAttributeOptions);
+    dbObjects.dynamicattributes.forEach(function(attribute){
+        if (attribute.type == 'picklist') {
+            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'female', clienId: attribute.clienId});
+            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clienId: attribute.clienId});
+        }
+    });
+    return bulkInsert('dynamicattributeoptions', dynamicAttributeOptions);
 };
 
 /**
- * TODO: Implement
+ * Creates dummy example values
  */
 module.exports.prepareDynamicAttributeValues = function() {
     var dynamicAttributeValues = [];
-    return bulkInsert('dynamicAttributevalues', dynamicAttributeValues);
+    dbObjects.dynamicattributes.forEach(function(attribute){
+
+            if (attribute.modelName == 'users'){
+                dbObjects.users.forEach(function(entity){
+                   dynamicAttributeValues.push({entityId: entity._id, dynamicAttributeId: attribute._id, clientId: entity.clientId, value: 'female'}); 
+                });
+            }
+            else{
+                var value = {};
+                  dbObjects.documents.forEach(function(entity){  
+                    if (attribute.type == 'text'){
+                        value = entity.name + 'some_value';
+                    }
+                    else{
+                        value = false; 
+                    }
+                    dynamicAttributeValues.push({entityId: entity._id, dynamicAttributeId: attribute._id, clientId: entity.clientId, value: value});
+                  });
+            }
+    })
+    return bulkInsert('dynamicattributevalues', dynamicAttributeValues);
 };
