@@ -38,6 +38,7 @@ var constants = require('../utils/constants');
  * Check whether the modelName given in the request is valid or not
  */
 function validateModelName(req, res, next) {
+    //TODO shouldn't the check be in constants.models instead of constants.dynamicAttributeTypes??
     if (constants.dynamicAttributeTypes.indexOf(req.params.modelName) < 0) {
         return res.sendStatus(400);
     }
@@ -198,8 +199,9 @@ router.put('/option/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMI
     // Dynamic attribute option is available here in every case, because validateSameClientId already checked for existence
 
     delete dynamicAttributeOption.dynamicAttributeId;
+    delete dynamicAttributeOption.clientId; //clientId should not be changed
     req.db.update('dynamicattributeoptions', dynamicAttributeOptionId, { $set: dynamicAttributeOption }).then((EntityWithInsertedAttributes) => {
-            return res.send(EntityWithInsertedAttributes);
+        return res.send(EntityWithInsertedAttributes);
     }); 
 });
 
