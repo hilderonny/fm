@@ -29,7 +29,7 @@ describe('API dynamicattributes', function() {
 
 ////////////////////////// AUTHENTICATION ////////////////////////////////////    
 
-    it('responds to GET/model/:modelName without authentication with 403', function() {
+      it('responds to GET/model/:modelName without authentication with 403', function() {
         var modelName = 'users';
          return superTest(server).get(`/api/dynamicattributes/model/${modelName}`).expect(403);
     });
@@ -672,7 +672,7 @@ describe('API dynamicattributes', function() {
         return db.get('dynamicattributeoptions').findOne({text_en: 'female'}).then(function(attributeOptionFromDB){
             return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function(){
                 return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){ 
-                    return superTest(server).del(`/api/dynamicattributes/option/${attributeOptionFromDB._id}`).expect(403);
+                    return superTest(server).del(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).expect(403);
                 });
             });
         });
@@ -682,7 +682,7 @@ describe('API dynamicattributes', function() {
         return db.get('dynamicattributeoptions').findOne({text_en: 'female'}).then(function(attributeOptionFromDB){
             return testHelpers.removeClientModule('1', 'base').then(function(){
                 return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){ 
-                    return superTest(server).del(`/api/dynamicattributes/option/${attributeOptionFromDB._id}`).expect(403);
+                    return superTest(server).del(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).expect(403);
                 });
             });
         });
@@ -692,7 +692,7 @@ describe('API dynamicattributes', function() {
         return db.get('dynamicattributeoptions').findOne({text_en: 'female'}).then(function(attributeOptionFromDB){
             return testHelpers.removeClientModule('1', 'base').then(function(){
                 return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ 
-                    return superTest(server).del(`/api/dynamicattributes/option/${attributeOptionFromDB._id}`).expect(403);
+                    return superTest(server).del(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).expect(403);
                 });
             });
         });
@@ -702,7 +702,7 @@ describe('API dynamicattributes', function() {
         return db.get('clients').findOne({name: '0'}).then(function(client0){
             return db.get('dynamicattributeoptions').findOne({text_en: 'female', clientId: client0._id}).then(function(attributeOptionFromDB){
                 return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){ 
-                    return superTest(server).del(`/api/dynamicattributes/option/${attributeOptionFromDB._id}`).expect(403);
+                    return superTest(server).del(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).expect(403);
                 });
             });
         });
@@ -718,7 +718,7 @@ describe('API dynamicattributes', function() {
         return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
             return testHelpers.removeWritePermission('0_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function(){
                 return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){
-                    return superTest(server).del(`/api/dynamicattributes/values/users/${userFromDB._id}`).expect(403);
+                    return superTest(server).del(`/api/dynamicattributes/values/users/${userFromDB._id}?token=${token}`).expect(403);
                 });
             });
         });
@@ -728,7 +728,7 @@ describe('API dynamicattributes', function() {
         return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
             return testHelpers.removeClientModule('0', 'base').then(function(){
                 return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){
-                    return superTest(server).del(`/api/dynamicattributes/values/users/${userFromDB._id}`).expect(403);
+                    return superTest(server).del(`/api/dynamicattributes/values/users/${userFromDB._id}?token=${token}`).expect(403);
                 });
             });
         });
@@ -738,7 +738,7 @@ describe('API dynamicattributes', function() {
         return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
             return testHelpers.removeClientModule('0', 'base').then(function(){
                 return testHelpers.doLoginAndGetToken('0_0_ADMIN0', 'test').then(function(token){
-                    return superTest(server).del(`/api/dynamicattributes/values/users/${userFromDB._id}`).expect(403);
+                    return superTest(server).del(`/api/dynamicattributes/values/users/${userFromDB._id}?token=${token}`).expect(403);
                 });
             });
         });
@@ -747,17 +747,24 @@ describe('API dynamicattributes', function() {
     it('responds to DELETE/values/:modelName/:id with an id of an existing entity which does not belong to the same client as the logged in user with 403', function() {
         return db.get('users').findOne({name: '1_0_0'}).then(function(userFromDB){ //client 1 
             return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ //client 0 
-                return superTest(server).del(`/api/dynamicattributes/values/users/${userFromDB._id}`).expect(403);
+                return superTest(server).del(`/api/dynamicattributes/values/users/${userFromDB._id}?token=${token}`).expect(403);
             });
         });
     });
 
 ////////////////////////// INVALID PARAMETERS ////////////////////////////////    
     
-    xit('responds to GET/model/:modelName without giving a modelName with 400', function() {
+    it('responds to GET/model/:modelName without giving a modelName with 400', function() {
+        return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
+            return superTest(server).get(`/api/dynamicattributes/model?token=${token}`).expect(400);
+        });
     });
     
-    xit('responds to GET/model/:modelName with invalid modelName with 400', function() {
+    it('responds to GET/model/:modelName with invalid modelName with 400', function() {
+        return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
+            var modelName = 'fakeName';
+            return superTest(server).get(`/api/dynamicattributes/model/${modelName}?token=${token}`).expect(400);
+        });
     });
     
     it('responds to GET/:id without giving an id with 400', function() {
@@ -778,7 +785,10 @@ describe('API dynamicattributes', function() {
         });
     });
     
-    xit('responds to GET/option/:id without giving an id with 400', function() {
+    it('responds to GET/option/:id without giving an id with 400', function() {
+        return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+            return superTest(server).get(`/api/dynamicattributes/option?token=${token}`).expect(400);
+        }); 
     });
     
     it('responds to GET/option/:id with invalid id with 400', function() {
@@ -793,7 +803,10 @@ describe('API dynamicattributes', function() {
         });  
     });
     
-    xit('responds to GET/options/:id without giving an id with 400', function() {
+    it('responds to GET/options/:id without giving an id with 400', function() {
+        return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+            return superTest(server).get(`/api/dynamicattributes/options?token=${token}`).expect(400);
+        }); 
     });
     
     it('responds to GET/options/:id with invalid id with 400', function() {
@@ -952,37 +965,74 @@ describe('API dynamicattributes', function() {
     xit('responds to PUT/values/:modelName/:id containg values with new entityId\'s with updated records but with old entityId\'s', function() {
     });
 
-    xit('responds to DELTE/:id without giving an id with 400', function() {
+    it('responds to DELTE/:id without giving an id with 400', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/?token=${token}`).expect(400);
+        });
     });
     
-    xit('responds to DELTE/:id with invalid id with 400', function() {
+    it('responds to DELTE/:id with invalid id with 400', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/invalidId?token=${token}`).expect(400);
+        });
     });
 
-    xit('responds to DELTE/:id with not existing dynamic attribute id with 403', function() {
+    it('responds to DELTE/:id with not existing dynamic attribute id with 403', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/999999999999999999999999?token=${token}`).expect(403);
+        });
     });
 
-    xit('responds to DELTE/option/:id without giving an id with 400', function() {
+    it('responds to DELTE/option/:id without giving an id with 400', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/option?token=${token}`).expect(400);
+        });
     });
     
-    xit('responds to DELTE/option/:id with invalid id with 400', function() {
+    it('responds to DELTE/option/:id with invalid id with 400', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/option/invalidId?token=${token}`).expect(400);
+        });
     });
 
-    xit('responds to DELTE/option/:id with not existing dynamic attribute option id with 403', function() {
+    it('responds to DELTE/option/:id with not existing dynamic attribute option id with 403', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/option/999999999999999999999999?token=${token}`).expect(403);
+        });
     });
 
-    xit('responds to DELTE/values/:modelName/:id without giving a model name and entity id with 400', function() {
+    it('responds to DELTE/values/:modelName/:id without giving a model name and entity id with 400', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/values?token=${token}`).expect(400);
+        });
     });
 
-    xit('responds to DELTE/values/:modelName/:id without giving an entity id but with giving a modelName with 400', function() {
+    it('responds to DELTE/values/:modelName/:id without giving an entity id but with giving a modelName with 400', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/values/users?token=${token}`).expect(400);
+        });
     });
     
-    xit('responds to DELTE/values/:modelName/:id with invalid modelName with 400', function() {
+    it('responds to DELTE/values/:modelName/:id with invalid modelName with 400', function() {
+        return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
+            return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+                var fakeModelName = 'lalala';
+                var entityId = userFromDB._id;
+                return superTest(server).del(`/api/dynamicattributes/values/${fakeModelName}/${entityId}?token=${token}`).expect(400);
+            });
+        });
     });
     
-    xit('responds to DELTE/values/:modelName/:id with invalid entity id with 400', function() {
+    it('responds to DELTE/values/:modelName/:id with invalid entity id with 400', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/values/users/invalidId?token=${token}`).expect(400);
+        });
     });
 
-    xit('responds to DELTE/values/:modelName/:id with not existing entity id with 403', function() {
+    it('responds to DELTE/values/:modelName/:id with not existing entity id with 403', function() {
+        return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
+            return superTest(server).del(`/api/dynamicattributes/values/users/999999999999999999999999?token=${token}`).expect(403);
+        });
     });
 
 ////////////////////////// POSITIVE TESTS ////////////////////////////////////    
@@ -993,49 +1043,73 @@ describe('API dynamicattributes', function() {
     xit('responds to GET/model/:modelName with a list containing all dynamic attributes of the given modelName', function() {
     });
 
-    xit('responds to GET/:id with all details of the dynamic attribute', function() {
+    it('responds to GET/:id with all details of the dynamic attribute', function(done) {
+        db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(attributeFromDB){
+            testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){
+                superTest(server).get(`/api/dynamicattributes/${attributeFromDB._id}?token=${token}`).then(function(res, err){
+                    if(err){return done(err);}
+                    var attributeFromApi = res.body;
+                    //console.log(attributeFromApi);
+                    //TODO implement actual comparisson between attributeFromDB and attributeFromApi
+                    done();
+                });
+            });
+        });
     });
 
-    xit('responds to GET/option/:id with all details of the dynamic attribute option', function() {
+    it('responds to GET/option/:id with all details of the dynamic attribute option', function(done) {
+        db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(attributeFromDB){
+            db.get('dynamicattributeoptions').findOne({dynamicAttributeId: attributeFromDB._id}).then(function(attributeOptionFromDB){
+                testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){
+                    superTest(server).get(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).then(function(res, err){
+                        if(err){return done(err);}
+                        var attributeOptionFromApi = res.body;
+                        //console.log(attributeOptionFromApi);
+                        //TODO implement actual comparisson
+                        done();     
+                    });
+                });
+            });
+        });
     });
 
-    xit('responds to GET/options/:id with a list of all options and their details of the dynamic attribute', function() {
+    xit('responds to GET/options/:id with a list of all options and their details of the dynamic attribute', function(done) {
     });
 
-    xit('responds to GET/values/:modelName/:id where no dynamic attribute values exist for the given entity id with an empty list', function() {
+    xit('responds to GET/values/:modelName/:id where no dynamic attribute values exist for the given entity id with an empty list', function(done) {
     });
 
-    xit('responds to GET/values/:modelName/:id with a list containing all dynamic attribute values (and all of their details) defined for the given entity id', function() {
+    xit('responds to GET/values/:modelName/:id with a list containing all dynamic attribute values (and all of their details) defined for the given entity id', function(done) {
     });
 
-    xit('responds to GET/types with a list of all possible dynamic attribute types', function() {
+    xit('responds to GET/types with a list of all possible dynamic attribute types', function(done) {
     });
 
-    xit('responds to POST/ with a new dynamic attribute containing generated _id and clientId', function() {
+    xit('responds to POST/ with a new dynamic attribute containing generated _id and clientId', function(done) {
     });
 
-    xit('responds to POST/option with a new dynamic attribute option containing generated _id and clientId', function() {
+    xit('responds to POST/option with a new dynamic attribute option containing generated _id and clientId', function(done) {
     });
 
-    xit('responds to POST/values/:modelName/:id with a list of new dynamic attribute values containing generated _id\'s, clientId\'s and entityId\'s', function() {
+    xit('responds to POST/values/:modelName/:id with a list of new dynamic attribute values containing generated _id\'s, clientId\'s and entityId\'s', function(done) {
     });
 
-    xit('responds to PUT/:id with an updated dynamic attribute', function() {
+    xit('responds to PUT/:id with an updated dynamic attribute', function(done) {
     });
 
-    xit('responds to PUT/option/:id with an updated dynamic attribute option', function() {
+    xit('responds to PUT/option/:id with an updated dynamic attribute option', function(done) {
     });
 
-    xit('responds to PUT/values/:modelName/:id with a list of updated dynamic attribute values', function() {
+    xit('responds to PUT/values/:modelName/:id with a list of updated dynamic attribute values', function(done) {
     });
 
-    xit('responds to DELETE/:id with a correct id with 204 and deletes the dynamic attribute, all of its dynamic attribute options and all of its dynamic attribute values from the database', function() {
+    xit('responds to DELETE/:id with a correct id with 204 and deletes the dynamic attribute, all of its dynamic attribute options and all of its dynamic attribute values from the database', function(done) {
     });
 
-    xit('responds to DELETE/option/:id with a correct id with 204 and deletes the dynamic attribute option and all dynamic attribute values which use it from the database', function() {
+    xit('responds to DELETE/option/:id with a correct id with 204 and deletes the dynamic attribute option and all dynamic attribute values which use it from the database', function(done) {
     });
 
-    xit('responds to DELETE/values/:modelName/:id with correct modelName and id with 204 and deletes all dynamic attribute values for the entity from the database', function() {
+    xit('responds to DELETE/values/:modelName/:id with correct modelName and id with 204 and deletes all dynamic attribute values for the entity from the database', function(done) {
     });
 
 });
