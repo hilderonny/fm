@@ -11,9 +11,16 @@ app.controller('ronnyseinsGoogleMapsCardController', function($scope, $http, $md
         $scope.map.addListener('click', function(e) {
             $scope.createMarker(e.latLng.lat(), e.latLng.lng() );
         });
-        $http.get('/api/markers?fields=_id+lat+lng').then(function (response) {
+        $http.get('/api/markers?fields=_id+lat+lng').then(function(response) {
             response.data.forEach(function(marker) {
                 $scope.addMarker(marker);
+            });
+        });
+        $http.get('/api/users?fields=_id+name+lat+lng').then(function(response) {
+            response.data.forEach(function(user) {
+                if (user.lat && user.lng) {
+                    $scope.addUser(user);
+                }
             });
         });
         // Try to use current location
@@ -38,6 +45,17 @@ app.controller('ronnyseinsGoogleMapsCardController', function($scope, $http, $md
         });
         mapMarker.addListener('click', function(e) {
             $scope.deleteMarker(mapMarker);
+        });
+    };
+
+    $scope.addUser = function(userData) {
+        var mapMarker = new google.maps.Marker({
+            position: new google.maps.LatLng(userData.lat, userData.lng),
+            label: userData.name,
+            text: userData.name,
+            map: $scope.map,
+            draggable: false,
+            _id: userData._id
         });
     };
 
