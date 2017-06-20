@@ -21,7 +21,6 @@ describe('API markers', function() {
             .then(testHelpers.preparePermissions)
             .then(testHelpers.prepareMarkers);
     });
-
     describe('GET/', function() {
 
         // Positive tests
@@ -52,25 +51,25 @@ describe('API markers', function() {
                                                 continue;
                                             }
                                             markerFound = true;
-                                        Object.keys(markerFromDatabase).forEach((key)=>{
-                                            var valueFromDatabase = markerFromDatabase[key].toString();
-                                            var valueFromApi = markerFromApi[key].toString();
-                                            assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of marker ${markerFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-                                        });
-                                    }
-                                    assert.ok(markerFound, `marker  was not returned by API`);
-                                });
-                             }
-                             done();                                  
-                           });                        
+                                            Object.keys(markerFromDatabase).forEach((key)=>{
+                                                var valueFromDatabase = markerFromDatabase[key].toString();
+                                                var valueFromApi = markerFromApi[key].toString();
+                                                assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of marker ${markerFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
+                                            });
+                                        }
+                                        assert.ok(markerFound, `marker  was not returned by API`);
+                                    });
+                                }
+                                done();                                  
+                            });                        
                         }).catch(done);
                      });            
                  });
             });                 
-    
+        
+        });
+        
     });
-    
-});
 
     describe('POST/', function() {
 
@@ -135,7 +134,6 @@ describe('API markers', function() {
     });
 
     describe('DELETE/:id', function() {
-
         // Negative tests
 
         it('responds with an invalid id with 400', function() {
@@ -147,25 +145,14 @@ describe('API markers', function() {
         it('responds with 404 when there is no marker for the given _id', function() {
             return db.get('markers').findOne({name: '1_0_0_1'}).then((markerFromDatabase)=>{
                 return testHelpers.doLoginAndGetToken('1_0_0','test').then((token)=>{
-                    return superTest(server).del('/api/markers/999999999999999999999999?token='+ token).send(markerFromDatabase).expect(403);
-                });
-            });
-        });
-
-       it('responds with 403 when the marker does not belong to the client of the user', function() {
-            return db.get('markers').findOne({name:'0_0_0_0'}).then((markerFromDatabase) =>{
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                    var id = markerFromDatabase._id;                   
-                    return superTest(server)
-                        .del(`/api/markers/${id}?token=${token}`)
-                        .expect(403);
+                    return superTest(server).del('/api/markers/999999999999999999999999?token='+ token).send(markerFromDatabase).expect(404);
                 });
             });
         });
 
         // Positive tests
 
-       it('responds with 204', function() {
+       it('responds with 204', function(done) {
             db.get('markers').findOne({name: '1_0_0_1'}).then((markerFromDatabaseBeforeDeletion)=>{
                 testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                     var id = markerFromDatabaseBeforeDeletion._id;
@@ -188,5 +175,4 @@ describe('API markers', function() {
         });
     
     });
-
 });
