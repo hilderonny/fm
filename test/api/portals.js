@@ -4,8 +4,9 @@
 
 var assert = require('assert');
 var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testhelpers');
 var db = require('../../middlewares/db');
+var co = require('../../utils/constants');
 
 describe('API portals', function(){
 
@@ -13,58 +14,29 @@ describe('API portals', function(){
 
     // Clear and prepare database with clients, user groups, users... 
      beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareActivities)
-            .then(testHelpers.prepareFmObjects)
-            .then(testHelpers.prepareFolders)
-            .then(testHelpers.prepareDocuments)
-            .then(testHelpers.preparePortals)
-            .then(testHelpers.prepareRelations);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions)
+            .then(th.prepareActivities)
+            .then(th.prepareFmObjects)
+            .then(th.prepareFolders)
+            .then(th.prepareDocuments)
+            .then(th.preparePortals)
+            .then(th.prepareRelations);
     });
 
     describe('GET/', function() {
 
-        // Negative tests
-
-        it('responds without authentication with 403', function() {
-                return superTest(server).get('/api/portals').expect(403);
-        });
-
-        it('responds without read permission with 403', function() {
-            // Remove the corresponding permission
-            return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return superTest(server).get('/api/portals?token=' + token).expect(403);
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                return testHelpers.doLoginAndGetToken('1_1_1', 'test').then(function(token){
-                    return superTest(server).get(`/api/portals?token=${token}`).expect(403);
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                    return superTest(server).get(`/api/portals?token=${token}`).expect(403);
-                });
-            });
-        });
+        th.apiTests.get.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL);
 
         // Positive tests
 
         it('responds with all portals', function(done) {
             db.get('portals').find().then((portalsFromDatabase) =>{
-                testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                     superTest(server).get(`/api/portals?token=${token}`).expect(200).end(function(err, res){
                         if (err) {
                                 done(err);
@@ -115,65 +87,11 @@ describe('API portals', function(){
 
     describe('GET/:id', function() {
 
-        // Negative tests
-
-        it('responds with invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return superTest(server).get('/api/portals/invalidId?token=' + token).expect(400);
-            });
-        });
-
-        it('responds without authentication with 403', function() {
-            // Load a valid id so we have a valid request and do not get a 404
-            return db.get('portals').findOne({name: 'p1'}).then((portalFromDB) => {
-                return superTest(server).get(`/api/portals/${portalFromDB._id.toString()}`).expect(403);
-            });
-        });
-
-        it('responds without read permission with 403', function() {
-            return db.get('portals').findOne({ name : 'p1' }).then((portalFromDatabase) => {
-                // Remove the corresponding permission
-                return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        return superTest(server).get(`/api/portals/${portalFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p2'}).then(function(portalFromDataBase){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_1', 'test').then(function(token){
-                        var id = portalFromDataBase._id;
-                        return superTest(server).get(`/api/portals/${id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p2'}).then(function(portalFromDataBase){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                        var id = portalFromDataBase._id;
-                        return superTest(server).get(`/api/portals/${id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with not existing id with 404', function() {
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return superTest(server).get('/api/portals/999999999999999999999999?token=' + token).expect(404);
-            });
-        });
-
-        // Positive tests
+        th.apiTests.getId.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals);
 
         it('responds with retrieved portal', function(done) {
             db.get('portals').findOne({name: 'p1'}).then((portalFromDatabase) =>{
-                testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                     superTest(server).get(`/api/portals/${portalFromDatabase._id}?token=${token}`).expect(200).end(function(err, res){
                         if (err) {
                                 done(err);
@@ -194,7 +112,7 @@ describe('API portals', function(){
         // Negative tests
         
         it('responds without any content with 400', function() {
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                 return superTest(server).post('/api/portals?token=' + token).send().expect(400);
             });
         });
@@ -207,8 +125,8 @@ describe('API portals', function(){
 
         it('responds without write permission with 403', function() {
             // Remove the corresponding permission
-            return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var newPortal = {name: 'p_test'};
                     return superTest(server).post(`/api/portals?token=${token}`).send(newPortal).expect(403);
                 });
@@ -216,8 +134,8 @@ describe('API portals', function(){
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                return testHelpers.doLoginAndGetToken('1_0_1', 'test').then(function(token){
+            return th.removeClientModule('1', 'licenseserver').then(function(){
+                return th.doLoginAndGetToken('1_0_1', 'test').then(function(token){
                     var newPortal = {
                         name: 'newPortalName',
                         isActive: true
@@ -228,8 +146,8 @@ describe('API portals', function(){
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+            return th.removeClientModule('1', 'licenseserver').then(function(){
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                     var newPortal = {
                         name: 'newPortalName',
                         isActive: true
@@ -242,7 +160,7 @@ describe('API portals', function(){
         // Positive tests
 
         it('responds with new portal containing _id field', function(done){
-            testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
+            th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
                 superTest(server).post(`/api/portals?token=${token}`).send({name: 'newPortal'}).expect(200).end((err, res) =>{
                     if(err){
                         done(err);
@@ -267,8 +185,8 @@ describe('API portals', function(){
         it('responds without write permission with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
                 //Remove corresponding permission
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                         var id = portalFromDataBase._id;
                         return superTest(server).post(`/api/portals/newkey/${id}?token=${token}`).expect(403);
                     });
@@ -278,8 +196,8 @@ describe('API portals', function(){
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_1', 'test').then(function(token){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                         var portalId = portalFromDataBase._id;
                         return superTest(server).post(`/api/portals/newkey/${portalId}?token=${token}`).send().expect(403);
                     });
@@ -289,8 +207,8 @@ describe('API portals', function(){
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var portalId = portalFromDataBase._id;
                         return superTest(server).post(`/api/portals/newkey/${portalId}?token=${token}`).send().expect(403);
                     });
@@ -299,7 +217,7 @@ describe('API portals', function(){
         });
 
         it('responds with non-exisitng id with 404', function(){
-                return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                     return superTest(server).post(`/api/portals/newkey/999999999999999999999999?token=${token}`).send().expect(404);
                 });
         });
@@ -308,7 +226,7 @@ describe('API portals', function(){
 
         it('responds with a new license key for the portal with the given id', function(done) {
             db.get('portals').findOne({name: 'p1'}).then((portalFromDatabase) =>{
-                testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                     superTest(server).post(`/api/portals/newkey/${portalFromDatabase._id}?token=${token}`).send().expect(200).end((err, res) =>{
                         if(err){
                             done(err);
@@ -329,14 +247,14 @@ describe('API portals', function(){
         // Negative tests
 
         it('responds with an invalid id with 400', function(){
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token)=>{
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token)=>{
                 var newPortal = {name: 'p_test', isActive: false};
                 return superTest(server).put(`/api/portals/invalidId?token=${token}`).send(newPortal).expect(400);
             });
         });
 
         it('responds without any content with 400', function(){
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                 return db.get('portals').findOne({name: 'p1'}).then((portalFromDB) => {
                     var newPortal = {};
                     return superTest(server).put(`/api/portals/${portalFromDB._id}?token=${token}`).send(newPortal).expect(400);
@@ -345,7 +263,7 @@ describe('API portals', function(){
         });
 
         it('responds with _id only in the sent content with 400', function(){
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                 return db.get('portals').findOne({name: 'p1'}).then((portalFromDB) => {
                     var newPortal = {_id: '111111111111'};
                     return superTest(server).put(`/api/portals/${portalFromDB._id}?token=${token}`).send(newPortal).expect(400);
@@ -356,8 +274,8 @@ describe('API portals', function(){
         it('responds without write permission with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
                 //Remove corresponding permission
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                         var id = portalFromDataBase._id;
                         var updatedPortal = {name: 'newPortalName'};
                         return superTest(server).put(`/api/portals/${id}?token=${token}`).send(updatedPortal).expect(403);
@@ -368,8 +286,8 @@ describe('API portals', function(){
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_1', 'test').then(function(token){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                         var portalId = portalFromDataBase._id;
                         var updatedPortal = {name: 'newPortalName'};
                         return superTest(server).put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(403);
@@ -380,8 +298,8 @@ describe('API portals', function(){
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var portalId = portalFromDataBase._id;
                         var updatedPortal = {name: 'newPortalName'};
                         return superTest(server).put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(403);
@@ -391,7 +309,7 @@ describe('API portals', function(){
         });
 
         it('responds with non-existing id with 404', function(){
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                 var updatedPermission = { canRead: true };
                 return superTest(server).put('/api/portals/999999999999999999999999?token=' + token).send(updatedPermission).expect(404);
             });
@@ -401,7 +319,7 @@ describe('API portals', function(){
 
         it('responds with correctly updated portal', function(done) {
             db.get('portals').findOne({name: 'p2'}).then((portalFromDatabase) =>{
-                testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
+                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
                     var portalId = portalFromDatabase._id.toString();
                     var updatedPortal = {name: 'p_new', isActive: 'false'}
                     superTest(server).put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(200).end((err, res) =>{
@@ -420,7 +338,7 @@ describe('API portals', function(){
 
         it('responds with a portal containing an _id field which differs from the id parameter with the updated portal and the original _id (_id cannot be changed)', function(done) {
             db.get('portals').findOne({name: 'p2'}).then((portalFromDatabase) =>{
-                testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
+                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
                     var portalId = portalFromDatabase._id.toString();
                     var updatedPortal = {name: 'p_new', _id: '999999999999999999999999'}
                     superTest(server).put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(200).end((err, res) =>{
@@ -443,7 +361,7 @@ describe('API portals', function(){
         // Negative tests
 
         it('responds with an invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                 return superTest(server).del('/api/portals/invalidId?token=' + token).expect(400);
             });
         });
@@ -451,8 +369,8 @@ describe('API portals', function(){
         it('responds without write permission with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
                 //Remove corresponding permission
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                         var id = portalFromDataBase._id;
                         return superTest(server).del(`/api/portals/${id}?token=${token}`).expect(403);
                     });
@@ -462,8 +380,8 @@ describe('API portals', function(){
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_1', 'test').then(function(token){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                         var portalId = portalFromDataBase._id;
                         return superTest(server).del(`/api/portals/${portalId}?token=${token}`).expect(403);
                     });
@@ -473,8 +391,8 @@ describe('API portals', function(){
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDataBase){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var portalId = portalFromDataBase._id;
                         return superTest(server).del(`/api/portals/${portalId}?token=${token}`).expect(403);
                     });
@@ -483,7 +401,7 @@ describe('API portals', function(){
         });
 
         it('responds with an id that does not exist with 404', function() {
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                 return superTest(server).del('/api/portals/999999999999999999999999?token=' + token).expect(404);
             });
         }); 
@@ -492,7 +410,7 @@ describe('API portals', function(){
 
         it('responds with a correct id with 204 and deletes all dependent objects (currently only portalmodules)', function(done){
             db.get('portals').findOne({name: 'p2'}).then((portalFromDatabase) =>{
-                testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
+                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
                     var portalId = portalFromDatabase._id.toString();
                     superTest(server).del(`/api/portals/${portalId}?token=${token}`).expect(204).end((err, res) =>{
                         if(err){
