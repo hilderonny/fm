@@ -23,20 +23,18 @@ var db = {
      */
     init: () => {
         // Ignore database update in tests
-        if (process.env.NODE_ENV === 'test') return;
+        if (process.env.NODE_ENV === 'test') return Promise.resolve();
         // Create admin user, when defined in localconfig
         var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
-        if (!localConfig.recreatePortalAdmin) return;
+        if (!localConfig.recreatePortalAdmin) return Promise.resolve();
         localConfig.recreatePortalAdmin = false;
         fs.writeFileSync('./config/localconfig.json', JSON.stringify(localConfig, null, 4));
         var users = monkDb.get('users');
         var userGroups = monkDb.get('usergroups');
 
         return users.remove({name:'admin'}).then(() => {
-            console.log('Creating admin usergroup ...');
             return userGroups.insert({ name: 'admin', clientId: null });
         }).then((existingAdminUserGroup) => {
-            console.log('Creating admin user ...');
             return users.insert({ 
                 name: 'admin',
                 pass: bcryptjs.hashSync('admin'),
@@ -44,10 +42,8 @@ var db = {
                 userGroupId: existingAdminUserGroup._id
             });
         }).then((existingAdminUser) => {
-            console.log('Creating admin usergroup permissions ...');
             return monkDb.get('permissions').bulkWrite([
                 { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_CLIENT', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
-                { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_USERGROUP', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
                 { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_SETTING', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } }, // TODO: Remove
                 { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_USER', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
                 { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_USERGROUP', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
@@ -61,6 +57,12 @@ var db = {
      */
     get: monkDb.get,
     /**
+     * Weiterleitung an monk für Event-Handling
+     */
+    on: function(type, listener) {
+        monkDb.on(type, listener);
+    },
+    /**
      * Inserts an object into a given collection. Fires the "insert" event with the collection and the inserted
      * element on completion: db.on('insert', (collection, result) => { ... });.
      * Usage: req.db.insert('users', { name: 'user1'} ).then(...);
@@ -71,7 +73,7 @@ var db = {
     insert: (collection, element) => {
         return monkDb.get(collection).insert(element).then((res) => {
             monkDb.emit('insert', collection, res); // db (Manager) is of type EventEmitter, see https://nodejs.org/api/events.html
-            return res;
+            return Promise.resolve(res);
         });
     },
     /**
@@ -87,7 +89,7 @@ var db = {
     update: (collection, query, update) => {
         return monkDb.get(collection).findOneAndUpdate(query, update).then((res) => {
             monkDb.emit('update', collection, res);
-            return res;
+            return Promise.resolve(res);
         });
     },
     /**
@@ -104,7 +106,7 @@ var db = {
         return monkDb.get(collection).find(query, resultFilter).then((existing) => {
             return monkDb.get(collection).remove(query).then((res) => {
                 monkDb.emit('remove', collection, existing); // Send original deleted objects to event receiver
-                return res; // Return deletion result to caller
+                return Promise.resolve(res); // Return deletion result to caller
             });
         });
     }

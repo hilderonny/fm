@@ -9,9 +9,7 @@
  * }
  */
 var router = require('express').Router();
-var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
-var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 
 router.get('/', (req, res) => {
@@ -35,7 +33,7 @@ router.post('/', function(req, res) {
 });
 
 // Delete a marker
-router.delete('/:id', validateId, validateSameClientId('markers'), function(req, res) {
+router.delete('/:id', validateId, function(req, res) {
     req.db.remove('markers', req.params.id).then((result) => {
         if (result.result.n < 1) {
             return res.sendStatus(404);
