@@ -56,7 +56,8 @@ module.exports.cleanDatabase = () => {
         'portals',
         'relations',
         'usergroups',
-        'users'
+        'users',
+        'markers'
     ].map((key) => db.get(key).drop());
     return Promise.all(promises); // Wait for all drop Promises to complete
 };
@@ -76,6 +77,26 @@ module.exports.doLoginAndGetToken = (username, password) => {
             });
     });
 };
+
+/**
+ * Vereinfachter Zugriff auf superTest.get()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
+ */
+module.exports.get = superTest(server).get;
+
+/**
+ * Vereinfachter Zugriff auf superTest.post()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
+ */
+module.exports.post = superTest(server).post;
+
+/**
+ * Vereinfachter Zugriff auf superTest.put()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
+ */
+module.exports.put = superTest(server).put;
+
+/**
+ * Vereinfachter Zugriff auf superTest.del()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
+ */
+module.exports.del = superTest(server).del;
 
 /**
  * Creates 3 clients and returns a promise without parameters.
@@ -282,6 +303,30 @@ module.exports.addUserAsParticipantToActivity = function(userName, activitiyName
         });
     });
 };
+
+/**
+ * Creates 2 markers for each user
+ *  The name schema is [UserName]_[IndexOfMarkers]
+ */
+module.exports.prepareMarkers = () => {
+    var markers = [];
+    dbObjects.users.forEach((user)=>{
+        markers.push({
+            clientId: user.clientId,
+            name: user.name + '_0',
+            lat: 'lat',
+            lng: 'lng'
+        });
+        markers.push({
+            clientId: user.clientId,
+            name: user.name +  '_1',
+            lat: 'lat',
+            lng: 'lng'        
+        });
+    });
+    return bulkInsert('markers', markers);
+};
+
 
 /**
  * Creates 3 FM objects for each client
