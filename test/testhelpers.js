@@ -79,6 +79,26 @@ module.exports.doLoginAndGetToken = (username, password) => {
 };
 
 /**
+ * Vereinfachter Zugriff auf superTest.get()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
+ */
+module.exports.get = superTest(server).get;
+
+/**
+ * Vereinfachter Zugriff auf superTest.post()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
+ */
+module.exports.post = superTest(server).post;
+
+/**
+ * Vereinfachter Zugriff auf superTest.put()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
+ */
+module.exports.put = superTest(server).put;
+
+/**
+ * Vereinfachter Zugriff auf superTest.del()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
+ */
+module.exports.del = superTest(server).del;
+
+/**
  * Creates 3 clients and returns a promise without parameters.
  */
 module.exports.prepareClients = () => {
