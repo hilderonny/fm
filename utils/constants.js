@@ -64,5 +64,8 @@ module.exports.permissions = {
     OFFICE_ACTIVITY: 'PERMISSION_OFFICE_ACTIVITY',
     OFFICE_DOCUMENT: 'PERMISSION_OFFICE_DOCUMENT',
     SETTINGS_PORTAL: 'PERMISSION_SETTINGS_PORTAL',
+    /**
+     * Permission to show and change the settings of the own account
+     */
     SETTINGS_USER: 'PERMISSION_SETTINGS_USER'
 };

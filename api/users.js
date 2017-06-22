@@ -126,10 +126,14 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), function(r
 
 //TODO check if other verifications are needed
 router.post('/newpassword', auth('PERMISSION_SETTINGS_USER', 'w', 'base'), (req, res) => {
-    var encryptedNewPassword = bcryptjs.hashSync(req.body.pass);
-    req.db.update('users', req.user._id, { $set: {pass:encryptedNewPassword} }).then(() => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-        res.sendStatus(200);
-    });
+    if (typeof(req.body.pass) === 'undefined') {
+        res.sendStatus(400);
+    } else {
+        var encryptedNewPassword = bcryptjs.hashSync(req.body.pass);
+        req.db.update('users', req.user._id, { $set: {pass:encryptedNewPassword} }).then(() => { // https://docs.mongodb.com/manual/reference/operator/update/set/
+            res.sendStatus(200);
+        });
+    }
 });
 
 var getUserFromDatabase = (req, res, userId, userFromRequest) => {

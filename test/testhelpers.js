@@ -493,6 +493,8 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
 };
 
 function getModuleForApi(api) {
+    // Use only the first parts until the slash
+    api = api.split('/')[0];
     for (var moduleName in moduleConfig.modules) {
         var m = moduleConfig.modules[moduleName];
         // API
@@ -598,6 +600,38 @@ th.apiTests = {
                     return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
                 }).then(function(token) {
                     return th.get(`/api/${api}/${insertedId}?token=${token}`).expect(403);
+                });
+            });
+        }
+    },
+    post: {
+        defaultNegative: function(api, permission) {
+            var testObject = {};
+            it('responds without authentication with 403', function() {
+                return th.post(`/api/${api}`).send(testObject).expect(403);
+            });
+            it('responds without write permission with 403', function() {
+                return th.removeWritePermission(th.defaults.user, permission).then(function() {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
+                });
+            });
+            function checkForUser(user) {
+                return function() {
+                    var moduleName = getModuleForApi(api);
+                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
+                        return th.doLoginAndGetToken(user, th.defaults.password);
+                    }).then(function(token) {
+                        return th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
+                    });
+                }
+            }
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+            it('responds with 400 when not sending an object to insert', function() {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    return th.post(`/api/${api}?token=${token}`).expect(400);
                 });
             });
         }

@@ -28,16 +28,16 @@ describe('API users', function() {
 
         it('responds with list of all users of the client of the logged in user containing all details', function(done) {
             // We use client 1
-            th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                 th
-                    .get('/api/users?token=' + token)
+                    .get(`/api/${co.apis.users}?token=${token}`)
                     .expect(200)
                     .end(function(err, res) {
                         var users = res.body;
                         // Check whether all users of the current client and all of their details are contained in the response
                         assert.strictEqual(users.length, 4, `Number of users differ (actual ${users.length}, expected 4)`); // 2 user groups with 2 users each;
                         // Get client of current user
-                        db.get('users').findOne({name: '1_0_0'}).then((currentUser) => {
+                        db.get(co.collections.users).findOne({name: th.defaults.user}).then((currentUser) => {
                             var currentUserClientId = currentUser.clientId.toString();
                             users.forEach((user) => {
                                 // Check properties for existence
@@ -135,10 +135,10 @@ describe('API users', function() {
         th.apiTests.getId.clientDependentNegative(co.apis.users, co.collections.users);
 
         it('responds with existing user id with all details of the user', function(done) {
-            db.get('users').findOne({name: '1_1_0'}).then((userFromDatabase) => {
-                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            db.get(co.collections.users).findOne({name: '1_1_0'}).then((userFromDatabase) => {
+                th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                     th
-                        .get(`/api/users/${userFromDatabase._id}?token=${token}`)
+                        .get(`/api/${co.apis.users}/${userFromDatabase._id}?token=${token}`)
                         .expect(200)
                         .end(function(err, res) {
                             var userFromRequest = res.body;
@@ -176,147 +176,89 @@ describe('API users', function() {
     });
 
     describe('POST/', function() {
-        
-        it('responds without write permission with 403', function() {
-            // Remove the corresponding permission
-            return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USER').then(() => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    var newUser = { 
-                        name: 'newUser'
-                    };
-                    return th.post('/api/users?token=' + token).send(newUser).expect(403);
-                });
-            });
-        });
 
-        it('responds without authentication with 403', function() {
-            return db.get('usergroups').findOne({name: '1_0'}).then((userGroup) => {
-                return th.post('/api/users')
-                    .send({ name: 'schnulli', pass: 'bulli', userGroupId: userGroup._id.toString() })
-                    .expect(403);
-            });
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return th.removeClientModule('1', 'base').then(function() {
-                return db.get('usergroups').findOne({name: '1_1'}).then((userGroupFromDB) => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        var newUser = { 
-                            name: 'newName',
-                            pass: 'test',
-                            userGroupId: userGroupFromDB._id,
-                            clientId: userGroupFromDB.clientId,
-                        };
-                        return th.post(`/api/users?token=${token}`).send(newUser).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return th.removeClientModule('1', 'base').then(function() {
-                return db.get('usergroups').findOne({name: '1_1'}).then((userGroupFromDB) => {
-                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                        var newUser = { 
-                            name: 'newName',
-                            pass: 'test',
-                            userGroupId: userGroupFromDB._id,
-                            clientId: userGroupFromDB.clientId,
-                        };
-                        return th.post(`/api/users?token=${token}`).send(newUser).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds without giving an user with 400', function(done) {
-            th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    th
-                        .post('/api/users')
-                        .expect(400)
-                        .end(function(err, res){
-                            done();})
-                });      
-        });
+        th.apiTests.post.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER);
 
         it('responds without giving an username with 400', function() {
-            return db.get('users').findOne({name: '1_1_0'}).then((userFromDatabase) =>{
-                return  th.doLoginAndGetToken('1_1_0', 'test').then((token) => {
-                    return  th
-                        .post('/api/users?token=' + token)
-                        .send({pass : 'test', userGroupId: userFromDatabase.userGroupId.toString()})
-                        .expect(400);
-                });
+            var newUser = {
+                pass: 'test'
+            };
+            return db.get(co.collections.users).findOne({name: '1_1_0'}).then((user) =>{
+                newUser.userGroupId = user.userGroupId.toString();
+                return  th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) => {
+                return th.post(`/api/${co.apis.users}?token=${token}`).send(newUser).expect(400);
             });
         });
 
         it('responds without giving an user password with 400', function() {
-            return db.get('users').findOne({name: '1_1_0'}).then((userFromDatabase) =>{
-                return  th.doLoginAndGetToken('1_1_0', 'test').then((token) => {
-                    return  th
-                        .post('/api/users?token=' + token)
-                        .send({name : '1_0_4', userGroupId :userFromDatabase.userGroupId.toString()})
-                        .expect(400);
-                });
+            var newUser = {
+                name: 'newUser'
+            };
+            return db.get(co.collections.users).findOne({name: '1_1_0'}).then((user) =>{
+                newUser.userGroupId = user.userGroupId.toString();
+                return  th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) => {
+                return th.post(`/api/${co.apis.users}?token=${token}`).send(newUser).expect(400);
             });
         });
         
         it('responds without giving an userGroupId with 400', function() {
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return th
-                        .post('/api/users?token=' + token)
-                        .send({name : '1_0_4', pass : 'test'})
-                        .expect(400);
-                });
+            var newUser = {
+                name: 'newUser', 
+                pass: 'test'
+            };
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
+                return th.post(`/api/${co.apis.users}?token=${token}`).send(newUser).expect(400);
+            });
         });
 
         it('responds with already used username with 409', function() {
-            return db.get('users').findOne({name: '1_1_0'}).then((userFromDatabase) =>{
-            return  th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return  th
-                        .post('/api/users?token=' + token)
-                        .send({name : userFromDatabase.name, pass : 'test', userGroupId :userFromDatabase.userGroupId.toString()})
-                        .expect(409);
-                });
+            var newUser = {
+                name: '1_0_0', 
+                pass: 'test'
+            };
+            return db.get('users').findOne({name: '1_1_0'}).then((user) =>{
+                newUser.userGroupId = user.userGroupId.toString();
+                return  th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) => {
+                return th.post(`/api/${co.apis.users}?token=${token}`).send(newUser).expect(409);
             });
         }); 
     
         it('responds with not existing userGroup with 400', function() {
-        return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-            return th
-                    .post('/api/users?token=' + token)
-                    .send({name : '1_1_6', pass : 'test', userGroupId : '999999999999999999999999'})
-                    .expect(400);
+            var newUser = {
+                name: 'newUser', 
+                pass: 'test', 
+                userGroupId: '999999999999999999999999'
+            };
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
+                return th.post(`/api/${co.apis.users}?token=${token}`).send(newUser).expect(400);
             });
         });
         
-        it('responds with correct user data with inserted user containing an _id field', function(done) {
-            db.get('users').findOne({name: '1_1_0'}).then(function(userFromDatabase){ //request user to get valid userGroupId and clientId
-                th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                    var newUser = {name: '1_1_4', 
-                                pass: 'test',
-                                userGroupId: userFromDatabase.userGroupId.toString(),
-                                clientId: userFromDatabase.clientId.toString()};
-                                
-                    th.post('/api/users?token=' + token)
-                                    .send(newUser).expect(200)
-                                    .end(function(err, res) {
-                        if(err){
-                                done(err);
-                                return;
-                            }
-                        var userFromApi = res.body;
-                        var keyCountFromApi = Object.keys(userFromApi).length - 1; // _id is returned additionally
-                        var keys = Object.keys(newUser);
-                        var keyCountFromDatabase =  keys.length; 
-                        assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of new user differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                        assert.strictEqual( newUser.name, userFromApi.name, 'Names do not match');
-                        assert.ok(bcryptjs.compareSync(newUser.pass, userFromApi.pass), 'Passwords do not match');
-                        assert.strictEqual( newUser.clientId, userFromApi.clientId, 'clientIds do not match');
-                        assert.strictEqual( newUser.userGroupId, userFromApi.userGroupId, 'userGroupIds do not match');
-                        done();
-                    });
-                });
+        it('responds with correct user data with inserted user containing an _id field', function() {
+            var newUser = {
+                name: 'newUser',
+                pass: 'test'
+            }
+            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+                newUser.userGroupId = user.userGroupId.toString();
+                newUser.clientId = user.clientId.toString();
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.post(`/api/${co.apis.users}?token=${token}`).send(newUser).expect(200);
+            }).then(function(response) {
+                var userFromApi = response.body;
+                var keyCountFromApi = Object.keys(userFromApi).length - 1; // _id is returned additionally
+                var keys = Object.keys(newUser);
+                var keyCountFromDatabase =  keys.length; 
+                assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of new user differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
+                assert.strictEqual( newUser.name, userFromApi.name, 'Names do not match');
+                assert.ok(bcryptjs.compareSync(newUser.pass, userFromApi.pass), 'Passwords do not match');
+                assert.strictEqual( newUser.clientId, userFromApi.clientId, 'clientIds do not match');
+                assert.strictEqual( newUser.userGroupId, userFromApi.userGroupId, 'userGroupIds do not match');
+                return Promise.resolve();
             });
         });
 
@@ -324,42 +266,21 @@ describe('API users', function() {
 
     describe('POST/newpassword', function() {
 
-        xit('responds with 403 without authentication', function() {
-        });
+        var api = `${co.apis.users}/newpassword`;
 
-        xit('responds with 403 without write permission', function() {
-        });
+        th.apiTests.post.defaultNegative(api, co.permissions.SETTINGS_USER);
 
-        xit('responds with 403 when the logged in user\'s (normal user) client has no access to this module', function() {
-        });
-
-        xit('responds with 403 when the logged in user\'s (administrator) client has no access to this module', function() {
-        });
-
-        xit('responds with 400 without giving a password as parameter', function() {
-        });
-
-        it('responds with 200 with giving an empty password and updates the password in the database (empty passwords are okay)', function(done) {
-            db.get('users').findOne({name: '1_0_0'}).then((userFromDatabase) => {
-                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    var objectToSend = {
-                        pass: ''
-                    };
-                    th
-                        .post(`/api/users/newpassword?token=${token}`)
-                        .send(objectToSend)
-                        .expect(200)
-                        .end((err, res) =>{
-                            if (err) {
-                                done(err);
-                                return;
-                            }
-                            db.get('users').findOne({name: '1_0_0'}).then(function getUserAfterPasswordChange(userAfterPasswordChange) {
-                                assert.ok(bcryptjs.compareSync(objectToSend.pass, userAfterPasswordChange.pass), `Password of updated user does not match the on in the database`);
-                                done();
-                            }).catch(done);
-                    });
-                });
+        it('responds with 200 with giving an empty password and updates the password in the database (empty passwords are okay)', function() {
+            var objectToSend = {
+                pass: ''
+            };
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                return th.post(`/api/${api}?token=${token}`).send(objectToSend).expect(200);
+            }).then(function() {
+                return db.get(co.collections.users).findOne({name: th.defaults.user});
+            }).then(function(userAfterPasswordChange) {
+                assert.ok(bcryptjs.compareSync(objectToSend.pass, userAfterPasswordChange.pass), `Password of updated user does not match the one in the database`);
+                return Promise.resolve();
             });
         });
 
