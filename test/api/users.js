@@ -51,39 +51,80 @@ describe('API users', function() {
             });
         });
 
+        it('contains information about the usergroup when parameter "joinUserGroup" is given', function() {
+            var users;
+            // We use client 1
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
+                return th.get(`/api/${co.apis.users}?token=${token}&joinUserGroup=true`).expect(200);
+            }).then(function(response){
+                users = response.body;
+                // Check whether all users of the current client and all of their details are contained in the response
+                assert.strictEqual(users.length, 4, `Number of users differ (actual ${users.length}, expected 4)`); // 2 user groups with 2 users each;
+                // Get client of current user
+                return db.get(co.collections.users).findOne({name: th.defaults.user});
+            }).then((currentUser) => {
+                var currentUserClientId = currentUser.clientId.toString();
+                users.forEach((user) => {
+                    // Check properties for existence
+                    ['name', 'clientId', 'userGroupId'].forEach((propertyName) => {
+                        assert.ok(user[propertyName], `Property "${propertyName}" is missing`);
+                    });
+                    // Check clientId for correctness
+                    assert.strictEqual(user.clientId, currentUserClientId, `ClientId of user in list (${user.clientId}) does not match the clientId of the logged in user (${currentUserClientId})`);
+                    // Check usergroup
+                    assert.ok(user.userGroup);
+                    assert.strictEqual(user.userGroup._id, user.userGroupId);
+                });
+                return Promise.resolve();
+            });
+        });
+
     });
 
     describe('GET/forIds', function() {
 
-        // Negative tests
-        
-        xit('responds without authentication with 403', function() {
-        });
+        function createTestUsers() {
+            return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}).then(function(userGroup) {
+                var userGroupId = userGroup._id;
+                var clientId = userGroup.clientId;
+                var testObjects = ['testUser1', 'testUser2', 'testUser3'].map(function(name) {
+                    return {
+                        name: name,
+                        pass: 'test',
+                        userGroupId: userGroupId,
+                        clientId: clientId
+                    }
+                });
+                return Promise.resolve(testObjects);
+            });
+        }
 
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-        });
+        th.apiTests.getForIds.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users, createTestUsers);
+        th.apiTests.getForIds.clientDependentNegative(co.apis.users, co.collections.users, createTestUsers);
 
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds with empty list when user has no read permission', function() {
-        });
-
-        xit('responds with empty list when query parameter "ids" does not exist', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains faulty IDs', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains IDs where no entities exist for', function() {
-        });
-
-        xit('returns only elements of the client of the logged in user when "ids" contains IDs of entities of another client', function() {
-        });
-
-        // Positive tests
-
-        xit('returns a list of users with all details for the given IDs', function() {
+        it('returns a list of users with all details except passowrd for the given IDs', function() {
+            var testUserIds, insertedUsers;
+            return createTestUsers().then(function(objects) {
+                return th.bulkInsert(co.collections.users, objects);
+            }).then(function(objects) {
+                insertedUsers = objects;
+                testUserIds = objects.map((to) => to._id.toString());
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.users}/forIds?ids=${testUserIds.join(',')}&token=${token}`).expect(200);
+            }).then(function(response) {
+                var users = response.body;
+                var idCount = insertedUsers.length;
+                assert.equal(users.length, idCount);
+                for (var i = 0; i < idCount; i++) {
+                    assert.strictEqual(users[i]._id, insertedUsers[i]._id.toString());
+                    assert.strictEqual(users[i].name, insertedUsers[i].name);
+                    assert.strictEqual(users[i].userGroupId, insertedUsers[i].userGroupId.toString());
+                    assert.strictEqual(users[i].clientId, insertedUsers[i].clientId.toString());
+                    assert.ok(!users[i].pass);
+                }
+                return Promise.resolve();
+            });
         });
     });
 

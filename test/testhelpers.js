@@ -21,7 +21,7 @@ var th = module.exports;
 
 var dbObjects = {};
 
-var bulkInsert = (collectionName, docs) => {
+th.bulkInsert = (collectionName, docs) => {
     if (!dbObjects[collectionName]) {
         dbObjects[collectionName] = [];
     }
@@ -107,7 +107,7 @@ th.del = superTest(server).del;
  * Creates 3 clients and returns a promise without parameters.
  */
 th.prepareClients = () => {
-    return bulkInsert('clients', [
+    return th.bulkInsert('clients', [
         { name: '0' },
         { name: '1' }
     ]);
@@ -125,7 +125,7 @@ th.prepareClientModules = () => {
         clientModules.push({ clientId: client._id, module: 'fmobjects' });
         clientModules.push({ clientId: client._id, module: 'licenseserver' });
     });
-    return bulkInsert('clientmodules', clientModules);
+    return th.bulkInsert('clientmodules', clientModules);
 };
 
 /**
@@ -152,7 +152,7 @@ th.prepareUserGroups = () => {
     });
     // Add user groups for portal
     userGroups.push({ name: '_0', clientId: null });
-    return bulkInsert('usergroups', userGroups);
+    return th.bulkInsert('usergroups', userGroups);
 };
 
 /**
@@ -168,7 +168,7 @@ th.prepareUsers = () => {
         users.push({ name: userGroup.name + '_0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id });
         users.push({ name: userGroup.name + '_ADMIN0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id, isAdmin: true }); // Administrator
     });
-    return bulkInsert('users', users);
+    return th.bulkInsert('users', users);
 };
 
 /**
@@ -189,7 +189,7 @@ th.preparePermissions = () => {
         permissions.push({ key: 'PERMISSION_SETTINGS_PORTAL', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_SETTINGS_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
     });
-    return bulkInsert('permissions', permissions);
+    return th.bulkInsert('permissions', permissions);
 };
 
 /**
@@ -234,7 +234,7 @@ th.removeAllPermissions = (userName, permissionKey) => {
 th.preparePortals = () => {
     var portals = [{name: 'p1', isActive: true, licenseKey: 'LicenseKey1'},
                    {name: 'p2', isActive: false, licenseKey: 'LicenseKey2'}];
-    return bulkInsert('portals', portals);
+    return th.bulkInsert('portals', portals);
 };
 
 /**
@@ -251,7 +251,7 @@ th.preparePortalModules = () => {
         portalModules.push({portalId: portal._id, module: 'fmobjects'});
         portalModules.push({portalId: portal._id, module: 'portalbase'});
     });
-    return bulkInsert('portalmodules', portalModules);
+    return th.bulkInsert('portalmodules', portalModules);
 };
 
 /**
@@ -293,7 +293,7 @@ th.prepareActivities = () => {
             type: 'Wartung'
         });
     });
-    return bulkInsert('activities', activities);
+    return th.bulkInsert('activities', activities);
 };
 
 /**
@@ -329,7 +329,7 @@ th.prepareMarkers = () => {
             lng: 'lng'        
         });
     });
-    return bulkInsert('markers', markers);
+    return th.bulkInsert('markers', markers);
 };
 
 
@@ -344,13 +344,13 @@ th.prepareFmObjects = () => {
         fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt', path:',' });
         fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Gebäude', path:',' });
     });
-    return bulkInsert('fmobjects', fmObjects).then((insertedRootFmObjects) => {
+    return th.bulkInsert('fmobjects', fmObjects).then((insertedRootFmObjects) => {
         var level1FmObjects = [];
         insertedRootFmObjects.forEach((rootFmObject) => {
             level1FmObjects.push({ name: rootFmObject.name + '_0', clientId: rootFmObject.clientId, type: 'Etage', path: rootFmObject.path + rootFmObject._id.toString() + ',', parentId: rootFmObject._id });
             level1FmObjects.push({ name: rootFmObject.name + '_1', clientId: rootFmObject.clientId, type: 'Raum', path: rootFmObject.path + rootFmObject._id.toString() + ',', parentId: rootFmObject._id });
         });
-        return bulkInsert('fmobjects', level1FmObjects);
+        return th.bulkInsert('fmobjects', level1FmObjects);
     });
 };
 
@@ -369,19 +369,19 @@ th.prepareFolders = () => {
     });
     // Add folder to portal
     rootFolders.push({ name: 'portalfolder', clientId: null });
-    return bulkInsert('folders', rootFolders).then((insertedRootFolders) => {
+    return th.bulkInsert('folders', rootFolders).then((insertedRootFolders) => {
         var level1Folders = [];
         insertedRootFolders.forEach((insertedRootFolder) => {
             level1Folders.push({ name: insertedRootFolder.name + '_0', clientId: insertedRootFolder.clientId, parentFolderId: insertedRootFolder._id });
             level1Folders.push({ name: insertedRootFolder.name + '_1', clientId: insertedRootFolder.clientId, parentFolderId: insertedRootFolder._id });
         });
-        return bulkInsert('folders', level1Folders).then((insertedLevel1Folders) => {
+        return th.bulkInsert('folders', level1Folders).then((insertedLevel1Folders) => {
             var level2Folders = [];
             insertedLevel1Folders.forEach((insertedLevel1Folder) => {
                 level2Folders.push({ name: insertedLevel1Folder.name + '_0', clientId: insertedLevel1Folder.clientId, parentFolderId: insertedLevel1Folder._id });
                 level2Folders.push({ name: insertedLevel1Folder.name + '_1', clientId: insertedLevel1Folder.clientId, parentFolderId: insertedLevel1Folder._id });
             });
-            return bulkInsert('folders', level2Folders);
+            return th.bulkInsert('folders', level2Folders);
         });
     });
 };
@@ -456,7 +456,7 @@ th.prepareDocuments = () => {
         documents.push({ name: client.name + '_0', clientId: client._id });
         documents.push({ name: client.name + '_1', clientId: client._id });
     });
-    return bulkInsert('documents', documents);
+    return th.bulkInsert('documents', documents);
 };
 
 /**
@@ -470,7 +470,7 @@ th.prepareRelations = function() {
             relations.push({ type1: key1, id1: dbObjects[key1][0]._id, type2: key2, id2: dbObjects[key2][0]._id });
         });
     });
-    return bulkInsert('relations', relations);
+    return th.bulkInsert('relations', relations);
 };
 
 /**
@@ -542,6 +542,130 @@ th.apiTests = {
             }
             it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
             it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+        }
+    },
+    getForIds: {
+        defaultNegative: function(api, permission, collection, createTestObjects) {
+            it('responds without authentication with 403', function() {
+                return createTestObjects().then(function(testObjects) {
+                    return th.bulkInsert(collection, testObjects);
+                }).then(function(insertedTestObjects) {
+                    var testObjectIds = insertedTestObjects.map((to) => to._id.toString());
+                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}`).expect(403);
+                });
+            });
+            function checkForUser(user) {
+                return function() {
+                    var moduleName = getModuleForApi(api);
+                    var testObjectIds;
+                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
+                        return createTestObjects();
+                    }).then(function(testObjects) {
+                        return th.bulkInsert(collection, testObjects);
+                    }).then(function(insertedTestObjects) {
+                        testObjectIds = insertedTestObjects.map((to) => to._id.toString());
+                        return th.doLoginAndGetToken(user, th.defaults.password);
+                    }).then(function(token) {
+                        return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(403);
+                    });
+                }
+            }
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+            it('responds with empty list when user has no read permission', function() {
+                var testObjectIds;
+                return th.removeReadPermission(th.defaults.user, permission).then(function() {
+                    return createTestObjects();
+                }).then(function(testObjects) {
+                    return th.bulkInsert(collection, testObjects);
+                }).then(function(insertedTestObjects) {
+                    testObjectIds = insertedTestObjects.map((to) => to._id.toString());
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(200);
+                }).then(function(response) {
+                    assert.equal(response.body.length, 0);
+                    return Promise.resolve();
+                });
+            });
+            it('responds with empty list when query parameter "ids" does not exist', function() {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    return th.get(`/api/${api}/forIds?token=${token}`).expect(200);
+                }).then(function(response) {
+                    assert.equal(response.body.length, 0);
+                    return Promise.resolve();
+                });
+            });
+            it('returns only elements of correct ids when parameter "ids" contains faulty IDs', function() {
+                var testObjectIds, insertedTestObjects;
+                return createTestObjects().then(function(testObjects) {
+                    return th.bulkInsert(collection, testObjects);
+                }).then(function(objects) {
+                    insertedTestObjects = objects;
+                    testObjectIds = objects.map((to) => to._id.toString());
+                    testObjectIds.push('invalidId');
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(200);
+                }).then(function(response) {
+                    var objects = response.body;
+                    var idCount = insertedTestObjects.length;
+                    assert.equal(objects.length, idCount);
+                    for (var i = 0; i < idCount; i++) {
+                        assert.strictEqual(objects[i].name, insertedTestObjects[i].name);
+                    }
+                    return Promise.resolve();
+                });
+            });
+            it('returns only elements of correct ids when parameter "ids" contains IDs where no entities exist for', function() {
+                var testObjectIds, insertedTestObjects;
+                return createTestObjects().then(function(testObjects) {
+                    return th.bulkInsert(collection, testObjects);
+                }).then(function(objects) {
+                    insertedTestObjects = objects;
+                    testObjectIds = objects.map((to) => to._id.toString());
+                    testObjectIds.push('999999999999999999999999');
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(200);
+                }).then(function(response) {
+                    var objects = response.body;
+                    var idCount = insertedTestObjects.length;
+                    assert.equal(objects.length, idCount);
+                    for (var i = 0; i < idCount; i++) {
+                        assert.strictEqual(objects[i]._id, insertedTestObjects[i]._id.toString());
+                    }
+                    return Promise.resolve();
+                });
+            });
+        },
+        clientDependentNegative: function(api, collection, createTestObjects) {
+            it('returns only elements of the client of the logged in user when "ids" contains IDs of entities of another client', function() {
+                var testObjectIds, insertedTestObjects, testObjects;
+                return createTestObjects().then(function(objects) {
+                    testObjects = objects;
+                    return db.get(co.collections.clients).findOne({name:th.defaults.otherClient});
+                }).then(function(otherClient) {
+                    testObjects.push({
+                        clientId:otherClient._id
+                    });
+                    return th.bulkInsert(collection, testObjects);
+                }).then(function(objects) {
+                    insertedTestObjects = objects;
+                    testObjectIds = objects.map((to) => to._id.toString());
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(200);
+                }).then(function(response) {
+                    var objects = response.body;
+                    var idCount = insertedTestObjects.length - 1; // The last one was from the foreign client
+                    assert.equal(objects.length, idCount);
+                    for (var i = 0; i < idCount; i++) {
+                        assert.strictEqual(objects[i]._id, insertedTestObjects[i]._id.toString());
+                    }
+                    return Promise.resolve();
+                });
+            });
         }
     },
     getId: {

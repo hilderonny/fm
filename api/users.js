@@ -48,6 +48,11 @@ router.get('/', auth('PERMISSION_ADMINISTRATION_USER', 'r', 'base'), (req, res) 
     }
     aggregateSteps.push({ $project: { pass: false } }); // Passwort niemals mit zurück geben // TODO: Test einbauen, ob Passwörter zurück kommen
     req.db.get('users').aggregate(aggregateSteps).then((users) => {
+        if (req.query.joinUserGroup) { // Benutzergruppen ggf. von Feld zu Einzelwert wandeln
+            users.forEach(function(user) {
+                user.userGroup = user.userGroup[0];
+            });
+        }
         res.send(users);
     });
 });
