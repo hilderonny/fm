@@ -115,7 +115,7 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), function(r
                 res.sendStatus(400);
             } else {
                 delete user._id; // Ids are generated automatically
-                user.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user
+                user.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user, because users can create only users for their own clients
                 req.db.insert('users', user).then((insertedUser) => {
                     res.send(insertedUser);
                 });

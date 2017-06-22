@@ -23,6 +23,9 @@ module.exports.apis = {
 module.exports.collections = {
     activities:'activities',
     clientmodules:'clientmodules',
+    /**
+     * Mandanten
+     */
     clients:'clients',
     documents:'documents',
     fmobjects:'fmobjects',
@@ -36,6 +39,9 @@ module.exports.collections = {
     portals:'portals',
     relations:'relations',
     settingsets:'settingsets',
+    /**
+     * Usergroups for users
+     */
     usergroups:'usergroups',
     /**
      * Users which can login to the system

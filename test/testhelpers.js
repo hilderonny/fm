@@ -14,6 +14,8 @@ var path = require('path');
 var localConfig = require('../config/localconfig.json'); // http://stackoverflow.com/a/14678694
 var documentsHelper = require('../utils/documentsHelper');
 var moduleConfig = require('../config/module-config.json');
+var co = require('../utils/constants');
+var monk = require('monk');
 
 var th = module.exports;
 
@@ -508,8 +510,10 @@ th.defaults = {
     adminUser: '1_0_ADMIN0',
     client: '1',
     otherClient: '0',
+    otherUser: '0_0_0',
     password: 'test',
     user: '1_0_0',
+    userGroup: '1_0'
 };
 
 th.apiTests = {
@@ -592,7 +596,7 @@ th.apiTests = {
             it('responds with 403 when the object with the given ID does not belong to the client of the logged in user', function() {
                 var insertedId;
                 // Get other client
-                return db.get('clients').findOne({name:th.defaults.otherClient}).then(function(client) {
+                return db.get(co.collections.clients).findOne({name:th.defaults.otherClient}).then(function(client) {
                     // Create an object for the other client
                     return db.get(collection).insert({clientId:client._id});
                 }).then(function(insertedObject) {
@@ -605,25 +609,34 @@ th.apiTests = {
         }
     },
     post: {
-        defaultNegative: function(api, permission) {
-            var testObject = {};
+        defaultNegative: function(api, permission, createTestObject) {
             it('responds without authentication with 403', function() {
-                return th.post(`/api/${api}`).send(testObject).expect(403);
+                return createTestObject().then(function(testObject) {
+                    return th.post(`/api/${api}`).send(testObject).expect(403);
+                });
             });
             it('responds without write permission with 403', function() {
+                var loginToken;
                 return th.removeWritePermission(th.defaults.user, permission).then(function() {
                     return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
                 }).then(function(token) {
-                    return th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    return th.post(`/api/${api}?token=${loginToken}`).send(testObject).expect(403);
                 });
             });
             function checkForUser(user) {
                 return function() {
+                    var loginToken;
                     var moduleName = getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
-                        return th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
+                        loginToken = token;
+                        return createTestObject();
+                    }).then(function(testObject) {
+                        return th.post(`/api/${api}?token=${loginToken}`).send(testObject).expect(403);
                     });
                 }
             }
@@ -632,6 +645,220 @@ th.apiTests = {
             it('responds with 400 when not sending an object to insert', function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     return th.post(`/api/${api}?token=${token}`).expect(400);
+                });
+            });
+        }
+    },
+    put: {
+        defaultNegative: function(api, permission, createTestObject) {
+            it('responds without authentication with 403', function() {
+                return createTestObject().then(function(testObject) {
+                    return th.put(`/api/${api}/${testObject._id}`).send(testObject).expect(403);
+                });
+            });
+            it('responds without write permission with 403', function() {
+                var loginToken;
+                return th.removeWritePermission(th.defaults.user, permission).then(function() {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(403);
+                });
+            });
+            function checkForUser(user) {
+                return function() {
+                    var loginToken;
+                    var moduleName = getModuleForApi(api);
+                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
+                        return th.doLoginAndGetToken(user, th.defaults.password);
+                    }).then(function(token) {
+                        loginToken = token;
+                        return createTestObject();
+                    }).then(function(testObject) {
+                        return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(403);
+                    });
+                }
+            }
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+            it('responds with 400 when not sending an object to insert', function() {
+                var loginToken;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).expect(400);
+                });
+            });
+            it('responds with 400 when the _id is invalid', function() {
+                var loginToken;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    return th.put(`/api/${api}/invalidId?token=${loginToken}`).send(testObject).expect(400);
+                });
+            });
+            it('responds with 403 when no object for the the _id exists', function() {
+                var loginToken;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    return th.put(`/api/${api}/999999999999999999999999?token=${loginToken}`).send(testObject).expect(403);
+                });
+            });
+            it('responds with the original _id when it was changed (_id cannot be changed)', function() {
+                var loginToken;
+                var originalId;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    originalId = testObject._id.toString();
+                    testObject._id = monk.id();
+                    return th.put(`/api/${api}/${originalId}?token=${loginToken}`).send(testObject).expect(200);
+                }).then(function(response) {
+                    assert.strictEqual(response.body._id, originalId);
+                    return Promise.resolve();
+                });
+            });
+        },
+        clientDependentNegative: function(api, createTestObject) {
+            it('responds with 403 when the object to update does not belong to client of the logged in user', function() {
+                var loginToken;
+                // Login as user from client 0
+                return th.doLoginAndGetToken(th.defaults.otherUser, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    // Make sure, that the object belongs to client 1!
+                    return createTestObject();
+                }).then(function(testObject) {
+                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(403);
+                });
+            });
+            it('responds with the original clientId when it was changed (clientId cannot be changed)', function() {
+                var loginToken;
+                var otherClientId;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return db.get(co.collections.clients).findOne({name:th.defaults.otherClient});
+                }).then(function(client) {
+                    otherClientId = client._id.toString();
+                    return createTestObject();
+                }).then(function(testObject) {
+                    testObject.clientId = otherClientId;
+                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(200);
+                }).then(function(response) {
+                    assert.notEqual(response.body.clientId, otherClientId);
+                    return Promise.resolve();
+                });
+            });
+        }
+    },
+    delete: {
+        defaultNegative: function(api, permission, getId) {
+            it('responds without authentication with 403', function() {
+                return getId().then(function(id) {
+                    return th.del(`/api/${api}/${id.toString()}`).expect(403);
+                });
+            });
+            it('responds without write permission with 403', function() {
+                var loginToken;
+                return th.removeWritePermission(th.defaults.user, permission).then(function() {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    loginToken = token;
+                    return getId();
+                }).then(function(id) {
+                    return th.del(`/api/${api}/${id.toString()}?token=${loginToken}`).expect(403);
+                });
+            });
+            function checkForUser(user) {
+                return function() {
+                    var loginToken;
+                    var moduleName = getModuleForApi(api);
+                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
+                        return th.doLoginAndGetToken(user, th.defaults.password);
+                    }).then(function(token) {
+                        loginToken = token;
+                        return getId();
+                    }).then(function(id) {
+                        return th.del(`/api/${api}/${id.toString()}?token=${loginToken}`).expect(403);
+                    });
+                }
+            }
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+            it('responds with 400 when the _id is invalid', function() {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    return th.del(`/api/${api}/invalidId?token=${token}`).expect(400);
+                });
+            });
+            it('responds with 403 when no object for the the _id exists', function() {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    return th.del(`/api/${api}/999999999999999999999999?token=${token}`).expect(403);
+                });
+            });
+        },
+        clientDependentNegative: function(api, getId) {
+            it('responds with 403 when the object to delete does not belong to client of the logged in user', function() {
+                var loginToken;
+                // Login as user from client 0
+                return th.doLoginAndGetToken(th.defaults.otherUser, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    // Make sure, that the object belongs to client 1!
+                    return getId();
+                }).then(function(id) {
+                    return th.del(`/api/${api}/${id.toString()}?token=${loginToken}`).expect(403);
+                });
+            });
+        },
+        defaultPositive: function(api, collection, getId) {
+            it('deletes the object and return 204', function() {
+                var loginToken, objectId;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return getId();
+                }).then(function(id) {
+                    objectId = id;
+                    return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
+                }).then(function() {
+                    return db.get(collection).findOne(objectId);
+                }).then(function(objectInDatabase) {
+                    assert.ok(!objectInDatabase);
+                    return Promise.resolve();
+                });
+            });
+            it('All relations, where the element is the source (type1, id1), are also deleted', function() {
+                var loginToken, objectId;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return getId();
+                }).then(function(id) {
+                    objectId = id;
+                    return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
+                }).then(function() {
+                    return db.get(co.collections.relations).find({type1:collection,id1:objectId});
+                }).then(function(objectsInDatabase) {
+                    assert.equal(objectsInDatabase.length, 0);
+                    return Promise.resolve();
+                });
+            });
+            it('All relations, where the element is the target (type2, id2), are also deleted', function() {
+                var loginToken, objectId;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return getId();
+                }).then(function(id) {
+                    objectId = id;
+                    return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
+                }).then(function() {
+                    return db.get(co.collections.relations).find({type2:collection,id2:objectId});
+                }).then(function(objectsInDatabase) {
+                    assert.equal(objectsInDatabase.length, 0);
+                    return Promise.resolve();
                 });
             });
         }
