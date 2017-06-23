@@ -2,7 +2,7 @@
     "modules" : {
 
         "base": {
-            "api" : [ "login", "menu", "permissions", "usergroups", "users", "relations", "settingsets", "translations" ],
+            "api" : [ "dynamicattributes", "login", "menu", "permissions", "usergroups", "users", "relations", "settingsets", "translations" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
             "public" : [
                 "css/base.css",
@@ -30,6 +30,12 @@
                 "css/icons/office/User Group Man Man.svg",
                 "css/icons/office/Search.svg",
                 "css/icons/office/Settings.svg",
+                "partial/Administration/AttributeDetailsTab.html",
+                "partial/Administration/AttributeElementsTab.html",
+                "partial/Administration/AttributesTab.html",
+                "partial/Administration/DynamicAttributeCreationFormCard.html",
+                "partial/Administration/DynamicAttributesCard.html",
+                "partial/Administration/DynamicAttributesEntityListCard.html",
                 "partial/Administration/PermissionCard.html",
                 "partial/Administration/SettingSetListCard.html",
                 "partial/Administration/UserCard.html",
@@ -62,6 +68,9 @@
                 "public/js/AppSetup.js",
                 "public/js/Utils.js",
                 "public/js/MainController.js",
+                "public/js/Administration/DynamicAttributesCardController.js",
+                "public/js/Administration/DynamicAttributeCreationFormCardController.js",
+                "public/js/Administration/DynamicAttributesEntityListCardController.js",
                 "public/js/Administration/PermissionCardController.js",
                 "public/js/Administration/SettingSetListCardController.js",
                 "public/js/Administration/UserCardController.js",
@@ -85,7 +94,8 @@
             ],
             "utils": [ "apiHelper", "configHelper", "constants" ],
             "settingsets" : [
-                { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER" }
+                { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
+                { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Settings", "permission": "PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
             ]
         },
 
@@ -145,7 +155,6 @@
                 }
             ]
         },
-
 
         "documents": {
             "api" : [ "documents", "extractdocument", "folders" ],

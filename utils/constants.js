@@ -28,6 +28,9 @@ module.exports.collections = {
      */
     clients:'clients',
     documents:'documents',
+    dynamicattributeoptions:'dynamicattributeoptions',
+    dynamicattributes:'dynamicattributes',
+    dynamicattributevalues:'dynamicattributevalues',
     fmobjects:'fmobjects',
     folders:'folders',
     markers:'markers',
@@ -57,6 +60,7 @@ module.exports.collections = {
 module.exports.permissions = {
     ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
     ADMINISTRATION_SETTINGS: 'PERMISSION_ADMINISTRATION_SETTINGS',
+    ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
     /**
      * Permission to show and edit users
      */
@@ -75,3 +79,22 @@ module.exports.permissions = {
      */
     SETTINGS_USER: 'PERMISSION_SETTINGS_USER'
 };
+
+/**
+ * List of all possible dynamic attribute types. Used for validation in dynamicattributes API.
+ */
+module.exports.dynamicAttributeTypes = [
+    'text',
+    'boolean',
+    'picklist'
+];
+
+/**
+ * List of all possible models that can have dynamic attribute. Used for option selection in dynamicattributes API.
+ */
+
+module.exports.models = [
+    'documents',
+    'usergroups',
+    'users'
+];
