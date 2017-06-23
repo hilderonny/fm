@@ -525,7 +525,7 @@ th.prepareDynamicAttributes = function() {
         dynamicAttributes.push(documentBoolAttribute);
         dynamicAttributes.push(documentTextAttribute);
     });
-    return bulkInsert('dynamicattributes', dynamicAttributes);
+    return th.bulkInsert('dynamicattributes', dynamicAttributes);
 };
 
 /**
@@ -541,7 +541,7 @@ th.prepareDynamicAttributeOptions = function() {
             dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clientId: attribute.clientId});
         }
     });
-    return bulkInsert('dynamicattributeoptions', dynamicAttributeOptions);
+    return th.bulkInsert('dynamicattributeoptions', dynamicAttributeOptions);
 };
 
 /**
@@ -569,7 +569,7 @@ th.prepareDynamicAttributeValues = function() {
                   });
             }
     })
-    return bulkInsert('dynamicattributevalues', dynamicAttributeValues);
+    return th.bulkInsert('dynamicattributevalues', dynamicAttributeValues);
 };
 
 function getModuleForApi(api) {
