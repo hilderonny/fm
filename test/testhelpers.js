@@ -191,7 +191,6 @@ th.preparePermissions = () => {
         permissions.push({ key: 'PERMISSION_SETTINGS_CLIENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_SETTINGS_PORTAL', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_SETTINGS_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
     });
     return th.bulkInsert('permissions', permissions);
 };
@@ -496,80 +495,6 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
         var valueFromApi = apiObject[key].toString();
         assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of ${name} ${apiObject._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
     });
-};
-
-/**
- * Creates 3 dynamic  attributes (one for each currently existing type)
- */
-th.prepareDynamicAttributes = function() {
-    var dynamicAttributes = [];
-    dbObjects.users.forEach(function(user){
-        var userAttribute = {modelName: 'users', 
-                             name_en: 'gender',
-                             clientId: user.clientId,
-                             type: 'picklist'};
-        dynamicAttributes.push(userAttribute);
-    });
-
-    dbObjects.documents.forEach(function(document){
-        var documentBoolAttribute = {modelName: 'documents', 
-                                    name_en: 'is secret',
-                                    clientId: document.clientId,
-                                    type: 'boolean'};
-
-        var documentTextAttribute = {modelName: 'documents', 
-                                    name_en: 'content description',
-                                    clientId: document.clientId,
-                                    type: 'text'}; 
-
-        dynamicAttributes.push(documentBoolAttribute);
-        dynamicAttributes.push(documentTextAttribute);
-    });
-    return bulkInsert('dynamicattributes', dynamicAttributes);
-};
-
-/**
- * Creates 2 options (elements) for an attribute of type picklist;
- *      attribute.modelName: 'users',
- *      attribute.name_en: 'gender'
- */
-th.prepareDynamicAttributeOptions = function() {
-    var dynamicAttributeOptions = [];
-    dbObjects.dynamicattributes.forEach(function(attribute){
-        if (attribute.type == 'picklist') {
-            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'female', clientId: attribute.clientId});
-            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clientId: attribute.clientId});
-        }
-    });
-    return bulkInsert('dynamicattributeoptions', dynamicAttributeOptions);
-};
-
-/**
- * Creates dummy example values
- */
-th.prepareDynamicAttributeValues = function() {
-    var dynamicAttributeValues = [];
-    dbObjects.dynamicattributes.forEach(function(attribute){
-
-            if (attribute.modelName == 'users'){
-                dbObjects.users.forEach(function(entity){
-                   dynamicAttributeValues.push({entityId: entity._id, dynamicAttributeId: attribute._id, clientId: entity.clientId, value: 'female'}); 
-                });
-            }
-            else{
-                var value = {};
-                  dbObjects.documents.forEach(function(entity){  
-                    if (attribute.type == 'text'){
-                        value = entity.name + 'some_value';
-                    }
-                    else{
-                        value = false; 
-                    }
-                    dynamicAttributeValues.push({entityId: entity._id, dynamicAttributeId: attribute._id, clientId: entity.clientId, value: value});
-                  });
-            }
-    })
-    return bulkInsert('dynamicattributevalues', dynamicAttributeValues);
 };
 
 function getModuleForApi(api) {

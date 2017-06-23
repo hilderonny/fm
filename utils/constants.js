@@ -60,7 +60,6 @@ module.exports.collections = {
 module.exports.permissions = {
     ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
     ADMINISTRATION_SETTINGS: 'PERMISSION_ADMINISTRATION_SETTINGS',
-    ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
     /**
      * Permission to show and edit users
      */
