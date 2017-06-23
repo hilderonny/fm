@@ -570,7 +570,7 @@ th.prepareDynamicAttributeValues = function() {
             }
     })
     return bulkInsert('dynamicattributevalues', dynamicAttributeValues);
-});
+};
 
 function getModuleForApi(api) {
     // Use only the first parts until the slash
