@@ -15,7 +15,7 @@
     "TRK_FMOBJECTS_NEW_FM_OBJECT" : "нов FM обект",
     "TRK_FMOBJECTS_NAME" : "име",
     "TRK_FMOBJECTS_POSITION" : "местоположение",
-    "TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT" : "Сигурни ли Сте, че искате да премахнете FM обект \"{{fmObjectName}}\" заедно с всички принадлежащи му обекти?",
+    "TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT" : "Сигурни ли сте, че искате да премахнете FM обект \"{{fmObjectName}}\" заедно с всички принадлежащи му обекти?",
     "TRK_FMOBJECTS_SAVE" : "запази промените",
     "TRK_FMOBJECTS_SELECT_FM_OBJECT" : "Избор на FM обект",
     "TRK_FMOBJECTS_SIZE" : "размери",

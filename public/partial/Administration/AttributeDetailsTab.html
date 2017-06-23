@@ -1,0 +1,21 @@
+<md-card-content layout="column">
+
+    <md-input-container flex>
+        <label translate>TRK_DYNAMICATTRIBUTES_TYPE</label>
+        <md-select ng-model="attribute.type">
+            <md-option ng-value="type" ng-repeat="type in types">
+                <span translate="TRK_{{type}}"></span>
+            </md-option>
+        </md-select>
+    </md-input-container>
+
+        <md-card-content  layout = "column" >
+            <md-input-container flex ng-repeat="language in languages">
+                <label translate = "TRK_DYNAMICATTRIBUTES_NAME_{{language}}"> </label>
+                <input ng-if = "language =='en'" ng-model="attribute.name" type="text" ng-required="true">
+                <input ng-if = "language !='en'" ng-model="attribute.translations[0]" type="text">
+            </md-input-container>
+
+        </md-card-content>  
+
+</md-card-content>

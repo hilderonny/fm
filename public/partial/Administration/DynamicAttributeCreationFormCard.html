@@ -1,0 +1,33 @@
+<md-card ng-cloak ng-controller="AdministrationAttributeCreationCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" ng-if="!isNewAttribute" translate>TRK_DYNAMICATTRIBUTES_EDIT_ATTRIBUTE</span>
+            <span class="md-headline" ng-if="isNewAttribute" translate>TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTE</span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+    </md-button>
+
+    <md-tabs flex>
+        <md-tab>
+            <md-tab-label><span>DETAILS</span></md-tab-label>
+            <md-tab-body><ng-include src="'partial/Administration/AttributeDetailsTab.html'"></ng-include></md-tab-body>
+        </md-tab>
+        <md-tab ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST' && !isNewAttribute">
+            <md-tab-label><span>ELEMETS</span></md-tab-label>
+            <md-tab-body><ng-include src="'partial/Administration/AttributeElementsTab.html'"></ng-include></md-tab-body>
+        </md-tab>
+    </md-tabs>
+
+    <!-- TODO: check if any additional permission is needed -->
+    <md-card-actions layout="row" layout-align="end center">
+        <md-button class="md-raised md-accent" ng-if="!isNewAttribute  && params.isSelection && params.selectCallback" ng-click="params.selectCallback(attribute)"><span translate>{{params.selectButtonText}}</span></md-button>
+        <md-button class="md-raised md-accent" ng-if="isNewAttribute " ng-click="createAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_CREATE</span></md-button>
+        <md-button class="md-raised md-accent" ng-if="!isNewAttribute && !params.isSelection" ng-click="saveAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_SAVE</span></md-button>
+        <md-button class="md-raised md-warn" ng-if="!isNewAttribute && !params.isSelection" ng-click="deleteAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
+    </md-card-actions>
+
+</md-card>
