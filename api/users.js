@@ -48,6 +48,11 @@ router.get('/', auth('PERMISSION_ADMINISTRATION_USER', 'r', 'base'), (req, res) 
     }
     aggregateSteps.push({ $project: { pass: false } }); // Passwort niemals mit zurück geben // TODO: Test einbauen, ob Passwörter zurück kommen
     req.db.get('users').aggregate(aggregateSteps).then((users) => {
+        if (req.query.joinUserGroup) { // Benutzergruppen ggf. von Feld zu Einzelwert wandeln
+            users.forEach(function(user) {
+                user.userGroup = user.userGroup[0];
+            });
+        }
         res.send(users);
     });
 });
@@ -115,7 +120,7 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), function(r
                 res.sendStatus(400);
             } else {
                 delete user._id; // Ids are generated automatically
-                user.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user
+                user.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user, because users can create only users for their own clients
                 req.db.insert('users', user).then((insertedUser) => {
                     res.send(insertedUser);
                 });
@@ -126,10 +131,14 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), function(r
 
 //TODO check if other verifications are needed
 router.post('/newpassword', auth('PERMISSION_SETTINGS_USER', 'w', 'base'), (req, res) => {
-    var encryptedNewPassword = bcryptjs.hashSync(req.body.pass);
-    req.db.update('users', req.user._id, { $set: {pass:encryptedNewPassword} }).then(() => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-        res.sendStatus(200);
-    });
+    if (typeof(req.body.pass) === 'undefined') {
+        res.sendStatus(400);
+    } else {
+        var encryptedNewPassword = bcryptjs.hashSync(req.body.pass);
+        req.db.update('users', req.user._id, { $set: {pass:encryptedNewPassword} }).then(() => { // https://docs.mongodb.com/manual/reference/operator/update/set/
+            res.sendStatus(200);
+        });
+    }
 });
 
 var getUserFromDatabase = (req, res, userId, userFromRequest) => {
