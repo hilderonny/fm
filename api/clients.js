@@ -154,7 +154,7 @@ router.put('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), val
  */
 router.delete('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), validateId, function(req, res) {
     var clientId = monk.id(req.params.id);
-    var dependentCollections = constants.collections;
+    var dependentCollections = Object.keys(constants.collections);
     // Remove all dependent objects (activities, documents, fmobjects, folders, permissions, usergroups, users)
     async.eachSeries(dependentCollections, (dependentCollection, callback) => {
         req.db.remove(dependentCollection, { clientId: clientId }).then((res) => {
