@@ -692,7 +692,7 @@ describe('API clients', function() {
                 testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                     var clientId = clientFromDatabase._id;
                     superTest(server).delete(`/api/clients/${clientId}?token=${token}`).expect(204).then((res) => {
-                        var dependentCollections = constants.collections;
+                        var dependentCollections = Object.keys(constants.collections);
                         async.eachSeries(dependentCollections, (dependentCollection, callback) => {
                             db.get(dependentCollection).count({ clientId: clientId }, (err, count) => {
                                 if (err) {

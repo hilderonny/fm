@@ -9,6 +9,7 @@
     "TRK_CLIENTS_CLIENTDELETED" : " تم حذف العميل ",
      "TRK_CLIENTS_CLIENT" : "العميل",
     "TRK_CLIENTS_CLIENTS" : " العملاء",
+    "TRK_CLIENTS_COMMENT" : "التعليقات",
     "TRK_CLIENTS_CREATE" : " إنشاء",
     "TRK_CLIENTS_CREATEADMIN" : " إضافة مدير جديد",
     "TRK_CLIENTS_CREATEADMINDESCRIPTION" :"<p>الرجاء إدخال اسم المستخدم وكلمة المرور للمديرالجديد <b>قبل</b> النقرعلى زر \"إنشاء\". لن يتم عرض هذه المعلومة مرة اخرى. </p><p>في حالة النقر على الزرإنشاء سيتم إنشاء مجموعة مستخدمين تحمل نفس الاسم المدخل . </p>",
