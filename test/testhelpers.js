@@ -19,13 +19,13 @@ var monk = require('monk');
 
 var th = module.exports;
 
-var dbObjects = {};
+th.dbObjects = {};
 
 th.bulkInsert = (collectionName, docs) => {
-    if (!dbObjects[collectionName]) {
-        dbObjects[collectionName] = [];
+    if (!th.dbObjects[collectionName]) {
+        th.dbObjects[collectionName] = [];
     }
-    dbObjects[collectionName] = dbObjects[collectionName].concat(docs);
+    th.dbObjects[collectionName] = th.dbObjects[collectionName].concat(docs);
     return db.get(collectionName).bulkWrite(docs.map((doc) => { return {insertOne:{document:doc}} })).then((res) => {
         var docsToReturn = [];
         for (var i = 0; i < res.insertedCount; i++) {
@@ -48,7 +48,7 @@ var generateLicenseKey = () => {
  * The returned promise has no parameter.
  */
 th.cleanDatabase = () => {
-    dbObjects = {};
+    th.dbObjects = {};
     var promises = [
         'activities',
         'clientmodules',
@@ -118,7 +118,7 @@ th.prepareClients = () => {
  */
 th.prepareClientModules = () => {
     var clientModules = [];
-    dbObjects.clients.forEach((client) => {
+    th.dbObjects.clients.forEach((client) => {
         clientModules.push({ clientId: client._id, module: 'base' });
         clientModules.push({ clientId: client._id, module: 'activities' });
         clientModules.push({ clientId: client._id, module: 'documents' });
@@ -146,7 +146,7 @@ th.removeClientModule = (clientName, module) => {
  */
 th.prepareUserGroups = () => {
     var userGroups = [];
-    dbObjects.clients.forEach((client) => {
+    th.dbObjects.clients.forEach((client) => {
         userGroups.push({ name: client.name + '_0', clientId: client._id });
         userGroups.push({ name: client.name + '_1', clientId: client._id });
     });
@@ -164,7 +164,7 @@ th.prepareUserGroups = () => {
 th.prepareUsers = () => {
     var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
     var users = [];
-    dbObjects.usergroups.forEach((userGroup) => {
+    th.dbObjects.usergroups.forEach((userGroup) => {
         users.push({ name: userGroup.name + '_0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id });
         users.push({ name: userGroup.name + '_ADMIN0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id, isAdmin: true }); // Administrator
     });
@@ -177,7 +177,7 @@ th.prepareUsers = () => {
  */
 th.preparePermissions = () => {
     var permissions = [];
-    dbObjects.usergroups.forEach((userGroup) => {
+    th.dbObjects.usergroups.forEach((userGroup) => {
         permissions.push({ key: 'PERMISSION_ADMINISTRATION_CLIENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: 'PERMISSION_ADMINISTRATION_USERGROUP', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
@@ -232,9 +232,13 @@ th.removeAllPermissions = (userName, permissionKey) => {
  */
 
 th.preparePortals = () => {
-    var portals = [{name: 'p1', isActive: true, licenseKey: 'LicenseKey1'},
-                   {name: 'p2', isActive: false, licenseKey: 'LicenseKey2'}];
-    return th.bulkInsert('portals', portals);
+    return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+        var portals = [
+            {name: 'p1', isActive: true, licenseKey: 'LicenseKey1', clientId: client._id},
+            {name: 'p2', isActive: false, licenseKey: 'LicenseKey2', clientId: client._id}
+        ];
+        return th.bulkInsert('portals', portals);
+    });
 };
 
 /**
@@ -244,7 +248,7 @@ th.preparePortals = () => {
 
 th.preparePortalModules = () => {
     var portalModules = [];
-    dbObjects.portals.forEach((portal) => {
+    th.dbObjects.portals.forEach((portal) => {
         portalModules.push({portalId: portal._id, module: 'base'});
         portalModules.push({portalId: portal._id, module: 'clients'});
         portalModules.push({portalId: portal._id, module: 'documents'});
@@ -264,7 +268,7 @@ th.preparePortalModules = () => {
 th.prepareActivities = () => {
     var activities = [];
     var now = new Date();
-    dbObjects.users.forEach((user) => {
+    th.dbObjects.users.forEach((user) => {
         now.setHours(now.getHours() - 24);
         activities.push({
             date: now.toISOString(),
@@ -315,7 +319,7 @@ th.addUserAsParticipantToActivity = function(userName, activitiyName) {
  */
 th.prepareMarkers = () => {
     var markers = [];
-    dbObjects.users.forEach((user)=>{
+    th.dbObjects.users.forEach((user)=>{
         markers.push({
             clientId: user.clientId,
             name: user.name + '_0',
@@ -340,7 +344,7 @@ th.prepareMarkers = () => {
  */
 th.prepareFmObjects = () => {
     var fmObjects = [];
-    dbObjects.clients.forEach((client) => {
+    th.dbObjects.clients.forEach((client) => {
         fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt', path:',' });
         fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Gebäude', path:',' });
     });
@@ -363,7 +367,7 @@ th.prepareFmObjects = () => {
  */
 th.prepareFolders = () => {
     var rootFolders = [];
-    dbObjects.clients.forEach((client) => {
+    th.dbObjects.clients.forEach((client) => {
         rootFolders.push({ name: client.name + '_0', clientId: client._id });
         rootFolders.push({ name: client.name + '_1', clientId: client._id });
     });
@@ -403,7 +407,7 @@ var createPath = (pathToCreate) => {
  */
 th.prepareDocumentFiles = () => {
     return new Promise((resolve, reject) => {
-        dbObjects.documents.forEach((document) => {
+        th.dbObjects.documents.forEach((document) => {
             var filePath = documentsHelper.getDocumentPath(document._id);
             createPath(path.dirname(filePath));
             fs.writeFileSync(filePath, document._id.toString());
@@ -447,12 +451,12 @@ th.removeDocumentFiles = () => {
  */
 th.prepareDocuments = () => {
     var documents = [];
-    dbObjects.folders.forEach((folder) => {
+    th.dbObjects.folders.forEach((folder) => {
         documents.push({ name: folder.name + '_0', clientId: folder.clientId, parentFolderId: folder._id });
         documents.push({ name: folder.name + '_1', clientId: folder.clientId, parentFolderId: folder._id });
     });
     // Documents in root folder
-    dbObjects.clients.forEach((client) => {
+    th.dbObjects.clients.forEach((client) => {
         documents.push({ name: client.name + '_0', clientId: client._id });
         documents.push({ name: client.name + '_1', clientId: client._id });
     });
@@ -464,10 +468,10 @@ th.prepareDocuments = () => {
  */
 th.prepareRelations = function() {
     var relations = [];
-    var keys = Object.keys(dbObjects);
+    var keys = Object.keys(th.dbObjects);
     keys.forEach(function(key1) {
         keys.forEach(function(key2) {
-            relations.push({ type1: key1, id1: dbObjects[key1][0]._id, type2: key2, id2: dbObjects[key2][0]._id });
+            relations.push({ type1: key1, id1: th.dbObjects[key1][0]._id, type2: key2, id2: th.dbObjects[key2][0]._id });
         });
     });
     return th.bulkInsert('relations', relations);
@@ -494,7 +498,7 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
     });
 };
 
-function getModuleForApi(api) {
+th.getModuleForApi = function(api) {
     // Use only the first parts until the slash
     api = api.split('/')[0];
     for (var moduleName in moduleConfig.modules) {
@@ -504,7 +508,7 @@ function getModuleForApi(api) {
             return moduleName;
         }
     };
-}
+};
 
 th.defaults = {
     adminUser: '1_0_ADMIN0',
@@ -533,7 +537,7 @@ th.apiTests = {
             });
             function checkForUser(user) {
                 return function() {
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -557,7 +561,7 @@ th.apiTests = {
             });
             function checkForUser(user) {
                 return function() {
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     var testObjectIds;
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return createTestObjects();
@@ -718,7 +722,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var insertedId;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return db.get(collection).insert(testObject);
                     }).then(function(insertedObject) {
@@ -760,7 +764,13 @@ th.apiTests = {
             });
         }
     },
+    /**
+     * Testfunktionen für POST - API Requests
+     */
     post: {
+        /**
+         * Standard-Negativtests, die das Verhalten von falschen Aufrufen prüfen
+         */
         defaultNegative: function(api, permission, createTestObject) {
             it('responds without authentication with 403', function() {
                 return createTestObject().then(function(testObject) {
@@ -781,7 +791,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -797,6 +807,35 @@ th.apiTests = {
             it('responds with 400 when not sending an object to insert', function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     return th.post(`/api/${api}?token=${token}`).expect(400);
+                });
+            });
+        },
+        /**
+         * Standardpositiv-Tests zum Prüfen, ob ein gesendetes Objekt auch
+         * korrekt in der Datenbank ankommt und ob die Rückgabedaten stimmen.
+         */
+        defaultPositive: function(api, collection, createTestObject) {
+            it('responds with the created element containing an _id field', function() {
+                var testObject;
+                return createTestObject().then(function(obj) {
+                    testObject = obj;
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.post(`/api/${api}?token=${token}`).send(testObject).expect(200);
+                }).then(function(response) {
+                    var objectFromApi = response.body;
+                    assert.ok(objectFromApi._id);
+                    Object.keys(testObject).forEach(function(key) {
+                        assert.ok(objectFromApi[key]);
+                        assert.strictEqual(objectFromApi[key].toString(), testObject[key].toString());
+                    });
+                    return db.get(collection).findOne(objectFromApi._id);
+                }).then(function(objectFromDatabase) {
+                    Object.keys(testObject).forEach(function(key) {
+                        assert.ok(objectFromDatabase[key]);
+                        assert.strictEqual(objectFromDatabase[key].toString(), testObject[key].toString());
+                    });
+                    return Promise.resolve();
                 });
             });
         }
@@ -822,7 +861,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -842,6 +881,19 @@ th.apiTests = {
                     return createTestObject();
                 }).then(function(testObject) {
                     return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).expect(400);
+                });
+            });
+            it('responds with 400 when the object to insert only contains an _id', function() {
+                var loginToken;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    Object.keys(testObject).forEach(function(key) {
+                        if (key === '_id') return;
+                        delete testObject[key];
+                    });
+                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(400);
                 });
             });
             it('responds with 400 when the _id is invalid', function() {
@@ -907,6 +959,19 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
+            it('responds with 400 when the object to insert only contains a clientId', function() {
+                var loginToken;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    Object.keys(testObject).forEach(function(key) {
+                        if (key === 'clientId') return;
+                        delete testObject[key];
+                    });
+                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(400);
+                });
+            });
         }
     },
     delete: {
@@ -930,7 +995,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
