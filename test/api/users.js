@@ -102,7 +102,7 @@ describe('API users', function() {
         th.apiTests.getForIds.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users, createTestUsers);
         th.apiTests.getForIds.clientDependentNegative(co.apis.users, co.collections.users, createTestUsers);
 
-        it('returns a list of users with all details except passowrd for the given IDs', function() {
+        it('returns a list of users with all details except password for the given IDs', function() {
             var testUserIds, insertedUsers;
             return createTestUsers().then(function(objects) {
                 return th.bulkInsert(co.collections.users, objects);

@@ -32,23 +32,18 @@ describe('API portals', function(){
 
         th.apiTests.get.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL);
 
-        // Positive tests
-
-        it('responds with all portals', function(done) {
-            db.get('portals').find().then((portalsFromDatabase) =>{
-                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    superTest(server).get(`/api/portals?token=${token}`).expect(200).end(function(err, res){
-                        if (err) {
-                                done(err);
-                                return;
-                            }
-                            var portalsFromApi = res.body; 
-                            assert.strictEqual(portalsFromDatabase.length, portalsFromApi.length, 'Number of sent portals does not match number of expected portals');
-                            //TODO test if more specific object attributes also match 
-
-                            done();
-                    });
-                }).catch(done);
+        it('responds with all portals', function() {
+            var portalsFromDatabase;
+            return db.get('portals').find().then(function(portals) {
+                portalsFromDatabase = portals;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.portals}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var portalsFromApi = response.body; 
+                assert.strictEqual(portalsFromDatabase.length, portalsFromApi.length, 'Number of sent portals does not match number of expected portals');
+                //TODO test if more specific object attributes also match 
+                return Promise.resolve();
             });
         });
 
@@ -56,52 +51,35 @@ describe('API portals', function(){
 
     describe('GET/forIds', function() {
 
-        // Negative tests
+        function createTestPortals() {
+            var testObjects = ['testPortal1', 'testPortal2', 'testPortal3'].map(function(name) {
+                return {
+                    name: name
+                }
+            });
+            return Promise.resolve(testObjects);
+        }
 
-        xit('responds without authentication with 403', function() {
-        });
+        th.apiTests.getForIds.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals, createTestPortals);
+        th.apiTests.getForIds.defaultPositive(co.apis.portals, co.collections.portals, createTestPortals);
 
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds with empty list when user has no read permission', function() {
-        });
-
-        xit('responds with empty list when query parameter "ids" does not exist', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains faulty IDs', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains IDs where no entities exist for', function() {
-        });
-
-        // Positive tests
-
-        xit('returns a list of portals with all details for the given IDs', function() {
-        });
     });
 
     describe('GET/:id', function() {
 
         th.apiTests.getId.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals);
 
-        it('responds with retrieved portal', function(done) {
-            db.get('portals').findOne({name: 'p1'}).then((portalFromDatabase) =>{
-                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    superTest(server).get(`/api/portals/${portalFromDatabase._id}?token=${token}`).expect(200).end(function(err, res){
-                        if (err) {
-                                done(err);
-                                return;
-                            }
-                            var portalFromApi = res.body; 
-                            assert.strictEqual(portalFromApi.name, 'p1', 'Name attribute missmatch');
-                            done();
-                    });
-                }).catch(done);
+        it('responds with retrieved portal', function() {
+            var portalFromDatabase;
+            return db.get('portals').findOne({name: th.defaults.portal}).then(function(portal) {
+                portalFromDatabase = portal;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.portals}/${portalFromDatabase._id}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var portalFromApi = response.body; 
+                assert.strictEqual(portalFromApi.name, portalFromDatabase.name);
+                return Promise.resolve();
             });
         });
 
@@ -113,12 +91,12 @@ describe('API portals', function(){
         
         it('responds without any content with 400', function() {
             return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return superTest(server).post('/api/portals?token=' + token).send().expect(400);
+                return th.post('/api/portals?token=' + token).send().expect(400);
             });
         });
 
         it('responds without authentication with 403', function() {
-            return superTest(server).post('/api/portals')
+            return th.post('/api/portals')
                 .send({name: 'p_test'})
                 .expect(403);
         });
@@ -128,7 +106,7 @@ describe('API portals', function(){
             return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
                 return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var newPortal = {name: 'p_test'};
-                    return superTest(server).post(`/api/portals?token=${token}`).send(newPortal).expect(403);
+                    return th.post(`/api/portals?token=${token}`).send(newPortal).expect(403);
                 });
             });
         });
@@ -140,7 +118,7 @@ describe('API portals', function(){
                         name: 'newPortalName',
                         isActive: true
                     };
-                    return superTest(server).post(`/api/portals?token0${token}`).send(newPortal).expect(403);
+                    return th.post(`/api/portals?token0${token}`).send(newPortal).expect(403);
                 });
             });
         });
@@ -152,7 +130,7 @@ describe('API portals', function(){
                         name: 'newPortalName',
                         isActive: true
                     };
-                    return superTest(server).post(`/api/portals?token0${token}`).send(newPortal).expect(403);
+                    return th.post(`/api/portals?token0${token}`).send(newPortal).expect(403);
                 });
             });
         });
@@ -161,7 +139,7 @@ describe('API portals', function(){
 
         it('responds with new portal containing _id field', function(done){
             th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
-                superTest(server).post(`/api/portals?token=${token}`).send({name: 'newPortal'}).expect(200).end((err, res) =>{
+                th.post(`/api/portals?token=${token}`).send({name: 'newPortal'}).expect(200).end((err, res) =>{
                     if(err){
                         done(err);
                         return
@@ -188,7 +166,7 @@ describe('API portals', function(){
                 return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
                     return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                         var id = portalFromDataBase._id;
-                        return superTest(server).post(`/api/portals/newkey/${id}?token=${token}`).expect(403);
+                        return th.post(`/api/portals/newkey/${id}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -199,7 +177,7 @@ describe('API portals', function(){
                 return th.removeClientModule('1', 'licenseserver').then(function(){
                     return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                         var portalId = portalFromDataBase._id;
-                        return superTest(server).post(`/api/portals/newkey/${portalId}?token=${token}`).send().expect(403);
+                        return th.post(`/api/portals/newkey/${portalId}?token=${token}`).send().expect(403);
                     });
                 });
             });
@@ -210,7 +188,7 @@ describe('API portals', function(){
                 return th.removeClientModule('1', 'licenseserver').then(function(){
                 return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var portalId = portalFromDataBase._id;
-                        return superTest(server).post(`/api/portals/newkey/${portalId}?token=${token}`).send().expect(403);
+                        return th.post(`/api/portals/newkey/${portalId}?token=${token}`).send().expect(403);
                     });
                 });
             });
@@ -218,7 +196,7 @@ describe('API portals', function(){
 
         it('responds with non-exisitng id with 404', function(){
                 return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    return superTest(server).post(`/api/portals/newkey/999999999999999999999999?token=${token}`).send().expect(404);
+                    return th.post(`/api/portals/newkey/999999999999999999999999?token=${token}`).send().expect(404);
                 });
         });
 
@@ -227,7 +205,7 @@ describe('API portals', function(){
         it('responds with a new license key for the portal with the given id', function(done) {
             db.get('portals').findOne({name: 'p1'}).then((portalFromDatabase) =>{
                 th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    superTest(server).post(`/api/portals/newkey/${portalFromDatabase._id}?token=${token}`).send().expect(200).end((err, res) =>{
+                    th.post(`/api/portals/newkey/${portalFromDatabase._id}?token=${token}`).send().expect(200).end((err, res) =>{
                         if(err){
                             done(err);
                             return;
@@ -249,7 +227,7 @@ describe('API portals', function(){
         it('responds with an invalid id with 400', function(){
             return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token)=>{
                 var newPortal = {name: 'p_test', isActive: false};
-                return superTest(server).put(`/api/portals/invalidId?token=${token}`).send(newPortal).expect(400);
+                return th.put(`/api/portals/invalidId?token=${token}`).send(newPortal).expect(400);
             });
         });
 
@@ -257,7 +235,7 @@ describe('API portals', function(){
             return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                 return db.get('portals').findOne({name: 'p1'}).then((portalFromDB) => {
                     var newPortal = {};
-                    return superTest(server).put(`/api/portals/${portalFromDB._id}?token=${token}`).send(newPortal).expect(400);
+                    return th.put(`/api/portals/${portalFromDB._id}?token=${token}`).send(newPortal).expect(400);
                 });   
             });
         });
@@ -266,7 +244,7 @@ describe('API portals', function(){
             return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
                 return db.get('portals').findOne({name: 'p1'}).then((portalFromDB) => {
                     var newPortal = {_id: '111111111111'};
-                    return superTest(server).put(`/api/portals/${portalFromDB._id}?token=${token}`).send(newPortal).expect(400);
+                    return th.put(`/api/portals/${portalFromDB._id}?token=${token}`).send(newPortal).expect(400);
                 });   
             });
         });
@@ -278,7 +256,7 @@ describe('API portals', function(){
                     return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                         var id = portalFromDataBase._id;
                         var updatedPortal = {name: 'newPortalName'};
-                        return superTest(server).put(`/api/portals/${id}?token=${token}`).send(updatedPortal).expect(403);
+                        return th.put(`/api/portals/${id}?token=${token}`).send(updatedPortal).expect(403);
                     });
                 });
             });
@@ -290,7 +268,7 @@ describe('API portals', function(){
                     return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                         var portalId = portalFromDataBase._id;
                         var updatedPortal = {name: 'newPortalName'};
-                        return superTest(server).put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(403);
+                        return th.put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(403);
                     });
                 });
             });       
@@ -302,7 +280,7 @@ describe('API portals', function(){
                     return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var portalId = portalFromDataBase._id;
                         var updatedPortal = {name: 'newPortalName'};
-                        return superTest(server).put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(403);
+                        return th.put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(403);
                     });
                 });
             });
@@ -311,7 +289,7 @@ describe('API portals', function(){
         it('responds with non-existing id with 404', function(){
             return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                 var updatedPermission = { canRead: true };
-                return superTest(server).put('/api/portals/999999999999999999999999?token=' + token).send(updatedPermission).expect(404);
+                return th.put('/api/portals/999999999999999999999999?token=' + token).send(updatedPermission).expect(404);
             });
         });
 
@@ -322,7 +300,7 @@ describe('API portals', function(){
                 th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
                     var portalId = portalFromDatabase._id.toString();
                     var updatedPortal = {name: 'p_new', isActive: 'false'}
-                    superTest(server).put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(200).end((err, res) =>{
+                    th.put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(200).end((err, res) =>{
                         if(err){
                             done(err);
                             return;
@@ -341,7 +319,7 @@ describe('API portals', function(){
                 th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
                     var portalId = portalFromDatabase._id.toString();
                     var updatedPortal = {name: 'p_new', _id: '999999999999999999999999'}
-                    superTest(server).put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(200).end((err, res) =>{
+                    th.put(`/api/portals/${portalId}?token=${token}`).send(updatedPortal).expect(200).end((err, res) =>{
                         if(err){
                             done(err);
                             return;
@@ -362,7 +340,7 @@ describe('API portals', function(){
 
         it('responds with an invalid id with 400', function() {
             return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return superTest(server).del('/api/portals/invalidId?token=' + token).expect(400);
+                return th.del('/api/portals/invalidId?token=' + token).expect(400);
             });
         });
 
@@ -372,7 +350,7 @@ describe('API portals', function(){
                 return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(() => {
                     return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                         var id = portalFromDataBase._id;
-                        return superTest(server).del(`/api/portals/${id}?token=${token}`).expect(403);
+                        return th.del(`/api/portals/${id}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -383,7 +361,7 @@ describe('API portals', function(){
                 return th.removeClientModule('1', 'licenseserver').then(function(){
                     return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                         var portalId = portalFromDataBase._id;
-                        return superTest(server).del(`/api/portals/${portalId}?token=${token}`).expect(403);
+                        return th.del(`/api/portals/${portalId}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -394,7 +372,7 @@ describe('API portals', function(){
                 return th.removeClientModule('1', 'licenseserver').then(function(){
                     return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var portalId = portalFromDataBase._id;
-                        return superTest(server).del(`/api/portals/${portalId}?token=${token}`).expect(403);
+                        return th.del(`/api/portals/${portalId}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -402,7 +380,7 @@ describe('API portals', function(){
 
         it('responds with an id that does not exist with 404', function() {
             return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return superTest(server).del('/api/portals/999999999999999999999999?token=' + token).expect(404);
+                return th.del('/api/portals/999999999999999999999999?token=' + token).expect(404);
             });
         }); 
 
@@ -412,7 +390,7 @@ describe('API portals', function(){
             db.get('portals').findOne({name: 'p2'}).then((portalFromDatabase) =>{
                 th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) =>{
                     var portalId = portalFromDatabase._id.toString();
-                    superTest(server).del(`/api/portals/${portalId}?token=${token}`).expect(204).end((err, res) =>{
+                    th.del(`/api/portals/${portalId}?token=${token}`).expect(204).end((err, res) =>{
                         if(err){
                             done(err);
                             return;

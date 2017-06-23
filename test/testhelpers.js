@@ -512,6 +512,7 @@ th.defaults = {
     otherClient: '0',
     otherUser: '0_0_0',
     password: 'test',
+    portal: 'p1',
     user: '1_0_0',
     userGroup: '1_0'
 };
@@ -662,6 +663,33 @@ th.apiTests = {
                     assert.equal(objects.length, idCount);
                     for (var i = 0; i < idCount; i++) {
                         assert.strictEqual(objects[i]._id, insertedTestObjects[i]._id.toString());
+                    }
+                    return Promise.resolve();
+                });
+            });
+        },
+        defaultPositive: function(api, collection, createTestObjects) {
+            it('returns a list of elements with all details for the given IDs', function() {
+                var testElementIds, insertedElements;
+                return createTestObjects().then(function(objects) {
+                    return th.bulkInsert(collection, objects);
+                }).then(function(objects) {
+                    insertedElements = objects;
+                    testElementIds = objects.map((to) => to._id.toString());
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.get(`/api/${api}/forIds?ids=${testElementIds.join(',')}&token=${token}`).expect(200);
+                }).then(function(response) {
+                    var elementsFromApi = response.body;
+                    var idCount = insertedElements.length;
+                    assert.equal(elementsFromApi.length, idCount);
+                    for (var i = 0; i < idCount; i++) {
+                        var elementFromApi = elementsFromApi[i];
+                        var elementFromDatabase = insertedElements[i];
+                        Object.keys(elementFromApi).forEach(function(key) {
+                            assert.ok(elementFromDatabase[key]);
+                            assert.strictEqual(elementFromApi[key].toString(), elementFromDatabase[key].toString());
+                        });
                     }
                     return Promise.resolve();
                 });
