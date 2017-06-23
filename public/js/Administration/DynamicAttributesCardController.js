@@ -21,8 +21,8 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
     };
 
     $scope.load = function(){
-        if($scope.params.entityName){
-            $scope.name =  $scope.params.entityName;
+        if($scope.params.modelName){
+            $scope.name =  $scope.params.modelName;
         }
         else {
             $scope.name =  "some name";
