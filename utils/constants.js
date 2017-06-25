@@ -5,6 +5,10 @@
  */
 module.exports.apis = {
     /**
+     * API zum Administrieren von dynamischen Attributen an Datenbankentitäten
+     */
+    dynamicattributes: 'dynamicattributes',
+    /**
      * API for edititing portals
      */
     portals: 'portals',
@@ -28,7 +32,13 @@ module.exports.collections = {
      */
     clients:'clients',
     documents:'documents',
+    /**
+     * Mögliche Werte für dynamische Attribute vom Typ picklist
+     */
     dynamicattributeoptions:'dynamicattributeoptions',
+    /**
+     * Definitionen von dynamischen Attributen an Entitäten
+     */
     dynamicattributes:'dynamicattributes',
     dynamicattributevalues:'dynamicattributevalues',
     fmobjects:'fmobjects',
@@ -60,6 +70,9 @@ module.exports.collections = {
 module.exports.permissions = {
     ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
     ADMINISTRATION_SETTINGS: 'PERMISSION_ADMINISTRATION_SETTINGS',
+    /**
+     * Permission to view and edit dynamic attribute definitions and picklist options
+     */
     ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
     /**
      * Permission to show and edit users
@@ -83,11 +96,11 @@ module.exports.permissions = {
 /**
  * List of all possible dynamic attribute types. Used for validation in dynamicattributes API.
  */
-module.exports.dynamicAttributeTypes = [
-    'text',
-    'boolean',
-    'picklist'
-];
+module.exports.dynamicAttributeTypes = {
+    text: 'text',
+    boolean: 'boolean',
+    picklist: 'picklist'
+};
 
 /**
  * List of all possible models that can have dynamic attribute. Used for option selection in dynamicattributes API.

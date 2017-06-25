@@ -32,14 +32,13 @@ var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var apiHelper = require('../utils/apiHelper');
-var constants = require('../utils/constants');
+var co = require('../utils/constants');
 
 /**
  * Check whether the modelName given in the request is valid or not
  */
 function validateModelName(req, res, next) {
-    //TODO shouldn't the check be in constants.models instead of constants.dynamicAttributeTypes??
-    if (constants.models.indexOf(req.params.modelName) < 0) {
+    if (!co.collections[req.query.modelName]) {
         return res.sendStatus(400);
     }
     next();
@@ -113,7 +112,7 @@ router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CL
  * Returns a list of all possible option types (currently only text, boolean and picklist)
  */
 router.get('/types', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), (req, res) => {
-    res.send(constants.dynamicAttributeTypes);
+    res.send(Object.keys(co.dynamicAttributeTypes));
 });
 
 /**
