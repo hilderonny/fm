@@ -1,4 +1,4 @@
-app.controller('AdministrationDynamicAttributesEntityListCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationDynamicAttributesModelListCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     // User clicks on close button
     $scope.closeCard = function() {
         if ($scope.params.closeCallback) {
@@ -8,17 +8,20 @@ app.controller('AdministrationDynamicAttributesEntityListCardController', functi
         utils.removeCard($element);
     };
 
-    $scope.selectEntity = function(selectedEntity){
+    //User clicks on ceratin list item to select particular model
+    $scope.selectModel = function(selectedModel){
         utils.removeCardsToTheRightOf($element);
         utils.addCard('Administration/DynamicAttributesCard', {
-            entityName: selectedEntity.name
+            modelName: selectedModel.name,
+            icon: selectedModel.icon, //TODO check if you need this parameter
+            title: selectedModel.title
         });
-        $scope.selectedEntity = selectedEntity;
+        $scope.selectedModel = selectedModel;
     };
     
-    $scope.entities = [
-        {name: 'users'},
-        {name: 'user groups'},
-        {name: 'documents'}
+    $scope.models = [
+        {name: 'users', icon: 'User', title: 'Users'}, //TODO add translation key for title attribute 
+        {name: 'usergroups', icon: 'User Group Man Man', title: 'User groups'},
+        {name: 'documents', icon: 'Document', title: 'Documents'}
     ];
 });

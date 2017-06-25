@@ -117,11 +117,11 @@ router.get('/types', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTR
 });
 
 /**
- * Creates a new dynamic attribute. Required properties are model, name_en and type.
+ * Creates a new dynamic attribute. Required properties are modelName, name_en and type.
  */
 router.post('/', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'w', 'base'), (req, res) => {
     var dynamicAttribute = req.body;
-    if (!dynamicAttribute || !dynamicAttribute.type || !dynamicAttribute.moduleName || !dynamicAttribute.name_en) {
+    if (!dynamicAttribute || !dynamicAttribute.type || !dynamicAttribute.modelName || !dynamicAttribute.name_en) {
         return res.sendStatus(400);
     }
     // Ids are generated automatically
@@ -129,7 +129,8 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUT
     dynamicAttribute.clientId = req.user.clientId; 
 
      req.db.insert('dynamicattributes', dynamicAttribute).then(function(insertedDynamicAttribute){
-            return res.send(insertedDynamicAttribute);
+         console.log(insertedDynamicAttribute);
+         return res.send(insertedDynamicAttribute);
      });
 });
 

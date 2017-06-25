@@ -6,13 +6,13 @@
 
     <md-card-title flex="none">
         <md-card-title-text>
-            <span class="md-headline"><span ng-bind="name"></span></span>
+            <span class="md-headline"><span ng-bind="title"></span></span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-button class="md-fab md-accent" ng-if="canWriteUserDetails" ng-click="showOtions()">
+    <!--md-button class="md-fab md-accent" ng-if="canWriteAttributeDetails" ng-click="showOtions()">
         <md-icon md-svg-src="/css/icons/material/Menu.svg"></md-icon>
-    </md-button>
+    </md-button-->
 
     <md-fab-speed-dial md-direction="down" class="md-scale">
         <md-fab-trigger>
@@ -22,17 +22,9 @@
             </md-button>
         </md-fab-trigger>
     </md-fab-speed-dial>
-
-    <!--md-tabs flex>
-        <md-tab>
-            <md-tab-label><span>ATTRIBUTES</span></md-tab-label>
-            <md-tab-body><ng-include src="'partial/Administration/AttributesTab.html'"></ng-include></md-tab-body>
-        </md-tab>
-    </md-tabs-->
-
     <md-list class="lines-beetween-items">
-        <md-list-item ng-repeat="attribute in dynamicattributes.modelName | orderBy: 'name_en'" ng-click="selectAttribute(attribute)" ng-class="{active:selectedAttribute == attribute}" aria-label="{{attribute.name_en}}">
-            <md-icon md-svg-src="/css/icons/material/{{dynamicattributes.modelName}}.svg"></md-icon>
+        <md-list-item ng-repeat="attribute in attributes | orderBy: ['name_en']" ng-click="selectAttribute(attribute)" ng-class="{active:selectedAttribute == attribute}" aria-label="{{attribute.name_en}}">
+            <md-icon md-svg-src="/css/icons/material/{{icon}}.svg"></md-icon>
             <p ng-bind="attribute.name_en"></p>
         </md-list-item>
     </md-list>

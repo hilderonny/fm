@@ -10,7 +10,29 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     };
 
     $scope.createAttribute = function(){
-
+        var attributeToSend = { 
+            name_en: $scope.attribute.name, 
+            modelName: $scope.params.modelName,
+            type: $scope.attribute.type
+        };
+        $http.post('/api/dynamicattributes', attributeToSend).then(function successCallback(response) {
+            if (response.status === 409) {
+                //$scope.usersForm.un.$setValidity('nameInUse', false);
+                return;
+            }
+            var createdAttribute = response.data;
+            $scope.isNewAttribute = false;
+            $scope.dynamicattribute._id = createdAttribute._id;
+            $scope.attribute.name = createdAttribute.name_en;
+            //$scope.relationsEntity = { type:'dynamicattributes', id:createdAttribute._id };
+            if ($scope.params.createAttributeCallback) {
+                $scope.params.createAttributeCallback(createdAttribute);
+            }
+            //TODO use the right translation key
+            /*$translate(['TRK_USERS_USER_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_CREATED).hideDelay(1000).position('bottom right'));
+            });*/
+        });
     };
 
     $scope.saveAttribute = function(){
@@ -35,7 +57,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     // Check the permissions for the details page for handling button visibility
     //TODO ask if this permission check is not pointless in this case!?
     $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function (response) {
-        $scope.canWriteUserDetails = response.data;
+        $scope.canWriteAttributeDetails = response.data;
     });
 
 
@@ -43,20 +65,30 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     //Loads dynamicAttribute details or prepares for an empty dialog for a new dynamicAttribute
     //Params:
     //... 
-   /* $scope.load = function(){
+    $scope.load = function(){
         //Switch between creation of a new dynamicAttribute and loading of an existing one
         if($scope.params.dynamicAttributeId){
             //Existing dynamicAttribute
-            $http.get().then(function(){
+            $http.get(`/api/dynamicattributes/${$scope.params.dynamicAttributeId}`).then(function(response){
                 $scope.isNewAttribute = false;
+                var completeAttribute = response.data;
+                $scope.dynamicattribute = completeAttribute;
+                $scope.attributeName = completeAttribute.name_en;
+                $scope.attributeType = completeAttribute.type;
+
             });
         }
         else{
             //new dynamicAttribute
             $scope.isNewAttribute = true;
+            $scope.dynamicattribute = {name_en: ''};
+            /*$scope.attributeName = 'Haha';
+            $scope.attributeType = 'text'; //TODO check how to use global types $scope.attributeType = ???
+            $scope.modelName = $scope.params.name;*/
         }
-    };*/
+        $scope.modelName = 'users';
+    };
 
-   // $scope.load();
+    $scope.load();
 
 });
