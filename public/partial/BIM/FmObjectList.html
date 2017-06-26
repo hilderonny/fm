@@ -1,8 +1,8 @@
 <md-list class="lines-beetween-items fmobjects-3">
-    <md-list-item ng-repeat="fmObject in fmobjects | orderBy: ['name']" ng-click="selectFmObject(fmObject, $event)" ng-class="{active:fmObjectListSelectedFmObject._id.toString() === fmObject._id.toString()}" aria-label="{{fmObject.name}}">
-        <md-icon md-svg-src="/css/icons/fm/{{fmObject.type}}.svg"></md-icon>
+    <md-list-item ng-repeat="fmobject in fmobjects | orderBy: ['name']" ng-click="selectFmObject(fmobject, $event)" ng-class="{active:fmObjectListSelectedFmObject._id.toString() === fmobject._id.toString()}" aria-label="{{fmobject.name}}">
+        <md-icon md-svg-src="/css/icons/fm/{{fmobject.type}}.svg"></md-icon>
         <div class="md-list-item-text">
-            <h3 ng-bind="fmObject.name"></h3>
+            <h3 ng-bind="fmobject.name"></h3>
         </div>
     </md-list-item>
 </md-list>

@@ -42,7 +42,7 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
         if($scope.params.modelName){
             $scope.title =  $scope.params.title;
             $scope.icon = $scope.params.icon;
-            $http.get(`/api/dynamicattributes/model/${$scope.params.modelName}`).then(function(attributesFromDataBank){
+            $http.get('/api/dynamicattributes/model/' + $scope.params.modelName).then(function(attributesFromDataBank){
                 $scope.attributes = attributesFromDataBank.data;
             })
         }

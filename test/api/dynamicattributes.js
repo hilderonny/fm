@@ -1058,22 +1058,40 @@ describe('API dynamicattributes', function() {
     });
 
     it('responds to GET/option/:id with all details of the dynamic attribute option', function(done) {
-        db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(attributeFromDB){
-            db.get('dynamicattributeoptions').findOne({dynamicAttributeId: attributeFromDB._id}).then(function(attributeOptionFromDB){
-                testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){
-                    superTest(server).get(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).then(function(res, err){
-                        if(err){return done(err);}
-                        var attributeOptionFromApi = res.body;
-                        //console.log(attributeOptionFromApi);
-                        //TODO implement actual comparisson
-                        done();     
+        db.get('clients').findOne({name: '0'}).then(function(client0){ 
+            db.get('dynamicattributes').findOne({type: 'picklist', clientId: client0._id}).then(function(attributeFromDB){ //attribute from client 0
+                db.get('dynamicattributeoptions').findOne({dynamicAttributeId: attributeFromDB._id}).then(function(attributeOptionFromDB){
+                    testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ //user from client 0
+                        superTest(server).get(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).then(function(res, err){
+                            if(err){return done(err);}
+                            var attributeOptionFromApi = res.body;
+                            //console.log(attributeOptionFromApi);
+                            //TODO implement actual comparisson
+                            done();     
+                        });
                     });
                 });
             });
         });
     });
 
-    xit('responds to GET/options/:id with a list of all options and their details of the dynamic attribute', function(done) {
+    it('responds to GET/options/:id with a list of all options and their details of the dynamic attribute', function(done) {
+        db.get('clients').findOne({name: '0'}).then(function(client0){
+            db.get('dynamicattributes').findOne({type: 'picklist', clientId: client0._id}).then(function(attributeFromDB){
+                db.get('dynamicattributeoptions').find({dynamicAttributeId: attributeFromDB._id}).then(function(OptionsFromDB){
+                     testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ //user from client 0
+                         superTest(server).get(`/api/dynamicattributes/options/${attributeFromDB._id}?token=${token}`).then(function(res, err){
+                             if(err){return done(err);}
+                             var OptionsFromApi = res.body;
+                             console.log(OptionsFromApi);
+                             console.log('Test fails for now :(');
+                             //TODO implement actual comparisson 
+                             done();
+                         });
+                     });    
+                });
+            });
+        });
     });
 
     xit('responds to GET/values/:modelName/:id where no dynamic attribute values exist for the given entity id with an empty list', function(done) {

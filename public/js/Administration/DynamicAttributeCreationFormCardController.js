@@ -69,7 +69,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         //Switch between creation of a new dynamicAttribute and loading of an existing one
         if($scope.params.dynamicAttributeId){
             //Existing dynamicAttribute
-            $http.get(`/api/dynamicattributes/${$scope.params.dynamicAttributeId}`).then(function(response){
+            $http.get('/api/dynamicattributes/' + $scope.params.dynamicAttributeId).then(function(response){
                 $scope.isNewAttribute = false;
                 var completeAttribute = response.data;
                 $scope.dynamicattribute = completeAttribute;

@@ -13,7 +13,7 @@
     "TRK_DOCUMENTS_IS_SHARED" : "споделен достъп",
     "TRK_DOCUMENTS_MORE_ACTIONS" : "Повече опции ...",
     "TRK_DOCUMENTS_NAME" : "име",
-    "TRK_DOCUMENTS_REALLY_DELETE_DOCUMENT" : "Сигурни ли Сте, че искате да премахнете следния документ \"{{documentName}}\"?",
+    "TRK_DOCUMENTS_REALLY_DELETE_DOCUMENT" : "Сигурни ли сте, че искате да премахнете следния документ \"{{documentName}}\"?",
     "TRK_DOCUMENTS_SAVE" : "запази",
     "TRK_DOCUMENTS_SELECT_FOLDER_OR_DOCUMENT" : "Избор на папкa или документ",
     "TRK_FOLDERS_CONTENT" : "съдържание",
