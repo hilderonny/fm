@@ -38,7 +38,7 @@ var co = require('../utils/constants');
  * Check whether the modelName given in the request is valid or not
  */
 function validateModelName(req, res, next) {
-    if (!co.collections[req.query.modelName]) {
+    if (!co.collections[req.params.modelName]) {
         return res.sendStatus(400);
     }
     next();
@@ -49,7 +49,7 @@ function validateModelName(req, res, next) {
  */
 router.get('/model/:modelName', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateModelName, (req, res) => {
     var modelName = req.params.modelName;
-    req.db.get('dynamicattributes').find({modelName: modelName}).then(function(dynamicattributes){
+    req.db.get(co.collections.dynamicattributes).find({modelName: modelName}).then(function(dynamicattributes){
         res.send(dynamicattributes);
     });
 });
@@ -112,6 +112,8 @@ router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CL
  * Returns a list of all possible option types (currently only text, boolean and picklist)
  */
 router.get('/types', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), (req, res) => {
+    res.send(co.dynamicAttributeTypes.map(function(k) { return co.dynamicAttributeTypes[k]; } ));
+    res.send(co.dynamicAttributeTypes.map((k) => co.dynamicAttributeTypes[k]));
     res.send(Object.keys(co.dynamicAttributeTypes));
 });
 
