@@ -463,7 +463,7 @@ th.prepareDocuments = () => {
 };
 
 /**
- * Create a relation to each activity for each document in the database.
+ * Create a relation to each activity for each usergroup in the database.
  */
 th.prepareRelations = function() {
     var relations = [];
@@ -514,7 +514,7 @@ th.createRelation = (entityType1, nameType1, entityType2, nameType2) => {
     });
 };
 
-function getModuleForApi(api) {
+th.getModuleForApi = function(api) {
     // Use only the first parts until the slash
     api = api.split('/')[0];
     for (var moduleName in moduleConfig.modules) {
@@ -524,9 +524,10 @@ function getModuleForApi(api) {
             return moduleName;
         }
     };
-}
+};
 
 th.defaults = {
+    activity: '1_0_0_0',
     adminUser: '1_0_ADMIN0',
     client: '1',
     otherClient: '0',
@@ -552,7 +553,7 @@ th.apiTests = {
             });
             function checkForUser(user) {
                 return function() {
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -576,7 +577,7 @@ th.apiTests = {
             });
             function checkForUser(user) {
                 return function() {
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     var testObjectIds;
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return createTestObjects();
@@ -710,7 +711,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var insertedId;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return db.get(collection).insert(testObject);
                     }).then(function(insertedObject) {
@@ -759,7 +760,7 @@ th.apiTests = {
                     return th.post(`/api/${api}`).send(testObject).expect(403);
                 });
             });
-            it('responds without write permission with 403', function() {
+            if (permission) it('responds without write permission with 403', function() {
                 var loginToken;
                 return th.removeWritePermission(th.defaults.user, permission).then(function() {
                     return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -773,7 +774,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -814,7 +815,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -908,7 +909,7 @@ th.apiTests = {
                     return th.del(`/api/${api}/${id.toString()}`).expect(403);
                 });
             });
-            it('responds without write permission with 403', function() {
+            if (permission) it('responds without write permission with 403', function() {
                 var loginToken;
                 return th.removeWritePermission(th.defaults.user, permission).then(function() {
                     return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -922,7 +923,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -959,7 +960,7 @@ th.apiTests = {
                 });
             });
         },
-        defaultPositive: function(api, collection, getId) {
+        defaultPositive: function(api, collection, getId, skipRelations) {
             it('deletes the object and return 204', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
@@ -975,7 +976,7 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
-            it('All relations, where the element is the source (type1, id1), are also deleted', function() {
+            if (!skipRelations) it('All relations, where the element is the source (type1, id1), are also deleted', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     loginToken = token;
@@ -990,7 +991,7 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
-            it('All relations, where the element is the target (type2, id2), are also deleted', function() {
+            if (!skipRelations) it('All relations, where the element is the target (type2, id2), are also deleted', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     loginToken = token;

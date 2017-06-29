@@ -3,68 +3,127 @@
  */
 var assert = require('assert');
 var fs = require('fs');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var async = require('async');
+var co = require('../../utils/constants');
 
 describe('API relations', function() {
-
-    var server = require('../../app');
     
     beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.prepareActivities)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareRelations);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.prepareActivities)
+            .then(th.preparePermissions)
+            .then(th.prepareRelations);
     });
 
     describe('GET/', function() {
 
         it('responds with 404', function() {
-            return superTest(server).get('/api/relations').expect(404);
+            return th.get(`/api/${co.apis.relations}`).expect(404);
         });
 
     });
 
-    describe('/:entityType/:id', function() {
+    describe('GET/:entityType/:id', function() {
 
-        xit('responds without authentication with 403', function() {
+        function createGetTestRelation() {
+            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, th.defaults.user).then(function(preparedRelation) {
+                return db.get(co.collections.relations).insert(preparedRelation);
+            });
+        }
+
+        it('responds without authentication with 403', function() {
+            return createGetTestRelation().then(function(createdRelation) {
+                return th.get(`/api/${co.apis.relations}/${createdRelation.type1}/${createdRelation.id1.toString()}`).expect(403);
+            });
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+        function checkForUser(user) {
+            return function() {
+                var relationFromDatabase;
+                var moduleName = th.getModuleForApi(co.apis.relations);
+                return th.removeClientModule(th.defaults.client, moduleName).then(function() {
+                    return createGetTestRelation();
+                }).then(function(createdRelation) {
+                    relationFromDatabase = createdRelation;
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.get(`/api/${co.apis.relations}/${relationFromDatabase.type1}/${relationFromDatabase.id1.toString()}?token=${token}`).expect(403);
+                });
+            }
+        }
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+
+        it('responds with an invalid id with 400', function() {
+            var relationFromDatabase;
+            return createGetTestRelation().then(function(createdRelation) {
+                relationFromDatabase = createdRelation;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.relations}/${relationFromDatabase.type1}/invalidId?token=${token}`).expect(400);
+            });
         });
 
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds with an invalid id with 400', function() {
-        });
-
-        xit('responds with an invalid entity type with an empty list', function() {
+        it('responds with an invalid entity type with an empty list', function() {
+            var relationFromDatabase;
+            return createGetTestRelation().then(function(createdRelation) {
+                relationFromDatabase = createdRelation;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.relations}/invalidEntityType/${relationFromDatabase.id1.toString()}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var relations = response.body;
+                assert.ok(Array.isArray(relations));
+                assert.strictEqual(relations.length, 0);
+                return Promise.resolve();
+            });
         });
         
-        xit('responds with an id where no entity of given entity type exists with 403', function() {
+        it('responds with an id where no entity of given entity type exists with empty list', function() {
+            var relationFromDatabase;
+            return createGetTestRelation().then(function(createdRelation) {
+                relationFromDatabase = createdRelation;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.relations}/${relationFromDatabase.type1}/999999999999999999999999?token=${token}`).expect(200);
+            }).then(function(response) {
+                var relations = response.body;
+                assert.ok(Array.isArray(relations));
+                assert.strictEqual(relations.length, 0);
+                return Promise.resolve();
+            });
         });
 
-        xit('responds with 403 when the entity of the given entity type with a given id does not belong to the client of the user', function() {
+        it('responds with empty list when the relation for the given entityType and id does not belong to the client of the user', function() {
+            var relationFromDatabase;
+            return createGetTestRelation().then(function(createdRelation) {
+                relationFromDatabase = createdRelation;
+                return th.doLoginAndGetToken(th.defaults.otherUser, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.relations}/${relationFromDatabase.type1}/${relationFromDatabase.id1.toString()}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var relations = response.body;
+                assert.ok(Array.isArray(relations));
+                assert.strictEqual(relations.length, 0);
+                return Promise.resolve();
+            });
         });
 
         it('returns all details of the realtion belongs to a given type1/2', function() {
             var relationFromDatabase, linkedrelationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'users', '1_0_0').then(function(preparedRelation){
-                return db.get('relations').insert(preparedRelation);
-            }).then(function(createdRelation){
+            return createGetTestRelation().then(function(createdRelation){
                 relationFromDatabase=createdRelation; 
-                return db.get('relations').find({type1:relationFromDatabase.type1,id1:relationFromDatabase.id1}).then(function(listrelationFromDatabse){                    
+                return db.get(co.apis.relations).find({type1:relationFromDatabase.type1,id1:relationFromDatabase.id1}).then(function(listrelationFromDatabse){                    
                     linkedrelationFromDatabase=listrelationFromDatabse;
-                    return testHelpers.doLoginAndGetToken('1_0_0','test');
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
                 }).then(function(token){
-                    return superTest(server).get(`/api/relations/${relationFromDatabase.type1}/${relationFromDatabase.id1}?token=${token}`).expect(200);                    
+                    return th.get(`/api/${co.apis.relations}/${relationFromDatabase.type1}/${relationFromDatabase.id1.toString()}?token=${token}`).expect(200);                    
                 }).then(function(response){
                     var allrelationFromApi = response.body;                   
                     assert.strictEqual(allrelationFromApi.length, linkedrelationFromDatabase.length,`Number of relation differ (${allrelationFromApi.length} from API, ${linkedrelationFromDatabase.length} in database)` )
@@ -80,132 +139,109 @@ describe('API relations', function() {
                     return Promise.resolve();
                 });
             });    
-
          });
+
     });
 
     describe('POST/', function() {
 
-        // Negative tests
+        function createPostTestRelation() {
+            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, th.defaults.user);
+        }
 
-        it('responds without authentication with 403', function() {
-            return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) => {                       
-                return superTest(server).post(`/api/relations`).send(preparedRelation).expect(403);
-            });
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                    return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) => {                       
-                        return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(403);
-                    });
-                });              
-            });  
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token)=>{
-                    return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) => {                       
-                        return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(403);
-                    });
-                });              
-            });  
-        });
-
+        th.apiTests.post.defaultNegative(co.apis.relations, false, createPostTestRelation);
         
         it('responds with 400 when the relation has no attribute "type1"', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) =>{
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return createPostTestRelation().then((preparedRelation) =>{
                     delete preparedRelation.type1;
-                    return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(400);
+                    return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(400);
 
                 });
             });
         });
 
         it('responds with 400 when the relation has no attribute "type2"', function() {
-             return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) =>{
+             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return createPostTestRelation().then((preparedRelation) =>{
                     delete preparedRelation.type2;
-                    return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(400);
+                    return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(400);
                 });
             });
         });
 
         it('responds with 400 when the relation has no attribute "id1"', function() {
-             return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) =>{
+             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return createPostTestRelation().then((preparedRelation) =>{
                     delete preparedRelation.id1;
-                    return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(400);
+                    return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(400);
 
                 });
             });
         });
 
         it('responds with 400 when the relation has no attribute "id2"', function() {
-             return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) =>{
+             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return createPostTestRelation().then((preparedRelation) =>{
                     delete preparedRelation.id2;
-                    return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(400);
+                    return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(400);
 
                 });
             });
         });
 
         it('responds with 400 when id1 is invalid', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) =>{
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return createPostTestRelation().then((preparedRelation) =>{
                     preparedRelation.id1 = 'invalid';
-                    return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(400);
+                    return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(400);
                });
             });
         });
 
         it('responds with 400 when id2 is invalid', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation) =>{
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return createPostTestRelation().then((preparedRelation) =>{
                     preparedRelation.id2 = 'invalid';
-                    return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(400);
+                    return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(400);
                });
             });
         });
 
         it('responds with 404 when there is no type1 entity for the given id1', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation)=>{
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return createPostTestRelation().then((preparedRelation)=>{
                     return db.get('clients').findOne({name: '1'}).then((client)=>{
                         preparedRelation.id1 = client._id;
-                        return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(404);
+                        return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(404);
                     });
                 });
             });
         });
 
         it('responds with 404 when there is no type2 entity for the given id2', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_1', 'users', '1_0_0').then((preparedRelation)=>{
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return createPostTestRelation().then((preparedRelation)=>{
                     return db.get('clients').findOne({name: '1'}).then((client)=>{
                         preparedRelation.id2 = client._id;
-                        return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(404);
+                        return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(404);
                     });
                 });
             });
         });
 
         it('responds with 403 when the type1 entity for the given id1 does not belong to the client of the user', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0','test').then((token)=>{
-                return testHelpers.createRelation('activities', '0_0_0_0', 'users', '1_0_0').then((preparedRelation)=>{
-                    return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(403);
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return th.createRelation(co.collections.activities, '0_0_0_0', co.collections.users, th.defaults.user).then((preparedRelation)=>{
+                    return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(403);
                 });
             });
         });
 
         it('responds with 403 when the type2 entity for the given id2 does not belong to the client of the user', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0','test').then((token)=>{
-                return testHelpers.createRelation('activities', '1_0_0_0', 'users', '0_0_0').then((preparedRelation)=>{
-                    return superTest(server).post(`/api/relations?token=${token}`).send(preparedRelation).expect(403);
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
+                return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, '0_0_0').then((preparedRelation)=>{
+                    return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(403);
                 });
             });
         });
@@ -213,23 +249,21 @@ describe('API relations', function() {
         // Positive tests
 
         it('responds with 200 and creates a relation between two entities of different types', function() {
-            var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'users', '1_0_0').then(function(preparedRelation) {
-                return db.get('relations').insert(preparedRelation);
-            }).then(function(createdRelation) {
-                relationFromDatabase = createdRelation;
-                return testHelpers.doLoginAndGetToken('1_0_0','test');
+            var preparedRelation;
+            return createPostTestRelation().then(function(relation) {
+                preparedRelation = relation;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 var newRelation = {
-                    type1: relationFromDatabase.type1,
-                    type2: relationFromDatabase.type2,
-                    id1: relationFromDatabase.id1.toString(),
-                    id2: relationFromDatabase.id2.toString()
+                    type1: preparedRelation.type1,
+                    type2: preparedRelation.type2,
+                    id1: preparedRelation.id1.toString(),
+                    id2: preparedRelation.id2.toString()
                 };
-                return superTest(server).post(`/api/relations?token=${token}`).send(newRelation).expect(200);
+                return th.post(`/api/${co.apis.relations}?token=${token}`).send(newRelation).expect(200);
             }).then(function(response) {
                 var relationFromApi = response.body; 
-                db.get('relations').findOne(relationFromApi._id).then((relationAfterCreation)=>{
+                db.get(co.collections.relations).findOne(relationFromApi._id).then((relationAfterCreation)=>{
                     assert.ok(relationAfterCreation, 'New Relation wasn not created');
                     assert.strictEqual(relationAfterCreation.type1, relationFromApi.type1,`type1 (${relationFromApi.type1} from API, differs from type1 ${relationAfterCreation.type1} in database)` );
                     assert.strictEqual(relationAfterCreation.id1.toString(), relationFromApi.id1.toString(),`Id1 (${relationFromApi.id1} from API, differs from id1 ${relationAfterCreation.id1} in database)`  );
@@ -241,23 +275,21 @@ describe('API relations', function() {
         });
 
         it('responds with 200 and creates a relation between two entities of same types', function() {
-              var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'activities', '1_0_0_1').then(function(preparedRelation) {
-                return db.get('relations').insert(preparedRelation);
-            }).then(function(createdRelation) {
-                relationFromDatabase = createdRelation;
-                return testHelpers.doLoginAndGetToken('1_0_0','test');
+            var preparedRelation;
+            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.activities, '1_0_0_1').then(function(relation) {
+                preparedRelation = relation;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 var newRelation = {
-                    type1: relationFromDatabase.type1,
-                    type2: relationFromDatabase.type2,
-                    id1: relationFromDatabase.id1.toString(),
-                    id2: relationFromDatabase.id2.toString()
+                    type1: preparedRelation.type1,
+                    type2: preparedRelation.type2,
+                    id1: preparedRelation.id1.toString(),
+                    id2: preparedRelation.id2.toString()
                 };
-                return superTest(server).post(`/api/relations?token=${token}`).send(newRelation).expect(200);
+                return th.post(`/api/${co.apis.relations}?token=${token}`).send(newRelation).expect(200);
             }).then(function(response) {
                 var relationFromApi = response.body; 
-                db.get('relations').findOne(relationFromApi._id).then(function(relationAfterCreation){
+                db.get(co.collections.relations).findOne(relationFromApi._id).then(function(relationAfterCreation){
                     assert.ok(relationAfterCreation, 'New Relation wasn not created');
                     assert.strictEqual(relationAfterCreation.type1, relationFromApi.type2,`type1 (${relationFromApi.type2} from API, differs from type2 ${relationAfterCreation.type1} in database)` );
                     assert.strictEqual(relationAfterCreation.id1.toString(), relationFromApi.id1.toString(),`Id1 (${relationFromApi.id1} from API, differs from id1 ${relationAfterCreation.id1} in database)`  );
@@ -269,23 +301,21 @@ describe('API relations', function() {
         });  
 
         it('responds with 200 and creates a relation between the same entities (id1=id2 and type1=type2)', function() {
-            var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'activities', '1_0_0_0').then(function(preparedRelation) {
-                return db.get('relations').insert(preparedRelation);
-            }).then(function(createdRelation) {
-                relationFromDatabase = createdRelation;
-                return testHelpers.doLoginAndGetToken('1_0_0','test');
+            var preparedRelation;
+            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.activities, th.defaults.activity).then(function(relation) {
+                preparedRelation = relation;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 var newRelation = {
-                    type1: relationFromDatabase.type1,
-                    type2: relationFromDatabase.type2,
-                    id1: relationFromDatabase.id1.toString(),
-                    id2: relationFromDatabase.id2.toString()
+                    type1: preparedRelation.type1,
+                    type2: preparedRelation.type2,
+                    id1: preparedRelation.id1.toString(),
+                    id2: preparedRelation.id2.toString()
                 };
-                return superTest(server).post(`/api/relations?token=${token}`).send(newRelation).expect(200);
+                return th.post(`/api/${co.apis.relations}?token=${token}`).send(newRelation).expect(200);
             }).then(function(response) {
                 var relationFromApi = response.body; 
-                db.get('relations').findOne(relationFromApi._id).then(function(relationAfterCreation){
+                db.get(co.collections.relations).findOne(relationFromApi._id).then(function(relationAfterCreation){
                     assert.ok(relationAfterCreation, 'New Relation wasn not created');
                     assert.strictEqual(relationAfterCreation.type1, relationFromApi.type2,`type1 (${relationFromApi.type2} from API, differs from type2 ${relationAfterCreation.type1} in database)` );
                     assert.strictEqual(relationAfterCreation.id1.toString(), relationFromApi.id2.toString(),`Id1 (${relationFromApi.id2} from API, differs from id1 ${relationAfterCreation.id1} in database)`  );
@@ -298,11 +328,11 @@ describe('API relations', function() {
 
         it('responds with 200 but does not create a relation between two entities where a relation already exists', function() {
             var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'users', '1_0_0').then(function(preparedRelation) {
-                return db.get('relations').insert(preparedRelation);
+            return createPostTestRelation().then(function(preparedRelation) {
+                return db.get(co.collections.relations).insert(preparedRelation);
             }).then(function(createdRelation) {
                 relationFromDatabase = createdRelation;
-                return testHelpers.doLoginAndGetToken('1_0_0','test');
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 var newRelation = {
                     type1: relationFromDatabase.type1,
@@ -310,7 +340,7 @@ describe('API relations', function() {
                     id1: relationFromDatabase.id1.toString(),
                     id2: relationFromDatabase.id2.toString()
                 };
-                return superTest(server).post(`/api/relations?token=${token}`).send(newRelation).expect(200);
+                return th.post(`/api/${co.apis.relations}?token=${token}`).send(newRelation).expect(200);
             }).then(function(response) {
                 assert.strictEqual(response.body._id, relationFromDatabase._id.toString());
                 return Promise.resolve();
@@ -321,104 +351,35 @@ describe('API relations', function() {
     describe('PUT/', function() {
 
         it('responds with 404', function() { 
-            return db.get('relations').findOne({type1: 'clients'}).then((relation)=>{
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{                 
-                    var id = relation._id;
-                    var updatedRelation={
-                        type1:'activities'
-                    };                                
-                    return superTest(server).put(`/api/relations/${id}?token=${token}`).send(updatedRelation).expect(404);
-                });
+            var relationFromDatabase;
+            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, th.defaults.user).then(function(preparedRelation) {
+                return db.get(co.collections.relations).insert(preparedRelation);
+            }).then(function(createdRelation) {
+                relationFromDatabase = createdRelation;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                var updatedRelation = {
+                    type1: co.collections.activities
+                };                                
+                return th.put(`/api/${co.apis.relations}/${relationFromDatabase._id.toString()}?token=${token}`).send(updatedRelation).expect(404);
             });              
         });
     });
 
     describe('DELETE/', function() {
 
-        // Negative tests
-        it('responds without authentication with 403', function() {           
-             return db.get('relations').findOne({type1:'activities'}).then((relation) => {                       
-                return superTest(server).del('/api/relations/' + relation._id.toString()).expect(403);
-            });           
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'users', '1_0_0').then(function(preparedRelation){
-                return db.get('relations').insert(preparedRelation);
-            }).then(function(createdRelation){
-                relationFromDatabase=createdRelation;
-                return testHelpers.removeClientModule('1','base').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_0','test');
-                }).then(function(token){
-                    return superTest(server).del(`/api/relations/${relationFromDatabase._id}?token=${token}`).expect(403);                    
-                });
-            });            
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'users', '1_0_0').then(function(preparedRelation){
-                return db.get('relations').insert(preparedRelation);
-            }).then(function(createdRelation){
-                relationFromDatabase=createdRelation;
-                return testHelpers.removeClientModule('1','base').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0','test');
-                }).then(function(token){
-                    return superTest(server).del(`/api/relations/${relationFromDatabase._id}?token=${token}`).expect(403);                    
-                });
-            });    
-           
-        });
-
-        it('responds with an invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).del('/api/relations/invalidId?token=' + token).expect(400);
-            });
-        });
-        
-        it('responds with an id where no relation exists with 403', function() {
-            var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'users', '1_0_0').then(function(preparedRelation){
-                return db.get('relations').insert(preparedRelation);
-            }).then(function(createdRelation){
-                relationFromDatabase=createdRelation;
-                return testHelpers.doLoginAndGetToken('1_0_0','test');              
-            }).then(function(token){
-                return superTest(server).del('/api/relations/999999999999999999999999?token=' + token).expect(403); 
-            });         
-        });
-        it('responds with 403 when the relations with a given id does not belong to the client of the user', function() {
-            var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'users', '1_0_0').then(function(preparedRelation){
-                return db.get('relations').insert(preparedRelation);
-            }).then(function(createdRelation){
-                relationFromDatabase=createdRelation;
-                return testHelpers.doLoginAndGetToken('0_0_0','test');              
-            }).then(function(token){
-                return superTest(server).del(`/api/relations/${relationFromDatabase._id}?token=${token}`).expect(403); 
-            });    
-        });
-           
-       // Positive tests
-
-        it('responds with 204 after successfully deleting the relation', function() {
-             var relationFromDatabase;
-            return testHelpers.createRelation('activities', '1_0_0_0', 'users', '1_0_0').then(function(preparedRelation) {
-                return db.get('relations').insert(preparedRelation);
+        function getDeleteRelationId() {
+            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, th.defaults.user).then(function(preparedRelation) {
+                return db.get(co.collections.relations).insert(preparedRelation);
             }).then(function(createdRelation) {
-                relationFromDatabase = createdRelation;
-                return testHelpers.doLoginAndGetToken('1_0_0','test');
-            }).then(function(token) {              
-                return superTest(server).del(`/api/relations/${relationFromDatabase._id}?token=${token}`).expect(204);
-            }).then(function(response) {
-                return db.get('relations').findOne(relationFromDatabase._id);
-            }).then(function(relationFromDatabaseAfterDeletion){
-                assert.ok(!relationFromDatabaseAfterDeletion, 'The relation has not been deleted yet');
-                return Promise.resolve();               
+                return Promise.resolve(createdRelation._id);
             });
-                
-        });
+        }
+
+        th.apiTests.delete.defaultNegative(co.apis.relations, false, getDeleteRelationId);
+        th.apiTests.delete.clientDependentNegative(co.apis.relations, getDeleteRelationId);
+        th.apiTests.delete.defaultPositive(co.apis.relations, co.collections.relations, getDeleteRelationId, true);
+
     });
 
 });
