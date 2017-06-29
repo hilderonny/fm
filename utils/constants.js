@@ -9,6 +9,10 @@ module.exports.apis = {
      */
     portals: 'portals',
     /**
+     * API for editing relations between database entities
+     */
+    relations: 'relations',
+    /**
      * API for editing users
      */
     users: 'users'
@@ -40,6 +44,9 @@ module.exports.collections = {
      * List of all portals registered to the license server. Only relevant on license server.
      */
     portals:'portals',
+    /**
+     * Relations between database entities
+     */
     relations:'relations',
     settingsets:'settingsets',
     /**
