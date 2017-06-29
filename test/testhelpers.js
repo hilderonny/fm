@@ -497,6 +497,23 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
     });
 };
 
+th.createRelation = (entityType1, nameType1, entityType2, nameType2) => {
+    return new Promise((resolve, reject) => {
+        db.get(entityType1).findOne({ name: nameType1 }).then((entity1) => {
+            db.get(entityType2).findOne({ name: nameType2 }).then((entity2) => {
+                var relation = {
+                    type1: entityType1,
+                    type2: entityType2,
+                    id1: entity1._id,
+                    id2: entity2._id,
+                    clientId: entity1.clientId
+                };
+                resolve(relation);
+            });
+        });
+    });
+};
+
 function getModuleForApi(api) {
     // Use only the first parts until the slash
     api = api.split('/')[0];
