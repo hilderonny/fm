@@ -203,6 +203,10 @@ router.put('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), validate
     }
     delete user._id; // When user object also contains the _id field
     delete user.clientId; // Prevent assignment of the user to another client
+    // For the case that only the _id had to be updated, return an error and do not handle any further
+    if (Object.keys(user).length < 1) {
+        return res.sendStatus(400);
+    }
     if (user.pass && user.pass.length > 0) {
         user.pass = bcryptjs.hashSync(user.pass);
     } else {

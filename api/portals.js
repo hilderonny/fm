@@ -11,10 +11,11 @@
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
+var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var async = require('async');
 var hat = require('hat');
-var constants = require('../utils/constants');
+var co = require('../utils/constants');
 
 // Generate license key with hat, https://github.com/substack/node-hat
 var generateLicenseKey = () => {
@@ -59,7 +60,7 @@ router.get('/forIds', auth(false, false, 'licenseserver'), (req, res) => {
 /**
  * Get single portal with given id
  */
-router.get('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), validateId, (req, res) => {
+router.get('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), validateId, validateSameClientId(co.collections.portals), (req, res) => {
     req.db.get('portals').findOne(req.params.id, req.query.fields).then((portal) => {
         if (!portal) {
             return res.sendStatus(403); // Send 403 instead of 404 for compatibility with tests and other APIs
@@ -94,6 +95,7 @@ router.post('/', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), 
     delete portal._id; // Ids are generated automatically
     // Generate new license key for new portal. Overwrite eventually sent licenseKey
     portal.licenseKey = generateLicenseKey();
+    portal.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user, because users can create only users for their own clients
     req.db.insert('portals', portal).then((insertedPortal) => {
         var newPortalModules = [
             { portalId: insertedPortal._id, module: 'base' },
@@ -108,20 +110,18 @@ router.post('/', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), 
 /**
  * Update portal details
  */
-router.put('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, function(req, res) {
+router.put('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, validateSameClientId(co.collections.portals), function(req, res) {
     var portal = req.body;
     if (!portal || Object.keys(portal).length < 1) {
         return res.sendStatus(400);
     }
     delete portal._id; // When portal object also contains the _id field
+    delete portal.clientId; // Prevent assignment of the portal to another client
     // For the case that only the _id had to be updated, return an error and do not handle any further
     if (Object.keys(portal).length < 1) {
         return res.sendStatus(400);
     }
     req.db.update('portals', req.params.id, { $set: portal }).then((updatedPortal) => {
-        if (!updatedPortal || updatedPortal.lastErrorObject) {
-            return res.sendStatus(404);
-        }
         return res.send(updatedPortal);
     });
 });
@@ -129,9 +129,9 @@ router.put('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver')
 /**
  * Delete portal and all dependent objects (portalmodules)
  */
-router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, function(req, res) {
+router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, validateSameClientId(co.collections.portals), function(req, res) {
     var portalId = monk.id(req.params.id);
-    var dependentCollections = constants.collections;
+    var dependentCollections = co.collections;
     // Remove all dependent objects (currently only portalmodules)
     async.eachSeries(dependentCollections, (dependentCollection, callback) => {
         req.db.remove(dependentCollection, { portalId: portalId }).then((res) => {
@@ -139,9 +139,6 @@ router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserve
         });
     }, (err) => {
         req.db.remove('portals', req.params.id).then((result) => {
-            if (result.result.n < 1) {
-                return res.sendStatus(404);
-            }
             res.sendStatus(204);
         });
     });

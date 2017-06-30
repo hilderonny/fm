@@ -39,6 +39,9 @@ module.exports.collections = {
     folders:'folders',
     markers:'markers',
     permissions:'permissions',
+    /**
+     * Modules assigned to portals
+     */
     portalmodules:'portalmodules',
     /**
      * List of all portals registered to the license server. Only relevant on license server.
