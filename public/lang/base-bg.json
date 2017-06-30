@@ -21,7 +21,7 @@
     "TRK_PERMISSION_ADMINISTRATION_USER" : "Администрация - потребители",
     "TRK_PERMISSION_ADMINISTRATION_USERGROUP" : "Администрация - групи потребители",
     "TRK_PERMISSION_BIM_FMOBJECT" : "FM обекти",
-    "TRK_PERMISSION_LICENSESERVER_PORTAL" : "Lizenzserver - портал",
+    "TRK_PERMISSION_LICENSESERVER_PORTAL" : "Лицензен сървър - портал",
     "TRK_PERMISSION_OFFICE_ACTIVITY" : "Офис - дейности",
     "TRK_PERMISSION_OFFICE_DOCUMENT" : "Офис - докименти",
     "TRK_PERMISSION_SETTINGS_PORTAL" : "Настройки - ниво портал",

@@ -54,6 +54,9 @@ th.cleanDatabase = () => {
         'clientmodules',
         'clients',
         'documents',
+        'dynamicattributes',
+        'dynamicattributeoptions',
+        'dynamicattributevalues',
         'fmobjects',
         'folders',
         'permissions',
@@ -464,7 +467,7 @@ th.prepareDocuments = () => {
 };
 
 /**
- * Create a relation to each activity for each document in the database.
+ * Create a relation to each activity for each usergroup in the database.
  */
 th.prepareRelations = function() {
     var relations = [];
@@ -498,6 +501,23 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
     });
 };
 
+th.createRelation = (entityType1, nameType1, entityType2, nameType2) => {
+    return new Promise((resolve, reject) => {
+        db.get(entityType1).findOne({ name: nameType1 }).then((entity1) => {
+            db.get(entityType2).findOne({ name: nameType2 }).then((entity2) => {
+                var relation = {
+                    type1: entityType1,
+                    type2: entityType2,
+                    id1: entity1._id,
+                    id2: entity2._id,
+                    clientId: entity1.clientId
+                };
+                resolve(relation);
+            });
+        });
+    });
+};
+
 th.getModuleForApi = function(api) {
     // Use only the first parts until the slash
     api = api.split('/')[0];
@@ -511,6 +531,7 @@ th.getModuleForApi = function(api) {
 };
 
 th.defaults = {
+    activity: '1_0_0_0',
     adminUser: '1_0_ADMIN0',
     client: '1',
     otherClient: '0',
@@ -777,7 +798,7 @@ th.apiTests = {
                     return th.post(`/api/${api}`).send(testObject).expect(403);
                 });
             });
-            it('responds without write permission with 403', function() {
+            if (permission) it('responds without write permission with 403', function() {
                 var loginToken;
                 return th.removeWritePermission(th.defaults.user, permission).then(function() {
                     return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -981,7 +1002,7 @@ th.apiTests = {
                     return th.del(`/api/${api}/${id.toString()}`).expect(403);
                 });
             });
-            it('responds without write permission with 403', function() {
+            if (permission) it('responds without write permission with 403', function() {
                 var loginToken;
                 return th.removeWritePermission(th.defaults.user, permission).then(function() {
                     return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -1032,7 +1053,7 @@ th.apiTests = {
                 });
             });
         },
-        defaultPositive: function(api, collection, getId) {
+        defaultPositive: function(api, collection, getId, skipRelations) {
             it('deletes the object and return 204', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
@@ -1048,7 +1069,7 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
-            it('All relations, where the element is the source (type1, id1), are also deleted', function() {
+            if (!skipRelations) it('All relations, where the element is the source (type1, id1), are also deleted', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     loginToken = token;
@@ -1063,7 +1084,7 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
-            it('All relations, where the element is the target (type2, id2), are also deleted', function() {
+            if (!skipRelations) it('All relations, where the element is the target (type2, id2), are also deleted', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     loginToken = token;

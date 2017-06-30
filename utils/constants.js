@@ -9,6 +9,10 @@ module.exports.apis = {
      */
     portals: 'portals',
     /**
+     * API for editing relations between database entities
+     */
+    relations: 'relations',
+    /**
      * API for editing users
      */
     users: 'users'
@@ -28,6 +32,9 @@ module.exports.collections = {
      */
     clients:'clients',
     documents:'documents',
+    dynamicattributeoptions:'dynamicattributeoptions',
+    dynamicattributes:'dynamicattributes',
+    dynamicattributevalues:'dynamicattributevalues',
     fmobjects:'fmobjects',
     folders:'folders',
     markers:'markers',
@@ -40,6 +47,9 @@ module.exports.collections = {
      * List of all portals registered to the license server. Only relevant on license server.
      */
     portals:'portals',
+    /**
+     * Relations between database entities
+     */
     relations:'relations',
     settingsets:'settingsets',
     /**
@@ -78,3 +88,22 @@ module.exports.permissions = {
      */
     SETTINGS_USER: 'PERMISSION_SETTINGS_USER'
 };
+
+/**
+ * List of all possible dynamic attribute types. Used for validation in dynamicattributes API.
+ */
+module.exports.dynamicAttributeTypes = [
+    'text',
+    'boolean',
+    'picklist'
+];
+
+/**
+ * List of all possible models that can have dynamic attribute. Used for option selection in dynamicattributes API.
+ */
+
+module.exports.models = [
+    'documents',
+    'usergroups',
+    'users'
+];

@@ -62,6 +62,9 @@ router.get('/forIds', auth(false, false, 'licenseserver'), (req, res) => {
  */
 router.get('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), validateId, validateSameClientId(co.collections.portals), (req, res) => {
     req.db.get('portals').findOne(req.params.id, req.query.fields).then((portal) => {
+        if (!portal) {
+            return res.sendStatus(403); // Send 403 instead of 404 for compatibility with tests and other APIs
+        }
         return res.send(portal);
     });
 });
