@@ -10,8 +10,6 @@ var co = require('../../utils/constants');
 
 describe('API portals', function(){
 
-    var server = require('../../app');
-
     // Clear and prepare database with clients, user groups, users... 
      beforeEach(() => {
         return th.cleanDatabase()

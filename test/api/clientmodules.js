@@ -94,6 +94,7 @@ describe('API clientmodules', function() {
                         var availableClientModuleKeys = Object.keys(moduleConfig.modules);
                         // Remove the ones already assigned in testhelpers
                         availableClientModuleKeys.splice(availableClientModuleKeys.indexOf('base'), 1);
+                        availableClientModuleKeys.splice(availableClientModuleKeys.indexOf('clients'), 1);
                         availableClientModuleKeys.splice(availableClientModuleKeys.indexOf('activities'), 1);
                         availableClientModuleKeys.splice(availableClientModuleKeys.indexOf('documents'), 1);
                         availableClientModuleKeys.splice(availableClientModuleKeys.indexOf('fmobjects'), 1);

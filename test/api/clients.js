@@ -10,7 +10,7 @@ var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 
-describe.only('API clients', function() {
+describe('API clients', function() {
     
     // Clear and prepare database with clients, user groups and users
     beforeEach(() => {
