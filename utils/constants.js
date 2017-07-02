@@ -7,6 +7,10 @@ module.exports.apis = {
     /**
      * API for edititing portals
      */
+    clients: 'clients',
+    /**
+     * API for edititing portals
+     */
     portals: 'portals',
     /**
      * API for editing relations between database entities
@@ -72,6 +76,9 @@ module.exports.collections = {
  * var permissions = require('../utils/constants').permissions;
  */
 module.exports.permissions = {
+    /**
+     * Permission to show and edit clients
+     */
     ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
     ADMINISTRATION_SETTINGS: 'PERMISSION_ADMINISTRATION_SETTINGS',
     /**

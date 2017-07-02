@@ -124,6 +124,7 @@ th.prepareClientModules = () => {
     th.dbObjects.clients.forEach((client) => {
         clientModules.push({ clientId: client._id, module: 'base' });
         clientModules.push({ clientId: client._id, module: 'activities' });
+        clientModules.push({ clientId: client._id, module: 'clients' });
         clientModules.push({ clientId: client._id, module: 'documents' });
         clientModules.push({ clientId: client._id, module: 'fmobjects' });
         clientModules.push({ clientId: client._id, module: 'licenseserver' });

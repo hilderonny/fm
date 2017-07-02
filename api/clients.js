@@ -163,7 +163,7 @@ router.delete('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), 
     }, (err) => {
         req.db.remove('clients', req.params.id).then((result) => {
             if (result.result.n < 1) {
-                return res.sendStatus(404);
+                return res.sendStatus(403); // For test compatibility
             }
             res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
         });

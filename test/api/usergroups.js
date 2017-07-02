@@ -9,7 +9,6 @@ var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 
 describe('API usergroups', function(){
-    var server = require('../../app');
 
     // Clear and prepare database with clients, user groups, users and permissions
     beforeEach(() => {
