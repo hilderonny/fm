@@ -24,4 +24,10 @@ app.controller('AdministrationDynamicAttributesModelListCardController', functio
         {name: 'usergroups', icon: 'User Group Man Man', title: 'User groups'},
         {name: 'documents', icon: 'Document', title: 'Documents'}
     ];
+
+   /* $http.get('/api/dynamicattributes/types').then(function(response){
+        $scope.Mmodels = response.data;
+        console.log( $scope.Mmodels);
+    });*/
+
 });
