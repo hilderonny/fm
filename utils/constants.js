@@ -13,6 +13,10 @@ module.exports.apis = {
      */
     relations: 'relations',
     /**
+     * API for editing usergroups
+     */
+    usergroups: 'usergroups',
+    /**
      * API for editing users
      */
     users: 'users'
