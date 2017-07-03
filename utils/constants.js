@@ -15,6 +15,10 @@ module.exports.apis = {
     /**
      * API for edititing portals
      */
+    folders: 'folders',
+    /**
+     * API for edititing portals
+     */
     portals: 'portals',
     /**
      * API for editing relations between database entities
