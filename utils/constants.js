@@ -5,15 +5,19 @@
  */
 module.exports.apis = {
     /**
-     * API for edititing portals
+     * API for edititing clients
      */
     clients: 'clients',
     /**
-     * API for edititing portals
+     * API for edititing documents
      */
     documents: 'documents',
     /**
-     * API for edititing portals
+     * API for edititing FM objects
+     */
+    fmobjects: 'fmobjects',
+    /**
+     * API for edititing folders
      */
     folders: 'folders',
     /**
@@ -54,6 +58,9 @@ module.exports.collections = {
     dynamicattributeoptions:'dynamicattributeoptions',
     dynamicattributes:'dynamicattributes',
     dynamicattributevalues:'dynamicattributevalues',
+    /**
+     * FM Objekte
+     */
     fmobjects:'fmobjects',
     /**
      * Verzeichnisse
@@ -100,6 +107,9 @@ module.exports.permissions = {
      */
     ADMINISTRATION_USER: 'PERMISSION_ADMINISTRATION_USER',
     ADMINISTRATION_USERGROUP: 'PERMISSION_ADMINISTRATION_USERGROUP',
+    /**
+     * Permission to show and edit FM objects
+     */
     BIM_FMOBJECT: 'PERMISSION_BIM_FMOBJECT',
     /**
      * Permission to show and edit portals on the license server

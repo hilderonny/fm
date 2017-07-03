@@ -724,6 +724,8 @@ describe('API documents', function(){
                 }
                 return db.get(co.collections.documents).insert(document);
             }).then(function(insertedDocument) {
+                return th.createRelationsToUser(co.collections.documents, insertedDocument);
+            }).then(function(insertedDocument) {
                 return Promise.resolve(insertedDocument._id);
             });
         }

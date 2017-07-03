@@ -19,6 +19,8 @@ var upload = multer({ dest: 'uploads/' })
 var fs = require('fs');
 var path = require('path');
 var documentsHelper = require('../utils/documentsHelper');
+var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 
 var downloadDocument = (response, document) => {
     var options = {
@@ -207,7 +209,7 @@ router.deleteDocument = (db, document) => {
         var filePath = documentsHelper.getDocumentPath(document._id);
         fs.unlink(filePath, (err) => {
             // Remove relations from database
-            db.get('relations').remove({ $or: [ { type1: 'documents', id1: document._id }, { type2: 'documents', id2: document._id } ] }).then(() => {
+            rh.deleteAllRelationsForEntity(co.collections.documents, document._id).then(() => {
                 // Remove document from database
                 db.remove('documents', document._id).then(resolve);
             });

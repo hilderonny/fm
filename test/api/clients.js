@@ -621,8 +621,9 @@ describe('API clients', function() {
     describe('DELETE/:id', function() {
 
         function getDeleteClientId() {
-            var client = { name: 'newClient' };
-            return db.get(co.collections.clients).insert(client).then(function(insertedClient) {
+            return db.get(co.collections.clients).insert({ name: 'newClient' }).then(function(client) {
+                return th.createRelationsToUser(co.collections.clients, client);
+            }).then(function(insertedClient) {
                 return Promise.resolve(insertedClient._id);
             });
         }

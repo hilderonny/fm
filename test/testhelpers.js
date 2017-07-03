@@ -349,14 +349,14 @@ th.prepareMarkers = () => {
 th.prepareFmObjects = () => {
     var fmObjects = [];
     th.dbObjects.clients.forEach((client) => {
-        fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt', path:',' });
-        fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Gebäude', path:',' });
+        fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt' });
+        fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Gebäude' });
     });
     return th.bulkInsert('fmobjects', fmObjects).then((insertedRootFmObjects) => {
         var level1FmObjects = [];
         insertedRootFmObjects.forEach((rootFmObject) => {
-            level1FmObjects.push({ name: rootFmObject.name + '_0', clientId: rootFmObject.clientId, type: 'Etage', path: rootFmObject.path + rootFmObject._id.toString() + ',', parentId: rootFmObject._id });
-            level1FmObjects.push({ name: rootFmObject.name + '_1', clientId: rootFmObject.clientId, type: 'Raum', path: rootFmObject.path + rootFmObject._id.toString() + ',', parentId: rootFmObject._id });
+            level1FmObjects.push({ name: rootFmObject.name + '_0', clientId: rootFmObject.clientId, type: 'Etage', parentId: rootFmObject._id });
+            level1FmObjects.push({ name: rootFmObject.name + '_1', clientId: rootFmObject.clientId, type: 'Raum', parentId: rootFmObject._id });
         });
         return th.bulkInsert('fmobjects', level1FmObjects);
     });
@@ -502,20 +502,36 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
     });
 };
 
-th.createRelation = (entityType1, nameType1, entityType2, nameType2) => {
-    return new Promise((resolve, reject) => {
-        db.get(entityType1).findOne({ name: nameType1 }).then((entity1) => {
-            db.get(entityType2).findOne({ name: nameType2 }).then((entity2) => {
-                var relation = {
-                    type1: entityType1,
-                    type2: entityType2,
-                    id1: entity1._id,
-                    id2: entity2._id,
-                    clientId: entity1.clientId
-                };
-                resolve(relation);
-            });
-        });
+th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoDatabase) => {
+    var entity1;
+    return db.get(entityType1).findOne({ name: nameType1 }).then((entity) => {
+        entity1 = entity;
+        return db.get(entityType2).findOne({ name: nameType2 });
+    }).then((entity2) => {
+        var relation = {
+            type1: entityType1,
+            type2: entityType2,
+            id1: entity1._id,
+            id2: entity2._id,
+            clientId: entity1.clientId
+        };
+        if (insertIntoDatabase) {
+            return db.get(co.collections.relations).insert(relation);
+        } else {
+            return Promise.resolve(relation);
+        }
+    });
+};
+
+th.createRelationsToUser = (entityType, entity) => {
+    return db.get(co.collections.users).findOne({name:th.defaults.user}).then(function(user) {
+        var relations = [
+            { type1: entityType, id1: entity._id, type2: co.collections.users, id2: user._id, clientId: user.clientId },
+            { type1: co.collections.users, id1: user._id, type2: entityType, id2: entity._id, clientId: user.clientId }
+        ];
+        return db.get(co.collections.relations).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+    }).then(function() {
+        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
     });
 };
 
@@ -1074,6 +1090,7 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
+            // TODO: Prüfung von Relationen scheint nicht zu stimmen.
             if (!skipRelations) it('All relations, where the element is the source (type1, id1), are also deleted', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
@@ -1081,11 +1098,14 @@ th.apiTests = {
                     return getId();
                 }).then(function(id) {
                     objectId = id;
+                    return db.get(co.collections.relations).find({type1:collection,id1:objectId});
+                }).then(function(relationsBefore) {
+                    assert.notEqual(relationsBefore.length, 0, 'There are no relations set up to test. Have a look into the testHelpers.prepare... functions.');
                     return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
                 }).then(function() {
                     return db.get(co.collections.relations).find({type1:collection,id1:objectId});
-                }).then(function(objectsInDatabase) {
-                    assert.equal(objectsInDatabase.length, 0);
+                }).then(function(relationsAfter) {
+                    assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
                     return Promise.resolve();
                 });
             });
@@ -1096,11 +1116,14 @@ th.apiTests = {
                     return getId();
                 }).then(function(id) {
                     objectId = id;
+                    return db.get(co.collections.relations).find({type2:collection,id2:objectId});
+                }).then(function(relationsBefore) {
+                    assert.notEqual(relationsBefore.length, 0, 'There are no relations set up to test. Have a look into the testHelpers.prepare... functions.');
                     return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
                 }).then(function() {
                     return db.get(co.collections.relations).find({type2:collection,id2:objectId});
-                }).then(function(objectsInDatabase) {
-                    assert.equal(objectsInDatabase.length, 0);
+                }).then(function(relationsAfter) {
+                    assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
                     return Promise.resolve();
                 });
             });

@@ -751,6 +751,8 @@ describe('API folders', function() {
                     parentFolderId: null
                 }
                 return db.get(co.collections.folders).insert(folder);
+            }).then(function(folder) {
+                return th.createRelationsToUser(co.collections.folders, folder);
             }).then(function(insertedFolder) {
                 return Promise.resolve(insertedFolder._id);
             });

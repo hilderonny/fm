@@ -16,6 +16,7 @@ var monk = require('monk');
 var async = require('async');
 var hat = require('hat');
 var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 
 // Generate license key with hat, https://github.com/substack/node-hat
 var generateLicenseKey = () => {
@@ -136,7 +137,9 @@ router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserve
         });
     }, (err) => {
         req.db.remove('portals', req.params.id).then((result) => {
-            res.sendStatus(204);
+            rh.deleteAllRelationsForEntity(co.collections.portals, portalId).then(function() {
+                res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+            });
         });
     });
 });

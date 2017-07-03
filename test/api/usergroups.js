@@ -538,6 +538,8 @@ describe('API usergroups', function(){
                 usergroup.name = 'newUserGroupToDelete';
                 return db.get(co.collections.usergroups).insert(usergroup);
             }).then(function(insertedUserGroup) {
+                return th.createRelationsToUser(co.collections.usergroups, insertedUserGroup);
+            }).then(function(insertedUserGroup) {
                 return Promise.resolve(insertedUserGroup._id);
             });
         }
