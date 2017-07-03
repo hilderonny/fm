@@ -11,6 +11,10 @@ module.exports.apis = {
     /**
      * API for edititing portals
      */
+    documents: 'documents',
+    /**
+     * API for edititing portals
+     */
     portals: 'portals',
     /**
      * API for editing relations between database entities
@@ -39,11 +43,17 @@ module.exports.collections = {
      * Mandanten
      */
     clients:'clients',
+    /**
+     * Dokumente
+     */
     documents:'documents',
     dynamicattributeoptions:'dynamicattributeoptions',
     dynamicattributes:'dynamicattributes',
     dynamicattributevalues:'dynamicattributevalues',
     fmobjects:'fmobjects',
+    /**
+     * Verzeichnisse
+     */
     folders:'folders',
     markers:'markers',
     permissions:'permissions',
@@ -92,6 +102,9 @@ module.exports.permissions = {
      */
     LICENSESERVER_PORTAL: 'PERMISSION_LICENSESERVER_PORTAL',
     OFFICE_ACTIVITY: 'PERMISSION_OFFICE_ACTIVITY',
+    /**
+     * Permission to show and edit documents and folders
+     */
     OFFICE_DOCUMENT: 'PERMISSION_OFFICE_DOCUMENT',
     SETTINGS_PORTAL: 'PERMISSION_SETTINGS_PORTAL',
     /**

@@ -76,6 +76,33 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
                 clientId: clientId
             } }
         ]).then(function(documents) {
+            // Pfade müssen sortiert werden, da graphLookup ein Problem beim Cachen hat und die Reihenfolge manchmal durcheinander haut
+            documents.forEach(function(document) {
+                if (document.path.length < 2) return; // Wenn nur ein Element oder keines drin ist, brauchen wir auch nicht zu sortieren
+                var oldPath = document.path;
+                var newPath = [ ];
+                var rootFolder;
+                var folderDict = {};
+                // Dictionary zum Nachschlagen bauen
+                oldPath.forEach(function(folder) {
+                    folderDict[folder._id] = folder;
+                    if (!folder.parentFolderId) rootFolder = folder;
+                });
+                // Jetzt verkettete Liste bauen
+                oldPath.forEach(function(folder) {
+                    if (!folder.parentFolderId) return;
+                    folderDict[folder.parentFolderId].child = folder;
+                });
+                // Und nun auflösen
+                var currentFolder = rootFolder;
+                do {
+                    newPath.push(currentFolder);
+                    var child = currentFolder.child;
+                    delete currentFolder.child;
+                    currentFolder = child;
+                } while(currentFolder);
+                document.path = newPath;
+            });
             res.send(documents);
         });
     });

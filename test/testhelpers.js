@@ -712,9 +712,13 @@ th.apiTests = {
                     for (var i = 0; i < idCount; i++) {
                         var elementFromApi = elementsFromApi[i];
                         var elementFromDatabase = insertedElements[i];
-                        Object.keys(elementFromApi).forEach(function(key) {
-                            assert.ok(elementFromDatabase[key]);
-                            assert.strictEqual(elementFromApi[key].toString(), elementFromDatabase[key].toString());
+                        Object.keys(elementFromDatabase).forEach(function(key) { // Prüfung beginnend mit Datenbank, bei Dokumenten wird der Pfad mit drangehängt
+                            assert.ok(elementFromApi[key] || elementFromApi[key] === null); // parentFolderId oder clientId können null ein
+                            if (elementFromApi[key] === null) {
+                                assert.ok(elementFromDatabase[key] === null);
+                            } else {
+                                assert.strictEqual(elementFromApi[key].toString(), elementFromDatabase[key].toString());
+                            }
                         });
                     }
                     return Promise.resolve();

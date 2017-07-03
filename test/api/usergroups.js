@@ -1,9 +1,7 @@
 /**
  * UNIT Tests for api/usergroups
  */
-
 var assert = require('assert');
-var superTest = require('supertest');
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
