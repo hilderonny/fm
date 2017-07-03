@@ -50,14 +50,14 @@ router.post('/', auth(false, false, 'base'), (req, res) => {
             return res.sendStatus(404);
         }
         //        
-        if (object1.clientId.toString() !== clientId.toString()) { // Quell-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
+        if (`${object1.clientId}` !== `${clientId}`) { // Quell-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
             return res.sendStatus(403);
         }
         req.db.get(relation.type2).findOne(relation.id2).then((object2) => {
             if (!object2) { // Ziel-Objekt existiert nicht
                 return res.sendStatus(404);
             }
-            if (object2.clientId.toString() !== clientId.toString()) {
+            if (`${object2.clientId}` !== `${clientId}`) {
                 return res.sendStatus(403); // Ziel-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
             }
             // Der Verknüpfung wird die ID des Mandanten des Benutzers angehängt, um beim Löschen die Zugehörigkeit zu prüfen

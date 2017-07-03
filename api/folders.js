@@ -185,7 +185,7 @@ var removeFolder = (db, folder) => {
     // Delete the folder itself
     promises.push(db.remove('folders', folder._id));
     return Promise.all(promises);
-}
+};
 
 // Delete a folder
 router.delete('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), validateId, validateSameClientId('folders'), function(req, res) {
