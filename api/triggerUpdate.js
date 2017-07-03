@@ -1,6 +1,6 @@
 /**
- * API für fm-avorium.de, um sich selbst aus Subversion zu updaten und danach die
- * Website neu zu starten.
+ * API für den zentralen Lizenzserver fm-avorium.de, um per POST eine neue Version vom CI-System
+ * hochzuladen, zu installieren und danach neu zu starten
  */
 var router = require('express').Router();
 var fs = require('fs');
