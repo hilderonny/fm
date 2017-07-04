@@ -1,4 +1,4 @@
-app.controller('AdministrationAttributeCreationCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationAttributeElementCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     
     // User clicks on close button
     $scope.closeCard = function() {
@@ -9,21 +9,21 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         utils.removeCard($element);
     };
 
-    $scope.createAttribute = function(){
-        var attributeToSend = { 
-            name_en: $scope.dynamicattribute.name_en, 
-            modelName: $scope.params.modelName,
-            type: $scope.dynamicattribute.type
+    $scope.createAttributeElement = function(){
+        //Required properties are dynamicAttributeId and text_en
+        var optionToSend = { 
+            text_en: $scope.dynamicattribute.text_en,
+            dynamicAttributeId: $scope.params.dynamicAttributeId._id
         };
-        $http.post('/api/dynamicattributes', attributeToSend).then(function successCallback(response) {
+        $http.post('/api/dynamicattribute/option', optionToSend).then(function successCallback(response) {
             if (response.status === 409) {
                 //$scope.usersForm.un.$setValidity('nameInUse', false);
                 return;
             }
             var createdAttribute = response.data;
-            $scope.isNewAttribute = false;
-            $scope.dynamicattribute._id = createdAttribute._id;
-            $scope.dynamicattribute.name_en = createdAttribute.name_en;
+            $scope.isNewElement = false;
+            //$scope.dynamicattribute._id = createdAttribute._id;
+           // $scope.dynamicattribute.name_en = createdAttribute.name_en;
             //$scope.relationsEntity = { type:'dynamicattributes', id:createdAttribute._id };
             if ($scope.params.createDynamicAttributeCallback) {
                 $scope.params.createDynamicAttributeCallback(createdAttribute);
@@ -35,11 +35,12 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         });
     };
 
-    $scope.saveAttribute = function(){
-        var attributeToSend = { name_en: $scope.dynamicattribute.name_en };
-        $http.put('/api/dynamicattributes/' + $scope.dynamicattribute._id, attributeToSend).then(function(response) {
-            var savedAttribute = response.data;
-            $scope.attributeName = $scope.dynamicattribute.name_en;
+    $scope.saveAttributeElement = function(){
+        var elementToSend = { text_en: $scope.attributeelement.text_en,
+                              dynamicAttributeId: $scope.params.dynamicAttributeId};
+        $http.put('/api/dynamicattribute/options' + $scope.params.dynamicAttributeElementId, elementToSend).then(function(response) {
+            var savedAttributeElement = response.data;
+            $scope.elementName = $scope.attributeelement.text_en;
             if ($scope.params.saveDynamicAttributeCallback) {
                 $scope.params.saveDynamicAttributeCallback(savedAttribute);
             }
@@ -50,7 +51,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         });
     };
 
-    $scope.deleteAttribute = function(){
+    $scope.deleteAttributeElement = function(){
         $translate(['TRK_USERGROUPS_USERGROUP_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
             $translate('TRK_USERGROUPS_REALLY_DELETE_USERGROUP', { attributeName: $scope.attributeName }).then(function(TRK_USERGROUPS_REALLY_DELETE_USERGROUP) {
                 var confirm = $mdDialog.confirm()
@@ -72,30 +73,6 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         });
     };
 
-    $scope.newAttributeElement = function(){
-        utils.removeCardsToTheRightOf($element);
-        utils.removeCard($element);
-        utils.addCard('Administration/DynamicAttributeElementCard', {
-            dynamicAttributeId: $scope.params.dynamicAttributeId
-        });
-    };
-    $scope.selectAttributeElement = function(selectedAttributeElement){
-        utils.removeCardsToTheRightOf($element);
-        utils.removeCard($element);
-        utils.addCard('Administration/DynamicAttributeElementCard', {
-          dynamicAttributeElementId: selectedAttributeElement._id,
-          dynamicAttributeId: $scope.params.dynamicAttributeId
-        });
-    };
-
-    //TODO check if needed 
-    //try unisng utils instead???
-    $scope.types = [
-        'DYNAMICATTRIBUTES_TYPE_TEXT',
-        'DYNAMICATTRIBUTES_TYPE_BOOLEAN',
-        'DYNAMICATTRIBUTES_TYPE_PICKLIST'
-    ];
-
     $scope.languages = $rootScope.languages;
 
     // Check the permissions for the details page for handling button visibility
@@ -109,32 +86,19 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     //Loads dynamicAttribute details or prepares for an empty dialog for a new dynamicAttribute
     //Params:
     //... 
-    // - $scope.params.createDynamicAttributeCallback : Callback function when a new attribute was created. Gets the attribute as parameter
-    // - $scope.params.saveDynamicAttributeCallback : Callback function when an existing attribute was saved. Gets the updated attribute as parameter
-    // - $scope.params.deletDynamicAttributeCallback : Callback function when an existing attribute was deleted. No parameters
-    // - $scope.params.closeDynamicAttributeCallback : Callback function when the card gets closed via button. No parameters
-    //
     $scope.load = function(){
-        //Switch between creation of a new dynamicAttribute and loading of an existing one
-        if($scope.params.dynamicAttributeId){
-            //Existing dynamicAttribute
-            $http.get('/api/dynamicattributes/' + $scope.params.dynamicAttributeId).then(function(response){
-                $scope.isNewAttribute = false;
-                var completeAttribute = response.data;
-                $scope.dynamicattribute = completeAttribute;
-                $scope.attributeName = completeAttribute.name_en; 
-                $scope.attributeType = completeAttribute.type;
-
-            });
-            //Get list of existing attribute options (so-called elements)
-            $http.get('/api/dynamicattributes/options/' + $scope.params.dynamicAttributeId).then(function(attributeOptionsFromDataBank){
-                $scope.elements = attributeOptionsFromDataBank.data;
+        //Switch between creation of a new attribute option (element) and loading of an existing one
+        if($scope.params.dynamicAttributeElementId){
+            //Existing attribute option/element
+            $scope.isNewElement = false;
+            $http.get('/api/dynamicattributes/option/' + $scope.params.dynamicAttributeElementId).then(function(attributeOptionFromDataBank){
+                $scope.attributeelement = attributeOptionFromDataBank.data;
             });
         }
         else{
             //new dynamicAttribute
-            $scope.isNewAttribute = true;
-            $scope.dynamicattribute = {name_en: '', type: 'text'};
+            $scope.isNewElement = true;
+            $scope.attributeelement = {text_en: ''};
         }
         $scope.modelName = 'users';
     };

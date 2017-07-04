@@ -18,6 +18,7 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
     var createDynamicAttributeCallback = function(savedAttribute) {
         utils.removeCardsToTheRightOf($element);
         $scope.selectedAttribute = savedAttribute;
+        console.log('onCreateCallback');
         upateListOfAttributes();
     };
 

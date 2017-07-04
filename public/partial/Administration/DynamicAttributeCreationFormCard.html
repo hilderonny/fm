@@ -10,7 +10,12 @@
     <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
         <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
     </md-button>
-
+    
+    <md-button class="md-fab md-accent md-scale" ng-if="attributeType == 'DYNAMICATTRIBUTES_TYPE_PICKLIST' && !isNewAttribute" ng-click="newAttributeElement()" aria-label="SHOW OPTIONS">
+        <md-tooltip md-direction="left"><span translate>TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTEELEMENT</span></md-tooltip>
+        <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+    </md-button>
+    
     <md-tabs flex>
         <md-tab>
             <md-tab-label><span>DETAILS</span></md-tab-label>
@@ -18,21 +23,19 @@
                 <md-card-content layout="column">
 
                     <md-input-container flex>
-                        <label translate>TRK_DYNAMICATTRIBUTES_TYPE</label>
-                        <md-select ng-model="attribute.type">
+                        <label ng-if = "isNewAttribute" translate>TRK_DYNAMICATTRIBUTES_TYPE</label>
+                        <md-select ng-if = "isNewAttribute" ng-model="dynamicattribute.type">
                             <md-option ng-value="type" ng-repeat="type in types">
                                 <span translate="TRK_{{type}}"></span>
                             </md-option>
                         </md-select>
                     </md-input-container>
-
                         <md-card-content  layout = "column" >
                             <md-input-container flex ng-repeat="language in languages">
                                 <label translate = "TRK_DYNAMICATTRIBUTES_NAME_{{language}}"> </label>
                                 <input ng-if = "language =='en'" ng-model="dynamicattribute.name_en" ng-required="true">
                                 <input ng-if = "language !='en'" ng-model="attribute.translations[0]" >
                             </md-input-container>
-
                         </md-card-content>  
 
                 </md-card-content>
@@ -40,9 +43,17 @@
             </md-tab-body>
         </md-tab>
         <!--md-tab ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST' && !isNewAttribute"-->
-        <md-tab ng-if="attributeType == 'picklist' && !isNewAttribute">
+        <md-tab ng-if="attributeType == 'DYNAMICATTRIBUTES_TYPE_PICKLIST' && !isNewAttribute">
             <md-tab-label><span>ELEMETS</span></md-tab-label>
-            <md-tab-body><ng-include src="'partial/Administration/AttributeElementsTab.html'"></ng-include></md-tab-body>
+
+            <md-tab-body>
+                <md-list class="lines-beetween-items">
+                    <md-list-item ng-repeat="element in elemetns | orderBy: ['name_en']" ng-click="selectAttributeElement(element)" ng-class="{active:selectedAttributeElement == element}" aria-label="{{element.name_en}}">
+                        <md-icon md-svg-src="/css/icons/material/Planner.svg"></md-icon>
+                        <p ng-bind="element.name_en"></p>
+                    </md-list-item>
+                </md-list>
+            </md-tab-body>
         </md-tab>
     </md-tabs>
 
