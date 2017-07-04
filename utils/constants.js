@@ -5,6 +5,10 @@
  */
 module.exports.apis = {
     /**
+     * API for assigning modules to clients
+     */
+    clientmodules: 'clientmodules',
+    /**
      * API for edititing clients
      */
     clients: 'clients',
@@ -46,6 +50,9 @@ module.exports.apis = {
  */
 module.exports.collections = {
     activities:'activities',
+    /**
+     * Modulzuordnungen für Mandanten
+     */
     clientmodules:'clientmodules',
     /**
      * Mandanten
