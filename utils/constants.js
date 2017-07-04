@@ -29,6 +29,10 @@ module.exports.apis = {
      */
     permissions: 'permissions',
     /**
+     * API for editing module assignments for portals
+     */
+    portalmodules: 'portalmodules',
+    /**
      * API for edititing portals
      */
     portals: 'portals',
@@ -104,6 +108,20 @@ module.exports.collections = {
      */
     users:'users'
 };
+
+/**
+ * Liste von Modulen, wie sie in der module-config verwendet wird.
+ */
+module.exports.modules = {
+    /**
+     * Terminmodul
+     */
+    activities: 'activities',
+    /**
+     * Grundmodul, welches in allen Installationen vorhanden ist
+     */
+    base: 'base'
+}
 
 /**
  * List of all possible permissions.

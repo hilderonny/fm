@@ -550,10 +550,24 @@ th.getModuleForApi = function(api) {
 th.defaults = {
     activity: '1_0_0_0',
     adminUser: '1_0_ADMIN0',
+    /**
+     * Standardmandant '1'
+     */
     client: '1',
+    /**
+     * Standardmandant '1' aus Datenbank auslesen und per Promise zurück geben
+     */
+    getClient: function() { return db.get(co.collections.clients).findOne({name:th.defaults.client}); },
+    /**
+     * Standardportal 'p1' aus Datenbank auslesen und per Promise zurück geben
+     */
+    getPortal: function() { return db.get(co.collections.portals).findOne({name:th.defaults.portal}); },
     otherClient: '0',
     otherUser: '0_0_0',
     password: 'test',
+    /**
+     * Standardportal 'p1'
+     */
     portal: 'p1',
     user: '1_0_0',
     userGroup: '1_0'
