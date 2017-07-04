@@ -1,9 +1,9 @@
 var moduleConfig = require('../config/module-config.json');
 
 /**
- * Returns a list of all permission keys available to the client of the logged in user.
+ * Returns a list of all permission keys available to the given client.
  * The keys are collected from the menu and settingset entries in the module-config.json
- * and are filtered by the modules assigned to the client of the logged in user.
+ * and are filtered by the modules assigned to the given client.
  * Returns a promise with an array of availyble permission keys as parameter
  * @example 
  * var configHelper = require('/utils/configHelper');

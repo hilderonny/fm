@@ -25,6 +25,10 @@ module.exports.apis = {
      */
     folders: 'folders',
     /**
+     * API for providing permissions to usergroups
+     */
+    permissions: 'permissions',
+    /**
      * API for edititing portals
      */
     portals: 'portals',
@@ -74,6 +78,9 @@ module.exports.collections = {
      */
     folders:'folders',
     markers:'markers',
+    /**
+     * Zugriffsberechtigungen für Benutzergruppen
+     */
     permissions:'permissions',
     /**
      * Modules assigned to portals
@@ -127,6 +134,13 @@ module.exports.permissions = {
      * Permission to show and edit documents and folders
      */
     OFFICE_DOCUMENT: 'PERMISSION_OFFICE_DOCUMENT',
+    /**
+     * Permission to show and change the settings of the own client (Logo, name)
+     */
+    SETTINGS_CLIENT: 'PERMISSION_SETTINGS_CLIENT',
+    /**
+     * Permission to show and change the settings of the portal (license key, etc.)
+     */
     SETTINGS_PORTAL: 'PERMISSION_SETTINGS_PORTAL',
     /**
      * Permission to show and change the settings of the own account
