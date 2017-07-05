@@ -5,6 +5,10 @@
  */
 module.exports.apis = {
     /**
+     * API for managing activities
+     */
+    activities: 'activities',
+    /**
      * API for assigning modules to clients
      */
     clientmodules: 'clientmodules',
@@ -17,6 +21,10 @@ module.exports.apis = {
      */
     documents: 'documents',
     /**
+     * API for extracting zipped documents
+     */
+    extractdocument: 'extractdocument',
+    /**
      * API for edititing FM objects
      */
     fmobjects: 'fmobjects',
@@ -25,9 +33,25 @@ module.exports.apis = {
      */
     folders: 'folders',
     /**
+     * API for logging in users
+     */
+    login: 'login',
+    /**
+     * API for managing geographical map markers
+     */
+    markers: 'markers',
+    /**
+     * API für retrieving menu structure
+     */
+    menu: 'menu',
+    /**
      * API for providing permissions to usergroups
      */
     permissions: 'permissions',
+    /**
+     * API for handling local portal settings like license key or checking for available updates
+     */
+    portalmanagement: 'portalmanagement',
     /**
      * API for editing module assignments for portals
      */
@@ -44,6 +68,18 @@ module.exports.apis = {
      * API for retrieving settings and setting sets
      */
     settingsets: 'settingsets',
+    /**
+     * API for retrieving translations for several languages
+     */
+    translations: 'translations',
+    /**
+     * API für fm.avorium.de zum automatischen Aktualisieren der Installation aus TeamCity heraus nach erfolgreichem Bau
+     */
+    triggerUpdate: 'triggerUpdate',
+    /**
+     * License server API for providing update packages to portals
+     */
+    update: 'update',
     /**
      * API for editing usergroups
      */
@@ -124,7 +160,31 @@ module.exports.modules = {
     /**
      * Grundmodul, welches in allen Installationen vorhanden ist
      */
-    base: 'base'
+    base: 'base',
+    /**
+     * Modul für Mandantenverwaltung
+     */
+    clients: 'clients',
+    /**
+     * Modul für Dokumenten- und Verzeichnisverwaltung
+     */
+    documents: 'documents',
+    /**
+     * Modul für FM-Objekt-Verwaltung
+     */
+    fmobjects: 'fmobjects',
+    /**
+     * Modul für Lizenzserverfunktionen wie Portalverwaltung und Update-API
+     */
+    licenseserver: 'licenseserver',
+    /**
+     * Modul zur Verwaltung des eigenen Portals. Stellt Einstellungsseiten für Lizenzschlüssel und Updates bereit
+     */
+    portalbase: 'portalbase',
+    /**
+     * Spielereien
+     */
+    ronnyseins: 'ronnyseins'
 }
 
 /**
