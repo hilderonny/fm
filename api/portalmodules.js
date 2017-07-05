@@ -29,11 +29,8 @@ router.get('/available', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licensese
         }
         req.db.get('portalmodules').find({ portalId: portal._id }, req.query.fields).then((portalModules) => {
             portalModules.forEach((portalModule) => {
-                var foundIndex = availablePortalModuleKeys.indexOf(portalModule.module);
-                if (foundIndex >= 0) {
-                    // Return only those modules which are not already assigned
-                    availablePortalModuleKeys.splice(foundIndex, 1);
-                }
+                // Return only those modules which are not already assigned
+                availablePortalModuleKeys.splice(availablePortalModuleKeys.indexOf(portalModule.module), 1);
             });
             res.send(availablePortalModuleKeys);
             return;

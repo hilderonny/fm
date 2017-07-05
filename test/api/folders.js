@@ -2,36 +2,34 @@
  * UNIT Tests for api/folders
  */
 var assert = require('assert');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
-var db = require('../../middlewares/db');
 var async = require('async');
 var fs = require('fs');
 var documentsHelper = require('../../utils/documentsHelper');
+var th = require('../testhelpers');
+var db = require('../../middlewares/db');
+var co = require('../../utils/constants');
 
 // xdescribe and xit are used for test stubs which should not run now and are to be implemented later
 describe('API folders', function() {
-
-    var server = require('../../app');
     
     // Clear and prepare database with clients, user groups and users
     beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareActivities)
-            .then(testHelpers.prepareFmObjects)
-            .then(testHelpers.prepareFolders)
-            .then(testHelpers.prepareDocuments)
-            .then(testHelpers.prepareRelations);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions)
+            .then(th.prepareActivities)
+            .then(th.prepareFmObjects)
+            .then(th.prepareFolders)
+            .then(th.prepareDocuments)
+            .then(th.prepareRelations);
     });
 
     // Delete temporary documents
     afterEach(() => {
-        return testHelpers.removeDocumentFiles()
+        return th.removeDocumentFiles()
     });
 
     describe('GET/', function() {
@@ -39,30 +37,30 @@ describe('API folders', function() {
         // Negative tests
 
         it('responds without authentication with 403', function() {
-            return superTest(server).get('/api/folders').expect(403);
+            return th.get('/api/folders').expect(403);
         });
 
         it('responds without read permission with 403', function() {
             // Remove the corresponding permission
-            return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return superTest(server).get(`/api/folders?token=${token}`).expect(403);
+            return th.removeReadPermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.get(`/api/folders?token=${token}`).expect(403);
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'documents').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return superTest(server).get(`/api/folders?token=${token}`).expect(403);
+            return th.removeClientModule('1', 'documents').then(function() {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.get(`/api/folders?token=${token}`).expect(403);
                 });
             });
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'documents').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                    return superTest(server).get(`/api/folders?token=${token}`).expect(403);
+            return th.removeClientModule('1', 'documents').then(function() {
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+                    return th.get(`/api/folders?token=${token}`).expect(403);
                 });
             });
         });
@@ -71,9 +69,9 @@ describe('API folders', function() {
 
         it('responds with object containing all folders and documents (and their details) which have no parent folder', function(done) {
             //user belonging to client 1 has 2 folders with 2 documents each
-            testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+            th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                 db.get('clients').findOne({name: '1'}).then((clientFromDatabase) =>{
-                    superTest(server).get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
+                    th.get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
                         if (err) {
                             done(err);
                             return;
@@ -101,8 +99,8 @@ describe('API folders', function() {
         it('responds with object containing empty folders array when no folders exist', function(done) {
             // First we need to delete all folders from the test preparations
             db.get('folders').remove().then(() => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    superTest(server).get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                    th.get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
                         if (err) return done(err);
                         var resultFromApi = res.body;
                         //check for empty folders array
@@ -116,8 +114,8 @@ describe('API folders', function() {
         it('responds with object containing empty documents array when no documents exist', function(done) {
             // First we need to delete all documents from the test preparations
             db.get('documents').remove().then(() => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    superTest(server).get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                    th.get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
                         if (err) {
                             done(err);
                             return;
@@ -133,38 +131,120 @@ describe('API folders', function() {
 
     });
 
+    describe('GET/allFoldersAndDocuments', function() {
+
+        var api = `${co.apis.folders}/allFoldersAndDocuments`;
+
+        function createTestFolders() {
+            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+                var clientId = client._id;
+                var testObjects = ['testFolder1', 'testFolder2', 'testFolder3'].map(function(name) {
+                    return {
+                        name: name,
+                        type: 'text/plain',
+                        clientId: clientId,
+                        parentFolderId: null
+                    }
+                });
+                return Promise.resolve(testObjects);
+            });
+        }
+
+        th.apiTests.get.defaultNegative(api, co.permissions.OFFICE_DOCUMENT, co.collections.folders, createTestFolders);
+
+        it('returns a hierarchy of all folders and documents available to the user\'s client', function() {
+            var client, documentsFromDatabase, foldersFromDatabase;
+            return db.get(co.collections.clients).findOne({name:'1'}).then(function(c) {
+                client = c;
+                return db.get(co.collections.documents).find({clientId:client._id});
+            }).then(function(documents) {
+                documentsFromDatabase = documents;
+                return db.get(co.collections.folders).find({clientId:client._id});
+            }).then(function(folders) {
+                foldersFromDatabase = folders;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${api}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var hierarchyFromApi = response.body;
+                assert.equal(hierarchyFromApi.length, documentsFromDatabase.length + foldersFromDatabase.length);
+                var idMap = {};
+                hierarchyFromApi.forEach(function(element) {
+                    idMap[element._id] = element;
+                });
+                documentsFromDatabase.forEach(function(document) {
+                    var id = document._id.toString();
+                    assert.ok(idMap[document._id]);
+                    delete idMap[document._id];
+                });
+                foldersFromDatabase.forEach(function(folder) {
+                    var id = folder._id.toString();
+                    assert.ok(idMap[folder._id]);
+                    delete idMap[folder._id];
+                });
+                assert.equal(Object.keys(idMap).length, 0);
+            });
+        });
+
+    });
+
     describe('GET/forIds', function() {
 
-        // Negative tests
+        function createTestFolders() {
+            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+                var clientId = client._id;
+                var testObjects = ['testFolder1', 'testFolder2', 'testFolder3'].map(function(name) {
+                    return {
+                        name: name,
+                        type: 'text/plain',
+                        clientId: clientId,
+                        parentFolderId: null
+                    }
+                });
+                return Promise.resolve(testObjects);
+            });
+        }
 
-        xit('responds without authentication with 403', function() {
+        th.apiTests.getForIds.defaultNegative(co.apis.folders, co.permissions.OFFICE_DOCUMENT, co.collections.folders, createTestFolders);
+        th.apiTests.getForIds.clientDependentNegative(co.apis.folders, co.collections.folders, createTestFolders);
+        th.apiTests.getForIds.defaultPositive(co.apis.folders, co.collections.folders, createTestFolders);
+
+        function checkPath(folder, folders) {
+            assert.ok(folder.path);
+            var parentFolders = [];
+            var parentFolderId = folder.parentFolderId;
+            while (parentFolderId) {
+                var parentFolder = folders[parentFolderId];
+                // Reihenfolge von API ist umgekehrt, daher vorn dran hängen
+                parentFolders.unshift(parentFolder);
+                parentFolderId = parentFolder.parentFolderId;
+            }
+            assert.strictEqual(folder.path.length, parentFolders.length);
+            for (var i = 0; i < parentFolders.length; i++) {
+                assert.strictEqual(folder.path[i]._id.toString(), parentFolders[i]._id.toString());
+                assert.strictEqual(folder.path[i].name, parentFolders[i].name);
+            }
+        }
+
+        it('returns the full path for each folder', function() {
+            var foldersInDatabase = th.dbObjects[co.collections.folders];
+            var ids = foldersInDatabase.map(function(doc) { return doc._id.toString() });
+            return db.get(co.collections.folders).find().then(function(folders) {
+                folders.forEach(function(folder) {
+                    foldersInDatabase[folder._id] = folder;
+                });
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) => {
+                return th.get(`/api/${co.apis.folders}/forIds?ids=${ids.join(',')}&token=${token}`).expect(200);
+            }).then(function(response) {
+                var foldersFromApi = response.body;
+                foldersFromApi.forEach(function(folderFromApi) {
+                    checkPath(folderFromApi, foldersInDatabase);
+                });
+                return Promise.resolve();
+            });
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds with empty list when user has no read permission', function() {
-        });
-
-        xit('responds with empty list when query parameter "ids" does not exist', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains faulty IDs', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains IDs where no entities exist for', function() {
-        });
-
-        xit('returns only elements of the client of the logged in user when "ids" contains IDs of entities of another client', function() {
-        });
-
-        // Positive tests
-
-        xit('returns a list of folders with all details for the given IDs', function() {
-        });
     });
 
     describe('GET/:id', function() {
@@ -173,33 +253,33 @@ describe('API folders', function() {
 
         it('responds without authentication with 403', function() {
             return db.get('folders').findOne({name: '0_0'}).then((folderFromDatabase) => {
-                return superTest(server).get(`/api/folders/${folderFromDatabase._id}`).expect(403);
+                return th.get(`/api/folders/${folderFromDatabase._id}`).expect(403);
             });
         });
 
         it('responds without read permission with 403', function() {
             // Remove the corresponding permission
-            return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.removeReadPermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     return db.get('folders').findOne({name: '1_0'}).then((folderFromDatabase) =>{
                         var folderId = folderFromDatabase._id.toString(); 
-                        return superTest(server).get(`/api/folders/${folderId}?token=${token}`).expect(403);
+                        return th.get(`/api/folders/${folderId}?token=${token}`).expect(403);
                     });
                 });
             });
         });
 
         it('responds with invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return superTest(server).get(`/api/folders/InvalidId?token=${token}`).expect(400);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.get(`/api/folders/InvalidId?token=${token}`).expect(400);
             });
         });
 
         it('responds with not existing folder id with 403', function() {
             // Here the validateSameClientId comes into the game and returns a 403 because the requested folder is
             // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return superTest(server).get(`/api/folders/999999999999999999999999?token=${token}`).expect(403);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.get(`/api/folders/999999999999999999999999?token=${token}`).expect(403);
             });
         });
     
@@ -207,19 +287,19 @@ describe('API folders', function() {
             //folder.clientId != user.clientId
             //logg-in as user for client 1, but ask for folder of client 2 
             return db.get('folders').findOne({name: '0_0'}).then((folderOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var folderId = folderOfUser2._id.toString();
-                    return superTest(server).get(`/api/folders/${folderId}?token=${token}`).expect(403);
+                    return th.get(`/api/folders/${folderId}?token=${token}`).expect(403);
                 });
             });        
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('folders').findOne({name: '1_0'}).then((folderOfUser) => {
-                return testHelpers.removeClientModule('1', 'documents').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.removeClientModule('1', 'documents').then(function() {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                         var folderId = folderOfUser._id.toString();
-                        return superTest(server).get(`/api/folders/${folderId}?token=${token}`).expect(403);
+                        return th.get(`/api/folders/${folderId}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -227,10 +307,10 @@ describe('API folders', function() {
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('folders').findOne({name: '1_0'}).then((folderOfUser) => {
-                return testHelpers.removeClientModule('1', 'documents').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+                return th.removeClientModule('1', 'documents').then(function() {
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
                         var folderId = folderOfUser._id.toString();
-                        return superTest(server).get(`/api/folders/${folderId}?token=${token}`).expect(403);
+                        return th.get(`/api/folders/${folderId}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -242,9 +322,9 @@ describe('API folders', function() {
             //Note: delivered subfolders are from one lever below the current folder
             //The actual complete folder structure can be deeper  
             db.get('folders').findOne({name: '1_0_0'}).then((folderFromDatabase)=>{ 
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+                th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                     var id = folderFromDatabase._id.toString();
-                    superTest(server).get(`/api/folders/${id}?token=${token}`).expect(200).end(function(err, res){
+                    th.get(`/api/folders/${id}?token=${token}`).expect(200).end(function(err, res){
                         if (err) {
                                 done(err);
                                 return;
@@ -269,53 +349,53 @@ describe('API folders', function() {
         // Negative tests
 
         it('responds without authentication with 403', function() {
-            return superTest(server).post('/api/folders').send({name: 'test_name'}).expect(403);
+            return th.post('/api/folders').send({name: 'test_name'}).expect(403);
         });
 
         it('responds without write permission with 403', function() {
             // Remove the corresponding permission
-            return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var newFolder = { 
                         name: 'newName'
                     };
-                    return superTest(server).post('/api/folders?token=' + token).send(newFolder).expect(403);
+                    return th.post('/api/folders?token=' + token).send(newFolder).expect(403);
                 });
             });
         });
 
         it('responds without giving a folder with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return superTest(server).post(`/api/folders?token=${token}`).send().expect(400);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.post(`/api/folders?token=${token}`).send().expect(400);
             });
         });
 
         it('responds with correct folder with invalid parentFolderId with 400', function() {
             // parentFolderId = null means that the folder becomes a root folder
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                 var newFolder = {name: 'test_folder', parentFolderId: '999999999999999999999999'};
-                return superTest(server).post(`/api/folders?token=${token}`).send(newFolder).expect(400);
+                return th.post(`/api/folders?token=${token}`).send(newFolder).expect(400);
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'documents').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.removeClientModule('1', 'documents').then(function() {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var newFolder = { 
                         name: 'newName'
                     };
-                    return superTest(server).post('/api/folders?token=' + token).send(newFolder).expect(403);
+                    return th.post('/api/folders?token=' + token).send(newFolder).expect(403);
                 });
             });
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'documents').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+            return th.removeClientModule('1', 'documents').then(function() {
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
                     var newFolder = { 
                         name: 'newName'
                     };
-                    return superTest(server).post('/api/folders?token=' + token).send(newFolder).expect(403);
+                    return th.post('/api/folders?token=' + token).send(newFolder).expect(403);
                 });
             });
         });
@@ -323,9 +403,9 @@ describe('API folders', function() {
         // Positive tests
 
         it('responds with correct folder data with inserted folder containing an _id field', function(done) {
-            testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+            th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                 var newFolder = {name: 'test_folder'};
-                superTest(server).post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
+                th.post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
                     if (err) {
                         done(err);
                         return;
@@ -348,9 +428,9 @@ describe('API folders', function() {
 
         it('responds with correct folder containing an _id with the inserted folder containing a generated _id', function(done) {
             // _id must not be settable on POST
-            testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+            th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                 var newFolder = {name: 'test_folder', _id: '999999999999999999999999'};
-                superTest(server).post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
+                th.post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
                     if (err) {
                         done(err);
                         return;
@@ -374,9 +454,9 @@ describe('API folders', function() {
 
         it('responds with correct folder containing a specific clientId with the inserted folder where the clientId is the one of the logged in user', function(done) {
             // clientId must not be settable on POST
-            testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+            th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                 var newFolder = {name: 'test_folder', clientId: '999999999999999999999999'};
-                superTest(server).post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
+                th.post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
                     if (err) {
                                 done(err);
                                 return;
@@ -400,9 +480,9 @@ describe('API folders', function() {
 
         it('responds with correct folder with no parentFolderId with the inserted folder and null as parentFolderId', function(done) {
             // parentFolderId = null means that the folder becomes a root folder
-            testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+            th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                 var newFolder = {name: 'test_folder', parentFolderId: null};
-                superTest(server).post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
+                th.post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
                     if (err) {
                         done(err);
                         return;
@@ -419,9 +499,9 @@ describe('API folders', function() {
 
         it('responds with correct folder with correct parentFolderId with the inserted folder and the ID of the parent folder as parentFolderId', function(done) {
             db.get('folders').findOne({name: '1_1_1'}).then((parentFolder) =>{
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+                th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                     var newFolder = { name: 'test_folder', parentFolderId: parentFolder._id.toString() };
-                    superTest(server).post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
+                    th.post(`/api/folders?token=${token}`).send(newFolder).expect(200).end(function(err, res){
                         if (err) {
                             done(err);
                             return;
@@ -446,27 +526,27 @@ describe('API folders', function() {
         it('responds without authentication with 403', function() {
             return db.get('folders').findOne({name: '0_0'}).then((folderFromDatabase) => {
                 var folderId = folderFromDatabase._id.toString();
-                return superTest(server).put('/api/folders/'+ folderId).send().expect(403);
+                return th.put('/api/folders/'+ folderId).send().expect(403);
             });
         });
 
         it('responds without write permission with 403', function() {
             return db.get('folders').findOne({ name : '1_1' }).then((folderFromDatabase) => {
                 // Remove the corresponding permission
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                         var updatedFolder = {
                             name: 'newName'
                         };
-                        return superTest(server).put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(403);
+                        return th.put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(403);
                     });
                 });
             });
         });
 
         it('responds with an invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return superTest(server).put(`/api/folders/InvalidId?token=${token}`).send({name: 'newFolderName'}).expect(400);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.put(`/api/folders/InvalidId?token=${token}`).send({name: 'newFolderName'}).expect(400);
             });
         });
 
@@ -476,16 +556,16 @@ describe('API folders', function() {
             var updatedFolder = {
                 name: 'newName'
             };
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).put(`/api/folders/999999999999999999999999?token=${token}`).send(updatedFolder).expect(403);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.put(`/api/folders/999999999999999999999999?token=${token}`).send(updatedFolder).expect(403);
             });
         });
 
         it('responds without giving a folder with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                 return db.get('folders').findOne({name: '1_0'}).then((folderFromDatabase)=>{
                     var folderId = folderFromDatabase._id.toString();
-                    return superTest(server).put(`/api/folders/${folderId}?token=${token}`).send().expect(400);
+                    return th.put(`/api/folders/${folderId}?token=${token}`).send().expect(400);
                 });
             });
         });
@@ -493,31 +573,31 @@ describe('API folders', function() {
         it('responds with an id of an existing folder which does not belong to the same client as the logged in user with 403', function() {
             //folder.clientId != user.clientId
             return db.get('folders').findOne({name: '0_0'}).then((folderOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var folderId = folderOfUser2._id.toString();
                     var updatedFolder = {name: 'new_folder_name'};
-                    return superTest(server).put(`/api/folders/${folderId}?token=${token}`).send(updatedFolder).expect(403);
+                    return th.put(`/api/folders/${folderId}?token=${token}`).send(updatedFolder).expect(403);
                 });
             });
         });
 
         it('responds with correct folder with invalid new parentFolderId with 400', function() {
             return db.get('folders').findOne({name: '1_1'}).then((folderFromDatabase) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var updatedFolder = { name: 'new_folder_name', parentFolderId: '999999999999999999999999' };
-                    return superTest(server).put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(400);
+                    return th.put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(400);
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('folders').findOne({ name : '1_0' }).then((folderFromDatabase) => {
-                return testHelpers.removeClientModule('1', 'documents').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.removeClientModule('1', 'documents').then(function() {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                         var updatedFolder = {
                             name: 'newName'
                         };
-                        return superTest(server).put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(403);
+                        return th.put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(403);
                     });
                 });
             });
@@ -525,12 +605,12 @@ describe('API folders', function() {
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('folders').findOne({ name : '1_0' }).then((folderFromDatabase) => {
-                return testHelpers.removeClientModule('1', 'documents').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+                return th.removeClientModule('1', 'documents').then(function() {
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
                         var updatedFolder = {
                             name: 'newName'
                         };
-                        return superTest(server).put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(403);
+                        return th.put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(403);
                     });
                 });
             });
@@ -540,10 +620,10 @@ describe('API folders', function() {
 
         it('responds with a folder containing an _id field which differs from the id parameter with the updated folder and the original _id (_id cannot be changed)', function(done) {
             db.get('folders').findOne({name: '1_1'}).then(function(folderFromDatabase){
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+                th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
                     var updatedFolder = {name: '1_2', _id: '999999999999999999999999'};
                     var id = folderFromDatabase._id.toString();
-                    superTest(server).put(`/api/folders/${id}?token=${token}`).send(updatedFolder).expect(200).end(function(err, res){
+                    th.put(`/api/folders/${id}?token=${token}`).send(updatedFolder).expect(200).end(function(err, res){
                         if (err) {
                             done(err);
                             return;
@@ -564,11 +644,11 @@ describe('API folders', function() {
         it('responds with a folder containing a clientId field with a different client id with the updated folder and the original clientId (clientId cannot be changed)', function(done) {
             db.get('folders').findOne({name: '1_1'}).then((folderFromDatabase) =>{ //looking for the folder first to obtain a valid _id
                 db.get('clients').findOne({name: '0'}).then((differentClientFromDB)=>{//then look for another cliet to use his/her _id as subsitute clientId
-                    testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                    th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                         var folderId = folderFromDatabase._id;
                         var updatedFolder = {name: 'new_folder_name',
                                             clientId: differentClientFromDB._id} //try to substitute the exsiting clientId
-                        superTest(server).put(`/api/folders/${folderId}?token=${token}`).send(updatedFolder).expect(200).end((err, res) =>{
+                        th.put(`/api/folders/${folderId}?token=${token}`).send(updatedFolder).expect(200).end((err, res) =>{
                             if(err){ 
                                 done(err);
                                 return;
@@ -588,9 +668,9 @@ describe('API folders', function() {
 
         it('responds with a folder with the updated folder and its new properties', function(done) {
             db.get('folders').findOne({name: '1_1'}).then((folderFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var updatedFolder = {name: 'new_folder_name'};
-                    superTest(server).put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(200).end((err,res) =>{
+                    th.put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(200).end((err,res) =>{
                         if(err){ 
                             done(err);
                             return;
@@ -605,9 +685,9 @@ describe('API folders', function() {
 
         it('responds with correct folder without parentFolderId with updated folder and old parentFolderId', function(done) {
             db.get('folders').findOne({name: '1_1_1'}).then((folderFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var updatedFolder = { name: 'new_folder_name' };
-                    superTest(server).put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(200).end((err,res) =>{
+                    th.put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(200).end((err,res) =>{
                         if(err){ 
                             done(err);
                             return;
@@ -623,9 +703,9 @@ describe('API folders', function() {
         it('responds with correct folder containing null as parentFolderId with updated folder and null as parentFolderId', function(done) {
             // Move folder to root
             db.get('folders').findOne({name: '1_1_1'}).then((folderFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var updatedFolder = { name: 'new_folder_name', parentFolderId: null };
-                    superTest(server).put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(200).end((err,res) =>{
+                    th.put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(200).end((err,res) =>{
                         if(err){ 
                             done(err);
                             return;
@@ -643,9 +723,9 @@ describe('API folders', function() {
             db.get('folders').findOne({name: '1_1'}).then((newParentFolder) => {
                 var newParentFolderId = newParentFolder._id.toString();
                 db.get('folders').findOne({name: '1_1_1'}).then((folderFromDatabase) => {
-                    testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                    th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                         var updatedFolder = { name: 'new_folder_name', parentFolderId: newParentFolderId };
-                        superTest(server).put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(200).end((err,res) =>{
+                        th.put(`/api/folders/${folderFromDatabase._id}?token=${token}`).send(updatedFolder).expect(200).end((err,res) =>{
                             if(err){ 
                                 done(err);
                                 return;
@@ -663,171 +743,103 @@ describe('API folders', function() {
 
     describe('DELETE/:id', function() {
 
-        // Negative tests
-
-        it('responds without authentication with 403', function() {
-            return db.get('folders').findOne({name: '1_0'}).then((folderFromDatabase) =>{
-                var folderId = folderFromDatabase._id.toString();
-                return superTest(server).del(`/api/folders/${folderId}`).expect(403);
+        function getDeleteFolderId() {
+            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+                var folder = {
+                    name: 'newFolderToDelete',
+                    clientId: client._id,
+                    parentFolderId: null
+                }
+                return db.get(co.collections.folders).insert(folder);
+            }).then(function(folder) {
+                return th.createRelationsToUser(co.collections.folders, folder);
+            }).then(function(insertedFolder) {
+                return Promise.resolve(insertedFolder._id);
             });
-        });
+        }
 
-        it('responds without write permission with 403', function() {
-            return db.get('folders').findOne({ name : '1_0' }).then((folderFromDatabase) => {
-                // Remove the corresponding permission
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        return superTest(server).del(`/api/folders/${folderFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with an invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).del('/api/folders/invalidId?token=' + token).expect(400);
-            });
-        });
-
-        it('responds with an id where no folders exists with 403', function() {
-            // Here the validateSameClientId comes into the game and returns a 403 because the requested folder is
-            // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                return superTest(server).del(`/api/folders/999999999999999999999999?token=${token}`).expect(403);
-            });
-        });
-
-        it('responds with an id of an existing folder which does not belong to the same client as the logged in user with 403', function() {
-            //folder.clientId != user.clientId
-            return db.get('folders').findOne({name: '0_0'}).then((folderOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    var folderId = folderOfUser2._id.toString();
-                    return superTest(server).del(`/api/folders/${folderId}?token=${token}`).expect(403);
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('folders').findOne({ name : '1_0' }).then((folderFromDatabase) => {
-                return testHelpers.removeClientModule('1', 'documents').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        return superTest(server).del(`/api/folders/${folderFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('folders').findOne({ name : '1_0' }).then((folderFromDatabase) => {
-                return testHelpers.removeClientModule('1', 'documents').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                        return superTest(server).del(`/api/folders/${folderFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
+        th.apiTests.delete.defaultNegative(co.apis.folders, co.permissions.OFFICE_DOCUMENT, getDeleteFolderId);
+        th.apiTests.delete.clientDependentNegative(co.apis.folders, getDeleteFolderId);
+        th.apiTests.delete.defaultPositive(co.apis.folders, co.collections.folders, getDeleteFolderId);
 
         // Positive tests
 
-        it('responds with an id of an existing folder without deleting parent folder', function(done){
-            db.get('folders').findOne({name: '1_1_0_1'}).then(function(folderFromDatabase){
-                var folderId = folderFromDatabase._id;
-                var parentId = folderFromDatabase.parentFolderId;
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                    superTest(server).del(`/api/folders/${folderId}?token=${token}`).expect(204).end(function(err, res){
-                        if(err){
-                            done(err);
-                            return;
-                        }
-                        else{
-                            //check if parent folder is still existing 
-                            db.get('folders').findOne({_id: parentId}).then(function(resultFromDatabase) {
-                                assert.strictEqual(resultFromDatabase.name, '1_1_0' , `Parent folder was deleted`);
-                                done();
-                            });
-                        }
-                    });
-                }).catch(done);
+        it('responds with an id of an existing folder without deleting parent folder', function(){
+            var folderId, parentId;
+            return db.get('folders').findOne({name: '1_1_0_1'}).then(function(folderFromDatabase){
+                folderId = folderFromDatabase._id;
+                parentId = folderFromDatabase.parentFolderId;
+                return th.doLoginAndGetToken('1_0_0', 'test');
+            }).then(function(token){
+                return th.del(`/api/folders/${folderId}?token=${token}`).expect(204);
+            }).then(function(){
+                //check if parent folder is still existing 
+                return db.get('folders').findOne({_id: parentId});
+            }).then(function(resultFromDatabase) {
+                assert.strictEqual(resultFromDatabase.name, '1_1_0' , `Parent folder was deleted`);
+                return Promise.resolve();
             });
         });
 
-        it('responds with an id of an existing folder without deleting documents or sibling folders on the same level', function(done){
+        it('responds with an id of an existing folder without deleting documents or sibling folders on the same level', function(){
             //Note: folder 1_1_1 had 2 sibling folders and 3 sibling documents; parent folder is 1_1
-            db.get('folders').findOne({name: '1_1_1'}).then(function(folderFromDatabase){
-                var folderId = folderFromDatabase._id;
-                var parentId = folderFromDatabase.parentFolderId;
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                    superTest(server).del(`/api/folders/${folderId}?token=${token}`).expect(204).end(function(err, res){
-                        if(err){
-                            done(err);
-                            return;
-                        }
-                        else{
-                            //check if siblings on the same level  still exist
-                            superTest(server).get(`/api/folders/${parentId}?token=${token}`).expect(204).end(function(err, res){
-                                var numSubFolders = res.body.folders.length;
-                                var numDocuments = res.body.documents.length;
-                                assert.strictEqual(numSubFolders, 1 , `Incorrect number of expected folders: 1 vs ${numSubFolders}`);
-                                assert.strictEqual(numDocuments, 2 , `Incorrect number of expected documents: 2 vs ${numSubFolders}`);
-                                done();
-                            });
-                        }
-                    });
-                }).catch(done);
+            var folderId, parentId, token;
+            return db.get('folders').findOne({name: '1_1_1'}).then(function(folderFromDatabase){
+                folderId = folderFromDatabase._id;
+                parentId = folderFromDatabase.parentFolderId;
+                return th.doLoginAndGetToken('1_0_0', 'test');
+            }).then(function(tok){
+                token = tok;
+                return th.del(`/api/folders/${folderId}?token=${token}`).expect(204);
+            }).then(function(){
+                //check if siblings on the same level  still exist
+                return th.get(`/api/folders/${parentId}?token=${token}`).expect(200);
+            }).then(function(response){
+                var numSubFolders = response.body.folders.length;
+                var numDocuments = response.body.documents.length;
+                assert.strictEqual(numSubFolders, 1 , `Incorrect number of expected folders: 1 vs ${numSubFolders}`);
+                assert.strictEqual(numDocuments, 2 , `Incorrect number of expected documents: 2 vs ${numSubFolders}`);
+                return Promise.resolve();
             });
         });
 
-        it('responds with a correct id with 204 and deletes all contained folders, documents and their files and the relations of the documents to activities', function(done) {
+        it('responds with a correct id with 204 and deletes all contained folders, documents and their files', function() {
             // Give us more time because this is a complex test
             this.timeout(30000);
             var folderName = '1_1_1';
-            testHelpers.prepareRelations().then(testHelpers.prepareDocumentFiles).then(() => { // Relations and document files are needed only in this test
-                // Retrieve the relations for all documents
-                db.get('documents').find({ name: { $regex: '^' + folderName + '_' } }, '_id clientId').then((relevantDocuments) => {
-                    var documentIds = relevantDocuments.map((doc) => doc._id);
-                    db.get('relations').find({ $or: [ { type1: 'documents', id1: { $in: documentIds } }, { type2: 'documents', id2: { $in: documentIds } } ] }, '_id').then((relations) => {
-                        var relationIds = relations.map((relation) => relation._id);
-                        // Now get the folder from the database and perform the deletion, WARNING: Here comes the callback hell :)
-                        db.get('folders').findOne({name: folderName}, '_id').then((folderFromDatabase) => {
-                            testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                                var folderId = folderFromDatabase._id;
-                                // Trigger deletion
-                                superTest(server).del(`/api/folders/${folderId}?token=${token}`).expect(204).end((err, res) => {
-                                    if (err) return done(err);
-                                    // Check whether the folder itself and the subfolders were deleted by filtering by their names
-                                    db.get('folders').count({ name: { $regex: '^' + folderName } }).then((folderCount) => {
-                                        assert.equal(folderCount, 0, 'Not all folders of the deleted folder were also deleted');
-                                        // Check whether documents were deleted by filtering by their names, but here with '_' otherwise the document with the same name as the folder would also be checked
-                                        db.get('documents').count({ name: { $regex: '^' + folderName + '_' } }).then((documentCount) => {
-                                            assert.equal(documentCount, 0, 'Not all documents and subdocuments of the deleted folder were also deleted');
-                                            // And at least check the relations
-                                            db.get('relations').count({ _id: { $in: relationIds } }).then((relationCount) => {
-                                                assert.equal(relationCount, 0, 'Not all relations of the deleted folder were also deleted');
-                                                // But there must still be other relations
-                                                db.get('relations').count().then((otherRelationCount) => {
-                                                    assert.notEqual(otherRelationCount, 0, 'The other relations were also deleted');
-                                                    // Finally check whether all files were removed
-                                                    relevantDocuments.forEach((document) => {
-                                                        var path = documentsHelper.getDocumentPath(document._id);
-                                                        assert.ok(!fs.existsSync(path), `Document file ${path} still exists after deletion`);
-                                                    });
-                                                    done();
-                                                }).catch(done); // Must be at each level where an assertion is made
-                                            }).catch(done);
-                                        }).catch(done);
-                                    }).catch(done);
-                                });
-                            });
-                        });
-                    });
+            var folderFromDatabase, relevantDocuments;
+            return th.prepareDocumentFiles().then(() => {
+                // Retrieve all contained documents for testing that their files are deleted
+                return db.get('documents').find({ name: { $regex: '^' + folderName + '_' } }, '_id clientId');
+            }).then((documents) => {
+                relevantDocuments = documents;
+                // Now get the folder from the database and perform the deletion, WARNING: Here comes the callback hell :)
+                return db.get('folders').findOne({name: folderName}, '_id');
+            }).then((folder) => {
+                folderFromDatabase = folder;
+                return th.doLoginAndGetToken('1_0_0', 'test');
+            }).then((token) => {
+                // Trigger deletion
+                return th.del(`/api/folders/${folderFromDatabase._id.toString()}?token=${token}`).expect(204);
+            }).then(function() {
+                // Check whether the folder itself and the subfolders were deleted by filtering by their names
+                return db.get('folders').count({ name: { $regex: '^' + folderName } });
+            }).then((folderCount) => {
+                assert.equal(folderCount, 0, 'Not all folders of the deleted folder were also deleted');
+                // Check whether documents were deleted by filtering by their names, but here with '_' otherwise the document with the same name as the folder would also be checked
+                return db.get('documents').count({ name: { $regex: '^' + folderName + '_' } });
+            }).then((documentCount) => {
+                assert.equal(documentCount, 0, 'Not all documents and subdocuments of the deleted folder were also deleted');
+                // Retrieve all contained documents for testing that their files are deleted
+                return db.get('documents').find({ name: { $regex: '^' + folderName + '_' } }, '_id clientId');
+            }).then((relevantDocuments) => {
+                // Finally check whether all files were removed
+                relevantDocuments.forEach((document) => {
+                    var path = documentsHelper.getDocumentPath(document._id);
+                    assert.ok(!fs.existsSync(path), `Document file ${path} still exists after deletion`);
                 });
+                return Promise.resolve();
             });
-        });
-
-        xit('All relations, where the element is the source (type1, id1), are also deleted', function() {
-        });
-
-        xit('All relations, where the element is the target (type2, id2), are also deleted', function() {
         });
 
     });
