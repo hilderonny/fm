@@ -488,6 +488,8 @@ describe('API users', function() {
                 user.name = 'newUserToDelete';
                 return db.get(co.collections.users).insert(user);
             }).then(function(insertedUser) {
+                return th.createRelationsToUser(co.collections.users, insertedUser);
+            }).then(function(insertedUser) {
                 return Promise.resolve(insertedUser._id);
             });
         }

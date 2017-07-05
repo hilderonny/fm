@@ -10,8 +10,6 @@ var co = require('../../utils/constants');
 
 describe('API portals', function(){
 
-    var server = require('../../app');
-
     // Clear and prepare database with clients, user groups, users... 
      beforeEach(() => {
         return th.cleanDatabase()
@@ -221,6 +219,8 @@ describe('API portals', function(){
         function getDeletePortalId() {
             return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
                 return db.get(co.collections.portals).insert({name:'newPortal', clientId:client._id});
+            }).then(function(portal) {
+                return th.createRelationsToUser(co.collections.portals, portal);
             }).then(function(portal) {
                 return Promise.resolve(portal._id);
             });
