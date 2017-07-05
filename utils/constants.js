@@ -41,6 +41,10 @@ module.exports.apis = {
      */
     relations: 'relations',
     /**
+     * API for retrieving settings and setting sets
+     */
+    settingsets: 'settingsets',
+    /**
      * API for editing usergroups
      */
     usergroups: 'usergroups',
