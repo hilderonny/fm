@@ -1,0 +1,6 @@
+<md-subheade><span translate>TRK_DYNAMICATTRIBUTES_ATTRIBUTES</span></md-subheade>
+<md-card-content>
+    <section ng-repeat="attribute in attributesArray() | orderBy:translateTitle">
+        <span translate="TRK_{{attribute.title}}"></span>
+    </section>
+</md-card-content>
