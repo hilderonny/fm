@@ -13,6 +13,7 @@
     "TRK_MENU_ADMINISTRATION_USERS" : "Users",
     "TRK_MENU_ADMINISTRATION_USERGROUPS" : "User groups",
     "TRK_MENU_LOGOUT" : "Logout",
+    "TRK_MENU_ADMINISTRATION_CRM":"Business Partners",
     "TRK_MODULE_base_NAME" : "Base",
     "TRK_NO" : "No",
     "TRK_OK" : "OK",

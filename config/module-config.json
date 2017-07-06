@@ -145,6 +145,35 @@
                 }
             ]
         },
+        
+        "busniesspartner" : {
+            "api":[ "busniesspartner", "partneraddress"],
+           
+            "public": [
+                "css/icons/material/Briefcase.svg",
+                "css/icons/office/Briefcase.svg",               
+                "partial/Administration/BPAddressCard.html",
+                "partial/Administration/BPCard.html",
+                "partial/Administration/BPListCard.html"
+            ],
+
+            "include":[
+                "public/js/Administration/BPAddressCardController.js",
+                "public/js/Administration/BPCardController.js",
+                "public/js/Administration/BPListCardController.js"
+            ],
+            
+            "languages" : [ "en", "de", "bg", "ar" ],
+            "menu": [
+                {
+                    "title": "TRK_MENU_CRM",
+                    "items": [
+                        { "mainCard": "Administration/BPListCard", "icon": "Briefcase", "title": "TRK_MENU_ADMINISTRATION_CRM", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS" }
+                    ]
+                }
+            ]
+
+        },
 
         "documents": {
             "api" : [ "documents", "extractdocument", "folders" ],
