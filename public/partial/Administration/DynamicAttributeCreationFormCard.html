@@ -59,10 +59,9 @@
 
     <!-- TODO: check if any additional permission is needed -->
     <md-card-actions layout="row" layout-align="end center">
-        <md-button class="md-raised md-accent" ng-if="!isNewAttribute  && params.isSelection && params.selectCallback" ng-click="params.selectCallback(attribute)"><span translate>{{params.selectButtonText}}</span></md-button>
         <md-button class="md-raised md-accent" ng-if="isNewAttribute " ng-click="createAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_CREATE</span></md-button>
-        <md-button class="md-raised md-accent" ng-if="!isNewAttribute && !params.isSelection" ng-click="saveAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_SAVE</span></md-button>
-        <md-button class="md-raised md-warn" ng-if="!isNewAttribute && !params.isSelection" ng-click="deleteAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
+        <md-button class="md-raised md-accent" ng-if="!isNewAttribute " ng-click="saveAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_SAVE</span></md-button>
+        <md-button class="md-raised md-warn" ng-if="!isNewAttribute " ng-click="deleteAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
     </md-card-actions>
 
 </md-card>
