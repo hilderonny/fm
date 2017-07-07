@@ -2,7 +2,6 @@
  * UNIT Tests for api/folders
  */
 var assert = require('assert');
-var async = require('async');
 var fs = require('fs');
 var documentsHelper = require('../../utils/documentsHelper');
 var th = require('../testhelpers');

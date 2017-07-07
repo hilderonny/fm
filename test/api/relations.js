@@ -5,7 +5,6 @@ var assert = require('assert');
 var fs = require('fs');
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');
-var async = require('async');
 var co = require('../../utils/constants');
 
 describe('API relations', function() {

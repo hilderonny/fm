@@ -1,13 +1,11 @@
 /**
  * UNIT Tests for api/clientmodules
- * @see http://softwareengineering.stackexchange.com/a/223376 for running async tasks in parallel
  */
 var assert = require('assert');
 var fs = require('fs');
 var th = require('../testHelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
-var async = require('async');
 
 describe('API clientmodules', function() {
 

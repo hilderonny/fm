@@ -39,7 +39,7 @@ describe('API documents', function(){
 
     // Delete temporary documents
     afterEach(() => {
-        return th.removeDocumentFiles()
+        return th.removeDocumentFiles();
     });
 
     describe('GET/forIds', function() {
