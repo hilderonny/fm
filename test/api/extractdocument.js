@@ -104,6 +104,22 @@ describe.only('API extractdocument', function() {
 
     describe.only('GET/:id', function() {
 
+        function compareStructure(actual, expected) {
+            if (expected.folders) expected.folders.forEach(function(expectedFolder) {
+                assert.ok(actual.folders);
+                assert.ok(actual.folders.length > 0);
+                var actualFolder = actual.folders.find((f) => f.name === expectedFolder.name);
+                assert.ok(actualFolder);
+                compareStructure(actualFolder, expectedFolder);
+            });
+            if (expected.documents) expected.documents.forEach(function(expectedDocument) {
+                assert.ok(actual.documents);
+                assert.ok(actual.documents.length > 0);
+                var actualDocument = actual.documents.find((d) => d.name === expectedDocument.name);
+                assert.ok(actualDocument);
+            });
+        }
+
         th.apiTests.getId.defaultNegative(co.apis.extractdocument, co.permissions.OFFICE_DOCUMENT, co.collections.documents);
         th.apiTests.getId.clientDependentNegative(co.apis.documents, co.collections.documents);
 
@@ -120,23 +136,19 @@ describe.only('API extractdocument', function() {
             });
         });
 
-        xit('responds with 400 when ZIP file is corrupted', function() {
+        it('responds with 400 when ZIP file is corrupted', function() {
+            var token;
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(tok) {
+                token = tok;
+                return getTestDocument();
+            }).then(function(document) {
+                var filePath = dh.getDocumentPath(document._id);
+                fs.writeFileSync(filePath, 'Invalid ZIP content');
+                return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(400);
+            });
         });
 
-        xit('responds with not existing id with 404', function() {
-        });
-
-        xit('responds with 403 when the document with the given _id does not belong to the client of the user', function() {
-        });
-
-        // Positive tests
-
-        function compareStructure(actual, expected) {
-            console.log(actual);
-            return Promise.resolve();
-        }
-
-        it.only('extracts the ZIP file and creates a folder structure in the folder of the document and documents for all contained files', function() {
+        it.skip('extracts the ZIP file and creates a folder structure in the folder of the document and documents for all contained files', function() {
             var token, documentFromDatabase, foldersDict = { rootFolder: { folders:[], documents:[] } };
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(tok) {
                 token = tok;
@@ -145,9 +157,8 @@ describe.only('API extractdocument', function() {
                 documentFromDatabase = doc;
                 return th.get(`/api/${co.apis.extractdocument}/${documentFromDatabase._id.toString()}?token=${token}`).expect(200);
             }).then(function() {
-                return db.get(co.collections.folders).find({});
+                return db.get(co.collections.folders).find();
             }).then(function(folders) {
-                console.log(folders);
                 folders.forEach(function(folder) {
                     foldersDict[folder._id] = folder;
                     folder.folders = [];
@@ -169,25 +180,77 @@ describe.only('API extractdocument', function() {
                         foldersDict.rootFolder.documents.push(document);
                     }
                 });
-                return compareStructure(foldersDict[documentFromDatabase.parentFolderId], zipContent);
+                compareStructure(foldersDict[documentFromDatabase.parentFolderId], zipContent);
+                return Promise.resolve();
             });
         });
 
-        xit('creates no folders or documents when the ZIP file is empty', function() {
+        it('creates no folders or documents when the ZIP file is empty', function() {
+            var token, document;
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(tok) {
+                token = tok;
+                return getTestDocument();
+            }).then(function(doc) {
+                document = doc;
+                var zip = new JSZip();
+                return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            }).then(function(zipFileBuffer) {
+                var filePath = dh.getDocumentPath(document._id);
+                fs.writeFileSync(filePath, zipFileBuffer);
+                return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(200);
+            }).then(function() {
+                return db.get(co.collections.folders).find({parentFolderId:document.parentFolderId});
+            }).then(function(folders) {
+                assert.strictEqual(folders.length, 0);
+                return db.get(co.collections.documents).find({parentFolderId:document.parentFolderId});
+            }).then(function(documents) {
+                assert.strictEqual(documents.length, 1); // Nur das Testdokument selbst
+                assert.strictEqual(documents[0]._id.toString(), document._id.toString());
+                return Promise.resolve();
+            });
         });
 
-        xit('creates folder structures in folder of document even if folders with the same name exist (creates duplicates)', function() {
-            // Create a subfolder "subfolder1"
-            // Prepare a ZIP containing "subfolder1" as folder
-            // Extract the ZIP file
-            // The current folder must now contain two folders named "subfolder1" and the newly created folder must contain the files from the ZIP file
+        it('creates folder structures in folder of document even if folders with the same name exist (creates duplicates)', function() {
+            var token, document;
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(tok) {
+                token = tok;
+                return getTestDocument();
+            }).then(function(doc) {
+                document = doc;
+                var folder = {name:'F1', parentFolderId:document.parentFolderId, clientId:document.clientId};
+                return db.insert(co.collections.folders, folder);
+            }).then(function() {
+                return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(200);
+            }).then(function() {
+                return db.get(co.collections.folders).find({parentFolderId:document.parentFolderId});
+            }).then(function(folders) {
+
+                // TODO: Aus irgendeinem Grund funktioniert dieser Test nur, wenn er allein durchgeführt wird. Andernfalls gibt es nur ein einziges Verzeichnis in der Rückgabe.
+                // Scheint irgendwas in der Vorbereitung schief zu laufen. Vermutlich ein asynchroner Aufruf eines vorherigen Tests, auf dessen Ergebnis nicht gewartet wird.
+                // Passiert nur, wenn der Test aus Zeile 151 vorher ausgeführt wird.
+
+                assert.strictEqual(folders.length, 3); // 1 Vorbereiteter und zwei aus ZIP-Datei
+                return Promise.resolve();
+            });
         });
 
-        xit('creates documents for files even if documents with the same name exist (creates duplicates)', function() {
-            // Upload a document "doc1.txt"
-            // Prepare a ZIP containing "doc1.txt" as file
-            // Extract the ZIP file
-            // The current folder must now contain two documents named "doc1.txt"
+        it('creates documents for files even if documents with the same name exist (creates duplicates)', function() {
+            var token, document;
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(tok) {
+                token = tok;
+                return getTestDocument();
+            }).then(function(doc) {
+                document = doc;
+                var duplicateDocument = {name:'Da', parentFolderId:document.parentFolderId, clientId:document.clientId};
+                return db.insert(co.collections.documents, duplicateDocument);
+            }).then(function() {
+                return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(200);
+            }).then(function() {
+                return db.get(co.collections.documents).find({parentFolderId:document.parentFolderId});
+            }).then(function(documents) {
+                assert.strictEqual(documents.length, 4); // 1 Vorbereiteter, 1 Testdokument und zwei aus ZIP-Datei
+                return Promise.resolve();
+            });
         });
 
     });

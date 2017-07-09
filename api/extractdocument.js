@@ -21,6 +21,7 @@ var co = require('../utils/constants');
  */
 var foldersToCreateWithDocumentList = { './': {folders:[],documents:[]}};
 var documentsAndFoldersCreatePromises = [];
+var documentsAndFoldersUpdatePromises = [];
 
 
 /**
@@ -47,67 +48,22 @@ function prepareFolderStructure(db, filePath, parentFolderId, clientId) {
         documentsAndFoldersCreatePromises.push(db.insert(co.collections.folders, folder).then(function(folder) {
             // Verzeichnis in Liste nachzubearbeitender Elemente aufnehmen, dabei im Parent gucken
             foldersToCreateWithDocumentList[parentPath].folders.push(folder);
+            foldersToCreateWithDocumentList[filePath].instance = folder;
             return Promise.resolve();
         }));
     }
 }
 
-var extractDocumentIntoFolder = (db, zipDocument, finishCallback) => {
-    var parentFolderId = zipDocument.parentFolderId;
-    var clientId = zipDocument.clientId;
-    var filePath = documentsHelper.getDocumentPath(zipDocument._id);
-    // Process each file in the ZIP
-    var fileIndex = 0;
-    var parser = unzip.Parse();
-    parser.on('close', finishCallback);
-    fs.createReadStream(filePath).pipe(parser).on('entry', (entry) => {
-        // Leere Verzeichnisse werden hier behandelt
-        if (entry.type === 'Directory') {
-            prepareFolderStructure(db, parentFolderId, clientId, entry.path);
-        }
-        // Dateien und deren Verzeichnisstruktur kommen von hier
-        if(entry.type === 'File') {
-            var fileName = entry.path;
-            // Create document
-            prepareFolderStructure(db, parentFolderId, clientId, fileName, (parentFolderOfEntryId) => {
-                fileIndex = fileIndex + 1;
-                var mimeType = mime.lookup(path.extname(fileName));
-                var document = {
-                    name: path.basename(fileName),
-                    type: mimeType,
-                    clientId: clientId,
-                    parentFolderId: parentFolderOfEntryId,
-                    isExtractable: mimeType === 'application/x-zip-compressed' || mimeType === 'application/zip'
-                };
-                if (parentFolderId) {
-                    document.parentFolderId = parentFolderOfEntryId;
-                }
-                db.insert('documents', document).then((insertedDocument) => {
-                    if (insertedDocument.parentFolderId === parentFolderId) {
-                        newDocumentsInDocumentFolder.push(insertedDocument);
-                    }
-                    var documentPath = documentsHelper.getDocumentPath(insertedDocument._id);
-                    documentsHelper.createPath(path.dirname(documentPath));
-                    entry.pipe(fs.createWriteStream(documentPath));
-                });
-            });
-        }
-    });
-};
-
-
-
-
-/*
+/**
 Das Problem besteht hier darin, dass der pipe()-Mechanismus event-basiert und synchron ist.
 Wenn in einem solchen Event aber asyncchrone Promises (Verzeichnisstruktur anlegen) enthalten sind,
 so kann die Event-Abarbeitung nicht warten, da es keinen resolve-hook im Ereignis gibt.
 
-Daher müssen die Dokumente in zwei Schritten erzeugt werden:
-1. Dateien als Dokumente anlegen und anschließend mit der ID im Verzeihnis abspeichern
+Daher müssen die Dokumente in mehreren Schritten erzeugt werden:
+1. Dateien als Dokumente anlegen und anschließend mit der ID im Verzeichnis abspeichern
 2. Gleichzeitig merken, welche Verzeichnisse erstellt werden müssen und welche Dokumente darin enthalten sind.
+3. Parents den generierten Verzeichnissen nud Dokumenten zuweisen, nachdem die Zwischenverzeichnisse in der Dtaenbank gelandet sind.
 */
-
 function extractDocument(db, zipDocument) {
     return new Promise(function(resolve, reject) {
         var filePath = documentsHelper.getDocumentPath(zipDocument._id);
@@ -117,13 +73,22 @@ function extractDocument(db, zipDocument) {
             // Warten, bis alle Dokumente in der Datenbank erzeugt wurden
             Promise.all(documentsAndFoldersCreatePromises).then(function() {
                 // So, nun die Parents vernünftig zuweisen
-
-
-                // TODO: Hier nun weiter
-
-
-
-                console.log(foldersToCreateWithDocumentList);
+                Object.keys(foldersToCreateWithDocumentList).forEach(function(key) {
+                    var folderWithChildren = foldersToCreateWithDocumentList[key];
+                    // Root folder wird dem Verzeichnis des Dokumentes angehangen
+                    var parentFolderId = key === './' ? zipDocument.parentFolderId : folderWithChildren.instance._id;
+                    folderWithChildren.folders.forEach(function(childFolder) {
+                        childFolder.parentFolderId = parentFolderId;
+                        documentsAndFoldersUpdatePromises.push(db.update(co.collections.folders, childFolder._id, childFolder));
+                    });
+                    folderWithChildren.documents.forEach(function(childDocument) {
+                        childDocument.parentFolderId = parentFolderId;
+                        documentsAndFoldersUpdatePromises.push(db.update(co.collections.documents, childDocument._id, childDocument));
+                    });
+                });
+            });
+            // Warten, bis alle Updates ausgeführt wurden, dann Aufruf zurück geben
+            Promise.all(documentsAndFoldersUpdatePromises).then(function() {
                 resolve();
             });
         });
@@ -155,7 +120,7 @@ function extractDocument(db, zipDocument) {
                     return Promise.resolve();
                 }));
             }
-        });
+        }).on('error', reject);
     });
 }
 
@@ -174,15 +139,10 @@ router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), validat
                 folders: createdFoldersInSameFolderAsZipDocument,
                 documents: createdDocumentsInSameFolderAsZipDocument
             });
+        }, (error) => {
+            // Error parsing file
+            res.sendStatus(400);
         });
-        /*
-        // Extract the document into the path of the parent folder
-        extractDocumentIntoFolder(req.db, document, () => {
-            res.send({
-                folders: newFoldersInDocumentFolder,
-                documents: newDocumentsInDocumentFolder
-            });
-        });*/
     });
 });
 
