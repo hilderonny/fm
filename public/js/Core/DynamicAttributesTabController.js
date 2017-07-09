@@ -282,9 +282,11 @@ app.controller('CoreDynamicAttributesTabController', function($scope, $http, $tr
         if(!$scope.relationsEntity){console.log('NO relationsEntity');}
         var modelname = $scope.$parent.relationsEntity.type;
         var entityId = $scope.relationsEntity.id;
+        console.log(entityId);
+        console.log(modelname);
         $http.get('/api/dynamicattributes/values/' + modelname + '/' + entityId).then(function(response){
             $scope.attributes = response.data;
-            console.log($scope.attributes);
+           // console.log($scope.attributes);
         });
 ;
        // $scope.attributes.title  =  '$scope.relationsEntity.type';

@@ -38,7 +38,7 @@ var co = require('../utils/constants');
  * Check whether the modelName given in the request is valid or not
  */
 function validateModelName(req, res, next) {
-    if (!co.collections[req.params.modelName]) {
+    if (!co.collections[req.params.modelName] || co.collections[req.params.modelName].canHaveAttributes == false) {
         return res.sendStatus(400);
     }
     next();
@@ -49,7 +49,7 @@ function validateModelName(req, res, next) {
  */
 router.get('/model/:modelName', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateModelName, (req, res) => {
     var modelName = req.params.modelName;
-    req.db.get(co.collections.dynamicattributes).find({modelName: modelName}).then(function(dynamicattributes){
+    req.db.get(co.collections.dynamicattributes.name).find({modelName: modelName}).then(function(dynamicattributes){
         res.send(dynamicattributes);
     });
 });
@@ -91,20 +91,30 @@ router.get('/options/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAM
 router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateModelName, validateId, validateSameClientId(), (req, res) => {
     var modelName = req.params.modelName;
     var entityId = req.params.id;
-    // TODO: check Implementation
-   /* req.db.get(modelName).findOne(entityId).then(function(entityFromDB){
-        res.send(entityFromDB);
-    });*/
-    //TODO: Alternative implemetation
-    req.db.get('dynamicattributes').find({modelName: modelName}).then(function(allAttributesForModel){
-        var Values = [];
-        allAttributesForModel.forEach(function(attribure) {
-            req.db.get('dynamicattributevalues').findOne({dynamicAttributeId: attribure._id})
-        }).then(function(value){
-            Values.push(value);
+    // TODO: fix implementation
+    req.db.get(modelName).findOne(entityId).then(function(entityFromDB){
+        req.db.get('dynamicattributevalues').find({entityId: entityFromDB._id}).then(function(attribureValues){
+            var dynamicattribureValues = attribureValues.body;
+            var Values = [];
+            console.log('GET/values method');
+            //console.log(dynamicattribureValues);
+            if(dynamicattribureValues){
+                dynamicattribureValues.forEach(function(attributeValue){
+                    req.db.get('dynamicattributes').findOne({dynamicAttributeId: attributeValue.dynamicAttributeId}).then(function(dynamicAttribute){
+                    var arrayElement;
+                        arrayElement["value"] = attributeValue.value;
+                        arrayElement["type"] = dynamicAttribute.type; 
+                        arrayElement["name_en"] = dynamicAttribute.name_en;
+                        Values.push(arrayElement);
+                    }).then(function(){return res.send(Values);});
+                });
+            }
+            else{
+              Values.push(13);
+              return  res.send(Values);
+            }
+            
         });
-        console.log(Values);
-        res.send(Values);
     });
 });
 
@@ -112,9 +122,28 @@ router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CL
  * Returns a list of all possible option types (currently only text, boolean and picklist)
  */
 router.get('/types', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), (req, res) => {
-    res.send(co.dynamicAttributeTypes.map(function(k) { return co.dynamicAttributeTypes[k]; } ));
-    res.send(co.dynamicAttributeTypes.map((k) => co.dynamicAttributeTypes[k]));
+     //res.send(co.dynamicAttributeTypes.map(function(k) { return co.dynamicAttributeTypes[k]; } ));
+    //res.send(co.dynamicAttributeTypes.map((k) => co.dynamicAttributeTypes[k]));
     res.send(Object.keys(co.dynamicAttributeTypes));
+});
+
+/**
+ * Returns a list of all possible data models which can have dynamic attributes (currently only...)
+ */
+router.get('/models', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), (req, res) => {
+    /*var models = [];
+    co.collections.forEach(function(collectionItem){
+        if(collectionItem.canHaveAttributes){
+            var modelObject = {name: collectionItem.name, icon: collectionItem.icon, title: 'some title'};
+            models.push(modelObject);
+        }
+    });*/
+    var models = [
+        {name: 'users', icon: 'User', title: 'Users'}, //TODO add translation key for title attribute 
+        {name: 'usergroups', icon: 'User Group Man Man', title: 'User groups'},
+        {name: 'folders', icon: 'Document', title: 'Documents'}
+    ];
+   return  res.sendStatus(200);
 });
 
 /**
@@ -130,7 +159,20 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUT
     dynamicAttribute.clientId = req.user.clientId; 
 
      req.db.insert('dynamicattributes', dynamicAttribute).then(function(insertedDynamicAttribute){
-         console.log(insertedDynamicAttribute);
+         //console.log(insertedDynamicAttribute);
+
+         req.db.get(dynamicAttribute.modelName).find({clientId: req.user.clientId}).then(function(allEntities){
+            allEntities.forEach(function(entity){
+                var emptyValue = {entityId: entity._id, 
+                                  clientId: req.user.clientId,
+                                  dynamicAttributeId: insertedDynamicAttribute._id,
+                                  value: null,
+                                  modelName: dynamicAttribute.modelName};
+                if(dynamicAttribute.type != 'DYNAMICATTRIBUTES_TYPE_PICKLIST'){
+                    req.db.insert('dynamicattributevalues', emptyValue);
+                }
+            });
+         });
          return res.send(insertedDynamicAttribute);
      });
 });

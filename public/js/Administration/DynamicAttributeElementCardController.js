@@ -12,14 +12,15 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
     $scope.createAttributeElement = function(){
         //Required properties are dynamicAttributeId and text_en
         var optionToSend = { 
-            text_en: $scope.dynamicattribute.text_en,
+            text_en: $scope.attributeelement.text_en,
             dynamicAttributeId: $scope.params.dynamicAttributeId._id
         };
-        $http.post('/api/dynamicattribute/option', optionToSend).then(function successCallback(response) {
+        $http.post('/api/dynamicattributes/option', optionToSend).then(function successCallback(response) {
             if (response.status === 409) {
                 //$scope.usersForm.un.$setValidity('nameInUse', false);
                 return;
             }
+            console.log('new attribute option');
             var createdAttribute = response.data;
             $scope.isNewElement = false;
             //$scope.dynamicattribute._id = createdAttribute._id;
