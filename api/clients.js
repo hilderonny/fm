@@ -157,7 +157,7 @@ router.delete('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), 
     var dependentCollections = Object.keys(constants.collections);
     // Remove all dependent objects (activities, documents, fmobjects, folders, permissions, usergroups, users)
     async.eachSeries(dependentCollections, (dependentCollection, callback) => {
-        req.db.remove(dependentCollection, { clientId: clientId }).then((res) => {
+        req.db.remove(dependentCollection.name, { clientId: clientId }).then((res) => {
             callback();
         });
     }, (err) => {

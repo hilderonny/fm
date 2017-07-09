@@ -25,41 +25,41 @@ module.exports.apis = {
  * var collections = require('../utils/constants').collections;
  */
 module.exports.collections = {
-    activities:'activities',
-    clientmodules:'clientmodules',
+    activities:{name:'activities', icon:'X.png', canHaveAttributes:true},
+    clientmodules:{name: 'clientmodules', canHaveAttributes:false},
     /**
      * Mandanten
      */
-    clients:'clients',
-    documents:'documents',
+    clients:{name:'clients', canHaveAttributes:false},
+    documents:{name:'documents',canHaveAttributes:false},
     /**
      * Mögliche Werte für dynamische Attribute vom Typ picklist
      */
-    dynamicattributeoptions:'dynamicattributeoptions',
+    dynamicattributeoptions:{name:'dynamicattributeoptions', canHaveAttributes:false},
     /**
      * Definitionen von dynamischen Attributen an Entitäten
      */
-    dynamicattributes:'dynamicattributes',
-    dynamicattributevalues:'dynamicattributevalues',
-    fmobjects:'fmobjects',
-    folders:'folders',
-    markers:'markers',
-    permissions:'permissions',
-    portalmodules:'portalmodules',
+    dynamicattributes:{name:'dynamicattributes', canHaveAttributes:false},
+    dynamicattributevalues:{name:'dynamicattributevalues', canHaveAttributes:false},
+    fmobjects:{name:'fmobjects', icon:'X.png', canHaveAttributes:true},
+    folders:{name:'folders',icon:'X.png', canHaveAttributes:true},
+    markers:{name:'markers', canHaveAttributes:false},
+    permissions:{name:'permissions', canHaveAttributes:false},
+    portalmodules:{name:'portalmodules', canHaveAttributes:false},
     /**
      * List of all portals registered to the license server. Only relevant on license server.
      */
-    portals:'portals',
-    relations:'relations',
-    settingsets:'settingsets',
+    portals:{name:'portals', canHaveAttributes:false},
+    relations:{name:'relations', canHaveAttributes:false},
+    settingsets:{name:'settingsets', canHaveAttributes:false},
     /**
      * Usergroups for users
      */
-    usergroups:'usergroups',
+    usergroups:{name:'usergroups', icon:'X.png', canHaveAttributes: true},
     /**
      * Users which can login to the system
      */
-    users:'users'
+    users:{name:'users', icon:'X.png', canHaveAttributes: true}
 };
 
 /**
@@ -97,9 +97,9 @@ module.exports.permissions = {
  * List of all possible dynamic attribute types. Used for validation in dynamicattributes API.
  */
 module.exports.dynamicAttributeTypes = {
-    text: 'text',
-    boolean: 'boolean',
-    picklist: 'picklist'
+    text: 'DYNAMICATTRIBUTES_TYPE_TEXT',
+    boolean: 'DYNAMICATTRIBUTES_TYPE_BOOLEAN',
+    picklist: 'DYNAMICATTRIBUTES_TYPE_PICKLIST'
 };
 
 /**
@@ -107,7 +107,7 @@ module.exports.dynamicAttributeTypes = {
  */
 
 module.exports.models = [
-    'documents',
+    'folders',
     'usergroups',
     'users'
 ];

@@ -32,8 +32,8 @@ describe('API dynamicattributes', function() {
 
     describe('GET/:id', function() {
 
-        th.apiTests.getId.defaultNegative(co.apis.dynamicattributes, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes);
-        th.apiTests.getId.clientDependentNegative(co.apis.dynamicattributes, co.collections.dynamicattributes);
+        th.apiTests.getId.defaultNegative(co.apis.dynamicattributes, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
+        th.apiTests.getId.clientDependentNegative(co.apis.dynamicattributes, co.collections.dynamicattributes.name);
 
         it('responds with all details of the dynamic attribute', function(done) {
             db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(attributeFromDB){
@@ -109,8 +109,8 @@ describe('API dynamicattributes', function() {
 
     describe('GET/option/:id', function() {
 
-        th.apiTests.getId.defaultNegative(optionApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributeoptions);
-        th.apiTests.getId.clientDependentNegative(optionApi, co.collections.dynamicattributeoptions);
+        th.apiTests.getId.defaultNegative(optionApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributeoptions.name);
+        th.apiTests.getId.clientDependentNegative(optionApi, co.collections.dynamicattributeoptions.name);
 
         it('responds with all details of the dynamic attribute option', function(done) {
             db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(attributeFromDB){
@@ -132,8 +132,8 @@ describe('API dynamicattributes', function() {
 
     describe('GET/options/:id', function() {
 
-        th.apiTests.getId.defaultNegative(optionsApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes);
-        th.apiTests.getId.clientDependentNegative(optionsApi, co.collections.dynamicattributes);
+        th.apiTests.getId.defaultNegative(optionsApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
+        th.apiTests.getId.clientDependentNegative(optionsApi, co.collections.dynamicattributes.name);
 
         it('responds with a list of all options and their details of the dynamic attribute', function(done) {
             db.get('clients').findOne({name: '0'}).then(function(client0){
@@ -237,9 +237,9 @@ describe('API dynamicattributes', function() {
     });
 
     function createTestDynamicAttribute() {
-        return db.get(co.collections.clients).findOne({name:'1'}).then(function(client) {
+        return db.get(co.collections.clients.name).findOne({name:'1'}).then(function(client) {
             return Promise.resolve({
-                modelName: co.collections.users,
+                modelName: co.collections.users.name,
                 clientId: client._id,
                 type: co.dynamicAttributeTypes.text,
                 name_en: 'Name EN',
@@ -276,7 +276,7 @@ describe('API dynamicattributes', function() {
 
     function createTestDynamicAttributeOption() {
         return createTestDynamicAttribute().then(function(attr) {
-            return db.get(co.collections.dynamicattributes).insert(attr);
+            return db.get(co.collections.dynamicattributes.name).insert(attr);
         }).then(function(insertedAttribute) {
             return Promise.resolve({
                 clientId: insertedAttribute.clientId,
@@ -411,7 +411,7 @@ describe('API dynamicattributes', function() {
 
         function createPutTestDynamicAttribute() {
             return createTestDynamicAttribute().then(function(attr) {
-                return db.get(co.collections.dynamicattributes).insert(attr);
+                return db.get(co.collections.dynamicattributes.name).insert(attr);
             });
         }
 
@@ -433,7 +433,7 @@ describe('API dynamicattributes', function() {
 
         function createPutTestDynamicAttributeOption() {
             return createTestDynamicAttributeOption().then(function(option) {
-                return db.get(co.collections.dynamicattributeoptions).insert(option);
+                return db.get(co.collections.dynamicattributeoptions.name).insert(option);
             });
         }
 
@@ -541,7 +541,7 @@ describe('API dynamicattributes', function() {
 
         function createDeleteTestDynamicAttribute() {
             return createTestDynamicAttribute().then(function(attr) {
-                return db.get(co.collections.dynamicattributes).insert(attr);
+                return db.get(co.collections.dynamicattributes.name).insert(attr);
             }).then(function(insertedAttribute) {
                 return Promise.resolve(insertedAttribute._id);
             });
@@ -559,7 +559,7 @@ describe('API dynamicattributes', function() {
 
         function createDeleteTestDynamicAttributeOption() {
             return createTestDynamicAttributeOption().then(function(option) {
-                return db.get(co.collections.dynamicattributeoptions).insert(option);
+                return db.get(co.collections.dynamicattributeoptions.name).insert(option);
             }).then(function(insertedOption) {
                 return Promise.resolve(insertedOption._id);
             });

@@ -722,7 +722,7 @@ th.apiTests = {
                 var testObjectIds, insertedTestObjects, testObjects;
                 return createTestObjects().then(function(objects) {
                     testObjects = objects;
-                    return db.get(co.collections.clients).findOne({name:th.defaults.otherClient});
+                    return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient});
                 }).then(function(otherClient) {
                     testObjects.push({
                         clientId:otherClient._id
@@ -798,7 +798,7 @@ th.apiTests = {
             it('responds with 403 when the object with the given ID does not belong to the client of the logged in user', function() {
                 var insertedId;
                 // Get other client
-                return db.get(co.collections.clients).findOne({name:th.defaults.otherClient}).then(function(client) {
+                return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient}).then(function(client) {
                     // Create an object for the other client
                     return db.get(collection).insert({clientId:client._id});
                 }).then(function(insertedObject) {
@@ -945,7 +945,7 @@ th.apiTests = {
                 var otherClientId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     loginToken = token;
-                    return db.get(co.collections.clients).findOne({name:th.defaults.otherClient});
+                    return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient});
                 }).then(function(client) {
                     otherClientId = client._id.toString();
                     return createTestObject();
@@ -1042,7 +1042,7 @@ th.apiTests = {
                     objectId = id;
                     return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
                 }).then(function() {
-                    return db.get(co.collections.relations).find({type1:collection,id1:objectId});
+                    return db.get(co.collections.relations.name).find({type1:collection,id1:objectId});
                 }).then(function(objectsInDatabase) {
                     assert.equal(objectsInDatabase.length, 0);
                     return Promise.resolve();
@@ -1057,7 +1057,7 @@ th.apiTests = {
                     objectId = id;
                     return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
                 }).then(function() {
-                    return db.get(co.collections.relations).find({type2:collection,id2:objectId});
+                    return db.get(co.collections.relations.name).find({type2:collection,id2:objectId});
                 }).then(function(objectsInDatabase) {
                     assert.equal(objectsInDatabase.length, 0);
                     return Promise.resolve();

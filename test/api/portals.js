@@ -87,7 +87,7 @@ describe('API portals', function(){
 
     describe('GET/:id', function() {
 
-        th.apiTests.getId.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals);
+        th.apiTests.getId.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals.name);
 
         it('responds with retrieved portal', function(done) {
             db.get('portals').findOne({name: 'p1'}).then((portalFromDatabase) =>{

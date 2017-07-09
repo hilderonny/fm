@@ -134,7 +134,7 @@ router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserve
     var dependentCollections = constants.collections;
     // Remove all dependent objects (currently only portalmodules)
     async.eachSeries(dependentCollections, (dependentCollection, callback) => {
-        req.db.remove(dependentCollection, { portalId: portalId }).then((res) => {
+        req.db.remove(dependentCollection.name, { portalId: portalId }).then((res) => {
             callback();
         });
     }, (err) => {

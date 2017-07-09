@@ -694,12 +694,12 @@ describe('API clients', function() {
                     superTest(server).delete(`/api/clients/${clientId}?token=${token}`).expect(204).then((res) => {
                         var dependentCollections = Object.keys(constants.collections);
                         async.eachSeries(dependentCollections, (dependentCollection, callback) => {
-                            db.get(dependentCollection).count({ clientId: clientId }, (err, count) => {
+                            db.get(dependentCollection.name).count({ clientId: clientId }, (err, count) => {
                                 if (err) {
                                     callback(err);
                                     return;
                                 }
-                                assert.equal(count, 0, `Not all ${dependentCollection} of the deleted client were also deleted`);
+                                assert.equal(count, 0, `Not all ${dependentCollection.name} of the deleted client were also deleted`);
                                 callback();
                             });
                         }, (err) => {
