@@ -1,53 +1,51 @@
 /**
  * UNIT Tests for api/usergroups
  */
-
 var assert = require('assert');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testhelpers');
 var db = require('../../middlewares/db');
+var co = require('../../utils/constants');
 
 describe('API usergroups', function(){
-    var server = require('../../app');
 
     // Clear and prepare database with clients, user groups, users and permissions
     beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareRelations);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions)
+            .then(th.prepareRelations);
     });
 
     describe('GET/', function() {
 
         it('responds without authentication with 403', function() {
-            return superTest(server).get('/api/usergroups').expect(403);
+            return th.get('/api/usergroups').expect(403);
         });
 
         it('responds without read permission with 403', function() {
             // Remove the corresponding permission
-            return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return superTest(server).get('/api/usergroups?token=' + token).expect(403);
+            return th.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.get('/api/usergroups?token=' + token).expect(403);
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return superTest(server).get(`/api/usergroups?token=${token}`).expect(403);
+            return th.removeClientModule('1', 'base').then(function() {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.get(`/api/usergroups?token=${token}`).expect(403);
                 });
             });
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                    return superTest(server).get(`/api/usergroups?token=${token}`).expect(403);
+            return th.removeClientModule('1', 'base').then(function() {
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+                    return th.get(`/api/usergroups?token=${token}`).expect(403);
                 });
             });
         });
@@ -55,8 +53,8 @@ describe('API usergroups', function(){
         it('responds with list of all usergroups of the client of the logged-in user containing all details', function(done) {
             db.get('clients').findOne({name: '1'}).then(function(currentClientFromDB){
                 db.get('usergroups').find({clientId: currentClientFromDB._id}).then(function(allUsergroupsFromDB){
-                    testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        superTest(server).get(`/api/usergroups?token=${token}`).expect(200).end(function(err, res) {
+                    th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                        th.get(`/api/usergroups?token=${token}`).expect(200).end(function(err, res) {
                             if (err) {
                                 done(err);
                                 return;
@@ -90,9 +88,9 @@ describe('API usergroups', function(){
         it('responds with specific fields given with list of all usergroups of the client of the logged-in user containing only the requested fields', function(done) {
             db.get('clients').findOne({name: '1'}).then(function(currentClientFromDB){
                 db.get('usergroups').find({clientId: currentClientFromDB._id}).then(function(allUsergroupsFromDB){
-                    testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                    th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                         var keys = ['_id', 'name']; // Include _id every time because it is returned by the API in every case!
-                        superTest(server).get(`/api/usergroups?token=${token}&fields=${keys.join('+')}`).expect(200).end(function(err, res) {
+                        th.get(`/api/usergroups?token=${token}&fields=${keys.join('+')}`).expect(200).end(function(err, res) {
                             if (err) {
                                 done(err);
                                 return;
@@ -129,36 +127,23 @@ describe('API usergroups', function(){
 
     describe('GET/forIds', function() {
 
-        // Negative tests
-        
-        xit('responds without authentication with 403', function() {
-        });
+        function createTestUserGroups() {
+            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+                var clientId = client._id;
+                var testObjects = ['testUserGroup1', 'testUserGroup2', 'testUserGroup3'].map(function(name) {
+                    return {
+                        name: name,
+                        clientId: clientId
+                    }
+                });
+                return Promise.resolve(testObjects);
+            });
+        }
 
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-        });
+        th.apiTests.getForIds.defaultNegative(co.apis.usergroups, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups, createTestUserGroups);
+        th.apiTests.getForIds.clientDependentNegative(co.apis.usergroups, co.collections.usergroups, createTestUserGroups);
+        th.apiTests.getForIds.defaultPositive(co.apis.usergroups, co.collections.usergroups, createTestUserGroups);
 
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds with empty list when user has no read permission', function() {
-        });
-
-        xit('responds with empty list when query parameter "ids" does not exist', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains faulty IDs', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains IDs where no entities exist for', function() {
-        });
-
-        xit('returns only elements of the client of the logged in user when "ids" contains IDs of entities of another client', function() {
-        });
-
-        // Positive tests
-
-        xit('returns a list of usergroups with all details for the given IDs', function() {
-        });
     });
 
     describe('GET/:id', function() {
@@ -166,16 +151,16 @@ describe('API usergroups', function(){
         it('responds without authentication with 403', function() {
             // Load a valid id so we have a valid request and do not get a 404
             return db.get('usergroups').findOne({name: '1_0'}).then((usergroup) => {
-                return superTest(server).get('/api/usergroups/' + usergroup._id.toString()).expect(403);
+                return th.get('/api/usergroups/' + usergroup._id.toString()).expect(403);
             });
         });
 
         it('responds without read permission with 403', function() {
             return db.get('usergroups').findOne({ name : '1_0' }).then((usergroupFromDatabase) => {
                 // Remove the corresponding permission
-                return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        return superTest(server).get(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).expect(403);
+                return th.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                        return th.get(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -185,19 +170,19 @@ describe('API usergroups', function(){
             //usergroup.clientId != user.clientId
             //logg-in as user for client 1, but ask for usergroup of client 2 
             return db.get('usergroups').findOne({name: '0_0'}).then((usergroupOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var id = usergroupOfUser2._id.toString();
-                    return superTest(server).get(`/api/folders/${id}?token=${token}`).expect(403);
+                    return th.get(`/api/folders/${id}?token=${token}`).expect(403);
                 });
             }); 
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('usergroups').findOne({name: '1_0'}).then((userFormDB) => {
-                return testHelpers.removeClientModule('1', 'base').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.removeClientModule('1', 'base').then(function() {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                         var userId = userFormDB._id;
-                        return superTest(server).get(`/api/usergroups/${userId}?token=${token}`).expect(403);
+                        return th.get(`/api/usergroups/${userId}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -205,33 +190,33 @@ describe('API usergroups', function(){
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('usergroups').findOne({name: '1_0'}).then((userFormDB) => {
-                return testHelpers.removeClientModule('1', 'base').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+                return th.removeClientModule('1', 'base').then(function() {
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
                         var userId = userFormDB._id;
-                        return superTest(server).get(`/api/usergroups/${userId}?token=${token}`).expect(403);
+                        return th.get(`/api/usergroups/${userId}?token=${token}`).expect(403);
                     });
                 });
             });
         });
 
         it('responds with invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).get('/api/usergroups/invalidId?token=' + token).expect(400);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.get('/api/usergroups/invalidId?token=' + token).expect(400);
             });
         });
 
         it('responds with not existing id with 403', function() {
             // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
             // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).get('/api/usergroups/999999999999999999999999?token=' + token).expect(403);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.get('/api/usergroups/999999999999999999999999?token=' + token).expect(403);
             });
         });
 
         it('responds with existing usergroup id with all details of the usergroup', function(done) {
             db.get('usergroups').findOne({name: '1_1'}).then((usergroupFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    superTest(server)
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    th
                         .get(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`)
                         .expect(200)
                         .end(function(err, res) {
@@ -247,9 +232,9 @@ describe('API usergroups', function(){
 
         it('responds with existing usergroup id and specific fields with details of usergroup containing only the given fields', function(done) {
             db.get('usergroups').findOne({name: '1_1'}).then((usergroupFromDatabase) =>{
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var keys = ['_id', 'name']; // Include _id every time because it is returned by the API in every case 
-                    superTest(server).get(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}&fields=${keys.join('+')}`).expect(200).end(function(err, res){
+                    th.get(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}&fields=${keys.join('+')}`).expect(200).end(function(err, res){
                         if (err) {
                             done(err);
                             return;
@@ -271,57 +256,57 @@ describe('API usergroups', function(){
     describe('POST/', function() {
 
         it('responds without authentication with 403', function() {
-            return superTest(server).post('/api/usergroups')
+            return th.post('/api/usergroups')
                 .send({ name: 'UserGroup' })
                 .expect(403);
         });
 
         it('responds without write permission with 403', function() {
             // Remove the corresponding permission
-            return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var newUsergroup = { 
                         name: 'newName'
                     };
-                    return superTest(server).post('/api/usergroups?token=' + token).send(newUsergroup).expect(403);
+                    return th.post('/api/usergroups?token=' + token).send(newUsergroup).expect(403);
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.removeClientModule('1', 'base').then(function() {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var newUsergroup = { 
                         name: 'newName'
                     };
-                    return superTest(server).post(`/api/usergroups?token=${token}`).send(newUsergroup).expect(403);
+                    return th.post(`/api/usergroups?token=${token}`).send(newUsergroup).expect(403);
                 });
             });
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+            return th.removeClientModule('1', 'base').then(function() {
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
                     var newUsergroup = { 
                         name: 'newName'
                     };
-                    return superTest(server).post(`/api/usergroups?token=${token}`).send(newUsergroup).expect(403);
+                    return th.post(`/api/usergroups?token=${token}`).send(newUsergroup).expect(403);
                 });
             });
         });
 
         it('responds without giving a usergroup with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).post('/api/usergroups?token=' + token).send().expect(400);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.post('/api/usergroups?token=' + token).send().expect(400);
             });
         });
 
         it('responds with correct usergroup data with inserted usergroup containing an _id field', function(done) {
             db.get('users').findOne({name: '1_0_0'}).then(function(userFromDatabase){ //request user to get valid userGroupId and clientId
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                     var newUsergroup = {name: 'new_test_group'}; //This name doesn't not need to be unique in the DB
                                     
-                    superTest(server).post('/api/usergroups?token=' + token).send(newUsergroup).expect(200).end(function(err, res) {
+                    th.post('/api/usergroups?token=' + token).send(newUsergroup).expect(200).end(function(err, res) {
                         if(err){
                             done(err);
                             return;
@@ -345,12 +330,12 @@ describe('API usergroups', function(){
 
         it('responds with clientId from another client with inserted usergroup containing an _id field and clientId same as the one of logged-in user', function(done) {
             db.get('users').findOne({name: '1_1_0'}).then(function(userFromDatabase){ //request user tp get valid userGroupId and clientId, client 1
-                testHelpers.doLoginAndGetToken('0_1_0', 'test').then(function(token){ //logg in as user from a different client, namely 0
+                th.doLoginAndGetToken('0_1_0', 'test').then(function(token){ //logg in as user from a different client, namely 0
                     db.get('users').findOne({name: '0_1_0'}).then(function(loggedInUser) {
                         //Make an attepmt to send wrong clinetId
                         var newUsergroup = {name: 'new_test_group', clientId: userFromDatabase.clientId};
                 
-                        superTest(server).post('/api/usergroups?token=' + token).send(newUsergroup).expect(200).end(function(err, res) {
+                        th.post('/api/usergroups?token=' + token).send(newUsergroup).expect(200).end(function(err, res) {
                             if(err){
                                 done(err);
                                 return;
@@ -380,7 +365,7 @@ describe('API usergroups', function(){
         it('responds without authentication with 403', function() {
             return db.get('usergroups').findOne({name: '1_0'}).then((usergroup) => {
                 var usergroupId = usergroup._id.toString();
-                return superTest(server).put('/api/usergroups/' + usergroupId)
+                return th.put('/api/usergroups/' + usergroupId)
                     .send({ name: 'UserGroup' })
                     .expect(403);
             });
@@ -389,12 +374,12 @@ describe('API usergroups', function(){
         it('responds without write permission with 403', function() {
             return db.get('usergroups').findOne({ name : '1_1' }).then((usergroupFromDatabase) => {
                 // Remove the corresponding permission
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                         var updatedUsergroup = {
                             name: 'newName'
                         };
-                        return superTest(server).put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send(updatedUsergroup).expect(403);
+                        return th.put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send(updatedUsergroup).expect(403);
                     });
                 });
             });
@@ -403,22 +388,22 @@ describe('API usergroups', function(){
         it('responds with an id of an existing usergroup which does not belong to the same client as the logged in user with 403', function() {
             //usergroup.clientId != user.clientId
             return db.get('usergroups').findOne({name: '0_0'}).then((usergroupOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var id = usergroupOfUser2._id.toString();
                     var updatedUsergroup = {name: 'new_name'};
-                    return superTest(server).put(`/api/folders/${id}?token=${token}`).expect(403);
+                    return th.put(`/api/folders/${id}?token=${token}`).expect(403);
                 });
             });   
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('usergroups').findOne({ name : '1_0' }).then((usergroupFromDatabase) => {
-                return testHelpers.removeClientModule('1', 'base').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.removeClientModule('1', 'base').then(function() {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                         var updatedUsergroup = {
                             name: 'newName'
                         };
-                        return superTest(server).put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send(updatedUsergroup).expect(403);
+                        return th.put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send(updatedUsergroup).expect(403);
                     });
                 });
             });
@@ -426,12 +411,12 @@ describe('API usergroups', function(){
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('usergroups').findOne({ name : '1_0' }).then((usergroupFromDatabase) => {
-                return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+                return th.removeClientModule('1', 'base').then(function() {
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
                         var updatedUsergroup = {
                             name: 'newName'
                         };
-                        return superTest(server).put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send(updatedUsergroup).expect(403);
+                        return th.put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send(updatedUsergroup).expect(403);
                     });
                 });
             });
@@ -441,15 +426,15 @@ describe('API usergroups', function(){
             var updatedUsergroup = {
                 name: 'newName'
             };
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).put('/api/usergroups/invalidId?token=' + token).send(updatedUsergroup).expect(400);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.put('/api/usergroups/invalidId?token=' + token).send(updatedUsergroup).expect(400);
             });
         });
 
         it('responds without giving a usergroup with 400', function() {
             return db.get('usergroups').findOne({ name : '1_0' }).then((usergroupFromDatabase) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return superTest(server).put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send().expect(400);
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send().expect(400);
                 });
             });
         });
@@ -462,8 +447,8 @@ describe('API usergroups', function(){
                 clientId: '888888888888888888888888'
             };
             return db.get('usergroups').findOne({ name : '1_0' }).then((usergroupFromDatabase) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return superTest(server).put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send(updatedUsergroup).expect(400);
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).send(updatedUsergroup).expect(400);
                 });
             });
         });
@@ -474,19 +459,19 @@ describe('API usergroups', function(){
             var updatedUsergroup = {
                 name: 'newGroup'
             };
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).put('/api/usergroups/999999999999999999999999?token=' + token).send(updatedUsergroup).expect(403);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.put('/api/usergroups/999999999999999999999999?token=' + token).send(updatedUsergroup).expect(403);
             });
         });
 
         it('responds with an usergroup containing an _id field which differs from the id parameter with the updated usergroup (_id cannot be changed)', function(done) {
             db.get('usergroups').findOne({name: '1_0'}).then((usergroupFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var updatedUsergroup = {
                         _id: '888888888888888888888888',
                         name: 'renamed Usergroup'
                     };
-                    superTest(server)
+                    th
                         .put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`)
                         .send(updatedUsergroup).expect(200).end(function(err, res) {
                             if(err){
@@ -503,12 +488,12 @@ describe('API usergroups', function(){
 
         it('responds with an usergroup containing a new clientId field with the updated usergroup (clientId cannot be changed)', function(done) {
             db.get('usergroups').findOne({name: '1_0'}).then((usergroupFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var updatedUsergroup = {
                         clientId: '888888888888888888888888',
                         name: 'renamed Usergroup'
                     };
-                    superTest(server)
+                    th
                         .put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`)
                         .send(updatedUsergroup).expect(200).end(function(err, res) {
                             if(err){
@@ -526,9 +511,9 @@ describe('API usergroups', function(){
         //currently the only meanigful update for a usergroup is the name field
         it('responds with correctly updated Usergroup name', function(done){
             db.get('usergroups').findOne({name: '1_0'}).then((usergroupFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_1_0', 'test').then(function(token){
+                th.doLoginAndGetToken('1_1_0', 'test').then(function(token){
                     var updatedUsergroup = {name: 'updated name'};
-                    superTest(server)
+                    th
                         .put(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`)
                         .send(updatedUsergroup).expect(200).end(function(err, res) {
                             if(err){
@@ -547,102 +532,38 @@ describe('API usergroups', function(){
     
     describe('DELETE/:id', function() {
 
-        it('responds without authentication with 403', function() {
-            // Load a valid usergroup id so we have a valid request and do not get a 404
-            return db.get('usergroups').findOne({name: '1_0'}).then((usergroup) => {
-                return superTest(server).del('/api/usergroups/' + usergroup._id.toString()).expect(403);
+        function getDeleteUserGroupId() {
+            return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}).then(function(usergroup) {
+                delete usergroup._id;
+                usergroup.name = 'newUserGroupToDelete';
+                return db.get(co.collections.usergroups).insert(usergroup);
+            }).then(function(insertedUserGroup) {
+                return th.createRelationsToUser(co.collections.usergroups, insertedUserGroup);
+            }).then(function(insertedUserGroup) {
+                return Promise.resolve(insertedUserGroup._id);
             });
-        });
+        }
 
-        it('responds with correct _id of a group that still contains users with 403', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                return db.get('usergroups').findOne({name: '1_1'}).then(function(usergroupFromDatabase){ //This usergroup has 4 users
-                    return superTest(server).del(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).expect(403);
-                });
+        th.apiTests.delete.defaultNegative(co.apis.usergroups, co.permissions.ADMINISTRATION_USERGROUP, getDeleteUserGroupId);
+        th.apiTests.delete.clientDependentNegative(co.apis.usergroups, getDeleteUserGroupId);
+        th.apiTests.delete.defaultPositive(co.apis.usergroups, co.collections.usergroups, getDeleteUserGroupId);
+
+        it('returns with 403 when the usergroup contains users', function() {
+            var userGroupId;
+            return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}).then(function(usergroup) {
+                userGroupId = usergroup._id;
+                var user = {
+                    name: 'testUser',
+                    pass: 'password',
+                    userGroupId : userGroupId,
+                    clientId: usergroup.clientId
+                }
+                return db.get(co.collections.users).insert(user);
+            }).then(function() {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.del(`/api/${co.apis.usergroups}/${userGroupId.toString()}?token=${token}`).expect(403);
             });
-        }); 
-
-        it('responds without write permission with 403', function() {
-            return db.get('usergroups').findOne({ name : '1_0' }).then((userFromDatabase) => {
-                // Remove the corresponding permission
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        return superTest(server).del(`/api/usergroups/${userFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with an id of an existing usergroup which does not belong to the same client as the logged in user with 403', function() {
-            //usergroup.clientId != user.clientId
-            return db.get('usergroups').findOne({name: '1_1'}).then((usergroupOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    var id = usergroupOfUser2._id.toString();
-                    return superTest(server).del(`/api/folders/${id}?token=${token}`).expect(403);
-                });
-            }); 
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('usergroups').findOne({ name : '1_0' }).then((usergroupFromDatabase) => {
-                return testHelpers.removeClientModule('1', 'base').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        return superTest(server).del(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('usergroups').findOne({ name : '1_0' }).then((usergroupFromDatabase) => {
-                return testHelpers.removeClientModule('1', 'base').then(function() {
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                        return superTest(server).del(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with an invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).delete('/api/usergroups/invalidId?token=' + token).expect(400);
-            });
-        });
-    
-        it('responds with an id that does not exist with 403', function() {
-            // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
-            // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).del('/api/usergroups/999999999999999999999999?token=' + token).expect(403);
-            });
-        });  
-
-        it('responds with correct id of a group without users with 204', function(done) {
-            testHelpers.doLoginAndGetToken('1_1_0', 'test').then(function(token){
-                var newUsergroup = {name: 'new_test_group'}; //This name doesn't not need to be unique in the DB
-                superTest(server).post('/api/usergroups?token=' + token).send(newUsergroup).expect(200).end(function(err, res) {
-                    if(err){
-                        done(err);
-                        return;
-                    }
-                    var usergroupFromApi = res.body;
-                    db.get('usergroups').findOne({_id: usergroupFromApi._id}).then((usergroupFromDatabase) =>{
-                        superTest(server).del(`/api/usergroups/${usergroupFromDatabase._id}?token=${token}`).expect(204).end(function(err, res){
-                            if(err){
-                                done(err);
-                                return;
-                            }
-                            done();
-                        });
-                    }).catch(done);
-                });
-            }).catch(done);
-        });
-
-        xit('All relations, where the element is the source (type1, id1), are also deleted', function() {
-        });
-
-        xit('All relations, where the element is the target (type2, id2), are also deleted', function() {
         });
 
     });

@@ -17,7 +17,7 @@
     "TRK_ACTIVITIES_NEXT_30_DAYS" : "следващите 30 дни",
     "TRK_ACTIVITIES_NEXT_7_DAYS" : "следващите 7 дни",
     "TRK_ACTIVITIES_OVERDUE" : "просрочени",
-    "TRK_ACTIVITIES_REALLY_DELETE_ACTIVITIY" : "Сигурни ли Сте, че искате да премахнете следната дейност: \"{{activityName}}\"?",
+    "TRK_ACTIVITIES_REALLY_DELETE_ACTIVITIY" : "Сигурни ли сте, че искате да премахнете следната дейност: \"{{activityName}}\"?",
     "TRK_ACTIVITIES_SAVE" : "запази промените",
     "TRK_ACTIVITIES_SELECT_ACTIVITY" : "Избор на дейност",
     "TRK_ACTIVITIES_TASK" : "задача",

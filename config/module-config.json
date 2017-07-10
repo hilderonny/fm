@@ -83,9 +83,9 @@
                     ]
                 }
             ],
-            "utils": [ "apiHelper", "configHelper", "constants" ],
+            "utils": [ "apiHelper", "configHelper", "constants", "relationsHelper" ],
             "settingsets" : [
-                { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER" }
+                { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"}
             ]
         },
 
@@ -145,7 +145,6 @@
                 }
             ]
         },
-
 
         "documents": {
             "api" : [ "documents", "extractdocument", "folders" ],

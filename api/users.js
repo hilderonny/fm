@@ -16,6 +16,8 @@ var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var apiHelper = require('../utils/apiHelper');
+var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 
 // Get all users of the current client, maybe filtered by userGroupId
 // TODO: Testfälle anpassen
@@ -48,6 +50,11 @@ router.get('/', auth('PERMISSION_ADMINISTRATION_USER', 'r', 'base'), (req, res) 
     }
     aggregateSteps.push({ $project: { pass: false } }); // Passwort niemals mit zurück geben // TODO: Test einbauen, ob Passwörter zurück kommen
     req.db.get('users').aggregate(aggregateSteps).then((users) => {
+        if (req.query.joinUserGroup) { // Benutzergruppen ggf. von Feld zu Einzelwert wandeln
+            users.forEach(function(user) {
+                user.userGroup = user.userGroup[0];
+            });
+        }
         res.send(users);
     });
 });
@@ -115,7 +122,7 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), function(r
                 res.sendStatus(400);
             } else {
                 delete user._id; // Ids are generated automatically
-                user.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user
+                user.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user, because users can create only users for their own clients
                 req.db.insert('users', user).then((insertedUser) => {
                     res.send(insertedUser);
                 });
@@ -126,10 +133,14 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), function(r
 
 //TODO check if other verifications are needed
 router.post('/newpassword', auth('PERMISSION_SETTINGS_USER', 'w', 'base'), (req, res) => {
-    var encryptedNewPassword = bcryptjs.hashSync(req.body.pass);
-    req.db.update('users', req.user._id, { $set: {pass:encryptedNewPassword} }).then(() => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-        res.sendStatus(200);
-    });
+    if (typeof(req.body.pass) === 'undefined') {
+        res.sendStatus(400);
+    } else {
+        var encryptedNewPassword = bcryptjs.hashSync(req.body.pass);
+        req.db.update('users', req.user._id, { $set: {pass:encryptedNewPassword} }).then(() => { // https://docs.mongodb.com/manual/reference/operator/update/set/
+            res.sendStatus(200);
+        });
+    }
 });
 
 var getUserFromDatabase = (req, res, userId, userFromRequest) => {
@@ -194,6 +205,10 @@ router.put('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), validate
     }
     delete user._id; // When user object also contains the _id field
     delete user.clientId; // Prevent assignment of the user to another client
+    // For the case that only the _id had to be updated, return an error and do not handle any further
+    if (Object.keys(user).length < 1) {
+        return res.sendStatus(400);
+    }
     if (user.pass && user.pass.length > 0) {
         user.pass = bcryptjs.hashSync(user.pass);
     } else {
@@ -211,9 +226,12 @@ router.put('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), validate
 
 // Delete an user
 router.delete('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), validateId, validateSameClientId('users'), function(req, res) {
+    var id = monk.id(req.params.id);
     req.db.remove('users', req.params.id).then((result) => {
         // Database element is available here in every case, because validateSameClientId already checked for existence
-        res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+        rh.deleteAllRelationsForEntity(co.collections.users, id).then(function() {
+            res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+        });
     });
 });
 
