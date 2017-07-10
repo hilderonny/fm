@@ -121,12 +121,12 @@ th.prepareClients = () => {
 th.prepareClientModules = () => {
     var clientModules = [];
     th.dbObjects.clients.forEach((client) => {
-        clientModules.push({ clientId: client._id, module: 'base' });
-        clientModules.push({ clientId: client._id, module: 'activities' });
-        clientModules.push({ clientId: client._id, module: 'clients' });
-        clientModules.push({ clientId: client._id, module: 'documents' });
-        clientModules.push({ clientId: client._id, module: 'fmobjects' });
-        clientModules.push({ clientId: client._id, module: 'licenseserver' });
+        clientModules.push({ clientId: client._id, module: co.modules.base });
+        clientModules.push({ clientId: client._id, module: co.modules.activities });
+        clientModules.push({ clientId: client._id, module: co.modules.clients });
+        clientModules.push({ clientId: client._id, module: co.modules.documents });
+        clientModules.push({ clientId: client._id, module: co.modules.fmobjects });
+        clientModules.push({ clientId: client._id, module: co.modules.licenseserver });
     });
     return th.bulkInsert('clientmodules', clientModules);
 };
@@ -181,16 +181,16 @@ th.prepareUsers = () => {
 th.preparePermissions = () => {
     var permissions = [];
     th.dbObjects.usergroups.forEach((userGroup) => {
-        permissions.push({ key: 'PERMISSION_ADMINISTRATION_CLIENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_ADMINISTRATION_USERGROUP', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_BIM_FMOBJECT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_OFFICE_ACTIVITY', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_OFFICE_DOCUMENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_LICENSESERVER_PORTAL', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_SETTINGS_CLIENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_SETTINGS_PORTAL', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_SETTINGS_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.ADMINISTRATION_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.ADMINISTRATION_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.ADMINISTRATION_USERGROUP, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.BIM_FMOBJECT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.OFFICE_ACTIVITY, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.OFFICE_DOCUMENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.LICENSESERVER_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.SETTINGS_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.SETTINGS_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.SETTINGS_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
     });
     return th.bulkInsert('permissions', permissions);
 };
@@ -563,6 +563,10 @@ th.defaults = {
      * Standardportal 'p1' aus Datenbank auslesen und per Promise zurück geben
      */
     getPortal: function() { return db.get(co.collections.portals).findOne({name:th.defaults.portal}); },
+    /**
+     * Standardbenutzergruppe '1_0' aus Datenbank auslesen und per Promise zurück geben
+     */
+    getUserGroup: function() { return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}); },
     otherClient: '0',
     otherUser: '0_0_0',
     password: 'test',
@@ -828,7 +832,7 @@ th.apiTests = {
         /**
          * Standard-Negativtests, die das Verhalten von falschen Aufrufen prüfen
          */
-        defaultNegative: function(api, permission, createTestObject) {
+        defaultNegative: function(api, permission, createTestObject, ignoreSendObjectTest) {
             it('responds without authentication with 403', function() {
                 return createTestObject().then(function(testObject) {
                     return th.post(`/api/${api}`).send(testObject).expect(403);
@@ -861,7 +865,8 @@ th.apiTests = {
             }
             it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
             it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-            it('responds with 400 when not sending an object to insert', function() {
+            // Bei portalmanagement muss nix geschickt werden.
+            if(!ignoreSendObjectTest) it('responds with 400 when not sending an object to insert', function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     return th.post(`/api/${api}?token=${token}`).expect(400);
                 });

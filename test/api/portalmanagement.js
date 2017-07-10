@@ -3,42 +3,39 @@
  */
 var assert = require('assert');
 var fs = require('fs');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testhelpers');
 var db = require('../../middlewares/db');
+var co = require('../../utils/constants');
 
 describe('API portalmanagement', function() {
-
-    var server = require('../../app');
     
+    function prepareTests() {
+        var userGroup;
+        return th.defaults.getUserGroup().then(function(ug) {
+            userGroup = ug;
+            return db.insert(co.collections.clientmodules, { clientId: userGroup.clientId, module: co.modules.portalbase });
+        }).then(function() {
+            return db.insert(co.collections.permissions, { key: co.permissions.ADMINISTRATION_SETTINGS, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        });
+    }
+
     beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions)
+            .then(prepareTests);
     });
 
     describe('GET/', function() {
 
-        // Negative tests
-
-        xit('responds without authentication with 403', function() {
-        });
-
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds without read permission with 403', function() {
-        });
+        th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS);
 
         // Positive tests
 
-        xit('responds with portalsettings (licenseserverurl and licensekey) from localconfig', function() {
+        xit('responds with portalsettings (licenseserverurl and licensekey only) from localconfig', function() {
         });
 
         xit('responds with portalsettings (licenseserverurl and licensekey set to null) when no localconfig file is there', function() {
@@ -48,19 +45,9 @@ describe('API portalmanagement', function() {
 
     describe('GET/checkforupdate', function() {
 
-        // Negative tests
+        var api = `${co.apis.portalmanagement}/checkforupdate`;
 
-        xit('responds without authentication with 403', function() {
-        });
-
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds without read permission with 403', function() {
-        });
+        th.apiTests.get.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS);
 
         xit('responds with 400 when no localconfig file is there', function() {
         });
@@ -80,21 +67,25 @@ describe('API portalmanagement', function() {
 
     });
 
+    describe('POST/', function() {
+
+        it('responds with 404', function() {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                return th.post(`/api/${co.apis.extractdocument}?token=${token}`).send({}).expect(404);
+            });
+        });
+    
+    });
+
     describe('POST/triggerupdate', function() {
 
-        // Negative tests
+        var api = `${co.apis.portalmanagement}/triggerupdate`;
 
-        xit('responds without authentication with 403', function() {
-        });
+        function createPostData() {
+            return Promise.resolve({});
+        }
 
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds without write permission with 403', function() {
-        });
+        th.apiTests.post.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS, createPostData, true);
 
         xit('responds with 400 when no localconfig file is there', function() {
         });
@@ -122,21 +113,51 @@ describe('API portalmanagement', function() {
 
     describe('PUT/', function() {
 
-        // Negative tests
+        var api = co.apis.portalmanagement;
+        var permission = co.permissions.ADMINISTRATION_SETTINGS;
 
-        xit('responds without authentication with 403', function() {
+        function createPutSettings() {
+            return Promise.resolve({
+                licenseserverurl: 'http://localhost',
+                licensekey: 'testlicensekey'
+            });
+        }
+
+        it('responds without authentication with 403', function() {
+            return createPutSettings().then(function(putSettings) {
+                return th.put(`/api/${api}`).send(putSettings).expect(403);
+            });
         });
-
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+        it('responds without write permission with 403', function() {
+            var loginToken;
+            return th.removeWritePermission(th.defaults.user, permission).then(function() {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                loginToken = token;
+                return createPutSettings();
+            }).then(function(putSettings) {
+                return th.put(`/api/${api}?token=${loginToken}`).send(putSettings).expect(403);
+            });
         });
-
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds without write permission with 403', function() {
-        });
-
-        xit('responds without giving data with 400', function() {
+        function checkForUser(user) {
+            return function() {
+                var loginToken;
+                return th.removeClientModule(th.defaults.client, co.modules.portalbase).then(function() {
+                    return th.doLoginAndGetToken(user, th.defaults.password);
+                }).then(function(token) {
+                    loginToken = token;
+                    return createPutSettings();
+                }).then(function(putSettings) {
+                    return th.put(`/api/${api}?token=${loginToken}`).send(putSettings).expect(403);
+                });
+            }
+        }
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+        it('responds with 400 when not sending an object to insert', function() {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                return th.put(`/api/${api}?token=${token}`).expect(400);
+            });
         });
 
         // Positive tests
@@ -147,11 +168,18 @@ describe('API portalmanagement', function() {
         xit('responds with 200 and updates the licenseserverurl and licensekey properties in the localconfig.json file with the new sent data', function() {
         });
 
+        xit('responds with 200 and does not update the localconfig file when other properties than licenseserverurl and licensekey are sent', function() {
+            // Mögliche andere Properties aus localconfig.json.template auslesen
+        });
+
     });
 
     describe('DELETE/', function() {
 
-        xit('responds with 404', function() {
+        it('responds with 404', function() {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                return th.del(`/api/${co.apis.extractdocument}?token=${token}`).expect(404);
+            });
         });
     
     });
