@@ -4,7 +4,6 @@
  */
 var superTest = require('supertest');
 var server = require('../app');
-var async = require('async');
 var db = require('../middlewares/db');
 var bcryptjs = require('bcryptjs');
 var assert = require('assert');
@@ -394,14 +393,17 @@ th.prepareFolders = () => {
     });
 };
 
-var createPath = (pathToCreate) => {
+/**
+ * Creates a path and all of its parent paths if they do not exist
+ */
+th.createPath = (pathToCreate) => {
     try {
         fs.statSync(pathToCreate);
         return; // Her we come only when the path exists
     }
     catch (err) {
         // path does not exist, create it
-        createPath(path.dirname(pathToCreate));
+        th.createPath(path.dirname(pathToCreate));
         fs.mkdirSync(pathToCreate);
     }
 }
@@ -413,7 +415,7 @@ th.prepareDocumentFiles = () => {
     return new Promise((resolve, reject) => {
         th.dbObjects.documents.forEach((document) => {
             var filePath = documentsHelper.getDocumentPath(document._id);
-            createPath(path.dirname(filePath));
+            th.createPath(path.dirname(filePath));
             fs.writeFileSync(filePath, document._id.toString());
         });
         resolve();
@@ -483,7 +485,6 @@ th.prepareRelations = function() {
 
 /**
  * Creates 3 documents for each folder
- * Asynchronous call:
  * return testHelpers.compareApiAndDatabaseObjects(
  *  'clients',
  *  [ '_id', 'name' ],

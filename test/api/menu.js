@@ -4,7 +4,6 @@
 var assert = require('assert');
 var fs = require('fs');
 var superTest = require('supertest');
-var async = require('async');
 var moduleConfig = require('../../config/module-config.json'); // http://stackoverflow.com/a/14678694
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');

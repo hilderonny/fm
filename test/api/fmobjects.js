@@ -3,7 +3,6 @@
  */
 var assert = require('assert');
 var fs = require('fs');
-var async = require('async');
 var newFMobject = {name: 'someName'};
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');

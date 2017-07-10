@@ -6,7 +6,6 @@ var fs = require('fs');
 var superTest = require('supertest');
 var testHelpers = require('../testhelpers');
 var db = require('../../middlewares/db');
-var async = require('async');
 
 describe('API portalmanagement', function() {
 
