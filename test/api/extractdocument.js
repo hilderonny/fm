@@ -10,7 +10,7 @@ var co = require('../../utils/constants');
 var JSZip = require('jszip');
 var path = require('path');
 
-describe.only('API extractdocument', function() {
+describe('API extractdocument', function() {
 
     var zipContent = {
         folders: [
@@ -102,7 +102,7 @@ describe.only('API extractdocument', function() {
 
     });
 
-    describe.only('GET/:id', function() {
+    describe('GET/:id', function() {
 
         function compareStructure(actual, expected) {
             if (expected.folders) expected.folders.forEach(function(expectedFolder) {
@@ -117,6 +117,19 @@ describe.only('API extractdocument', function() {
                 assert.ok(actual.documents.length > 0);
                 var actualDocument = actual.documents.find((d) => d.name === expectedDocument.name);
                 assert.ok(actualDocument);
+            });
+        }
+
+        function checkResult(result) {
+            assert.ok(result);
+            assert.ok(result.folders);
+            assert.strictEqual(result.folders.length, zipContent.folders.length);
+            zipContent.folders.forEach(function(folder) {
+                assert.ok(result.folders.find((f) => f.name === folder.name));
+            });
+            assert.strictEqual(result.documents.length, zipContent.files.length);
+            zipContent.files.forEach(function(file) {
+                assert.ok(result.documents.find((d) => d.name === file));
             });
         }
 
@@ -148,7 +161,7 @@ describe.only('API extractdocument', function() {
             });
         });
 
-        it.skip('extracts the ZIP file and creates a folder structure in the folder of the document and documents for all contained files', function() {
+        it('extracts the ZIP file and creates a folder structure in the folder of the document and documents for all contained files', function() {
             var token, documentFromDatabase, foldersDict = { rootFolder: { folders:[], documents:[] } };
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(tok) {
                 token = tok;
@@ -156,7 +169,8 @@ describe.only('API extractdocument', function() {
             }).then(function(doc) {
                 documentFromDatabase = doc;
                 return th.get(`/api/${co.apis.extractdocument}/${documentFromDatabase._id.toString()}?token=${token}`).expect(200);
-            }).then(function() {
+            }).then(function(response) {
+                checkResult(response.body);
                 return db.get(co.collections.folders).find();
             }).then(function(folders) {
                 folders.forEach(function(folder) {
@@ -221,14 +235,10 @@ describe.only('API extractdocument', function() {
                 return db.insert(co.collections.folders, folder);
             }).then(function() {
                 return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(200);
-            }).then(function() {
+            }).then(function(response) {
+                checkResult(response.body);
                 return db.get(co.collections.folders).find({parentFolderId:document.parentFolderId});
             }).then(function(folders) {
-
-                // TODO: Aus irgendeinem Grund funktioniert dieser Test nur, wenn er allein durchgeführt wird. Andernfalls gibt es nur ein einziges Verzeichnis in der Rückgabe.
-                // Scheint irgendwas in der Vorbereitung schief zu laufen. Vermutlich ein asynchroner Aufruf eines vorherigen Tests, auf dessen Ergebnis nicht gewartet wird.
-                // Passiert nur, wenn der Test aus Zeile 151 vorher ausgeführt wird.
-
                 assert.strictEqual(folders.length, 3); // 1 Vorbereiteter und zwei aus ZIP-Datei
                 return Promise.resolve();
             });
