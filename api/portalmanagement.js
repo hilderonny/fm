@@ -55,12 +55,21 @@ router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', 
     var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
     var updateExtractPath = localConfig.updateExtractPath ? localConfig.updateExtractPath : './temp/';
     var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
-    request(url, function (error, response, body) {
-        if (error || response.statusCode !== 200) {
+    var updateRequest = request(url);
+    updateRequest.on('error', function () {
+        updateRequest.abort();
+        return res.sendStatus(400);
+    });
+    updateRequest.on('response', function (response) {
+        if (response.statusCode !== 200) {
+            updateRequest.abort();
             return res.sendStatus(400);
         }
-        return res.sendStatus(200);
-    }).pipe(unzip.Extract({ path: updateExtractPath }));
+    });
+    var unzipStream = updateRequest.pipe(unzip.Extract({ path: updateExtractPath }));
+    unzipStream.on('close', function() {
+        return res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
+    });
 });
 
 /**
