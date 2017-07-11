@@ -26,8 +26,8 @@
     "TRK_PORTALS_PORTAL_CREATED" : "порталът е създаден",
     "TRK_PORTALS_PORTAL_DELETED" : "порталът е премахнат",
     "TRK_PORTALS_PORTALS" : "портали",
-    "TRK_PORTALS_REALLY_DELETE_PORTAL" : "Сигурни ли Сте, че искате да премахнете следния портал: \"{{portalName}}\"?",
-    "TRK_PORTALS_REALLY_GENERATE_LICENSEKEY" : "Сигурни ли Сте, че искате да генерирате нов лицензен ключ? Новият ключ ще бъде запазен автоматично, след което старият ключ ще е невалиден.",
+    "TRK_PORTALS_REALLY_DELETE_PORTAL" : "Сигурни ли сте, че искате да премахнете следния портал: \"{{portalName}}\"?",
+    "TRK_PORTALS_REALLY_GENERATE_LICENSEKEY" : "Сигурни ли сте, че искате да генерирате нов лицензен ключ? Новият ключ ще бъде запазен автоматично, след което старият ключ ще е невалиден.",
     "TRK_PORTALS_SAVE" : "запази промените",
     "TRK_PORTALS_SELECT_PORTAL" : "Избор на портал",
     "TRK_YES" : "да"

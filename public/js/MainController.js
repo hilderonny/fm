@@ -103,11 +103,11 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
         $rootScope.$emit('localeChanged', lang); // Tell the activity controller to update its date picker
     }
 
-    $scope.languages = [ 'de', 'en', 'bg', 'ar']; // Define which languages are shown in menu
+    $rootScope.languages = [ 'de', 'en']; // Define which languages are shown in menu
 
     $scope.setLang($translate.proposedLanguage());
 
-    if ($scope.languages.indexOf($scope.currentLanguage) < 0) {
+    if ($rootScope.languages.indexOf($scope.currentLanguage) < 0) {
         $scope.setLang('en'); // Fallback
     }
 
