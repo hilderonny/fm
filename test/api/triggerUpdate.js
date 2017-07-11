@@ -3,31 +3,36 @@
  */
 var assert = require('assert');
 var fs = require('fs');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testhelpers');
 var db = require('../../middlewares/db');
+var co = require('../../utils/constants');
 
-describe('API triggerUpdate', function() {
-
-    var server = require('../../app');
+describe.only('API triggerUpdate', function() {
     
     beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions);
     });
 
     describe('GET/', function() {
 
-        xit('responds with 404', function() {
+        it('responds with 404', function() {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                return th.get(`/api/${co.apis.triggerUpdate}?token=${token}`).expect(404);
+            });
         });
 
     });
 
-    describe('POST/', function() {
+    describe.only('POST/', function() {
+
+        // TODO: Upload-Funktion aus fileuploader.js in utils-Modul verschieben und als promise bauen
+        // Dann kann das sowohl direkt als node--Skript im bauprozess als auch per fileuploader.js
+        // Script als auch hier zum Testen benutzt werden.
 
         // Negative tests
 
@@ -55,14 +60,20 @@ describe('API triggerUpdate', function() {
 
     describe('PUT/', function() {
 
-        xit('responds with 404', function() {
+        it('responds with 404', function() {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                return th.put(`/api/${co.apis.triggerUpdate}?token=${token}`).send({}).expect(404);
+            });
         });
 
     });
 
     describe('DELETE/', function() {
 
-        xit('responds with 404', function() {
+        it('responds with 404', function() {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                return th.del(`/api/${co.apis.triggerUpdate}?token=${token}`).expect(404);
+            });
         });
     
     });
