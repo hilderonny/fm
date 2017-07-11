@@ -6,7 +6,6 @@ var fs = require('fs');
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
-var lct = JSON.parse(fs.readFileSync('config/localconfig.json.template')); // Mit dieser Art zu lesen mus vom Root-Verezchnis ausgegangen werden
 var mc = require('../../config/module-config.json');
 var rimraf = require('rimraf');
 
