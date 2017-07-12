@@ -2,12 +2,17 @@
  * UNIT Tests for api/triggerUpdate
  */
 var assert = require('assert');
+var rimraf = require('rimraf');
+var path = require('path');
 var fs = require('fs');
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var ap = require('../../utils/app-packager');
+var wh = require('../../utils/webHelper');
+var lc = require('../../config/localconfig.json');
 
-describe.only('API triggerUpdate', function() {
+describe('API triggerUpdate', function() {
     
     beforeEach(() => {
         return th.cleanDatabase()
@@ -28,32 +33,104 @@ describe.only('API triggerUpdate', function() {
 
     });
 
-    describe.only('POST/', function() {
+    describe('POST/', function() {
 
-        // TODO: Upload-Funktion aus fileuploader.js in utils-Modul verschieben und als promise bauen
-        // Dann kann das sowohl direkt als node--Skript im bauprozess als auch per fileuploader.js
-        // Script als auch hier zum Testen benutzt werden.
+        var extractPath = './extractTemp/';
+        var originalExtractPath = lc.updateExtractPath;
+        var httpsPort = process.env.HTTPS_PORT || lc.httpsPort || 443;
+        var url = `https://localhost:${httpsPort}/api/triggerUpdate`;
+        var secret = 'hubbele bubbele';
 
-        // Negative tests
-
-        xit('responds with 401 when secret is not "hubbele bubbele"', function() {
+        beforeEach(function() {
+            lc.updateExtractPath = extractPath;
+            rimraf.sync('./temp/');
+            rimraf.sync(extractPath);
         });
 
-        xit('responds with 400 when no file was sent in request', function() {
+        afterEach(function() {
+            lc.updateExtractPath = originalExtractPath;
+            rimraf.sync('./temp/');
+            rimraf.sync(extractPath);
         });
 
-        xit('responds with 400 when file is not a ZIP file', function() {
+        function prepareFile() {
+            return new Promise(function(resolve, reject) {
+                ap.pack([co.modules.base], resolve, 'Testversion');
+            });
+        }
+
+        function checkExtractedFiles(path, moduleNames) {
+            th.createFileList(moduleNames).forEach(function(fileName) {
+                var fullPath = path + fileName;
+                assert.ok(fs.existsSync(fullPath), `File ${fullPath} does not exist`);
+            });
+            return Promise.resolve();
+        }
+
+        it('responds with 401 when there is no secret given', function() {
+            return prepareFile().then(function(fileContent) {
+                return wh.postFileToUrl(url, 'testfile.zip', fileContent, null, 900000);
+            }).then(function(response) {
+                assert.strictEqual(response.statusCode, 401);
+            });
         });
 
-        // Positive tests
-
-        xit('responds with 200 and extracts the content of the ZIP file into the updateExtractPath (without existing web.config file)', function() {
-            // Create a ZIP file with a folder "updateTest" within it to prevent overwriting real files in the root folder
+        it('responds with 401 when secret is not "hubbele bubbele"', function() {
+            return prepareFile().then(function(fileContent) {
+                return wh.postFileToUrl(url, 'testfile.zip', fileContent, { secret: 'irgendwas' }, 900000);
+            }).then(function(response) {
+                assert.strictEqual(response.statusCode, 401);
+            });
         });
 
-        xit('responds with 200 and extracts the content of the ZIP file into the updateExtractPath and updates the timestamp of the web.config file when it exists', function() {
-            // Create a ZIP file with a folder "updateTest" within it to prevent overwriting real files in the root folder
-            // Create a web.config file. This is the special case for installations under iisnode on windows
+        it('responds with 400 when no file was sent in request', function() {
+            return prepareFile().then(function(fileContent) {
+                return wh.postFileToUrl(url, 'testfile.zip', null, { secret: secret }, 900000);
+            }).then(function(response) {
+                assert.strictEqual(response.statusCode, 400);
+            });
+        });
+
+        it('responds with 400 when file is not a ZIP file', function() {
+            return prepareFile().then(function(fileContent) {
+                return wh.postFileToUrl(url, 'testfile.zip', 'textcontent', { secret: secret }, 900000);
+            }).then(function(response) {
+                assert.strictEqual(response.statusCode, 400);
+            });
+        });
+
+        it('responds with 200 and extracts the content of the ZIP file into the updateExtractPath (without existing web.config file)', function() {
+            return prepareFile().then(function(fileContent) {
+                return wh.postFileToUrl(url, 'testfile.zip', fileContent, { secret: secret }, 900000);
+            }).then(function(response) {
+                assert.strictEqual(response.statusCode, 200);
+                return checkExtractedFiles(extractPath, [co.modules.base]);
+            });
+        });
+
+        it('responds with 200 and extracts the content of the ZIP file into the updateExtractPath and updates the timestamp of the web.config file when it exists', function() {
+            fs.mkdirSync(extractPath);
+            var webConfigPath = path.join(extractPath, 'web.config');
+            fs.writeFileSync(webConfigPath, 'Dummycontent');
+            var mtimeBeforeUpdate = fs.lstatSync(webConfigPath).mtime.getTime();
+            return prepareFile().then(function(fileContent) {
+                return wh.postFileToUrl(url, 'testfile.zip', fileContent, { secret: secret }, 900000);
+            }).then(function(response) {
+                assert.strictEqual(response.statusCode, 200);
+                var mtimeAfterUpdate = fs.lstatSync(webConfigPath).mtime.getTime();
+                assert.notStrictEqual(mtimeAfterUpdate, mtimeBeforeUpdate, 'web.config was not touched or has not updated time stamp');
+                return checkExtractedFiles(extractPath, [co.modules.base]);
+            });
+        });
+
+        it('responds with 200 and extracts the content of the ZIP file into the ./temp path when updateExtractPath is not given in localconfig', function() {
+            delete lc.updateExtractPath;
+            return prepareFile().then(function(fileContent) {
+                return wh.postFileToUrl(url, 'testfile.zip', fileContent, { secret: secret }, 900000);
+            }).then(function(response) {
+                assert.strictEqual(response.statusCode, 200);
+                return checkExtractedFiles('./temp/', [co.modules.base]);
+            });
         });
 
     });

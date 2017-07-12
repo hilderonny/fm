@@ -9,6 +9,7 @@ var upload = multer({ dest: 'uploads/' })
 var path = require('path');
 var unzip = require('unzip');
 var child_process = require('child_process');
+var lc = require('../config/localconfig.json');
 
 var createPath = (pathToCreate) => {
     try {
@@ -33,32 +34,33 @@ router.post('/', upload.single('file'), function(req, res) {
         return res.sendStatus(400);
     }
     var filePath = path.join(__dirname, '/../', file.path);
+    var extractPath = lc.updateExtractPath ? lc.updateExtractPath : './temp/';
     // Extract file
     var parser = unzip.Parse();
-    parser.on('close', () => {
-        // Delete uploaded file
-        fs.unlinkSync(filePath);
-        // Node-Module installieren
-        child_process.exec('npm install', (error, stdout, stderr) => {
-            if (error) process.stderr.write(error);
-            if (stderr.length > 0) process.stderr.write(stderr);
-            if (stdout.length > 0) process.stdout.write(stdout);
+    fs.createReadStream(filePath)
+        .pipe(parser)
+        .on('entry', (entry) => {
+            if(entry.type === 'File') {
+                var fullPath = path.join(__dirname, '/../', extractPath, entry.path);
+                createPath(path.dirname(fullPath));
+                entry.pipe(fs.createWriteStream(fullPath));
+            }
+        })
+        .on('error', (error) => {
+            return res.sendStatus(400);
+        }).on('close', function() {
+            // Delete uploaded file
+            fs.unlinkSync(filePath);
+            // Node-Module installieren
+            child_process.exec('npm install');
+            // web.config touchen
+            var webConfigPath = path.join(extractPath, 'web.config');
+            if (fs.existsSync(webConfigPath)) {
+                var webConfigContent = fs.readFileSync(webConfigPath);
+                fs.writeFileSync(webConfigPath, webConfigContent);
+            }
+            return res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
         });
-        // web.config touchen
-        var webConfigFileName = './web.config';
-        if (fs.existsSync(webConfigFileName)) {
-            var webConfigContent = fs.readFileSync(webConfigFileName);
-            fs.writeFileSync(webConfigFileName, webConfigContent);
-        }
-        return res.sendStatus(200);
-    });
-    fs.createReadStream(filePath).pipe(parser).on('entry', (entry) => {
-        if(entry.type === 'File') {
-            var fullPath = path.join(__dirname, '/../', entry.path);
-            createPath(path.dirname(fullPath));
-            entry.pipe(fs.createWriteStream(fullPath));
-        }
-    });
 });
 
 

@@ -19,7 +19,7 @@ module.exports.postFileToUrl = (url, fileName, fileContent, formProperties, time
             resolve(response);
         });
         var form = req.form();
-        form.append('file', fileContent, { filename: fileName });
+        if (fileContent) form.append('file', fileContent, { filename: fileName });
         if (formProperties) Object.keys(formProperties).forEach(function(key) {
             form.append(key, formProperties[key]);
         });
