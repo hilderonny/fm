@@ -128,7 +128,6 @@ describe('module-config.json', function() {
             'debug.log',
             'documents/',
             'drafts/',
-            'fileuploader.js',
             'node_modules/',
             'priv.key',
             'pub.cert',
@@ -139,7 +138,8 @@ describe('module-config.json', function() {
             'temp/',
             'test/',
             'test.bat',
-            'uploads/'
+            'uploads/',
+            'utils/webHelper.js'
         ];
         handleDirectoriesRecursively('', errors, referencedFiles, pathsToIgnore);
         if (errors.length > 0) {

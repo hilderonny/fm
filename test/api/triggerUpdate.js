@@ -47,11 +47,11 @@ describe.only('API triggerUpdate', function() {
 
         // Positive tests
 
-        xit('responds with 200 and extracts the content of the ZIP file into the app root folder (without existing web.config file)', function() {
+        xit('responds with 200 and extracts the content of the ZIP file into the updateExtractPath (without existing web.config file)', function() {
             // Create a ZIP file with a folder "updateTest" within it to prevent overwriting real files in the root folder
         });
 
-        xit('responds with 200 and extracts the content of the ZIP file into the app root folder and updates the timestamp of the web.config file when it exists', function() {
+        xit('responds with 200 and extracts the content of the ZIP file into the updateExtractPath and updates the timestamp of the web.config file when it exists', function() {
             // Create a ZIP file with a folder "updateTest" within it to prevent overwriting real files in the root folder
             // Create a web.config file. This is the special case for installations under iisnode on windows
         });
