@@ -91,17 +91,14 @@ router.get('/options/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAM
 router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', 'r', 'base'), validateModelName, validateId, validateSameClientId(), (req, res) => {
     var modelName = req.params.modelName;
     var entityId = req.params.id;
-    // TODO: fix implementation
+    // TODO: check implementation
     req.db.get(modelName).findOne(entityId).then(function(entityFromDB){
         req.db.get('dynamicattributevalues').find({entityId: entityFromDB._id}).then(function(attribureValues){
-            var dynamicattribureValues = attribureValues.body;
             var Values = [];
-            console.log('GET/values method');
-            //console.log(dynamicattribureValues);
-            if(dynamicattribureValues){
-                dynamicattribureValues.forEach(function(attributeValue){
-                    req.db.get('dynamicattributes').findOne({dynamicAttributeId: attributeValue.dynamicAttributeId}).then(function(dynamicAttribute){
-                    var arrayElement;
+            if(attribureValues){
+                attribureValues.forEach(function(attributeValue){
+                    req.db.get('dynamicattributes').findOne({_id: attributeValue.dynamicAttributeId}).then(function(dynamicAttribute){
+                    var arrayElement = {};
                         arrayElement["value"] = attributeValue.value;
                         arrayElement["type"] = dynamicAttribute.type; 
                         arrayElement["name_en"] = dynamicAttribute.name_en;
@@ -110,7 +107,7 @@ router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CL
                 });
             }
             else{
-              Values.push(13);
+              Values.push( "no attribute values found");
               return  res.send(Values);
             }
             
