@@ -2,7 +2,7 @@ app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, 
     
     var createFolderCallback = function(createdFolder) {
         $scope.folder.folders.push(createdFolder);
-        $scope.selectedFolder = createdFolder;
+        $scope.selectFolder(createdFolder);
     };
     var saveFolderCallback = function(savedFolder) {
         $scope.selectedFolder.name = savedFolder.name;

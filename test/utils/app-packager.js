@@ -5,41 +5,7 @@ var assert = require('assert');
 var moduleConfig = require('../../config/module-config.json');
 var appPackager = require('../../utils/app-packager');
 var JSZip = require('jszip');
-
-// Helper for creating a list of file names which must be contained with the given modules
-var createFileList = (moduleNames) => {
-    var fileList = [];
-    fileList.push('config/module-config.json');
-    if (!moduleNames || moduleNames.length < 1) {
-        var moduleNames = Object.keys(moduleConfig.modules);
-    }
-    moduleNames.forEach((moduleName) => {
-        var module = moduleConfig.modules[moduleName];
-        if (module.api) module.api.forEach((apiFileName) => {
-            fileList.push(`api/${apiFileName}.js`);
-        });
-        if (module.middlewares) module.middlewares.forEach((middlewareFileName) => {
-            fileList.push(`middlewares/${middlewareFileName}.js`);
-        });
-        if (module.utils) module.utils.forEach((utilFileName) => {
-            fileList.push(`utils/${utilFileName}.js`);
-        });
-        if (module.public) module.public.forEach((publicFileName) => {
-            fileList.push(`public/${publicFileName}`);
-        });
-        if (module.root) module.root.forEach((rootFileName) => {
-            fileList.push(`${rootFileName}`);
-        });
-        if (module.include) module.include.forEach((includeFileName) => {
-            if (includeFileName.indexOf('node_modules/') === 0) return; // Ignore node modules
-            fileList.push(`${includeFileName}`);
-        });
-        if (module.languages) module.languages.forEach((language) => {
-            fileList.push(`public/lang/${moduleName}-${language}.json`);
-        });
-    });
-    return fileList;
-};
+var th = require('../testhelpers');
 
 // Validates the given moduleConfig that it contains all configuration data
 // for the modules with the given names and return true, when all is okay
@@ -65,10 +31,10 @@ var testModuleConfig = (moduleConfigForModuleNames, moduleNames, done) => {
 
 // Helper for making tests with different module name lists
 var testAppPackager = (moduleNames, version, done) => {
-    appPackager.pack(moduleNames, (buffer) => {
+    appPackager.pack(moduleNames, version).then((buffer) => {
         // From http://stackoverflow.com/a/39324475
         var zip = new JSZip();
-        var fileList = createFileList(moduleNames);
+        var fileList = th.createFileList(moduleNames);
         var zippedModuleConfigFile = false;
         zip.loadAsync(buffer).then((zipContent) => {
             var fileNames = Object.keys(zipContent.files);
@@ -105,7 +71,7 @@ var testAppPackager = (moduleNames, version, done) => {
             }
             done();
         });
-    }, version);
+    });
 };
 
 describe('UTILS App packager', function() {
@@ -117,14 +83,6 @@ describe('UTILS App packager', function() {
             () => { appPackager.pack([ 'base', 'notexistingmodule' ]) },
             Error,
             'The requested module "notexistingmodule" does not exist'
-        );
-        done();
-    });
-    it('throws an error when no handling callback is given', function(done) {
-        assert.throws(
-            () => { appPackager.pack([ ]) },
-            Error,
-            'Missing callback'
         );
         done();
     });

@@ -37,7 +37,8 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
     // Click on Create-button to create a new client
     $scope.createClient = function() {
         var clientToSend = { 
-            name: $scope.client.name 
+            name: $scope.client.name,
+            comment:$scope.client.comment 
         };
         $http.post('/api/clients', clientToSend).then(function(response) {
             var createdClient = response.data;
@@ -62,7 +63,8 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
     // Click on Save-button to save an existing client
     $scope.saveClient = function() {
         var clientToSend = { 
-            name: $scope.client.name 
+            name: $scope.client.name,
+            comment:$scope.client.comment
         };
         $http.put('/api/clients/' + $scope.client._id, clientToSend).then(function(response) {
             var savedClient = response.data;
@@ -165,7 +167,7 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
         } else {
             // New client
             $scope.isNewClient = true;
-            $scope.client = { name : "" };
+            $scope.client = { name : "", comment:'' };
             $scope.clientModules = [];
         }
     };
