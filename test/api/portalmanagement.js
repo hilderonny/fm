@@ -15,9 +15,9 @@ describe('API portalmanagement', function() {
         var userGroup;
         return th.defaults.getUserGroup().then(function(ug) {
             userGroup = ug;
-            return db.insert(co.collections.clientmodules, { clientId: userGroup.clientId, module: co.modules.portalbase });
+            return db.insert(co.collections.clientmodules.name, { clientId: userGroup.clientId, module: co.modules.portalbase });
         }).then(function() {
-            return db.insert(co.collections.permissions, { key: co.permissions.ADMINISTRATION_SETTINGS, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+            return db.insert(co.collections.permissions.name, { key: co.permissions.ADMINISTRATION_SETTINGS, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         });
     }
 
@@ -98,7 +98,7 @@ describe('API portalmanagement', function() {
             lc.licensekey = 'Testkey';
             lc.licenseserverurl = 'https://invalidurl.avorium.de';
             saveConfigs();
-            return db.insert(co.collections.portals, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
+            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 return th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(400);
@@ -108,7 +108,7 @@ describe('API portalmanagement', function() {
         it('responds with 400 when license key is invalid', function() {
             lc.licensekey = 'InvalidKey';
             saveConfigs();
-            return db.insert(co.collections.portals, {name:'Testportal', isActive: true, licenseKey: 'ValidKey'}).then(function() {
+            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: 'ValidKey'}).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 return th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(400);
@@ -120,7 +120,7 @@ describe('API portalmanagement', function() {
             lc.licensekey = 'Testkey';
             pj.version = 'Testversion';
             saveConfigs();
-            return db.insert(co.collections.portals, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
+            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 return th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(200);
@@ -169,8 +169,8 @@ describe('API portalmanagement', function() {
             lc.licenseserverurl = 'https://invalidurl.avorium.de';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            return db.insert(co.collections.portals, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
-                return db.insert(co.collections.portalmodules, {portalId: insertedPortal._id, module: co.modules.base});
+            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
+                return db.insert(co.collections.portalmodules.name, {portalId: insertedPortal._id, module: co.modules.base});
             }).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -182,8 +182,8 @@ describe('API portalmanagement', function() {
             lc.licensekey = 'InvalidKey';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            return db.insert(co.collections.portals, {name:'Testportal', isActive: true, licenseKey: 'ValidKey'}).then(function(insertedPortal) {
-                return db.insert(co.collections.portalmodules, {portalId: insertedPortal._id, module: co.modules.base});
+            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: 'ValidKey'}).then(function(insertedPortal) {
+                return db.insert(co.collections.portalmodules.name, {portalId: insertedPortal._id, module: co.modules.base});
             }).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -195,7 +195,7 @@ describe('API portalmanagement', function() {
             lc.licensekey = 'Testkey';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            return db.insert(co.collections.portals, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
+            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 return th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
@@ -206,8 +206,8 @@ describe('API portalmanagement', function() {
             lc.licensekey = 'Testkey';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            return db.insert(co.collections.portals, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
-                return db.insert(co.collections.portalmodules, {portalId: insertedPortal._id, module: co.modules.base});
+            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
+                return db.insert(co.collections.portalmodules.name, {portalId: insertedPortal._id, module: co.modules.base});
             }).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -221,8 +221,8 @@ describe('API portalmanagement', function() {
             lc.licensekey = 'Testkey';
             delete lc.updateExtractPath;
             saveConfigs();
-            return db.insert(co.collections.portals, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
-                return db.insert(co.collections.portalmodules, {portalId: insertedPortal._id, module: co.modules.base});
+            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
+                return db.insert(co.collections.portalmodules.name, {portalId: insertedPortal._id, module: co.modules.base});
             }).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {

@@ -71,7 +71,7 @@ describe('UTILS configHelper', function() {
             var clientToUse;
             return th.defaults.getClient().then(function(client) {
                 clientToUse = client;
-                return db.get(co.collections.clientmodules).remove({clientId:client._id});
+                return db.get(co.collections.clientmodules.name).remove({clientId:client._id});
             }).then(function() {
                 return configHelper.getAvailablePermissionKeysForClient(clientToUse._id, db);
             }).then(function(permissionKeys) {
@@ -88,16 +88,16 @@ describe('UTILS configHelper', function() {
             var clientToUse;
             return th.defaults.getClient().then(function(client) {
                 clientToUse = client;
-                return db.get(co.collections.clientmodules).remove({clientId:client._id});
+                return db.get(co.collections.clientmodules.name).remove({clientId:client._id});
             }).then(function() {
-                return db.get(co.collections.clientmodules).insert({ clientId: clientToUse._id, module: 'testModule' });
+                return db.get(co.collections.clientmodules.name).insert({ clientId: clientToUse._id, module: 'testModule' });
             }).then(function() {
                 var clientModules = [
                     { clientId: clientToUse._id, module: co.modules.base },
                     { clientId: clientToUse._id, module: co.modules.activities },
                     { clientId: clientToUse._id, module: co.modules.documents }
                 ];
-                return db.get(co.collections.clientmodules).bulkWrite(clientModules.map((clientModule) => { return {insertOne:{document:clientModule}} }));
+                return db.get(co.collections.clientmodules.name).bulkWrite(clientModules.map((clientModule) => { return {insertOne:{document:clientModule}} }));
             }).then(function() {
                 return configHelper.getAvailablePermissionKeysForClient(clientToUse._id, db);
             }).then(function(permissionKeys) {
@@ -127,14 +127,14 @@ describe('UTILS configHelper', function() {
             var clientToUse;
             return th.defaults.getClient().then(function(client) {
                 clientToUse = client;
-                return db.get(co.collections.clientmodules).remove({clientId:client._id});
+                return db.get(co.collections.clientmodules.name).remove({clientId:client._id});
             }).then(function() {
                 var clientModules = [
                     { clientId: clientToUse._id, module: 'Wurstel' },
                     { clientId: clientToUse._id, module: 'Hustel' },
                     { clientId: clientToUse._id, module: co.modules.documents }
                 ];
-                return db.get(co.collections.clientmodules).bulkWrite(clientModules.map((clientModule) => { return {insertOne:{document:clientModule}} }));
+                return db.get(co.collections.clientmodules.name).bulkWrite(clientModules.map((clientModule) => { return {insertOne:{document:clientModule}} }));
             }).then(function() {
                 return configHelper.getAvailablePermissionKeysForClient(clientToUse._id, db);
             }).then(function(permissionKeys) {
@@ -188,7 +188,7 @@ describe('UTILS configHelper', function() {
             var clientToUse;
             return th.defaults.getClient().then(function(client) {
                 clientToUse = client;
-                return db.get(co.collections.clientmodules).remove({clientId:client._id});
+                return db.get(co.collections.clientmodules.name).remove({clientId:client._id});
             }).then(function() {
                 return configHelper.getAvailableModulesForClient(clientToUse._id, db);
             }).then(function(modules) {
@@ -201,14 +201,14 @@ describe('UTILS configHelper', function() {
             var clientToUse;
             return th.defaults.getClient().then(function(client) {
                 clientToUse = client;
-                return db.get(co.collections.clientmodules).remove({clientId:client._id});
+                return db.get(co.collections.clientmodules.name).remove({clientId:client._id});
             }).then(function() {
                 var clientModules = [
                     { clientId: clientToUse._id, module: co.modules.base },
                     { clientId: clientToUse._id, module: co.modules.activities },
                     { clientId: clientToUse._id, module: co.modules.documents }
                 ];
-                return db.get(co.collections.clientmodules).bulkWrite(clientModules.map((clientModule) => { return {insertOne:{document:clientModule}} }));
+                return db.get(co.collections.clientmodules.name).bulkWrite(clientModules.map((clientModule) => { return {insertOne:{document:clientModule}} }));
             }).then(function() {
                 return configHelper.getAvailableModulesForClient(clientToUse._id, db);
             }).then(function(modules) {
@@ -236,14 +236,14 @@ describe('UTILS configHelper', function() {
             var clientToUse;
             return th.defaults.getClient().then(function(client) {
                 clientToUse = client;
-                return db.get(co.collections.clientmodules).remove({clientId:client._id});
+                return db.get(co.collections.clientmodules.name).remove({clientId:client._id});
             }).then(function() {
                 var clientModules = [
                     { clientId: clientToUse._id, module: 'Hampel' },
                     { clientId: clientToUse._id, module: 'Pampel' },
                     { clientId: clientToUse._id, module: co.modules.documents }
                 ];
-                return db.get(co.collections.clientmodules).bulkWrite(clientModules.map((clientModule) => { return {insertOne:{document:clientModule}} }));
+                return db.get(co.collections.clientmodules.name).bulkWrite(clientModules.map((clientModule) => { return {insertOne:{document:clientModule}} }));
             }).then(function() {
                 return configHelper.getAvailableModulesForClient(clientToUse._id, db);
             }).then(function(modules) {
@@ -289,7 +289,7 @@ describe('UTILS configHelper', function() {
             var clientToUse;
             return th.defaults.getClient().then(function(client) {
                 clientToUse = client;
-                return db.get(co.collections.clientmodules).remove({clientId:client._id});
+                return db.get(co.collections.clientmodules.name).remove({clientId:client._id});
             }).then(function() {
                 return configHelper.isPermissionAvailableToClient(clientToUse._id, co.permissions.OFFICE_ACTIVITY, db);
             }).then(function(isAvailable) {

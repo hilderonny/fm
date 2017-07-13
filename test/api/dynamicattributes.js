@@ -32,11 +32,11 @@ describe('API dynamicattributes', function() {
 
     describe('GET/:id', function() {
 
-        th.apiTests.getId.defaultNegative(co.apis.dynamicattributes, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
+        th.apiTests.getId.defaultNegative(co.apis.dynamicattributes, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
         th.apiTests.getId.clientDependentNegative(co.apis.dynamicattributes, co.collections.dynamicattributes.name);
 
         it('responds with all details of the dynamic attribute', function(done) {
-            db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(attributeFromDB){
+            db.get(co.collections.dynamicattributes.name).findOne({type: 'picklist'}).then(function(attributeFromDB){
                 th.doLoginAndGetToken('0_0_0', 'test').then(function(token){
                     th.get(`/api/dynamicattributes/${attributeFromDB._id}?token=${token}`).then(function(res, err){
                         if(err){return done(err);}
@@ -60,7 +60,7 @@ describe('API dynamicattributes', function() {
 
         it('responds without read permission with 403', function() {
             // Remove the corresponding permission
-            return th.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function() {
+            return th.removeReadPermission('1_0_0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES).then(function() {
                 return th.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
                     var modelName = 'users';
                     return th.get(`/api/dynamicattributes/model/${modelName}?token=${token}`).expect(403);
@@ -109,11 +109,11 @@ describe('API dynamicattributes', function() {
 
     describe('GET/option/:id', function() {
 
-        th.apiTests.getId.defaultNegative(optionApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributeoptions.name);
+        th.apiTests.getId.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributeoptions.name);
         th.apiTests.getId.clientDependentNegative(optionApi, co.collections.dynamicattributeoptions.name);
 
         it('responds with all details of the dynamic attribute option', function(done) {
-            db.get('dynamicattributes').findOne({type: 'picklist'}).then(function(attributeFromDB){
+            db.get(co.collections.dynamicattributes.name).findOne({type: 'picklist'}).then(function(attributeFromDB){
                 db.get('dynamicattributeoptions').findOne({dynamicAttributeId: attributeFromDB._id}).then(function(attributeOptionFromDB){
                     th.doLoginAndGetToken('0_0_0', 'test').then(function(token){
                         th.get(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).then(function(res, err){
@@ -132,12 +132,12 @@ describe('API dynamicattributes', function() {
 
     describe('GET/options/:id', function() {
 
-        th.apiTests.getId.defaultNegative(optionsApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
+        th.apiTests.getId.defaultNegative(optionsApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
         th.apiTests.getId.clientDependentNegative(optionsApi, co.collections.dynamicattributes.name);
 
         it('responds with a list of all options and their details of the dynamic attribute', function(done) {
             db.get('clients').findOne({name: '0'}).then(function(client0){
-                db.get('dynamicattributes').findOne({type: 'picklist', clientId: client0._id}).then(function(attributeFromDB){
+                db.get(co.collections.dynamicattributes.name).findOne({type: 'picklist', clientId: client0._id}).then(function(attributeFromDB){
                     db.get('dynamicattributeoptions').find({dynamicAttributeId: attributeFromDB._id}).then(function(OptionsFromDB){
                         testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ //user from client 0
                             superTest(server).get(`/api/dynamicattributes/options/${attributeFromDB._id}?token=${token}`).then(function(res, err){
@@ -158,7 +158,7 @@ describe('API dynamicattributes', function() {
 
     describe('GET/types', function() {
 
-        th.apiTests.get.defaultNegative(typesApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES);
+        th.apiTests.get.defaultNegative(typesApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES);
 
         xit('responds with a list of all possible dynamic attribute types', function() {
         });
@@ -174,7 +174,7 @@ describe('API dynamicattributes', function() {
         });
 
         it('responds without read permission with 403', function() {
-            return th.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function(){
+            return th.removeReadPermission('1_0_0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES).then(function(){
                 return db.get('users').findOne({name: '1_0_0'}).then(function(userFromDB){
                     return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                         return th.get(`/api/dynamicattributes/values/users/${userFromDB._id}?token=${token}`).expect(403);
@@ -252,7 +252,7 @@ describe('API dynamicattributes', function() {
 
     describe('POST/', function() {
 
-        th.apiTests.post.defaultNegative(co.apis.dynamicattributes, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, createTestDynamicAttribute)
+        th.apiTests.post.defaultNegative(co.apis.dynamicattributes, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createTestDynamicAttribute)
 
         xit('responds without giving a modelName with 400', function() {
         });
@@ -291,7 +291,7 @@ describe('API dynamicattributes', function() {
 
     describe('POST/option', function() {
 
-        th.apiTests.post.defaultNegative(optionApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, createTestDynamicAttributeOption)
+        th.apiTests.post.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createTestDynamicAttributeOption)
 
         xit('responds without giving a dynamicAttributeId with 400', function() {
         });
@@ -326,7 +326,7 @@ describe('API dynamicattributes', function() {
             return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
                 var id = userFromDB._id;
                 var newValues = {};
-                return th.removeWritePermission('0_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function(){
+                return th.removeWritePermission('0_0_0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES).then(function(){
                     return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){
                         return th.post(`/api/dynamicattributes/values/${modelName}/${id}?token=${token}`).send(newValues).expect(403);
                     });
@@ -415,7 +415,7 @@ describe('API dynamicattributes', function() {
             });
         }
 
-        th.apiTests.put.defaultNegative(co.apis.dynamicattributes, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, createPutTestDynamicAttribute);
+        th.apiTests.put.defaultNegative(co.apis.dynamicattributes, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createPutTestDynamicAttribute);
         th.apiTests.put.clientDependentNegative(co.apis.dynamicattributes, createPutTestDynamicAttribute);
 
         xit('responds with a new modelName with an updated record but with old modelName', function() {
@@ -437,7 +437,7 @@ describe('API dynamicattributes', function() {
             });
         }
 
-        th.apiTests.put.defaultNegative(optionApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, createPutTestDynamicAttributeOption);
+        th.apiTests.put.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createPutTestDynamicAttributeOption);
         th.apiTests.put.clientDependentNegative(optionApi, createPutTestDynamicAttributeOption);
 
         xit('responds with a new dynamicAttributeId with an updated record but with old dynamicAttributeId', function() {
@@ -462,7 +462,7 @@ describe('API dynamicattributes', function() {
             return db.get('users').findOne({name: '0_0_0'}).then(function(entity){
                 var updatedAttributevalue = {gender: 'male'}; 
                 var modelName = 'users';
-                return th.removeWritePermission('0_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function(){
+                return th.removeWritePermission('0_0_0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES).then(function(){
                     return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
                         return th.put(`/api/dynamicattributes/values/${modelName}/${entity._id}?token=${token}`).expect(403);
                     });
@@ -547,7 +547,7 @@ describe('API dynamicattributes', function() {
             });
         }
 
-        th.apiTests.delete.defaultNegative(co.apis.dynamicattributes, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttribute);
+        th.apiTests.delete.defaultNegative(co.apis.dynamicattributes, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttribute);
         th.apiTests.delete.clientDependentNegative(co.apis.dynamicattributes, createDeleteTestDynamicAttribute);
 
         xit('responds with a correct id with 204 and deletes the dynamic attribute, all of its dynamic attribute options and all of its dynamic attribute values from the database', function() {
@@ -565,7 +565,7 @@ describe('API dynamicattributes', function() {
             });
         }
 
-        th.apiTests.delete.defaultNegative(optionApi, co.permissions.ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttributeOption);
+        th.apiTests.delete.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttributeOption);
         th.apiTests.delete.clientDependentNegative(optionApi, createDeleteTestDynamicAttributeOption);
 
         xit('responds with a correct id with 204 and deletes the dynamic attribute option and all dynamic attribute values which use it from the database', function() {
@@ -583,7 +583,7 @@ describe('API dynamicattributes', function() {
 
         it('responds without write permission with 403', function() {
             return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
-                return th.removeWritePermission('0_0_0', 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function(){
+                return th.removeWritePermission('0_0_0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES).then(function(){
                     return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){
                         return th.del(`/api/dynamicattributes/values/users/${userFromDB._id}?token=${token}`).expect(403);
                     });

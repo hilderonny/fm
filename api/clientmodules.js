@@ -81,7 +81,7 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), funct
             return res.sendStatus(400);
         }
         // Prüfen, ob so eine Zuordnung schon besteht
-        req.db.get(co.collections.clientmodules).findOne({clientId:client._id, module:clientModule.module}).then(function(existingClientModule) {
+        req.db.get(co.collections.clientmodules.name).findOne({clientId:client._id, module:clientModule.module}).then(function(existingClientModule) {
             if (existingClientModule) {
                 return res.send(existingClientModule); // Zuordnung besteht bereits, einfach zurück schicken
             }

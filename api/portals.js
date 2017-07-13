@@ -61,7 +61,7 @@ router.get('/forIds', auth(false, false, 'licenseserver'), (req, res) => {
 /**
  * Get single portal with given id
  */
-router.get('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), validateId, validateSameClientId(co.collections.portals), (req, res) => {
+router.get('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), validateId, validateSameClientId(co.collections.portals.name), (req, res) => {
     req.db.get('portals').findOne(req.params.id, req.query.fields).then((portal) => {
         return res.send(portal);
     });
@@ -108,7 +108,7 @@ router.post('/', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), 
 /**
  * Update portal details
  */
-router.put('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, validateSameClientId(co.collections.portals), function(req, res) {
+router.put('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, validateSameClientId(co.collections.portals.name), function(req, res) {
     var portal = req.body;
     if (!portal || Object.keys(portal).length < 1) {
         return res.sendStatus(400);
@@ -127,17 +127,17 @@ router.put('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver')
 /**
  * Delete portal and all dependent objects (portalmodules)
  */
-router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, validateSameClientId(co.collections.portals), function(req, res) {
+router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, validateSameClientId(co.collections.portals.name), function(req, res) {
     var portalId = monk.id(req.params.id);
-    var dependentCollections = co.collections;
+    var dependentCollections = Object.keys(co.collections).map((key) => co.collections[key].name);
     // Remove all dependent objects (currently only portalmodules)
     async.eachSeries(dependentCollections, (dependentCollection, callback) => {
-        req.db.remove(dependentCollection.name, { portalId: portalId }).then((res) => {
+        req.db.remove(dependentCollection, { portalId: portalId }).then((res) => {
             callback();
         });
     }, (err) => {
         req.db.remove('portals', req.params.id).then((result) => {
-            rh.deleteAllRelationsForEntity(co.collections.portals, portalId).then(function() {
+            rh.deleteAllRelationsForEntity(co.collections.portals.name, portalId).then(function() {
                 res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
             });
         });

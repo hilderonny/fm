@@ -46,7 +46,7 @@ describe('API extractdocument', function() {
     var testDocumentName = 'extractTestDocument';
 
     function getTestDocument() {
-        return db.get(co.collections.documents).findOne({name:testDocumentName});
+        return db.get(co.collections.documents.name).findOne({name:testDocumentName});
     }
     
     function prepareZippedDocument() {
@@ -54,9 +54,9 @@ describe('API extractdocument', function() {
         // Dokument erstellen
         return th.defaults.getClient().then(function(c) {
             client = c;
-            return db.insert(co.collections.folders, {name: testFolderName, clientId: client._id});
+            return db.insert(co.collections.folders.name, {name: testFolderName, clientId: client._id});
         }).then(function(folder){
-            return db.insert(co.collections.documents, {name: testDocumentName, clientId: client._id, parentFolderId: folder._id, isExtractable:true});
+            return db.insert(co.collections.documents.name, {name: testDocumentName, clientId: client._id, parentFolderId: folder._id, isExtractable:true});
         }).then(function(doc) {
             document = doc;
             // Inhalte für ZIP-Datei vorbereiten
@@ -133,8 +133,8 @@ describe('API extractdocument', function() {
             });
         }
 
-        th.apiTests.getId.defaultNegative(co.apis.extractdocument, co.permissions.OFFICE_DOCUMENT, co.collections.documents);
-        th.apiTests.getId.clientDependentNegative(co.apis.documents, co.collections.documents);
+        th.apiTests.getId.defaultNegative(co.apis.extractdocument, co.permissions.OFFICE_DOCUMENT, co.collections.documents.name);
+        th.apiTests.getId.clientDependentNegative(co.apis.documents, co.collections.documents.name);
 
         it('responds with 400 when document is not an extractable file', function() {
             var token, document;
@@ -143,7 +143,7 @@ describe('API extractdocument', function() {
                 return getTestDocument();
             }).then(function(doc) {
                 document = doc;
-                return db.update(co.collections.documents, document._id, { $set: { isExtractable: false } });
+                return db.update(co.collections.documents.name, document._id, { $set: { isExtractable: false } });
             }).then(function() {
                 return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(400);
             });
@@ -171,7 +171,7 @@ describe('API extractdocument', function() {
                 return th.get(`/api/${co.apis.extractdocument}/${documentFromDatabase._id.toString()}?token=${token}`).expect(200);
             }).then(function(response) {
                 checkResult(response.body);
-                return db.get(co.collections.folders).find();
+                return db.get(co.collections.folders.name).find();
             }).then(function(folders) {
                 folders.forEach(function(folder) {
                     foldersDict[folder._id] = folder;
@@ -185,7 +185,7 @@ describe('API extractdocument', function() {
                         foldersDict.rootFolder.folders.push(folder);
                     }
                 });
-                return db.get(co.collections.documents).find({});
+                return db.get(co.collections.documents.name).find({});
             }).then(function(documents) {
                 documents.forEach(function(document) {
                     if (document.parentFolderId) {
@@ -213,10 +213,10 @@ describe('API extractdocument', function() {
                 fs.writeFileSync(filePath, zipFileBuffer);
                 return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(200);
             }).then(function() {
-                return db.get(co.collections.folders).find({parentFolderId:document.parentFolderId});
+                return db.get(co.collections.folders.name).find({parentFolderId:document.parentFolderId});
             }).then(function(folders) {
                 assert.strictEqual(folders.length, 0);
-                return db.get(co.collections.documents).find({parentFolderId:document.parentFolderId});
+                return db.get(co.collections.documents.name).find({parentFolderId:document.parentFolderId});
             }).then(function(documents) {
                 assert.strictEqual(documents.length, 1); // Nur das Testdokument selbst
                 assert.strictEqual(documents[0]._id.toString(), document._id.toString());
@@ -232,12 +232,12 @@ describe('API extractdocument', function() {
             }).then(function(doc) {
                 document = doc;
                 var folder = {name:'F1', parentFolderId:document.parentFolderId, clientId:document.clientId};
-                return db.insert(co.collections.folders, folder);
+                return db.insert(co.collections.folders.name, folder);
             }).then(function() {
                 return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(200);
             }).then(function(response) {
                 checkResult(response.body);
-                return db.get(co.collections.folders).find({parentFolderId:document.parentFolderId});
+                return db.get(co.collections.folders.name).find({parentFolderId:document.parentFolderId});
             }).then(function(folders) {
                 assert.strictEqual(folders.length, 3); // 1 Vorbereiteter und zwei aus ZIP-Datei
                 return Promise.resolve();
@@ -252,11 +252,11 @@ describe('API extractdocument', function() {
             }).then(function(doc) {
                 document = doc;
                 var duplicateDocument = {name:'Da', parentFolderId:document.parentFolderId, clientId:document.clientId};
-                return db.insert(co.collections.documents, duplicateDocument);
+                return db.insert(co.collections.documents.name, duplicateDocument);
             }).then(function() {
                 return th.get(`/api/${co.apis.extractdocument}/${document._id.toString()}?token=${token}`).expect(200);
             }).then(function() {
-                return db.get(co.collections.documents).find({parentFolderId:document.parentFolderId});
+                return db.get(co.collections.documents.name).find({parentFolderId:document.parentFolderId});
             }).then(function(documents) {
                 assert.strictEqual(documents.length, 4); // 1 Vorbereiteter, 1 Testdokument und zwei aus ZIP-Datei
                 return Promise.resolve();

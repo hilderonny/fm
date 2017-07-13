@@ -181,7 +181,7 @@ var removeFolder = (db, folder) => {
         var documentPromises = documents.map((document) => documentsApi.deleteDocument(db, document));
         return Promise.all(documentPromises);
     }));
-    promises.push(rh.deleteAllRelationsForEntity(co.collections.folders, folder._id));
+    promises.push(rh.deleteAllRelationsForEntity(co.collections.folders.name, folder._id));
     // Delete the folder itself
     promises.push(db.remove('folders', folder._id));
     return Promise.all(promises);

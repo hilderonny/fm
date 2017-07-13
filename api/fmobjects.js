@@ -103,12 +103,12 @@ router.post('/', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), function(req
     fmObject.clientId = req.user.clientId; // Assing the new FM object to the same client as the logged in user
     // Check the parentId for existence
     var insertFmObject = function() {
-        req.db.insert(co.collections.fmobjects, fmObject).then((insertedFmObject) => {
+        req.db.insert(co.collections.fmobjects.name, fmObject).then((insertedFmObject) => {
             return res.send(insertedFmObject);
         });
     };
     if (fmObject.parentId) {
-        req.db.get(co.collections.fmobjects).findOne(fmObject.parentId).then(function(parentFmObject) {
+        req.db.get(co.collections.fmobjects.name).findOne(fmObject.parentId).then(function(parentFmObject) {
             if (!parentFmObject) {
                 res.sendStatus(400);
             } else {
@@ -135,13 +135,13 @@ router.put('/:id', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), validateId
     }
     // Check the parentId for existence
     var updateFmObject = function() {
-        req.db.update(co.collections.fmobjects, req.params.id, { $set: fmObject }).then((updatedFmObject) => {
+        req.db.update(co.collections.fmobjects.name, req.params.id, { $set: fmObject }).then((updatedFmObject) => {
             return res.send(updatedFmObject);
         });
     };
     if (fmObject.parentId) {
         fmObject.parentId = monk.id(fmObject.parentId);
-        req.db.get(co.collections.fmobjects).findOne(fmObject.parentId).then(function(parentFmObject) {
+        req.db.get(co.collections.fmobjects.name).findOne(fmObject.parentId).then(function(parentFmObject) {
             if (!parentFmObject) {
                 res.sendStatus(400);
             } else {
@@ -157,19 +157,19 @@ router.put('/:id', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), validateId
 var removeFmObject = (db, fmObject) => {
     var promises = [];
     // Delete children recursively
-    promises.push(db.get(co.collections.fmobjects).find({ parentId: fmObject._id }, '_id').then((subElements) => {
+    promises.push(db.get(co.collections.fmobjects.name).find({ parentId: fmObject._id }, '_id').then((subElements) => {
         return Promise.all(subElements.map((subElement) => removeFmObject(db, subElement)));
     }));
     // Delete relations
-    promises.push(rh.deleteAllRelationsForEntity(co.collections.fmobjects, fmObject._id));
+    promises.push(rh.deleteAllRelationsForEntity(co.collections.fmobjects.name, fmObject._id));
     // Delete the FM object itself
-    promises.push(db.remove(co.collections.fmobjects, fmObject._id));
+    promises.push(db.remove(co.collections.fmobjects.name, fmObject._id));
     return Promise.all(promises);
 };
 
 // Delete an FM object
 router.delete('/:id', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), validateId, validateSameClientId('fmobjects'), function(req, res) {
-    req.db.get(co.collections.fmobjects).findOne(req.params.id).then((fmObject) => {
+    req.db.get(co.collections.fmobjects.name).findOne(req.params.id).then((fmObject) => {
         // Database element is available here in every case, because validateSameClientId already checked for existence
         return removeFmObject(req.db, fmObject);
     }).then(() => {

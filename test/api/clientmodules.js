@@ -120,7 +120,7 @@ describe('API clientmodules', function() {
             var moduleToTest = 'activities';
             var relevantClient, token;
             return th.removeClientModule(th.defaults.client, moduleToTest).then(function() {
-                return db.get(co.collections.clients).findOne({name:th.defaults.client});
+                return db.get(co.collections.clients.name).findOne({name:th.defaults.client});
             }).then(function(client) {
                 relevantClient = client;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -132,7 +132,7 @@ describe('API clientmodules', function() {
                 var availableModules = response.body;
                 assert.ok(availableModules.indexOf(moduleToTest) >= 0);
                 // Assign the activities module
-                return db.get(co.collections.clientmodules).insert({ clientId: relevantClient._id, module: moduleToTest });
+                return db.get(co.collections.clientmodules.name).insert({ clientId: relevantClient._id, module: moduleToTest });
             }).then(function() {
                 // Retreive the list of available modules, it must not contain the activities now
                 return th.get(`/api/${co.apis.clientmodules}/available?token=${token}&clientId=${relevantClient._id.toString()}`).expect(200);
@@ -417,7 +417,7 @@ describe('API clientmodules', function() {
             var moduleToTest = 'activities';
             var newClientModule = { module: moduleToTest };
             return th.removeClientModule(th.defaults.client, moduleToTest).then(function() {
-                return db.get(co.collections.clients).findOne({name:th.defaults.client});
+                return db.get(co.collections.clients.name).findOne({name:th.defaults.client});
             }).then(function(client) {
                 newClientModule.clientId = client._id.toString();
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -427,7 +427,7 @@ describe('API clientmodules', function() {
                 var clientModuleFromApi = response.body;
                 assert.ok(clientModuleFromApi._id, 'Inserted client module does not contain an _id field');
                 delete clientModuleFromApi._id;
-                th.compareApiAndDatabaseObjects(co.collections.clientmodules, Object.keys(newClientModule), clientModuleFromApi, newClientModule);
+                th.compareApiAndDatabaseObjects(co.collections.clientmodules.name, Object.keys(newClientModule), clientModuleFromApi, newClientModule);
                 return Promise.resolve();
             });
         });
@@ -435,9 +435,9 @@ describe('API clientmodules', function() {
         it('responds with the existing assignment when an assignment between a client and a module already exists', function() {
             var moduleToTest = 'activities';
             var relevantClient, existingClientModule;
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
                 relevantClient = client;
-                return db.get(co.collections.clientmodules).findOne({clientId:client._id, module:moduleToTest});
+                return db.get(co.collections.clientmodules.name).findOne({clientId:client._id, module:moduleToTest});
             }).then(function(clientModule) {
                 existingClientModule = clientModule;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);

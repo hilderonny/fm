@@ -78,7 +78,7 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
 
     // Check the permissions for the details page for handling button visibility
     //TODO ask if this permission check is not pointless in this case!?
-    $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function (response) {
+    $http.get('/api/permissions/canWrite/PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function (response) {
         $scope.canWriteAttributeDetails = response.data;
     });
 

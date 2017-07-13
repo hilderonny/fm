@@ -209,10 +209,6 @@ module.exports.permissions = {
     ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
     ADMINISTRATION_SETTINGS: 'PERMISSION_ADMINISTRATION_SETTINGS',
     /**
-     * Permission to view and edit dynamic attribute definitions and picklist options
-     */
-    ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
-    /**
      * Permission to show and edit users
      */
     ADMINISTRATION_USER: 'PERMISSION_ADMINISTRATION_USER',
@@ -234,6 +230,10 @@ module.exports.permissions = {
      * Permission to show and change the settings of the own client (Logo, name)
      */
     SETTINGS_CLIENT: 'PERMISSION_SETTINGS_CLIENT',
+    /**
+     * Permission to view and edit dynamic attribute definitions and picklist options
+     */
+    SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
     /**
      * Permission to show and change the settings of the portal (license key, etc.)
      */

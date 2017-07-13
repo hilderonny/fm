@@ -20,7 +20,7 @@ var co = require('../utils/constants');
 router.get('/:entityType/:id', auth(false, false, 'base'), validateId, function(req, res) {
     var entityType = req.params.entityType;
     var id = monk.id(req.params.id);
-    req.db.get(co.collections.relations).find({$or: [
+    req.db.get(co.collections.relations.name).find({$or: [
         { $and: [ { type1: entityType, id1: id, clientId: req.user.clientId } ] },
         { $and: [ { type2: entityType, id2: id, clientId: req.user.clientId } ] }
     ]}).then(function(relations) {

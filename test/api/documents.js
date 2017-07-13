@@ -45,7 +45,7 @@ describe('API documents', function(){
     describe('GET/forIds', function() {
 
         function createTestDocuments() {
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
                 var clientId = client._id;
                 var testObjects = ['testDocument1', 'testDocument2', 'testDocument3'].map(function(name) {
                     return {
@@ -59,9 +59,9 @@ describe('API documents', function(){
             });
         }
 
-        th.apiTests.getForIds.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, co.collections.documents, createTestDocuments);
-        th.apiTests.getForIds.clientDependentNegative(co.apis.documents, co.collections.documents, createTestDocuments);
-        th.apiTests.getForIds.defaultPositive(co.apis.documents, co.collections.documents, createTestDocuments);
+        th.apiTests.getForIds.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, co.collections.documents.name, createTestDocuments);
+        th.apiTests.getForIds.clientDependentNegative(co.apis.documents, co.collections.documents.name, createTestDocuments);
+        th.apiTests.getForIds.defaultPositive(co.apis.documents, co.collections.documents.name, createTestDocuments);
 
         function checkPath(document, folders) {
             assert.ok(document.path);
@@ -81,10 +81,10 @@ describe('API documents', function(){
         }
 
         it('returns the full path for each document', function() {
-            var documentsInDatabase = th.dbObjects[co.collections.documents];
+            var documentsInDatabase = th.dbObjects[co.collections.documents.name];
             var foldersInDatabase = {};
             var ids = documentsInDatabase.map(function(doc) { return doc._id.toString() });
-            return db.get(co.collections.folders).find().then(function(folders) {
+            return db.get(co.collections.folders.name).find().then(function(folders) {
                 folders.forEach(function(folder) {
                     foldersInDatabase[folder._id] = folder;
                 });
@@ -715,16 +715,16 @@ describe('API documents', function(){
     describe('DELETE/:id', function() {
 
         function getDeleteDocumentId() {
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
                 var document = {
                     name: 'newDocumentToDelete',
                     type: 'text/plain',
                     clientId: client._id,
                     parentFolderId: null
                 }
-                return db.get(co.collections.documents).insert(document);
+                return db.get(co.collections.documents.name).insert(document);
             }).then(function(insertedDocument) {
-                return th.createRelationsToUser(co.collections.documents, insertedDocument);
+                return th.createRelationsToUser(co.collections.documents.name, insertedDocument);
             }).then(function(insertedDocument) {
                 return Promise.resolve(insertedDocument._id);
             });
@@ -732,7 +732,7 @@ describe('API documents', function(){
 
         th.apiTests.delete.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, getDeleteDocumentId);
         th.apiTests.delete.clientDependentNegative(co.apis.documents, getDeleteDocumentId);
-        th.apiTests.delete.defaultPositive(co.apis.documents, co.collections.documents, getDeleteDocumentId);
+        th.apiTests.delete.defaultPositive(co.apis.documents, co.collections.documents.name, getDeleteDocumentId);
 
         // Positive tests
 

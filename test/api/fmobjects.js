@@ -110,7 +110,7 @@ describe('API fmobjects', function() {
     describe('GET/forIds', function() {
 
         function createTestFmObjects() {
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
                 var clientId = client._id;
                 var testObjects = ['testFmObject1', 'testFmObject2', 'testFmObject3'].map(function(name) {
                     return {
@@ -124,16 +124,16 @@ describe('API fmobjects', function() {
             });
         }
 
-        th.apiTests.getForIds.defaultNegative(co.apis.fmobjects, co.permissions.BIM_FMOBJECT, co.collections.fmobjects, createTestFmObjects);
-        th.apiTests.getForIds.clientDependentNegative(co.apis.fmobjects, co.collections.fmobjects, createTestFmObjects);
-        th.apiTests.getForIds.defaultPositive(co.apis.fmobjects, co.collections.fmobjects, createTestFmObjects);
+        th.apiTests.getForIds.defaultNegative(co.apis.fmobjects, co.permissions.BIM_FMOBJECT, co.collections.fmobjects.name, createTestFmObjects);
+        th.apiTests.getForIds.clientDependentNegative(co.apis.fmobjects, co.collections.fmobjects.name, createTestFmObjects);
+        th.apiTests.getForIds.defaultPositive(co.apis.fmobjects, co.collections.fmobjects.name, createTestFmObjects);
 
         it('returns the path to the root for every obtained FM object', function() {
             var ids;
-            return db.get(co.collections.fmobjects).findOne({name:'1_0_1'}).then(function(fmObject) {
-                return db.get(co.collections.fmobjects).insert({ name: 'L2FMO', type: 'Raum', parentId: fmObject._id, clientId: fmObject.clientId });
+            return db.get(co.collections.fmobjects.name).findOne({name:'1_0_1'}).then(function(fmObject) {
+                return db.get(co.collections.fmobjects.name).insert({ name: 'L2FMO', type: 'Raum', parentId: fmObject._id, clientId: fmObject.clientId });
             }).then(function() {
-                return db.get(co.collections.fmobjects).find({$or:[ {name:'1_0'}, {name:'1_1_0'}, {name:'L2FMO'} ]});
+                return db.get(co.collections.fmobjects.name).find({$or:[ {name:'1_0'}, {name:'1_1_0'}, {name:'L2FMO'} ]});
             }).then(function(fmObjects) {
                 ids = fmObjects.map(function(fmobject) { return fmobject._id.toString() });
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -260,7 +260,7 @@ describe('API fmobjects', function() {
         }
 
         th.apiTests.post.defaultNegative(co.apis.fmobjects, co.permissions.BIM_FMOBJECT, createPostTestFmObject);
-        th.apiTests.post.defaultPositive(co.apis.fmobjects, co.collections.fmobjects, createPostTestFmObject);
+        th.apiTests.post.defaultPositive(co.apis.fmobjects, co.collections.fmobjects.name, createPostTestFmObject);
 
         it('responds with 400 when there is no FM object with the given parentId (when parentId is set)', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
@@ -271,8 +271,8 @@ describe('API fmobjects', function() {
 
         it('responds with correctly created FM object with given parent', function() {
             var parentFmObject, newFMobject = {name: 'O1' };
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
-                return db.get(co.collections.fmobjects).findOne({clientId:client._id});
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
+                return db.get(co.collections.fmobjects.name).findOne({clientId:client._id});
             }).then(function(fmObject) {
                 parentFmObject = fmObject;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -280,7 +280,7 @@ describe('API fmobjects', function() {
                 newFMobject.parentId = parentFmObject._id.toString();
                 return th.post(`/api/${co.apis.fmobjects}?token=${token}`).send(newFMobject).expect(200);
             }).then(function(response) {
-                return db.get(co.collections.fmobjects).findOne(response.body._id);
+                return db.get(co.collections.fmobjects.name).findOne(response.body._id);
             }).then(function(createdFmObject) {
                 assert.ok(createdFmObject);
                 assert.strictEqual(createdFmObject.name, newFMobject.name);
@@ -294,8 +294,8 @@ describe('API fmobjects', function() {
     describe('PUT/:id', function() {
 
         function createPutTestFmObject() {
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
-                return db.get(co.collections.fmobjects).insert({name:'newFmObject', clientId:client._id});
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
+                return db.get(co.collections.fmobjects.name).insert({name:'newFmObject', clientId:client._id});
             }).then(function(fmObject) {
                 return Promise.resolve(fmObject);
             });
@@ -306,7 +306,7 @@ describe('API fmobjects', function() {
 
         it('responds with 400 when there is no FM object with the given new parentId (when parentId is changed)', function() {
             var fmObjectFromDB;
-            return db.get(co.collections.fmobjects).findOne({name: '1_0'}).then(function(fmObject){
+            return db.get(co.collections.fmobjects.name).findOne({name: '1_0'}).then(function(fmObject){
                 fmObjectFromDB = fmObject;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token){
@@ -317,8 +317,8 @@ describe('API fmobjects', function() {
 
         it('responds with correctly updated FM object', function() {
             var fmObjectFromDatabase, newParentFmObject, updatedFmObject;
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
-                return db.get(co.collections.fmobjects).findOne({clientId:client._id});
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
+                return db.get(co.collections.fmobjects.name).findOne({clientId:client._id});
             }).then(function(fmObject) {
                 newParentFmObject = fmObject;
                 return createPutTestFmObject();
@@ -341,15 +341,15 @@ describe('API fmobjects', function() {
     describe('DELETE/:id', function() {
 
         function getDeleteFmObjectId() {
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
                 var fmObject = {
                     name: 'newFmObjectToDelete',
                     clientId: client._id,
                     parentId: null
                 }
-                return db.get(co.collections.fmobjects).insert(fmObject);
+                return db.get(co.collections.fmobjects.name).insert(fmObject);
             }).then(function(insertedFmObject) {
-                return th.createRelationsToUser(co.collections.fmobjects, insertedFmObject);
+                return th.createRelationsToUser(co.collections.fmobjects.name, insertedFmObject);
             }).then(function(insertedFmObject) {
                 return Promise.resolve(insertedFmObject._id);
             });
@@ -357,7 +357,7 @@ describe('API fmobjects', function() {
 
         th.apiTests.delete.defaultNegative(co.apis.fmobjects, co.permissions.BIM_FMOBJECT, getDeleteFmObjectId);
         th.apiTests.delete.clientDependentNegative(co.apis.fmobjects, getDeleteFmObjectId);
-        th.apiTests.delete.defaultPositive(co.apis.fmobjects, co.collections.fmobjects, getDeleteFmObjectId);
+        th.apiTests.delete.defaultPositive(co.apis.fmobjects, co.collections.fmobjects.name, getDeleteFmObjectId);
 
         // Positive tests
 

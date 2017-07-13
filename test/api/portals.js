@@ -58,15 +58,15 @@ describe('API portals', function(){
             return Promise.resolve(testObjects);
         }
 
-        th.apiTests.getForIds.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals, createTestPortals);
-        th.apiTests.getForIds.defaultPositive(co.apis.portals, co.collections.portals, createTestPortals);
+        th.apiTests.getForIds.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals.name, createTestPortals);
+        th.apiTests.getForIds.defaultPositive(co.apis.portals, co.collections.portals.name, createTestPortals);
 
     });
 
     describe('GET/:id', function() {
 
-        th.apiTests.getId.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals);
-        th.apiTests.getId.clientDependentNegative(co.apis.portals, co.collections.portals);
+        th.apiTests.getId.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, co.collections.portals.name);
+        th.apiTests.getId.clientDependentNegative(co.apis.portals, co.collections.portals.name);
 
         it('responds with retrieved portal', function() {
             var portalFromDatabase;
@@ -94,14 +94,14 @@ describe('API portals', function(){
         }
 
         th.apiTests.post.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, createPostTestPortal);
-        th.apiTests.post.defaultPositive(co.apis.portals, co.collections.portals, createPostTestPortal);
+        th.apiTests.post.defaultPositive(co.apis.portals, co.collections.portals.name, createPostTestPortal);
 
     });
 
     describe('POST/newkey', function() {
 
         function createTestObject() {
-            return db.get(co.collections.portals).insert({name:'testPortal'});
+            return db.get(co.collections.portals.name).insert({name:'testPortal'});
         }
 
         var testPortal = { name: 'testPortal' };
@@ -168,8 +168,8 @@ describe('API portals', function(){
     describe('PUT/:id', function() {
 
         function createPutTestPortal() {
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
-                return db.get(co.collections.portals).insert({name:'newPortal', clientId:client._id});
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
+                return db.get(co.collections.portals.name).insert({name:'newPortal', clientId:client._id});
             }).then(function(portal) {
                 return Promise.resolve(portal);
             });
@@ -217,10 +217,10 @@ describe('API portals', function(){
     describe('DELETE/:id', function() {
 
         function getDeletePortalId() {
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
-                return db.get(co.collections.portals).insert({name:'newPortal', clientId:client._id});
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
+                return db.get(co.collections.portals.name).insert({name:'newPortal', clientId:client._id});
             }).then(function(portal) {
-                return th.createRelationsToUser(co.collections.portals, portal);
+                return th.createRelationsToUser(co.collections.portals.name, portal);
             }).then(function(portal) {
                 return Promise.resolve(portal._id);
             });
@@ -228,7 +228,7 @@ describe('API portals', function(){
 
         th.apiTests.delete.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, getDeletePortalId);
         th.apiTests.delete.clientDependentNegative(co.apis.portals, getDeletePortalId);
-        th.apiTests.delete.defaultPositive(co.apis.portals, co.collections.portals, getDeletePortalId);
+        th.apiTests.delete.defaultPositive(co.apis.portals, co.collections.portals.name, getDeletePortalId);
 
         it('responds with a correct id with 204 and deletes all dependent objects (currently only portalmodules)', function(){
             var portalId;
@@ -238,10 +238,10 @@ describe('API portals', function(){
             }).then(function(token) {
                 return th.del(`/api/portals/${portalId.toString()}?token=${token}`).expect(204);
             }).then(function(response) {
-                return db.get(co.collections.portals).findOne({_id: portalId});
+                return db.get(co.collections.portals.name).findOne({_id: portalId});
             }).then(function(stillExistingPortal) {
                 assert.ok(!stillExistingPortal);
-                return db.get(co.collections.portalmodules).findOne({portalId: portalId});
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalId});
             }).then(function(stillExistingPortalModule) {
                 assert.ok(!stillExistingPortalModule);
                 return Promise.resolve();

@@ -102,7 +102,7 @@ describe('API users', function() {
         th.apiTests.getForIds.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users.name, createTestUsers);
         th.apiTests.getForIds.clientDependentNegative(co.apis.users, co.collections.users.name, createTestUsers);
 
-        it('returns a list of users with all details except passowrd for the given IDs', function() {
+        it('returns a list of users with all details except password for the given IDs', function() {
             var testUserIds, insertedUsers;
             return createTestUsers().then(function(objects) {
                 return th.bulkInsert(co.collections.users.name, objects);
@@ -420,7 +420,7 @@ describe('API users', function() {
                 userGroupId: '999999999999999999999999'
             };
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -487,6 +487,8 @@ describe('API users', function() {
                 delete user._id;
                 user.name = 'newUserToDelete';
                 return db.get(co.collections.users.name).insert(user);
+            }).then(function(insertedUser) {
+                return th.createRelationsToUser(co.collections.users.name, insertedUser);
             }).then(function(insertedUser) {
                 return Promise.resolve(insertedUser._id);
             });

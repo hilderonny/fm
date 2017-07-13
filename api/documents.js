@@ -209,7 +209,7 @@ router.deleteDocument = (db, document) => {
         var filePath = documentsHelper.getDocumentPath(document._id);
         fs.unlink(filePath, (err) => {
             // Remove relations from database
-            rh.deleteAllRelationsForEntity(co.collections.documents, document._id).then(() => {
+            rh.deleteAllRelationsForEntity(co.collections.documents.name, document._id).then(() => {
                 // Remove document from database
                 db.remove('documents', document._id).then(resolve);
             });

@@ -128,7 +128,7 @@ describe('API usergroups', function(){
     describe('GET/forIds', function() {
 
         function createTestUserGroups() {
-            return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
                 var clientId = client._id;
                 var testObjects = ['testUserGroup1', 'testUserGroup2', 'testUserGroup3'].map(function(name) {
                     return {
@@ -140,9 +140,9 @@ describe('API usergroups', function(){
             });
         }
 
-        th.apiTests.getForIds.defaultNegative(co.apis.usergroups, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups, createTestUserGroups);
-        th.apiTests.getForIds.clientDependentNegative(co.apis.usergroups, co.collections.usergroups, createTestUserGroups);
-        th.apiTests.getForIds.defaultPositive(co.apis.usergroups, co.collections.usergroups, createTestUserGroups);
+        th.apiTests.getForIds.defaultNegative(co.apis.usergroups, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups.name, createTestUserGroups);
+        th.apiTests.getForIds.clientDependentNegative(co.apis.usergroups, co.collections.usergroups.name, createTestUserGroups);
+        th.apiTests.getForIds.defaultPositive(co.apis.usergroups, co.collections.usergroups.name, createTestUserGroups);
 
     });
 
@@ -533,12 +533,12 @@ describe('API usergroups', function(){
     describe('DELETE/:id', function() {
 
         function getDeleteUserGroupId() {
-            return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}).then(function(usergroup) {
+            return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}).then(function(usergroup) {
                 delete usergroup._id;
                 usergroup.name = 'newUserGroupToDelete';
-                return db.get(co.collections.usergroups).insert(usergroup);
+                return db.get(co.collections.usergroups.name).insert(usergroup);
             }).then(function(insertedUserGroup) {
-                return th.createRelationsToUser(co.collections.usergroups, insertedUserGroup);
+                return th.createRelationsToUser(co.collections.usergroups.name, insertedUserGroup);
             }).then(function(insertedUserGroup) {
                 return Promise.resolve(insertedUserGroup._id);
             });
@@ -546,11 +546,11 @@ describe('API usergroups', function(){
 
         th.apiTests.delete.defaultNegative(co.apis.usergroups, co.permissions.ADMINISTRATION_USERGROUP, getDeleteUserGroupId);
         th.apiTests.delete.clientDependentNegative(co.apis.usergroups, getDeleteUserGroupId);
-        th.apiTests.delete.defaultPositive(co.apis.usergroups, co.collections.usergroups, getDeleteUserGroupId);
+        th.apiTests.delete.defaultPositive(co.apis.usergroups, co.collections.usergroups.name, getDeleteUserGroupId);
 
         it('returns with 403 when the usergroup contains users', function() {
             var userGroupId;
-            return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}).then(function(usergroup) {
+            return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}).then(function(usergroup) {
                 userGroupId = usergroup._id;
                 var user = {
                     name: 'testUser',
@@ -558,7 +558,7 @@ describe('API usergroups', function(){
                     userGroupId : userGroupId,
                     clientId: usergroup.clientId
                 }
-                return db.get(co.collections.users).insert(user);
+                return db.get(co.collections.users.name).insert(user);
             }).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
