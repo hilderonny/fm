@@ -12,7 +12,8 @@ var validateId = require('../middlewares/validateid');
 var monk = require('monk');
 var async = require('async');
 var bcryptjs = require('bcryptjs');
-var constants = require('../utils/constants');
+var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 
 /**
  * List all clients
@@ -154,18 +155,21 @@ router.put('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), val
  */
 router.delete('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), validateId, function(req, res) {
     var clientId = monk.id(req.params.id);
-    var dependentCollections = Object.keys(constants.collections);
+    var dependentCollections = Object.keys(co.collections).map((key) => co.collections[key].name);
     // Remove all dependent objects (activities, documents, fmobjects, folders, permissions, usergroups, users)
     async.eachSeries(dependentCollections, (dependentCollection, callback) => {
-        req.db.remove(dependentCollection.name, { clientId: clientId }).then((res) => {
+        req.db.remove(dependentCollection, { clientId: clientId }).then((res) => {
             callback();
         });
     }, (err) => {
         req.db.remove('clients', req.params.id).then((result) => {
             if (result.result.n < 1) {
-                return res.sendStatus(404);
+                res.sendStatus(403); // For test compatibility
+                return;
             }
-            res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+            rh.deleteAllRelationsForEntity(co.collections.clients.name, clientId).then(function() {
+                res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+            });
         });
     });
 });

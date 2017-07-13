@@ -11,6 +11,7 @@ var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
+var co = require('../utils/constants');
 
 /**
  * Sucht alle Verknüpfungen zu einer Entität einer bestimmten ID und liefert diese als Liste
@@ -19,9 +20,9 @@ var monk = require('monk');
 router.get('/:entityType/:id', auth(false, false, 'base'), validateId, function(req, res) {
     var entityType = req.params.entityType;
     var id = monk.id(req.params.id);
-    req.db.get('relations').find({$or: [
-        { $and: [ { type1: entityType, id1: id } ] },
-        { $and: [ { type2: entityType, id2: id } ] }
+    req.db.get(co.collections.relations.name).find({$or: [
+        { $and: [ { type1: entityType, id1: id, clientId: req.user.clientId } ] },
+        { $and: [ { type2: entityType, id2: id, clientId: req.user.clientId } ] }
     ]}).then(function(relations) {
         res.send(relations);
     });
@@ -42,27 +43,25 @@ router.post('/', auth(false, false, 'base'), (req, res) => {
     }
     relation.id1 = monk.id(relation.id1);
     relation.id2 = monk.id(relation.id2);
-    var clientId = req.user.clientId ? req.user.clientId.toString() : null;
+    var clientId = req.user.clientId;
     // Prüfen, ob die Quell- und Zielobjekte existieren
     req.db.get(relation.type1).findOne(relation.id1).then((object1) => {
         if (!object1) { // Quell-Objekt existiert nicht
             return res.sendStatus(404);
         }
         //        
-        var object1ClientId = object1.clientId ? object1.clientId.toString() : null;
-        if (object1ClientId !== clientId) { // Quell-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
+        if (`${object1.clientId}` !== `${clientId}`) { // Quell-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
             return res.sendStatus(403);
         }
         req.db.get(relation.type2).findOne(relation.id2).then((object2) => {
             if (!object2) { // Ziel-Objekt existiert nicht
                 return res.sendStatus(404);
             }
-            var object2ClientId = object2.clientId ? object2.clientId.toString() : null;
-            if (object2ClientId !== clientId) {
+            if (`${object2.clientId}` !== `${clientId}`) {
                 return res.sendStatus(403); // Ziel-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
             }
             // Der Verknüpfung wird die ID des Mandanten des Benutzers angehängt, um beim Löschen die Zugehörigkeit zu prüfen
-            relation.clientId = req.user.clientId;
+            relation.clientId = clientId;
             // Verknüpfung anlegen. Vorher gucken, ob es die nicht schon gibt
             req.db.get('relations').find({$or: [
                 { $and: [ { type1: relation.type1, id1: relation.id1, type2: relation.type2, id2: relation.id2 } ] },

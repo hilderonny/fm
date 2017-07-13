@@ -5,6 +5,7 @@ var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
 var moduleConfig = require('../config/module-config.json');
+var co = require('../utils/constants');
 
 var rootPath = path.dirname(__dirname);
 
@@ -127,7 +128,6 @@ describe('module-config.json', function() {
             'debug.log',
             'documents/',
             'drafts/',
-            'fileuploader.js',
             'node_modules/',
             'priv.key',
             'pub.cert',
@@ -138,7 +138,8 @@ describe('module-config.json', function() {
             'temp/',
             'test/',
             'test.bat',
-            'uploads/'
+            'uploads/',
+            'utils/webHelper.js'
         ];
         handleDirectoriesRecursively('', errors, referencedFiles, pathsToIgnore);
         if (errors.length > 0) {
@@ -146,6 +147,77 @@ describe('module-config.json', function() {
         } else {
             done();
         }
+    });
+
+    it('APIs match with those in constants', function() {
+        var apisFromConfig = [], errors = [];
+        Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].api).forEach((modApis) => {
+            if (modApis) modApis.forEach(function(api) {
+                if (apisFromConfig.indexOf(api) < 0) apisFromConfig.push(api);
+            });
+        });
+        // Alle in der config definierten APIs müssen als Konstanten vorhanden sein
+        apisFromConfig.forEach(function(api) {
+            if (!co.apis[api]) errors.push(`API ${api} is not defined in constants`);
+        });
+        // Alle als Konstanten definierten APIs müssen irgendwo in config enthalten sein
+        Object.keys(co.apis).forEach(function(key) {
+            var api = co.apis[key];
+            if (apisFromConfig.indexOf(api) < 0) errors.push(`API ${api} is not defined in module-config`);
+        });
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n'));
+        }
+        return Promise.resolve();
+    });
+
+    it('modules match with those in constants', function() {
+        var errors = [];
+        var modulesFromConfig = Object.keys(moduleConfig.modules);
+        // Alle in der config definierten Module müssen als Konstanten vorhanden sein
+        modulesFromConfig.forEach(function(mod) {
+            if (!co.modules[mod]) errors.push(`Module ${mod} is not defined in constants`);
+        });
+        // Alle als Konstanten definierten Module müssen irgendwo in config enthalten sein
+        Object.keys(co.modules).forEach(function(key) {
+            var mod = co.modules[key];
+            if (modulesFromConfig.indexOf(mod) < 0) errors.push(`Module ${mod} is not defined in module-config`);
+        });
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n'));
+        }
+        return Promise.resolve();
+    });
+
+    /* TODO: Wieder rein nehmen, wenn die Mandantenlogos und damit auch die PERMISSION_SETTINGS_CLIENT Berechtigung kommen */
+    it.skip('permissions match with those in constants', function() {
+        var permissionsFromConfig = [], errors = [];
+        Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].menu).forEach((modMenus) => {
+            if (modMenus) modMenus.forEach(function(menu) {
+                menu.items.forEach(function(item) {
+                    if (item.permission && permissionsFromConfig.indexOf(item.permission) < 0) permissionsFromConfig.push(item.permission);
+                });
+            });
+        });
+        Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].settingsets).forEach((modSettingSets) => {
+            if (modSettingSets) modSettingSets.forEach(function(modSettingSets) {
+                if (modSettingSets.permission && permissionsFromConfig.indexOf(modSettingSets.permission) < 0) permissionsFromConfig.push(modSettingSets.permission);
+            });
+        });
+        // Alle in der config definierten Zugriffsrechte müssen als Konstanten vorhanden sein
+        permissionsFromConfig.forEach(function(permission) {
+            var permissionName = permission.substring(11);
+            if (!co.permissions[permissionName]) errors.push(`Permission ${permission} is not defined in constants`);
+        });
+        // Alle als Konstanten definierten Zugriffsrechte müssen irgendwo in config enthalten sein
+        Object.keys(co.permissions).forEach(function(key) {
+            var permission = co.permissions[key];
+            if (permissionsFromConfig.indexOf(permission) < 0) errors.push(`Permission ${permission} is not defined in module-config`);
+        });
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n'));
+        }
+        return Promise.resolve();
     });
 
 });

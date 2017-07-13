@@ -30,8 +30,6 @@
                 "css/icons/office/User Group Man Man.svg",
                 "css/icons/office/Search.svg",
                 "css/icons/office/Settings.svg",
-                "partial/Administration/AttributeDetailsTab.html",
-                "partial/Administration/AttributeElementsTab.html",
                 "partial/Administration/DynamicAttributeCreationFormCard.html",
                 "partial/Administration/DynamicAttributesCard.html",
                 "partial/Administration/DynamicAttributeElementCard.html",
@@ -95,10 +93,10 @@
                     ]
                 }
             ],
-            "utils": [ "apiHelper", "configHelper", "constants" ],
+            "utils": [ "apiHelper", "configHelper", "constants", "relationsHelper" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
-                { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Settings", "permission": "PERMISSION_ADMINISTRATION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
+                { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Settings", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
             ]
         },
 

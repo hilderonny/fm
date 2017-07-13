@@ -16,7 +16,8 @@ var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var documentsApi = require('./documents');
-
+var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 
 /**
  * Retrieve all folders and documents of the root folder of the client of
@@ -180,18 +181,19 @@ var removeFolder = (db, folder) => {
         var documentPromises = documents.map((document) => documentsApi.deleteDocument(db, document));
         return Promise.all(documentPromises);
     }));
+    promises.push(rh.deleteAllRelationsForEntity(co.collections.folders.name, folder._id));
     // Delete the folder itself
     promises.push(db.remove('folders', folder._id));
     return Promise.all(promises);
-}
+};
 
 // Delete a folder
 router.delete('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), validateId, validateSameClientId('folders'), function(req, res) {
     req.db.get('folders').findOne(req.params.id).then((folder) => {
         // Database element is available here in every case, because validateSameClientId already checked for existence
-        removeFolder(req.db, folder).then(() => {
-            res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
-        });
+        return removeFolder(req.db, folder);
+    }).then(() => {
+        res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
     });
 });
 

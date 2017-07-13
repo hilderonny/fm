@@ -4,87 +4,86 @@
 
 var assert = require('assert');
 var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testhelpers');
 var db = require('../../middlewares/db');
+var co = require('../../utils/constants');
 var fs = require('fs');
 
 describe('API portalmodules', function(){
 
-    var server = require('../../app');
-
     // Clear and prepare database with clients, user groups, users... 
      beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareActivities)
-            .then(testHelpers.prepareFmObjects)
-            .then(testHelpers.prepareFolders)
-            .then(testHelpers.prepareDocuments)
-            .then(testHelpers.preparePortals)
-            .then(testHelpers.preparePortalModules);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions)
+            .then(th.prepareActivities)
+            .then(th.prepareFmObjects)
+            .then(th.prepareFolders)
+            .then(th.prepareDocuments)
+            .then(th.preparePortals)
+            .then(th.preparePortalModules);
     });
 
     describe('GET/', function() {
 
         it('responds with incorrect query parameter portalId with 400', function(){
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                return superTest(server).get(`/api/portalmodules?portalId=IvalidId&token=${token}`).expect(400);
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                return th.get(`/api/portalmodules?portalId=IvalidId&token=${token}`).expect(400);
             });
         });
 
         it('responds with non-existing query parameter portalId with 400', function(){
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                return superTest(server).get(`/api/portalmodules?portalId=999999999999999999999999&token=${token}`).expect(400);
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                return th.get(`/api/portalmodules?portalId=999999999999999999999999&token=${token}`).expect(400);
             });
         });
 
         it('responds without query parameter portalId with 400', function(){
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                return superTest(server).get(`/api/portalmodules?token=${token}`).expect(400);
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                return th.get(`/api/portalmodules?token=${token}`).expect(400);
             });
         });
 
         it('responds without authentication with 403', function() {
-                return superTest(server).get('/api/portalmodules').expect(403);
+                return th.get('/api/portalmodules').expect(403);
         });
 
         it('responds without read rights with 403', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
                 // Remove the corresponding permission
-                return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        return superTest(server).get(`/api/portalmodules?portalId=${portalFromDB._id}&token=${token}`).expect(403);
+                return th.removeReadPermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                        return th.get(`/api/portalmodules?portalId=${portalFromDB._id}&token=${token}`).expect(403);
                     });
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                return testHelpers.doLoginAndGetToken('1_0_1', 'test').then(function(token){
-                    return superTest(server).get(`/api/portalmodules?token=${token}`).expect(403);
+            return th.removeClientModule('1', 'licenseserver').then(function(){
+                return th.doLoginAndGetToken('1_0_1', 'test').then(function(token){
+                    return th.get(`/api/portalmodules?token=${token}`).expect(403);
                 });
             });
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                    return superTest(server).get(`/api/portalmodules?token=${token}`).expect(403);
+            return th.removeClientModule('1', 'licenseserver').then(function(){
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+                    return th.get(`/api/portalmodules?token=${token}`).expect(403);
                 });
             });
         });
 
         it('responds with correct portalId with list of all portal module assignments for the portal with all details', function(done) {
-            db.get('portals').findOne({name: 'p1'}).then((portalFromDatabase) => {
+            db.get(co.collections.portals.name).findOne({name: 'p1'}).then((portalFromDatabase) => {
                 var portalId = portalFromDatabase._id;
-                db.get('portalmodules').find({portalId: portalId}).then((portalModulesFromDatabase) => {
-                    testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                        superTest(server).get(`/api/portalmodules?token=${token}&portalId=${portalId}`).expect(200).end(function(err, res) {
+                db.get(co.collections.portalmodules.name).find({portalId: portalId}).then((portalModulesFromDatabase) => {
+                    th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+                        th.get(`/api/portalmodules?token=${token}&portalId=${portalId}`).expect(200).end(function(err, res) {
                             if (err) {
                                 done(err);
                                 return;
@@ -100,7 +99,7 @@ describe('API portalmodules', function(){
                                         continue;
                                     }
                                     portalModuleFound = true;
-                                    testHelpers.compareApiAndDatabaseObjects('portal module', keys, portalModuleFromApi, portalModuleFromDatabase);
+                                    th.compareApiAndDatabaseObjects(co.collections.portalmodules.name, keys, portalModuleFromApi, portalModuleFromDatabase);
                                 }
                                 assert.ok(portalModuleFound, `Portal module "${portalModuleFromDatabase.name}" was not returned by API`);
                             });
@@ -116,68 +115,68 @@ describe('API portalmodules', function(){
     describe('GET/available', function() {
 
         it('responds with incorrect query parameter portalId with 400', function(){
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                return superTest(server).get(`/api/portalmodules/available?portalId=IvalidId&token=${token}`).expect(400);
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                return th.get(`/api/portalmodules/available?portalId=IvalidId&token=${token}`).expect(400);
             });
         });
 
         it('responds with non-existing query parameter portalId with 400', function(){
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                return superTest(server).get(`/api/portalmodules/available?portalId=999999999999999999999999&token=${token}`).expect(400);
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                return th.get(`/api/portalmodules/available?portalId=999999999999999999999999&token=${token}`).expect(400);
             });
         });
 
         it('responds without query parameter portalId with 400', function(){
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                return superTest(server).get(`/api/portalmodules/available?token=${token}`).expect(400);
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                return th.get(`/api/portalmodules/available?token=${token}`).expect(400);
             });
         });
 
         it('responds without authentication with 403', function(){
-            return db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
-                return superTest(server).get(`/api/portalmodules/available?portalId=${portalFromDB._id}`).expect(403);
+            return db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
+                return th.get(`/api/portalmodules/available?portalId=${portalFromDB._id}`).expect(403);
             });
         });
 
         it('responds without read rights with 403', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
                 // Remove the corresponding permission
-                return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        return superTest(server).get(`/api/portalmodules/available?portalId=${portalFromDB._id}&token=${token}`).expect(403);
+                return th.removeReadPermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                        return th.get(`/api/portalmodules/available?portalId=${portalFromDB._id}&token=${token}`).expect(403);
                     });
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
                         var id = portalFromDB._id;
-                        return superTest(server).get(`/api/portalmodules/available?portalId=${id}&token=${token}`).expect(403);
+                        return th.get(`/api/portalmodules/available?portalId=${id}&token=${token}`).expect(403);
                     });
                 });
             });
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var id = portalFromDB._id;
-                        return superTest(server).get(`/api/portalmodules/available?portalId=${id}&token=${token}`).expect(403);
+                        return th.get(`/api/portalmodules/available?portalId=${id}&token=${token}`).expect(403);
                     });
                 });
             })
         });
 
         it('responds with correct portalId with list of all modules still unassigned to particular portal', function(done) {
-            db.get('portals').findOne({name: 'p1'}).then((portalFromDatabase) => {
+            db.get(co.collections.portals.name).findOne({name: 'p1'}).then((portalFromDatabase) => {
                 var portalId = portalFromDatabase._id;
-                db.get('portalmodules').find({portalId: portalId}).then((portalModulesFromDatabase) => {
-                    testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                        superTest(server).get(`/api/portalmodules/available?token=${token}&portalId=${portalId}`).expect(200).end(function(err, res) {
+                db.get(co.collections.portalmodules.name).find({portalId: portalId}).then((portalModulesFromDatabase) => {
+                    th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+                        th.get(`/api/portalmodules/available?token=${token}&portalId=${portalId}`).expect(200).end(function(err, res) {
                             if (err) {
                                 done(err);
                                 return;
@@ -210,29 +209,24 @@ describe('API portalmodules', function(){
             });
         });
 
-        it('responds with list of available modules after assigning one. The list must not contain the assigned module', function(done) {
-            // Check the list of available modules, it must contain the activities module
-            // Assign the activities module (have a look into testhelpers for which module you can use. activities is a good start)
-            // Retreive the list of available modules, it must not contain the activities now
-            db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                var portalId = portalFromDB._id;
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                    superTest(server).get(`/api/portalmodules/available?token=${token}&portalId=${portalId}`).expect(200).then(function(availableBeforeAssignment){
-                        var assignmentModule = {portalId: portalId, module: 'activities'};
-                        superTest(server).post(`/api/portalmodules?token=${token}`).send(assignmentModule).expect(200).then(function(){
-                            superTest(server).get(`/api/portalmodules/available?token=${token}&portalId=${portalId}`).expect(200).end(function(err, res){
-                                var initialModuleList = availableBeforeAssignment.body;
-                                var modifiedModuleList = res.body;
-                                if(err){
-                                    done(err);
-                                    return;
-                                };
-                                assert.strictEqual(initialModuleList.length -1, modifiedModuleList.length, 'Incorrect nubmer of abailable modules');
-                                done();
-                            });
-                        });
-                    });
-                });
+        it('responds with list of available modules after assigning one. The list must not contain the assigned module', function() {
+            var portal, token, moduleToTest = 'activities';
+            return th.defaults.getPortal().then(function(p) {
+                portal = p;
+                // Eventuell vorhandene Zuordnung löschen
+                return db.get(co.collections.portalmodules.name).remove({portalId:p._id,module:co.modules.activities});
+            }).then(function() {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(tok) {
+                token = tok;
+                return th.get(`/api/${co.apis.portalmodules}/available?token=${token}&portalId=${portal._id.toString()}`).expect(200);
+            }).then(function(response) {
+                assert.ok(response.body.indexOf(moduleToTest) >= 0);
+                return db.get(co.collections.portalmodules.name).insert({portalId:portal._id,module:co.modules.activities});
+            }).then(function() {
+                return th.get(`/api/${co.apis.portalmodules}/available?token=${token}&portalId=${portal._id.toString()}`).expect(200);
+            }).then(function(response) {
+                assert.ok(response.body.indexOf(moduleToTest) < 0);
             });
         });
 
@@ -241,22 +235,22 @@ describe('API portalmodules', function(){
     describe('GET/:id', function() {
 
         it('responds without authentication with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get('portalmodules').findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
                     var id = portalModuleFromDB._id;
-                    return superTest(server).get(`/api/portalmodules/${id}`).expect(403);
+                    return th.get(`/api/portalmodules/${id}`).expect(403);
                 });
             });     
         });
 
         it('responds without read rights with 403', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get('portalmodules').findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
                     var id = portalModuleFromDB._id;
                     // Remove the corresponding permission
-                    return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                        return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                            return superTest(server).get(`/api/portalmodules/${id}?portalId=${portalFromDB._id}&token=${token}`).expect(403);
+                    return th.removeReadPermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
+                        return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
+                            return th.get(`/api/portalmodules/${id}?portalId=${portalFromDB._id}&token=${token}`).expect(403);
                         });
                     });
                 });
@@ -264,39 +258,39 @@ describe('API portalmodules', function(){
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('portalmodules').findOne({module: 'base'}).then(function(portalModuleFromDB){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_1', 'test').then(function(token){
+            return db.get(co.collections.portalmodules.name).findOne({module: 'base'}).then(function(portalModuleFromDB){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_0_1', 'test').then(function(token){
                         var id  = portalModuleFromDB._id;
-                        return superTest(server).get(`/api/portalmodules/${id}?token=${token}`).expect(403);
+                        return th.get(`/api/portalmodules/${id}?token=${token}`).expect(403);
                     });
                 });
             });
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('portalmodules').findOne({module: 'base'}).then(function(portalModuleFromDB){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+            return db.get(co.collections.portalmodules.name).findOne({module: 'base'}).then(function(portalModuleFromDB){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var id  = portalModuleFromDB._id;
-                        return superTest(server).get(`/api/portalmodules/${id}?token=${token}`).expect(403);
+                        return th.get(`/api/portalmodules/${id}?token=${token}`).expect(403);
                     });
                 });
             });
         });
 
         it('responds with valid but non-existing id with 404', function(){
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
-                return superTest(server).get(`/api/portalmodules/999999999999999999999999?token=${token}`).expect(404);
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+                return th.get(`/api/portalmodules/999999999999999999999999?token=${token}`).expect(404);
             });
         });
 
         it('responds with existing id with all details of the portal module assigment', function(done){
-            db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
-                db.get('portalmodules').findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
-                    testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+            db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
+                db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+                    th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                         var id = portalModuleFromDB._id;
-                        superTest(server).get(`/api/portalmodules/${id}?token=${token}`).expect(200).end(function(err,res){
+                        th.get(`/api/portalmodules/${id}?token=${token}`).expect(200).end(function(err,res){
                             if(err){
                                 done(err);
                                 return;
@@ -318,93 +312,93 @@ describe('API portalmodules', function(){
     describe('POST/', function() {
 
         it('responds without assigning any portalmodule data with 400', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
-                    return superTest(server).post(`/api/portalmodules?token=${token}`).send().expect(400);
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
+                    return th.post(`/api/portalmodules?token=${token}`).send().expect(400);
                 });
             });
 
         });
 
         it('responds without assigning particular module data with 400', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
                     var newModule = {
                         portalId: portalFromDB._id
                     };
-                    return superTest(server).post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
+                    return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
                 });
             });
         });
 
         it('responds without assigning portalId data with 400', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
                     var newModule = {
                         module: 'activities'
                     };
-                    return superTest(server).post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
+                    return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
                 });
             });
         });
 
         it('responds with assigning non-existing portalId with 400', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
                     var newModule = {
                         module: 'activities',
                         portalId: '999999999999999999999999'
                     };
-                    return superTest(server).post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
+                    return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
                 });
             });
         });
 
         it('responds with valid data but without write permission with 403', function(){
-            return db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+            return db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
+                return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
                         //both module and portalId have to be provided
                         var newModule = {
                             module: 'activities',
                             portalId: portalFromDB._id
                         }
-                        return superTest(server).post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
+                        return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
                     });
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_1', 'test').then(function(token){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                         var newModule = {portalId: portalFromDB._id,
                                         module: 'activities'}
-                        return superTest(server).post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
+                        return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
                     });
                 });
             });
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.removeClientModule('1', 'licenseserver').then(function(){
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var newModule = {portalId: portalFromDB._id,
                                         module: 'activities'}
-                        return superTest(server).post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
+                        return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
                     });
                 });
             });
         });
 
         it('responds with correct portalmodule data with inserted portalmodule containing auto-generated _id field', function(done){
-            db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+            db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                     var newModule = {portalId: portalFromDB._id,
                                     module: 'activities'}
-                    superTest(server).post(`/api/portalmodules?token=${token}`).send(newModule).expect(200).end(function(err, res){
+                    th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(200).end(function(err, res){
                         if(err){
                             done(err);
                             return;
@@ -424,12 +418,12 @@ describe('API portalmodules', function(){
 
         it('responds with portalmodule data containg _id with inserted portalmodule containing auto-generated _id field', function(done){
             //user defined _id should not be possibels
-            db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+            db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                     var newModule = {portalId: portalFromDB._id,
                                     module: 'activities',
                                     _id: '999999999999999999999999'} //send id of valid format but higly unlikely to be recreated by automated generation
-                    superTest(server).post(`/api/portalmodules?token=${token}`).send(newModule).expect(200).end(function(err, res){
+                    th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(200).end(function(err, res){
                         if(err){
                             done(err);
                             return;
@@ -447,11 +441,11 @@ describe('API portalmodules', function(){
         it('responds with 409 when an assignment between a portal and a module already exists', function() {
             // Create an assignment between a portal and a module
             // Try to create another assignment between the same portal and module, must result in an error (409 conflict)
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){
                     var assignmentModule = {portalId: portalFromDB._id, module: 'activities'}
-                    return superTest(server).post(`/api/portalmodules?token=${token}`).send(assignmentModule).expect(200).then(function(){
-                        return superTest(server).post(`/api/portalmodules?token=${token}`).send(assignmentModule).expect(409);
+                    return th.post(`/api/portalmodules?token=${token}`).send(assignmentModule).expect(200).then(function(){
+                        return th.post(`/api/portalmodules?token=${token}`).send(assignmentModule).expect(409);
                     });
                 });
             });
@@ -462,52 +456,52 @@ describe('API portalmodules', function(){
     describe('PUT/:id', function() {
 
         it('responds with an invalid id with 400', function() {
-            return db.get('portalmodules').findOne({ module: 'base' }).then((portalModuleFromDatabase) => {
-                return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
-                    return superTest(server).put(`/api/portalmodules/invalid?token=${token}`).send(portalModuleFromDatabase).expect(400);
+            return db.get(co.collections.portalmodules.name).findOne({ module: 'base' }).then((portalModuleFromDatabase) => {
+                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
+                    return th.put(`/api/portalmodules/invalid?token=${token}`).send(portalModuleFromDatabase).expect(400);
                 });
             });
         });
 
         it('responds without giving data with 400', function() {
-            return db.get('portalmodules').findOne({ module: 'documents' }).then((portalModuleFromDatabase) => {
-                return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
-                    return superTest(server).put(`/api/portalmodules/${portalModuleFromDatabase._id}?token=${token}`).send().expect(400);
+            return db.get(co.collections.portalmodules.name).findOne({ module: 'documents' }).then((portalModuleFromDatabase) => {
+                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
+                    return th.put(`/api/portalmodules/${portalModuleFromDatabase._id}?token=${token}`).send().expect(400);
                 });
             });
         });
 
         it('responds without meaningful data assigment with 400', function() {
             //attempts to update only the _id of portalmodule should be recognised as problematic
-            return db.get('portalmodules').findOne({ module: 'base' }).then((portalModuleFromDatabase) => {
-                return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
+            return db.get(co.collections.portalmodules.name).findOne({ module: 'base' }).then((portalModuleFromDatabase) => {
+                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
                     var id = portalModuleFromDatabase._id;
                     var updatedModule = {_id: '999999999999999999999999'}
-                    return superTest(server).put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(400);
+                    return th.put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(400);
                 });
             });
         });
 
         it('responds with valid data but without write permission with 403', function(){
-            return db.get('portalmodules').findOne({ module: 'base' }).then((portalModuleFromDatabase) => {
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
+            return db.get(co.collections.portalmodules.name).findOne({ module: 'base' }).then((portalModuleFromDatabase) => {
+                return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                         var id = portalModuleFromDatabase._id;
                         var updatedModule = {module: 'activities'}
-                        return superTest(server).put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(403);
+                        return th.put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(403);
                     });
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get('portalmodules').findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
-                    return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                        return testHelpers.doLoginAndGetToken('1_1_1', 'test').then(function(token){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
+                    return th.removeClientModule('1', 'licenseserver').then(function(){
+                        return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                             var updatedModule = {module: 'activities'}
                             var id = portalModuleFromDB._id;
-                            return superTest(server).put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(403);
+                            return th.put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(403);
                         });
                     });
                 });
@@ -515,13 +509,13 @@ describe('API portalmodules', function(){
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get('portalmodules').findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
-                    return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                        return testHelpers.doLoginAndGetToken('1_1_1', 'test').then(function(token){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
+                    return th.removeClientModule('1', 'licenseserver').then(function(){
+                        return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                             var updatedModule = {module: 'activities'}
                             var id = portalModuleFromDB._id;
-                            return superTest(server).put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(403);
+                            return th.put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(403);
                         });
                     });
                 });
@@ -529,18 +523,18 @@ describe('API portalmodules', function(){
         });
 
         it('responds with valid but non-existing id with 404', function(){
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
-                return superTest(server).put(`/api/portalmodules/999999999999999999999999?token=${token}`).send({module: 'clients'}).expect(404);
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+                return th.put(`/api/portalmodules/999999999999999999999999?token=${token}`).send({module: 'clients'}).expect(404);
             });
         });
 
         it('responds with correct portalmodule data with correctly updated module', function(done){
-            db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
-                db.get('portalmodules').findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
-                    testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+            db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
+                db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
+                    th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                         var id = portalModuleFromDB._id;
                         var updatedModule = {module: 'activities'}
-                        superTest(server).put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(200).end(function(err,res){
+                        th.put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(200).end(function(err,res){
                             if(err){
                                 done(err);
                                 return;
@@ -557,13 +551,13 @@ describe('API portalmodules', function(){
         });
 
         it('responds with portalmodule data containing _id with correctly updated module keeping original _id unchanged', function(done){
-            db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
-                db.get('portalmodules').findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
-                    testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+            db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
+                db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
+                    th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                         var id = portalModuleFromDB._id;
                         var updatedModule = {module: 'activities',
                                             _id:'999999999999999999999999'} //send id of valid format but higly unlikely to be recreated by automated generation
-                        superTest(server).put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(200).end(function(err,res){
+                        th.put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(200).end(function(err,res){
                             if(err){
                                 done(err);
                                 return;
@@ -579,13 +573,13 @@ describe('API portalmodules', function(){
         });
 
         it('responds with portalmodule data containing portalId with correctly updated module keeping original portalId unchanged', function(done){
-            db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
-                db.get('portalmodules').findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
-                    testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+            db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
+                db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id, module: 'documents'}).then(function(portalModuleFromDB){
+                    th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                         var id = portalModuleFromDB._id;
                         var updatedModule = {module: 'activities',
                                             portalId:'999999999999999999999999'} //send id of valid format but higly unlikely to be recreated by automated generation
-                        superTest(server).put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(200).end(function(err,res){
+                        th.put(`/api/portalmodules/${id}?token=${token}`).send(updatedModule).expect(200).end(function(err,res){
                             if(err){
                                 done(err);
                                 return;
@@ -606,29 +600,29 @@ describe('API portalmodules', function(){
     describe('DELETE/:id', function() {
 
         it('responds with incorect id with 400', function(){
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
-                return superTest(server).del(`/api/portalmodules/IvalidId?token=${token}`);
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+                return th.del(`/api/portalmodules/IvalidId?token=${token}`);
             });
         });
 
         it('responds with valid data but without write permission with 403', function(){
-            return db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+            return db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
+                return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
                         var id = portalFromDB._id;
-                        return superTest(server).del(`/api/portalmodules/${id}?token=${token}`).expect(403);
+                        return th.del(`/api/portalmodules/${id}?token=${token}`).expect(403);
                     });
                 });
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get('portalmodules').findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
-                    return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                        return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+                    return th.removeClientModule('1', 'licenseserver').then(function(){
+                        return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                             var id = portalModuleFromDB._id;
-                            return superTest(server).del(`/api/portalmodules/${id}?token=${token}`).expect(403);
+                            return th.del(`/api/portalmodules/${id}?token=${token}`).expect(403);
                         });
                     });
                 });
@@ -636,12 +630,12 @@ describe('API portalmodules', function(){
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get('portalmodules').findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
-                    return testHelpers.removeClientModule('1', 'licenseserver').then(function(){
-                        return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+                    return th.removeClientModule('1', 'licenseserver').then(function(){
+                        return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                             var id = portalModuleFromDB._id;
-                            return superTest(server).del(`/api/portalmodules/${id}?token=${token}`).expect(403);
+                            return th.del(`/api/portalmodules/${id}?token=${token}`).expect(403);
                         });
                     });
                 });
@@ -649,22 +643,22 @@ describe('API portalmodules', function(){
         });
 
         it('responds with valid but non-existing id with 404', function(){
-            return testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
-                return superTest(server).del(`/api/portalmodules/999999999999999999999999?token=${token}`).expect(404);
+            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+                return th.del(`/api/portalmodules/999999999999999999999999?token=${token}`).expect(404);
             });
         });
 
         it('responds with correct existing id with 204', function(done){
-            db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                db.get('portalmodules').findOne({module: 'documents', portalId: portalFromDB._id}).then(function(portalModuleFromDB){
-                    testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
+            db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                db.get(co.collections.portalmodules.name).findOne({module: 'documents', portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+                    th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                         var id = portalModuleFromDB._id;
-                        superTest(server).del(`/api/portalmodules/${id}?token=${token}`).expect(204).end(function(err,res){
+                        th.del(`/api/portalmodules/${id}?token=${token}`).expect(204).end(function(err,res){
                             if(err){
                                 done(err);
                                 return;
                             }
-                            db.get('portalmodules').findOne({_id: id}).then((stillExistingPortalModule) => {
+                            db.get(co.collections.portalmodules.name).findOne({_id: id}).then((stillExistingPortalModule) => {
                                 assert.ok(!stillExistingPortalModule, 'portal module has not been deleted from database');
                                 done();
                             });

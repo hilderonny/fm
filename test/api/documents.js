@@ -1,14 +1,13 @@
 /**
  * UNIT Tests for api/documents
  */
-
 var assert = require('assert');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
 var documentsHelper = require('../../utils/documentsHelper');
-var db = require('../../middlewares/db');
 var fs = require('fs');
 var path = require('path');
+var th = require('../testhelpers');
+var db = require('../../middlewares/db');
+var co = require('../../utils/constants');
 
 /**
  * Creates a temporary file with the given file name and content and returns
@@ -22,61 +21,85 @@ var createFileForUpload = (fileName, content) => {
 
 describe('API documents', function(){
 
-    var server = require('../../app');
-
     // Clear and prepare database with clients, user groups, users... 
     beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareActivities)
-            .then(testHelpers.prepareFmObjects)
-            .then(testHelpers.prepareFolders)
-            .then(testHelpers.prepareDocuments)
-            .then(testHelpers.prepareDocumentFiles)
-            .then(testHelpers.prepareRelations);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions)
+            .then(th.prepareActivities)
+            .then(th.prepareFmObjects)
+            .then(th.prepareFolders)
+            .then(th.prepareDocuments)
+            .then(th.prepareDocumentFiles)
+            .then(th.prepareRelations);
     });
 
     // Delete temporary documents
     afterEach(() => {
-        return testHelpers.removeDocumentFiles()
+        return th.removeDocumentFiles();
     });
 
     describe('GET/forIds', function() {
 
-        // Negative tests
+        function createTestDocuments() {
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
+                var clientId = client._id;
+                var testObjects = ['testDocument1', 'testDocument2', 'testDocument3'].map(function(name) {
+                    return {
+                        name: name,
+                        type: 'text/plain',
+                        clientId: clientId,
+                        parentFolderId: null
+                    }
+                });
+                return Promise.resolve(testObjects);
+            });
+        }
 
-        xit('responds without authentication with 403', function() {
+        th.apiTests.getForIds.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, co.collections.documents.name, createTestDocuments);
+        th.apiTests.getForIds.clientDependentNegative(co.apis.documents, co.collections.documents.name, createTestDocuments);
+        th.apiTests.getForIds.defaultPositive(co.apis.documents, co.collections.documents.name, createTestDocuments);
+
+        function checkPath(document, folders) {
+            assert.ok(document.path);
+            var parentFolders = [];
+            var parentFolderId = document.parentFolderId;
+            while (parentFolderId) {
+                var parentFolder = folders[parentFolderId];
+                // Reihenfolge von API ist umgekehrt, daher vorn dran hängen
+                parentFolders.unshift(parentFolder);
+                parentFolderId = parentFolder.parentFolderId;
+            }
+            assert.strictEqual(document.path.length, parentFolders.length);
+            for (var i = 0; i < parentFolders.length; i++) {
+                assert.strictEqual(document.path[i]._id.toString(), parentFolders[i]._id.toString());
+                assert.strictEqual(document.path[i].name, parentFolders[i].name);
+            }
+        }
+
+        it('returns the full path for each document', function() {
+            var documentsInDatabase = th.dbObjects[co.collections.documents.name];
+            var foldersInDatabase = {};
+            var ids = documentsInDatabase.map(function(doc) { return doc._id.toString() });
+            return db.get(co.collections.folders.name).find().then(function(folders) {
+                folders.forEach(function(folder) {
+                    foldersInDatabase[folder._id] = folder;
+                });
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) => {
+                return th.get(`/api/${co.apis.documents}/forIds?ids=${ids.join(',')}&token=${token}`).expect(200);
+            }).then(function(response) {
+                var documentsFromApi = response.body;
+                documentsFromApi.forEach(function(documentFromApi) {
+                    checkPath(documentFromApi, foldersInDatabase);
+                });
+                return Promise.resolve();
+            });
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-        });
-
-        xit('responds with empty list when user has no read permission', function() {
-        });
-
-        xit('responds with empty list when query parameter "ids" does not exist', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains faulty IDs', function() {
-        });
-
-        xit('returns only elements of correct ids when parameter "ids" contains IDs where no entities exist for', function() {
-        });
-
-        xit('returns only elements of the client of the logged in user when "ids" contains IDs of entities of another client', function() {
-        });
-
-        // Positive tests
-
-        xit('returns a list of documents with all details for the given IDs', function() {
-        });
     });
 
     describe('GET/share/:id', function() {
@@ -86,29 +109,29 @@ describe('API documents', function(){
         it('responds with invalid id with 400', function(){
             //for shared documents no user authentication is required 
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDatabase){
-                return superTest(server).get(`/api/documents/share/invalidid`).expect(400);
+                return th.get(`/api/documents/share/invalidid`).expect(400);
             });
         });
 
         it('responds with id where no document exists with 404', function(){
             //for shared documents no user authentication is required 
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDatabase){
-                return superTest(server).get(`/api/documents/share/999999999999999999999999`).expect(404);
+                return th.get(`/api/documents/share/999999999999999999999999`).expect(404);
             });
         });
 
         it('responds with valid id of non-shared document with 403', function(){
             //for shared documents no user authentication is required 
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDatabase){
-                return superTest(server).get(`/api/documents/share/${documentFromDatabase._id}`).expect(403);
+                return th.get(`/api/documents/share/${documentFromDatabase._id}`).expect(403);
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDB){
-                return testHelpers.removeClientModule('1', 'documents').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        return superTest(server).get(`/api/documents/share/${documentFromDB._id}?token=${token}`).expect(403);
+                return th.removeClientModule('1', 'documents').then(function(){
+                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                        return th.get(`/api/documents/share/${documentFromDB._id}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -116,9 +139,9 @@ describe('API documents', function(){
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDB){
-                return testHelpers.removeClientModule('1', 'documents').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                        return superTest(server).get(`/api/documents/share/${documentFromDB._id}?token=${token}`).expect(403);
+                return th.removeClientModule('1', 'documents').then(function(){
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+                        return th.get(`/api/documents/share/${documentFromDB._id}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -131,7 +154,7 @@ describe('API documents', function(){
                 var documentId = documentFromDatabase._id;
                 // First we ned to share the document
                 db.update('documents', documentId, { $set: { isShared: true } }).then((updatedDocument) => {
-                    superTest(server).get(`/api/documents/share/${documentId}`).expect(200).end(function(err, res){
+                    th.get(`/api/documents/share/${documentId}`).expect(200).end(function(err, res){
                         if(err) return done(err);
                         assert.strictEqual(res.type, 'application/octet-stream', 'Document type is not as expected.');
                         assert.strictEqual(res.text, documentId.toString(), 'Document content is not as expected');
@@ -148,8 +171,8 @@ describe('API documents', function(){
         // Negative tests
 
         it('responds with an invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return superTest(server).put(`/api/documents/InvalidId?token=${token}`).expect(400);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.put(`/api/documents/InvalidId?token=${token}`).expect(400);
             });
         });
 
@@ -157,25 +180,25 @@ describe('API documents', function(){
             //load valid id to avoid 404 error 
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDB){
                 var id = documentFromDB._id;
-                return superTest(server).get(`/api/documents/${id}`).expect(403);
+                return th.get(`/api/documents/${id}`).expect(403);
             });           
         });
 
         it('responds with not existing folder id with 403', function() {
             // Here the validateSameClientId comes into the game and returns a 403 because the requested folder is
             // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return superTest(server).get(`/api/documents/999999999999999999999999?token=${token}`).expect(403);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.get(`/api/documents/999999999999999999999999?token=${token}`).expect(403);
             });
         });
 
         it('responds without read permission with 403', function(){
             // Remove the corresponding permission
-            return testHelpers.removeReadPermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.removeReadPermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     return db.get('documents').findOne({name: '1_0_1'}).then((documentFromDatabase) =>{
                         var documentId = documentFromDatabase._id; 
-                        return superTest(server).get(`/api/documents/${documentId}?token=${token}`).expect(403);
+                        return th.get(`/api/documents/${documentId}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -185,9 +208,9 @@ describe('API documents', function(){
             //document.clientId != user.clientId
             //login as user for client 1, but ask for document of client 2 
             return db.get('documents').findOne({name: '0_0_1'}).then((documentOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var id = documentOfUser2._id;
-                    return superTest(server).get(`/api/documents/${id}?token=${token}`).expect(403);
+                    return th.get(`/api/documents/${id}?token=${token}`).expect(403);
                 });
             });        
         });
@@ -195,9 +218,9 @@ describe('API documents', function(){
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('documents').findOne({name: '1_0_1'}).then(function(documentFromDB){
                 //remove module assignment for client 1
-                return testHelpers.removeClientModule('1', 'documents').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_0', 'test').then(function(token){
-                        return superTest(server).get(`/api/documents/${documentFromDB._id}?token=${token}`).expect(403);
+                return th.removeClientModule('1', 'documents').then(function(){
+                    return th.doLoginAndGetToken('1_1_0', 'test').then(function(token){
+                        return th.get(`/api/documents/${documentFromDB._id}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -206,9 +229,9 @@ describe('API documents', function(){
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('documents').findOne({name: '1_0_1'}).then(function(documentFromDB){
                 //remove module assignment for client 1
-                return testHelpers.removeClientModule('1', 'documents').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                        return superTest(server).get(`/api/documents/${documentFromDB._id}?token=${token}`).expect(403);
+                return th.removeClientModule('1', 'documents').then(function(){
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+                        return th.get(`/api/documents/${documentFromDB._id}?token=${token}`).expect(403);
                     });
                 });
             });
@@ -219,8 +242,8 @@ describe('API documents', function(){
         it('responds with valid id and authentication with retrieved document', function(done){
             db.get('documents').findOne({name: '1_1'}).then(function(documentFromDatabase){
                 var documentId = documentFromDatabase._id;
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                    superTest(server).get(`/api/documents/${documentId}?token=${token}`).expect(200).end(function(err, res){
+                th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                    th.get(`/api/documents/${documentId}?token=${token}`).expect(200).end(function(err, res){
                         if(err){
                             done(err);
                             return;
@@ -237,8 +260,8 @@ describe('API documents', function(){
         it('responds with valid id and authentication plus download request with correct document downloaded', function(done){
             db.get('documents').findOne({name: '1_1'}).then(function(documentFromDatabase){
                 var documentId = documentFromDatabase._id;
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                    superTest(server).get(`/api/documents/${documentId}?token=${token}&action=download`).expect(200).end(function(err, res){
+                th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                    th.get(`/api/documents/${documentId}?token=${token}&action=download`).expect(200).end(function(err, res){
                         if(err){
                             done(err);
                             return;
@@ -262,9 +285,9 @@ describe('API documents', function(){
             var fileName = 'testDocumentPost.txt';
             var fileContent = 'Gaga Bubu';
             var filePath = createFileForUpload(fileName, fileContent);
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                 //https://visionmedia.github.io/superagent/#multipart-requests
-                return superTest(server).post(`/api/documents?token=${token}`).field('parentFolderId', 'invalidid').attach('file', filePath).expect(400);
+                return th.post(`/api/documents?token=${token}`).field('parentFolderId', 'invalidid').attach('file', filePath).expect(400);
             });
         });
 
@@ -273,17 +296,17 @@ describe('API documents', function(){
             var fileName = 'testDocumentPost.txt';
             var fileContent = 'Gaga Bubu';
             var filePath = createFileForUpload(fileName, fileContent);
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                 //https://visionmedia.github.io/superagent/#multipart-requests
-                return superTest(server).post(`/api/documents?token=${token}`).field('parentFolderId', '999999999999999999999999').attach('file', filePath).expect(400);
+                return th.post(`/api/documents?token=${token}`).field('parentFolderId', '999999999999999999999999').attach('file', filePath).expect(400);
             });
         });
 
         it('responds without file with 400', () => {
             return db.get('folders').findOne({name: '1_1_1'}).then((folderOfClient1) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     //https://visionmedia.github.io/superagent/#multipart-requests
-                    return superTest(server).post(`/api/documents?token=${token}`).field('parentFolderId', folderOfClient1._id.toString()).expect(400)
+                    return th.post(`/api/documents?token=${token}`).field('parentFolderId', folderOfClient1._id.toString()).expect(400)
                 });
             });
         });
@@ -293,9 +316,9 @@ describe('API documents', function(){
             var fileName = 'testDocumentPost.txt';
             var fileContent = 'Gaga Bubu';
             var filePath = createFileForUpload(fileName, fileContent);
-            return testHelpers.removeClientModule('1', 'documents').then(function(){
-                return testHelpers.doLoginAndGetToken('1_1_0', 'test').then(function(token){
-                    return superTest(server).post(`/api/documents?token=${token}`).attach('file', filePath).expect(403);
+            return th.removeClientModule('1', 'documents').then(function(){
+                return th.doLoginAndGetToken('1_1_0', 'test').then(function(token){
+                    return th.post(`/api/documents?token=${token}`).attach('file', filePath).expect(403);
                 });
             });
         });
@@ -305,9 +328,9 @@ describe('API documents', function(){
             var fileName = 'testDocumentPost.txt';
             var fileContent = 'Gaga Bubu';
             var filePath = createFileForUpload(fileName, fileContent);
-            return testHelpers.removeClientModule('1', 'documents').then(function(){
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                    return superTest(server).post(`/api/documents?token=${token}`).attach('file', filePath).expect(403);
+            return th.removeClientModule('1', 'documents').then(function(){
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+                    return th.post(`/api/documents?token=${token}`).attach('file', filePath).expect(403);
                 });
             });
         });
@@ -315,16 +338,16 @@ describe('API documents', function(){
         it('responds without authentication with 403', function() {
             var newDocument = {name: 'new_document_name'};
             // TODO: Attach real document, because you would get a 400 otherwise
-            return superTest(server).post(`/api/documents`).send(newDocument).expect(403);       
+            return th.post(`/api/documents`).send(newDocument).expect(403);       
         });
 
         it('responds without write permission with 403', function() {
             // Remove the corresponding permission
-            return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var newDocuments = {name: 'newName'};
                     // TODO: Attach real document, because you would get a 400 otherwise
-                    return superTest(server).post('/api/documents?token=' + token).send(newDocuments).expect(403);
+                    return th.post('/api/documents?token=' + token).send(newDocuments).expect(403);
                 });
             });
         });
@@ -345,9 +368,9 @@ describe('API documents', function(){
                         // And we need an user for authentication
                         db.insert('users', { name: userGroup.name + '_0', pass: '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S', clientId: userGroup.clientId, userGroupId: userGroup._id, isAdmin: true }).then((user) => {
                             // Now login the new user
-                            testHelpers.doLoginAndGetToken(user.name, 'test').then((token) => {
+                            th.doLoginAndGetToken(user.name, 'test').then((token) => {
                                 //https://visionmedia.github.io/superagent/#multipart-requests
-                                superTest(server).post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
+                                th.post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
                                     fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
                                     if(err) return done(err);
                                     var id = res.body._id;
@@ -372,9 +395,9 @@ describe('API documents', function(){
             var fileName = 'testDocumentPost.txt';
             var fileContent = 'Gaga Bubu';
             var filePath = createFileForUpload(fileName, fileContent);
-            testHelpers.doLoginAndGetToken('_0_0', 'test').then((token) => { // This username is from a portal user
+            th.doLoginAndGetToken('_0_0', 'test').then((token) => { // This username is from a portal user
                 //https://visionmedia.github.io/superagent/#multipart-requests
-                superTest(server).post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
+                th.post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
                     fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
                     if(err) return done(err);
                     var id = res.body._id;
@@ -395,9 +418,9 @@ describe('API documents', function(){
             var fileName = 'testDocumentPost.txt';
             var fileContent = 'Gaga Bubu';
             var filePath = createFileForUpload(fileName, fileContent);
-            testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                 //https://visionmedia.github.io/superagent/#multipart-requests
-                superTest(server).post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
+                th.post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
                     fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
                     if(err) return done(err);
                     var id = res.body._id;
@@ -417,10 +440,10 @@ describe('API documents', function(){
             var fileContent = 'Gaga Bubu';
             var filePath = createFileForUpload(fileName, fileContent);
             db.get('folders').findOne({name: '1_1_1'}).then((folderOfClient1) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var parentFolderId = folderOfClient1._id.toString();
                     //https://visionmedia.github.io/superagent/#multipart-requests
-                    superTest(server).post(`/api/documents?token=${token}`).field('parentFolderId', parentFolderId).attach('file', filePath).end((err, res) => {
+                    th.post(`/api/documents?token=${token}`).field('parentFolderId', parentFolderId).attach('file', filePath).end((err, res) => {
                         fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
                         if(err) return done(err);
                         var id = res.body._id;
@@ -445,9 +468,9 @@ describe('API documents', function(){
             var fileName = 'testDocumentPost.txt';
             var fileContent = 'Gaga Bubu';
             var filePath = createFileForUpload(fileName, fileContent);
-            testHelpers.doLoginAndGetToken('_0_0', 'test').then((token) => { // This username is from a portal user
+            th.doLoginAndGetToken('_0_0', 'test').then((token) => { // This username is from a portal user
                 //https://visionmedia.github.io/superagent/#multipart-requests
-                superTest(server).post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
+                th.post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
                     fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
                     if(err) return done(err);
                     var id = res.body._id;
@@ -470,25 +493,25 @@ describe('API documents', function(){
         // Negative tests
 
         it('responds with an invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return superTest(server).put(`/api/documents/InvalidId?token=${token}`).send({name: 'new_document_name'}).expect(400);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.put(`/api/documents/InvalidId?token=${token}`).send({name: 'new_document_name'}).expect(400);
             });
         });
 
         it('responds with valid id but no actual update data with 400', function(){
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDB){
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                     var id = documentFromDB._id;
-                    return superTest(server).put(`/api/documents/${id}?token=${token}`).send().expect(400);
+                    return th.put(`/api/documents/${id}?token=${token}`).send().expect(400);
                 });
             });
         });
 
         it('responds with valid id but no actual update data with 400', function(){
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDB){
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
                     var id = documentFromDB._id;
-                    return superTest(server).put(`/api/documents/${id}?token=${token}`).send().expect(400);
+                    return th.put(`/api/documents/${id}?token=${token}`).send().expect(400);
                 });
             });
         });
@@ -498,17 +521,17 @@ describe('API documents', function(){
             return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDB){
                 var id = documentFromDB._id;
                 var updatedDoc = {name: 'new_document_name'};
-                return superTest(server).put(`/api/documents/${id}`).send(updatedDoc).expect(403);
+                return th.put(`/api/documents/${id}`).send(updatedDoc).expect(403);
             });          
         });
 
         it('responds without write permission with 403', function() {
             return db.get('documents').findOne({ name : '1_0' }).then((documentFromDatabase) => {
                 // Remove the corresponding permission
-                return testHelpers.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                    return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
+                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                         var updatedDoc = {name: 'new_document_name'};
-                        return superTest(server).put(`/api/documents/${documentFromDatabase._id}?token=${token}`).send(updatedDoc).expect(403);
+                        return th.put(`/api/documents/${documentFromDatabase._id}?token=${token}`).send(updatedDoc).expect(403);
                     });
                 });
             });
@@ -518,8 +541,8 @@ describe('API documents', function(){
             // Here the validateSameClientId comes into the game and returns a 403 because the requested folder is
             // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
             var updatedDoc = {name: 'new_document_name'};
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return superTest(server).put(`/api/documents/999999999999999999999999?token=${token}`).send(updatedDoc).expect(403);
+            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.put(`/api/documents/999999999999999999999999?token=${token}`).send(updatedDoc).expect(403);
             });
         });
 
@@ -527,20 +550,20 @@ describe('API documents', function(){
             //document.clientId != user.clientId
             //logged user belongs to client 1, but requested documet to client 2 
             return db.get('documents').findOne({name: '0_0'}).then((documentOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
                     var id = documentOfUser2._id;
                     var updatedDocument = {name: 'new_document_name'};
-                    return superTest(server).put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(403);
+                    return th.put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(403);
                 });
             });
         });
 
         it('responds with correct document with invalid new parentFolderId with 400', () => {
             return db.get('documents').findOne({name: '1_1_1'}).then((documentFromDatabase) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var id = documentFromDatabase._id.toString();
                     var updatedDocument = {parentFolderId: '999999999999999999999999', name: 'new_document_name'};
-                    return superTest(server).put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(400);
+                    return th.put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(400);
                 });
             });
         });
@@ -548,10 +571,10 @@ describe('API documents', function(){
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
             return db.get('documents').findOne({name: '1_0_1'}).then(function(documentFromDB){
                 //remove module assigment for client 1
-                return testHelpers.removeClientModule('1', 'documents').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_0', 'test').then(function(token){
+                return th.removeClientModule('1', 'documents').then(function(){
+                    return th.doLoginAndGetToken('1_1_0', 'test').then(function(token){
                         var updates = {name: 'newName'};
-                        return superTest(server).put(`/api/documents/${documentFromDB._id}?token=${token}`).send(updates).expect(403);
+                        return th.put(`/api/documents/${documentFromDB._id}?token=${token}`).send(updates).expect(403);
                     });
                 });
             });
@@ -560,10 +583,10 @@ describe('API documents', function(){
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
             return db.get('documents').findOne({name: '1_0_1'}).then(function(documentFromDB){
                 //remove module assigment for client 1
-                return testHelpers.removeClientModule('1', 'documents').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
+                return th.removeClientModule('1', 'documents').then(function(){
+                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var updates = {name: 'newName'};
-                        return superTest(server).put(`/api/documents/${documentFromDB._id}?token=${token}`).send(updates).expect(403);
+                        return th.put(`/api/documents/${documentFromDB._id}?token=${token}`).send(updates).expect(403);
                     });
                 });
             });
@@ -573,10 +596,10 @@ describe('API documents', function(){
 
         it('responds with valid _id with correcly updated document', (done) => {
             db.get('documents').findOne({name: '1_1_1'}).then((documentFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var id = documentFromDatabase._id.toString();
                     var updatedDocument = {name: 'new_document_name'};
-                    superTest(server).put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
+                    th.put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
                         var idFromrespondse = res.body._id;
                         assert.ok(idFromrespondse, '_id not returned.');
                         //Ask the database directly
@@ -592,10 +615,10 @@ describe('API documents', function(){
 
         it('responds giving a new _id with updated document without changing its original _id', (done) => {
             db.get('documents').findOne({name: '1_1_1'}).then((documentFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var id = documentFromDatabase._id.toString();
                     var updatedDocument = {_id: '999999999999999999999999', name: 'new_document_name'};
-                    superTest(server).put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
+                    th.put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
                         var idFromrespondse = res.body._id;
                         assert.ok(idFromrespondse, '_id not returned.');
                         assert.strictEqual(idFromrespondse, id, '_id was changed.');
@@ -613,10 +636,10 @@ describe('API documents', function(){
         it('responds giving a new clientId with updated document without changing its original clientId', (done) => {
             db.get('clients').findOne({name: '1'}).then((client) => {
                 db.get('documents').findOne({name: '0_0_1'}).then((documentFromDatabase) => {
-                    testHelpers.doLoginAndGetToken('0_0_0', 'test').then((token) => {
+                    th.doLoginAndGetToken('0_0_0', 'test').then((token) => {
                         var id = documentFromDatabase._id.toString();
                         var updatedDocument = {clientId: client._id.toString, name: 'new_document_name'};
-                        superTest(server).put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
+                        th.put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
                             //Ask the database directly
                             db.get('documents').findOne(id).then((updatedDocumentFromDatabase) => {
                                 assert.ok(updatedDocumentFromDatabase, 'Document not found in database.');
@@ -632,10 +655,10 @@ describe('API documents', function(){
 
         it('responds with correct document without parentFolderId with updated document and old parentFolderId', (done) => {
             db.get('documents').findOne({name: '1_1_1'}).then((documentFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var id = documentFromDatabase._id.toString();
                     var updatedDocument = {name: 'new_document_name'};
-                    superTest(server).put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
+                    th.put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
                         //Ask the database directly
                         db.get('documents').findOne(id).then((updatedDocumentFromDatabase) => {
                             assert.ok(updatedDocumentFromDatabase, 'Document not found in database.');
@@ -650,10 +673,10 @@ describe('API documents', function(){
 
         it('responds with correct document containing null as parentFolderId with updated document and null as parentFolderId', (done) => {
             db.get('documents').findOne({name: '1_1_1'}).then((documentFromDatabase) => {
-                testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var id = documentFromDatabase._id.toString();
                     var updatedDocument = {parentFolderId: null, name: 'new_document_name'};
-                    superTest(server).put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
+                    th.put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
                         //Ask the database directly
                         db.get('documents').findOne(id).then((updatedDocumentFromDatabase) => {
                             assert.ok(updatedDocumentFromDatabase, 'Document not found in database.');
@@ -670,10 +693,10 @@ describe('API documents', function(){
             db.get('folders').findOne({name: '1_1'}).then((folder) => {
                 var folderId = folder._id.toString();
                 db.get('documents').findOne({name: '1_1_1'}).then((documentFromDatabase) => {
-                    testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                         var id = documentFromDatabase._id.toString();
                         var updatedDocument = {parentFolderId: folderId, name: 'new_document_name'};
-                        superTest(server).put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
+                        th.put(`/api/documents/${id}?token=${token}`).send(updatedDocument).expect(200).end((err,res) => {
                             //Ask the database directly
                             db.get('documents').findOne(id).then((updatedDocumentFromDatabase) => {
                                 assert.ok(updatedDocumentFromDatabase, 'Document not found in database.');
@@ -691,142 +714,49 @@ describe('API documents', function(){
 
     describe('DELETE/:id', function() {
 
-        // Negative tests
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('documents').findOne({name: '1_0_1'}).then(function(documentFromDB){
-                //remove module assigment for client 1
-                return testHelpers.removeClientModule('1', 'documents').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_0', 'test').then(function(token){
-                        return superTest(server).del(`/api/documents/${documentFromDB._id}?token=${token}`).expect(403);
-                    });
-                });
+        function getDeleteDocumentId() {
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
+                var document = {
+                    name: 'newDocumentToDelete',
+                    type: 'text/plain',
+                    clientId: client._id,
+                    parentFolderId: null
+                }
+                return db.get(co.collections.documents.name).insert(document);
+            }).then(function(insertedDocument) {
+                return th.createRelationsToUser(co.collections.documents.name, insertedDocument);
+            }).then(function(insertedDocument) {
+                return Promise.resolve(insertedDocument._id);
             });
-        });
+        }
 
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('documents').findOne({name: '1_0_1'}).then(function(documentFromDB){
-                //remove module assigment for client 1
-                return testHelpers.removeClientModule('1', 'documents').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                        return superTest(server).del(`/api/documents/${documentFromDB._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds without write permission with 403', function() {
-            return db.get('documents').findOne({name: '1_0_1'}).then(function(documentFromDB){
-                //remove write permission
-                return testHelpers.removeWritePermission('1_1_0', 'PERMISSION_OFFICE_DOCUMENT').then(function(){
-                    return testHelpers.doLoginAndGetToken('1_1_0', 'test').then(function(token){
-                        return superTest(server).del(`/api/documents/${documentFromDB._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with an invalid id with 400', function() {
-            return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return superTest(server).del(`/api/documents/InvalidId?token=${token}`).expect(400);
-            });
-        });
-
-        it('responds without authentication with 403', function() {
-            //load valid id to avoid 404 error 
-            return db.get('documents').findOne({name: '1_1_1'}).then(function(documentFromDB){
-                var id = documentFromDB._id;
-                return superTest(server).put(`/api/documents/${id}`).expect(403);
-            });          
-        });
-
-        it('responds with an id of an existing document which does not belong to the same client as the logged in user with 403', function() {
-            //document.clientId != user.clientId
-            //logg-in as user for client 1, but ask for document of client 2 
-            return db.get('documents').findOne({name: '0_0_1'}).then((documentOfUser2) => {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    var id = documentOfUser2._id;
-                    return superTest(server).del(`/api/documents/${id}?token=${token}`).expect(403);
-                });
-            });        
-        });
+        th.apiTests.delete.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, getDeleteDocumentId);
+        th.apiTests.delete.clientDependentNegative(co.apis.documents, getDeleteDocumentId);
+        th.apiTests.delete.defaultPositive(co.apis.documents, co.collections.documents.name, getDeleteDocumentId);
 
         // Positive tests
 
-        it('responds with valid id with 204 and deletes the respective document, its file and its relations to activities', (done) => {
+        it('responds with valid id with 204 and deletes the respective document and its file', () => {
+            var document;
             // Give us more time because this is a complex test
             this.timeout(10000);
-            testHelpers.prepareRelations().then(testHelpers.prepareDocumentFiles).then(() => { // Relations and document files are needed only in this test
-                // Retrieve the relations for the document
-                db.get('documents').findOne({name: '1_0_1'}).then((document) => {
-                    db.get('relations').find({ $or: [ { type1: 'documents', id1: document._id }, { type2: 'documents', id2: document._id } ] }, '_id').then((relations) => {
-                        var relationIds = relations.map((relation) => relation._id);
-                        testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                            // Trigger deletion
-                            superTest(server).del(`/api/documents/${document._id}?token=${token}`).expect(204).end((err, res) => {
-                                if (err) return done(err);
-                                // Check whether document was deleted
-                                db.get('documents').findOne(document._id).then((documentAfterDeletion) => {
-                                    assert.equal(documentAfterDeletion, null, 'Document still exists in database');
-                                    // And at least check the relations
-                                    db.get('relations').count({ _id: { $in: relationIds } }).then((relationCount) => {
-                                        assert.equal(relationCount, 0, 'Not all relations of the deleted document were also deleted');
-                                        // But there must still be other relations
-                                        db.get('relations').count().then((otherRelationCount) => {
-                                            assert.notEqual(otherRelationCount, 0, 'The other relations were also deleted');
-                                            // Finally check whether all files were removed
-                                            var documentPath = documentsHelper.getDocumentPath(document._id);
-                                            assert.ok(!fs.existsSync(documentPath), `Document file ${documentPath} still exists after deletion`);
-                                            done();
-                                        }).catch(done); // Must be at each level where an assertion is made
-                                    }).catch(done);
-                                }).catch(done);
-                            });
-                        });
-                    });
-                });
+            return th.prepareRelations().then(th.prepareDocumentFiles).then(() => { // Relations and document files are needed only in this test
+                return db.get('documents').findOne({name: '1_0_1'});
+            }).then((doc) => {
+                document = doc;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) => {
+                // Trigger deletion
+                return th.del(`/api/documents/${document._id}?token=${token}`).expect(204);
+            }).then((response) => {
+                // Check whether document was deleted
+                return db.get('documents').findOne(document._id);
+            }).then((documentAfterDeletion) => {
+                // Finally check whether all files were removed
+                var documentPath = documentsHelper.getDocumentPath(document._id);
+                assert.ok(!fs.existsSync(documentPath), `Document file ${documentPath} still exists after deletion`);
+                return Promise.resolve();
             });
-        });
-
-        it('responds with valid id assigned to the portal (no clientId) with 204 and deletes the respective document, its file and its relations to activities', (done) => {
-            // Give us more time because this is a complex test
-            this.timeout(10000);
-            testHelpers.prepareRelations().then(testHelpers.prepareDocumentFiles).then(() => { // Relations and document files are needed only in this test
-                // Retrieve the relations for the document
-                db.get('documents').findOne({name: 'portalfolder_0_1'}).then((document) => {
-                    db.get('relations').find({ $or: [ { type1: 'documents', id1: document._id }, { type2: 'documents', id2: document._id } ] }, '_id').then((relations) => {
-                        var relationIds = relations.map((relation) => relation._id);
-                        testHelpers.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                            // Trigger deletion
-                            superTest(server).del(`/api/documents/${document._id}?token=${token}`).expect(204).end((err, res) => {
-                                if (err) return done(err);
-                                // Check whether document was deleted
-                                db.get('documents').findOne(document._id).then((documentAfterDeletion) => {
-                                    assert.equal(documentAfterDeletion, null, 'Document still exists in database');
-                                    // And at least check the relations
-                                    db.get('relations').count({ _id: { $in: relationIds } }).then((relationCount) => {
-                                        assert.equal(relationCount, 0, 'Not all relations of the deleted document were also deleted');
-                                        // But there must still be other relations
-                                        db.get('relations').count().then((otherRelationCount) => {
-                                            assert.notEqual(otherRelationCount, 0, 'The other relations were also deleted');
-                                            // Finally check whether all files were removed
-                                            var documentPath = documentsHelper.getDocumentPath(document._id);
-                                            assert.ok(!fs.existsSync(documentPath), `Document file ${documentPath} still exists after deletion`);
-                                            done();
-                                        }).catch(done); // Must be at each level where an assertion is made
-                                    }).catch(done);
-                                }).catch(done);
-                            });
-                        });
-                    });
-                });
-            });
-        });
-
-        xit('All relations, where the element is the source (type1, id1), are also deleted', function() {
-        });
-
-        xit('All relations, where the element is the target (type2, id2), are also deleted', function() {
         });
 
     });
