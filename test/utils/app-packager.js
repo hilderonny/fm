@@ -31,7 +31,7 @@ var testModuleConfig = (moduleConfigForModuleNames, moduleNames, done) => {
 
 // Helper for making tests with different module name lists
 var testAppPackager = (moduleNames, version, done) => {
-    appPackager.pack(moduleNames, (buffer) => {
+    appPackager.pack(moduleNames, version).then((buffer) => {
         // From http://stackoverflow.com/a/39324475
         var zip = new JSZip();
         var fileList = th.createFileList(moduleNames);
@@ -71,7 +71,7 @@ var testAppPackager = (moduleNames, version, done) => {
             }
             done();
         });
-    }, version);
+    });
 };
 
 describe('UTILS App packager', function() {
@@ -83,14 +83,6 @@ describe('UTILS App packager', function() {
             () => { appPackager.pack([ 'base', 'notexistingmodule' ]) },
             Error,
             'The requested module "notexistingmodule" does not exist'
-        );
-        done();
-    });
-    it('throws an error when no handling callback is given', function(done) {
-        assert.throws(
-            () => { appPackager.pack([ ]) },
-            Error,
-            'Missing callback'
         );
         done();
     });
