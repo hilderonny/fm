@@ -106,10 +106,10 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
                         Values.push(arrayElement);
                         return Promise.resolve();
                     })); 
-                });//.then(function(){return res.send(Values);});
-               // return res.send(Values);
+                });
             }
             Promise.all(promises).then(function() {
+                console.log('promisses are kept');
                 res.send(Values);
             });
         });

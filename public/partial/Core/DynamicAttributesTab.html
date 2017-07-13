@@ -1,11 +1,28 @@
-<md-subheade><span translate>TRK_DYNAMICATTRIBUTES_ATTRIBUTES</span></md-subheade>
+<!--md-subheade><span translate>TRK_DYNAMICATTRIBUTES_ATTRIBUTES</span></md-subheade-->
 <md-card-content>
-    <!--section ng-repeat="attribute in attributesArray() | orderBy:translateTitle">
-        <span translate="TRK_{{attribute.title}}"></span>
-    </section-->
+
     <md-list class="lines-beetween-items">
         <md-list-item ng-repeat="attribute in attributesArray() | orderBy:translateTitle" >
-            <p ng-bind="TRK_{{attribute.title}}"></p>
+
+            <md-input-container flex ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_TEXT'">
+                <label ng-bind="attribute.name_en"></label>
+                <input ng-model="attribute.value">
+            </md-input-container>
+            
+            <md-input-container flex ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_BOOLEAN'">
+                <md-checkbox ng-model="attribute.value">   <p ng-bind="attribute.name_en"></p> </md-checkbox>
+            </md-input-container>
+
+            <md-input-container flex ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST'">
+                <label ng-bind="attribute.name_en"></label>
+                <md-select ng-model="attribute.value">  
+                    <md-option ng-value="option" ng-repeat="option in attributeOptions | orderBy: 'option.tex_en'">
+                        <span ng-bind="option.tex_en"></span>
+                    </md-option>
+                </md-select>
+            </md-input-container>
+
+
         </md-list-item>
     </md-list>
 </md-card-content>

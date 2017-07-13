@@ -4,10 +4,6 @@ app.controller('CoreDynamicAttributesTabController', function($scope, $http, $tr
      * Lädt die Verknüpfungen des aktuellen Objekts vom Server und füllt die Liste
      */
     $scope.loadAttributes = function() {
-       // $scope.attributes.title  =  '$scope.relationsEntity.type';
-    };
-
-    $scope.$on('load', function() {
         console.log('DA');
         if(!$scope.relationsEntity){console.log('NO relationsEntity');}
         var modelname = $scope.$parent.relationsEntity.type;
@@ -18,9 +14,10 @@ app.controller('CoreDynamicAttributesTabController', function($scope, $http, $tr
             $scope.attributes = response.data;
             console.log($scope.attributes);
         });
-    });
+       // $scope.attributes.title  =  '$scope.relationsEntity.type';
+    };
 
-    //$scope.loadAttributes();
+    $scope.loadAttributes();
     /**
      * Hilfsfunktionen zum Umwandeln der Verknüpfungen in ein Feld, das sortiert
      * werden kann.
