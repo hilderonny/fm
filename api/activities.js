@@ -102,9 +102,6 @@ router.post('/', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), function
 // Update an activity
 router.put('/:id', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), validateId, validateSameClientId('activities'), function(req, res) {
     var activity = req.body;
-    if (!activity) {
-        return res.sendStatus(400);
-    }
     delete activity._id; // When activity object also contains the _id field
     delete activity.clientId; // Prevent assignment of the activity to another client
     delete activity.createdByUserId;

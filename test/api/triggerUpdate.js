@@ -26,9 +26,7 @@ describe('API triggerUpdate', function() {
     describe('GET/', function() {
 
         it('responds with 404', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.get(`/api/${co.apis.triggerUpdate}?token=${token}`).expect(404);
-            });
+            return th.get(`/api/${co.apis.triggerUpdate}`).expect(404);
         });
 
     });
@@ -54,9 +52,7 @@ describe('API triggerUpdate', function() {
         });
 
         function prepareFile() {
-            return new Promise(function(resolve, reject) {
-                ap.pack([co.modules.base], resolve, 'Testversion');
-            });
+            return ap.pack([co.modules.base], 'Testversion');
         }
 
         function checkExtractedFiles(path, moduleNames) {
@@ -138,9 +134,7 @@ describe('API triggerUpdate', function() {
     describe('PUT/', function() {
 
         it('responds with 404', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.put(`/api/${co.apis.triggerUpdate}?token=${token}`).send({}).expect(404);
-            });
+            return th.put(`/api/${co.apis.triggerUpdate}`).send({}).expect(404);
         });
 
     });
@@ -148,9 +142,7 @@ describe('API triggerUpdate', function() {
     describe('DELETE/', function() {
 
         it('responds with 404', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.del(`/api/${co.apis.triggerUpdate}?token=${token}`).expect(404);
-            });
+            return th.del(`/api/${co.apis.triggerUpdate}`).expect(404);
         });
     
     });

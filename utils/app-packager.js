@@ -40,13 +40,13 @@ var handleModuleConfig = (originalModuleConfigString, moduleNameList) => {
  * and returns a ZIP file with all relevant files.
  * When the moduleNameList is empty or not set, a ZIP file with all modules
  * are returned (used for fm.avorium.de packaging).
- * Calles doneCallback when the operation is completes with the ZIP file content as nodebuffer object.
+ * Returns Promise containing the zipped buffer
  * @param version Version number to use in package.json
  * @throws Error when one of the requested module names does not exist.
- * @example require('/utils/app-packager').pack(['base','module1','module2'], doneCallback, version);
+ * @example require('/utils/app-packager').pack(['base','module1','module2'], version).then(function(buffer){});
  * @see http://stuk.github.io/jszip/documentation/howto/write_zip.html
  */
-module.exports.pack = (moduleNameList, doneCallback, version) => {
+module.exports.pack = (moduleNameList, version) => {
     // When no modules are given, take all of them
     if (!moduleNameList || moduleNameList.length < 1) {
         var moduleNameList = Object.keys(moduleConfig.modules);
@@ -58,9 +58,6 @@ module.exports.pack = (moduleNameList, doneCallback, version) => {
         if (!requestedModule) {
             throw new Error(`The requested module "${moduleName}" does not exist`);
         }
-    }
-    if (!doneCallback) {
-        throw new Error('Missing callback');
     }
     zip = new JSZip();
     // Package.json must be there in every case
@@ -142,5 +139,5 @@ module.exports.pack = (moduleNameList, doneCallback, version) => {
             zip.file(fullOfficePath, fs.readFileSync('./' + fullOfficePath));
         });
     }
-    zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } }).then(doneCallback);
+    return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
 };
