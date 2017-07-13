@@ -16,6 +16,7 @@ var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var apiHelper = require('../utils/apiHelper');
+var co = require('../utils/constants');
 var configHelper = require('../utils/configHelper');
 
 /**
@@ -149,7 +150,7 @@ router.get('/available/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'b
 apiHelper.createDefaultGetIdRoute(router, 'permissions', 'PERMISSION_ADMINISTRATION_USERGROUP', 'base');
 
 // Create a permission
-router.post('/', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'w', 'base'), function(req, res) {
+router.post('/', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', 'base'), function(req, res) {
     var permission = req.body;
     configHelper.getAvailablePermissionKeysForClient(req.user.clientId, req.db).then(function(permissionKeyForUser) {
         if (!permission || Object.keys(permission).length < 1 || !permission.userGroupId || !validateId.validateId(permission.userGroupId) || !permission.key || permissionKeyForUser.indexOf(permission.key) < 0) {
@@ -159,13 +160,19 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'w', 'base'), funct
         permission.clientId = req.user.clientId; // Assing the new userGroup to the same client as the logged in user
         permission.userGroupId = monk.id(permission.userGroupId); // Make it a real ID
         // Check whether userGroup exists
-        req.db.get('usergroups').findOne({ _id: permission.userGroupId, clientId: permission.clientId}).then((existingUserGroup) => {
+        req.db.get(co.collections.usergroups).findOne({ _id: permission.userGroupId, clientId: permission.clientId}).then((existingUserGroup) => {
             if (!existingUserGroup) {
                 // User group does not not exist or is in another client
                 return res.sendStatus(400);
             }
-            req.db.insert('permissions', permission).then((insertedPermission) => {
-                return res.send(insertedPermission);
+            // Prüfen, ob so eine Berechtigung schon besteht
+            req.db.get(co.collections.permissions).findOne({userGroupId:existingUserGroup._id, key:permission.key}).then(function(existingPermission) {
+                if (existingPermission) {
+                    return res.send(existingPermission); // Berechtigung besteht bereits, einfach zurück schicken
+                }
+                req.db.insert(co.collections.permissions, permission).then((insertedPermission) => {
+                    return res.send(insertedPermission);
+                });
             });
         });
     });

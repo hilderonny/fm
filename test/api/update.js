@@ -3,84 +3,141 @@
  */
 var assert = require('assert');
 var fs = require('fs');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var request = require('request');
+var unzip = require('unzip');
+var th = require('../testhelpers');
 var db = require('../../middlewares/db');
-var async = require('async');
+var co = require('../../utils/constants');
+var pj = JSON.parse(fs.readFileSync('./package.json'));
+var lc = JSON.parse(fs.readFileSync('./config/localconfig.json'));
 
 describe('API update', function() {
 
-    var server = require('../../app');
+    function preparePortal() {
+        return db.insert(co.collections.portals, { name: 'Updatetestportal', isActive: true, licenseKey: 'TestKey' }).then(function(portal) {
+            return db.insert(co.collections.portalmodules, {portalId: portal._id, module: co.modules.base});
+        });
+    }
     
     beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions)
+            .then(preparePortal);
     });
 
-    describe('GET/version?licensekey', function() {
+    describe('GET/version?licenseKey', function() {
 
-        // Negative tests
-
-        xit('responds with 400 when no licensekey is given', function() {
+        it('responds with 400 when no licenseKey is given', function() {
+            return th.get(`/api/${co.apis.update}/version`).expect(400);
         });
 
-        xit('responds with 403 when licensekey is invalid', function() {
+        it('responds with 403 when licenseKey is invalid', function() {
+            return th.get(`/api/${co.apis.update}/version?licenseKey=invalidLicenseKey`).expect(403);
         });
 
-        xit('responds with 403 when portal for licensekey is inactive', function() {
+        it('responds with 403 when portal for licenseKey is inactive', function() {
+            return db.update(co.collections.portals, {name: 'Updatetestportal'}, {isActive:false}).then(function(portal) {
+                return th.get(`/api/${co.apis.update}/version?licenseKey=${portal.licenseKey}`).expect(403);
+            });
         });
 
-        // Positive tests
-
-        xit('responds with version defined in package.json', function() {
+        it('responds with version defined in package.json', function() {
+            return db.get(co.collections.portals).findOne({name: 'Updatetestportal'}).then(function(portal) {
+                return th.get(`/api/${co.apis.update}/version?licenseKey=${portal.licenseKey}`).expect(200);
+            }).then(function(response) {
+                assert.strictEqual(response.text, pj.version);
+            });
         });
 
     });
 
     describe('GET/download?licensekey', function() {
 
-        // Negative tests
-
-        xit('responds with 400 when no licensekey is given', function() {
+        it('responds with 400 when no licenseKey is given', function() {
+            return th.get(`/api/${co.apis.update}/download`).expect(400);
         });
 
-        xit('responds with 403 when licensekey is invalid', function() {
+        it('responds with 403 when licenseKey is invalid', function() {
+            return th.get(`/api/${co.apis.update}/download?licenseKey=invalidLicenseKey`).expect(403);
         });
 
-        xit('responds with 403 when portal for licensekey is inactive', function() {
+        it('responds with 403 when portal for licenseKey is inactive', function() {
+            return db.update(co.collections.portals, {name: 'Updatetestportal'}, {isActive:false}).then(function(portal) {
+                return th.get(`/api/${co.apis.update}/download?licenseKey=${portal.licenseKey}`).expect(403);
+            });
         });
 
-        xit('responds with 404 when portal of licensekey has no module assigned', function() {
+        it('responds with 404 when portal of licensekey has no module assigned', function() {
+            var portal;
+            return db.get(co.collections.portals).findOne({name: 'Updatetestportal'}).then(function(p) {
+                portal = p;
+                return db.remove(co.collections.portalmodules, {portalId:portal._id});
+            }).then(function() {
+                return th.get(`/api/${co.apis.update}/download?licenseKey=${portal.licenseKey}`).expect(404);
+            });
         });
 
-        // Positive tests
-
-        xit('responds with ZIP file containing files for all modules available for the portal of the licensekey', function() {
+        it('responds with ZIP file containing files for all modules available for the portal of the licensekey', function() {
+            var filesInPackage = [];
+            return db.get(co.collections.portals).findOne({name: 'Updatetestportal'}).then(function(portal) {
+                return new Promise(function(resolve, reject) {
+                    var httpsPort = process.env.HTTPS_PORT || lc.httpsPort || 443;
+                    var url = `https://localhost:${httpsPort}/api/${co.apis.update}/download?licenseKey=${portal.licenseKey}`;
+                    var updateRequest = request(url);
+                    updateRequest.on('error', function (error) {
+                        updateRequest.abort();
+                        reject(error);
+                    });
+                    updateRequest.on('response', function (response) {
+                        if (response.statusCode !== 200) {
+                            updateRequest.abort();
+                            reject(response.statusCode);
+                        }
+                    });
+                    updateRequest.pipe(unzip.Parse())
+                    .on('error', reject)
+                    .on('entry', function(entry) {
+                        if(entry.type === 'File') {
+                            filesInPackage.push(entry.path);
+                        }
+                        entry.autodrain(); // Speicher bereinigen
+                    })
+                    .on('close', resolve);
+                });
+            }).then(function() {
+                th.createFileList([co.modules.base]).forEach(function(fileName) {
+                    assert.ok(filesInPackage.indexOf(fileName) >= 0, `File ${fileName} not found in update package`);
+                });
+                return Promise.resolve();
+            });
         });
 
     });
 
     describe('POST/', function() {
 
-        xit('responds with 404', function() {
+        it('responds with 404', function() {
+            return th.post(`/api/${co.apis.update}`).send({}).expect(404);
         });
 
     });
 
     describe('PUT/', function() {
 
-        xit('responds with 404', function() {
+        it('responds with 404', function() {
+            return th.put(`/api/${co.apis.update}`).send({}).expect(404);
         });
 
     });
 
     describe('DELETE/', function() {
 
-        xit('responds with 404', function() {
+        it('responds with 404', function() {
+            return th.del(`/api/${co.apis.update}`).expect(404);
         });
     
     });

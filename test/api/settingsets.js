@@ -3,13 +3,12 @@
  */
 
 var assert = require('assert');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testHelpers');
 var db = require('../../middlewares/db');
+var co = require('../../utils/constants');
+var moduleConfig = require('../../config/module-config.json');
 
 describe('API settingsets', function(){
-
-    var server = require('../../app');
 
     function compareSettingSets(settingSetFromApi, expectedSettingSet) {
         assert.strictEqual(settingSetFromApi.length, expectedSettingSet.length, `Number of setting sets differ (${settingSetFromApi.length} from API, ${expectedSettingSet.length} expected)`);
@@ -30,39 +29,46 @@ describe('API settingsets', function(){
 
     // Clear and prepare database with clients, user groups, users... 
     beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions);
+        return th.cleanDatabase()
+            .then(th.prepareClients)
+            .then(th.prepareClientModules)
+            .then(th.prepareUserGroups)
+            .then(th.prepareUsers)
+            .then(th.preparePermissions);
+    });
+
+    afterEach(function() {
+        // Ggf. angelegte Testmodule wieder löschen
+        delete moduleConfig.modules.testModul1;
+        delete moduleConfig.modules.testModul2;
+        return Promise.resolve();
     });
 
     describe('GET/', function() {
 
         it('responds with 403 without authentication', function() {
-            return superTest(server).get('/api/settingsets').expect(403);
+            return th.get('/api/settingsets').expect(403);
         });
 
         it('responds with 403 when the logged in user\'s (normal user) client has no access to this module', function() {
-            return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return superTest(server).get(`/api/settingsets?token=${token}`).expect(403);
+            return th.removeClientModule('1', 'base').then(function() {
+                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.get(`/api/settingsets?token=${token}`).expect(403);
                 });
             });
         });
 
         it('responds with 403 when the logged in user\'s (administrator) client has no access to this module', function() {
-            return testHelpers.removeClientModule('1', 'base').then(function() {
-                return testHelpers.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                    return superTest(server).get(`/api/settingsets?token=${token}`).expect(403);
+            return th.removeClientModule('1', 'base').then(function() {
+                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
+                    return th.get(`/api/settingsets?token=${token}`).expect(403);
                 });
             });
         });
 
         it('responds with all setting sets of of type portal, client and user when the logged in user is a portal administrator', function(done) {
-            testHelpers.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                superTest(server).get(`/api/settingsets?token=${token}`).expect(200).end(function(err, res) {
+            th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
+                th.get(`/api/settingsets?token=${token}`).expect(200).end(function(err, res) {
                     if (err) return done(err);
                     var settingSetsFromApi = res.body;
                     var expectedSettingSets = [
@@ -86,8 +92,8 @@ describe('API settingsets', function(){
         });
 
         it('responds with setting sets of type portal, client and user when logged in user is a portal user', function(done) {
-            testHelpers.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                superTest(server).get(`/api/settingsets?token=${token}`).expect(200).end(function(err, res) {
+            th.doLoginAndGetToken('_0_0', 'test').then((token) => {
+                th.get(`/api/settingsets?token=${token}`).expect(200).end(function(err, res) {
                     if (err) return done(err);
                     var settingSetsFromApi = res.body;
                     var expectedSettingSets = [
@@ -111,8 +117,8 @@ describe('API settingsets', function(){
         });
 
         it('responds with setting sets of type client and user when logged in user is a client user', function(done) {
-            testHelpers.doLoginAndGetToken('0_0_0', 'test').then((token) => {
-                superTest(server).get(`/api/settingsets?token=${token}`).expect(200).end(function(err, res) {
+            th.doLoginAndGetToken('0_0_0', 'test').then((token) => {
+                th.get(`/api/settingsets?token=${token}`).expect(200).end(function(err, res) {
                     if (err) return done(err);
                     var settingSetsFromApi = res.body;
                     var expectedSettingSets = [
@@ -130,9 +136,9 @@ describe('API settingsets', function(){
         });
 
         it('responds only with setting sets the logged in user has read permission to', function(done) {
-            testHelpers.removeReadPermission('_0_0', 'PERMISSION_SETTINGS_USER').then(() => {
-                testHelpers.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                    superTest(server).get(`/api/settingsets?token=${token}`).expect(200).end(function(err, res) {
+            th.removeReadPermission('_0_0', 'PERMISSION_SETTINGS_USER').then(() => {
+                th.doLoginAndGetToken('_0_0', 'test').then((token) => {
+                    th.get(`/api/settingsets?token=${token}`).expect(200).end(function(err, res) {
                         if (err) return done(err);
                         var settingSetsFromApi = res.body;
                         var expectedSettingSets = [
@@ -150,7 +156,28 @@ describe('API settingsets', function(){
             });
         });
 
-        xit('expands an existing setting set type from one module with further setting sets of another module', function() {
+        it('expands an existing setting set type from one module with further setting sets of another module', function() {
+            // Testmodule vorbereiten
+            moduleConfig.modules.testModul1 = {
+                settingsets : [
+                    { mainCard: 'TestCard1', title: 'TestTitle1', type: 'TEST_SETTING_SET', icon: 'TestIcon1', permission: 'PERMISSION_SETTINGS_USER' }
+                ]
+            };
+            moduleConfig.modules.testModul2 = {
+                settingsets : [
+                    { mainCard: 'TestCard2', title: 'TestTitle2', type: 'TEST_SETTING_SET', icon: 'TestIcon2', permission: 'PERMISSION_SETTINGS_USER' }
+                ]
+            };
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                return th.get(`/api/${co.apis.settingsets}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var settingSetsFromApi = response.body;
+                var relevantSettingSets = settingSetsFromApi.filter((s) => s.type === 'TEST_SETTING_SET');
+                compareSettingSets(relevantSettingSets, [{
+                    type: 'TEST_SETTING_SET',
+                    items: [moduleConfig.modules.testModul1.settingsets[0], moduleConfig.modules.testModul2.settingsets[0]]
+                }]);
+            });
             // Define a setting set in the base module, e.g. in type USERS
             // Define another one in documents module, also of type USERS
             // Now both settings must be available in the result, not only the first or second (check that appending works)
@@ -160,19 +187,19 @@ describe('API settingsets', function(){
 
     describe('POST/', function() {
         it('responds with 404', function() {
-            return superTest(server).post('/api/settingsets').expect(404);
+            return th.post('/api/settingsets').expect(404);
         });
     });
 
     describe('PUT/', function() {
         it('responds with 404', function() {
-            return superTest(server).put('/api/settingsets').expect(404);
+            return th.put('/api/settingsets').expect(404);
         });
     });
 
     describe('DELETE/', function() {
         it('responds with 404', function() {
-            return superTest(server).del('/api/settingsets').expect(404);
+            return th.del('/api/settingsets').expect(404);
         });
     });
 
