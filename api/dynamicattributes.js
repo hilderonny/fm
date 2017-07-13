@@ -95,22 +95,23 @@ router.get('/values/:modelName/:id', auth('PERMISSION_ADMINISTRATION_SETTINGS_CL
     req.db.get(modelName).findOne(entityId).then(function(entityFromDB){
         req.db.get('dynamicattributevalues').find({entityId: entityFromDB._id}).then(function(attribureValues){
             var Values = [];
+            var promises = [];
             if(attribureValues){
                 attribureValues.forEach(function(attributeValue){
-                    req.db.get('dynamicattributes').findOne({_id: attributeValue.dynamicAttributeId}).then(function(dynamicAttribute){
-                    var arrayElement = {};
+                    promises.push(req.db.get('dynamicattributes').findOne({_id: attributeValue.dynamicAttributeId}).then(function(dynamicAttribute){
+                        var arrayElement = {};
                         arrayElement["value"] = attributeValue.value;
                         arrayElement["type"] = dynamicAttribute.type; 
                         arrayElement["name_en"] = dynamicAttribute.name_en;
                         Values.push(arrayElement);
-                    }).then(function(){return res.send(Values);});
-                });
+                        return Promise.resolve();
+                    })); 
+                });//.then(function(){return res.send(Values);});
+               // return res.send(Values);
             }
-            else{
-              Values.push( "no attribute values found");
-              return  res.send(Values);
-            }
-            
+            Promise.all(promises).then(function() {
+                res.send(Values);
+            });
         });
     });
 });
