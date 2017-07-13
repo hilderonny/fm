@@ -12,6 +12,7 @@ var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
 var monk = require('monk');
 var fs = require('fs');
+var co = require('../utils/constants');
 
 /**
  * List all available client module names for a given client
@@ -79,10 +80,16 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), funct
         if (!client) {
             return res.sendStatus(400);
         }
-        delete clientModule._id; // Ids are generated automatically
-        clientModule.clientId = client._id; // Make it a real id
-        req.db.insert('clientmodules', clientModule).then((insertedClientModule) => {
-            return res.send(insertedClientModule);
+        // Prüfen, ob so eine Zuordnung schon besteht
+        req.db.get(co.collections.clientmodules).findOne({clientId:client._id, module:clientModule.module}).then(function(existingClientModule) {
+            if (existingClientModule) {
+                return res.send(existingClientModule); // Zuordnung besteht bereits, einfach zurück schicken
+            }
+            delete clientModule._id; // Ids are generated automatically
+            clientModule.clientId = client._id; // Make it a real id
+            req.db.insert('clientmodules', clientModule).then((insertedClientModule) => {
+                return res.send(insertedClientModule);
+            });
         });
     });
 });

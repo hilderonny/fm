@@ -4,9 +4,9 @@
   "description": "Avorium FM",
   "main": "app.js",
   "scripts": {
-    "test": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --slow 500 --timeout 900000 -R mocha-teamcity-reporter ./test/**/*.js",
-    "testlocal": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=localtestdb IGNORE_FAILED_TRANSLATION_TESTS=true ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --slow 500 --timeout 5000 -R spec ./test/**/*.js",
-    "basetest": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=localtestdb ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --slow 500 --timeout 5000 -R spec ./test/*.js ./test/utils/*.js"
+    "test": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --async-only --slow 500 --timeout 900000 -R mocha-teamcity-reporter ./test/**/*.js",
+    "testlocal": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=localtestdb IGNORE_FAILED_TRANSLATION_TESTS=true ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --async-only --slow 500 --timeout 5000 -R spec ./test/**/*.js",
+    "basetest": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=localtestdb ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --async-only --slow 500 --timeout 5000 -R spec ./test/*.js ./test/utils/*.js"
   },
   "author": "Ronny Hildebrandt",
   "license": "ISC",
@@ -36,7 +36,7 @@
     "jszip": "^3.1.3",
     "mime": "^1.3.4",
     "moment": "^2.15.1",
-    "monk": "^3.1.2",
+    "monk": "^4.0.0",
     "morgan": "^1.7.0",
     "multer": "^1.2.0",
     "node-windows": "^0.1.12",
@@ -53,6 +53,7 @@
     "mocha": "^3.1.2",
     "mocha-teamcity-reporter": "^1.1.1",
     "really-need": "^1.9.2",
+    "rimraf": "^2.6.1",
     "supertest": "^2.0.1"
   }
 }

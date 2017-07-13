@@ -1,8 +1,8 @@
 {
     "dbName" : "Name of the mongo database, e.g. 'db'",
     "documentspath": "Path where the uploaded documents are stored. Can be relative to app.js or absolute, e.g. 'documents/'",
-    "httpPort": "Port where the HTTP handler of the app should listen, e.g. 80. Only useful when useHTTP=true"
-    "httpsPort": "Port where the HTTPS handler of the app should listen, e.g. 443. Only useful when useHTTPS=true"
+    "httpPort": "Port where the HTTP handler of the app should listen, e.g. 80. Only useful when useHTTP=true",
+    "httpsPort": "Port where the HTTPS handler of the app should listen, e.g. 443. Only useful when useHTTPS=true",
     "licensekey": "License key you obtained from avorium",
     "licenseserverurl": "URL of the license server to fetch updates from, e.g. 'https://fm.avorium.de'",
     "npmInstallCommand": "Full commandline to do install required libraries, e.g. '\"C:\\Program Files\\nodejs\\npm.cmd\" install'",

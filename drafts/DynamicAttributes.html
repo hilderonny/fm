@@ -17,86 +17,151 @@
     </head>
 	<body ng-app="app" ng-controller="MainController" layout="column">
 
-        <md-toolbar layout="row" class="md-toolbar-tools"><h1>Module Base</h1></md-toolbar>
+        <md-toolbar layout="row" class="md-toolbar-tools"><h1>Modul "base"</h1></md-toolbar>
 
         <div flex layout="row">
             <md-content flex layout="row">
 
                 <md-card>
-                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Datenbankmodelle</span></md-card-title-text></md-card-title>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Dynamische Attribute</span></md-card-title-text></md-card-title>
                     <md-card-content>
                         <md-list class="lines-beetween-items">
-                            <md-list-item><md-icon md-svg-src="/css/icons/office/Briefcase.svg"></md-icon><p>Mandanten</p></md-list-item>
-                            <md-list-item><md-icon md-svg-src="/css/icons/office/User.svg"></md-icon><p>Benutzer</p></md-list-item>
-                            <md-list-item><md-icon md-svg-src="/css/icons/office/User Group Man Man.svg"></md-icon><p>Benutzergruppen</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="/css/icons/material/Planner.svg"></md-icon><p>Termin</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="/css/icons/material/Briefcase.svg"></md-icon><p>Mandant</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="/css/icons/material/Document.svg"></md-icon><p>Dokument</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="/css/icons/material/Folder.svg"></md-icon><p>Verzeichnis</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="/css/icons/material/Cottage.svg"></md-icon><p>FM Objekt</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>Benutzer</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="/css/icons/material/User Group Man Man.svg"></md-icon><p>Benutzergruppe</p></md-list-item>
+                            <md-list-item><md-icon md-svg-src="/css/icons/material/Server.svg"></md-icon><p>Portal</p></md-list-item>
                         </md-list>
+                        <p>Hier werden alle Datentypen aufgelistet, die dynamische Attribute bekommen können.</p>
                     </md-card-content>
                 </md-card>
 
                 <md-card>
-                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Modellname</span></md-card-title-text></md-card-title>
-                    <md-fab-speed-dial md-direction="down" class="md-scale">
-                        <md-fab-trigger><md-button class="md-fab md-accent"><md-tooltip md-direction="left">More actions ...</md-tooltip><md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon></md-button></md-fab-trigger>
-                        <md-fab-actions>
-                            <md-button class="md-fab md-raised md-mini"><md-tooltip md-direction="left">Neues Attribut</span></md-tooltip><md-icon md-svg-src="icons/View Details.svg"></md-icon></md-button>
-                            <md-button class="md-fab md-raised md-mini"><md-tooltip md-direction="left">Neuer Verweis</span></md-tooltip><md-icon md-svg-src="icons/Link.svg"></md-icon></md-button>
-                        </md-fab-actions>
-                    </md-fab-speed-dial>
-                    <md-tabs flex>
-                        <md-tab>
-                            <md-tab-label>Attribute</md-tab-label>
-                            <md-tab-body>
-                                <md-card-content>
-                                    <md-list class="lines-beetween-items">
-                                        <md-list-item><md-icon md-svg-src="icons/View Details.svg"></md-icon><div class="md-list-item-text multiline"><p>Attributname</p><p>Textfeld</p></div></md-list-item>
-                                        <md-list-item><md-icon md-svg-src="icons/View Details.svg"></md-icon><div class="md-list-item-text multiline"><p>Attributname</p><p>Auswahlliste</p></div></md-list-item>
-                                    </md-list>
-                                </md-card-content>
-                            </md-tab-body>
-                        </md-tab>
-                        <md-tab>
-                            <md-tab-label>Verweise</md-tab-label>
-                            <md-tab-body>
-                                <md-card-content>
-                                    <md-list class="lines-beetween-items">
-                                    </md-list>
-                                </md-card-content>
-                            </md-tab-body>
-                        </md-tab>
-                    </md-tabs>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Dokument</span></md-card-title-text></md-card-title>
+                    <md-button class="md-fab md-accent"><md-tooltip md-direction="left">Attribut hinzufügen</md-tooltip><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon></md-button>
+                    <md-card-content>
+                        <md-list class="lines-beetween-items">
+                            <md-list-item><md-icon md-svg-src="icons/View Details.svg"></md-icon><div class="md-list-item-text multiline"><p>Beschreibung</p><p>Textfeld</p></div></md-list-item>
+                            <md-list-item><md-icon md-svg-src="icons/View Details.svg"></md-icon><div class="md-list-item-text multiline"><p>Ist freigegeben</p><p>Wahrheitswert</p></div></md-list-item>
+                            <md-list-item><md-icon md-svg-src="icons/View Details.svg"></md-icon><div class="md-list-item-text multiline"><p>Art des Inhalts</p><p>Auswahlliste</p></div></md-list-item>
+                        </md-list>
+                        <p>Auf dieser Seite werden die dynamischen Attribute für einen Objekttyp (hier "Dokument") aufgelistet. Die zweite Zeile enthält jeweils den Datentyp des Attributs.</p>
+                        <p>Mit dem + Button erstellt man ein neues Attribut. Klickt man einen Eintrag an, wird die Eigenschaftsseite des Attributes angezeigt.</p>
+                    </md-card-content>
                 </md-card>
 
                 <md-card>
-                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">(Neues) Attribut</span></md-card-title-text></md-card-title>
-                    <md-button class="md-fab md-accent"><md-tooltip md-direction="left">Element erstellen</md-tooltip><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon></md-button>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Neues Attribut erstellen</span></md-card-title-text></md-card-title>
+                    <form layout="column">
+                        <md-card-content layout="column">
+                            <md-input-container flex><label>Typ</label><md-select ng-model="dummy">
+                                <md-option ng-value="selected">Textfeld</md-option>
+                                <md-option>Wahrheitswert</md-option>
+                                <md-option>Auswahlliste</md-option>
+                            </md-select></md-input-container>
+                            <md-input-container flex><label>Bezeichnung EN</label><input ng-required="true" value="Description" /></md-input-container>
+                            <md-input-container flex><label>Bezeichnung DE</label><input value="Beschreibung"/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung BG</label><input/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung AR</label><input/></md-input-container>
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-raised md-accent">Hinzufügen</md-button>
+                            </md-card-actions>
+                            <p>Mit dieser Karte wird ein neues Attribut erstellt. Man wählt einen Datentypen aus und gibt zumindest die engschlische Bezeichnung an. Die anderen Sprachen sind optional, englisch dient als Fallback-Sprache.</p>
+                        </md-card-content>
+                    </form>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Neues Attribut erstellen</span></md-card-title-text></md-card-title>
+                    <form layout="column">
+                        <md-card-content layout="column">
+                            <md-input-container flex><label>Typ</label><md-select ng-model="dummy">
+                                <md-option>Textfeld</md-option>
+                                <md-option ng-value="selected">Wahrheitswert</md-option>
+                                <md-option>Auswahlliste</md-option>
+                            </md-select></md-input-container>
+                            <md-input-container flex><label>Bezeichnung EN</label><input ng-required="true" value="Is released" /></md-input-container>
+                            <md-input-container flex><label>Bezeichnung DE</label><input value="Ist freigegeben"/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung BG</label><input/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung AR</label><input/></md-input-container>
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-raised md-accent">Hinzufügen</md-button>
+                            </md-card-actions>
+                        </md-card-content>
+                    </form>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Neues Attribut erstellen</span></md-card-title-text></md-card-title>
+                    <form layout="column">
+                        <md-card-content layout="column">
+                            <md-input-container flex><label>Typ</label><md-select ng-model="dummy">
+                                <md-option>Textfeld</md-option>
+                                <md-option>Wahrheitswert</md-option>
+                                <md-option ng-value="selected">Auswahlliste</md-option>
+                            </md-select></md-input-container>
+                            <md-input-container flex><label>Bezeichnung EN</label><input ng-required="true" value="Content type" /></md-input-container>
+                            <md-input-container flex><label>Bezeichnung DE</label><input value="Art des Inhalts"/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung BG</label><input/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung AR</label><input/></md-input-container>
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-raised md-accent">Hinzufügen</md-button>
+                            </md-card-actions>
+                            <p>Beim Typ "Auswahlliste" werden die mögliches Auswahlelemente erst nach dem Erstellen des Attributes angelegt.</p>
+                        </md-card-content>
+                    </form>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Attribut bearbeiten</span></md-card-title-text></md-card-title>
+                    <form layout="column">
+                        <md-card-content layout="column">
+                            <md-input-container flex><label>Bezeichnung EN</label><input ng-required="true" value="Description" /></md-input-container>
+                            <md-input-container flex><label>Bezeichnung DE</label><input value="Beschreibung"/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung BG</label><input/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung AR</label><input/></md-input-container>
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-raised md-accent">Speichern</md-button>
+                                <md-button class="md-raised md-warn">Löschen</md-button>
+                            </md-card-actions>
+                            <p>Das nachträgliche Ändern des Typs ist nicht möglich, da dadurch der Verwendungszweck des Datentyps verändert würde. Wenn man sich vertan hat, muss man das Attribut halt löschen und mit einem anderen Typ neu anlegen.</p>
+                        </md-card-content>
+                    </form>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Attribut bearbeiten</span></md-card-title-text></md-card-title>
+                    <md-button class="md-fab md-accent"><md-tooltip md-direction="left">Element hinzufügen</md-tooltip><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon></md-button>
                     <md-tabs flex>
                         <md-tab>
                             <md-tab-label>Details</md-tab-label>
                             <md-tab-body>
                                 <form layout="column">
                                     <md-card-content layout="column">
-                                        <md-input-container flex><label>Typ</label><md-select ng-model="dummy"><md-option ng-value="selected">Auswahlliste</md-option></md-select></md-input-container>
-                                        <md-input-container flex><label>Bezeichnung EN</label><input ng-required="true"/></md-input-container>
-                                        <md-input-container flex><label>Bezeichnung DE</label><input/></md-input-container>
+                                        <md-input-container flex><label>Bezeichnung EN</label><input value="Content type" ng-required="true"/></md-input-container>
+                                        <md-input-container flex><label>Bezeichnung DE</label><input value="Art des Inhalts"/></md-input-container>
                                         <md-input-container flex><label>Bezeichnung BG</label><input/></md-input-container>
                                         <md-input-container flex><label>Bezeichnung AR</label><input/></md-input-container>
                                         <md-card-actions layout="row" layout-align="end center">
-                                            <md-button class="md-raised md-accent">Hinzufügen</md-button>
                                             <md-button class="md-raised md-accent">Speichern</md-button>
                                             <md-button class="md-raised md-warn">Löschen</md-button>
                                         </md-card-actions>
+                                        <p>Beim Datentyp "Auswahlliste" werden Tabs angezeigt. Unter "Details kann man die Bezeichnungen ändern und unter "Listenelemente" werden die gültigen Auswahlwerte für die Auswahlliste gepflegt. Mit dem +-Button können neue Elemente hinzugefügt werden.</p>
                                     </md-card-content>
                                 </form>
                             </md-tab-body>
                         </md-tab>
                         <md-tab>
-                            <md-tab-label>Elemente</md-tab-label>
+                            <md-tab-label>Listenelemente</md-tab-label>
                             <md-tab-body>
                                 <md-card-content>
                                     <md-list class="lines-beetween-items">
-                                        <md-list-item><md-icon md-svg-src="icons/Sorting Options.svg"></md-icon><div class="md-list-item-text multiline"><p>Bezeichnung</p><p>Wert</p></div></md-list-item>
-                                        <md-list-item><md-icon md-svg-src="icons/Sorting Options.svg"></md-icon><div class="md-list-item-text multiline"><p>Geschäftlich</p><p>1</p></div></md-list-item>
-                                        <md-list-item><md-icon md-svg-src="icons/Sorting Options.svg"></md-icon><div class="md-list-item-text multiline"><p>Privat</p><p>2</p></div></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="icons/Sorting Options.svg"></md-icon><p>Angebot</p></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="icons/Sorting Options.svg"></md-icon><p>Rechnung</p></md-list-item>
+                                        <md-list-item><md-icon md-svg-src="icons/Sorting Options.svg"></md-icon><p>Vertrag</p></md-list-item>
                                     </md-list>
                                 </md-card-content>
                             </md-tab-body>
@@ -105,21 +170,74 @@
                 </md-card>
 
                 <md-card>
-                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">(Neues) Element</span></md-card-title-text></md-card-title>
-                    <md-card-content>
-                        <form layout="column">
-                            <md-input-container flex><label>Wert</label><input/></md-input-container>
-                            <md-input-container flex><label>Bezeichnung EN</label><input ng-required="true"/></md-input-container>
-                            <md-input-container flex><label>Bezeichnung DE</label><input/></md-input-container>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Neues Listenelement erstellen</span></md-card-title-text></md-card-title>
+                    <form layout="column">
+                        <md-card-content layout="column">
+                            <md-input-container flex><label>Bezeichnung EN</label><input ng-required="true" value="Offer" /></md-input-container>
+                            <md-input-container flex><label>Bezeichnung DE</label><input value="Angebot"/></md-input-container>
                             <md-input-container flex><label>Bezeichnung BG</label><input/></md-input-container>
                             <md-input-container flex><label>Bezeichnung AR</label><input/></md-input-container>
                             <md-card-actions layout="row" layout-align="end center">
                                 <md-button class="md-raised md-accent">Hinzufügen</md-button>
+                            </md-card-actions>
+                        </md-card-content>
+                    </form>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Listenelement bearbeiten</span></md-card-title-text></md-card-title>
+                    <form layout="column">
+                        <md-card-content layout="column">
+                            <md-input-container flex><label>Bezeichnung EN</label><input ng-required="true" value="Offer" /></md-input-container>
+                            <md-input-container flex><label>Bezeichnung DE</label><input value="Angebot"/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung BG</label><input/></md-input-container>
+                            <md-input-container flex><label>Bezeichnung AR</label><input/></md-input-container>
+                            <md-card-actions layout="row" layout-align="end center">
                                 <md-button class="md-raised md-accent">Speichern</md-button>
                                 <md-button class="md-raised md-warn">Löschen</md-button>
                             </md-card-actions>
-                        </form>
-                    </md-card-content>
+                        </md-card-content>
+                    </form>
+                </md-card>
+
+                <md-card>
+                    <md-card-title flex="none" class="withfab"><md-card-title-text><span class="md-headline">Dokument_01_2017.docx</span></md-card-title-text></md-card-title>
+                    <md-button class="md-fab md-accent"><md-tooltip md-direction="left">More actions ...</md-tooltip><md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon></md-button>
+                    <md-tabs flex>
+                        <md-tab>
+                            <md-tab-label>Details</md-tab-label>
+                            <md-tab-body>
+                                <form layout="column">
+                                    <md-card-content layout="column">
+                                        <md-input-container flex><label>Name</label><input value="Dokument_01_2017.docx"/></md-input-container>
+                                        <md-input-container flex>
+                                            <md-checkbox><span>Öffentlich zugänglich</span></md-checkbox>
+                                        </md-input-container>
+                                        <md-input-container flex><label>Beschreibung</label><input value="Diese Datei enthält die Rechnung zu ..."/></md-input-container>
+                                        <md-input-container flex>
+                                            <md-checkbox><span>Ist freigegeben</span></md-checkbox>
+                                        </md-input-container>
+                                        <md-input-container flex><label>Typ</label><md-select ng-model="dummy">
+                                            <md-option>Angebot</md-option>
+                                            <md-option ng-value="selected">Rechnung</md-option>
+                                            <md-option>Vertrag</md-option>
+                                        </md-select></md-input-container>
+                                        <md-card-actions layout="row" layout-align="end center">
+                                            <md-button class="md-raised md-accent">Speichern</md-button>
+                                            <md-button class="md-raised md-warn">Löschen</md-button>
+                                        </md-card-actions>
+                                        <p>Diese Karte zeigt am Bespiel eines Dokumentes, wie dynamische Attribute und deren Werte für das Objekt angezeigt und gepflegt werden.</p>
+                                        <p>Im oberen Bereich werden die Attribute angezeigt, die fest am Objekttyp dranhängen (Name und Öffentlich zugänglich).</p>
+                                        <p>Darunter werden alle dynamischen Attribute aufgelistet, die für den Objekttypen definiert wurden.</p>
+                                    </md-card-content>
+                                </form>
+                            </md-tab-body>
+                        </md-tab>
+                        <md-tab>
+                            <md-tab-label>Verknüpfungen</md-tab-label>
+                            <md-tab-body></md-tab-body>
+                        </md-tab>
+                    </md-tabs>
                 </md-card>
 
             </md-content>
