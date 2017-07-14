@@ -255,6 +255,7 @@ module.exports.dynamicAttributeTypes = {
 
 /**
  * List of all possible models that can have dynamic attribute. Used for option selection in dynamicattributes API.
+ * TODO: use constants.collections instead
  */
 
 module.exports.models = [
@@ -262,3 +263,21 @@ module.exports.models = [
     'usergroups',
     'users'
 ];
+
+/**
+ * Auflistung von Einstellungsarten, die bestimmen, in welchem Abschnitt die Einstellungen angezeigt werden
+ */
+module.exports.settingSetTypes = {
+    /**
+     * Mandantenebene
+     */
+    CLIENT: 'SETTINGSET_TYPE_CLIENT',
+    /**
+     * Portalebene
+     */
+    PORTAL: 'SETTINGSET_TYPE_PORTAL',
+    /**
+     * Benutzerebene
+     */
+    USER: 'SETTINGSET_TYPE_USER'
+};
