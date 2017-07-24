@@ -103,6 +103,7 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
                         arrayElement["value"] = attributeValue.value;
                         arrayElement["type"] = dynamicAttribute.type; 
                         arrayElement["name_en"] = dynamicAttribute.name_en;
+                        arrayElement["dynamicAttributeId"] = dynamicAttribute._id;
                         Values.push(arrayElement);
                         return Promise.resolve();
                     })); 
@@ -166,9 +167,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'ba
                                   dynamicAttributeId: insertedDynamicAttribute._id,
                                   value: null,
                                   modelName: dynamicAttribute.modelName};
-                if(dynamicAttribute.type != 'DYNAMICATTRIBUTES_TYPE_PICKLIST'){
                     req.db.insert('dynamicattributevalues', emptyValue);
-                }
             });
          });
          return res.send(insertedDynamicAttribute);

@@ -2,7 +2,8 @@
 <md-card-content>
 
     <md-list class="lines-beetween-items">
-        <md-list-item ng-repeat="attribute in attributesArray() | orderBy:translateTitle" >
+        <!--TODO: find out why ordering is not working-->
+        <md-list-item ng-repeat="attribute in attributesArray() | orderBy: 'attribute.name_en'" >
 
             <md-input-container flex ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_TEXT'">
                 <label ng-bind="attribute.name_en"></label>
@@ -16,7 +17,7 @@
             <md-input-container flex ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST'">
                 <label ng-bind="attribute.name_en"></label>
                 <md-select ng-model="attribute.value">  
-                    <md-option ng-value="option" ng-repeat="option in attributeOptions | orderBy: 'option.tex_en'">
+                    <md-option ng-value="option" ng-repeat="option in attributeOptionsArray() | orderBy: 'option.tex_en'">
                         <span ng-bind="option.tex_en"></span>
                     </md-option>
                 </md-select>
