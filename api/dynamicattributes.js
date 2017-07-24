@@ -90,8 +90,30 @@ router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES
  */
 router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateModelName, validateId, validateSameClientId(), (req, res) => {
     var modelName = req.params.modelName;
-    var entityId = req.params.id;
+    var entityId = monk.id(req.params.id);
     // TODO: check implementation
+    req.db.get(co.collections.dynamicattributevalues.name).aggregate([
+        { $lookup: { // https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/
+            from: co.collections.dynamicattributes.name,
+            localField: 'dynamicAttributeId',
+            foreignField: '_id',
+            as: 'type'
+        } },
+        { $unwind: '$type' }, // https://docs.mongodb.com/manual/reference/operator/aggregation/unwind/
+        { $lookup: {
+            from: co.collections.dynamicattributeoptions.name,
+            localField: 'type._id',
+            foreignField: 'dynamicAttributeId',
+            as: 'options'
+        } },
+        { $match: { // Find only relevant elements
+            modelName: modelName,
+            entityId: entityId
+        } }
+    ]).then(function(valuesForEntity) {
+        console.log(valuesForEntity);
+    });
+
     req.db.get(modelName).findOne(entityId).then(function(entityFromDB){
         req.db.get('dynamicattributevalues').find({entityId: entityFromDB._id}).then(function(attribureValues){
             var Values = [];
