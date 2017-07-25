@@ -11,8 +11,6 @@ md-card {
     min-width: 360px;
     flex: 0 0 360px;
     display: flex;
-    transform-origin: bottom left;
-    transform: rotate(0deg);
     border:none;
     background-repeat: no-repeat;
     background-size: contain;
@@ -51,9 +49,19 @@ md-card  button.close {
     transform: scale(0.75);
 }
 
+md-card md-toolbar.md-toolbar-tools {
+    padding: 0 8px;
+}
+
+md-card md-toolbar button md-icon {
+    height: 20px;
+    width: 20px;
+    min-height: 20px;
+    min-width: 20px;
+}
+
 md-card > md-card-content {
     overflow: auto;
-    display: flex;
     flex-direction: column;
     flex: 1;
     background-color: rgba(255,255,255,0.97);
@@ -78,6 +86,12 @@ md-card-title-text {
 md-card-title-text > span {
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+md-content.list-details md-card:nth-of-type(2) {
+    flex: 1;
+    width: initial;
+    min-width: initial;
 }
 
 md-icon {
@@ -184,6 +198,9 @@ md-list-item.active, md-list-item > div.active {
     background-color: lightgrey;
 }
 
+md-list-item.level-1 { -webkit-margin-start: 16px; }
+md-list-item.level-2 { -webkit-margin-start: 32px; }
+
 md-list-item.strikethrough h3, md-list-item.strikethrough h4, md-list-item.strikethrough p {
     color:#bbbbbb;
     text-decoration: line-through;
@@ -211,6 +228,12 @@ md-toolbar.transparent {
 
 md-toolbar.portal {
     background-color: red;
+}
+
+md-toolbar button p {
+    margin:0;
+    line-height: 14px;
+    font-size: 8px;
 }
 
 md-toolbar button.lang {
@@ -391,6 +414,15 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
     color: rgba(0,0,0,0.54);
 }
 
+.md-secondary-container md-icon {
+    opacity: 0.4;
+    height: 16px;
+    width: 16px;
+    min-height: 16px;
+    min-width: 16px;
+}
+
+
 .progress-panel {
     background-color: rgba(255,255,255,0.9);
     position: absolute;
@@ -431,16 +463,10 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
         position: absolute;
         top: 0;
         left: 0;
+        right: 0;
         height: 100%;
         opacity: 0.9999; /** https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ **/
-        transform: rotate(90deg);
         border: 1px solid black;
-        transition: all 250ms;
-    }
-
-    md-card.willclose {
-        transform-origin: bottom right;
-        transform: rotate(-90deg);
     }
 
     md-list.activities-3 h3 {
@@ -587,6 +613,10 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
         padding:0;
         top: -9px;
         right: -11px;
+    }
+
+    md-content.list-details md-card md-toolbar button.close-card {
+        display: none;
     }
 
     md-tabs-canvas {

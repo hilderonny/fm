@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+        <link rel="stylesheet" href="/css/base.css">
+        <link rel="stylesheet" href="/css/local.css">
+        <style>
+            md-card {
+                transform:initial;
+            }
+            </style>
+        <script src="/node_modules/angular/angular.min.js"></script>
+        <script src="/node_modules/angular-aria/angular-aria.min.js"></script>
+        <script src="/node_modules/angular-animate/angular-animate.min.js"></script>
+        <script src="/node_modules/angular-material/angular-material.min.js"></script>
+        <script>
+var app = angular.module('app', ['ngMaterial'] );
+app.config(function($mdThemingProvider) { $mdThemingProvider.theme('default').primaryPalette('indigo').accentPalette('blue-grey');$mdThemingProvider.enableBrowserColor(); });
+
+app.controller('MainController', function($scope, $rootScope) {
+
+});
+        </script>
+    </head>
+	<body ng-app="app" ng-controller="MainController" layout="column">
+
+        <md-toolbar layout="row" class="md-toolbar-tools">
+            <h1>Baumstruktur mit Detailansicht</h1>
+        </md-toolbar>
+
+        <div flex layout="row">
+
+            <md-content flex layout="row" class="list-details">
+
+                <md-card class="list">
+
+                    <md-toolbar class="md-toolbar-tools md-accent">
+                        <md-button><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon><p>Top Level</p></md-button>
+                    </md-toolbar>
+                
+                    <md-card-content>
+                        <md-list>
+                            <md-list-item ng-click=";"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 1</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="active level-1"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 2</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-2"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 3</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-2"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 3</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-1"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-2"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 3</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-3"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-4"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-5"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-6"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-7"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-8"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-9"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                            <md-list-item ng-click=";" class="level-9"><md-icon md-svg-src="/css/icons/material/User.svg"></md-icon><p>List item 4</p><md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon></md-list-item>
+                        </md-list>
+                    </md-card-content>
+                </md-card>
+
+                <md-card>
+
+                    <!-- Kartenbreite abhängig von Anzahl Kindelemente: https://codepen.io/mattlubner/pen/RWPYdx -->
+
+                    <md-toolbar class="md-toolbar-tools md-accent">
+                        <md-button><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon><p>Sub item</p></md-button>
+                        <div flex></div>
+                        <md-button class="close-card" onclick="this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+                    </md-toolbar>
+                
+                    <!-- Title -->
+                    <md-card-title flex="none"><md-card-title-text><span class="md-headline">Example card without tabs</span></md-card-title-text></md-card-title>
+                    <!-- Card content -->
+                    <md-card-content>
+                        <form layout="column">
+                            <md-input-container flex><label>Text</label><input/></md-input-container>
+                            <md-input-container flex><md-checkbox>Checkbox</md-checkbox></md-input-container>
+                            <md-input-container flex><label>Text area</label><textarea rows="5"></textarea></md-input-container>
+                            <md-input-container flex>
+                                <label>Picklist</label>
+                                <md-select ng-model="dummy"><!-- For preselction add ' ng-value="selected"' to an option -->
+                                    <md-option>Option 1</md-option>
+                                    <md-option>Option 2</md-option>
+                                    <md-option>Option 3</md-option>
+                                </md-select>
+                            </md-input-container>
+                            <!-- Buttons -->
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-raised">Normal</md-button>
+                                <md-button class="md-raised md-accent">Accent</md-button>
+                                <md-button class="md-raised md-warn">Warn</md-button>
+                            </md-card-actions>
+                        </form>
+                    </md-card-content>
+                </md-card>
+
+            </md-content>
+        </div>
+    </body>
+</html>
