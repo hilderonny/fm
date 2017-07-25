@@ -34,6 +34,11 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
 
     $scope.handleDirectUrls = function() {
         var mappings = {
+            fmobjects: {
+                mainMenu: 'TRK_MENU_BIM',
+                subMenu: 'TRK_MENU_BIM_FMOBJECTS',
+                additionalCard: 'BIM/FmobjectCard'
+            },
             usergroups: {
                 mainMenu: 'TRK_MENU_ADMINISTRATION',
                 subMenu: 'TRK_MENU_ADMINISTRATION_USERGROUPS',

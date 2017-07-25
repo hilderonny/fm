@@ -104,6 +104,7 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
                 $scope.fmObject = completeFmObject;
                 $scope.fmObjectName = completeFmObject.name; // Prevent updating the label when changing the input value 
                 $scope.relationsEntity = { type:'fmobjects', id:completeFmObject._id };
+                utils.setLocation('fmobjects/' + $scope.params.fmObjectId);
             });
         } else {
             // New FM object

@@ -97,6 +97,16 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
             return $http.get('/api/permissions/canWrite/PERMISSION_BIM_FMOBJECT');
         }).then(function (response) {
             $scope.canWriteFmObjects = response.data;
+            // Check preselection
+            var flatFmObjects = [];
+            var flattenFmObjects = function(fmObject) {
+                flatFmObjects.push(fmObject);
+                if (fmObject.children) fmObject.children.forEach(flattenFmObjects);
+            };
+            flattenFmObjects($scope.fmObject);
+            console.log(flatFmObjects);
+            utils.handlePreselection($scope, flatFmObjects, $scope.selectFmObject);
+            if (!$scope.params.preselection) utils.setLocation('fmobjects');
         });
     }
 
