@@ -140,6 +140,14 @@ app.factory('utils', function($compile, $rootScope, $http, $translate) {
                     setTimeout(function() { utils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
                 }
             }
+        },
+
+        handlePreselection: function($scope, collection, selectFunction) {
+            // Check preselection
+            if ($scope.params.preselection) {
+                var elementToSelect = collection.find(function(e) { return e._id === $scope.params.preselection; });
+                if (elementToSelect) selectFunction(elementToSelect);
+            }
         }
 
     }

@@ -1,5 +1,5 @@
 // Setup app. Must be included before all controllers
-var app = angular.module('app', ['ngMaterial', 'ngMessages', 'ngSanitize', 'pascalprecht.translate', 'angularMoment'] ); // Include app dependency on ngMaterial and error messages, see https://material.angularjs.org/latest/demo/input and https://angular-translate.github.io/docs/#/guide/02_getting-started
+var app = angular.module('app', ['ngMaterial', 'ngMessages', 'ngSanitize', 'pascalprecht.translate', 'angularMoment', 'ngRoute'] ); // Include app dependency on ngMaterial and error messages, see https://material.angularjs.org/latest/demo/input and https://angular-translate.github.io/docs/#/guide/02_getting-started
 
 // Define theme
 app.config(function($mdThemingProvider) {

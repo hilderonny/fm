@@ -54,6 +54,7 @@
                 "node_modules/angular-messages/angular-messages.min.js",
                 "node_modules/moment/min/moment.min.js",
                 "node_modules/angular-moment/angular-moment.min.js",
+                "node_modules/angular-route/angular-route.min.js",
                 "node_modules/angular-sanitize/angular-sanitize.min.js",
                 "node_modules/angular-translate/dist/angular-translate.min.js",
                 "node_modules/angular-translate/dist/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js",

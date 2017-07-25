@@ -46,20 +46,13 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ht
 
     // Loads the userGroups list from the server
     // Params:
-    // - $scope.params.selectedUserGroupId : ID of the userGroup to select in the list
+    // - $scope.params.preselection : ID of the userGroup to select in the list
     $scope.load = function() {
         $scope.selectedUserGroup = false;
         $http.get('/api/usergroups?fields=_id+name').then(function (response) {
             $scope.userGroups = response.data;
-            if ($scope.params.selectedUserGroupId) {
-                for (var i = 0; i < $scope.userGroups.length; i++) {
-                    var userGroup = $scope.userGroups[i];
-                    if (userGroup._id === $scope.params.selectedUserGroupId) {
-                        $scope.selectedUserGroup = userGroup;
-                        break;
-                    }
-                }
-            }
+            // Check preselection
+            utils.handlePreselection($scope, $scope.userGroups, $scope.selectUserGroup);
         });
     }
 

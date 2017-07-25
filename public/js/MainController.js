@@ -1,5 +1,5 @@
 // Controller for main functions
-app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSidenav, $http, $mdDialog, $translate, $mdDateLocale, utils) {
+app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSidenav, $http, $mdDialog, $translate, $mdDateLocale, $location, utils) {
 
     $scope.$mdMedia = $mdMedia; // https://github.com/angular/material/issues/2341#issuecomment-93680762
 
@@ -34,7 +34,34 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     $scope.showmainCard = function(cardUrl) {
         angular.element(document.querySelector('#cardcanvas')).empty();
         utils.addCard(cardUrl);
-    }
+    };
+
+    $scope.handleDirectUrls = function() {
+        var mappings = {
+            usergroups: {
+                mainMenu: 'TRK_MENU_ADMINISTRATION',
+                subMenu: 'TRK_MENU_ADMINISTRATION_USERGROUPS',
+                additionalCard: 'Administration/UsergroupCard'
+            },
+            users:  {
+                mainMenu: 'TRK_MENU_ADMINISTRATION',
+                subMenu: 'TRK_MENU_ADMINISTRATION_USERS',
+                additionalCard: 'Administration/UserCard'
+            }
+        };
+        if (mappings[$scope.path[1]]) {
+            var mapping = mappings[$scope.path[1]];
+            var mainMenu = $scope.menu.find(function(m) { return m.title === mapping.mainMenu; });
+            if (!mainMenu) return;
+            var subMenu = mainMenu.items.find(function(mi) { return mi.title === mapping.subMenu; });
+            if (!subMenu) return;
+            $scope.currentMenuItem = subMenu;
+            angular.element(document.querySelector('#cardcanvas')).empty();
+            utils.addCardWithPermission(subMenu.mainCard, { preselection: $scope.path[2] }, subMenu.permission);
+        }
+        //if ($scope.path.length === 2) $scope.handleOneLevelDirectUrl($scope.path[1]);
+        //else if ($scope.path.length === 3) $scope.handleTwoLevelDirectUrl($scope.path[1], $scope.path[2]);
+    };
 
     // User clicked on login button
     $scope.doLogin = function(hideErrorMessage) {
@@ -66,7 +93,8 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                         localStorage.removeItem("loginCredentials");
                         $scope.isLoggedIn = false;
                     }
-                })
+                });
+                $scope.handleDirectUrls();
             });
             $scope.isLoggingIn = false;
             $scope.currentMenuItem = null;
@@ -86,7 +114,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                 );
             });
         });
-    }
+    };
 
     // Define used languages
     $scope.setLang = function(lang) {
@@ -110,6 +138,15 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     if ($rootScope.languages.indexOf($scope.currentLanguage) < 0) {
         $scope.setLang('en'); // Fallback
     }
+
+    // Handle direct URLs, checked after login
+
+    $rootScope.$on('$locationChangeSuccess', function(evt, newUrl, oldUrl) {
+        $scope.path = $location.path().split('/');
+        $scope.hash = $location.hash();
+        if (newUrl === oldUrl) return;
+        if ($scope.isLoggedIn) $scope.handleDirectUrls();
+    });
 
     // Try to do a login with information from local storage
     try {

@@ -47,20 +47,13 @@ app.controller('AdministrationUserlistCardController', function($scope, $http, $
 
     // Loads the users list from the server
     // Params:
-    // - $scope.params.selectedUserId : ID of the user to select in the list
+    // - $scope.params.preselection : ID of the user to select in the list
     $scope.load = function() {
         $scope.selectedUser = false;
         $http.get('/api/users?fields=_id+name').then(function (response) {
             $scope.users = response.data;
-            if ($scope.params.selectedUserId) {
-                for (var i = 0; i < $scope.users.length; i++) {
-                    var user = $scope.users[i];
-                    if (user._id === $scope.params.selectedUserId) {
-                        $scope.selectedUser = user;
-                        break;
-                    }
-                }
-            }
+            // Check preselection
+            utils.handlePreselection($scope, $scope.users, $scope.selectUser);
         });
         // Check the permissions for the details page for handling button visibility
         $http.get('/api/permissions/canRead/PERMISSION_ADMINISTRATION_USER').then(function (response) {
