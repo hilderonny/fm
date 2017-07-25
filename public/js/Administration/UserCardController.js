@@ -118,6 +118,7 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
                             break;
                         }
                     }
+                    utils.setLocation('users/' + $scope.params.userId);
                 });
             });
         } else {
@@ -133,7 +134,6 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
         $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USER').then(function (response) {
             $scope.canWriteUserDetails = response.data;
         });
-
     }
 
     $scope.load();

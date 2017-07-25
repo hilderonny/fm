@@ -52,15 +52,16 @@ app.controller('AdministrationUserlistCardController', function($scope, $http, $
         $scope.selectedUser = false;
         $http.get('/api/users?fields=_id+name').then(function (response) {
             $scope.users = response.data;
+            // Check the permissions for the details page for handling button visibility
+            return $http.get('/api/permissions/canRead/PERMISSION_ADMINISTRATION_USER');
+        }).then(function (response) {
+            $scope.canReadUserDetails = response.data;
+            return $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USER');
+        }).then(function (response) {
+            $scope.canWriteUserDetails = response.data;
             // Check preselection
             utils.handlePreselection($scope, $scope.users, $scope.selectUser);
-        });
-        // Check the permissions for the details page for handling button visibility
-        $http.get('/api/permissions/canRead/PERMISSION_ADMINISTRATION_USER').then(function (response) {
-            $scope.canReadUserDetails = response.data;
-        });
-        $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USER').then(function (response) {
-            $scope.canWriteUserDetails = response.data;
+            if (!$scope.params.preselection) utils.setLocation('users');
         });
     }
 

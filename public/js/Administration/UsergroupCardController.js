@@ -168,18 +168,18 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
         if ($scope.params.userGroupId) {
             // Existing userGroup
             $http.get('/api/usergroups/' + $scope.params.userGroupId + '?fields=_id+name').then(function(userGroupsResponse) {
-                var userGroup = userGroupsResponse.data;
+                $scope.userGroup = userGroupsResponse.data;
                 $scope.isNewUserGroup = false;
-                $scope.userGroup = userGroup;
-                $scope.userGroupName = userGroup.name; // Prevent updating the label when changing the name input value
-                $scope.relationsEntity = { type:'usergroups', id:userGroup._id };
-                $http.get('/api/users/?fields=_id+name&userGroupId=' + $scope.params.userGroupId).then(function(usersResponse) {
-                    userGroup.users = usersResponse.data;
-                });
-                $http.get('/api/permissions/assigned/' + $scope.params.userGroupId).then(function(permissionsResponse) {
-                    userGroup.permissions = permissionsResponse.data;
-                });
+                $scope.userGroupName = $scope.userGroup.name; // Prevent updating the label when changing the name input value
+                $scope.relationsEntity = { type:'usergroups', id:$scope.userGroup._id };
+                return $http.get('/api/users/?fields=_id+name&userGroupId=' + $scope.params.userGroupId);
+            }).then(function(usersResponse) {
+                $scope.userGroup.users = usersResponse.data;
+                return $http.get('/api/permissions/assigned/' + $scope.params.userGroupId);
+            }).then(function(permissionsResponse) {
+                $scope.userGroup.permissions = permissionsResponse.data;
                 checkCanAddPermission();
+                utils.setLocation('usergroups/' + $scope.params.userGroupId);
             });
         } else {
             // New userGroup

@@ -22,7 +22,8 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             if (menuItem.action) {
                 menuItem.action();
             } else {
-                $scope.showmainCard(menuItem.mainCard);
+                angular.element(document.querySelector('#cardcanvas')).empty();
+                utils.addCardWithPermission(menuItem.mainCard, null, menuItem.permission);
                 $mdSidenav('left').close();
             }
         } else {
@@ -30,11 +31,6 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             $mdSidenav('left').close();
         }
     }
-
-    $scope.showmainCard = function(cardUrl) {
-        angular.element(document.querySelector('#cardcanvas')).empty();
-        utils.addCard(cardUrl);
-    };
 
     $scope.handleDirectUrls = function() {
         var mappings = {
