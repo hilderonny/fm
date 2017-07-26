@@ -118,7 +118,7 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
                             break;
                         }
                     }
-                    utils.setLocation('users/' + $scope.params.userId);
+                    utils.setLocation('/users/' + $scope.params.userId);
                 });
             });
         } else {

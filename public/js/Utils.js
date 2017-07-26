@@ -146,8 +146,9 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 if (elementToSelect) selectFunction(elementToSelect);
             }
         },
-
         setLocation: function(url) {
+            if ($location.url() === url) return;
+            $rootScope.ignoreNextLocationChange = true;
             $location.url(url);
         }
 

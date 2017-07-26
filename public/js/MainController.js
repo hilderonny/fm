@@ -143,6 +143,10 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     // Handle direct URLs, checked after login
 
     $rootScope.$on('$locationChangeSuccess', function(evt, newUrl, oldUrl) {
+        if ($rootScope.ignoreNextLocationChange) {
+            $rootScope.ignoreNextLocationChange = false;
+            return;
+        }
         $scope.path = $location.path().split('/');
         $scope.hash = $location.hash();
         if (newUrl === oldUrl) return;

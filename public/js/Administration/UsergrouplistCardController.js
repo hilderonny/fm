@@ -53,7 +53,7 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ht
             $scope.userGroups = response.data;
             // Check preselection
             utils.handlePreselection($scope, $scope.userGroups, $scope.selectUserGroup);
-            if (!$scope.params.preselection) utils.setLocation('usergroups');
+            if (!$scope.params.preselection) utils.setLocation('/usergroups');
         });
     }
 

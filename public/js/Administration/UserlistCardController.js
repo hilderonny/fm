@@ -61,7 +61,7 @@ app.controller('AdministrationUserlistCardController', function($scope, $http, $
             $scope.canWriteUserDetails = response.data;
             // Check preselection
             utils.handlePreselection($scope, $scope.users, $scope.selectUser);
-            if (!$scope.params.preselection) utils.setLocation('users');
+            if (!$scope.params.preselection) utils.setLocation('/users');
         });
     }
 

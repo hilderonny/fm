@@ -179,7 +179,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
             }).then(function(permissionsResponse) {
                 $scope.userGroup.permissions = permissionsResponse.data;
                 checkCanAddPermission();
-                utils.setLocation('usergroups/' + $scope.params.userGroupId);
+                utils.setLocation('/usergroups/' + $scope.params.userGroupId);
             });
         } else {
             // New userGroup

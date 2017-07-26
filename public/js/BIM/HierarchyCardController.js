@@ -104,9 +104,8 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
                 if (fmObject.children) fmObject.children.forEach(flattenFmObjects);
             };
             flattenFmObjects($scope.fmObject);
-            console.log(flatFmObjects);
             utils.handlePreselection($scope, flatFmObjects, $scope.selectFmObject);
-            if (!$scope.params.preselection) utils.setLocation('fmobjects');
+            if (!$scope.params.preselection) utils.setLocation('/fmobjects');
         });
     }
 
