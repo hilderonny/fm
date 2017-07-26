@@ -6,75 +6,57 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
         $scope.selectedFmObject.type = savedFmObject.type;
     };
     var deleteFmObjectCallback = function() {
-        var parentFmObject = $scope.selectedFmObject.parent;
-        for (var i = 0; i < parentFmObject.children.length; i++) {
-            var childFmObject = parentFmObject.children[i];
-            if (childFmObject._id === $scope.selectedFmObject._id) {
-                parentFmObject.children.splice(i, 1);
-                $scope.selectedFmObject = false;
-                break;
-            }
+        var idx = $scope.flatFmObjects.indexOf($scope.selectedFmObject);
+        while ($scope.flatFmObjects[idx+1] && $scope.flatFmObjects[idx+1].level > $scope.selectedFmObject.level) {
+            $scope.flatFmObjects.splice(idx + 1, 1);
         }
+        $scope.flatFmObjects.splice(idx, 1);
+        closeFmObjectCallback();
     };
-    var createFmObjectCallback = function(createdFmObject, event) {
-        var parentFmObject = $scope.selectedFmObject ? $scope.selectedFmObject: $scope.fmObject;
-        createdFmObject.children = []; 
-        parentFmObject.children.push(createdFmObject);
-        prepareReferencesToParent(parentFmObject);
-        if (!parentFmObject.isOpen) {
-            $scope.openFmObject(parentFmObject, event);
+    var createFmObjectCallback = function(createdFmObject) {
+        if ($scope.selectedFmObject) {
+            if (!$scope.selectedFmObject.children) $scope.selectedFmObject.children = [];
+            var indexToInsert = $scope.flatFmObjects.indexOf($scope.selectedFmObject) + 1;
+            while ($scope.flatFmObjects[indexToInsert].level > $scope.selectedFmObject.level) indexToInsert++;
+            $scope.flatFmObjects.splice(indexToInsert, 0, createdFmObject);
+            $scope.selectedFmObject.children.push(createdFmObject);
+            createdFmObject.level = $scope.selectedFmObject.level + 1;
+        } else {
+            createdFmObject.level = 0;
+            $scope.flatFmObjects.push(createdFmObject);
         }
-        $scope.selectFmObject(createdFmObject, event);
+        $scope.selectFmObject(createdFmObject);
     };
     var closeFmObjectCallback = function() {
+        console.log('CLOSE');
         $scope.selectedFmObject = false;
-    };
-
-    // Click on Arrow button to open or close an hierarchy level
-    $scope.openFmObject = function(fmObject, event) {
-        fmObject.isOpen = !fmObject.isOpen;
-        (event || window.event).stopPropagation(); // Prevent that card receives click event
+        utils.setLocation('/fmobjects');
     };
 
     // Click on level name or icon to select it or click on card to unselect all
-    // Passing events for Firefox: http://stackoverflow.com/a/30777938
-    $scope.selectFmObject = function(fmObject, event) {
+    $scope.selectFmObject = function(fmObject) {
         utils.removeCardsToTheRightOf($element);
-        if (fmObject) {
-            utils.addCard('BIM/FmobjectCard', {
-                fmObjectId: fmObject._id,
-                saveFmObjectCallback: saveFmObjectCallback,
-                deleteFmObjectCallback: deleteFmObjectCallback,
-                closeCallback: closeFmObjectCallback,
-                isSelection: $scope.params.isSelection,
-                selectButtonText: $scope.params.selectButtonText,
-                selectCallback: $scope.params.selectCallback
-            });
-        }
-        $scope.selectedFmObject = fmObject;
-        (event || window.event).stopPropagation(); // Prevent that card receives click event
-    };
-
-    // Click on new FM object button opens detail dialog with new FM object data
-    $scope.newFmObject = function(event) {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('BIM/FmobjectCard', {
-            parentFmObjectId: $scope.selectedFmObject ? $scope.selectedFmObject._id : null,
-            createFmObjectCallback: createFmObjectCallback,
+        utils.addCardWithPermission('BIM/FmobjectCard', {
+            fmObjectId: fmObject._id,
+            createFmObjectCallback: createFmObjectCallback, // Wird benötigt, wenn Unterelemente erzeugt werden
             saveFmObjectCallback: saveFmObjectCallback,
             deleteFmObjectCallback: deleteFmObjectCallback,
             closeCallback: closeFmObjectCallback
+        }, 'PERMISSION_BIM_FMOBJECT').then(function() {
+            $scope.selectedFmObject = fmObject;
         });
-        (event || window.event).stopPropagation(); // Prevent that card receives click event
-    }
+    };
 
-    var prepareReferencesToParent = function(fmObject) {
-        for (var i = 0; i < fmObject.children.length; i++) {
-            var childFmObject = fmObject.children[i];
-            childFmObject.parent = fmObject;
-            prepareReferencesToParent(childFmObject);
-        }
-    }
+    // Click on new FM object button opens detail dialog with new FM object data
+    $scope.newFmObject = function() {
+        $scope.selectedFmObject = null;
+        utils.removeCardsToTheRightOf($element);
+        utils.addCardWithPermission('BIM/FmobjectCard', {
+            parentFmObjectId: null,
+            createFmObjectCallback: createFmObjectCallback,
+            closeCallback: closeFmObjectCallback
+        }, 'PERMISSION_BIM_FMOBJECT');
+    };
 
     // User clicks on close button
     $scope.closeCard = function() {
@@ -86,13 +68,9 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
     };
 
     $scope.load = function() {
+        var rootFmObjects;
         $http.get('/api/fmobjects').then(function(response) {
-            var rootFmObjects = response.data;
-            $scope.fmObject = {
-                children: rootFmObjects
-            };
-            prepareReferencesToParent($scope.fmObject);
-        }).then(function() {
+            rootFmObjects = response.data;
             // Check write permission
             return $http.get('/api/permissions/canWrite/PERMISSION_BIM_FMOBJECT');
         }).then(function (response) {
@@ -100,11 +78,13 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
             // Check preselection
             $scope.flatFmObjects = [];
             var flattenFmObjects = function(fmObject, level) {
-                if (level >= 0) $scope.flatFmObjects.push(fmObject); // Root-Objekt ignorieren
+                $scope.flatFmObjects.push(fmObject); // Root-Objekt ignorieren
                 fmObject.level = level;
                 if (fmObject.children) fmObject.children.forEach(function(f) { flattenFmObjects(f, level + 1) });
             };
-            flattenFmObjects($scope.fmObject, -1);
+            rootFmObjects.forEach(function(fmo) {
+                flattenFmObjects(fmo, 0);
+            });
             utils.handlePreselection($scope, $scope.flatFmObjects, $scope.selectFmObject);
             if (!$scope.params.preselection) utils.setLocation('/fmobjects');
         });

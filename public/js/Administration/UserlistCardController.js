@@ -19,6 +19,7 @@ app.controller('AdministrationUserlistCardController', function($scope, $http, $
     };
     var closeUserCardCallback = function() {
         $scope.selectedUser = false;
+        utils.setLocation('/users');
     };
 
     // Click on user in user list shows user details

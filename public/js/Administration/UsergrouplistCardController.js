@@ -19,6 +19,7 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ht
     };
     var closeUserGroupCardCallback = function() {
         $scope.selectedUserGroup = false;
+        utils.setLocation('/usergroups');
     };
 
     // Click on userGroup in userGroup list shows userGroup details

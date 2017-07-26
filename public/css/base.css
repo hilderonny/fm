@@ -51,6 +51,7 @@ md-card  button.close {
 
 md-card md-toolbar.md-toolbar-tools {
     padding: 0 8px;
+    min-height: 36px;
 }
 
 md-card md-toolbar button md-icon {
@@ -65,6 +66,12 @@ md-card > md-card-content {
     flex-direction: column;
     flex: 1;
     background-color: rgba(255,255,255,0.97);
+}
+
+md-card.list-details-details {
+    flex: 1;
+    width: initial;
+    min-width: initial;
 }
 
 md-card-content > md-grid-list {
@@ -86,12 +93,6 @@ md-card-title-text {
 md-card-title-text > span {
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-md-content.list-details md-card:nth-of-type(2) {
-    flex: 1;
-    width: initial;
-    min-width: initial;
 }
 
 md-icon {
@@ -200,6 +201,11 @@ md-list-item.active, md-list-item > div.active {
 
 md-list-item.level-1 { -webkit-margin-start: 16px; }
 md-list-item.level-2 { -webkit-margin-start: 32px; }
+md-list-item.level-3 { -webkit-margin-start: 48px; }
+md-list-item.level-4 { -webkit-margin-start: 64px; }
+md-list-item.level-5 { -webkit-margin-start: 80px; }
+md-list-item.level-6 { -webkit-margin-start: 96px; }
+md-list-item.level-7 { -webkit-margin-start: 112px; }
 
 md-list-item.strikethrough h3, md-list-item.strikethrough h4, md-list-item.strikethrough p {
     color:#bbbbbb;
@@ -669,6 +675,10 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
     md-list-item .md-list-item-inner > md-icon:first-child:not(.md-avatar-icon) {
         margin-top:0;
         margin-bottom: 0;
+    }
+
+    md-list-item md-icon.forward {
+        display: none;
     }
 
     .md-list-item-text > * {

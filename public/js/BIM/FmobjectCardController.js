@@ -10,8 +10,18 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
         'FMOBJECTS_TYPE_INVENTORY'
     ];
     
+    // Click on new FM object button opens detail dialog with new FM object data
+    $scope.newFmObject = function() {
+        utils.removeCard($element);
+        utils.addCardWithPermission('BIM/FmobjectCard', {
+            parentFmObjectId: $scope.fmObject._id,
+            createFmObjectCallback: $scope.params.createFmObjectCallback,
+            closeCallback: $scope.params.closeCallback
+        }, 'PERMISSION_BIM_FMOBJECT');
+    };
+
     // Click on Create-button to create a new FM object
-    $scope.createFmObject = function(event) {
+    $scope.createFmObject = function() {
         var fmObjectToSend =  { 
             name: $scope.fmObject.name, 
             type: $scope.fmObject.type, 
@@ -26,7 +36,7 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
             $scope.fmObjectName = $scope.fmObject.name; 
             $scope.relationsEntity = { type:'fmobjects', id:createdFmObject._id };
             if ($scope.params.createFmObjectCallback) {
-                $scope.params.createFmObjectCallback(createdFmObject, event);
+                $scope.params.createFmObjectCallback(createdFmObject);
             }
             $translate(['TRK_FMOBJECTS_FM_OBJECT_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_FM_OBJECT_CREATED).hideDelay(1000).position('bottom right'));
@@ -48,31 +58,33 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
             if ($scope.params.saveFmObjectCallback) {
                 $scope.params.saveFmObjectCallback(savedFmObject);
             }
-            $translate(['TRK_FMOBJECTS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
-            });
+            return $translate(['TRK_FMOBJECTS_CHANGES_SAVED']);
+        }).then(function(translations) {
+            $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
         });
     };
 
     // Click on delete button to delete an existing FM object
     $scope.deleteFmObject = function() {
-        $translate(['TRK_FMOBJECTS_FM_OBJECT_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
-            $translate('TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT', { fmObjectName: $scope.fmObjectName }).then(function(TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT) {
-                var confirm = $mdDialog.confirm()
-                    .title(TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT)
-                    .ok(translations.TRK_YES)
-                    .cancel(translations.TRK_NO);
-                $mdDialog.show(confirm).then(function() {
-                    $http.delete('/api/fmobjects/' + $scope.fmObject._id).then(function(response) {
-                        if ($scope.params.deleteFmObjectCallback) {
-                            $scope.params.deleteFmObjectCallback();
-                        }
-                        utils.removeCardsToTheRightOf($element);
-                        utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_FM_OBJECT_DELETED).hideDelay(1000).position('bottom right'));
-                    });
-                });
-            });
+        var translations;
+        $translate(['TRK_FMOBJECTS_FM_OBJECT_DELETED', 'TRK_YES', 'TRK_NO']).then(function(t) {
+            translations = t;
+            return $translate('TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT', { fmObjectName: $scope.fmObjectName });
+        }).then(function(TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT) {
+            var confirm = $mdDialog.confirm()
+                .title(TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT)
+                .ok(translations.TRK_YES)
+                .cancel(translations.TRK_NO);
+            return $mdDialog.show(confirm);
+        }).then(function() {
+            return $http.delete('/api/fmobjects/' + $scope.fmObject._id);
+        }).then(function(response) {
+            if ($scope.params.deleteFmObjectCallback) {
+                $scope.params.deleteFmObjectCallback();
+            }
+            utils.removeCardsToTheRightOf($element);
+            utils.removeCard($element);
+            $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_FM_OBJECT_DELETED).hideDelay(1000).position('bottom right'));
         });
     };
 

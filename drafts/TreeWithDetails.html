@@ -31,9 +31,9 @@ app.controller('MainController', function($scope, $rootScope) {
 
         <div flex layout="row">
 
-            <md-content flex layout="row" class="list-details">
+            <md-content flex layout="row">
 
-                <md-card class="list">
+                <md-card class="list-details-list">
 
                     <md-toolbar class="md-toolbar-tools md-accent">
                         <md-button><md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon><p>Top Level</p></md-button>
@@ -60,7 +60,7 @@ app.controller('MainController', function($scope, $rootScope) {
                     </md-card-content>
                 </md-card>
 
-                <md-card>
+                <md-card class="list-details-details">
 
                     <!-- Kartenbreite abhängig von Anzahl Kindelemente: https://codepen.io/mattlubner/pen/RWPYdx -->
 
