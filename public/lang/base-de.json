@@ -35,6 +35,7 @@
     "TRK_PERMISSIONS_WRITE" : "Schreiben",
     "TRK_RELATIONS_ADD_LINK" : "Verknüpfung hinzufügen",
     "TRK_RELATIONS_DELETED" : "Die Verknüpfung wurde gelöscht",
+    "TRK_RELATIONS_NEW_LINK" : "Verknüpfung",
     "TRK_RELATIONS_REALLY_DELETE_RELATION" : "Möchten Sie die Verknüpfung wirklich löschen?",
     "TRK_RELATIONS_RELATION_CREATED" : "Die Verknüpfung wurde erstellt",
     "TRK_RELATIONS_LINKS" : "Verknüpfungen",

@@ -113,7 +113,7 @@ app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, 
                     return {
                         icon:'material/User', 
                         firstLine:user.name,
-                        secondLine:user.userGroup[0].name,
+                        secondLine: user.userGroup.name,
                         type:'users',
                         id:user._id
                     };
@@ -211,10 +211,13 @@ app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, 
      */
     $scope.onNewLinkClick = function(evt) {
         var nodeToHandle = evt.currentTarget;
-        while (nodeToHandle && !nodeToHandle.classList.contains('relations-anchor')) {
+        /*
+        while (nodeToHandle && nodeToHandle.tagName.toLowerCase() !== 'md-toolbar') {
             nodeToHandle = nodeToHandle.parentNode;
+            console.log(nodeToHandle.tagName);
         }
-        var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_END, $mdPanel.yPosition.ALIGN_TOPS);
+        */
+        var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.CENTER, $mdPanel.yPosition.BELOW);
         var parentScope = $scope;
         $mdPanel.open({
             attachTo: angular.element(document.body),

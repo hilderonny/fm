@@ -107,38 +107,28 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
             });
         },
         fmobjects: function(relationList) {
-            return new Promise(function(resolve, reject) {
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/fmobjects/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var fmObjects = response.data;
-                    if (!fmObjects || fmObjects.length < 1) return resolve(false);
-                    var relations = {
-                        title: 'FMOBJECTS_FM_OBJECTS',
-                        items: fmObjects.map(function(fmObject) {
-                            return { // ViewModel für einzelnen Eintrag
-                                icon:'fm/' + fmObject.type, 
-                                firstLine:fmObject.name,
-                                secondLine:fmObject.path.map(function(pathElement) {
-                                    return pathElement.name
-                                }).join (' » '),
-                                id:fmObject._id,
-                                relationId:targetIds[fmObject._id].relationId,
-                                onSelect: function() {
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'BIM/FmobjectCard', {
-                                        fmObjectId: fmObject._id,
-                                        saveFmObjectCallback: $scope.loadRelations,
-                                        deleteFmObjectCallback:$scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_BIM_FMOBJECT');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.fmobjects = relations;
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/fmobjects/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var fmObjects = response.data;
+                if (!fmObjects || fmObjects.length < 1) return Promise.resolve(false);
+                var relations = {
+                    title: 'FMOBJECTS_FM_OBJECTS',
+                    items: fmObjects.map(function(fmObject) {
+                        return { // ViewModel für einzelnen Eintrag
+                            icon:'fm/' + fmObject.type, 
+                            firstLine:fmObject.name,
+                            secondLine:fmObject.path.map(function(pathElement) {
+                                return pathElement.name
+                            }).join (' » '),
+                            id:fmObject._id,
+                            relationId:targetIds[fmObject._id].relationId,
+                            targetUrl:'/fmobjects/' + fmObject._id
+                        };
+                    })
+                }
+                $scope.relations.fmobjects = relations;
+                return Promise.resolve(relations);
             });
         },
         folders: function(relationList) {
@@ -209,68 +199,48 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
             });
         },
         usergroups: function(relationList) {
-            return new Promise(function(resolve, reject) {
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/usergroups/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var userGroups = response.data;
-                    if (!userGroups || userGroups.length < 1) return resolve(false);
-                    var relations = {
-                        title: 'USERGROUPS_USERGROUPS',
-                        items: userGroups.map(function(userGroup) {
-                            return {
-                                icon:'material/User Group Man Man', 
-                                firstLine:userGroup.name,
-                                id:userGroup._id,
-                                relationId:targetIds[userGroup._id].relationId,
-                                onSelect: function() {
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'Administration/UsergroupCard', {
-                                        userGroupId: userGroup._id,
-                                        saveUserGroupCallback: $scope.loadRelations,
-                                        deleteUserGroupCallback:$scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_ADMINISTRATION_USERGROUP');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.usergroups = relations;
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/usergroups/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var userGroups = response.data;
+                if (!userGroups || userGroups.length < 1) return Promise.resolve(false);
+                var relations = {
+                    title: 'USERGROUPS_USERGROUPS',
+                    items: userGroups.map(function(userGroup) {
+                        return {
+                            icon:'material/User Group Man Man', 
+                            firstLine:userGroup.name,
+                            id:userGroup._id,
+                            relationId:targetIds[userGroup._id].relationId,
+                            targetUrl:'/usergroups/' + userGroup._id
+                        };
+                    })
+                }
+                $scope.relations.usergroups = relations;
+                return Promise.resolve(relations);
             });
         },
         users: function(relationList) {
-            return new Promise(function(resolve, reject) {
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/users/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var users = response.data;
-                    if (!users || users.length < 1) return resolve(false);
-                    var relations = {
-                        title: 'USERS_USERS',
-                        items: users.map(function(user) {
-                            return {
-                                icon:'material/User', 
-                                firstLine: user.name,
-                                secondLine: user.userGroup[0].name,
-                                id:user._id,
-                                relationId:targetIds[user._id].relationId,
-                                onSelect: function() {
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'Administration/UserCard', {
-                                        userId: user._id,
-                                        saveUserCallback: $scope.loadRelations,
-                                        deleteUserCallback:$scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_ADMINISTRATION_USERGROUP');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.users = relations;
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/users/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var users = response.data;
+                if (!users || users.length < 1) return Promise.resolve(false);
+                var relations = {
+                    title: 'USERS_USERS',
+                    items: users.map(function(user) {
+                        return {
+                            icon:'material/User', 
+                            firstLine: user.name,
+                            secondLine: user.userGroup[0].name,
+                            id:user._id,
+                            relationId:targetIds[user._id].relationId,
+                            targetUrl:'/users/' + user._id
+                        };
+                    })
+                }
+                $scope.relations.users = relations;
+                return Promise.resolve(relations);
             });
         },
     };
@@ -348,9 +318,10 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
      * Behandelt die Auswahl eines Listenelementes und öffnet die entsprechende Detailkarte
      */
     $scope.onSelectElement = function(element) {
-        if (element.onSelect) element.onSelect().then(function() {
+        if (element.targetUrl) {
+            utils.setLocation(element.targetUrl, true);
             $scope.selectedElement = element;
-        });
+        };
     };
 
     /**
