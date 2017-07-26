@@ -98,13 +98,14 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
         }).then(function (response) {
             $scope.canWriteFmObjects = response.data;
             // Check preselection
-            var flatFmObjects = [];
-            var flattenFmObjects = function(fmObject) {
-                flatFmObjects.push(fmObject);
-                if (fmObject.children) fmObject.children.forEach(flattenFmObjects);
+            $scope.flatFmObjects = [];
+            var flattenFmObjects = function(fmObject, level) {
+                if (level >= 0) $scope.flatFmObjects.push(fmObject); // Root-Objekt ignorieren
+                fmObject.level = level;
+                if (fmObject.children) fmObject.children.forEach(function(f) { flattenFmObjects(f, level + 1) });
             };
-            flattenFmObjects($scope.fmObject);
-            utils.handlePreselection($scope, flatFmObjects, $scope.selectFmObject);
+            flattenFmObjects($scope.fmObject, -1);
+            utils.handlePreselection($scope, $scope.flatFmObjects, $scope.selectFmObject);
             if (!$scope.params.preselection) utils.setLocation('/fmobjects');
         });
     }

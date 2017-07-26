@@ -16,7 +16,13 @@
     </md-button>
 
     <md-card-content>
-        <ng-include flex src="'partial/BIM/HierarchyCardLevel.html'"></ng-include>
+        <md-list>
+            <md-list-item ng-click="selectFmObject(fmObject)" ng-repeat="fmObject in flatFmObjects" ng-class="[{active:selectedFmObject==fmObject}, 'level-'+fmObject.level]" aria-label="{{fmObject.name}}">
+                <md-icon md-svg-src="/css/icons/fm/{{fmObject.type}}.svg"></md-icon>
+                <p ng-bind="fmObject.name"></p>
+                <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary"></md-icon>
+            </md-list-item>
+        </md-list>
     </md-card-content>
 
 </md-card>

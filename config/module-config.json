@@ -201,7 +201,6 @@
                 "partial/BIM/FmobjectCardDetails.html",
                 "partial/BIM/FmObjectList.html",
                 "partial/BIM/HierarchyCard.html",
-                "partial/BIM/HierarchyCardLevel.html"
             ],
             "include" : [
                 "public/js/BIM/FmobjectCardController.js",
