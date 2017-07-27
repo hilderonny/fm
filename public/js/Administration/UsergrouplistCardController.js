@@ -4,14 +4,8 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ht
         $scope.selectedUserGroup.name = savedUserGroup.name;
     };
     var deleteUserGroupCallback = function() {
-        for (var i = 0; i < $scope.userGroups.length; i++) {
-            var userGroup = $scope.userGroups[i];
-            if (userGroup._id === $scope.selectedUserGroup._id) {
-                $scope.userGroups.splice(i, 1);
-                $scope.selectedUserGroup = false;
-                break;
-            }
-        }
+        $scope.userGroups.splice($scope.userGroups.indexOf($scope.selectedUserGroup), 1);
+        closeUserGroupCardCallback();
     };
     var createUserGroupCallback = function(createdUserGroup) {
         $scope.userGroups.push(createdUserGroup);
@@ -24,25 +18,27 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ht
 
     // Click on userGroup in userGroup list shows userGroup details
     $scope.selectUserGroup = function(selectedUserGroup) {
+        if (!$scope.canReadUserGroupDetails) return;
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/UsergroupCard', {
+        utils.addCardWithPermission('Administration/UsergroupCard', {
             userGroupId: selectedUserGroup._id,
             saveUserGroupCallback: saveUserGroupCallback,
             deleteUserGroupCallback: deleteUserGroupCallback,
             closeCallback: closeUserGroupCardCallback
+        }, 'PERMISSION_ADMINISTRATION_USERGROUP').then(function() {
+            $scope.selectedUserGroup = selectedUserGroup;
         });
-        $scope.selectedUserGroup = selectedUserGroup;
     }
 
     // Click on new userGroup button opens detail dialog with new userGroup data
     $scope.newUsergroup = function() {
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/UsergroupCard', {
+        utils.addCardWithPermission('Administration/UsergroupCard', {
             createUserGroupCallback: createUserGroupCallback,
             saveUserGroupCallback: saveUserGroupCallback,
             deleteUserGroupCallback: deleteUserGroupCallback,
             closeCallback: closeUserGroupCardCallback
-        });
+        }, 'PERMISSION_ADMINISTRATION_USERGROUP');
     }
 
     // Loads the userGroups list from the server
@@ -50,8 +46,15 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ht
     // - $scope.params.preselection : ID of the userGroup to select in the list
     $scope.load = function() {
         $scope.selectedUserGroup = false;
-        $http.get('/api/usergroups?fields=_id+name').then(function (response) {
+        $http.get('/api/usergroups').then(function (response) {
             $scope.userGroups = response.data;
+            // Check the permissions for the details page for handling button visibility
+            return $http.get('/api/permissions/canRead/PERMISSION_ADMINISTRATION_USERGROUP');
+        }).then(function (response) {
+            $scope.canReadUserGroupDetails = response.data;
+            return $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USERGROUP');
+        }).then(function (response) {
+            $scope.canWriteUserGroupDetails = response.data;
             // Check preselection
             utils.handlePreselection($scope, $scope.userGroups, $scope.selectUserGroup);
             if (!$scope.params.preselection) utils.setLocation('/usergroups');

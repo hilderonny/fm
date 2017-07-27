@@ -13,6 +13,7 @@
             <md-list-item ng-repeat="user in users | orderBy: 'name'" ng-click="selectUser(user)" ng-class="selectedUser == user ? 'active' : false" aria-label="{{user.name}}">
                 <md-icon md-svg-src="/css/icons/material/User.svg"></md-icon>
                 <p ng-bind="user.name"></p>
+                <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
             </md-list-item>
         </md-list>
     </md-card-content>

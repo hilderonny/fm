@@ -100,6 +100,7 @@ router.get('/forLoggedInUser', auth(false, false, 'base'), (req, res) => {
  * set and later the corresponding module was removed from the client
  * or from the portal.
  * Used for listing all assigned permissions for a specific user group.
+ * DEPRECATED: Wird gar nicht mehr benötigt
  */
 router.get('/assigned/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'base'), validateId, validateSameClientId('usergroups'), function(req, res) {
     // Filter permission keys for portal and client of user group
@@ -116,6 +117,32 @@ router.get('/assigned/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'ba
     });
 });
 
+router.get('/forUserGroup/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'base'), validateId, validateSameClientId('usergroups'), function(req, res) {
+    var userGroup, permissionKeysForClient;
+    req.db.get('usergroups').findOne(req.params.id).then(function(ug) {
+        userGroup = ug;
+        return configHelper.getAvailablePermissionKeysForClient(userGroup.clientId, req.db);
+    }).then(function(keys) {
+        permissionKeysForClient = keys;
+        // Obtain the permissions for the user group
+        return req.db.get('permissions').find({ 
+            userGroupId: userGroup._id,
+            key: { $in: permissionKeysForClient } // Filter out permissions which are not available to the portal and client of the user group
+        });
+    }).then((permissionsOfUserGroup) => {
+        var result = permissionKeysForClient.map((key) => {
+            var existingPermission = permissionsOfUserGroup.find((p) => p.key === key);
+            return {
+                _id: existingPermission ? existingPermission._id : null,
+                canRead: existingPermission ? existingPermission.canRead : false,
+                canWrite: existingPermission ? existingPermission.canWrite : false,
+                key: key
+            };
+        });
+        res.send(result);
+    });
+});
+
 /**
  * Get all available permissions for a specific user group.
  * Only those permissions, which were not already assigned and which are
@@ -124,6 +151,7 @@ router.get('/assigned/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'ba
  * selected one will also be contained in the result. This is the case for
  * selecting an existing permission where the combobox contains the selected
  * permission itself.
+ * DEPRECATED: Wird gar nicht mehr benötigt
  */
 router.get('/available/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'base'), validateId, validateSameClientId('usergroups'), function(req, res) {
     var userGroupId = req.params.id;

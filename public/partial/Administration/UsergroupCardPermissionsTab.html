@@ -1,10 +1,11 @@
 <md-list class="lines-beetween-items">
-    <md-list-item ng-repeat="permission in userGroup.permissions | orderBy: 'key'" ng-click="selectPermission(permission)" ng-class="{active:selectedPermission == permission}" aria-label="{{permission.key}}">
-        <md-icon ng-if="!permission.canRead && !permission.canWrite" md-svg-src="/css/icons/material/Cancel.svg"></md-icon>
-        <md-icon ng-if="permission.canRead && !permission.canWrite" md-svg-src="/css/icons/material/Search.svg"></md-icon>
-        <md-icon ng-if="permission.canWrite" md-svg-src="/css/icons/material/Edit.svg"></md-icon>
-        <p>
-            <span translate="TRK_{{ permission.key }}"></span>
-        </p>
+    <md-list-item ng-repeat="permission in userGroup.permissions | orderBy: 'key'" ng-class="{active:selectedPermission == permission}" aria-label="{{permission.key}}">
+        <p translate="TRK_{{ permission.key }}"></p>
+        <md-button class="md-icon-button" aria-label="READ" ng-click="switchRead(permission)" ng-class="{disabled:!permission.canRead}">
+            <md-icon md-svg-src="/css/icons/material/Search.svg"></md-icon>
+        </md-button>
+        <md-button class="md-icon-button" aria-label="WRITE" ng-click="switchWrite(permission)" ng-class="{disabled:!permission.canWrite}">
+            <md-icon md-svg-src="/css/icons/material/Edit.svg"></md-icon>
+        </md-button>
     </md-list-item>
 </md-list>

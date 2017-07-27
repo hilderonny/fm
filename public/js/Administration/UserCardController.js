@@ -1,7 +1,7 @@
 app.controller('AdministrationUserCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.resetUserNameError = function() {
-        $scope.usersForm.un.$setValidity('nameInUse', true);
+        if ($scope.usersForm) $scope.usersForm.un.$setValidity('nameInUse', true);
     }
 
     // Click on Create-button to create a new user

@@ -277,13 +277,7 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
             $scope.relations = {};
             // Verknüpfungsdetails abhängig von deren Typ laden
             Object.keys(sortedRelations).forEach(function(typeName) {
-                $scope.relationLoaders[typeName](sortedRelations[typeName]).then(function(relations) {
-                    if (relations && relations.items) relations.items.forEach(function(item) {
-                        if ($scope.selectedElement && item.id === $scope.selectedElement.id) {
-                            $scope.selectedElement = item;
-                        }
-                    })
-                });
+                $scope.relationLoaders[typeName](sortedRelations[typeName]);
             });
         });
     };
@@ -320,7 +314,6 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
     $scope.onSelectElement = function(element) {
         if (element.targetUrl) {
             utils.setLocation(element.targetUrl, true);
-            $scope.selectedElement = element;
         };
     };
 

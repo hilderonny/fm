@@ -4,14 +4,8 @@ app.controller('AdministrationUserlistCardController', function($scope, $http, $
         $scope.selectedUser.name = savedUser.name;
     };
     var deleteUserCallback = function() {
-        for (var i = 0; i < $scope.users.length; i++) {
-            var user = $scope.users[i];
-            if (user._id === $scope.selectedUser._id) {
-                $scope.users.splice(i, 1);
-                $scope.selectedUser = false;
-                break;
-            }
-        }
+        $scope.users.splice($scope.users.indexOf($scope.selectedUser), 1);
+        closeUserCardCallback();
     };
     var createUserCallback = function(createdUser) {
         $scope.users.push(createdUser);
@@ -26,24 +20,25 @@ app.controller('AdministrationUserlistCardController', function($scope, $http, $
     $scope.selectUser = function(selectedUser) {
         if (!$scope.canReadUserDetails) return;
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/UserCard', {
+        utils.addCardWithPermission('Administration/UserCard', {
             userId: selectedUser._id,
             saveUserCallback: saveUserCallback,
             deleteUserCallback: deleteUserCallback,
             closeCallback: closeUserCardCallback
+        }, 'PERMISSION_ADMINISTRATION_USER').then(function() {
+            $scope.selectedUser = selectedUser;
         });
-        $scope.selectedUser = selectedUser;
     }
 
     // Click on new user button opens detail dialog with new user data
     $scope.newUser = function() {
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/UserCard', {
+        utils.addCardWithPermission('Administration/UserCard', {
             createUserCallback: createUserCallback,
             saveUserCallback: saveUserCallback,
             deleteUserCallback: deleteUserCallback,
             closeCallback: closeUserCardCallback
-        });
+        }, 'PERMISSION_ADMINISTRATION_USER');
     }
 
     // Loads the users list from the server

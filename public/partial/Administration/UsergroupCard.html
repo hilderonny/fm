@@ -1,31 +1,22 @@
-<md-card ng-cloak ng-controller="AdministrationUsergroupCardController" style="background-image:url('/css/icons/office/User Group Man Man.svg');">
+<md-card ng-cloak ng-controller="AdministrationUsergroupCardController" style="background-image:url('/css/icons/office/User Group Man Man.svg');" class="list-details-details">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-if="canAddPermission" ng-click="newPermission()" aria-label="ADD PERMISSION">
+            <md-tooltip md-direction="bottom"><span translate>TRK_USERGROUPS_ADD_NEW_PERMISSION</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+            <p translate>TRK_USERGROUPS_PERMISSION</p>
+        </md-button>
+        <ng-include ng-if="!isNewUserGroup" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
     
-    <md-card-title flex="none" class="withfab">
+    <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" ng-if="!isNewUserGroup"><span ng-bind="userGroupName"></span></span>
             <span class="md-headline" ng-if="isNewUserGroup" translate>TRK_USERGROUPS_NEW_USERGROUP</span>
         </md-card-title-text>
     </md-card-title>
-
-    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewUserGroup">
-        <md-fab-trigger>
-            <md-button class="md-fab md-accent" aria-label="MENU">
-                <md-tooltip md-direction="left"><span translate>TRK_USERGROUPS_MORE_ACTIONS</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
-            </md-button>
-        </md-fab-trigger>
-        <md-fab-actions>
-            <md-button class="md-fab md-raised md-mini" ng-if="canAddPermission" ng-click="newPermission()" aria-label="ADD PERMISSION">
-                <md-tooltip md-direction="left"><span translate>TRK_USERGROUPS_ADD_NEW_PERMISSION</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-            </md-button>
-            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
-        </md-fab-actions>
-    </md-fab-speed-dial>
-
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
 
     <md-tabs flex>
         <md-tab>

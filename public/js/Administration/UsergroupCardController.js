@@ -1,25 +1,4 @@
 app.controller('AdministrationUsergroupCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
-    var saveUserCallback = function(savedUser) {
-        if (savedUser.userGroupId !== $scope.userGroup._id) {
-            deleteUserCallback(); // Remove user from list because he was assigned to another userGroup
-            utils.removeCardsToTheRightOf($element);
-        } else {
-            $scope.selectedUser.name = savedUser.name;
-        }
-    };
-    var deleteUserCallback = function() {
-        for (var i = 0; i < $scope.userGroup.users.length; i++) {
-            var user = $scope.userGroup.users[i];
-            if (user._id === $scope.selectedUser._id) {
-                $scope.userGroup.users.splice(i, 1);
-                $scope.selectedUser = false;
-                break;
-            }
-        }
-    };
-    var closeUserCardCallback = function() {
-        $scope.selectedUser = false;
-    };
     
     var createPermissionCallback = function(createdPermission) {
         $scope.userGroup.permissions.push(createdPermission);
@@ -121,15 +100,8 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
 
     // User selects an user in the User tab
     $scope.selectUser = function(selectedUser) {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/UserCard', {
-            userId: selectedUser._id,
-            saveUserCallback: saveUserCallback,
-            deleteUserCallback: deleteUserCallback,
-            closeCallback: closeUserCardCallback
-        });
-        $scope.selectedUser = selectedUser;
-    }
+        utils.setLocation('/users/' + selectedUser._id, true);
+    };
 
     // Click on permission in permission list shows permission details
     $scope.selectPermission = function(selectedPermission) {
@@ -179,6 +151,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
             }).then(function(permissionsResponse) {
                 $scope.userGroup.permissions = permissionsResponse.data;
                 checkCanAddPermission();
+                $http.get('/api/permissions/forUserGroup/' + $scope.params.userGroupId).then(function(response) { console.log(response.data);});
                 utils.setLocation('/usergroups/' + $scope.params.userGroupId);
             });
         } else {
