@@ -84,3 +84,5 @@ app.directive('compareTo', function() {
     }
   };
 });
+
+app.directUrlMappings = {};

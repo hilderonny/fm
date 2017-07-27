@@ -61,3 +61,9 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ht
     $scope.load();
 
 });
+
+app.directUrlMappings.usergroups = {
+    mainMenu: 'TRK_MENU_ADMINISTRATION',
+    subMenu: 'TRK_MENU_ADMINISTRATION_USERGROUPS',
+    additionalCard: 'Administration/UsergroupCard'
+};

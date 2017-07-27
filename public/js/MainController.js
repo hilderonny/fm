@@ -15,7 +15,6 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     }
 
     // Handle click on sidenav menu item
-    // Deprecated
     $scope.menuClick = function(menuItem) {
         $scope.currentMenuItem = menuItem;
         if (menuItem) {
@@ -32,26 +31,10 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
         }
     }
 
+
     $scope.handleDirectUrls = function() {
-        var mappings = {
-            fmobjects: {
-                mainMenu: 'TRK_MENU_BIM',
-                subMenu: 'TRK_MENU_BIM_FMOBJECTS',
-                additionalCard: 'BIM/FmobjectCard'
-            },
-            usergroups: {
-                mainMenu: 'TRK_MENU_ADMINISTRATION',
-                subMenu: 'TRK_MENU_ADMINISTRATION_USERGROUPS',
-                additionalCard: 'Administration/UsergroupCard'
-            },
-            users:  {
-                mainMenu: 'TRK_MENU_ADMINISTRATION',
-                subMenu: 'TRK_MENU_ADMINISTRATION_USERS',
-                additionalCard: 'Administration/UserCard'
-            }
-        };
-        if (mappings[$scope.path[1]]) {
-            var mapping = mappings[$scope.path[1]];
+        if (app.directUrlMappings[$scope.path[1]]) {
+            var mapping = app.directUrlMappings[$scope.path[1]];
             var mainMenu = $scope.menu.find(function(m) { return m.title === mapping.mainMenu; });
             if (!mainMenu) return;
             var subMenu = mainMenu.items.find(function(mi) { return mi.title === mapping.subMenu; });
@@ -60,8 +43,6 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             angular.element(document.querySelector('#cardcanvas')).empty();
             utils.addCardWithPermission(subMenu.mainCard, { preselection: $scope.path[2] }, subMenu.permission);
         }
-        //if ($scope.path.length === 2) $scope.handleOneLevelDirectUrl($scope.path[1]);
-        //else if ($scope.path.length === 3) $scope.handleTwoLevelDirectUrl($scope.path[1], $scope.path[2]);
     };
 
     // User clicked on login button

@@ -17,7 +17,7 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
         if ($scope.selectedFmObject) {
             if (!$scope.selectedFmObject.children) $scope.selectedFmObject.children = [];
             var indexToInsert = $scope.flatFmObjects.indexOf($scope.selectedFmObject) + 1;
-            while ($scope.flatFmObjects[indexToInsert].level > $scope.selectedFmObject.level) indexToInsert++;
+            while ($scope.flatFmObjects[indexToInsert] && $scope.flatFmObjects[indexToInsert].level > $scope.selectedFmObject.level) indexToInsert++;
             $scope.flatFmObjects.splice(indexToInsert, 0, createdFmObject);
             $scope.selectedFmObject.children.push(createdFmObject);
             createdFmObject.level = $scope.selectedFmObject.level + 1;
@@ -93,3 +93,9 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
     $scope.load();
 
 });
+
+app.directUrlMappings.fmobjects = {
+    mainMenu: 'TRK_MENU_BIM',
+    subMenu: 'TRK_MENU_BIM_FMOBJECTS',
+    additionalCard: 'BIM/FmobjectCard'
+};
