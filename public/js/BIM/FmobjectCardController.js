@@ -1,4 +1,4 @@
-app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
+app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
 
     $scope.types = [
         'FMOBJECTS_TYPE_PROJECT',
@@ -126,9 +126,7 @@ app.controller('BIMFmobjectCardController', function($scope, $http, $mdDialog, $
                 $scope.fmObject.parentId = $scope.params.parentFmObjectId;
             }
         }
-        $http.get('/api/permissions/canWrite/PERMISSION_BIM_FMOBJECT').then(function (response) {
-            $scope.canWriteFmObjects = response.data;
-        });
+        $scope.canWriteFmObjects = $rootScope.canWrite('PERMISSION_BIM_FMOBJECT');
     };
 
     $scope.load();

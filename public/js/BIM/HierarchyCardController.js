@@ -1,4 +1,4 @@
-app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, $element, $mdToast, $mdPanel, utils) {
+app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $mdPanel, utils) {
     
     // Event callbacks
     var saveFmObjectCallback = function(savedFmObject) {
@@ -72,9 +72,7 @@ app.controller('BIMHierarchyCardController', function($scope, $http, $mdDialog, 
         $http.get('/api/fmobjects').then(function(response) {
             rootFmObjects = response.data;
             // Check write permission
-            return $http.get('/api/permissions/canWrite/PERMISSION_BIM_FMOBJECT');
-        }).then(function (response) {
-            $scope.canWriteFmObjects = response.data;
+            $scope.canWriteFmObjects = $rootScope.canWrite('PERMISSION_BIM_FMOBJECT');
             // Check preselection
             $scope.flatFmObjects = [];
             var flattenFmObjects = function(fmObject, level) {

@@ -78,7 +78,7 @@ router.get('/forLoggedInUser', auth(false, false, 'base'), (req, res) => {
         // Bei Administratoren werden alle Permissions einfach zurück gegeben
         if (req.user.isAdmin) {
             var adminPermissions = permissionKeysForClient.map(function(permissionKey) {
-                return { key:permissionKey, canRead:true, canWrite:true, clientId:req.user.clientid, userGroupId: req.user.userGroupId };
+                return { key:permissionKey, canRead:true, canWrite:true, clientId:req.user.clientId, userGroupId: req.user.userGroupId };
             });
             res.send(adminPermissions);
         } else {

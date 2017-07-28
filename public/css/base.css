@@ -199,13 +199,13 @@ md-list-item.active, md-list-item > div.active {
     background-color: lightgrey;
 }
 
-md-list-item.level-1 { -webkit-margin-start: 16px; }
-md-list-item.level-2 { -webkit-margin-start: 32px; }
-md-list-item.level-3 { -webkit-margin-start: 48px; }
-md-list-item.level-4 { -webkit-margin-start: 64px; }
-md-list-item.level-5 { -webkit-margin-start: 80px; }
-md-list-item.level-6 { -webkit-margin-start: 96px; }
-md-list-item.level-7 { -webkit-margin-start: 112px; }
+md-list-item.level-1 { margin-left: 16px; }
+md-list-item.level-2 { margin-left: 32px; }
+md-list-item.level-3 { margin-left: 48px; }
+md-list-item.level-4 { margin-left: 64px; }
+md-list-item.level-5 { margin-left: 80px; }
+md-list-item.level-6 { margin-left: 96px; }
+md-list-item.level-7 { margin-left: 112px; }
 
 md-list-item.strikethrough h3, md-list-item.strikethrough h4, md-list-item.strikethrough p {
     color:#bbbbbb;

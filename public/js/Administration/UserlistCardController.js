@@ -1,4 +1,4 @@
-app.controller('AdministrationUserlistCardController', function($scope, $http, $mdDialog, $element, utils) {
+app.controller('AdministrationUserlistCardController', function($scope, $rootScope, $http, $mdDialog, $element, utils) {
     
     var saveUserCallback = function(savedUser) {
         $scope.selectedUser.name = savedUser.name;
@@ -49,12 +49,8 @@ app.controller('AdministrationUserlistCardController', function($scope, $http, $
         $http.get('/api/users?fields=_id+name').then(function (response) {
             $scope.users = response.data;
             // Check the permissions for the details page for handling button visibility
-            return $http.get('/api/permissions/canRead/PERMISSION_ADMINISTRATION_USER');
-        }).then(function (response) {
-            $scope.canReadUserDetails = response.data;
-            return $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USER');
-        }).then(function (response) {
-            $scope.canWriteUserDetails = response.data;
+            $scope.canWriteUserDetails = $rootScope.canWrite('PERMISSION_ADMINISTRATION_USER');
+            $scope.canReadUserDetails = $rootScope.canRead('PERMISSION_ADMINISTRATION_USER');
             // Check preselection
             utils.handlePreselection($scope, $scope.users, $scope.selectUser);
             if (!$scope.params.preselection) utils.setLocation('/users');

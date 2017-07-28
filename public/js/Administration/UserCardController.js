@@ -1,4 +1,4 @@
-app.controller('AdministrationUserCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationUserCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.resetUserNameError = function() {
         if ($scope.usersForm) $scope.usersForm.un.$setValidity('nameInUse', true);
@@ -131,9 +131,7 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
             });
         }
         // Check the permissions for the details page for handling button visibility
-        $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USER').then(function (response) {
-            $scope.canWriteUserDetails = response.data;
-        });
+        $scope.canWriteUserDetails = $rootScope.canWrite('PERMISSION_ADMINISTRATION_USER');
     }
 
     $scope.load();
