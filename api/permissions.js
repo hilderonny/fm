@@ -20,56 +20,6 @@ var co = require('../utils/constants');
 var configHelper = require('../utils/configHelper');
 
 /**
- * Checks whether the currently logged in user has read permissions on the
- * given permission key. Used for handling link and button visibility on client.
- */
-router.get('/canRead/:key', auth(false, false, 'base'), (req, res) => {
-    // Als Erstes prüfen, ob der Mandant überhaupt Zugriff auf das Modul hat, welches die Berechtigung verwendet
-    configHelper.isPermissionAvailableToClient(req.user.clientId, req.params.key, req.db).then(function(permissionIsAvailable) {
-        if (!permissionIsAvailable) {
-            res.send(false);
-            return;
-        }
-        if (req.user.isAdmin) {
-            res.send(true);
-            return;
-        }
-        req.db.get('permissions').findOne({ key: req.params.key, userGroupId: req.user.userGroupId, canRead: true}).then((permission) => {
-            if (!permission) {
-                res.send(false);
-                return;
-            }
-            res.send(true);
-        });
-    });
-});
-
-/**
- * Checks whether the currently logged in user has write permissions on the
- * given permission key. Used for handling link and button visibility on client.
- */
-router.get('/canWrite/:key', auth(false, false, 'base'), (req, res) => {
-    // Als Erstes prüfen, ob der Mandant überhaupt Zugriff auf das Modul hat, welches die Berechtigung verwendet
-    configHelper.isPermissionAvailableToClient(req.user.clientId, req.params.key, req.db).then(function(permissionIsAvailable) {
-        if (!permissionIsAvailable) {
-            res.send(false);
-            return;
-        }
-        if (req.user.isAdmin) {
-            res.send(true);
-            return;
-        }
-        req.db.get('permissions').findOne({ key: req.params.key, userGroupId: req.user.userGroupId, canWrite: true}).then((permission) => {
-            if (!permission) {
-                res.send(false);
-                return;
-            }
-            res.send(true);
-        });
-    });
-});
-
-/**
  * Liefert alle Berechtigungen für den angemeldeten Benutzer. Wird für Verweise verwendet, um
  * Verweismenü zu filtern.
  */

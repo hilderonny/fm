@@ -50,7 +50,7 @@ app.controller('LicenseServerPortalListCardController', function($scope, $http, 
     // - $scope.params.selectedPortalId : ID of the portal to select in the list
     $scope.load = function() {
         $scope.selectedPortal = false;
-        $http.get('/api/portals?fields=_id+name+isActive').then(function (response) {
+        $http.get('/api/portals').then(function (response) {
             $scope.portals = response.data;
             if ($scope.params.selectedPortalId) {
                 for (var i = 0; i < $scope.portals.length; i++) {

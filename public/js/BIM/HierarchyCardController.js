@@ -94,6 +94,5 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
 
 app.directUrlMappings.fmobjects = {
     mainMenu: 'TRK_MENU_BIM',
-    subMenu: 'TRK_MENU_BIM_FMOBJECTS',
-    additionalCard: 'BIM/FmobjectCard'
+    subMenu: 'TRK_MENU_BIM_FMOBJECTS'
 };

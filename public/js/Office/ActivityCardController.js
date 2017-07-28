@@ -111,9 +111,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
             $scope.isNewActivity = true;
             $scope.activity = { date: new Date(), name: '', task: '', isDone: false, type: 'ACTIVITIES_TYPE_NONE', comment: '', fullyEditable: true };
         }
-        $http.get('/api/permissions/canWrite/PERMISSION_OFFICE_ACTIVITY').then(function (response) {
-            $scope.canWriteActivities = response.data;
-        });
+        $scope.canWriteActivities = $rootScope.canWrite('PERMISSION_OFFICE_ACTIVITY');
     };
 
     // Listen on locale changes to update the date picker. Event is fired from MainController

@@ -62,6 +62,5 @@ app.controller('AdministrationUserlistCardController', function($scope, $rootSco
 
 app.directUrlMappings.users = {
     mainMenu: 'TRK_MENU_ADMINISTRATION',
-    subMenu: 'TRK_MENU_ADMINISTRATION_USERS',
-    additionalCard: 'Administration/UserCard'
+    subMenu: 'TRK_MENU_ADMINISTRATION_USERS'
 };

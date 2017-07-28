@@ -14,13 +14,76 @@
         <md-tab>
             <md-tab-label><span translate>TRK_SETTINGS_LICENSE</span></md-tab-label>
             <md-tab-body>
-                <ng-include src="'partial/Administration/PortalSettingsCardLicenseTab.html'"></ng-include>
+                <form name="portalSettingsLicenseForm">
+
+                    <md-card-content layout="column">
+
+                        <md-input-container flex>
+                            <label translate>TRK_SETTINGS_LICENSESERVER</label>
+                            <input type="url" ng-model="settings.licenseServer" name="licenseServer" ng-required="true" ng-keydown="resetLicenseServerError()">
+                            <div ng-messages="portalSettingsForm.licenseServer.$error">
+                                <div ng-message="required" translate>TRK_SETTINGS_MISSING_LICENSESERVER</div>
+                            </div>
+                        </md-input-container>
+
+                        <md-input-container flex>
+                            <label translate>TRK_SETTINGS_LICENSEKEY</label>
+                            <textarea ng-model="settings.licenseKey" rows="5"></textarea>
+                        </md-input-container>
+
+                    </md-card-content>
+
+                    <md-card-actions layout="row" layout-align="end center">
+                        <md-button class="md-raised md-accent" ng-click="saveSettings()" ng-if="canWritePortalSettings" ng-disabled="portalSettingsForm.$invalid"><span translate>TRK_SETTINGS_SAVE</span></md-button>
+                    </md-card-actions>
+
+                </form>
+
             </md-tab-body>
         </md-tab>
         <md-tab>
             <md-tab-label><span translate>TRK_SETTINGS_UPDATES</span></md-tab-label>
             <md-tab-body>
-                <md-card-content ng-include="'partial/Administration/PortalSettingsCardUpdatesTab.html'"></md-card-content>
+                <md-card-content>
+                    <form name="portalSettingsUpdatesForm">
+
+                        <md-card-content layout="column" ng-if="updatesChecked">
+                            <h4 translate>TRK_SETTINGS_VERSION_ON_SERVER</h4>
+                            <p>{{versionOnServer}}</p>
+                            <h4 translate>TRK_SETTINGS_LOCAL_VERSION</h4>
+                            <p>{{localVersion}}</p>
+                        </md-card-content>
+
+                        <md-card-content layout="column" ng-if="updateInProgress">
+                            <h4 translate>TRK_SETTINGS_UPDATE_IN_PROGRESS</h4>
+                            <p translate>TRK_SETTINGS_WAIT_FOR_UPDATE_COMPLETION</p>
+                        </md-card-content>
+
+                        <md-card-actions layout="row" layout-align="end center">
+
+                            <md-button class="md-raised" ng-click="checkForUpdates()"><span translate>TRK_SETTINGS_CHECK_FOR_UPDATES</span></md-button>
+
+                            <md-button class="md-raised md-accent" ng-if="updatesChecked && canWritePortalSettings" ng-click="downloadAndInstallUpdate()"><span translate>TRK_SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE</span></md-button>
+                            
+                        </md-card-actions>
+
+                        <md-card-actions layout="row" layout-align="end center">
+
+                            <md-button ng-if="canWritePortalSettings" class="md-raised" ng-click="downloadUpdate()" ng-disabled="portalSettingsForm.$invalid">
+                                <span translate>TRK_SETTINGS_UPLOAD_UPDATE</span>
+                                <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadFile(this)" accept="application/zip" />
+                            </md-button>
+                            
+                        </md-card-actions>
+
+                    </form>
+
+                    <div class="progress-panel" ng-if="isUploading">
+                        <md-progress-circular md-mode="{{uploadMode}}" value="{{uploadProgress}}"></md-progress-circular>
+                        <span>{{uploadProgress}} %</span>
+                    </div>
+                    
+                </md-card-content>
             </md-tab-body>
         </md-tab>
     </md-tabs>

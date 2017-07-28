@@ -1,4 +1,4 @@
-app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
+app.controller('OfficeCalendarCardController', function($scope, $rootScope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
     
     // Event callbacks
     var saveActivityCallback = function(savedActivity) {
@@ -101,9 +101,7 @@ app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog
         $http.get('api/activities').then(function(response) {
             $scope.activityListActivities = response.data;
         });
-        $http.get('/api/permissions/canWrite/PERMISSION_OFFICE_ACTIVITY').then(function (response) {
-            $scope.canWriteActivities = response.data;
-        });
+        $scope.canWriteActivities = $rootScope.canWrite('PERMISSION_OFFICE_ACTIVITY');
     }
 
     $scope.load();

@@ -1,4 +1,4 @@
-app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
+app.controller('OfficeFolderCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
     
     var createFolderCallback = function(createdFolder) {
         $scope.folder.folders.push(createdFolder);
@@ -194,9 +194,7 @@ app.controller('OfficeFolderCardController', function($scope, $http, $mdDialog, 
      * Ermittelt Berechtigungen für diverse Buttons vom Server
      */
     $scope.checkPermission = function() {
-        $http.get('/api/permissions/canWrite/PERMISSION_OFFICE_DOCUMENT').then(function(canWriteResponse) {
-            $scope.canWriteDocuments = canWriteResponse.data;
-        });
+        $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
     };
 
     // Loads the folder details or prepares the empty dialog for a new folder

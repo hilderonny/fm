@@ -246,9 +246,7 @@
             "public" : [
                 "css/icons/material/Settings.svg",
                 "css/icons/office/Settings.svg",
-                "partial/Administration/PortalSettingsCard.html",
-                "partial/Administration/PortalSettingsCardLicenseTab.html",
-                "partial/Administration/PortalSettingsCardUpdatesTab.html"
+                "partial/Administration/PortalSettingsCard.html"
             ],
             "include" : [
                 "public/js/Administration/PortalSettingsCardController.js"
