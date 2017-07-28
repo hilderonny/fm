@@ -198,6 +198,9 @@ function findPermissionKeyInModuleConfig(permissionKey, errors, fileName) {
                 });
             }
         });
+        if (mod.permissions && mod.permissions.indexOf(permissionKey) >= 0) {
+            found = true;
+        }
         if (mod.settingsets) mod.settingsets.forEach(function eachSettingSet(settingSet) {
             if (settingSet.permission === permissionKey) {
                 found = true;
@@ -208,7 +211,7 @@ function findPermissionKeyInModuleConfig(permissionKey, errors, fileName) {
     if (!found) errors.push(`Translation key TRK_${permissionKey} for permission defined in ${fileName} is not used in module-config`);
 }
 
-describe.only('Translations', function describeTranslations() {
+describe('Translations', function describeTranslations() {
     var itFunction = it;//process.env.IGNORE_FAILED_TRANSLATION_TESTS === 'true' ? skipIfFailed : it;
     var translationDefinitions = collectTranslationDefinitions();
     // Iterate over modules
