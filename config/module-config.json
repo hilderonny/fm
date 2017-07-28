@@ -60,7 +60,6 @@
                 "node_modules/angular-translate/dist/angular-translate.min.js",
                 "node_modules/angular-translate/dist/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js",
                 "node_modules/moment/locale/de.js",
-                "node_modules/moment/locale/bg.js",
                 "public/js/AppSetup.js",
                 "public/js/Utils.js",
                 "public/js/MainController.js",
@@ -74,7 +73,7 @@
                 "public/js/Core/RelationsMenuController.js",
                 "public/js/Core/RelationsTabController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar" ],
+            "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_ADMINISTRATION",
@@ -105,7 +104,7 @@
                 "public/js/Office/ActivityCardController.js",
                 "public/js/Office/CalendarCardController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar"],
+            "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_OFFICE",
@@ -137,7 +136,7 @@
                 "public/js/Administration/ClientModuleCardController.js",
                 "public/js/Administration/ClientListCardController.js"
             ],
-            "languages" : [ "en", "de", "bg","ar" ],
+            "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_PORTAL",
@@ -170,7 +169,7 @@
                 "public/js/Office/DocumentCardController.js",
                 "public/js/Office/FolderCardController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar" ],
+            "languages" : [ "en", "de" ],
             "utils": [ "documentsHelper" ],
             "menu": [
                 {
@@ -207,7 +206,7 @@
                 "public/js/BIM/FmobjectCardController.js",
                 "public/js/BIM/HierarchyCardController.js"
             ],
-            "languages" : ["en", "de", "bg", "ar"],
+            "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_BIM",
@@ -234,7 +233,7 @@
                 "public/js/LicenseServer/PortalModuleCardController.js",
                 "public/js/LicenseServer/PortalListCardController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar" ],
+            "languages" : [ "en", "de" ],
             "menu" : [
                 {
                     "title": "TRK_MENU_LICENSESERVER",
@@ -258,7 +257,7 @@
             "include" : [
                 "public/js/Administration/PortalSettingsCardController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar" ],
+            "languages" : [ "en", "de" ],
             "settingsets" : [
                 { "mainCard": "Administration/PortalSettingsCard", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "type": "SETTINGSET_TYPE_PORTAL", "icon": "Server", "permission": "PERMISSION_SETTINGS_PORTAL" }
             ]
