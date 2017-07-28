@@ -10,9 +10,9 @@
     </md-card-content>
 
     <md-card-actions layout="row" layout-align="end center">
-        <md-button class="md-raised md-accent" ng-if="isNewUserGroup" ng-click="createUserGroup()" ng-disabled="userGroupsForm.$invalid"><span translate>TRK_USERGROUPS_CREATE</span></md-button>
-        <md-button class="md-raised md-accent" ng-hide="isNewUserGroup" ng-click="saveUserGroup()" ng-disabled="userGroupsForm.$invalid"><span translate>TRK_USERGROUPS_SAVE</span></md-button>
-        <md-button class="md-raised md-warn" ng-hide="isNewUserGroup || userGroup.users.length > 0" ng-click="deleteUserGroup()"><span translate>TRK_USERGROUPS_DELETE</span></md-button>
+        <md-button class="md-raised md-accent" ng-if="isNewUserGroup && canWriteUserGroup" ng-click="createUserGroup()" ng-disabled="userGroupsForm.$invalid"><span translate>TRK_USERGROUPS_CREATE</span></md-button>
+        <md-button class="md-raised md-accent" ng-if="!isNewUserGroup && canWriteUserGroup" ng-click="saveUserGroup()" ng-disabled="userGroupsForm.$invalid"><span translate>TRK_USERGROUPS_SAVE</span></md-button>
+        <md-button class="md-raised md-warn" ng-if="!isNewUserGroup && userGroup.users.length == 0 && canWriteUserGroup" ng-click="deleteUserGroup()"><span translate>TRK_USERGROUPS_DELETE</span></md-button>
     </md-card-actions>
 
 </form>

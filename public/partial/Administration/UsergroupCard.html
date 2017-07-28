@@ -38,7 +38,7 @@
                 </md-card-content>
             </md-tab-body>
         </md-tab>
-        <md-tab ng-if="!isNewUserGroup">
+        <md-tab ng-if="!isNewUserGroup && canReadUser">
             <md-tab-label><span translate>TRK_USERGROUPS_USERS</span></md-tab-label>
             <md-tab-body>
                 <md-card-content ng-include="'partial/Administration/UsergroupCardUsersTab.html'"></md-card-content>

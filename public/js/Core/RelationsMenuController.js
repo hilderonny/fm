@@ -284,6 +284,9 @@ app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, 
                 return permission.canRead && referenceType.requiredReadPermission === permission.key;
             });
         });
+        $scope.canWriteRelations = !!permissions.find(function(permission) {
+            return permission.canWrite && permission.key === 'PERMISSION_CORE_RELATIONS';
+        });
     });
 
 });

@@ -319,10 +319,11 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
 }
 
 .disabled {
-    opacity: 0.3;
+    opacity: 0.2;
 }
 
 .disabled::before {
+    opacity:0.6;
     content: "";
     position: absolute;
     top: 0;

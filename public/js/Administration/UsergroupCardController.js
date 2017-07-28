@@ -131,6 +131,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
     };
 
     $scope.switchRead = function(permission) {
+        if (!$scope.canWriteUserGroup) return;
         var tempPermission = JSON.parse(JSON.stringify(permission))
         tempPermission.canRead = !tempPermission.canRead;
         if (!tempPermission.canRead) tempPermission.canWrite = false;
@@ -138,6 +139,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
     };
 
     $scope.switchWrite = function(permission) {
+        if (!$scope.canWriteUserGroup) return;
         var tempPermission = JSON.parse(JSON.stringify(permission))
         tempPermission.canWrite = !tempPermission.canWrite;
         if (tempPermission.canWrite) tempPermission.canRead = true;
@@ -172,6 +174,13 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
             $scope.isNewUserGroup = true;
             $scope.userGroup = { name : "" };
         }
+        // Check the permissions for the details page for handling button visibility
+        $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USERGROUP').then(function (response) {
+            $scope.canWriteUserGroup = response.data;
+        });
+        $http.get('/api/permissions/canRead/PERMISSION_ADMINISTRATION_USER').then(function (response) {
+            $scope.canReadUser = response.data;
+        });
     }
 
     $scope.load();

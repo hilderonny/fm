@@ -338,6 +338,20 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
 
     }
 
+    /*
+     * Prüft die Referenztypen, ob der angemeldete Benutzer Lesezugriff auf die Zielobjektlisten hat und gibt nur
+     * erlaubte Elemente in einem Promise zurück.
+     */
+    $http.get('/api/permissions/forLoggedInUser').then(function(response) {
+        var permissions = response.data;
+        $scope.canReadRelations = !!permissions.find(function(permission) {
+            return permission.canRead && permission.key === 'PERMISSION_CORE_RELATIONS';
+        });
+        $scope.canWriteRelations = !!permissions.find(function(permission) {
+            return permission.canWrite && permission.key === 'PERMISSION_CORE_RELATIONS';
+        });
+    });
+
     /**
      * Im übergeordneten Scope wird eine Methode zum Neuladen der Elemente referenziert,
      * die von anderen Kind-Controllern (RelationsMenuController) verwendet werden kann,
