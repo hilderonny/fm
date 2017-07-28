@@ -1,4 +1,4 @@
-app.controller('AdministrationUsergroupCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationUsergroupCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.getPermissions = function() {
         return $http.get('/api/permissions/forUserGroup/' + $scope.userGroup._id).then(function(permissionsResponse) {
@@ -82,31 +82,6 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
         utils.setLocation('/users/' + selectedUser._id, true);
     };
 
-    // Click on permission in permission list shows permission details
-    $scope.selectPermission = function(selectedPermission) {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/PermissionCard', {
-            permissionId: selectedPermission._id,
-            userGroupId: $scope.userGroup._id, // Also needed for API call
-            savePermissionCallback: savePermissionCallback,
-            deletePermissionCallback: deletePermissionCallback,
-            closeCallback: closePermissionCardCallback
-        });
-        $scope.selectedPermission = selectedPermission;
-    }
-
-    // Click on new user button opens detail dialog with new user data
-    $scope.newPermission = function() {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/PermissionCard', {
-            userGroupId: $scope.userGroup._id,
-            createPermissionCallback: createPermissionCallback,
-            savePermissionCallback: savePermissionCallback,
-            deletePermissionCallback: deletePermissionCallback,
-            closeCallback: closePermissionCardCallback
-        });
-    };
-
     $scope.savePermission = function(permissionToSave, permissionToUpdate) {
         if (permissionToSave._id) {
             if (permissionToSave.canRead || permissionToSave.canWrite) {
@@ -157,7 +132,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
         // Switch between creation of a new userGroup and loading of an existing userGroup
         if ($scope.params.userGroupId) {
             // Existing userGroup
-            $http.get('/api/usergroups/' + $scope.params.userGroupId + '?fields=_id+name').then(function(userGroupsResponse) {
+            $http.get('/api/usergroups/' + $scope.params.userGroupId).then(function(userGroupsResponse) {
                 $scope.userGroup = userGroupsResponse.data;
                 $scope.isNewUserGroup = false;
                 $scope.userGroupName = $scope.userGroup.name; // Prevent updating the label when changing the name input value
@@ -175,12 +150,8 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
             $scope.userGroup = { name : "" };
         }
         // Check the permissions for the details page for handling button visibility
-        $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USERGROUP').then(function (response) {
-            $scope.canWriteUserGroup = response.data;
-        });
-        $http.get('/api/permissions/canRead/PERMISSION_ADMINISTRATION_USER').then(function (response) {
-            $scope.canReadUser = response.data;
-        });
+        $scope.canWriteUserGroup = $rootScope.canWrite('PERMISSION_ADMINISTRATION_USERGROUP');
+        $scope.canReadUser = $rootScope.canRead('PERMISSION_ADMINISTRATION_USER');
     }
 
     $scope.load();

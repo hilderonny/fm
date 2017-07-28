@@ -18,13 +18,9 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         addCardWithPermission: function(cardTemplateUrl, params, requiredPermission) {
             var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
             // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
-            return $http.get('/api/permissions/canRead/' + requiredPermission).then(function permissionCheck(response) {
-                if (!response.data) {
-                    return Promise.reject();
-                }
-                utils.cardsToAdd.push(cardToAdd);
-                return $http.get('/partial/' + cardTemplateUrl + '.html', { cache: true});
-            }).then(function(response) {
+            if (!$rootScope.canRead(requiredPermission)) return;
+            utils.cardsToAdd.push(cardToAdd);
+            return $http.get('/partial/' + cardTemplateUrl + '.html', { cache: true}).then(function(response) {
                 // Check whether the card should still be shown. When the dummy object is no longer
                 // in the array, the request tooks too long and the user has done something other meanwhile
                 if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response

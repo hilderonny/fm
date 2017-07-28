@@ -17,7 +17,24 @@
         <md-tab>
             <md-tab-label><span translate>TRK_USERGROUPS_DETAILS</span></md-tab-label>
             <md-tab-body>
-                <ng-include src="'partial/Administration/UsergroupCardDetailsTab.html'"></ng-include>
+                <form name="userGroupsForm">
+
+                    <md-card-content layout="column">
+
+                        <md-input-container flex>
+                            <label translate>TRK_USERGROUPS_NAME</label>
+                            <input ng-model="userGroup.name" name="name">
+                        </md-input-container>
+
+                    </md-card-content>
+
+                    <md-card-actions layout="row" layout-align="end center">
+                        <md-button class="md-raised md-accent" ng-if="isNewUserGroup && canWriteUserGroup" ng-click="createUserGroup()" ng-disabled="userGroupsForm.$invalid"><span translate>TRK_USERGROUPS_CREATE</span></md-button>
+                        <md-button class="md-raised md-accent" ng-if="!isNewUserGroup && canWriteUserGroup" ng-click="saveUserGroup()" ng-disabled="userGroupsForm.$invalid"><span translate>TRK_USERGROUPS_SAVE</span></md-button>
+                        <md-button class="md-raised md-warn" ng-if="!isNewUserGroup && userGroup.users.length == 0 && canWriteUserGroup" ng-click="deleteUserGroup()"><span translate>TRK_USERGROUPS_DELETE</span></md-button>
+                    </md-card-actions>
+
+                </form>
             </md-tab-body>
         </md-tab>
         <md-tab ng-if="!isNewUserGroup">
@@ -41,7 +58,14 @@
         <md-tab ng-if="!isNewUserGroup && canReadUser">
             <md-tab-label><span translate>TRK_USERGROUPS_USERS</span></md-tab-label>
             <md-tab-body>
-                <md-card-content ng-include="'partial/Administration/UsergroupCardUsersTab.html'"></md-card-content>
+                <md-card-content>
+                    <md-list class="lines-beetween-items">
+                        <md-list-item ng-repeat="user in userGroup.users | orderBy: 'name'" ng-click="selectUser(user)" ng-class="{active:selectedUser == user}" aria-label="{{user.name}}">
+                            <md-icon md-svg-src="/css/icons/material/User.svg"></md-icon>
+                            <p ng-bind="user.name"></p>
+                        </md-list-item>
+                    </md-list>
+                </md-card-content>
             </md-tab-body>
         </md-tab>
         <ng-include ng-if="!isNewUserGroup" src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>

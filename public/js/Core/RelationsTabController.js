@@ -1,4 +1,4 @@
-app.controller('CoreRelationsTabController', function($scope, $http, $translate, $mdDialog, $mdToast, $element, $filter, utils) {
+app.controller('CoreRelationsTabController', function($scope, $rootScope, $http, $translate, $mdDialog, $mdToast, $element, $filter, utils) {
 
     /**
      * Hilfsfunktionen zum Laden und Aufarbeiten von Verknüpfungen
@@ -342,15 +342,8 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
      * Prüft die Referenztypen, ob der angemeldete Benutzer Lesezugriff auf die Zielobjektlisten hat und gibt nur
      * erlaubte Elemente in einem Promise zurück.
      */
-    $http.get('/api/permissions/forLoggedInUser').then(function(response) {
-        var permissions = response.data;
-        $scope.canReadRelations = !!permissions.find(function(permission) {
-            return permission.canRead && permission.key === 'PERMISSION_CORE_RELATIONS';
-        });
-        $scope.canWriteRelations = !!permissions.find(function(permission) {
-            return permission.canWrite && permission.key === 'PERMISSION_CORE_RELATIONS';
-        });
-    });
+    $scope.canWriteRelations = $rootScope.canWrite('PERMISSION_CORE_RELATIONS');
+    $scope.canReadRelations = $rootScope.canRead('PERMISSION_CORE_RELATIONS');
 
     /**
      * Im übergeordneten Scope wird eine Methode zum Neuladen der Elemente referenziert,

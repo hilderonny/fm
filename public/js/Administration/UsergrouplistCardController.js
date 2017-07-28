@@ -1,4 +1,4 @@
-app.controller('AdministrationUsergrouplistCardController', function($scope, $http, $mdDialog, $element, utils) {
+app.controller('AdministrationUsergrouplistCardController', function($scope, $rootScope, $http, $mdDialog, $element, utils) {
     
     var saveUserGroupCallback = function(savedUserGroup) {
         $scope.selectedUserGroup.name = savedUserGroup.name;
@@ -49,12 +49,8 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ht
         $http.get('/api/usergroups').then(function (response) {
             $scope.userGroups = response.data;
             // Check the permissions for the details page for handling button visibility
-            return $http.get('/api/permissions/canRead/PERMISSION_ADMINISTRATION_USERGROUP');
-        }).then(function (response) {
-            $scope.canReadUserGroupDetails = response.data;
-            return $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USERGROUP');
-        }).then(function (response) {
-            $scope.canWriteUserGroupDetails = response.data;
+            $scope.canWriteUserGroupDetails = $rootScope.canWrite('PERMISSION_ADMINISTRATION_USERGROUP');
+            $scope.canReadUserGroupDetails = $rootScope.canRead('PERMISSION_ADMINISTRATION_USERGROUP');
             // Check preselection
             utils.handlePreselection($scope, $scope.userGroups, $scope.selectUserGroup);
             if (!$scope.params.preselection) utils.setLocation('/usergroups');

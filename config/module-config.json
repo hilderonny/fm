@@ -34,8 +34,6 @@
                 "partial/Administration/SettingSetListCard.html",
                 "partial/Administration/UserCard.html",
                 "partial/Administration/UsergroupCard.html",
-                "partial/Administration/UsergroupCardDetailsTab.html",
-                "partial/Administration/UsergroupCardUsersTab.html",
                 "partial/Administration/UsergrouplistCard.html",
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",

@@ -1,4 +1,4 @@
-app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, $mdDialog, $translate, $mdToast, moment) {
+app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http, $mdPanel, $mdDialog, $translate, $mdToast, moment) {
 
     /**
      * Liste aller möglicher Referenztypen für das Menü für neue Verknüpfungen.
@@ -277,16 +277,9 @@ app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, 
      * Prüft die Referenztypen, ob der angemeldete Benutzer Lesezugriff auf die Zielobjektlisten hat und gibt nur
      * erlaubte Elemente in einem Promise zurück.
      */
-    $http.get('/api/permissions/forLoggedInUser').then(function(response) {
-        var permissions = response.data;
-        $scope.availableReferenceTypes = allReferenceTypes.filter(function(referenceType) {
-            return !!permissions.find(function(permission) { // !! is to convert undefined to false
-                return permission.canRead && referenceType.requiredReadPermission === permission.key;
-            });
-        });
-        $scope.canWriteRelations = !!permissions.find(function(permission) {
-            return permission.canWrite && permission.key === 'PERMISSION_CORE_RELATIONS';
-        });
+    $scope.canWriteRelations = $rootScope.canWrite('PERMISSION_CORE_RELATIONS');
+    $scope.availableReferenceTypes = allReferenceTypes.filter(function(referenceType) {
+        return $rootScope.canRead(referenceType.requiredReadPermission);
     });
 
 });

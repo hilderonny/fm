@@ -28,6 +28,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
         } else {
             angular.element(document.querySelector('#cardcanvas')).empty();
             $mdSidenav('left').close();
+            utils.setLocation('/');
         }
     }
 
@@ -44,6 +45,16 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             utils.addCardWithPermission(subMenu.mainCard, { preselection: $scope.path[2] }, subMenu.permission);
         }
     };
+
+    $rootScope.permissions = {};
+
+    $rootScope.canRead = function(permissionKey) {
+        return $rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canRead;
+    }
+
+    $rootScope.canWrite = function(permissionKey) {
+        return $rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canWrite;
+    }
 
     // User clicked on login button
     $scope.doLogin = function(hideErrorMessage) {
@@ -76,10 +87,18 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                         $scope.isLoggedIn = false;
                     }
                 });
+                // Ermittelt zentral alle Berechtigungen für den angemeldeten Benutzer.
+                // Diese können dann per $rootScope.permissions[key] abgefragt werden.
+                return $http.get('/api/permissions/forLoggedInUser');
+            }).then(function(response) {
+                $rootScope.permissions = {};
+                response.data.forEach(function(permission) {
+                    $rootScope.permissions[permission.key] = permission;
+                });
+                $scope.isLoggingIn = false;
+                $scope.currentMenuItem = null;
                 $scope.handleDirectUrls();
             });
-            $scope.isLoggingIn = false;
-            $scope.currentMenuItem = null;
         }).catch(function() {
             localStorage.removeItem("loginCredentials"); // Delete login credentials to prevent login loop
             $scope.isLoggingIn = false;
