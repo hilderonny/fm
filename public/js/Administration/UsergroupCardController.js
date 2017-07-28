@@ -1,5 +1,15 @@
 app.controller('AdministrationUsergroupCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
+    $scope.getPermissions = function() {
+        return $http.get('/api/permissions/forUserGroup/' + $scope.userGroup._id).then(function(permissionsResponse) {
+            $scope.userGroup.permissions = permissionsResponse.data;
+            $scope.userGroup.permissions.forEach(function(permission) {
+                permission.translationKey = 'TRK_' + permission.key;
+            });
+            return Promise.resolve();
+        });
+    };
+
     // Click on Create-button to create a new userGroup
     $scope.createUserGroup = function() {
         var userGroupToSend = { name: $scope.userGroup.name };
@@ -10,9 +20,8 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
             $scope.userGroup._id = createdUserGroup._id;
             $scope.userGroupName = $scope.userGroup.name;
             $scope.relationsEntity = { type:'usergroups', id:createdUserGroup._id };
-            return $http.get('/api/permissions/forUserGroup/' + createdUserGroup._id);
-        }).then(function(permissionsResponse) {
-            $scope.userGroup.permissions = permissionsResponse.data;
+            return $scope.getPermissions();
+        }).then(function() {
             if ($scope.params.createUserGroupCallback) {
                 $scope.params.createUserGroupCallback(createdUserGroup);
             }
@@ -154,9 +163,8 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
                 return $http.get('/api/users/?userGroupId=' + $scope.params.userGroupId + '#ignore403');
             }).then(function(usersResponse) {
                 $scope.userGroup.users = usersResponse.data;
-                return $http.get('/api/permissions/forUserGroup/' + $scope.params.userGroupId);
-            }).then(function(permissionsResponse) {
-                $scope.userGroup.permissions = permissionsResponse.data;
+                return $scope.getPermissions();
+            }).then(function() {
                 utils.setLocation('/usergroups/' + $scope.params.userGroupId);
             });
         } else {

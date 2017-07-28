@@ -25,8 +25,8 @@
             <md-tab-body>
                 <md-card-content>
                     <md-list class="lines-beetween-items">
-                        <md-list-item ng-repeat="permission in userGroup.permissions | orderBy: 'key'" ng-class="{active:selectedPermission == permission}" aria-label="{{permission.key}}">
-                            <p translate="TRK_{{ permission.key }}"></p>
+                        <md-list-item ng-repeat="permission in userGroup.permissions | orderBy: 'translationKey | translate'" ng-class="{active:selectedPermission == permission}" aria-label="{{permission.key}}">
+                            <p translate="{{ permission.translationKey }}"></p>
                             <md-button ng-class="{'md-icon-button':true,disabled:!permission.canRead}" aria-label="READ" ng-click="switchRead(permission)" ng-class="{disabled:!permission.canRead}">
                                 <md-icon md-svg-src="/css/icons/material/Search.svg"></md-icon>
                             </md-button>

@@ -21,6 +21,7 @@
     "TRK_PERMISSION_ADMINISTRATION_USER" : "Administration - Benutzer",
     "TRK_PERMISSION_ADMINISTRATION_USERGROUP" : "Administration - Benutzergruppen",
     "TRK_PERMISSION_BIM_FMOBJECT" : "BIM - FM Objekte",
+    "TRK_PERMISSION_CORE_RELATIONS" : "Allgemein - Verknüpfungen",
     "TRK_PERMISSION_LICENSESERVER_PORTAL" : "Lizenzserver - Portale",
     "TRK_PERMISSION_OFFICE_ACTIVITY" : "Büro - Termine",
     "TRK_PERMISSION_OFFICE_DOCUMENT" : "Büro - Dokumente",
