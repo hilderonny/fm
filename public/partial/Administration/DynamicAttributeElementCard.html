@@ -16,8 +16,8 @@
                     <md-card-content  layout = "column" >
                         <md-input-container flex ng-repeat="language in languages">
                             <label translate = "TRK_DYNAMICATTRIBUTES_NAME_{{language}}"> </label>
-                            <input ng-if = "language =='en'" ng-model="dynamicattribute.name_en" ng-required="true">
-                            <input ng-if = "language !='en'" ng-model="attribute.translations[0]" >
+                            <input ng-if = "language =='en'" ng-model="attributeelement.text_en" ng-required="true">
+                            <input ng-if = "language !='en'" ng-model="attributeelement.translations[0]" >
                         </md-input-container>
                     </md-card-content>  
             </md-card-content>

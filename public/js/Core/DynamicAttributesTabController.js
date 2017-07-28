@@ -23,32 +23,6 @@ app.controller('CoreDynamicAttributesTabController', function($scope, $http, $tr
         return $scope.attributes ? Object.keys($scope.attributes).map(function(key) {
                 return $scope.attributes[key]; }) : [];
     }
+    
     $scope.attributesArray();
-
-    $scope.loadAttributeElements = function(dynamicAttributeId) {
-            $http.get('/api/dynamicattributes/options/' + dynamicAttributeId).then(function(response){
-            $scope.options = response.data;
-            $scope.options._id = dynamicAttributeId;
-            console.log($scope.options);
-        });
-    };
-
-    $scope.PrepareAttributeElements = function(){ 
-        //TODO: fix problem with asynchomous function execution!
-        console.log(Array.from($scope.attributesArray));
-        // forEach() operates only on arrays 
-        Array.from($scope.attributesArray).forEach(function(attributeInstance) {
-            console.log("Doing something here");
-            if(attributeInstance[type] == "DYNAMICATTRIBUTES_TYPE_PICKLIST"){
-                $scope.loadAttributeElements(attributeInstance._id);
-            }
-        });
-    }
-
-    $scope.PrepareAttributeElements();
-
-    $scope.attributeOptionsArray = function() {    
-        return $scope.options ? Object.keys($scope.options).map(function(key) {
-                return $scope.options[key]; }) : [];
-    }
 });

@@ -1,29 +1,33 @@
 <!--md-subheade><span translate>TRK_DYNAMICATTRIBUTES_ATTRIBUTES</span></md-subheade-->
 <md-card-content>
 
-    <md-list class="lines-beetween-items">
-        <!--TODO: find out why ordering is not working-->
-        <md-list-item ng-repeat="attribute in attributesArray() | orderBy: 'attribute.name_en'" >
-
-            <md-input-container flex ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_TEXT'">
-                <label ng-bind="attribute.name_en"></label>
+    <md-list class="lines-beetween-items">     
+        <md-list-item ng-repeat="attribute in attributesArray() | orderBy: 'type.name_en'" >
+            <md-input-container flex ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_TEXT'">
+                <label ng-bind="attribute.type.name_en"></label>
                 <input ng-model="attribute.value">
             </md-input-container>
-            
-            <md-input-container flex ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_BOOLEAN'">
-                <md-checkbox ng-model="attribute.value">   <p ng-bind="attribute.name_en"></p> </md-checkbox>
-            </md-input-container>
+        </md-list-item>
+    </md-list>  
 
-            <md-input-container flex ng-if="attribute.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST'">
-                <label ng-bind="attribute.name_en"></label>
+    <md-list class="lines-beetween-items">
+        <md-list-item ng-repeat="attribute in attributesArray() | orderBy: 'type.name_en'" >
+            <md-input-container flex ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_BOOLEAN'">
+                <md-checkbox ng-model="attribute.value">   <p ng-bind="attribute.type.name_en"></p> </md-checkbox>
+            </md-input-container>
+        </md-list-item>
+    </md-list>
+
+    <md-list class="lines-beetween-items">
+        <md-list-item ng-repeat="attribute in attributesArray() | orderBy: 'type.name_en'" >
+            <md-input-container flex ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST'">
+                <label ng-bind="attribute.type.name_en"></label>
                 <md-select ng-model="attribute.value">  
-                    <md-option ng-value="option" ng-repeat="option in attributeOptionsArray() | orderBy: 'option.tex_en'">
-                        <span ng-bind="option.tex_en"></span>
+                    <md-option ng-value="option['_id']" ng-repeat="option in attribute.options | orderBy: 'text_en' track by $index">
+                        <span ng-bind="option['text_en']"></span>
                     </md-option>
                 </md-select>
             </md-input-container>
-
-
         </md-list-item>
     </md-list>
 </md-card-content>

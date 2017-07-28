@@ -13,14 +13,13 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
         //Required properties are dynamicAttributeId and text_en
         var optionToSend = { 
             text_en: $scope.attributeelement.text_en,
-            dynamicAttributeId: $scope.params.dynamicAttributeId._id
+            dynamicAttributeId: $scope.params.dynamicAttributeId
         };
         $http.post('/api/dynamicattributes/option', optionToSend).then(function successCallback(response) {
             if (response.status === 409) {
                 //$scope.usersForm.un.$setValidity('nameInUse', false);
                 return;
             }
-            console.log('new attribute option');
             var createdAttribute = response.data;
             $scope.isNewElement = false;
             //$scope.dynamicattribute._id = createdAttribute._id;
@@ -29,9 +28,8 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
             if ($scope.params.createDynamicAttributeCallback) {
                 $scope.params.createDynamicAttributeCallback(createdAttribute);
             }
-            //TODO use the right translation key
-            $translate(['TRK_USERS_USER_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_DYNAMICATTRIBUTES_OPTION_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_OPTION_CREATED).hideDelay(1000).position('bottom right'));
             });
         });
     };

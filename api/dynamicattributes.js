@@ -91,7 +91,7 @@ router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES
 router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateModelName, validateId, validateSameClientId(), (req, res) => {
     var modelName = req.params.modelName;
     var entityId = monk.id(req.params.id);
-    // TODO: check implementation
+  
     req.db.get(co.collections.dynamicattributevalues.name).aggregate([
         { $lookup: { // https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/
             from: co.collections.dynamicattributes.name,
@@ -112,30 +112,7 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
         } }
     ]).then(function(valuesForEntity) {
         console.log(valuesForEntity);
-    });
-
-    req.db.get(modelName).findOne(entityId).then(function(entityFromDB){
-        req.db.get('dynamicattributevalues').find({entityId: entityFromDB._id}).then(function(attribureValues){
-            var Values = [];
-            var promises = [];
-            if(attribureValues){
-                attribureValues.forEach(function(attributeValue){
-                    promises.push(req.db.get('dynamicattributes').findOne({_id: attributeValue.dynamicAttributeId}).then(function(dynamicAttribute){
-                        var arrayElement = {};
-                        arrayElement["value"] = attributeValue.value;
-                        arrayElement["type"] = dynamicAttribute.type; 
-                        arrayElement["name_en"] = dynamicAttribute.name_en;
-                        arrayElement["dynamicAttributeId"] = dynamicAttribute._id;
-                        Values.push(arrayElement);
-                        return Promise.resolve();
-                    })); 
-                });
-            }
-            Promise.all(promises).then(function() {
-                console.log('promisses are kept');
-                res.send(Values);
-            });
-        });
+        res.send(valuesForEntity);
     });
 });
 
@@ -203,22 +180,24 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'ba
 router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'base'), (req, res) => {
     var dynamicAttributeOption = req.body;
 
-    if(!dynamicAttributeOption || !dynamicAttributeOption.dynamicAttributeId || !dynamicAttributeOption.text_en) {
+    if(!dynamicAttributeOption || !dynamicAttributeOption.dynamicAttributeId || !dynamicAttributeOption.text_en || !validateId.validateId(dynamicAttributeOption.dynamicAttributeId)) {
+        console.log('missing data');
         return res.sendStatus(400);
     }
     //Options are allowed only for Attributes of type picklist
     req.db.get('dynamicattributes').findOne({_id: dynamicAttributeOption.dynamicAttributeId}).then(function(dynamicAttribute){
-        if(dynamicAttribute.type != 'picklist'){
+        if(dynamicAttribute.type != 'DYNAMICATTRIBUTES_TYPE_PICKLIST'){
             console.log('attribute type is not picklist');
+            console.log(dynamicAttribute.type);
             return res.sendStatus(400);
+        }else{
+            delete dynamicAttributeOption._id; // Ids are generated automatically
+            dynamicAttributeOption.dynamicAttributeId = monk.id(dynamicAttributeOption.dynamicAttributeId);
+            dynamicAttributeOption.clientId = req.user.clientId; 
+            req.db.insert('dynamicattributeoptions', dynamicAttributeOption).then(function(inserteddynamicAttributeOption){
+                return res.send(inserteddynamicAttributeOption); 
+            });
         }
-    });
-
-    delete dynamicAttributeOption._id; // Ids are generated automatically
-    delete dynamicAttributeOption.dynamicAttributeId;
-    dynamicAttributeOption.clientId = req.user.clientId; 
-    req.db.insert('dynamicattributeoptions', dynamicAttributeOption).then(function(inserteddynamicAttributeOption){
-        return res.send(inserteddynamicAttributeOption); 
     });
 });
 
