@@ -31,7 +31,10 @@ app.config(['$httpProvider', function($httpProvider) {
               // Eine andere Idee, den Response abzufragen und nach einem speziellen
               // ForceReload - Inhalt oder Header zu checken, würde das Problem mit den 403
               // aus weggenommenen Rechten nicht lösen.
-              if (rejection.status === 403 && rejection.config.url.startsWith('/api/')) {
+              // Wird an die URL #ignore403 angehangen, werden die Fehler ignoriert.
+              // Das wird z.B. bei der Benutzerliste für Benutzergruppen verwendet, wenn
+              // man zwar die Benutzergruppe aber keine Benutzer sehen darf.
+              if (rejection.status === 403 && rejection.config.url.startsWith('/api/') && !rejection.config.url.endsWith('#ignore403')) {
                 location.reload();
               }
               return rejection;

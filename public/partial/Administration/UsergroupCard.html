@@ -1,11 +1,6 @@
 <md-card ng-cloak ng-controller="AdministrationUsergroupCardController" style="background-image:url('/css/icons/office/User Group Man Man.svg');" class="list-details-details">
 
     <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button ng-if="canAddPermission" ng-click="newPermission()" aria-label="ADD PERMISSION">
-            <md-tooltip md-direction="bottom"><span translate>TRK_USERGROUPS_ADD_NEW_PERMISSION</span></md-tooltip>
-            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-            <p translate>TRK_USERGROUPS_PERMISSION</p>
-        </md-button>
         <ng-include ng-if="!isNewUserGroup" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
         <div flex></div>
         <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
@@ -28,7 +23,19 @@
         <md-tab ng-if="!isNewUserGroup">
             <md-tab-label><span translate>TRK_USERGROUPS_PERMISSIONS</span></md-tab-label>
             <md-tab-body>
-                <md-card-content ng-include="'partial/Administration/UsergroupCardPermissionsTab.html'"></md-card-content>
+                <md-card-content>
+                    <md-list class="lines-beetween-items">
+                        <md-list-item ng-repeat="permission in userGroup.permissions | orderBy: 'key'" ng-class="{active:selectedPermission == permission}" aria-label="{{permission.key}}">
+                            <p translate="TRK_{{ permission.key }}"></p>
+                            <md-button ng-class="{'md-icon-button':true,disabled:!permission.canRead}" aria-label="READ" ng-click="switchRead(permission)" ng-class="{disabled:!permission.canRead}">
+                                <md-icon md-svg-src="/css/icons/material/Search.svg"></md-icon>
+                            </md-button>
+                            <md-button ng-class="{'md-icon-button':true,disabled:!permission.canWrite}" aria-label="WRITE" ng-click="switchWrite(permission)" ng-class="{disabled:!permission.canWrite}">
+                                <md-icon md-svg-src="/css/icons/material/Edit.svg"></md-icon>
+                            </md-button>
+                        </md-list-item>
+                    </md-list>
+                </md-card-content>
             </md-tab-body>
         </md-tab>
         <md-tab ng-if="!isNewUserGroup">

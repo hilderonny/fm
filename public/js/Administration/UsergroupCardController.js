@@ -1,54 +1,24 @@
 app.controller('AdministrationUsergroupCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
-    
-    var createPermissionCallback = function(createdPermission) {
-        $scope.userGroup.permissions.push(createdPermission);
-        $scope.selectPermission(createdPermission);
-        checkCanAddPermission();
-    };
-    
-    var savePermissionCallback = function(savedPermission) {
-        $scope.selectedPermission.key = savedPermission.key;
-        $scope.selectedPermission.canRead = savedPermission.canRead;
-        $scope.selectedPermission.canWrite = savedPermission.canWrite;
-    };
-    
-    var deletePermissionCallback = function() {
-        for (var i = 0; i < $scope.userGroup.permissions.length; i++) {
-            var permission = $scope.userGroup.permissions[i];
-            if (permission._id === $scope.selectedPermission._id) {
-                $scope.userGroup.permissions.splice(i, 1);
-                $scope.selectedPermission = false;
-                break;
-            }
-        }
-        checkCanAddPermission();
-    };
-    var closePermissionCardCallback = function() {
-        $scope.selectedPermission = false;
-    };
-
-    var checkCanAddPermission = function() {
-        $http.get('/api/permissions/available/' + $scope.userGroup._id).then(function(response) {
-            $scope.canAddPermission = response.data.length > 0;
-        });
-    };
 
     // Click on Create-button to create a new userGroup
     $scope.createUserGroup = function() {
         var userGroupToSend = { name: $scope.userGroup.name };
+        var createdUserGroup;
         $http.post('/api/usergroups', userGroupToSend).then(function(response) {
-            var createdUserGroup = response.data;
+            createdUserGroup = response.data;
             $scope.isNewUserGroup = false;
             $scope.userGroup._id = createdUserGroup._id;
             $scope.userGroupName = $scope.userGroup.name;
             $scope.relationsEntity = { type:'usergroups', id:createdUserGroup._id };
-            checkCanAddPermission();
+            return $http.get('/api/permissions/forUserGroup/' + createdUserGroup._id);
+        }).then(function(permissionsResponse) {
+            $scope.userGroup.permissions = permissionsResponse.data;
             if ($scope.params.createUserGroupCallback) {
                 $scope.params.createUserGroupCallback(createdUserGroup);
             }
-            $translate(['TRK_USERGROUPS_USERGROUP_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_USERGROUP_CREATED).hideDelay(1000).position('bottom right'));
-            });
+            return $translate(['TRK_USERGROUPS_USERGROUP_CREATED']);
+        }).then(function(translations) {
+            $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_USERGROUP_CREATED).hideDelay(1000).position('bottom right'));
         });
     }
 
@@ -126,7 +96,44 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
             deletePermissionCallback: deletePermissionCallback,
             closeCallback: closePermissionCardCallback
         });
-    }
+    };
+
+    $scope.savePermission = function(permissionToSave, permissionToUpdate) {
+        if (permissionToSave._id) {
+            if (permissionToSave.canRead || permissionToSave.canWrite) {
+                $http.put('/api/permissions/' + permissionToSave._id, permissionToSave).then(function(response) {
+                    permissionToUpdate.canRead = response.data.canRead;
+                    permissionToUpdate.canWrite = response.data.canWrite;
+                });
+            } else {
+                $http.delete('/api/permissions/' + permissionToSave._id).then(function() {
+                    delete permissionToUpdate._id;
+                    permissionToUpdate.canRead = false;
+                    permissionToUpdate.canWrite = false;
+                });
+            }
+        } else {
+            $http.post('/api/permissions', permissionToSave).then(function(response) {
+                permissionToUpdate._id = response.data._id;
+                permissionToUpdate.canRead = response.data.canRead;
+                permissionToUpdate.canWrite = response.data.canWrite;
+            })
+        }
+    };
+
+    $scope.switchRead = function(permission) {
+        var tempPermission = JSON.parse(JSON.stringify(permission))
+        tempPermission.canRead = !tempPermission.canRead;
+        if (!tempPermission.canRead) tempPermission.canWrite = false;
+        $scope.savePermission(tempPermission, permission);
+    };
+
+    $scope.switchWrite = function(permission) {
+        var tempPermission = JSON.parse(JSON.stringify(permission))
+        tempPermission.canWrite = !tempPermission.canWrite;
+        if (tempPermission.canWrite) tempPermission.canRead = true;
+        $scope.savePermission(tempPermission, permission);
+    };
 
     // Loads the userGroup details or prepares the empty dialog for a new userGroup
     // Params:
@@ -144,14 +151,12 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
                 $scope.isNewUserGroup = false;
                 $scope.userGroupName = $scope.userGroup.name; // Prevent updating the label when changing the name input value
                 $scope.relationsEntity = { type:'usergroups', id:$scope.userGroup._id };
-                return $http.get('/api/users/?fields=_id+name&userGroupId=' + $scope.params.userGroupId);
+                return $http.get('/api/users/?userGroupId=' + $scope.params.userGroupId + '#ignore403');
             }).then(function(usersResponse) {
                 $scope.userGroup.users = usersResponse.data;
-                return $http.get('/api/permissions/assigned/' + $scope.params.userGroupId);
+                return $http.get('/api/permissions/forUserGroup/' + $scope.params.userGroupId);
             }).then(function(permissionsResponse) {
                 $scope.userGroup.permissions = permissionsResponse.data;
-                checkCanAddPermission();
-                $http.get('/api/permissions/forUserGroup/' + $scope.params.userGroupId).then(function(response) { console.log(response.data);});
                 utils.setLocation('/usergroups/' + $scope.params.userGroupId);
             });
         } else {

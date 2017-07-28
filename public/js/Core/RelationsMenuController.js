@@ -217,7 +217,7 @@ app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, 
             console.log(nodeToHandle.tagName);
         }
         */
-        var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.CENTER, $mdPanel.yPosition.BELOW);
+        var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW);
         var parentScope = $scope;
         $mdPanel.open({
             attachTo: angular.element(document.body),
