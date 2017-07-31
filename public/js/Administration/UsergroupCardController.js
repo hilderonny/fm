@@ -28,6 +28,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
             return $translate(['TRK_USERGROUPS_USERGROUP_CREATED']);
         }).then(function(translations) {
             $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_USERGROUP_CREATED).hideDelay(1000).position('bottom right'));
+            utils.setLocation('/usergroups/' + $scope.userGroup._id);
         });
     }
 

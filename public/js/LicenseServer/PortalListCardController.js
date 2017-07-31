@@ -13,6 +13,7 @@ app.controller('LicenseServerPortalListCardController', function($scope, $http, 
                 break;
             }
         }
+        closePortalCardCallback();
     };
     var createPortalCallback = function(createdPortal) {
         $scope.portals.push(createdPortal);
@@ -20,29 +21,31 @@ app.controller('LicenseServerPortalListCardController', function($scope, $http, 
     };
     var closePortalCardCallback = function() {
         $scope.selectedPortal = false;
+        utils.setLocation('/portals');
     };
 
     // Click on portal in portal list shows portal details
     $scope.selectPortal = function(selectedPortal) {
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('LicenseServer/PortalCard', {
+        utils.addCardWithPermission('LicenseServer/PortalCard', {
             portalId: selectedPortal._id,
             savePortalCallback: savePortalCallback,
             deletePortalCallback: deletePortalCallback,
             closeCallback: closePortalCardCallback
+        }, 'PERMISSION_LICENSESERVER_PORTAL').then(function() {
+            $scope.selectedPortal = selectedPortal;
         });
-        $scope.selectedPortal = selectedPortal;
     }
 
     // Click on new portal button opens detail dialog with new portal data
     $scope.newPortal = function() {
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('LicenseServer/PortalCard', {
+        utils.addCardWithPermission('LicenseServer/PortalCard', {
             createPortalCallback: createPortalCallback,
             savePortalCallback: savePortalCallback,
             deletePortalCallback: deletePortalCallback,
             closeCallback: closePortalCardCallback
-        });
+        }, 'PERMISSION_LICENSESERVER_PORTAL');
     }
 
     // Loads the portals list from the server
@@ -61,8 +64,16 @@ app.controller('LicenseServerPortalListCardController', function($scope, $http, 
                     }
                 }
             }
+            // Check preselection
+            utils.handlePreselection($scope, $scope.portals, $scope.selectPortal);
+            if (!$scope.params.preselection) utils.setLocation('/portals');
         });
     }
 
     $scope.load();
 });
+
+app.directUrlMappings.portals = {
+    mainMenu: 'TRK_MENU_LICENSESERVER',
+    subMenu: 'TRK_MENU_LICENSESERVER_PORTALS'
+};

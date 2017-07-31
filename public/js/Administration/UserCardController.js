@@ -30,6 +30,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
             $translate(['TRK_USERS_USER_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_CREATED).hideDelay(1000).position('bottom right'));
             });
+            utils.setLocation('/users/' + createdUser._id);
         });
     }
 

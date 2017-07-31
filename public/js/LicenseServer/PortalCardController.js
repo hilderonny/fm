@@ -58,6 +58,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
                 $translate(['TRK_PORTALS_PORTAL_CREATED']).then(function(translations) {
                     $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_PORTAL_CREATED).hideDelay(1000).position('bottom right'));
                 });
+                utils.setLocation('/portals/' + createdPortal._id);
             });
         });
     };
@@ -171,9 +172,10 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
                 $scope.relationsEntity = { type:'portals', id:completePortal._id };
                 checkAvailableModules();
                 // portal module assignments
-                $http.get('/api/portalmodules?portalId=' + $scope.portal._id).then(function(portalModulesResponse) {
-                    $scope.portalModuleAssignments = portalModulesResponse.data;
-                });
+                return $http.get('/api/portalmodules?portalId=' + $scope.portal._id);
+            }).then(function(portalModulesResponse) {
+                $scope.portalModuleAssignments = portalModulesResponse.data;
+                utils.setLocation('/portals/' + $scope.params.portalId);
             });
         } else {
             // New portal
