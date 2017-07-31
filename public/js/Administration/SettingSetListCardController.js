@@ -2,6 +2,7 @@ app.controller('AdministrationSettingSetListCardController', function($scope, $h
     
     var closeSettingSetCardCallback = function() {
         $scope.selectedSettingSetItem = false;
+        utils.setLocation('/settings');
     };
 
     // Click on user in user list shows user details

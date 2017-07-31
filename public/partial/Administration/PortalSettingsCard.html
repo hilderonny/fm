@@ -1,14 +1,15 @@
 <md-card ng-cloak ng-controller="AdministrationPortalSettingsCardController" style="background-image:url('/css/icons/office/Settings.svg');">
 
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
     <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" translate>TRK_SETTINGS_PORTALSETTINGS</span>
         </md-card-title-text>
     </md-card-title>
-
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
 
     <md-tabs flex>
         <md-tab>
