@@ -32,6 +32,7 @@ app.controller('AdministrationUserlistCardController', function($scope, $rootSco
 
     // Click on new user button opens detail dialog with new user data
     $scope.newUser = function() {
+        $scope.selectedUser = null;
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/UserCard', {
             createUserCallback: createUserCallback,

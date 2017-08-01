@@ -32,6 +32,7 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ro
 
     // Click on new userGroup button opens detail dialog with new userGroup data
     $scope.newUsergroup = function() {
+        $scope.selectedUserGroup = null;
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/UsergroupCard', {
             createUserGroupCallback: createUserGroupCallback,

@@ -1,4 +1,4 @@
-app.controller('LicenseServerPortalListCardController', function($scope, $http, $mdDialog, $element, $translate, utils) {
+app.controller('LicenseServerPortalListCardController', function($scope, $rootScope, $http, $mdDialog, $element, $translate, utils) {
 
     var savePortalCallback = function(savedPortal) {
         $scope.selectedPortal.name = savedPortal.name;
@@ -39,6 +39,7 @@ app.controller('LicenseServerPortalListCardController', function($scope, $http, 
 
     // Click on new portal button opens detail dialog with new portal data
     $scope.newPortal = function() {
+        $scope.selectedPortal = null;
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('LicenseServer/PortalCard', {
             createPortalCallback: createPortalCallback,
@@ -64,6 +65,8 @@ app.controller('LicenseServerPortalListCardController', function($scope, $http, 
                     }
                 }
             }
+            // Check the permissions for the details page for handling button visibility
+            $scope.canWritePortals = $rootScope.canWrite('PERMISSION_LICENSESERVER_PORTAL');
             // Check preselection
             utils.handlePreselection($scope, $scope.portals, $scope.selectPortal);
             if (!$scope.params.preselection) utils.setLocation('/portals');

@@ -216,17 +216,17 @@
         "licenseserver" : {
             "api" : [ "portalmodules", "portals", "triggerUpdate", "update" ],
             "public" : [
-                "css/icons/material/Server.svg",
-                "css/icons/office/Server.svg",
+                "css/icons/material/Checkmark.svg",
                 "css/icons/material/Module.svg",
+                "css/icons/material/Server.svg",
+                "css/icons/material/Unavailable.svg",
                 "css/icons/office/Module.svg",
+                "css/icons/office/Server.svg",
                 "partial/LicenseServer/PortalCard.html",
-                "partial/LicenseServer/PortalModuleCard.html",
                 "partial/LicenseServer/PortalListCard.html"
             ],
             "include" : [
                 "public/js/LicenseServer/PortalCardController.js",
-                "public/js/LicenseServer/PortalModuleCardController.js",
                 "public/js/LicenseServer/PortalListCardController.js"
             ],
             "languages" : [ "en", "de" ],

@@ -102,13 +102,13 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
                 permissionToUpdate._id = response.data._id;
                 permissionToUpdate.canRead = response.data.canRead;
                 permissionToUpdate.canWrite = response.data.canWrite;
-            })
+            });
         }
     };
 
     $scope.switchRead = function(permission) {
         if (!$scope.canWriteUserGroup) return;
-        var tempPermission = JSON.parse(JSON.stringify(permission))
+        var tempPermission = JSON.parse(JSON.stringify(permission));
         tempPermission.canRead = !tempPermission.canRead;
         if (!tempPermission.canRead) tempPermission.canWrite = false;
         $scope.savePermission(tempPermission, permission);

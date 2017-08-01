@@ -318,7 +318,7 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
   width: 256px;
 }
 
-.disabled {
+.disabled, .grayedout {
     opacity: 0.2;
 }
 
