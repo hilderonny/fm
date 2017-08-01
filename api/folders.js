@@ -19,32 +19,55 @@ var documentsApi = require('./documents');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 
-/**
- * Retrieve all folders and documents of the root folder of the client of
- * the logged in user. The root folder is no real object. It is cunstructed by
- * collecting all folders and documents, where the parentFolderId is null.
- * @return { 
- *  folders: [], 
- *  documents: []
- * }
- */
-router.get('/', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), (req, res) => {
-    var clientId = req.user.clientId;
-    req.db.get('folders').find({ parentFolderId: null, clientId: clientId }).then((folders) => {
-        req.db.get('documents').find({ parentFolderId: null, clientId: clientId }).then((documents) => {
-            var rootFolder = {
-                folders: folders,
-                documents: documents
+router.get('/', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), (req, res) => {
+    var clientId = req.user.clientId; // clientId === null means that the user is a portal user
+    var rootElements = [];
+    var allFolders = {};
+    var folders, documents;
+    req.db.get(co.collections.folders).find({ clientId: clientId }, { sort : { name : 1 } }).then((folders) => {
+        folders.forEach((f) => {
+            allFolders[f._id] = {
+                _id: f._id,
+                type: 'f', // Traffic sparen, anstelle von "folder"
+                name: f.name,
+                children: []
             };
-            res.send(rootFolder);
         });
+        folders.forEach((f) => {
+            if (f.parentFolderId) {
+                var parentFolder = allFolders[f.parentFolderId];
+                if (!parentFolder.children) parentFolder.children = [];
+                parentFolder.children.push(allFolders[f._id]);
+            } else {
+                rootElements.push(allFolders[f._id]);
+            }
+        });
+        return req.db.get(co.collections.documents).find({ clientId: clientId }, { sort : { name : 1 } });
+    }).then(function(documents) {
+        documents.forEach((d) => {
+            var docToSend = {
+                _id: d._id,
+                type: 'd', // Traffic sparen, anstelle von "folder"
+                name: d.name
+            };
+            if (d.parentFolderId) {
+                var parentFolder = allFolders[d.parentFolderId];
+                if (!parentFolder.children) parentFolder.children = [];
+                parentFolder.children.push(docToSend);
+            } else {
+                rootElements.push(docToSend);
+            }
+        });
+        return res.send(rootElements);
     });
+    // https://docs.mongodb.com/manual/tutorial/model-tree-structures-with-materialized-paths/
 });
 
 /**
  * Gibt alle Verzeichnisse und Dokumente zurück. Wird für den Dialog
  * zum Erstellen von Verknüpfungen verwendet
  */
+// TODO: Mit GET/ zusammenführen
 router.get('/allFoldersAndDocuments', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), function(req, res) {
     var clientId = req.user.clientId; // clientId === null means that the user is a portal user
     req.db.get('folders').find({ clientId: clientId }).then((folders) => {

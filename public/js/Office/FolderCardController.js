@@ -208,39 +208,28 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
     // - $scope.params.uploadDocumentCallback : Callback function when a new document was uploaded. Gets the document as parameter
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
-        // First check whether to show the root folder
-        if (!$scope.params.folderId && !$scope.params.createNewFolder) {
-            $http.get('/api/folders').then(function(response) {
-                var rootFolder = response.data;
-                $scope.isNewFolder = false;
-                $scope.isRootFolder = true;
-                $scope.folder = rootFolder;
-                $scope.checkPermission();
+        $http.get('/api/folders').then(function(response) {
+            var rootElements = response.data;
+            $scope.elements = [];
+            var flattenElements = function(element, level) {
+                $scope.elements.push(element);
+                element.level = level;
+                if (element.children) element.children.forEach(function(e) { flattenElements(e, level + 1) });
+            };
+            rootElements.forEach(function(e) {
+                flattenElements(e, 0);
             });
-        } else {
-            $scope.parentFolderId = $scope.params.parentFolderId;
-            // No root folder, check whether to create a new folder or load an exiting one
-            if (!$scope.params.createNewFolder) {
-                // Folderid exists, load it
-                $http.get('/api/folders/' + $scope.params.folderId).then(function(response) {
-                    var folder = response.data;
-                    $scope.isNewFolder = false;
-                    $scope.isRootFolder = false;
-                    $scope.folder = folder;
-                    $scope.folderName = folder.name;
-                    // Information über den geladenen Ordner für Verknüpfungen-Tab bereit stellen
-                    $scope.relationsEntity = { type:'folders', id:folder._id };
-                    $scope.checkPermission();
-                });
-            } else {
-                // No folderId, create new folder
-                $scope.isNewFolder = true;
-                $scope.isRootFolder = false;
-                $scope.folder = { name: '' };
-            }
-        }
+            $scope.checkPermission();
+            utils.handlePreselection($scope, $scope.elements, $scope.selectElement);
+            if (!$scope.params.preselection) utils.setLocation('/documents');
+        });
     };
 
     $scope.load();
 
 });
+
+app.directUrlMappings.documents = {
+    mainMenu: 'TRK_MENU_OFFICE',
+    subMenu: 'TRK_MENU_OFFICE_DOCUMENTS'
+};
