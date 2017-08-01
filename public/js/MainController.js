@@ -85,6 +85,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                     "action": function() {
                         localStorage.removeItem("loginCredentials");
                         $scope.isLoggedIn = false;
+                        utils.setLocation('/');
                     }
                 });
                 // Ermittelt zentral alle Berechtigungen für den angemeldeten Benutzer.

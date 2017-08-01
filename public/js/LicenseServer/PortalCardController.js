@@ -147,9 +147,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
         } else {
             // New portal
             $scope.isNewPortal = true;
-            $scope.portal = { name : "", isActive : true };
-            $scope.portalModuleAssignments = [];
-            //checkAvailableModules();
+            $scope.portal = { name : "", isActive : true, portalModules: [] };
         }
         $scope.canWritePortals = $rootScope.canWrite('PERMISSION_LICENSESERVER_PORTAL');
     };

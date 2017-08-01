@@ -14,69 +14,39 @@ var monk = require('monk');
 var fs = require('fs');
 var co = require('../utils/constants');
 
-/**
- * List all available client module names for a given client
- */
-router.get('/available', auth('PERMISSION_ADMINISTRATION_CLIENT', 'r', 'clients'), (req, res) => {
-    if (!req.query.clientId || !validateId.validateId(req.query.clientId)) {
-        return res.sendStatus(400);
-    }
-    var moduleConfig = JSON.parse(fs.readFileSync('./config/module-config.json').toString());
-    var allClientModuleKeys = Object.keys(moduleConfig.modules);
-    req.db.get('clients').findOne(req.query.clientId).then((client) => {
-        if (!client) {
-            res.sendStatus(400);
-            return;
-        }
-        // Filter out modules which are already assigned to the client
-        req.db.get('clientmodules').find({ clientId: client._id }, req.query.fields).then((clientmodules) => {
-            var clientModuleKeys = clientmodules.map((clientModule) => clientModule.module);
-            var availableClientModuleKeys = allClientModuleKeys.filter((key) => clientModuleKeys.indexOf(key) < 0);
-            res.send(availableClientModuleKeys);
-            return;
+router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), validateId, function(req, res) {
+    var client;
+    var clientModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
+    req.db.get(co.collections.clients).findOne(req.params.id).then(function(c) {
+        client = c;
+        // Obtain the client modules for the client
+        return req.db.get(co.collections.clientmodules).find({ 
+            clientId: client._id,
+            module: { $in: clientModuleKeys }
         });
-    });
-});
-
-/**
- * List all client module assignments for a given client.
- */
-router.get('/', auth('PERMISSION_ADMINISTRATION_CLIENT', 'r', 'clients'), (req, res) => {
-    if (!req.query.clientId || !validateId.validateId(req.query.clientId)) {
-        return res.sendStatus(400);
-    }
-    req.db.get('clients').findOne(req.query.clientId).then((client) => {
-        if (!client) {
-            return res.sendStatus(400);
-        }
-        req.db.get('clientmodules').find({ clientId: client._id }, req.query.fields).then((clientmodules) => {
-            return res.send(clientmodules);
+    }).then((clientModulesOfClient) => {
+        var result = clientModuleKeys.map((key) => {
+            var existingClientModule = clientModulesOfClient.find((c) => c.module === key);
+            return {
+                _id: existingClientModule ? existingClientModule._id : null,
+                clientId: client._id,
+                active: existingClientModule ? true : false,
+                module: key
+            };
         });
-    });
-});
-
-/**
- * Get single client module with given id
- */
-router.get('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'r', 'clients'), validateId, (req, res) => {
-    req.db.get('clientmodules').findOne(req.params.id, req.query.fields).then((clientmodule) => {
-        if (!clientmodule) {
-            // Client module with given ID not found
-            return res.sendStatus(404);
-        }
-        return res.send(clientmodule);
+        res.send(result);
     });
 });
 
 /**
  * Create a new client module
  */
-router.post('/', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), function(req, res) {
+router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), function(req, res) {
     var clientModule = req.body;
     if (!clientModule || Object.keys(clientModule).length < 2 || !clientModule.clientId || !validateId.validateId(clientModule.clientId) || !clientModule.module) { // At least clientId and module
         return res.sendStatus(400);
     }
-    req.db.get('clients').findOne(clientModule.clientId).then((client) => {
+    req.db.get(co.collections.clients).findOne(clientModule.clientId).then((client) => {
         if (!client) {
             return res.sendStatus(400);
         }
@@ -87,7 +57,7 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), funct
             }
             delete clientModule._id; // Ids are generated automatically
             clientModule.clientId = client._id; // Make it a real id
-            req.db.insert('clientmodules', clientModule).then((insertedClientModule) => {
+            req.db.insert(co.collections.clientmodules, clientModule).then((insertedClientModule) => {
                 return res.send(insertedClientModule);
             });
         });
@@ -95,40 +65,10 @@ router.post('/', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), funct
 });
 
 /**
- * Update client module details
- */
-router.put('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), validateId, function(req, res) {
-    var clientModule = req.body;
-    if (!clientModule || Object.keys(clientModule).length < 1) {
-        return res.sendStatus(400);
-    }
-    delete clientModule._id; // When client object also contains the _id field
-    delete clientModule.clientId; // When client object also contains the clientId field
-    // For the case that only the _id had to be updated, return the original clientModule, because the _id cannot be changed
-    if (Object.keys(clientModule).length < 1) {
-        req.db.get('clientmodules').findOne(req.params.id, req.query.fields).then((clientModuleFromDatabase) => {
-            if (!clientModuleFromDatabase) {
-                // Client module with given ID not found
-                return res.sendStatus(404);
-            }
-            return res.send(clientModuleFromDatabase);
-        });
-    } else {
-        req.db.update('clientmodules', req.params.id, { $set: clientModule }).then((updatedClientModule) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-            if (!updatedClientModule || updatedClientModule.lastErrorObject) {
-                // Client module with given ID not found
-                return res.sendStatus(404);
-            }
-            return res.send(updatedClientModule);
-        });
-    }
-});
-
-/**
  * Delete client module
  */
-router.delete('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), validateId, function(req, res) {
-    req.db.remove('clientmodules', req.params.id).then((result) => {
+router.delete('/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), validateId, function(req, res) {
+    req.db.remove(co.collections.clientmodules, req.params.id).then((result) => {
         if (result.result.n < 1) {
             return res.sendStatus(404);
         }

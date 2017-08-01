@@ -18,7 +18,6 @@ app.controller('AdministrationUserlistCardController', function($scope, $rootSco
 
     // Click on user in user list shows user details
     $scope.selectUser = function(selectedUser) {
-        if (!$scope.canReadUserDetails) return;
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/UserCard', {
             userId: selectedUser._id,
@@ -47,7 +46,7 @@ app.controller('AdministrationUserlistCardController', function($scope, $rootSco
     // - $scope.params.preselection : ID of the user to select in the list
     $scope.load = function() {
         $scope.selectedUser = false;
-        $http.get('/api/users?fields=_id+name').then(function (response) {
+        $http.get('/api/users').then(function (response) {
             $scope.users = response.data;
             // Check the permissions for the details page for handling button visibility
             $scope.canWriteUserDetails = $rootScope.canWrite('PERMISSION_ADMINISTRATION_USER');

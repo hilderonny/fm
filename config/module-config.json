@@ -121,15 +121,11 @@
                 "css/icons/office/Add User Male.svg",
                 "css/icons/office/Briefcase.svg",
                 "css/icons/office/Module.svg",
-                "partial/Administration/AdministratorCard.html",
                 "partial/Administration/ClientCard.html",
-                "partial/Administration/ClientModuleCard.html",
                 "partial/Administration/ClientListCard.html"
             ],
             "include" : [
-                "public/js/Administration/AdministratorCardController.js",
                 "public/js/Administration/ClientCardController.js",
-                "public/js/Administration/ClientModuleCardController.js",
                 "public/js/Administration/ClientListCardController.js"
             ],
             "languages" : [ "en", "de" ],
