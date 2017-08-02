@@ -26,6 +26,7 @@
     "TRK_FOLDERS_MORE_ACTIONS" : "Mehr Aktionen ...",
     "TRK_FOLDERS_NAME" : "Name",
     "TRK_FOLDERS_NEW_FOLDER" : "Neues Verzeichnis",
+    "TRK_FOLDERS_REALLY_DELETE_FOLDER" : "Soll das Verzeichnis \"{{folderName}}\" wirklich gelöscht werden?",
     "TRK_FOLDERS_ROOTFOLDER" : "Stammverzeichnis",
     "TRK_FOLDERS_SAVE" : "Speichern",
     "TRK_FOLDERS_UPLOAD_DOCUMENT" : "Dokument hochladen",

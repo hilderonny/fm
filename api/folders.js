@@ -122,17 +122,20 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
 });
 
 // Get a specific folder and its contained folders and documents
-router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validateId, validateSameClientId('folders'), (req, res) => {
+router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), validateId, validateSameClientId('folders'), (req, res) => {
     var id = monk.id(req.params.id);
-    req.db.get('folders').findOne(id).then((folder) => {
+    var folder;
+    req.db.get(co.collections.folders).findOne(id).then((f) => {
+        folder = f;
+        folder.elements = [];
         // Database element is available here in every case, because validateSameClientId already checked for existence
-        req.db.get('folders').find({ parentFolderId: id }).then((folders) => {
-            folder.folders = folders;
-            req.db.get('documents').find({ parentFolderId: id }).then((documents) => {
-                folder.documents = documents;
-                res.send(folder);
-            });
-        });
+        return req.db.get(co.collections.folders).find({ parentFolderId: id }, { sort : { name : 1 } });
+    }).then((subfolders) => {
+        folder.elements = folder.elements.concat(subfolders);
+        return req.db.get(co.collections.documents).find({ parentFolderId: id }, { sort : { name : 1 } });
+    }).then((documents) => {
+        folder.elements = folder.elements.concat(documents);
+        res.send(folder);
     });
 });
 

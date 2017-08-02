@@ -153,12 +153,12 @@
                 "css/icons/office/Folder.svg",
                 "css/icons/office/Upload.svg",
                 "partial/Office/DocumentCard.html",
-                "partial/Office/FolderCard.html",
-                "partial/Office/FolderCardContentTab.html",
-                "partial/Office/FolderCardDetailsTab.html"
+                "partial/Office/DocumentListCard.html",
+                "partial/Office/FolderCard.html"
             ],
             "include" : [
                 "public/js/Office/DocumentCardController.js",
+                "public/js/Office/DocumentListCardController.js",
                 "public/js/Office/FolderCardController.js"
             ],
             "languages" : [ "en", "de" ],
@@ -167,7 +167,7 @@
                 {
                     "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/FolderCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT" }
+                        { "mainCard": "Office/DocumentListCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT" }
                     ]
                 }
             ]

@@ -26,6 +26,7 @@
     "TRK_FOLDERS_MORE_ACTIONS" : "More options...",
     "TRK_FOLDERS_NAME" : "Name",
     "TRK_FOLDERS_NEW_FOLDER" : "New folder",
+    "TRK_FOLDERS_REALLY_DELETE_FOLDER" : "Are you sure you want to delete the following folder: \"{{folderName}}\"?",
     "TRK_FOLDERS_ROOTFOLDER" : "Root folder",
     "TRK_FOLDERS_SAVE" : "Save",
     "TRK_FOLDERS_UPLOAD_DOCUMENT" : "upload",

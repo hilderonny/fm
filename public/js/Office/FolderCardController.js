@@ -1,69 +1,28 @@
 app.controller('OfficeFolderCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
-    
-    var createFolderCallback = function(createdFolder) {
-        $scope.folder.folders.push(createdFolder);
-        $scope.selectFolder(createdFolder);
-    };
-    var saveFolderCallback = function(savedFolder) {
-        $scope.selectedFolder.name = savedFolder.name;
-    };
-    var deleteFolderCallback = function() {
-        for (var i = 0; i < $scope.folder.folders.length; i++) {
-            var folder = $scope.folder.folders[i];
-            if (folder._id === $scope.selectedFolder._id) {
-                $scope.folder.folders.splice(i, 1);
-                $scope.selectedFolder = false;
-                break;
-            }
-        }
-    };
-    var closeFolderCardCallback = function() {
-        $scope.selectedFolder = false;
-    };
-    var saveDocumentCallback = function(savedDocument) {
-        $scope.selectedDocument.name = savedDocument.name;
-    };
-    var extractDocumentCallback = function(newBaseFolderDocument) {
-        if (newBaseFolderDocument.folders.length > 0) {
-            Array.prototype.push.apply($scope.folder.folders, newBaseFolderDocument.folders); // https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/push#Zwei_Arrays_Zusammenführen
-        }
-        if (newBaseFolderDocument.documents.length > 0) {
-            Array.prototype.push.apply($scope.folder.documents, newBaseFolderDocument.documents); // https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/push#Zwei_Arrays_Zusammenführen
-        }
-    };
-    var deleteDocumentCallback = function() {
-        for (var i = 0; i < $scope.folder.documents.length; i++) {
-            var document = $scope.folder.documents[i];
-            if (document._id === $scope.selectedDocument._id) {
-                $scope.folder.documents.splice(i, 1);
-                $scope.selectedDocument = false;
-                break;
-            }
-        }
-    };
-    var closeDocumentCardCallback = function() {
-        $scope.selectedDocument = false;
+
+    $scope.selectElement = function(element) {
+
     };
 
     // Click on Create-button to create a new folder
     $scope.createFolder = function() {
-        var folderToSend = { name: $scope.folder.name };
-        if (!$scope.isRootFolder) {
-            folderToSend.parentFolderId = $scope.parentFolderId;
-        }
+        var folderToSend = { 
+            name: $scope.folder.name, 
+            parentFolderId: $scope.folder.parentFolderId
+        };
         $http.post('/api/folders', folderToSend).then(function(response) {
             var createdFolder = response.data;
             $scope.isNewFolder = false;
             $scope.folder._id = createdFolder._id;
-            $scope.folder.folders = [];
-            $scope.folder.documents = [];
             $scope.folderName = $scope.folder.name;
             // Information über neuen Ordner für Verknüpfungen-Tab bereit stellen
             $scope.relationsEntity = { type:'folders', id:createdFolder._id };
             if ($scope.params.createFolderCallback) {
                 $scope.params.createFolderCallback(createdFolder);
             }
-            $mdToast.show($mdToast.simple().textContent('Verzeichnis erstellt').hideDelay(1000).position('bottom right'));
+            $translate(['TRK_FOLDERS_FOLDER_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_FOLDER_CREATED).hideDelay(1000).position('bottom right'));
+            });
         });
     };
 
@@ -76,25 +35,33 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
             if ($scope.params.saveFolderCallback) {
                 $scope.params.saveFolderCallback(savedFolder);
             }
-            $mdToast.show($mdToast.simple().textContent('Änderungen gespeichert').hideDelay(1000).position('bottom right'));
+            $translate(['TRK_FOLDERS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            });
         });
     };
 
     // Click on delete button to delete an existing folder
     $scope.deleteFolder = function() {
-        var confirm = $mdDialog.confirm()
-            .title('Soll das Verzeichnis "' + $scope.folderName + '" samt Inhalt wirklich gelöscht werden?')
-            .ok('Ja')
-            .cancel('Nein');
-        $mdDialog.show(confirm).then(function() {
-            $http.delete('/api/folders/' + $scope.folder._id).then(function(response) {
-                if ($scope.params.deleteFolderCallback) {
-                    $scope.params.deleteFolderCallback();
-                }
-                utils.removeCardsToTheRightOf($element);
-                utils.removeCard($element);
-                $mdToast.show($mdToast.simple().textContent('Verzeichnis gelöscht').hideDelay(1000).position('bottom right'));
-            });
+        var translations;
+        $translate(['TRK_FOLDERS_FOLDER_DELETED', 'TRK_YES', 'TRK_NO']).then(function(t) {
+            translations = t;
+            return $translate('TRK_FOLDERS_REALLY_DELETE_FOLDER', { folderName: $scope.folderName });
+        }).then(function(TRK_FOLDERS_REALLY_DELETE_FOLDER) {
+            var confirm = $mdDialog.confirm()
+                .title(TRK_FOLDERS_REALLY_DELETE_FOLDER)
+                .ok(translations.TRK_YES)
+                .cancel(translations.TRK_NO);
+            return $mdDialog.show(confirm);
+        }).then(function() {
+            return $http.delete('/api/folders/' + $scope.folder._id);
+        }).then(function(response) {
+            if ($scope.params.deleteFolderCallback) {
+                $scope.params.deleteFolderCallback();
+            }
+            utils.removeCardsToTheRightOf($element);
+            utils.removeCard($element);
+            $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_FOLDER_DELETED).hideDelay(1000).position('bottom right'));
         });
     };
 
@@ -107,30 +74,9 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
         utils.removeCard($element);
     };
 
-    // User selects subfolder which gets shown in new card
-    $scope.selectFolder = function(selectedFolder) {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Office/FolderCard', {
-            folderId: selectedFolder._id,
-            saveFolderCallback: saveFolderCallback,
-            deleteFolderCallback: deleteFolderCallback,
-            closeCallback: closeFolderCardCallback
-        });
-        $scope.selectedFolder = selectedFolder;
-        $scope.selectedDocument = false;
-    };
-
-    // Click on new folder button opens detail dialog with new folder data
+    // Neuen Ornder in dem selektierten erstellen
     $scope.newFolder = function() {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Office/FolderCard', {
-            createNewFolder: true,
-            parentFolderId: $scope.isRootFolder ? null : $scope.folder._id,
-            createFolderCallback: createFolderCallback,
-            saveFolderCallback: saveFolderCallback,
-            deleteFolderCallback: deleteFolderCallback,
-            closeCallback: closeFolderCardCallback
-        });
+
     };
 
     // Performs the upload of the selected file
@@ -162,12 +108,11 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
             if (e.target.readyState === 4) {
                 $scope.isUploading = false;
                 var uploadedDocument = e.target.response;
-                $scope.folder.documents.push(uploadedDocument);
-                $scope.selectDocument(uploadedDocument);
-                if ($scope.params.uploadDocumentCallback) {
-                    $scope.params.uploadDocumentCallback(uploadedDocument);
-                }
-                $mdToast.show($mdToast.simple().textContent('Dokument hochgeladen').hideDelay(1000).position('bottom right'));
+                $scope.folder.elements.push(uploadedDocument);
+                $scope.selectElement(uploadedDocument);
+                $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function(translations) {
+                    $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
+                });
             }
         }
         xhr.responseType = 'json';
@@ -176,60 +121,24 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
         xhr.send(form);
     };
 
-    // User selects document which gets shown in new card
-    $scope.selectDocument = function(selectedDocument) {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Office/DocumentCard', {
-            documentId: selectedDocument._id,
-            saveDocumentCallback: saveDocumentCallback,
-            deleteDocumentCallback: deleteDocumentCallback,
-            extractDocumentCallback: extractDocumentCallback,
-            closeCallback: closeDocumentCardCallback
-        });
-        $scope.selectedFolder = false;
-        $scope.selectedDocument = selectedDocument;
-    };
-
-    /**
-     * Ermittelt Berechtigungen für diverse Buttons vom Server
-     */
-    $scope.checkPermission = function() {
-        $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
-    };
-
-    // Loads the folder details or prepares the empty dialog for a new folder
-    // Params:
-    // - $scope.params.createNewFolder : When true, a new folder is to be created and folderId is ignored
-    // - $scope.params.folderId : ID of the folder to load, when not set, the root folder is returned
-    // - $scope.params.parentFolderId : ID of the parent folder, when a new folder is to be created. When not set, the root folder will get the parent folder
-    // - $scope.params.createFolderCallback : Callback function when a new folder was created. Gets the folder as parameter
-    // - $scope.params.saveFolderCallback : Callback function when an existing folder was saved. Gets the updated folder as parameter
-    // - $scope.params.deleteFolderCallback : Callback function when an existing folder was deleted. No parameters
-    // - $scope.params.uploadDocumentCallback : Callback function when a new document was uploaded. Gets the document as parameter
-    // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
-        $http.get('/api/folders').then(function(response) {
-            var rootElements = response.data;
-            $scope.elements = [];
-            var flattenElements = function(element, level) {
-                $scope.elements.push(element);
-                element.level = level;
-                if (element.children) element.children.forEach(function(e) { flattenElements(e, level + 1) });
-            };
-            rootElements.forEach(function(e) {
-                flattenElements(e, 0);
+        if ($scope.params.folderId) {
+            $http.get('/api/folders/' + $scope.params.folderId).then(function(folderResponse) {
+                var completeFolder = folderResponse.data;
+                $scope.isNewFolder = false;
+                $scope.folder = completeFolder;
+                $scope.folderName = completeFolder.name; // Prevent updating the label when changing the name input value
+                $scope.relationsEntity = { type:'folders', id:completeFolder._id };
+            }).then(function() {
+                utils.setLocation('/documents/' + $scope.params.folderId);
             });
-            $scope.checkPermission();
-            utils.handlePreselection($scope, $scope.elements, $scope.selectElement);
-            if (!$scope.params.preselection) utils.setLocation('/documents');
-        });
+        } else {
+            $scope.isNewFolder = true;
+            $scope.folder = { name : "", parentFolderId: $scope.params.parentFolderId, folders: [], documents: [] };
+        }
+        $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
     };
 
     $scope.load();
 
 });
-
-app.directUrlMappings.documents = {
-    mainMenu: 'TRK_MENU_OFFICE',
-    subMenu: 'TRK_MENU_OFFICE_DOCUMENTS'
-};

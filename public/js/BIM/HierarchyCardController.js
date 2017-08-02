@@ -28,7 +28,6 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
         $scope.selectFmObject(createdFmObject);
     };
     var closeFmObjectCallback = function() {
-        console.log('CLOSE');
         $scope.selectedFmObject = false;
         utils.setLocation('/fmobjects');
     };

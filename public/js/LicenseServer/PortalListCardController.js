@@ -5,14 +5,7 @@ app.controller('LicenseServerPortalListCardController', function($scope, $rootSc
         $scope.selectedPortal.isActive = savedPortal.isActive;
     };
     var deletePortalCallback = function() {
-        for (var i = 0; i < $scope.portals.length; i++) {
-            var portal = $scope.portals[i];
-            if (portal._id === $scope.selectedPortal._id) {
-                $scope.portals.splice(i, 1);
-                $scope.selectedPortal = false;
-                break;
-            }
-        }
+        $scope.portals.splice($scope.portals.indexOf($scope.selectedPortal), 1);
         closePortalCardCallback();
     };
     var createPortalCallback = function(createdPortal) {
