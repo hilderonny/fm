@@ -32,6 +32,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
             $translate(['TRK_ACTIVITIES_ACTIVITY_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_ACTIVITIES_ACTIVITY_CREATED).hideDelay(1000).position('bottom right'));
             });
+            utils.setLocation('/activities/' + createdActivity._id);
         });
     };
 
@@ -105,6 +106,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                 $scope.activity = completeActivity;
                 $scope.activityName = completeActivity.name; // Prevent updating the label when changing the input value 
                 $scope.relationsEntity = { type:'activities', id:completeActivity._id };
+                utils.setLocation('/activities/' + completeActivity._id);
             });
         } else {
             // New activity

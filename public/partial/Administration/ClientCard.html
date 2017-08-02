@@ -1,12 +1,12 @@
 <md-card ng-cloak ng-controller="AdministrationClientCardController" style="background-image:url('/css/icons/office/Briefcase.svg');" class="list-details-details">
 
     <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button ng-if="canWriteClients" ng-click="newAdmin()" aria-label="ADD ADMIN">
+        <md-button ng-if="!isNewClient && canWriteClients" ng-click="newAdmin()" aria-label="ADD ADMIN">
             <md-tooltip md-direction="bottom"><span translate>TRK_CLIENTS_CREATEADMIN</span></md-tooltip>
             <md-icon md-svg-src="/css/icons/material/Add User Male.svg"></md-icon>
             <p translate>TRK_CLIENTS_ADMIN</p>
         </md-button>
-        <ng-include ng-if="!isNewClient && canWriteClients" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <ng-include ng-if="!isNewClient" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
         <div flex></div>
         <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
     </md-toolbar>

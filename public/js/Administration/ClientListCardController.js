@@ -9,7 +9,7 @@ app.controller('AdministrationClientListCardController', function($scope, $rootS
     };
     var createClientCallback = function(createdClient) {
         $scope.clients.push(createdClient);
-        $scope.selectedClient = createdClient;
+        $scope.selectClient(createdClient);
     };
     var closeClientCardCallback = function() {
         $scope.selectedClient = false;
@@ -35,8 +35,6 @@ app.controller('AdministrationClientListCardController', function($scope, $rootS
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/ClientCard', {
             createClientCallback: createClientCallback,
-            saveClientCallback: saveClientCallback,
-            deleteClientCallback: deleteClientCallback,
             closeCallback: closeClientCardCallback
         }, 'PERMISSION_ADMINISTRATION_CLIENT');
     }

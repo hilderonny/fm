@@ -9,7 +9,7 @@ app.controller('AdministrationUserlistCardController', function($scope, $rootSco
     };
     var createUserCallback = function(createdUser) {
         $scope.users.push(createdUser);
-        $scope.selectedUser = createdUser;
+        $scope.selectUser(createdUser);
     };
     var closeUserCardCallback = function() {
         $scope.selectedUser = false;
@@ -35,8 +35,6 @@ app.controller('AdministrationUserlistCardController', function($scope, $rootSco
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/UserCard', {
             createUserCallback: createUserCallback,
-            saveUserCallback: saveUserCallback,
-            deleteUserCallback: deleteUserCallback,
             closeCallback: closeUserCardCallback
         }, 'PERMISSION_ADMINISTRATION_USER');
     }

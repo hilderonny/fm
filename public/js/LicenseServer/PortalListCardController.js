@@ -10,7 +10,7 @@ app.controller('LicenseServerPortalListCardController', function($scope, $rootSc
     };
     var createPortalCallback = function(createdPortal) {
         $scope.portals.push(createdPortal);
-        $scope.selectedPortal = createdPortal;
+        $scope.selectPortal(createdPortal);
     };
     var closePortalCardCallback = function() {
         $scope.selectedPortal = false;
@@ -36,8 +36,6 @@ app.controller('LicenseServerPortalListCardController', function($scope, $rootSc
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('LicenseServer/PortalCard', {
             createPortalCallback: createPortalCallback,
-            savePortalCallback: savePortalCallback,
-            deletePortalCallback: deletePortalCallback,
             closeCallback: closePortalCardCallback
         }, 'PERMISSION_LICENSESERVER_PORTAL');
     }

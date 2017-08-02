@@ -92,8 +92,6 @@
                 "css/icons/material/Planner.svg",
                 "css/icons/office/Planner.svg",
                 "partial/Office/ActivityCard.html",
-                "partial/Office/ActivityCardDetailsTab.html",
-                "partial/Office/ActivityList.html",
                 "partial/Office/CalendarCard.html"
             ],
             "include" : [

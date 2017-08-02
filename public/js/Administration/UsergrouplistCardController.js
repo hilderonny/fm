@@ -9,7 +9,7 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ro
     };
     var createUserGroupCallback = function(createdUserGroup) {
         $scope.userGroups.push(createdUserGroup);
-        $scope.selectedUserGroup = createdUserGroup;
+        $scope.selectUserGroup(createdUserGroup);
     };
     var closeUserGroupCardCallback = function() {
         $scope.selectedUserGroup = false;
@@ -36,8 +36,6 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ro
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/UsergroupCard', {
             createUserGroupCallback: createUserGroupCallback,
-            saveUserGroupCallback: saveUserGroupCallback,
-            deleteUserGroupCallback: deleteUserGroupCallback,
             closeCallback: closeUserGroupCardCallback
         }, 'PERMISSION_ADMINISTRATION_USERGROUP');
     }
