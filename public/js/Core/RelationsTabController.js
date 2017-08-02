@@ -10,7 +10,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             // Details für die verknüpften Elemente laden, dabei API-Erweiterung nutzen
             return $http.get('/api/activities/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
                 var activities = response.data;
-                if (!activities || activities.length < 1) return resolve(false);
+                if (!activities || activities.length < 1)  return Promise.resolve(false);
                 // ViewModel für Anzeige in Liste vorbereiten. Die Objektattribute müssen genau so heissen, die Liste erwartet das
                 var relations = {
                     title: 'ACTIVITIES_ACTIVITIES', // Übersetzungsschlüssel ohne Präfix "TRK_" als Abschnittsüberschrift
@@ -34,7 +34,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
             return $http.get('/api/clients/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
                 var clients = response.data;
-                if (!clients || clients.length < 1) return resolve(false);
+                if (!clients || clients.length < 1)  return Promise.resolve(false);
                 var relations = {
                     title: 'CLIENTS_CLIENTS',
                     items: clients.map(function(client) {
@@ -56,7 +56,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
             return $http.get('/api/documents/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
                 var documents = response.data;
-                if (!documents || documents.length < 1) return resolve(false);
+                if (!documents || documents.length < 1)  return Promise.resolve(false);
                 var relations = {
                     title: 'DOCUMENTS_DOCUMENTS',
                     items: documents.map(function(document) {
@@ -106,7 +106,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
             return $http.get('/api/folders/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
                 var folders = response.data;
-                if (!folders || folders.length < 1) return resolve(false);
+                if (!folders || folders.length < 1)  return Promise.resolve(false);
                 var relations = {
                     title: 'FOLDERS_FOLDERS',
                     items: folders.map(function(folder) {
@@ -131,7 +131,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
             return $http.get('/api/portals/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
                 var portals = response.data;
-                if (!portals || portals.length < 1) return resolve(false);
+                if (!portals || portals.length < 1)  return Promise.resolve(false);
                 var relations = {
                     title: 'PORTALS_PORTALS',
                     items: portals.map(function(portal) {
