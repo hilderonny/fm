@@ -21,6 +21,26 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
         $scope.selectElement(folderElement);
     };
 
+    var uploadDocumentCallback = function(uploadedDocument) {
+        var documentElement = {
+            _id: uploadedDocument._id,
+            type: 'd',
+            name: uploadedDocument.name
+        };
+        if ($scope.selectedElement) {
+            if (!$scope.selectedElement.children) $scope.selectedElement.children = [];
+            var indexToInsert = $scope.elements.indexOf($scope.selectedElement) + 1;
+            while ($scope.elements[indexToInsert] && $scope.elements[indexToInsert].level > $scope.selectedElement.level) indexToInsert++;
+            $scope.elements.splice(indexToInsert, 0, documentElement);
+            $scope.selectedElement.children.push(documentElement);
+            documentElement.level = $scope.selectedElement.level + 1;
+        } else {
+            documentElement.level = 0;
+            $scope.elements.push(documentElement);
+        }
+        $scope.selectElement(documentElement);
+    };
+
     var saveElementCallback = function(savedElement) {
         $scope.selectedElement.name = savedElement.name;
     };
@@ -51,8 +71,10 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
         if (element.type === 'f') {
             utils.addCardWithPermission('Office/FolderCard', {
                 folderId: element._id,
+                createFolderCallback: createFolderCallback,
                 saveFolderCallback: saveElementCallback,
                 deleteFolderCallback: deleteElementCallback,
+                uploadDocumentCallback: uploadDocumentCallback,
                 closeCallback: closeElementCallback
             }, 'PERMISSION_OFFICE_DOCUMENT').then(function() {
                 $scope.selectedElement = element;

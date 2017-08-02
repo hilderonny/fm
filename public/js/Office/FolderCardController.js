@@ -1,7 +1,7 @@
 app.controller('OfficeFolderCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
 
     $scope.selectElement = function(element) {
-
+        utils.setLocation('/documents/' + element._id, true);
     };
 
     // Click on Create-button to create a new folder
@@ -76,7 +76,12 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
 
     // Neuen Ornder in dem selektierten erstellen
     $scope.newFolder = function() {
-
+        utils.removeCard($element);
+        utils.addCardWithPermission('Office/FolderCard', {
+            parentFolderId: $scope.folder._id,
+            createFolderCallback: $scope.params.createFolderCallback,
+            closeCallback: $scope.params.closeElementCallback
+        }, 'PERMISSION_OFFICE_DOCUMENT');
     };
 
     // Performs the upload of the selected file
@@ -110,6 +115,9 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
                 var uploadedDocument = e.target.response;
                 $scope.folder.elements.push(uploadedDocument);
                 $scope.selectElement(uploadedDocument);
+                if ($scope.params.uploadDocumentCallback) {
+                    $scope.params.uploadDocumentCallback(uploadedDocument);
+                }
                 $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function(translations) {
                     $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
                 });

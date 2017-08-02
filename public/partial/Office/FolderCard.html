@@ -1,4 +1,4 @@
-<md-card ng-cloak ng-controller="OfficeFolderCardController" style="background-image:url(/css/icons/office/Document.svg);">
+<md-card ng-cloak ng-controller="OfficeFolderCardController" style="background-image:url(/css/icons/office/Document.svg);" class="list-details-details">
 
     <md-toolbar class="md-toolbar-tools md-accent">
         <md-button ng-if="!isNewFolder && canWriteDocuments" ng-click="newFolder()" aria-label="ADD FOLDER">
@@ -16,6 +16,13 @@
         <div flex></div>
         <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
     </md-toolbar>
+
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" ng-hide="isNewFolder"><span ng-bind="folderName"></span></span>
+            <span class="md-headline" ng-if="isNewFolder" translate>TRK_FOLDERS_NEW_FOLDER</span>
+        </md-card-title-text>
+    </md-card-title>
 
     <script type="text/ng-template" id="FoldersFormTemplate">
         <md-card-content>

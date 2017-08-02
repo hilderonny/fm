@@ -5,105 +5,75 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
      */
     $scope.relationLoaders = {
         activities: function(relationList) {
-            return new Promise(function(resolve, reject) { // Ein Promise mit den Verknüpfungen als Parameter muss zurück gegeben werden
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                // Details für die verknüpften Elemente laden, dabei API-Erweiterung nutzen
-                $http.get('/api/activities/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var activities = response.data;
-                    if (!activities || activities.length < 1) return resolve(false);
-                    // ViewModel für Anzeige in Liste vorbereiten. Die Objektattribute müssen genau so heissen, die Liste erwartet das
-                    var relations = {
-                        title: 'ACTIVITIES_ACTIVITIES', // Übersetzungsschlüssel ohne Präfix "TRK_" als Abschnittsüberschrift
-                        items: activities.map(function(activity) {
-                            return { // ViewModel für einzelnen Eintrag
-                                icon:'material/Planner', // TODO: Pfadangabe in Doku überarbeiten
-                                firstLine:activity.name,
-                                secondLine:moment(activity.date).format('L'),
-                                id:activity._id,
-                                relationId:targetIds[activity._id].relationId,
-                                onSelect: function() { // Handler, der bei Selektion des Listeneintrags die Detailkarte lädt
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'Office/ActivityCard', {
-                                        activityId: activity._id,
-                                        saveActivityCallback: $scope.loadRelations,
-                                        deleteActivityCallback:$scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_OFFICE_ACTIVITY');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.activities = relations; // Verknüpfungen dem richtigen Abschnitt zuweisen
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            // Details für die verknüpften Elemente laden, dabei API-Erweiterung nutzen
+            return $http.get('/api/activities/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var activities = response.data;
+                if (!activities || activities.length < 1) return resolve(false);
+                // ViewModel für Anzeige in Liste vorbereiten. Die Objektattribute müssen genau so heissen, die Liste erwartet das
+                var relations = {
+                    title: 'ACTIVITIES_ACTIVITIES', // Übersetzungsschlüssel ohne Präfix "TRK_" als Abschnittsüberschrift
+                    items: activities.map(function(activity) {
+                        return { // ViewModel für einzelnen Eintrag
+                            icon:'material/Planner', // TODO: Pfadangabe in Doku überarbeiten
+                            firstLine:activity.name,
+                            secondLine:moment(activity.date).format('L'),
+                            id:activity._id,
+                            relationId:targetIds[activity._id].relationId,
+                            targetUrl:'/activities/' + activity._id
+                        };
+                    })
+                }
+                $scope.relations.activities = relations; // Verknüpfungen dem richtigen Abschnitt zuweisen
+                return Promise.resolve(relations);
             });
         },
         clients: function(relationList) {
-            return new Promise(function(resolve, reject) {
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/clients/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var clients = response.data;
-                    if (!clients || clients.length < 1) return resolve(false);
-                    var relations = {
-                        title: 'CLIENTS_CLIENTS',
-                        items: clients.map(function(client) {
-                            return {
-                                icon:'material/Briefcase', 
-                                firstLine:client.name,
-                                id:client._id,
-                                relationId:targetIds[client._id].relationId,
-                                onSelect: function() {
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'Administration/ClientCard', {
-                                        clientId: client._id,
-                                        saveClientCallback: $scope.loadRelations,
-                                        deleteClientCallback:$scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_ADMINISTRATION_CLIENT');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.clients = relations;
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/clients/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var clients = response.data;
+                if (!clients || clients.length < 1) return resolve(false);
+                var relations = {
+                    title: 'CLIENTS_CLIENTS',
+                    items: clients.map(function(client) {
+                        return {
+                            icon:'material/Briefcase', 
+                            firstLine:client.name,
+                            id:client._id,
+                            relationId:targetIds[client._id].relationId,
+                            targetUrl:'/clients/' + client._id
+                        };
+                    })
+                }
+                $scope.relations.clients = relations;
+                return Promise.resolve(relations);
             });
         },
         documents: function(relationList) {
-            return new Promise(function(resolve, reject) {
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/documents/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var documents = response.data;
-                    if (!documents || documents.length < 1) return resolve(false);
-                    var relations = {
-                        title: 'DOCUMENTS_DOCUMENTS',
-                        items: documents.map(function(document) {
-                            return { // ViewModel für einzelnen Eintrag
-                                icon: 'material/Document', 
-                                firstLine: document.name,
-                                secondLine: document.path.map(function(pathElement) {
-                                    return pathElement.name
-                                }).join (' / '),
-                                id: document._id,
-                                relationId: targetIds[document._id].relationId,
-                                onSelect: function() {
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'Office/DocumentCard', {
-                                        documentId: document._id,
-                                        saveDocumentCallback: $scope.loadRelations,
-                                        deleteDocumentCallback: $scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_OFFICE_DOCUMENT');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.documents = relations;
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/documents/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var documents = response.data;
+                if (!documents || documents.length < 1) return resolve(false);
+                var relations = {
+                    title: 'DOCUMENTS_DOCUMENTS',
+                    items: documents.map(function(document) {
+                        return { // ViewModel für einzelnen Eintrag
+                            icon: 'material/Document', 
+                            firstLine: document.name,
+                            secondLine: document.path.map(function(pathElement) {
+                                return pathElement.name
+                            }).join (' / '),
+                            id: document._id,
+                            relationId: targetIds[document._id].relationId,
+                            targetUrl:'/documents/' + document._id
+                        };
+                    })
+                }
+                $scope.relations.documents = relations;
+                return Promise.resolve(relations);
             });
         },
         fmobjects: function(relationList) {
@@ -132,70 +102,50 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             });
         },
         folders: function(relationList) {
-            return new Promise(function(resolve, reject) {
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/folders/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var folders = response.data;
-                    if (!folders || folders.length < 1) return resolve(false);
-                    var relations = {
-                        title: 'FOLDERS_FOLDERS',
-                        items: folders.map(function(folder) {
-                            return { // ViewModel für einzelnen Eintrag
-                                icon:'material/Folder', 
-                                firstLine:folder.name,
-                                secondLine:folder.path.map(function(pathElement) {
-                                    return pathElement.name
-                                }).join (' / '),
-                                id:folder._id,
-                                relationId:targetIds[folder._id].relationId,
-                                onSelect: function() {
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'Office/FolderCard', {
-                                        folderId: folder._id,
-                                        saveFolderCallback: $scope.loadRelations,
-                                        deleteFolderCallback:$scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_OFFICE_DOCUMENT');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.folders = relations;
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/folders/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var folders = response.data;
+                if (!folders || folders.length < 1) return resolve(false);
+                var relations = {
+                    title: 'FOLDERS_FOLDERS',
+                    items: folders.map(function(folder) {
+                        return { // ViewModel für einzelnen Eintrag
+                            icon:'material/Folder', 
+                            firstLine:folder.name,
+                            secondLine:folder.path.map(function(pathElement) {
+                                return pathElement.name
+                            }).join (' / '),
+                            id:folder._id,
+                            relationId:targetIds[folder._id].relationId,
+                            targetUrl:'/documents/' + folder._id
+                        };
+                    })
+                }
+                $scope.relations.folders = relations;
+                return Promise.resolve(relations);
             });
         },
         portals: function(relationList) {
-            return new Promise(function(resolve, reject) {
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/portals/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var portals = response.data;
-                    if (!portals || portals.length < 1) return resolve(false);
-                    var relations = {
-                        title: 'PORTALS_PORTALS',
-                        items: portals.map(function(portal) {
-                            return {
-                                icon:'material/Server', 
-                                firstLine:portal.name,
-                                id:portal._id,
-                                relationId:targetIds[portal._id].relationId,
-                                onSelect: function() {
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'LicenseServer/PortalCard', {
-                                        portalId: portal._id,
-                                        savePortalCallback: $scope.loadRelations,
-                                        deletePortalCallback:$scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_LICENSESERVER_PORTAL');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.portals = relations;
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/portals/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var portals = response.data;
+                if (!portals || portals.length < 1) return resolve(false);
+                var relations = {
+                    title: 'PORTALS_PORTALS',
+                    items: portals.map(function(portal) {
+                        return {
+                            icon:'material/Server', 
+                            firstLine:portal.name,
+                            id:portal._id,
+                            relationId:targetIds[portal._id].relationId,
+                            targetUrl:'/portals/' + portal._id
+                        };
+                    })
+                }
+                $scope.relations.portals = relations;
+                return Promise.resolve(relations);
             });
         },
         usergroups: function(relationList) {

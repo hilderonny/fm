@@ -77,7 +77,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             var nextCard;
             do {
                 nextCard = card.next();
-                utils.destroyAndRemoveCard(nextCard);
+                utils.removeCard(nextCard);
             } while (nextCard.length > 0);
         },
 
@@ -94,23 +94,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         // its scope to prevent memory leaks. Should not be called directly.
         // Call removeCard() instead to have a nice animation.
         // See https://www.bennadel.com/blog/2706-always-trigger-the-destroy-event-before-removing-elements-in-angularjs-directives.htm
-        destroyAndRemoveCard: function(card) {
+        removeCard: function(card) {
             if (card && card.length) {
                 card.scope().$destroy(); // Need to destroy the scope before removing the card from the dom, see link above
                 card.remove(); 
             }
-        },
-
-        // Removes the given card from the canvas
-        removeCard: function(card) {
-            // Show hide animation
-            card.addClass('willclose');
-            card[0].style.borderColor = 'black';
-            card[0].style.removeProperty('transform');
-            // Wait until animation completed
-            setTimeout(function() { 
-                utils.destroyAndRemoveCard(card);
-            }, 250);
         },
 
         /**
