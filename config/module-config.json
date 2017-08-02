@@ -190,7 +190,6 @@
                 "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg",
                 "partial/BIM/FmobjectCard.html",
-                "partial/BIM/FmobjectCardDetails.html",
                 "partial/BIM/FmObjectList.html",
                 "partial/BIM/HierarchyCard.html"
             ],
