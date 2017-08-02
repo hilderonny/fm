@@ -1,32 +1,23 @@
-<md-card ng-cloak ng-controller="OfficeDocumentCardController" style="background-image:url(/css/icons/office/Document.svg);">
+<md-card ng-cloak ng-controller="OfficeDocumentCardController" style="background-image:url(/css/icons/office/Document.svg);" class="list-details-details">
 
-    <md-card-title flex="none" class="withfab">
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-click="downloadDocument()" aria-label="DOWNLOAD">
+            <md-tooltip md-direction="bottom"><span translate>TRK_DOCUMENTS_DOWNLOAD_DOCUMENT</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Download.svg"></md-icon>
+            <p translate>TRK_DOCUMENTS_DOWNLOAD</p>
+        </md-button>
+        <ng-include ng-if="!isNewFolder" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" ng-bind="documentName"></span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor">
-        <md-fab-trigger>
-            <md-button class="md-fab md-accent" aria-label="MENU">
-                <md-tooltip md-direction="left"><span translate>TRK_DOCUMENTS_MORE_ACTIONS</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
-            </md-button>
-        </md-fab-trigger>
-        <md-fab-actions>
-            <md-button class="md-fab md-raised md-mini" ng-click="downloadDocument()" aria-label="DOWNLOAD">
-                <md-tooltip md-direction="left"><span translate>TRK_DOCUMENTS_DOWNLOAD</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Download.svg"></md-icon>
-            </md-button>
-            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
-        </md-fab-actions>
-    </md-fab-speed-dial>
-
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
-
-    <md-tabs flex ng-if="!isNewFolder && !isRootFolder">
+    <md-tabs flex>
         <md-tab>
             <md-tab-label><span translate>TRK_DOCUMENTS_DETAILS</span></md-tab-label>
             <md-tab-body>

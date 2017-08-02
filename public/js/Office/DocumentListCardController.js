@@ -46,9 +46,23 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
     };
 
     var deleteElementCallback = function() {
-        $scope.elements.splice($scope.elements.indexOf($scope.selectedElement), 1);
+        var index = $scope.elements.indexOf($scope.selectedElement);
+        var deleteCount = 1;
+        for (var i = index + 1; i < $scope.elements.length; i++) {
+            if ($scope.elements[i].level > $scope.selectedElement.level) {
+                deleteCount++;
+            } else {
+                break; //Wichtig, da sonst Unterelemente in kommenden Pfaden ebenfalls gelöscht würden
+            }
+        }
+        $scope.elements.splice($scope.elements.indexOf($scope.selectedElement), deleteCount);
         closeElementCallback();
     };
+
+    var extractDocumentCallback = function() {
+        // Hierarchie einfach neu laden
+        $scope.load();
+    }
 
     var closeElementCallback = function() {
         $scope.selectedElement = false;
@@ -84,6 +98,7 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
                 documentId: element._id,
                 saveDocumentCallback: saveElementCallback,
                 deleteDocumentCallback: deleteElementCallback,
+                extractDocumentCallback: extractDocumentCallback,
                 closeCallback: closeElementCallback
             }, 'PERMISSION_OFFICE_DOCUMENT').then(function() {
                 $scope.selectedElement = element;

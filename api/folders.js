@@ -23,7 +23,6 @@ router.get('/', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents),
     var clientId = req.user.clientId; // clientId === null means that the user is a portal user
     var rootElements = [];
     var allFolders = {};
-    var folders, documents;
     req.db.get(co.collections.folders).find({ clientId: clientId }, { sort : { name : 1 } }).then((folders) => {
         folders.forEach((f) => {
             allFolders[f._id] = {
@@ -131,10 +130,18 @@ router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.document
         // Database element is available here in every case, because validateSameClientId already checked for existence
         return req.db.get(co.collections.folders).find({ parentFolderId: id }, { sort : { name : 1 } });
     }).then((subfolders) => {
-        folder.elements = folder.elements.concat(subfolders);
+        folder.elements = folder.elements.concat(subfolders.map((subFolder) => { return {
+            _id: subFolder._id,
+            type: 'f',
+            name: subFolder.name
+        }}));
         return req.db.get(co.collections.documents).find({ parentFolderId: id }, { sort : { name : 1 } });
     }).then((documents) => {
-        folder.elements = folder.elements.concat(documents);
+        folder.elements = folder.elements.concat(documents.map((document) => { return {
+            _id: document._id,
+            type: 'd',
+            name: document.name
+        }}));
         res.send(folder);
     });
 });

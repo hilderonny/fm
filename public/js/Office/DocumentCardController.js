@@ -91,6 +91,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             $scope.relationsEntity = { type:'documents', id:document._id };
             // Berechtigungen ermitteln
             $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
+            utils.setLocation('/documents/' + $scope.params.documentId);
         });
     }
 
