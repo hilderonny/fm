@@ -9,7 +9,7 @@ var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 
 // xdescribe and xit are used for test stubs which should not run now and are to be implemented later
-describe('API folders', function() {
+describe.only('API folders', function() {
     
     // Clear and prepare database with clients, user groups and users
     beforeEach(() => {

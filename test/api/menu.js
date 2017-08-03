@@ -9,7 +9,7 @@ var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 
-describe('API menu', function() {
+describe.only('API menu', function() {
 
     var extractMenu = () => { // The same functionality as in API
         var fullMenuObject = {};

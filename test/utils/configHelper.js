@@ -11,7 +11,7 @@ var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var moduleConfig = require('../../config/module-config.json');
 
-describe('UTILS configHelper', function() {
+describe.only('UTILS configHelper', function() {
         
     beforeEach(() => {
         return th.cleanDatabase()
