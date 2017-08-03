@@ -98,6 +98,7 @@ module.exports.apis = {
  */
 module.exports.collections = {
     activities:'activities',
+    busniesspartner: 'busniesspartner',
     /**
      * Modulzuordnungen für Mandanten
      */
@@ -207,6 +208,11 @@ module.exports.permissions = {
      * Permission to show and edit FM objects
      */
     BIM_FMOBJECT: 'PERMISSION_BIM_FMOBJECT',
+    /**
+     * Permission to show and edit CRM
+     */
+    CRM_BUSINESSPARTNERS:"PERMISSION_CRM_BUSINESSPARTNERS",
+      
     /**
      * Permission to show and edit portals on the license server
      */

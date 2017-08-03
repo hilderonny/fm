@@ -176,6 +176,38 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
                 });
             });
         },
+         partners: function(relationList) {
+            return new Promise(function(resolve, reject) {
+                var targetIds = {};
+                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+                $http.get('/api/busniesspartner/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                    var partners = response.data;
+                    if (!partners || partners.length < 1) return resolve(false);
+                    var relations = {
+                        title: 'BP_BP',
+                        items: partners.map(function(partner) {
+                            return {
+                                icon:'material/Briefcase', 
+                                firstLine:partner.name,
+                                id:partner._id,
+                                relationId:targetIds[partner._id].relationId,
+                                onSelect: function() {
+                                    var item = this;
+                                    return utils.replaceCardWithPermission($element, 'Administration/BPCard', {
+                                        partnerId: partner._id,
+                                        saveBPCallback: $scope.loadRelations,
+                                        deleteBPCallback:$scope.loadRelations,
+                                        closeCallback: function() { $scope.selectedElement = null; }
+                                    }, 'PERMISSION_CRM_BUSINESSPARTNERS');
+                                }
+                            };
+                        })
+                    }
+                    $scope.relations.partners = relations;
+                    resolve(relations);
+                });
+            });
+        },
         portals: function(relationList) {
             return new Promise(function(resolve, reject) {
                 var targetIds = {};
@@ -272,7 +304,7 @@ app.controller('CoreRelationsTabController', function($scope, $http, $translate,
                     resolve(relations);
                 });
             });
-        },
+        }        
     };
 
     /**

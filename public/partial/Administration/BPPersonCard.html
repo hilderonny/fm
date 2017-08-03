@@ -1,0 +1,42 @@
+<md-card ng-cloak style="background-image:url('/css/icons/office/User.svg');">
+ <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline"  translate>TRK_BP_NEW_PERSON</span>
+           <!-- <span class="md-headline" ng-if= "!isNewPerson"  translate>TRK_BP_PERSON</span>-->
+        </md-card-title-text>
+    </md-card-title>
+
+   <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+  </md-button>
+
+    <md-card-content >
+        <form layout = "column">
+            <md-input-container flex>
+                <label translate>TRK_BP_PERSON_NAME</label>  
+                <md-select ng-model ="Person.name" >  
+                    <md-option ng-value="personName"> 
+                        <span translate="TRK_BP_PERSON_{{personName}}_NAME"></span>
+                    </md-option>  
+                </md-select>
+             </md-input-container>
+
+            <md-input-container flex>
+                <label translate>TRK_BP_PERSON_ROLLE</label>  
+                <md-select ng-model ="Person.rolle" >  
+                    <md-option ng-value="personRolle" > 
+                        <span translate="TRK_BP_PERSON_{{personRolle}}_ROLLE"></span>
+                    </md-option>  
+                </md-select>
+             </md-input-container>
+
+             <md-card-actions layout="row" layout-align="end center">
+                <md-button class="md-raised md-accent" ><span translate>TRK_BP_CREATE_ADDRESS</span></md-button>
+                <md-button class="md-raised md-accent" ><span translate>TRK_BP_SAVE</span></md-button>
+                <md-button class="md-raised md-warn" ><span translate>TRK_BP_DELETE</span></md-button>
+            </md-card-actions>    
+        </form>
+    </md-card-content>
+
+
+</md-card>
