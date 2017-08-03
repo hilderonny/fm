@@ -168,7 +168,7 @@
                 {
                     "title": "TRK_MENU_CRM",
                     "items": [
-                        { "mainCard": "Administration/BPListCard", "icon": "Briefcase", "title": "TRK_MENU_ADMINISTRATION_CRM", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS" }
+                        { "mainCard": "Administration/BPListCard", "icon": "Briefcase", "title": "TRK_MENU_ADMINISTRATION_CRM_BUSNIESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS" }
                     ]
                 }
             ]

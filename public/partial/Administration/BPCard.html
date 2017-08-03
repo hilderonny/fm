@@ -3,14 +3,13 @@
 <md-card-title flex="none" class="withfab">
     <md-card-title-text>
         <span class = "md-headline" ng-hide ="isNewPartner">
-            <span ng-bind= "partnerName"> 
-            </span>
+            <span ng-bind= "partnerName"> </span>
         </span>
         <span class="md-headline" ng-if= "isNewPartner" translate>TRK_BP_NEWPARTNER </span>        
     </md-card-title-text>
 </md-card-title>
 
-<md-fab-speed-dial md-direction = "down" class="md-scale" ng-if="!isNewPartner">
+<md-fab-speed-dial md-direction = "down" class="md-scale relations-anchor" ng-if="!isNewPartner">
     <md-fab-trigger>
         <md-button class ="md-fab md-accent" aria-label="MENU">
             <md-tooltip md-direction ="left">
@@ -21,25 +20,15 @@
     </md-fab-trigger>
 
     <md-fab-actions>
-        <md-button class ="md-fab md-raised md-mini" aria-label="ADD Person">
-            <md-tooltip md-direction="left"> <span translate>TRK_BP_ADD_PERSON</span>
-            </md-tooltip>
-             <md-icon md-svg-src="/css/icons/material/User.svg"></md-icon>
-        </md-button>
-         <md-button class ="md-fab md-raised md-mini" aria-label="ADD Business relationship">
-            <md-tooltip md-direction="left"> <span translate>TRK_BP_ADD_BUSINESS_RELATIONSHIP</span>
-            </md-tooltip>
-             <md-icon md-svg-src="/css/icons/material/Briefcase.svg"></md-icon>
-        </md-button>
         <md-button class ="md-fab md-raised md-mini" ng-click="addAddress()"  aria-label="ADD Address">
             <md-tooltip md-direction="left"> <span translate>TRK_BP_ADD_ADDRESS</span>
             </md-tooltip>
-             <md-icon md-svg-src="/css/icons/material/User.svg"></md-icon>
+             <md-icon md-svg-src="/drafts/icons/Map Marker.svg"></md-icon>
         </md-button>       
+            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
     </md-fab-actions>
-
-
 </md-fab-speed-dial>
+
 <md-button class="md-icon-button close" ng-click ="closeCard()" aria-label="CLOSE CARD">
     <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
 </md-button>
@@ -53,18 +42,18 @@
                 <input ng-model ="partner.name" name ="name">
              </md-input-container>
 
-             <md-input-container flex  ng-if="!isNewPartner" ng-disabled="partnersForm.$invalid">
+             <md-input-container flex ng-disabled="partnersForm.$invalid">
               <label translate>TRK_BP_INDUSTRY_NAME </label>
-            <input ng-model ="industry.name" name ="name">
+            <input ng-model ="partner.industry" name ="name">
             </md-input-container>
 
-            <md-input-container flex ng-if="!isNewPartner" ng-disabled="partnersForm.$invalid">
-                <md-checkbox ng-model="partner.isAdmin"><span translate>TRK_BP_ADMINISTRATOR</span></md-checkbox>
+            <md-input-container flex ng-disabled="partnersForm.$invalid">
+                <md-checkbox ng-model="partner.isJuristic"><span translate> TRK_BP_JURISTIC_PERSON</span></md-checkbox>
             </md-input-container>
 
-            <md-input-container flex ng-if="!isNewPartner" ng-disabled="partnersForm.$invalid">
+            <md-input-container flex  ng-disabled="partnersForm.$invalid">
                  <label translate>TRK_BP_ROLE </label>
-               <input ng-model ="rolle.name" name ="name">
+               <input ng-model ="partner.rolle" name ="name">
             </md-input-container>
 
              <md-card-actions layout = "row" layout-align="end center">
@@ -72,15 +61,14 @@
                      <span translate>TRK_BP_CREATE </span>
                  </md-button>
 
-                 <md-button class ="md-raised md-accent" ng-if="!isNewPartner" ng-disabled="partnersForm.$invalid">
-                     <span translate>TRK_BP_ADD</span>
-                 </md-button>
                  <md-button class ="md-raised md-accent" ng-if="!isNewPartner" ng-click ="savePartner()" ng-disabled="partnersForm.$invalid">
                      <span translate>TRK_BP_SAVE</span>
                  </md-button>
-                 <md-button class ="md-raised md-accent" ng-if="!isNewPartner" ng-click ="deletePartner()" ng-disabled="partnersForm.$invalid">
+
+                 <md-button class ="md-raised md-warn" ng-if="!isNewPartner" ng-click ="deletePartner()" ng-disabled="partnersForm.$invalid">
                      <span translate>TRK_BP_DELETE</span>
                  </md-button>
+
              </md-card-actions>
         </form>
     </md-card-content>
@@ -95,10 +83,6 @@
         <ng-include src="'PartnersFormTemplate'"> </ng-include>    
         </md-tab-body>
     </md-tab>
-    <md-tab>
-        <md-tab-label><span translate>TRK_BP_PERSON</span></md-tab-label>
-    </md-tab>
-
     <md-tab>
         <md-tab-label><span translate>TRK_BP_ADDRESS</span>
     </md-tab-label>
@@ -116,19 +100,8 @@
             </md-list>
         </md-tab-body>
     </md-tab>
-
-
-    <md-tab>
-        <md-tab-label><span translate>TRK_BP_BUSINESS_RELATIONS</span></md-tab-label>
-    </md-tab>
+        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
 </md-tabs>
-
-
-
-
-
-
-
 
 
 <ng-include flex ng-if="isNewPartner" src="'PartnersFormTemplate'"></ng-include>

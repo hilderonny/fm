@@ -86,7 +86,7 @@ app.controller('AdministrationBPAddressCardController', function($scope, $http, 
            $scope.isNewAddress = true;
            $scope.partnerAddresses = [];             
            $scope.partnerAddress = {
-             type: $scope.addressTypes[0]
+           type: $scope.addressTypes[0]
          };
        }
    };

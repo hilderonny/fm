@@ -15,13 +15,14 @@
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
+var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var fs = require('fs');
 
 /**
  * Create a new address and assign it to a partner
  */
-router.post('/', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'w'), function(req, res) {
+router.post('/', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'w','partneraddress'), function(req, res) {
   var address=req.body;
   if(!address || Object.keys(address).lenght<1 || !address.partnerId){
       return res.send(400);
@@ -47,13 +48,9 @@ req.db.get('partners').findOne(address.partnerId).then((partner)=>
 /**
  * Get single partner address with given id
  */
-router.get('/:id', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'r'), validateId, (req, res) => {
+router.get('/:id', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'r','partneraddress'), validateId,validateSameClientId('addresses'),(req, res) => {
     req.db.get('addresses').findOne(req.params.id, req.query.fields).then((address) => {
-        if (!address) {
-            // address with given ID not found
-            return res.sendStatus(404);
-        }
-        return res.send(address);
+      res.send(address);
     });
 });
 
@@ -79,7 +76,7 @@ router.get('/', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'r', 'partners'), (req, 
 /**
 Updating business partner address.
  **/
-router.put('/:id', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'w', 'partners'), validateId, function(req, res){
+router.put('/:id', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'w', 'partneraddress'), validateId,validateSameClientId('addresses'),  function(req, res){
     var address = req.body;
     if(!address || Object.keys(address).length < 1 ){
         return res.sendStatus(400);
@@ -87,11 +84,7 @@ router.put('/:id', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'w', 'partners'), val
     delete address._id;
     delete address.partnerId;
      req.db.update('addresses', req.params.id, { $set: address }).then((updatedAddress) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-            if (!updatedAddress || updatedAddress.lastErrorObject) {
-                // Address with given ID not found
-                return res.sendStatus(404);
-            }
-            return res.send(updatedAddress);
+           res.send(updatedAddress);
         });
 });
 
@@ -99,11 +92,8 @@ router.put('/:id', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'w', 'partners'), val
 /**
  * Delete partner address
  */
-router.delete('/:id', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'w', 'partners'), validateId, function(req, res) {
+router.delete('/:id', auth('PERMISSION_CRM_BUSINESSPARTNERS', 'w', 'partneraddress'), validateId, validateSameClientId('addresses'),function(req, res) {
     req.db.remove('addresses', req.params.id).then((result) => {
-        if (result.result.n < 1) {
-            return res.sendStatus(404);
-        }
         res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
     });
 });

@@ -70,7 +70,8 @@ module.exports.permissions = {
     /**
      * Permission to show and edit CRM
      */
-    CRM_BUSINESSPARTNERS:"PERMISSION_CRM_BUSINESSPARTNERS",    
+    CRM_BUSINESSPARTNERS:"PERMISSION_CRM_BUSINESSPARTNERS",
+      
     /**
      * Permission to show and edit portals on the license server
      */
