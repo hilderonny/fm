@@ -16,7 +16,7 @@ module.exports.getAvailablePermissionKeysForClient = function(clientId, db) {
             Object.keys(modules).forEach(function(moduleKey) {
                 var mod = modules[moduleKey];
                 // Handle menu entries
-                mod.menu.forEach(function(menu) {
+                if (mod.menu) mod.menu.forEach(function(menu) {
                     menu.items.forEach(function(item) {
                         if (item.permission && permissionKeys.indexOf(item.permission) < 0) {
                             permissionKeys.push(item.permission);
