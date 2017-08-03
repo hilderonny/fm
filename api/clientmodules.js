@@ -18,6 +18,9 @@ router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.
     var client;
     var clientModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
     req.db.get(co.collections.clients).findOne(req.params.id).then(function(c) {
+        if (!c) {
+            return Promise.reject();
+        }
         client = c;
         // Obtain the client modules for the client
         return req.db.get(co.collections.clientmodules).find({ 
@@ -35,6 +38,8 @@ router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.
             };
         });
         res.send(result);
+    }, () => {
+        res.sendStatus(400);
     });
 });
 

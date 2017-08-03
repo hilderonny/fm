@@ -23,101 +23,6 @@ describe('API permissions', function(){
 
     var validPermisionKey = 'PERMISSION_BIM_FMOBJECT';
 
-    describe('GET/:id', function(){
-
-        it('responds with invalid id with 400', function() {
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return th.get('/api/permissions/invalidId?token=' + token).expect(400);
-            });
-        });
-
-        it('responds without authentication with 403', function() {
-            // Load a valid id so we have a valid request and do not get a 404
-            return db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER'}).then((permissionFromDB) => {
-                return th.get('/api/permissions/' + permissionFromDB._id.toString()).expect(403);
-            });
-        });
-
-
-        it('responds without read permission with 403', function() {
-            return db.get('permissions').findOne({ key : 'PERMISSION_ADMINISTRATION_USER' }).then((permissionFromDB) => {
-                // Remove the corresponding permission
-                return th.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        return th.get(`/api/permissions/${permissionFromDB._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with an id of an existing permission which does not belong to the same client as the logged in user with 403', function() {
-            //permission.clientId != user.clientId
-            //logg-in as user of client 1, but ask for permission of client 2
-            return db.get('clients').findOne({name: '0'}).then((clientFormDB) => {
-                return db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', clientId: clientFormDB._id}).then((permissionFromDatabase) => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                        var permissionId = permissionFromDatabase._id.toString();
-                        return th.get(`/api/folders/${permissionId}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with not existing id with 403', function() {
-            // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
-            // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                return th.get('/api/permissions/999999999999999999999999?token=' + token).expect(403);
-            });
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('permissions').findOne({ key: validPermisionKey}).then(function(permissionFromDatabase){
-                var id = permissionFromDatabase._id;
-                return th.removeClientModule('1', 'base').then(function(){
-                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        return th.get(`/api/permissions/${id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('permissions').findOne({key: validPermisionKey}).then(function(permissionFromDatabase){
-                var id = permissionFromDatabase._id;
-                return th.removeClientModule('1', 'base').then(function(){
-                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                        return th.get(`/api/permissions/${id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with existing permission id with all details of the requested permission', function(done) {
-            db.get('usergroups').findOne({name: '1_0'}).then((userGroupFromDB) => {
-                //find unique Permission as a combination of its key and userGroupId to further use its _id
-                db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: userGroupFromDB._id}).then((permissionFromDatabase) => {
-                    th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        th
-                            .get(`/api/permissions/${permissionFromDatabase._id}?token=${token}`)
-                            .expect(200)
-                            .end(function(err, res) {
-                                var permissionFromApi = res.body;
-                                assert.strictEqual(permissionFromApi._id.toString(), permissionFromDatabase._id.toString(), `Id of permission in database does not match key from API ("${permissionFromDatabase._id.toString()}" vs. "${permissionFromApi._id}")`);
-                                assert.strictEqual(permissionFromApi.key.toString(), permissionFromDatabase.key.toString(), `Key of usergroup in database does not match key from API ("${permissionFromDatabase.key}" vs. "${permissionFromApi.key}")`);
-                                assert.strictEqual(permissionFromApi.userGroupId.toString(), permissionFromDatabase.userGroupId.toString(), `userGroupId of usergroup in database does not match key from API ("${permissionFromDatabase.userGroupId}" vs. "${permissionFromApi.userGroupId}")`);
-                                assert.strictEqual(permissionFromApi.clientId.toString(), permissionFromDatabase.clientId.toString(), `clientId of usergroup in database does not match the one from API ("${permissionFromDatabase.clientId}" vs. "${permissionFromApi.clientId}")`);
-                                assert.strictEqual(permissionFromApi.canRead.toString(), permissionFromDatabase.canRead.toString(), `canRead property of usergroup in database does not match key from API ("${permissionFromDatabase.canRead}" vs. "${permissionFromApi.canRead}")`);
-                                assert.strictEqual(permissionFromApi.canWrite.toString(), permissionFromDatabase.canWrite.toString(), `canWrite property of usergroup in database does not match key from API ("${permissionFromDatabase.canWrite}" vs. "${permissionFromApi.canWrite}")`);
-                                done();
-                            });
-                    }).catch(done);
-                });
-            });
-        });
-
-    });
-
     function getUserGroup() {
         return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup});
     }
@@ -261,6 +166,18 @@ describe('API permissions', function(){
                     assert.ok(expectedPermissions.indexOf(permission) >= 0);
                 });
             });
+        });
+
+    });
+
+    describe('GET/forUserGroup/:id', function() {
+
+        var api = `${co.apis.permissions}/forUserGroup`;
+
+        th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups);
+        th.apiTests.getId.clientDependentNegative(api, co.collections.usergroups);
+
+        xit('responds with all permissions where the states are correctly set', function() {
         });
 
     });

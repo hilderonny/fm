@@ -60,12 +60,6 @@ describe('API clientmodules', function() {
             });
         });
 
-        it('responds without query parameter clientId with 400', function() {
-            return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                return th.get(`/api/clientmodules/forClient?token=${token}`).expect(400);
-            });
-        });
-
         it('responds with incorrect query parameter clientId with 400', function() {
             return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
                 return th.get(`/api/clientmodules/forClient/invalid?token=${token}`).expect(400);
@@ -78,36 +72,7 @@ describe('API clientmodules', function() {
             });
         });
 
-        it('responds with correct clientId with list of all client module assignments for the client with all details', function(done) {
-            db.get('clients').findOne({name: '1'}).then((clientFromDatabase) => {
-                var clientId = clientFromDatabase._id;
-                db.get('clientmodules').find({clientId: clientId}).then((clientModulesFromDatabase) => {
-                    th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                        th.get(`/api/clientmodules/forClient/${clientId.toString()}?token=${token}`).expect(200).end(function(err, res) {
-                            if (err) {
-                                done(err);
-                                return;
-                            }
-                            var clientModulesFromApi = res.body;
-                            assert.strictEqual(clientModulesFromApi.length, clientModulesFromDatabase.length, `Number of client modules differ (${clientModulesFromApi.length} from API, ${clientModulesFromDatabase.length} in database)`);
-                            clientModulesFromDatabase.forEach((clientModuleFromDatabase) => {
-                                var keys = Object.keys(clientModuleFromDatabase); // Include _id every time because it is returned by the API in every case!
-                                var clientModuleFound = false;
-                                for (var i = 0; i < clientModulesFromApi.length; i++) {
-                                    var clientModuleFromApi = clientModulesFromApi[i];
-                                    if (clientModuleFromApi._id !== clientModuleFromDatabase._id.toString()) {
-                                        continue;
-                                    }
-                                    clientModuleFound = true;
-                                    th.compareApiAndDatabaseObjects('client module', keys, clientModuleFromApi, clientModuleFromDatabase);
-                                }
-                                assert.ok(clientModuleFound, `Client module "${clientModuleFromDatabase.name}" was not returned by API`);
-                            });
-                            done();
-                        });
-                    });
-                });
-            });
+        xit('responds with all modules where the assignment states are correctly set', function() {
         });
 
     });

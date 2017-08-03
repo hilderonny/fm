@@ -50,7 +50,7 @@ router.post('/', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licen
     }
     req.db.get(co.collections.portals).findOne(portalModule.portalId).then((portal) => {
         if (!portal || `${portal.clientId ? portal.clientId : 'null'}` !== `${req.user.clientId}`) {
-            return res.sendStatus(400);
+            return Promise.reject(400);
         }
         delete portalModule._id; // Ids are generated automatically
         portalModule.portalId = portal._id;
@@ -59,12 +59,13 @@ router.post('/', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licen
         return req.db.get(co.collections.portalmodules).find(portalModule);
     }).then(function(existingAssignments) {
         if (existingAssignments.length > 0) {
-            res.sendStatus(409); // Diese Zuordnung gibt es schon
-            return Promise.reject();
+            return Promise.reject(409); // Diese Zuordnung gibt es schon
         }
         return req.db.insert(co.collections.portalmodules, portalModule);
     }).then((insertedPortalModule) => {
         res.send(insertedPortalModule);
+    }).catch((status) => {
+        res.sendStatus(status);
     });
 });
 
