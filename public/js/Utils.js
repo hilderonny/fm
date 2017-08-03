@@ -140,6 +140,14 @@ app.factory('utils', function($compile, $rootScope, $http, $translate) {
                     setTimeout(function() { utils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
                 }
             }
+        },
+
+        loadDynamicAttributes: function(scope) {
+            console.log('loadDynamicAttributes', scope);
+        },
+
+        saveDynamicAttributes: function(scope) {
+
         }
 
     }
