@@ -142,8 +142,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate) {
             }
         },
 
-        loadDynamicAttributes: function(scope) {
-            console.log('loadDynamicAttributes', scope);
+        loadDynamicAttributes: function(scope, modelName, entityId) {
+            $http.get('/api/dynamicattributes/values/' + modelName + '/' + entityId).then(function(response) {
+                scope.attributes = response.data;
+                console.log(scope.attributes);
+            });
         },
 
         saveDynamicAttributes: function(scope) {

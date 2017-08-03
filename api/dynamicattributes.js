@@ -55,17 +55,6 @@ router.get('/model/:modelName', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRI
 });
 
 /**
- * Returns a dynamic attribute with the given _id
- */
-router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
-    var dynamicAttributeId = req.params.id;
-    req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(dynamicattribute){
-        // Database element is available here in every case, because validateSameClientId already checked for existence
-        res.send(dynamicattribute);
-    });
-});
-
-/**
  * Returns the concrete option with the given _id.
  */
 router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId('dynamicattributeoptions'), (req, res) => {
@@ -88,8 +77,7 @@ router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES
 /**
  * Returns all values of the dynamic attributes of an entity of a model MODELNAME with the given _id.
  */
-router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateModelName, validateId, validateSameClientId(), (req, res) => {
-    var modelName = req.params.modelName;
+router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId(), (req, res) => {
     var entityId = monk.id(req.params.id);
   
     req.db.get(co.collections.dynamicattributevalues.name).aggregate([
@@ -107,7 +95,6 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
             as: 'options'
         } },
         { $match: { // Find only relevant elements
-            modelName: modelName,
             entityId: entityId
         } }
     ]).then(function(valuesForEntity) {
@@ -142,6 +129,17 @@ router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r'
         {name: 'folders', icon: 'Document', title: 'Documents'}
     ];
    return  res.sendStatus(200);
+});
+
+/**
+ * Returns a dynamic attribute with the given _id
+ */
+router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
+    var dynamicAttributeId = req.params.id;
+    req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(dynamicattribute){
+        // Database element is available here in every case, because validateSameClientId already checked for existence
+        res.send(dynamicattribute);
+    });
 });
 
 /**

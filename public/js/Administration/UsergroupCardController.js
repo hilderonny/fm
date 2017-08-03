@@ -179,7 +179,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $http, 
                 $http.get('/api/permissions/assigned/' + $scope.params.userGroupId).then(function(permissionsResponse) {
                     userGroup.permissions = permissionsResponse.data;
                 });
-                utils.loadDynamicAttributes($scope);
+                utils.loadDynamicAttributes($scope, 'usergroups', $scope.params.userGroupId);
                 checkCanAddPermission();
             });
         } else {
