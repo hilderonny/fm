@@ -16,6 +16,8 @@ var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var apiHelper = require('../utils/apiHelper');
+var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 
 // Get all users of the current client, maybe filtered by userGroupId
 // TODO: Testfälle anpassen
@@ -203,6 +205,10 @@ router.put('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), validate
     }
     delete user._id; // When user object also contains the _id field
     delete user.clientId; // Prevent assignment of the user to another client
+    // For the case that only the _id had to be updated, return an error and do not handle any further
+    if (Object.keys(user).length < 1) {
+        return res.sendStatus(400);
+    }
     if (user.pass && user.pass.length > 0) {
         user.pass = bcryptjs.hashSync(user.pass);
     } else {
@@ -220,9 +226,12 @@ router.put('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), validate
 
 // Delete an user
 router.delete('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), validateId, validateSameClientId('users'), function(req, res) {
+    var id = monk.id(req.params.id);
     req.db.remove('users', req.params.id).then((result) => {
         // Database element is available here in every case, because validateSameClientId already checked for existence
-        res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+        rh.deleteAllRelationsForEntity(co.collections.users, id).then(function() {
+            res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+        });
     });
 });
 

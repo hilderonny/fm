@@ -1,9 +1,9 @@
 var moduleConfig = require('../config/module-config.json');
 
 /**
- * Returns a list of all permission keys available to the client of the logged in user.
+ * Returns a list of all permission keys available to the given client.
  * The keys are collected from the menu and settingset entries in the module-config.json
- * and are filtered by the modules assigned to the client of the logged in user.
+ * and are filtered by the modules assigned to the given client.
  * Returns a promise with an array of availyble permission keys as parameter
  * @example 
  * var configHelper = require('/utils/configHelper');
@@ -14,20 +14,18 @@ module.exports.getAvailablePermissionKeysForClient = function(clientId, db) {
         module.exports.getAvailableModulesForClient(clientId, db).then(function(modules) {
             var permissionKeys = [];
             Object.keys(modules).forEach(function(moduleKey) {
-                var module = modules[moduleKey];
+                var mod = modules[moduleKey];
                 // Handle menu entries
-                if (module.menu) {
-                    module.menu.forEach(function(menu) {
-                        menu.items.forEach(function(item) {
-                            if (item.permission && permissionKeys.indexOf(item.permission) < 0) {
-                                permissionKeys.push(item.permission);
-                            }
-                        })
-                    });
-                }
+                mod.menu.forEach(function(menu) {
+                    menu.items.forEach(function(item) {
+                        if (item.permission && permissionKeys.indexOf(item.permission) < 0) {
+                            permissionKeys.push(item.permission);
+                        }
+                    })
+                });
                 // Handle settingsets
-                if (module.settingsets) {
-                    module.settingsets.forEach(function(settingset) {
+                if (mod.settingsets) {
+                    mod.settingsets.forEach(function(settingset) {
                         if (settingset.permission && permissionKeys.indexOf(settingset.permission) < 0) {
                             permissionKeys.push(settingset.permission);
                         }
@@ -53,15 +51,13 @@ module.exports.isPermissionAvailableToClient = function(clientId, permissionKey,
             for (var moduleKey in modules) { // Diese Art dr Schleife ist nötig, um sie vorzeitig abzubrechen. array.forEach kann nicht abgebrochen werden.
                 var mod = modules[moduleKey];
                 // Handle menu entries
-                if (mod.menu) {
-                    for (var menuKey in mod.menu) {
-                        var menu = mod.menu[menuKey];
-                        for (var itemKey in menu.items) {
-                            var item = menu.items[itemKey];
-                            if (item.permission && item.permission === permissionKey) {
-                                resolve(true);
-                                return;
-                            }
+                for (var menuKey in mod.menu) {
+                    var menu = mod.menu[menuKey];
+                    for (var itemKey in menu.items) {
+                        var item = menu.items[itemKey];
+                        if (item.permission && item.permission === permissionKey) {
+                            resolve(true);
+                            return;
                         }
                     }
                 }

@@ -4,7 +4,6 @@
  */
 var superTest = require('supertest');
 var server = require('../app');
-var async = require('async');
 var db = require('../middlewares/db');
 var bcryptjs = require('bcryptjs');
 var assert = require('assert');
@@ -19,13 +18,13 @@ var monk = require('monk');
 
 var th = module.exports;
 
-var dbObjects = {};
+th.dbObjects = {};
 
 th.bulkInsert = (collectionName, docs) => {
-    if (!dbObjects[collectionName]) {
-        dbObjects[collectionName] = [];
+    if (!th.dbObjects[collectionName]) {
+        th.dbObjects[collectionName] = [];
     }
-    dbObjects[collectionName] = dbObjects[collectionName].concat(docs);
+    th.dbObjects[collectionName] = th.dbObjects[collectionName].concat(docs);
     return db.get(collectionName).bulkWrite(docs.map((doc) => { return {insertOne:{document:doc}} })).then((res) => {
         var docsToReturn = [];
         for (var i = 0; i < res.insertedCount; i++) {
@@ -48,7 +47,7 @@ var generateLicenseKey = () => {
  * The returned promise has no parameter.
  */
 th.cleanDatabase = () => {
-    dbObjects = {};
+    th.dbObjects = {};
     var promises = [
         'activities',
         'clientmodules',
@@ -121,12 +120,13 @@ th.prepareClients = () => {
  */
 th.prepareClientModules = () => {
     var clientModules = [];
-    dbObjects.clients.forEach((client) => {
-        clientModules.push({ clientId: client._id, module: 'base' });
-        clientModules.push({ clientId: client._id, module: 'activities' });
-        clientModules.push({ clientId: client._id, module: 'documents' });
-        clientModules.push({ clientId: client._id, module: 'fmobjects' });
-        clientModules.push({ clientId: client._id, module: 'licenseserver' });
+    th.dbObjects.clients.forEach((client) => {
+        clientModules.push({ clientId: client._id, module: co.modules.base });
+        clientModules.push({ clientId: client._id, module: co.modules.activities });
+        clientModules.push({ clientId: client._id, module: co.modules.clients });
+        clientModules.push({ clientId: client._id, module: co.modules.documents });
+        clientModules.push({ clientId: client._id, module: co.modules.fmobjects });
+        clientModules.push({ clientId: client._id, module: co.modules.licenseserver });
     });
     return th.bulkInsert('clientmodules', clientModules);
 };
@@ -149,7 +149,7 @@ th.removeClientModule = (clientName, module) => {
  */
 th.prepareUserGroups = () => {
     var userGroups = [];
-    dbObjects.clients.forEach((client) => {
+    th.dbObjects.clients.forEach((client) => {
         userGroups.push({ name: client.name + '_0', clientId: client._id });
         userGroups.push({ name: client.name + '_1', clientId: client._id });
     });
@@ -167,7 +167,7 @@ th.prepareUserGroups = () => {
 th.prepareUsers = () => {
     var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
     var users = [];
-    dbObjects.usergroups.forEach((userGroup) => {
+    th.dbObjects.usergroups.forEach((userGroup) => {
         users.push({ name: userGroup.name + '_0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id });
         users.push({ name: userGroup.name + '_ADMIN0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id, isAdmin: true }); // Administrator
     });
@@ -180,17 +180,17 @@ th.prepareUsers = () => {
  */
 th.preparePermissions = () => {
     var permissions = [];
-    dbObjects.usergroups.forEach((userGroup) => {
-        permissions.push({ key: 'PERMISSION_ADMINISTRATION_CLIENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_ADMINISTRATION_USERGROUP', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_BIM_FMOBJECT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_OFFICE_ACTIVITY', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_OFFICE_DOCUMENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_LICENSESERVER_PORTAL', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_SETTINGS_CLIENT', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_SETTINGS_PORTAL', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: 'PERMISSION_SETTINGS_USER', userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+    th.dbObjects.usergroups.forEach((userGroup) => {
+        permissions.push({ key: co.permissions.ADMINISTRATION_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.ADMINISTRATION_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.ADMINISTRATION_USERGROUP, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.BIM_FMOBJECT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.OFFICE_ACTIVITY, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.OFFICE_DOCUMENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.LICENSESERVER_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.SETTINGS_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.SETTINGS_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.SETTINGS_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
     });
     return th.bulkInsert('permissions', permissions);
 };
@@ -235,9 +235,13 @@ th.removeAllPermissions = (userName, permissionKey) => {
  */
 
 th.preparePortals = () => {
-    var portals = [{name: 'p1', isActive: true, licenseKey: 'LicenseKey1'},
-                   {name: 'p2', isActive: false, licenseKey: 'LicenseKey2'}];
-    return th.bulkInsert('portals', portals);
+    return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+        var portals = [
+            {name: 'p1', isActive: true, licenseKey: 'LicenseKey1', clientId: client._id},
+            {name: 'p2', isActive: false, licenseKey: 'LicenseKey2', clientId: client._id}
+        ];
+        return th.bulkInsert('portals', portals);
+    });
 };
 
 /**
@@ -247,12 +251,12 @@ th.preparePortals = () => {
 
 th.preparePortalModules = () => {
     var portalModules = [];
-    dbObjects.portals.forEach((portal) => {
-        portalModules.push({portalId: portal._id, module: 'base'});
-        portalModules.push({portalId: portal._id, module: 'clients'});
-        portalModules.push({portalId: portal._id, module: 'documents'});
-        portalModules.push({portalId: portal._id, module: 'fmobjects'});
-        portalModules.push({portalId: portal._id, module: 'portalbase'});
+    th.dbObjects.portals.forEach((portal) => {
+        portalModules.push({portalId: portal._id, module: co.modules.base});
+        portalModules.push({portalId: portal._id, module: co.modules.clients});
+        portalModules.push({portalId: portal._id, module: co.modules.documents});
+        portalModules.push({portalId: portal._id, module: co.modules.fmobjects});
+        portalModules.push({portalId: portal._id, module: co.modules.portalbase});
     });
     return th.bulkInsert('portalmodules', portalModules);
 };
@@ -267,7 +271,7 @@ th.preparePortalModules = () => {
 th.prepareActivities = () => {
     var activities = [];
     var now = new Date();
-    dbObjects.users.forEach((user) => {
+    th.dbObjects.users.forEach((user) => {
         now.setHours(now.getHours() - 24);
         activities.push({
             date: now.toISOString(),
@@ -318,7 +322,7 @@ th.addUserAsParticipantToActivity = function(userName, activitiyName) {
  */
 th.prepareMarkers = () => {
     var markers = [];
-    dbObjects.users.forEach((user)=>{
+    th.dbObjects.users.forEach((user)=>{
         markers.push({
             clientId: user.clientId,
             name: user.name + '_0',
@@ -343,15 +347,15 @@ th.prepareMarkers = () => {
  */
 th.prepareFmObjects = () => {
     var fmObjects = [];
-    dbObjects.clients.forEach((client) => {
-        fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt', path:',' });
-        fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Gebäude', path:',' });
+    th.dbObjects.clients.forEach((client) => {
+        fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt' });
+        fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Gebäude' });
     });
     return th.bulkInsert('fmobjects', fmObjects).then((insertedRootFmObjects) => {
         var level1FmObjects = [];
         insertedRootFmObjects.forEach((rootFmObject) => {
-            level1FmObjects.push({ name: rootFmObject.name + '_0', clientId: rootFmObject.clientId, type: 'Etage', path: rootFmObject.path + rootFmObject._id.toString() + ',', parentId: rootFmObject._id });
-            level1FmObjects.push({ name: rootFmObject.name + '_1', clientId: rootFmObject.clientId, type: 'Raum', path: rootFmObject.path + rootFmObject._id.toString() + ',', parentId: rootFmObject._id });
+            level1FmObjects.push({ name: rootFmObject.name + '_0', clientId: rootFmObject.clientId, type: 'Etage', parentId: rootFmObject._id });
+            level1FmObjects.push({ name: rootFmObject.name + '_1', clientId: rootFmObject.clientId, type: 'Raum', parentId: rootFmObject._id });
         });
         return th.bulkInsert('fmobjects', level1FmObjects);
     });
@@ -366,7 +370,7 @@ th.prepareFmObjects = () => {
  */
 th.prepareFolders = () => {
     var rootFolders = [];
-    dbObjects.clients.forEach((client) => {
+    th.dbObjects.clients.forEach((client) => {
         rootFolders.push({ name: client.name + '_0', clientId: client._id });
         rootFolders.push({ name: client.name + '_1', clientId: client._id });
     });
@@ -389,14 +393,17 @@ th.prepareFolders = () => {
     });
 };
 
-var createPath = (pathToCreate) => {
+/**
+ * Creates a path and all of its parent paths if they do not exist
+ */
+th.createPath = (pathToCreate) => {
     try {
         fs.statSync(pathToCreate);
         return; // Her we come only when the path exists
     }
     catch (err) {
         // path does not exist, create it
-        createPath(path.dirname(pathToCreate));
+        th.createPath(path.dirname(pathToCreate));
         fs.mkdirSync(pathToCreate);
     }
 }
@@ -406,9 +413,9 @@ var createPath = (pathToCreate) => {
  */
 th.prepareDocumentFiles = () => {
     return new Promise((resolve, reject) => {
-        dbObjects.documents.forEach((document) => {
+        th.dbObjects.documents.forEach((document) => {
             var filePath = documentsHelper.getDocumentPath(document._id);
-            createPath(path.dirname(filePath));
+            th.createPath(path.dirname(filePath));
             fs.writeFileSync(filePath, document._id.toString());
         });
         resolve();
@@ -450,12 +457,12 @@ th.removeDocumentFiles = () => {
  */
 th.prepareDocuments = () => {
     var documents = [];
-    dbObjects.folders.forEach((folder) => {
+    th.dbObjects.folders.forEach((folder) => {
         documents.push({ name: folder.name + '_0', clientId: folder.clientId, parentFolderId: folder._id });
         documents.push({ name: folder.name + '_1', clientId: folder.clientId, parentFolderId: folder._id });
     });
     // Documents in root folder
-    dbObjects.clients.forEach((client) => {
+    th.dbObjects.clients.forEach((client) => {
         documents.push({ name: client.name + '_0', clientId: client._id });
         documents.push({ name: client.name + '_1', clientId: client._id });
     });
@@ -463,14 +470,14 @@ th.prepareDocuments = () => {
 };
 
 /**
- * Create a relation to each activity for each document in the database.
+ * Create a relation to each activity for each usergroup in the database.
  */
 th.prepareRelations = function() {
     var relations = [];
-    var keys = Object.keys(dbObjects);
+    var keys = Object.keys(th.dbObjects);
     keys.forEach(function(key1) {
         keys.forEach(function(key2) {
-            relations.push({ type1: key1, id1: dbObjects[key1][0]._id, type2: key2, id2: dbObjects[key2][0]._id });
+            relations.push({ type1: key1, id1: th.dbObjects[key1][0]._id, type2: key2, id2: th.dbObjects[key2][0]._id });
         });
     });
     return th.bulkInsert('relations', relations);
@@ -478,7 +485,6 @@ th.prepareRelations = function() {
 
 /**
  * Creates 3 documents for each folder
- * Asynchronous call:
  * return testHelpers.compareApiAndDatabaseObjects(
  *  'clients',
  *  [ '_id', 'name' ],
@@ -497,7 +503,40 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
     });
 };
 
-function getModuleForApi(api) {
+th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoDatabase) => {
+    var entity1;
+    return db.get(entityType1).findOne({ name: nameType1 }).then((entity) => {
+        entity1 = entity;
+        return db.get(entityType2).findOne({ name: nameType2 });
+    }).then((entity2) => {
+        var relation = {
+            type1: entityType1,
+            type2: entityType2,
+            id1: entity1._id,
+            id2: entity2._id,
+            clientId: entity1.clientId
+        };
+        if (insertIntoDatabase) {
+            return db.get(co.collections.relations).insert(relation);
+        } else {
+            return Promise.resolve(relation);
+        }
+    });
+};
+
+th.createRelationsToUser = (entityType, entity) => {
+    return db.get(co.collections.users).findOne({name:th.defaults.user}).then(function(user) {
+        var relations = [
+            { type1: entityType, id1: entity._id, type2: co.collections.users, id2: user._id, clientId: user.clientId },
+            { type1: co.collections.users, id1: user._id, type2: entityType, id2: entity._id, clientId: user.clientId }
+        ];
+        return db.get(co.collections.relations).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+    }).then(function() {
+        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
+    });
+};
+
+th.getModuleForApi = function(api) {
     // Use only the first parts until the slash
     api = api.split('/')[0];
     for (var moduleName in moduleConfig.modules) {
@@ -507,14 +546,34 @@ function getModuleForApi(api) {
             return moduleName;
         }
     };
-}
+};
 
 th.defaults = {
+    activity: '1_0_0_0',
     adminUser: '1_0_ADMIN0',
+    /**
+     * Standardmandant '1'
+     */
     client: '1',
+    /**
+     * Standardmandant '1' aus Datenbank auslesen und per Promise zurück geben
+     */
+    getClient: function() { return db.get(co.collections.clients).findOne({name:th.defaults.client}); },
+    /**
+     * Standardportal 'p1' aus Datenbank auslesen und per Promise zurück geben
+     */
+    getPortal: function() { return db.get(co.collections.portals).findOne({name:th.defaults.portal}); },
+    /**
+     * Standardbenutzergruppe '1_0' aus Datenbank auslesen und per Promise zurück geben
+     */
+    getUserGroup: function() { return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}); },
     otherClient: '0',
     otherUser: '0_0_0',
     password: 'test',
+    /**
+     * Standardportal 'p1'
+     */
+    portal: 'p1',
     user: '1_0_0',
     userGroup: '1_0'
 };
@@ -535,7 +594,7 @@ th.apiTests = {
             });
             function checkForUser(user) {
                 return function() {
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -559,7 +618,7 @@ th.apiTests = {
             });
             function checkForUser(user) {
                 return function() {
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     var testObjectIds;
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return createTestObjects();
@@ -669,6 +728,37 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
+        },
+        defaultPositive: function(api, collection, createTestObjects) {
+            it('returns a list of elements with all details for the given IDs', function() {
+                var testElementIds, insertedElements;
+                return createTestObjects().then(function(objects) {
+                    return th.bulkInsert(collection, objects);
+                }).then(function(objects) {
+                    insertedElements = objects;
+                    testElementIds = objects.map((to) => to._id.toString());
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.get(`/api/${api}/forIds?ids=${testElementIds.join(',')}&token=${token}`).expect(200);
+                }).then(function(response) {
+                    var elementsFromApi = response.body;
+                    var idCount = insertedElements.length;
+                    assert.equal(elementsFromApi.length, idCount);
+                    for (var i = 0; i < idCount; i++) {
+                        var elementFromApi = elementsFromApi[i];
+                        var elementFromDatabase = insertedElements[i];
+                        Object.keys(elementFromDatabase).forEach(function(key) { // Prüfung beginnend mit Datenbank, bei Dokumenten wird der Pfad mit drangehängt
+                            assert.ok(elementFromApi[key] || elementFromApi[key] === null); // parentFolderId oder clientId können null ein
+                            if (elementFromApi[key] === null) {
+                                assert.ok(elementFromDatabase[key] === null);
+                            } else {
+                                assert.strictEqual(elementFromApi[key].toString(), elementFromDatabase[key].toString());
+                            }
+                        });
+                    }
+                    return Promise.resolve();
+                });
+            });
         }
     },
     getId: {
@@ -693,7 +783,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var insertedId;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return db.get(collection).insert(testObject);
                     }).then(function(insertedObject) {
@@ -735,14 +825,20 @@ th.apiTests = {
             });
         }
     },
+    /**
+     * Testfunktionen für POST - API Requests
+     */
     post: {
-        defaultNegative: function(api, permission, createTestObject) {
+        /**
+         * Standard-Negativtests, die das Verhalten von falschen Aufrufen prüfen
+         */
+        defaultNegative: function(api, permission, createTestObject, ignoreSendObjectTest) {
             it('responds without authentication with 403', function() {
                 return createTestObject().then(function(testObject) {
                     return th.post(`/api/${api}`).send(testObject).expect(403);
                 });
             });
-            it('responds without write permission with 403', function() {
+            if (permission) it('responds without write permission with 403', function() {
                 var loginToken;
                 return th.removeWritePermission(th.defaults.user, permission).then(function() {
                     return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -756,7 +852,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -769,9 +865,39 @@ th.apiTests = {
             }
             it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
             it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-            it('responds with 400 when not sending an object to insert', function() {
+            // Bei portalmanagement muss nix geschickt werden.
+            if(!ignoreSendObjectTest) it('responds with 400 when not sending an object to insert', function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     return th.post(`/api/${api}?token=${token}`).expect(400);
+                });
+            });
+        },
+        /**
+         * Standardpositiv-Tests zum Prüfen, ob ein gesendetes Objekt auch
+         * korrekt in der Datenbank ankommt und ob die Rückgabedaten stimmen.
+         */
+        defaultPositive: function(api, collection, createTestObject) {
+            it('responds with the created element containing an _id field', function() {
+                var testObject;
+                return createTestObject().then(function(obj) {
+                    testObject = obj;
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                }).then(function(token) {
+                    return th.post(`/api/${api}?token=${token}`).send(testObject).expect(200);
+                }).then(function(response) {
+                    var objectFromApi = response.body;
+                    assert.ok(objectFromApi._id);
+                    Object.keys(testObject).forEach(function(key) {
+                        assert.ok(objectFromApi[key]);
+                        assert.strictEqual(objectFromApi[key].toString(), testObject[key].toString());
+                    });
+                    return db.get(collection).findOne(objectFromApi._id);
+                }).then(function(objectFromDatabase) {
+                    Object.keys(testObject).forEach(function(key) {
+                        assert.ok(objectFromDatabase[key]);
+                        assert.strictEqual(objectFromDatabase[key].toString(), testObject[key].toString());
+                    });
+                    return Promise.resolve();
                 });
             });
         }
@@ -797,7 +923,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -817,6 +943,19 @@ th.apiTests = {
                     return createTestObject();
                 }).then(function(testObject) {
                     return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).expect(400);
+                });
+            });
+            it('responds with 400 when the object to insert only contains an _id', function() {
+                var loginToken;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    Object.keys(testObject).forEach(function(key) {
+                        if (key === '_id') return;
+                        delete testObject[key];
+                    });
+                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(400);
                 });
             });
             it('responds with 400 when the _id is invalid', function() {
@@ -882,6 +1021,19 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
+            it('responds with 400 when the object to insert only contains a clientId', function() {
+                var loginToken;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                    loginToken = token;
+                    return createTestObject();
+                }).then(function(testObject) {
+                    Object.keys(testObject).forEach(function(key) {
+                        if (key === 'clientId') return;
+                        delete testObject[key];
+                    });
+                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(400);
+                });
+            });
         }
     },
     delete: {
@@ -891,7 +1043,7 @@ th.apiTests = {
                     return th.del(`/api/${api}/${id.toString()}`).expect(403);
                 });
             });
-            it('responds without write permission with 403', function() {
+            if (permission) it('responds without write permission with 403', function() {
                 var loginToken;
                 return th.removeWritePermission(th.defaults.user, permission).then(function() {
                     return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -905,7 +1057,7 @@ th.apiTests = {
             function checkForUser(user) {
                 return function() {
                     var loginToken;
-                    var moduleName = getModuleForApi(api);
+                    var moduleName = th.getModuleForApi(api);
                     return th.removeClientModule(th.defaults.client, moduleName).then(function() {
                         return th.doLoginAndGetToken(user, th.defaults.password);
                     }).then(function(token) {
@@ -942,7 +1094,7 @@ th.apiTests = {
                 });
             });
         },
-        defaultPositive: function(api, collection, getId) {
+        defaultPositive: function(api, collection, getId, skipRelations) {
             it('deletes the object and return 204', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
@@ -958,36 +1110,82 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
-            it('All relations, where the element is the source (type1, id1), are also deleted', function() {
+            // TODO: Prüfung von Relationen scheint nicht zu stimmen.
+            if (!skipRelations) it('All relations, where the element is the source (type1, id1), are also deleted', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     loginToken = token;
                     return getId();
                 }).then(function(id) {
                     objectId = id;
+                    return db.get(co.collections.relations).find({type1:collection,id1:objectId});
+                }).then(function(relationsBefore) {
+                    assert.notEqual(relationsBefore.length, 0, 'There are no relations set up to test. Have a look into the testHelpers.prepare... functions.');
                     return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
                 }).then(function() {
                     return db.get(co.collections.relations).find({type1:collection,id1:objectId});
-                }).then(function(objectsInDatabase) {
-                    assert.equal(objectsInDatabase.length, 0);
+                }).then(function(relationsAfter) {
+                    assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
                     return Promise.resolve();
                 });
             });
-            it('All relations, where the element is the target (type2, id2), are also deleted', function() {
+            if (!skipRelations) it('All relations, where the element is the target (type2, id2), are also deleted', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     loginToken = token;
                     return getId();
                 }).then(function(id) {
                     objectId = id;
+                    return db.get(co.collections.relations).find({type2:collection,id2:objectId});
+                }).then(function(relationsBefore) {
+                    assert.notEqual(relationsBefore.length, 0, 'There are no relations set up to test. Have a look into the testHelpers.prepare... functions.');
                     return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
                 }).then(function() {
                     return db.get(co.collections.relations).find({type2:collection,id2:objectId});
-                }).then(function(objectsInDatabase) {
-                    assert.equal(objectsInDatabase.length, 0);
+                }).then(function(relationsAfter) {
+                    assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
                     return Promise.resolve();
                 });
             });
         }
     }
+};
+
+
+/**
+ * Erstellt eine Liste von Dateien, die für eine gegebene Menge von Modulen existieren müssen.
+ * Wird von app-packager und portalmanagement Tests verwendet.
+ */
+th.createFileList = (moduleNames) => {
+    var fileList = [];
+    fileList.push('config/module-config.json');
+    if (!moduleNames || moduleNames.length < 1) {
+        var moduleNames = Object.keys(moduleConfig.modules);
+    }
+    moduleNames.forEach((moduleName) => {
+        var module = moduleConfig.modules[moduleName];
+        if (module.api) module.api.forEach((apiFileName) => {
+            fileList.push(`api/${apiFileName}.js`);
+        });
+        if (module.middlewares) module.middlewares.forEach((middlewareFileName) => {
+            fileList.push(`middlewares/${middlewareFileName}.js`);
+        });
+        if (module.utils) module.utils.forEach((utilFileName) => {
+            fileList.push(`utils/${utilFileName}.js`);
+        });
+        if (module.public) module.public.forEach((publicFileName) => {
+            fileList.push(`public/${publicFileName}`);
+        });
+        if (module.root) module.root.forEach((rootFileName) => {
+            fileList.push(`${rootFileName}`);
+        });
+        if (module.include) module.include.forEach((includeFileName) => {
+            if (includeFileName.indexOf('node_modules/') === 0) return; // Ignore node modules
+            fileList.push(`${includeFileName}`);
+        });
+        if (module.languages) module.languages.forEach((language) => {
+            fileList.push(`public/lang/${moduleName}-${language}.json`);
+        });
+    });
+    return fileList;
 };
