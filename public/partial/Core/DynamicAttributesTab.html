@@ -2,32 +2,23 @@
 <md-card-content>
 
     <md-list class="lines-beetween-items">     
-        <md-list-item ng-repeat="attribute in attributesArray() | orderBy: 'type.name_en'" >
+        <md-list-item ng-repeat="attribute in attributes | orderBy: 'type.name_en'" >
             <md-input-container flex ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_TEXT'">
                 <label ng-bind="attribute.type.name_en"></label>
                 <input ng-model="attribute.value">
             </md-input-container>
-        </md-list-item>
-    </md-list>  
-
-    <md-list class="lines-beetween-items">
-        <md-list-item ng-repeat="attribute in attributesArray() | orderBy: 'type.name_en'" >
             <md-input-container flex ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_BOOLEAN'">
-                <md-checkbox ng-model="attribute.value">   <p ng-bind="attribute.type.name_en"></p> </md-checkbox>
+                <md-checkbox ng-model="attribute.value" >   <p ng-bind="attribute.type.name_en"></p> </md-checkbox>
             </md-input-container>
-        </md-list-item>
-    </md-list>
-
-    <md-list class="lines-beetween-items">
-        <md-list-item ng-repeat="attribute in attributesArray() | orderBy: 'type.name_en'" >
             <md-input-container flex ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST'">
                 <label ng-bind="attribute.type.name_en"></label>
                 <md-select ng-model="attribute.value">  
-                    <md-option ng-value="option['_id']" ng-repeat="option in attribute.options | orderBy: 'text_en' track by $index">
+                    <md-option ng-value="option['_id']" ng-repeat="option in attribute.options | orderBy: 'text_en' track by $index" >
                         <span ng-bind="option['text_en']"></span>
                     </md-option>
                 </md-select>
             </md-input-container>
         </md-list-item>
-    </md-list>
+    </md-list>  
+
 </md-card-content>

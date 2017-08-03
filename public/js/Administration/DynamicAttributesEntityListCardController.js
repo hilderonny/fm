@@ -19,15 +19,9 @@ app.controller('AdministrationDynamicAttributesModelListCardController', functio
         $scope.selectedModel = selectedModel;
     };
     //TODo check and fix problem with confusion between folders and documents database table
-    $scope.models = [
-        {name: 'users', icon: 'User', title: 'Users'}, //TODO add translation key for title attribute 
-        {name: 'usergroups', icon: 'User Group Man Man', title: 'User groups'},
-        {name: 'folders', icon: 'Document', title: 'Documents'}
-    ];
-
-   /* $http.get('/api/dynamicattributes/types').then(function(response){
-        $scope.Mmodels = response.data;
-        console.log( $scope.Mmodels);
-    });*/
+    $http.get('/api/dynamicattributes/models').then(function(response){
+        $scope.models = response.data;
+        console.log( $scope.models);
+    });
 
 });

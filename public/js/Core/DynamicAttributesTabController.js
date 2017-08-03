@@ -8,21 +8,18 @@ app.controller('CoreDynamicAttributesTabController', function($scope, $http, $tr
         var modelname = $scope.$parent.relationsEntity.type;
         var entityId = $scope.relationsEntity.id;
         $http.get('/api/dynamicattributes/values/' + modelname + '/' + entityId).then(function(response){
-            $scope.attributes = response.data;
+            $scope.attributes = Object.keys(response.data).map(function(key) {
+                return response.data[key]; });
             console.log($scope.attributes);
         });
     };
     $scope.loadAttributes();
   
-    /**
-     * Hilfsfunktionen zum Umwandeln der Verknüpfungen in ein Feld, das sortiert
-     * werden kann.
-     */
-    $scope.attributesArray = function() {
-        
-        return $scope.attributes ? Object.keys($scope.attributes).map(function(key) {
-                return $scope.attributes[key]; }) : [];
+    var origSaveUserGroup = $scope.$parent.$parent.$parent.saveUserGroup;
+    // Click on Save-button to save an existing userGroup
+    $scope.$parent.$parent.$parent.saveUserGroup = function() {
+        origSaveUserGroup();
+        console.log('Speichere Dynamische Attribute');
+        // ....
     }
-    
-    $scope.attributesArray();
 });
