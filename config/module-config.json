@@ -78,7 +78,6 @@
                 "public/js/Administration/UsergrouplistCardController.js",
                 "public/js/Administration/UserlistCardController.js",
                 "public/js/Administration/UserSettingsCardController.js",
-                "public/js/Core/DynamicAttributesTabController.js",
                 "public/js/Core/RelationsMenuController.js",
                 "public/js/Core/RelationsTabController.js"
             ],
