@@ -1,4 +1,4 @@
-<md-tab md-on-select="onTabSelected()">
+<md-tab ng-if="canReadRelations" md-on-select="onTabSelected()">
     <md-tab-label><span translate>TRK_RELATIONS_LINKS</span></md-tab-label>
     <md-tab-body>
         <md-card-content>
@@ -9,7 +9,7 @@
                         <md-icon md-svg-src="/css/icons/{{item.icon}}.svg"></md-icon><!-- TODO: Pfadangabe in Doku überarbeiten -->
                         <p ng-if="!item.secondLine">{{item.firstLine}}</p>
                         <div ng-if="item.secondLine" class="md-list-item-text multiline"><p>{{item.firstLine}}</p><p>{{item.secondLine}}</p></div>
-                        <md-button class="md-icon-button md-accent" aria-label="DELETE">
+                        <md-button ng-if="canWriteRelations" class="md-icon-button md-accent" aria-label="DELETE">
                             <md-icon ng-click="onDeleteElement(item.relationId)" md-svg-src="/css/icons/material/Delete.svg"></md-icon>
                         </md-button>
                     </md-list-item>

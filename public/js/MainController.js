@@ -1,5 +1,5 @@
 // Controller for main functions
-app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSidenav, $http, $mdDialog, $translate, $mdDateLocale, utils) {
+app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSidenav, $http, $mdDialog, $translate, $mdDateLocale, $location, utils) {
 
     $scope.$mdMedia = $mdMedia; // https://github.com/angular/material/issues/2341#issuecomment-93680762
 
@@ -15,25 +15,45 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     }
 
     // Handle click on sidenav menu item
-    // Deprecated
     $scope.menuClick = function(menuItem) {
         $scope.currentMenuItem = menuItem;
         if (menuItem) {
             if (menuItem.action) {
                 menuItem.action();
             } else {
-                $scope.showmainCard(menuItem.mainCard);
+                angular.element(document.querySelector('#cardcanvas')).empty();
+                utils.addCardWithPermission(menuItem.mainCard, null, menuItem.permission);
                 $mdSidenav('left').close();
             }
         } else {
             angular.element(document.querySelector('#cardcanvas')).empty();
             $mdSidenav('left').close();
+            utils.setLocation('/');
         }
     }
 
-    $scope.showmainCard = function(cardUrl) {
-        angular.element(document.querySelector('#cardcanvas')).empty();
-        utils.addCard(cardUrl);
+
+    $scope.handleDirectUrls = function() {
+        if (app.directUrlMappings[$scope.path[1]]) {
+            var mapping = app.directUrlMappings[$scope.path[1]];
+            var mainMenu = $scope.menu.find(function(m) { return m.title === mapping.mainMenu; });
+            if (!mainMenu) return;
+            var subMenu = mainMenu.items.find(function(mi) { return mi.title === mapping.subMenu; });
+            if (!subMenu) return;
+            $scope.currentMenuItem = subMenu;
+            angular.element(document.querySelector('#cardcanvas')).empty();
+            utils.addCardWithPermission(subMenu.mainCard, { preselection: $scope.path[2] }, subMenu.permission);
+        }
+    };
+
+    $rootScope.permissions = {};
+
+    $rootScope.canRead = function(permissionKey) {
+        return $rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canRead;
+    }
+
+    $rootScope.canWrite = function(permissionKey) {
+        return $rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canWrite;
     }
 
     // User clicked on login button
@@ -65,11 +85,21 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                     "action": function() {
                         localStorage.removeItem("loginCredentials");
                         $scope.isLoggedIn = false;
+                        utils.setLocation('/');
                     }
-                })
+                });
+                // Ermittelt zentral alle Berechtigungen für den angemeldeten Benutzer.
+                // Diese können dann per $rootScope.permissions[key] abgefragt werden.
+                return $http.get('/api/permissions/forLoggedInUser');
+            }).then(function(response) {
+                $rootScope.permissions = {};
+                response.data.forEach(function(permission) {
+                    $rootScope.permissions[permission.key] = permission;
+                });
+                $scope.isLoggingIn = false;
+                $scope.currentMenuItem = null;
+                $scope.handleDirectUrls();
             });
-            $scope.isLoggingIn = false;
-            $scope.currentMenuItem = null;
         }).catch(function() {
             localStorage.removeItem("loginCredentials"); // Delete login credentials to prevent login loop
             $scope.isLoggingIn = false;
@@ -86,7 +116,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                 );
             });
         });
-    }
+    };
 
     // Define used languages
     $scope.setLang = function(lang) {
@@ -110,6 +140,19 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     if ($rootScope.languages.indexOf($scope.currentLanguage) < 0) {
         $scope.setLang('en'); // Fallback
     }
+
+    // Handle direct URLs, checked after login
+
+    $rootScope.$on('$locationChangeSuccess', function(evt, newUrl, oldUrl) {
+        if ($rootScope.ignoreNextLocationChange) {
+            $rootScope.ignoreNextLocationChange = false;
+            return;
+        }
+        $scope.path = $location.path().split('/');
+        $scope.hash = $location.hash();
+        if (newUrl === oldUrl) return;
+        if ($scope.isLoggedIn) $scope.handleDirectUrls();
+    });
 
     // Try to do a login with information from local storage
     try {

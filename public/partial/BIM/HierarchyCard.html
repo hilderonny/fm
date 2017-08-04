@@ -1,22 +1,21 @@
-<md-card ng-cloak ng-controller="BIMHierarchyCardController" ng-click="selectFmObject(false, $event)" style="background-image:url('/css/icons/office/Cottage.svg');">
+<md-card ng-cloak ng-controller="BIMHierarchyCardController" style="background-image:url('/css/icons/office/Cottage.svg');">
 
-    <md-card-title flex="none" class="withfab">
-        <md-card-title-text>
-            <span class="md-headline" translate>TRK_FMOBJECTS_FM_HIERARCHY</span>
-        </md-card-title-text>
-    </md-card-title>
-
-    <md-button class="md-fab md-accent" ng-click="newFmObject($event)" aria-label="ADD FM OBJECT" ng-if="canWriteFmObjects">
-        <md-tooltip md-direction="left"><span translate>TRK_FMOBJECTS_CREATE_NEW_FM_OBJECT</span></md-tooltip>
-        <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-    </md-button>
-
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD" ng-if="params.isSelection">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-click="newFmObject()" aria-label="ADD FM OBJECT" ng-if="canWriteFmObjects">
+            <md-tooltip md-direction="bottom"><span translate>TRK_FMOBJECTS_NEW_ELEMENT_IN_ROOT</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+            <p translate>TRK_FMOBJECTS_NEW_ELEMENT</p>
+        </md-button>
+    </md-toolbar>
 
     <md-card-content>
-        <ng-include flex src="'partial/BIM/HierarchyCardLevel.html'"></ng-include>
+        <md-list>
+            <md-list-item ng-click="selectFmObject(fmObject)" ng-repeat="fmObject in flatFmObjects" ng-class="[{active:selectedFmObject==fmObject}, 'level-'+fmObject.level]" aria-label="{{fmObject.name}}">
+                <md-icon md-svg-src="/css/icons/fm/{{fmObject.type}}.svg"></md-icon>
+                <p ng-bind="fmObject.name"></p>
+                <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
+            </md-list-item>
+        </md-list>
     </md-card-content>
 
 </md-card>

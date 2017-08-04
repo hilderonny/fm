@@ -1,4 +1,4 @@
-app.controller('OfficeDocumentCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('OfficeDocumentCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     // Click on Download-document-button
     $scope.downloadDocument = function() {
@@ -90,9 +90,8 @@ app.controller('OfficeDocumentCardController', function($scope, $http, $mdDialog
             // Information über das Dokument für Verknüpfungen-Tab bereit stellen
             $scope.relationsEntity = { type:'documents', id:document._id };
             // Berechtigungen ermitteln
-            $http.get('/api/permissions/canWrite/PERMISSION_OFFICE_DOCUMENT').then(function(canWriteResponse) {
-                $scope.canWriteDocuments = canWriteResponse.data;
-            });
+            $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
+            utils.setLocation('/documents/' + $scope.params.documentId);
         });
     }
 

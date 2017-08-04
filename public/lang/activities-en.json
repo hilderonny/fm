@@ -1,5 +1,4 @@
 {
-    "TRK_ACTIVITIES_ACTIVITIES" : "Activities",
     "TRK_ACTIVITIES_ACTIVITY" : "Activity",
     "TRK_ACTIVITIES_ACTIVITY_CREATED" : "Activity created",
     "TRK_ACTIVITIES_ACTIVITIY_DELETED" : "Activity removed",
@@ -11,7 +10,6 @@
     "TRK_ACTIVITIES_DELETE" : "Delete",
     "TRK_ACTIVITIES_DETAILS" : "Details",
     "TRK_ACTIVITIES_DONE" : "Resolved",
-    "TRK_ACTIVITIES_MORE_ACTIONS" : "More activities ...",
     "TRK_ACTIVITIES_NAME" : "Name",
     "TRK_ACTIVITIES_NEW_ACTIVITY" : "New Activity",
     "TRK_ACTIVITIES_NEXT_30_DAYS" : "next 30 days",

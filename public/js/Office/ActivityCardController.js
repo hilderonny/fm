@@ -32,6 +32,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
             $translate(['TRK_ACTIVITIES_ACTIVITY_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_ACTIVITIES_ACTIVITY_CREATED).hideDelay(1000).position('bottom right'));
             });
+            utils.setLocation('/activities/' + createdActivity._id);
         });
     };
 
@@ -105,15 +106,14 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                 $scope.activity = completeActivity;
                 $scope.activityName = completeActivity.name; // Prevent updating the label when changing the input value 
                 $scope.relationsEntity = { type:'activities', id:completeActivity._id };
+                utils.setLocation('/activities/' + completeActivity._id);
             });
         } else {
             // New activity
             $scope.isNewActivity = true;
             $scope.activity = { date: new Date(), name: '', task: '', isDone: false, type: 'ACTIVITIES_TYPE_NONE', comment: '', fullyEditable: true };
         }
-        $http.get('/api/permissions/canWrite/PERMISSION_OFFICE_ACTIVITY').then(function (response) {
-            $scope.canWriteActivities = response.data;
-        });
+        $scope.canWriteActivities = $rootScope.canWrite('PERMISSION_OFFICE_ACTIVITY');
     };
 
     // Listen on locale changes to update the date picker. Event is fired from MainController

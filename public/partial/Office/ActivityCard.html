@@ -1,33 +1,68 @@
-<md-card ng-cloak ng-controller="OfficeActivityCardController" style="background-image:url('/css/icons/office/Planner.svg');">
+<md-card ng-cloak ng-controller="OfficeActivityCardController" style="background-image:url('/css/icons/office/Planner.svg');" class="list-details-details">
 
-    <md-card-title flex="none" class="withfab">
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <ng-include ng-if="!isNewActivity" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" ng-bind="activityName" ng-if="!isNewActivity"></span>
             <span class="md-headline" ng-if="isNewActivity" translate>TRK_ACTIVITIES_NEW_ACTIVITY</span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewActivity">
-        <md-fab-trigger>
-            <md-button class="md-fab md-accent" aria-label="MENU">
-                <md-tooltip md-direction="left"><span translate>TRK_ACTIVITIES_MORE_ACTIONS</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
-            </md-button>
-        </md-fab-trigger>
-        <md-fab-actions>
-            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
-        </md-fab-actions>
-    </md-fab-speed-dial>
-
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
-
     <md-tabs flex>
         <md-tab>
             <md-tab-label><span translate>TRK_ACTIVITIES_DETAILS</span></md-tab-label>
             <md-tab-body>
-                <ng-include src="'partial/Office/ActivityCardDetailsTab.html'"></ng-include>
+                <form name="activityForm">
+
+                    <md-card-content layout="column">
+
+                        <md-input-container ng-if="activity.fullyEditable">
+                            <label translate>TRK_ACTIVITIES_DATE</label>
+                            <md-datepicker ng-model="activity.date" md-open-on-focus></md-datepicker>
+                        </md-input-container>
+
+                        <md-input-container flex ng-if="activity.fullyEditable">
+                            <label translate>TRK_ACTIVITIES_NAME</label>
+                            <input ng-model="activity.name" />
+                        </md-input-container>
+
+                        <md-input-container flex ng-if="activity.fullyEditable">
+                            <label translate>TRK_ACTIVITIES_TYPE</label>
+                            <md-select ng-model="activity.type">
+                                <md-option ng-value="type" ng-repeat="type in types">
+                                    <span translate="TRK_{{type}}"></span>
+                                </md-option>
+                            </md-select>
+                        </md-input-container>
+
+                        <md-input-container flex ng-if="activity.fullyEditable">
+                            <label translate>TRK_ACTIVITIES_TASK</label>
+                            <textarea ng-model="activity.task" rows="5"></textarea>
+                        </md-input-container>
+
+                        <md-input-container flex>
+                            <md-checkbox ng-model="activity.isDone"><span translate>TRK_ACTIVITIES_DONE</span></md-checkbox>
+                        </md-input-container>
+
+                        <md-input-container flex>
+                            <label translate>TRK_ACTIVITIES_COMMENT</label>
+                            <textarea ng-model="activity.comment" rows="5"></textarea>
+                        </md-input-container>
+
+                    </md-card-content>
+
+                    <md-card-actions layout="row" layout-align="end center">
+                        <md-button class="md-raised md-accent" ng-if="isNewActivity && canWriteActivities" ng-click="createActivity()"><span translate>TRK_ACTIVITIES_CREATE</span></md-button>
+                        <md-button class="md-raised md-accent" ng-if="!isNewActivity && canWriteActivities" ng-click="saveActivity()"><span translate>TRK_ACTIVITIES_SAVE</span></md-button>
+                        <md-button class="md-raised md-warn" ng-if="!isNewActivity && canWriteActivities" ng-click="deleteActivity()"><span translate>TRK_ACTIVITIES_DELETE</span></md-button>
+                    </md-card-actions>
+
+                </form>
             </md-tab-body>
         </md-tab>
         <ng-include ng-if="!isNewActivity" src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>

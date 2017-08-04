@@ -1,5 +1,5 @@
 // Define utils factory, http://stackoverflow.com/a/26109991
-app.factory('utils', function($compile, $rootScope, $http, $translate) {
+app.factory('utils', function($compile, $rootScope, $http, $translate, $location) {
     var utils = {
 
         // On slow connections clicking on list items multiply adds multiple cards
@@ -16,33 +16,26 @@ app.factory('utils', function($compile, $rootScope, $http, $translate) {
          * @param requiredPermission Berechtigung, die für die Anzeige der Karte benötigt wird.
          */
         addCardWithPermission: function(cardTemplateUrl, params, requiredPermission) {
-            return new Promise(function(resolve, reject) {
-                // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
-                $http.get('/api/permissions/canRead/' + requiredPermission).then(function permissionCheck(response) {
-                    if (!response.data) {
-                        reject();
-                        return;
-                    }
-                    var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
-                    utils.cardsToAdd.push(cardToAdd);
-                    $http.get('/partial/' + cardTemplateUrl + '.html', { cache: true}).then(function(response) {
-                        // Check whether the card should still be shown. When the dummy object is no longer
-                        // in the array, the request tooks too long and the user has done something other meanwhile
-                        if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response
-                        var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
-                        var card = angular.element(response.data);
-                        var domCard = card[0];
-                        cardCanvas.append(card);
-                        var newScope = $rootScope.$new(true);
-                        newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
-                        // Compile (render) the new card and attach its new controller
-                        $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
-                        window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
-                        // Scroll card in view, but wait until the card is put into the dom
-                        utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
-                        resolve(card);
-                    });
-                });
+            var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
+            // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
+            if (!$rootScope.canRead(requiredPermission)) return;
+            utils.cardsToAdd.push(cardToAdd);
+            return $http.get('/partial/' + cardTemplateUrl + '.html', { cache: true}).then(function(response) {
+                // Check whether the card should still be shown. When the dummy object is no longer
+                // in the array, the request tooks too long and the user has done something other meanwhile
+                if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response
+                var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
+                var card = angular.element(response.data);
+                var domCard = card[0];
+                cardCanvas.append(card);
+                var newScope = $rootScope.$new(true);
+                newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
+                // Compile (render) the new card and attach its new controller
+                $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
+                window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
+                // Scroll card in view, but wait until the card is put into the dom
+                utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+                return Promise.resolve(card);
             });
         },
 
@@ -84,7 +77,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate) {
             var nextCard;
             do {
                 nextCard = card.next();
-                utils.destroyAndRemoveCard(nextCard);
+                utils.removeCard(nextCard);
             } while (nextCard.length > 0);
         },
 
@@ -101,23 +94,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate) {
         // its scope to prevent memory leaks. Should not be called directly.
         // Call removeCard() instead to have a nice animation.
         // See https://www.bennadel.com/blog/2706-always-trigger-the-destroy-event-before-removing-elements-in-angularjs-directives.htm
-        destroyAndRemoveCard: function(card) {
+        removeCard: function(card) {
             if (card && card.length) {
                 card.scope().$destroy(); // Need to destroy the scope before removing the card from the dom, see link above
                 card.remove(); 
             }
-        },
-
-        // Removes the given card from the canvas
-        removeCard: function(card) {
-            // Show hide animation
-            card.addClass('willclose');
-            card[0].style.borderColor = 'black';
-            card[0].style.removeProperty('transform');
-            // Wait until animation completed
-            setTimeout(function() { 
-                utils.destroyAndRemoveCard(card);
-            }, 250);
         },
 
         /**
@@ -140,6 +121,19 @@ app.factory('utils', function($compile, $rootScope, $http, $translate) {
                     setTimeout(function() { utils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
                 }
             }
+        },
+
+        handlePreselection: function($scope, collection, selectFunction) {
+            // Check preselection
+            if ($scope.params.preselection) {
+                var elementToSelect = collection.find(function(e) { return e._id === $scope.params.preselection; });
+                if (elementToSelect) selectFunction(elementToSelect);
+            }
+        },
+        setLocation: function(url, handleLocationChange) {
+            if ($location.url() === url) return;
+            if (!handleLocationChange) $rootScope.ignoreNextLocationChange = true;
+            $location.url(url);
         }
 
     }

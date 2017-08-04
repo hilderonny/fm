@@ -1,4 +1,10 @@
-<md-card ng-cloak ng-controller="AdministrationUserCardController" style="background-image:url(/css/icons/office/User.svg);">
+<md-card ng-cloak ng-controller="AdministrationUserCardController" style="background-image:url(/css/icons/office/User.svg);" class="list-details-details">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <ng-include ng-if="!isNewUser" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
 
     <md-card-title flex="none">
         <md-card-title-text>
@@ -6,22 +12,6 @@
             <span class="md-headline" ng-if="isNewUser" translate>TRK_USERS_NEW_USER</span>
         </md-card-title-text>
     </md-card-title>
-
-    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewUser">
-        <md-fab-trigger>
-            <md-button class="md-fab md-accent" aria-label="MENU">
-                <md-tooltip md-direction="left"><span translate>TRK_USERS_MORE_ACTIONS</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
-            </md-button>
-        </md-fab-trigger>
-        <md-fab-actions>
-            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
-        </md-fab-actions>
-    </md-fab-speed-dial>
-
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
 
     <script type="text/ng-template" id="UsersFormTemplate">
 
