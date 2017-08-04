@@ -89,5 +89,6 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
         }
     };
 
+    $scope.modelName = $scope.params.modelName;
     $scope.load();
 });

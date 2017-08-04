@@ -81,7 +81,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     };
     $scope.selectAttributeElement = function(selectedAttributeElement){
         utils.removeCardsToTheRightOf($element);
-        utils.removeCard($element);
+        //utils.removeCard($element);
         utils.addCard('Administration/DynamicAttributeElementCard', {
           dynamicAttributeElementId: selectedAttributeElement._id,
           dynamicAttributeId: $scope.params.dynamicAttributeId

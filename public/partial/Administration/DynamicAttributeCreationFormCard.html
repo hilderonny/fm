@@ -1,4 +1,4 @@
-<md-card ng-cloak ng-controller="AdministrationAttributeCreationCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+<md-card ng-cloak ng-controller="AdministrationAttributeCreationCardController">
 
     <md-card-title flex="none">
         <md-card-title-text>
@@ -47,7 +47,7 @@
             <md-tab-label><span translate>TRK_DYNAMICATTRIBUTES_ELEMENTS</span></md-tab-label>
             <md-tab-body>
                 <md-list class="lines-beetween-items">
-                    <md-list-item ng-repeat="element in elements | orderBy: ['text_en']" ng-click="selectAttributeElement(element)" ng-class="{active:selectedAttributeElement == element}" aria-label="{{element.name_en}}">
+                    <md-list-item ng-repeat="element in elements | orderBy: ['text_en']" ng-click="selectAttributeElement(element)" ng-class="{active:selectedAttributeElement == element}" aria-label="{{element.text_en}}">
                         <md-icon md-svg-src="/css/icons/material/Planner.svg"></md-icon>
                         <p ng-bind="element.text_en"></p>
                     </md-list-item>
@@ -58,9 +58,9 @@
 
     <!-- TODO: check if any additional permission is needed -->
     <md-card-actions layout="row" layout-align="end center">
-        <md-button class="md-raised md-accent" ng-if="isNewAttribute " ng-click="createAttribute()"><span translate>TRK_DA_CREATE</span></md-button>
-        <md-button class="md-raised md-accent" ng-if="!isNewAttribute " ng-click="saveAttribute()"><span translate>TRK_DA_SAVE</span></md-button>
-        <md-button class="md-raised md-warn" ng-if="!isNewAttribute " ng-click="deleteAttribute()"><span translate>TRK_DA_DELETE</span></md-button>
+        <md-button class="md-raised md-accent" ng-if="isNewAttribute " ng-click="createAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_CREATE</span></md-button>
+        <md-button class="md-raised md-accent" ng-if="!isNewAttribute " ng-click="saveAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_SAVE</span></md-button>
+        <md-button class="md-raised md-warn" ng-if="!isNewAttribute " ng-click="deleteAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
     </md-card-actions>
 
 </md-card>

@@ -1,4 +1,4 @@
-<md-card ng-cloak ng-controller="AdministrationDynamicAttributesCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+<md-card ng-cloak ng-controller="AdministrationDynamicAttributesCardController">
 
     <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
         <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
@@ -6,13 +6,12 @@
 
     <md-card-title flex="none">
         <md-card-title-text>
-            <span class="md-headline"><span ng-bind="title"></span></span>
+            <span class="md-headline">
+                <span translate="TRK_SETTINGSET_DYNAMICATTRIBUTES"></span>
+                <div translate="TRK_DA_MODEL_{{modelName}}"></div>
+            </span>
         </md-card-title-text>
     </md-card-title>
-
-    <!--md-button class="md-fab md-accent" ng-if="canWriteAttributeDetails" ng-click="showOtions()">
-        <md-icon md-svg-src="/css/icons/material/Menu.svg"></md-icon>
-    </md-button-->
 
     <md-fab-speed-dial md-direction="down" class="md-scale">
         <md-fab-trigger>
