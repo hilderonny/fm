@@ -1,4 +1,4 @@
-<md-card ng-cloak ng-controller="AdministrationAttributeCreationCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+<md-card ng-cloak ng-controller="AdministrationAttributeCreationCardController">
 
     <md-card-title flex="none">
         <md-card-title-text>
@@ -45,10 +45,9 @@
 
         <md-tab ng-if="attributeType == 'DYNAMICATTRIBUTES_TYPE_PICKLIST' && !isNewAttribute">
             <md-tab-label><span translate>TRK_DYNAMICATTRIBUTES_ELEMENTS</span></md-tab-label>
-
             <md-tab-body>
                 <md-list class="lines-beetween-items">
-                    <md-list-item ng-repeat="element in elemetns | orderBy: ['text_en']" ng-click="selectAttributeElement(element)" ng-class="{active:selectedAttributeElement == element}" aria-label="{{element.name_en}}">
+                    <md-list-item ng-repeat="element in elements | orderBy: ['text_en']" ng-click="selectAttributeElement(element)" ng-class="{active:selectedAttributeElement == element}" aria-label="{{element.text_en}}">
                         <md-icon md-svg-src="/css/icons/material/Planner.svg"></md-icon>
                         <p ng-bind="element.text_en"></p>
                     </md-list-item>

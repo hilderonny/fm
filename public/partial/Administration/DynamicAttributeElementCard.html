@@ -24,10 +24,10 @@
 
     <!-- TODO: check if any additional permission is needed -->
     <md-card-actions layout="row" layout-align="end center">
-        <md-button class="md-raised md-accent" ng-if="!isNewElement  && params.isSelection && params.selectCallback" ng-click="params.selectCallback(attribute)"><span translate>{{params.selectButtonText}}</span></md-button>
-        <md-button class="md-raised md-accent" ng-if="isNewElement " ng-click="createAttributeElement()"><span translate>TRK_DYNAMICATTRIBUTES_CREATE</span></md-button>
-        <md-button class="md-raised md-accent" ng-if="!isNewElement && !params.isSelection" ng-click="saveAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_SAVE</span></md-button>
-        <md-button class="md-raised md-warn" ng-if="!isNewElement && !params.isSelection" ng-click="deleteAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
+        <!--md-button class="md-raised md-accent" ng-if="!isNewElement  && params.isSelection && params.selectCallback" ng-click="params.selectCallback(attribute)"><span translate>{{params.selectButtonText}}</span></md-button-->
+        <md-button class="md-raised md-accent" ng-if="isNewElement " ng-click="createAttributeElement()"><span translate>TRK_DA_OPTION_CREATE</span></md-button>
+        <md-button class="md-raised md-accent" ng-if="!isNewElement" ng-click="saveAttributeElement()"><span translate>TRK_DA_OPTION_SAVE</span></md-button>
+        <md-button class="md-raised md-warn" ng-if="!isNewElement" ng-click="deleteAttributeElement()"><span translate>TRK_DA_OPTION_DELETE</span></md-button>
     </md-card-actions>
 
 </md-card>

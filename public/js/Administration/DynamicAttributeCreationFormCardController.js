@@ -81,7 +81,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     };
     $scope.selectAttributeElement = function(selectedAttributeElement){
         utils.removeCardsToTheRightOf($element);
-        utils.removeCard($element);
+        //utils.removeCard($element);
         utils.addCard('Administration/DynamicAttributeElementCard', {
           dynamicAttributeElementId: selectedAttributeElement._id,
           dynamicAttributeId: $scope.params.dynamicAttributeId
@@ -124,9 +124,8 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
                 $scope.dynamicattribute = completeAttribute;
                 $scope.attributeName = completeAttribute.name_en; 
                 $scope.attributeType = completeAttribute.type;
-
             });
-            $scope.loadElements($scope.params.dynamicAttributeId);
+           
 
         }
         else{
@@ -137,16 +136,16 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         $scope.modelName = 'users';
     };
 
-    $scope.loadElements = function(dynamicAttributeId){
-            //Get list of existing attribute options (so-called elements)
-            $http.get('/api/dynamicattributes/options/' + dynamicAttributeId).then(function(attributeOptionsFromDataBank){
-                $scope.elements = attributeOptionsFromDataBank.data;
-                console.log(dynamicAttributeId);
-                console.log(attributeOptionsFromDataBank.data);
-            });
-            
+    $scope.loadElements = function(){
+        //Get list of existing attribute options (so-called elements)
+        if($scope.params.dynamicAttributeId){
+        $http.get('/api/dynamicattributes/options/' + $scope.params.dynamicAttributeId).then(function(attributeOptionsFromDataBank){
+            $scope.elements = attributeOptionsFromDataBank.data;
+            console.log(attributeOptionsFromDataBank.data);
+        }); 
+        }
     }
-
+    $scope.loadElements();
     $scope.load();
 
 });
