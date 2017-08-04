@@ -37,14 +37,13 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
     $scope.saveAttributeElement = function(){
         var elementToSend = { text_en: $scope.attributeelement.text_en,
                               dynamicAttributeId: $scope.params.dynamicAttributeId};
-        $http.put('/api/dynamicattribute/options' + $scope.params.dynamicAttributeElementId, elementToSend).then(function(response) {
+        $http.put('/api/dynamicattributes/option/' + $scope.params.dynamicAttributeElementId, elementToSend).then(function(response) {
             var savedAttributeElement = response.data;
             $scope.elementName = $scope.attributeelement.text_en;
             if ($scope.params.saveDynamicAttributeCallback) {
                 $scope.params.saveDynamicAttributeCallback(savedAttribute);
             }
-            //TODO use the right translation key
-            $translate(['TRK_USERGROUPS_CHANGES_SAVED']).then(function(translations) {
+            $translate(['TRK_DA_OPTION_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
@@ -58,18 +57,19 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
-                    $http.delete('/api/dynamicattributes/' + $scope.params.dynamicAttributeId).then(function(response) {
-                        if ($scope.params.deletDynamicAttributeCallback) {
-                            $scope.params.deletDynamicAttributeCallback();
+                    $http.delete('/api/dynamicattributes/option/' + $scope.params.dynamicAttributeElementId).then(function(response) {
+                        if ($scope.params.deleteDynamicAttributeCallback) {
+                            $scope.params.deleteDynamicAttributeCallback();
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        //TODO use the right translation key
-                        $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_USERGROUP_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_DA_OPTION_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
         });
+
+        console.log("DELETE");
     };
 
     $scope.languages = $rootScope.languages;

@@ -55,21 +55,11 @@ router.get('/model/:modelName', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRI
 });
 
 /**
- * Returns a dynamic attribute with the given _id
- */
-router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
-    var dynamicAttributeId = req.params.id;
-    req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(dynamicattribute){
-        // Database element is available here in every case, because validateSameClientId already checked for existence
-        res.send(dynamicattribute);
-    });
-});
-
-/**
  * Returns the concrete option with the given _id.
  */
 router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId('dynamicattributeoptions'), (req, res) => {
-    var dynamicAttributeOptionId = req.params.id;
+    var dynamicAttributeOptionId = monk.id(req.params.id);
+    console.log("GET/option");
     req.db.get('dynamicattributeoptions').findOne(dynamicAttributeOptionId).then(function(attributeOption){
         res.send(attributeOption);
     });
@@ -79,7 +69,7 @@ router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
  * Returns a list of options for a dynamic attribute with the given _id. The type of the dynamic attribute must be picklist.
  */
 router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
-    var dynamicAttributeId = req.params.id;
+    var dynamicAttributeId =  monk.id(req.params.id);
     req.db.get('dynamicattributeoptions').find({dynamicAttributeId: dynamicAttributeId}).then(function(attributeOptions){
         res.send(attributeOptions);
     });
@@ -129,19 +119,31 @@ router.get('/types', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r',
  * Returns a list of all possible data models which can have dynamic attributes (currently only...)
  */
 router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), (req, res) => {
-    /*var models = [];
-    co.collections.forEach(function(collectionItem){
-        if(collectionItem.canHaveAttributes){
-            var modelObject = {name: collectionItem.name, icon: collectionItem.icon, title: 'some title'};
+    var models = [];
+    //TODO solve problem with asynchonous execution!!!
+    /*Array.from(co.collections).forEach(function(collectionItem){
+        if(collectionItem.canHaveAttributes == true){
+            var modelObject = {name: collectionItem.name, icon: collectionItem.icon};
             models.push(modelObject);
         }
     });*/
     var models = [
-        {name: 'users', icon: 'User', title: 'Users'}, //TODO add translation key for title attribute 
-        {name: 'usergroups', icon: 'User Group Man Man', title: 'User groups'},
-        {name: 'folders', icon: 'Document', title: 'Documents'}
+        {name: 'users', icon: 'User'}, 
+        {name: 'usergroups', icon: 'User Group Man Man'},
+        {name: 'folders', icon: 'Document'}
     ];
-   return  res.sendStatus(200);
+   res.send(models);
+});
+
+/**
+ * Returns a dynamic attribute with the given _id
+ */
+router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
+    var dynamicAttributeId = req.params.id;
+    req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(dynamicattribute){
+        // Database element is available here in every case, because validateSameClientId already checked for existence
+        res.send(dynamicattribute);
+    });
 });
 
 /**
@@ -245,7 +247,7 @@ router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMI
  * Also changing the model is not supported. Only the name_* properties can be updated.
  */
 router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
-    var dynamicAttributeId = req.params.id;
+    var dynamicAttributeId = monk.id(req.params.id);
     var dynamicAttribute = req.body;
 
     delete dynamicAttribute._id;
@@ -267,11 +269,10 @@ router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', '
  * The dynamicattributeid of the option cannot be changed.
  */
 router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'base'), validateId, validateSameClientId('dynamicattributeoptions'), (req, res) => {
-    var dynamicAttributeOptionId = req.params.id;
+    var dynamicAttributeOptionId = monk.id(req.params.id);
     var dynamicAttributeOption = req.body;
 
     // Dynamic attribute option is available here in every case, because validateSameClientId already checked for existence
-
     delete dynamicAttributeOption.dynamicAttributeId;
     delete dynamicAttributeOption.clientId; //clientId should not be changed
     req.db.update('dynamicattributeoptions', dynamicAttributeOptionId, { $set: dynamicAttributeOption }).then((updatedAttributeValue) => {
@@ -296,7 +297,7 @@ router.put('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
  */
 router.delete('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'base'), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
     var dynamicAttributeId = req.params.id;
-    // TODO: Implement
+    // TODO: check implementation
     req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(existingAttributeFromDB){
         if(existingAttributeFromDB.type == 'picklist'){
             //delete options
@@ -325,17 +326,26 @@ router.delete('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w'
  * attribute where this option is the value.
  */
 router.delete('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'base'), validateId, validateSameClientId('dynamicattributeoptions'), (req, res) => {
-    var dynamicAttributeOptionId = req.params.id;
+    console.log("DEL / option");
+    var dynamicAttributeOptionId = monk.id(req.params.id);
     // Database element is available here in every case, because validateSameClientId already checked for existence
     req.db.get('dynamicattributeoptions').findOne({_id: dynamicAttributeOptionId}).then(function(attributeOption){
-        var dynamicAttributeId = attributeOption.dynamicAttributeId;
+        var dynamicAttributeId = monk.id(attributeOption.dynamicAttributeId);
         req.db.get('dynamicattributes').findOne({_id: dynamicAttributeId}).then(function(dynamicAttribute){
-            //delete values for corresponding attribure option
-            req.db.remove('dynamicattributevalues', {_id: dynamicAttributeOptionId}).then(function(result){
-                //delete option itself
-                req.db.remove('dynamicattributeoptions', {_id: dynamicAttributeOptionId}).then(function(result){
-                    return res.sendStatus(204);
-                });
+            //TODO check if option is assigned as a value to DA of type picklist; if so, set value to null
+            req.db.get('dynamicattributevalues').find({dynamicAttributeId: dynamicAttributeId}).then(function(attribureValue){
+                 console.log(attribureValue);  
+                if(attribureValue.value != dynamicAttributeOptionId){
+                    //safe to delete option because it is not set as value
+                    req.db.remove('dynamicattributeoptions', {_id: dynamicAttributeOptionId}).then(function(result){
+                        return res.sendStatus(204);
+                    });
+                }else{
+                    //option cannot be deleted yet because it is still used as a value for exsting picklist attribute
+                    //TODO: create toast to inform the user
+                    console.log('Option cannot be deleted yet!');    
+                    return res.sendStatus(400);
+                }
             });
         });
     });
