@@ -1,9 +1,9 @@
 <!--md-subheade><span translate>TRK_DYNAMICATTRIBUTES_ATTRIBUTES</span></md-subheade-->
 
-<md-input-container flex ng-repeat="attribute in attributes | orderBy: 'type.name_en'">
+<md-input-container flex ng-repeat="attribute in dynamicAttributes | orderBy: 'type.name_en'">
     <label ng-bind="attribute.type.name_en" ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_TEXT' || attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST'"></label>
     <input ng-model="attribute.value" ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_TEXT'">
-    <md-checkbox ng-model="attribute.value" ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_BOOLEAN'"><span ng-bind="attribute.type.name_en"></span></md-checkbox>
+    <md-checkbox ng-model="attribute.value" ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_BOOLEAN'" aria-label="attribute.type.name_en"><span ng-bind="attribute.type.name_en"></span></md-checkbox>
     <md-select ng-model="attribute.value" ng-if="attribute.type.type == 'DYNAMICATTRIBUTES_TYPE_PICKLIST'">  
         <md-option ng-value="option['_id']" ng-repeat="option in attribute.options | orderBy: 'text_en' track by $index">
             <span ng-bind="option['text_en']"></span>

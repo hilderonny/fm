@@ -79,7 +79,7 @@ router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES
  */
 router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), validateId, validateSameClientId(), (req, res) => {
     var entityId = monk.id(req.params.id);
-  
+  /*
     req.db.get(co.collections.dynamicattributevalues.name).aggregate([
         { $lookup: { // https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/
             from: co.collections.dynamicattributes.name,
@@ -96,9 +96,40 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
         } },
         { $match: { // Find only relevant elements
             entityId: entityId
+        } }*/
+    req.db.get(co.collections.dynamicattributes.name).aggregate([
+        { $lookup: { // In Typen nachgucken, damit wir auch solche Werte bekommen, für die nix in der Datenbank steht
+            from: co.collections.dynamicattributevalues.name,
+            localField: '_id',
+            foreignField: 'dynamicAttributeId',
+            as: 'valueInstance'
+        } },
+        { $project: { // Erst mal Felder filtern und Werte suchen
+            _id: 0,
+            type: '$$ROOT', // Der Typ steckt im Feld type drin, anders geht das nicht mit project, siehe https://stackoverflow.com/questions/19431773/include-all-existing-fields-and-add-new-fields-to-document
+            valueInstance: { $filter: {
+                input: '$valueInstance',
+                as: 'dav',
+                cond: { $eq: [ '$$dav.entityId', entityId ] } // Nur Werte für die korrekte Entität suchen
+            } }
+        } },
+        { $unwind: { // Es sollte nur einen Wert geben, diesen extrahieren.
+            path: '$valueInstance',
+            preserveNullAndEmptyArrays: true // Falls es keinen Wert gibt, null zurück geben
+        } },
+        { $addFields: { // Den Wert direkt als Attribut zurück geben
+            value: { $ifNull: [ '$valueInstance.value', null ] }
+        } },
+        { $lookup: { // Eventuelle Optionen für Picklisten suchen
+            from: co.collections.dynamicattributeoptions.name,
+            localField: '_id',
+            foreignField: 'dynamicAttributeId',
+            as: 'options'
+        } },
+        { $project: { // Das temporäre Wertefeld brauchen wir nicht mehr
+            'type.valueInstance': 0
         } }
     ]).then(function(valuesForEntity) {
-        console.log(valuesForEntity);
         res.send(valuesForEntity);
     });
 });
@@ -204,37 +235,28 @@ router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w
  */
 router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'base'), validateModelName, validateId, validateSameClientId(), (req, res) => {
     var modelName = req.params.modelName;
-    var entityId = req.params.id;
+    var entity;
     var dynamicAttributeValues = req.body;
-    // TODO: check implementation
-   /* req.db.get(modelName).findOne(entityId).then(function(existingEntityFromDB){
-        if(!existingEntityFromDB){
-            return res.sendStatus(403); 
-        }
-        else{
-            req.db.update(modelName, entityId, { $set: dynamicAttributeValues }).then((EntityWithInsertedAttributes) => {
-                return res.send(EntityWithInsertedAttributes);
-            });
-        }
-    });*/
-
-    // alternative implementation ///////
-    if(!dynamicAttributeValues) {
-        return res.sendStatus(400);
-    }
-
-    dynamicAttributeValues.forEach(function(value){
-        value.clientId = req.user.clientId;
-        delete value._id;
-        if(!value.dynamicAttributeId){
-             return res.sendStatus(400);
-        }
+    req.db.get(modelName).findOne(req.params.id).then((e) => {
+        if (!e) return Promise.reject();
+        entity = e;
+        return req.db.remove(co.collections.dynamicattributevalues.name, {entityId: entity._id});
+    }).then(() => {
+        // Jetzt einfach neue values anlegen
+        var bulkData = dynamicAttributeValues.map((dav) => { return { 
+            insertOne: { document: {
+                dynamicAttributeId: monk.id(dav.daId),
+                entityId: entity._id,
+                clientId: entity.clientId,
+                value: dav.type === co.dynamicAttributeTypes.picklist && dav.value !== null ? monk.id(dav.value) : dav.value
+            } }
+        }});
+        return req.db.get(co.collections.dynamicattributevalues.name).bulkWrite(bulkData);
+    }).then((bulkResult) => {
+        res.sendStatus(200);
+    }).catch((error) => {
+        res.sendStatus(400);
     });
-
-    req.db.insert('dynamicattributevalues', dynamicAttributeValues).then(function(inserteddAttributeValue){
-        return res.send(inserteddAttributeValue); 
-    });
-
 });
 
 /**
@@ -275,16 +297,6 @@ router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
     req.db.update('dynamicattributeoptions', dynamicAttributeOptionId, { $set: dynamicAttributeOption }).then((updatedAttributeValue) => {
         return res.send(updatedAttributeValue);
     }); 
-});
-
-/**
- * Updates a value set for an entity of the type MODELNAME and the given _id. 
- */
-router.put('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', 'base'), validateModelName, validateId, validateSameClientId(), (req, res) => {
-    var modelName = req.params.modelName;
-    var entityId = req.params.id;
-    var dynamicAttributeValues = req.body;
-    // TODO: Implement
 });
 
 /**
