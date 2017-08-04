@@ -9,7 +9,7 @@ var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 
-describe.only('API menu', function() {
+describe('API menu', function() {
 
     var extractMenu = () => { // The same functionality as in API
         var fullMenuObject = {};
@@ -88,7 +88,7 @@ describe.only('API menu', function() {
                             title: 'TRK_MENU_OFFICE',
                             items: [
                                 { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                                { mainCard: 'Office/FolderCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                                { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
                             ]
                         },
                         {
@@ -134,7 +134,7 @@ describe.only('API menu', function() {
                     title: 'TRK_MENU_OFFICE',
                     items: [
                         { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                        { mainCard: 'Office/FolderCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                        { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
                     ]
                 },
                 {

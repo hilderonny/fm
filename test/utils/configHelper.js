@@ -11,7 +11,7 @@ var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var moduleConfig = require('../../config/module-config.json');
 
-describe.only('UTILS configHelper', function() {
+describe('UTILS configHelper', function() {
         
     beforeEach(() => {
         return th.cleanDatabase()
@@ -113,6 +113,7 @@ describe.only('UTILS configHelper', function() {
                     co.permissions.ADMINISTRATION_SETTINGS,
                     co.permissions.ADMINISTRATION_USER,
                     co.permissions.ADMINISTRATION_USERGROUP,
+                    co.permissions.CORE_RELATIONS,
                     co.permissions.SETTINGS_USER,
                     co.permissions.OFFICE_ACTIVITY,
                     co.permissions.OFFICE_DOCUMENT

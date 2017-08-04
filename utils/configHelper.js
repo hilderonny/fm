@@ -33,8 +33,8 @@ module.exports.getAvailablePermissionKeysForClient = function(clientId, db) {
                     });
                 }
             });
-            // Special handle permission for relations
-            permissionKeys.push(co.permissions.CORE_RELATIONS);
+            // Special handle permission for relations, aber nur, wenn für den Mandanten Module freigeschaltet sind
+            if (Object.keys(modules).length > 0) permissionKeys.push(co.permissions.CORE_RELATIONS);
             resolve(permissionKeys);
         });
     });

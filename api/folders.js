@@ -51,6 +51,7 @@ router.get('/', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents),
             };
             if (d.parentFolderId) {
                 var parentFolder = allFolders[d.parentFolderId];
+                if (!parentFolder) return; // Wenn aus irgendeinem Grund die Verzeichnisse aus der Datenbank gelöscht wurden ...
                 if (!parentFolder.children) parentFolder.children = [];
                 parentFolder.children.push(docToSend);
             } else {
