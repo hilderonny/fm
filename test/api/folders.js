@@ -66,65 +66,91 @@ describe('API folders', function() {
 
         // Positive tests
 
-        it('responds with object containing all folders and documents (and their details) which have no parent folder', function(done) {
+        function checkChild(child, level) {
+            assert.ok(child);
+            assert.ok(child._id); // Soll erst mal reichen
+            assert.ok(child.name);
+            assert.ok(child.type);
+            if (child.type === 'f') {
+                assert.ok(child.children);
+                assert.strictEqual(child.children.length, level < 2 ? 4 : 2); // Ab level X gibt es nur noch zwei Dokumente
+                child.children.forEach((grandChild) => {
+                    checkChild(grandChild, level + 1);
+                });
+            } else {
+                assert.strictEqual(child.type, 'd');
+            }
+        }
+
+        it('responds with object containing all folders and documents as hierarchy', function() {
             //user belonging to client 1 has 2 folders with 2 documents each
-            th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                db.get('clients').findOne({name: '1'}).then((clientFromDatabase) =>{
-                    th.get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        var rootFolder = res.body;
-                        var rootFolderFolders = rootFolder.folders;
-                        var rootFolderDocuments = rootFolder.documents;
-                        var clientId = clientFromDatabase._id;
-                        assert.strictEqual(2, rootFolderFolders.length, 'Expected number of folders in the root is wrong');
-                        assert.strictEqual(2, rootFolderDocuments.length, 'Expected number of documents in the root is wrong');
-                        rootFolderFolders.forEach(function(currentFolder){
-                            assert.strictEqual(currentFolder.clientId, clientId.toString(), 'clientId of retrieved folder is not correct');
-                        });
-                        rootFolderDocuments.forEach(function(currentDocument){
-                            assert.strictEqual(currentDocument.clientId, clientId.toString(), 'clientId of retrieved document is not correct');
-                        });
-                        // TODO: Check folder names
-                        // TODO: check document names
-                        done();
-                    });
-                }).catch(done); // catch(done) immer auf dem Level des innersten "then"
+            var token, clientFromDatabase;
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((t) => {
+                token = t;
+                return db.get(co.collections.clients).findOne({name: '1'});
+            }).then((c) => {
+                clientFromDatabase = c;
+                return th.get(`/api/folders?token=${token}`).expect(200);
+            }).then((response) => {
+                var rootContent = response.body;
+                assert.ok(rootContent);
+                assert.equal(rootContent.length, 4);
+                rootContent.forEach((child) => {
+                    checkChild(child, 0);
+                });
+                return Promise.resolve();
             });
         });
 
-        it('responds with object containing empty folders array when no folders exist', function(done) {
+        it('responds with object containing only documents when no folders exist', function() {
             // First we need to delete all folders from the test preparations
-            db.get('folders').remove().then(() => {
-                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    th.get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
-                        if (err) return done(err);
-                        var resultFromApi = res.body;
-                        //check for empty folders array
-                        assert.strictEqual(0, Object.keys(resultFromApi.folders).length, 'Unexpected content');
-                        done();
-                    });
-                }).catch(done);
+            return db.get(co.collections.folders).remove().then(() => {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) =>{
+                return th.get(`/api/folders?token=${token}`).expect(200);
+            }).then((res) => {
+                var documents = res.body;
+                assert.equal(2, documents.length);
+                documents.forEach((document) => {
+                    assert.ok(document._id);
+                    assert.ok(document.name);
+                    assert.strictEqual(document.type, 'd');
+                })
+                return Promise.resolve();
             });
         });
 
-        it('responds with object containing empty documents array when no documents exist', function(done) {
-            // First we need to delete all documents from the test preparations
-            db.get('documents').remove().then(() => {
-                th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    th.get(`/api/folders?token=${token}`).expect(200).end(function(err, res){
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        var resultFromApi = res.body;
-                        //check for empty documents array
-                        assert.strictEqual(0, Object.keys(resultFromApi.documents).length, 'Unexpected content');
-                        done();
-                    });
-                }).catch(done);
+        it('responds with object containing only folders when no documents exist', function() {
+            // First we need to delete all folders from the test preparations
+            return db.get(co.collections.documents).remove().then(() => {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) =>{
+                return th.get(`/api/folders?token=${token}`).expect(200);
+            }).then((res) => {
+                var folders = res.body;
+                assert.equal(2, folders.length);
+                folders.forEach((folder) => {
+                    assert.ok(folder._id);
+                    assert.ok(folder.name);
+                    assert.strictEqual(folder.type, 'f');
+                    assert.ok(folder.children);
+                    assert.strictEqual(folder.children.length, 2);
+                })
+                return Promise.resolve();
+            });
+        });
+
+        it('responds with object containing empty array when no folders or documents exist', function() {
+            // First we need to delete all folders from the test preparations
+            return db.get(co.collections.folders).remove().then(() => {
+                return db.get(co.collections.documents).remove();
+            }).then(() => {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) =>{
+                return th.get(`/api/folders?token=${token}`).expect(200);
+            }).then((res) => {
+                assert.equal(0, res.body.length);
+                return Promise.resolve();
             });
         });
 
@@ -317,27 +343,28 @@ describe('API folders', function() {
 
         // Positive tests
 
-        it('responds with existing folder id with all details of the folder and its subfolders and documents', function(done) {
+        it('responds with existing folder id with all details of the folder and its subfolders and documents', function() {
             //Note: delivered subfolders are from one lever below the current folder
-            //The actual complete folder structure can be deeper  
-            db.get('folders').findOne({name: '1_0_0'}).then((folderFromDatabase)=>{ 
-                th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                    var id = folderFromDatabase._id.toString();
-                    th.get(`/api/folders/${id}?token=${token}`).expect(200).end(function(err, res){
-                        if (err) {
-                                done(err);
-                                return;
-                                }
-                        var resultFromApi = res.body;
-                        var numberOfDucments = 2; //number of documents contained in the current folder
-                        var numDocumentsFromApi = resultFromApi.documents.length;
-                        var numberOfSubfolders = 2; //number of subfolders one level below current folder 
-                        var numSubfoldersFromApi = resultFromApi.folders.length;
-                        assert.strictEqual(numberOfDucments, numDocumentsFromApi, `folder does not contian the expected number of documents`);
-                        assert.strictEqual(numberOfSubfolders, numSubfoldersFromApi, `folder does not contian the expected number of subfolders`);
-                        done();
-                    });
-                }).catch(done);
+            //The actual complete folder structure can be deeper 
+            var folderFromDatabase;
+            return db.get(co.collections.folders).findOne({name: '1_0_0'}).then((f)=>{ 
+                folderFromDatabase = f;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token)=>{
+                return th.get(`/api/folders/${folderFromDatabase._id.toString()}?token=${token}`).expect(200);
+            }).then((res) => {
+                var folderFromApi = res.body;
+                assert.strictEqual(folderFromApi._id, folderFromDatabase._id.toString());
+                assert.strictEqual(folderFromApi.clientId, folderFromDatabase.clientId.toString());
+                assert.strictEqual(folderFromApi.parentFolderId, folderFromDatabase.parentFolderId.toString());
+                assert.strictEqual(folderFromApi.name, folderFromDatabase.name);
+                assert.ok(folderFromApi.elements);
+                assert.strictEqual(folderFromApi.elements.length, 4);
+                assert.strictEqual(folderFromApi.elements[0].type, 'f');
+                assert.strictEqual(folderFromApi.elements[1].type, 'f');
+                assert.strictEqual(folderFromApi.elements[2].type, 'd');
+                assert.strictEqual(folderFromApi.elements[3].type, 'd');
+                return Promise.resolve();
             });
         });
 
@@ -780,13 +807,13 @@ describe('API folders', function() {
             });
         });
 
-        it('responds with an id of an existing folder without deleting documents or sibling folders on the same level', function(){
+        it('responds with 204 without deleting documents or sibling folders on the same level', function(){
             //Note: folder 1_1_1 had 2 sibling folders and 3 sibling documents; parent folder is 1_1
             var folderId, parentId, token;
-            return db.get('folders').findOne({name: '1_1_1'}).then(function(folderFromDatabase){
+            return db.get(co.collections.folders).findOne({name: '1_1_1'}).then(function(folderFromDatabase){
                 folderId = folderFromDatabase._id;
                 parentId = folderFromDatabase.parentFolderId;
-                return th.doLoginAndGetToken('1_0_0', 'test');
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(tok){
                 token = tok;
                 return th.del(`/api/folders/${folderId}?token=${token}`).expect(204);
@@ -794,10 +821,7 @@ describe('API folders', function() {
                 //check if siblings on the same level  still exist
                 return th.get(`/api/folders/${parentId}?token=${token}`).expect(200);
             }).then(function(response){
-                var numSubFolders = response.body.folders.length;
-                var numDocuments = response.body.documents.length;
-                assert.strictEqual(numSubFolders, 1 , `Incorrect number of expected folders: 1 vs ${numSubFolders}`);
-                assert.strictEqual(numDocuments, 2 , `Incorrect number of expected documents: 2 vs ${numSubFolders}`);
+                assert.strictEqual(response.body.elements.length, 3);
                 return Promise.resolve();
             });
         });

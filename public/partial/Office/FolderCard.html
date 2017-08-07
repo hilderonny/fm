@@ -1,54 +1,71 @@
-<md-card ng-cloak ng-controller="OfficeFolderCardController" style="background-image:url(/css/icons/office/Document.svg);">
+<md-card ng-cloak ng-controller="OfficeFolderCardController" style="background-image:url(/css/icons/office/Document.svg);" class="list-details-details">
 
-    <md-card-title flex="none" class="withfab">
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-if="!isNewFolder && canWriteDocuments" ng-click="newFolder()" aria-label="ADD FOLDER">
+            <md-tooltip md-direction="bottom"><span translate>TRK_FOLDERS_CREATE_NEW_FOLDER</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Add Folder.svg"></md-icon>
+            <p translate>TRK_FOLDERS_FOLDER</p>
+        </md-button>
+        <md-button ng-if="!isNewFolder && canWriteDocuments" aria-label="UPLOAD FILE">
+            <md-tooltip md-direction="bottom"><span translate>TRK_FOLDERS_UPLOAD_DOCUMENT</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Upload.svg"></md-icon>
+            <p translate>TRK_FOLDERS_UPLOAD</p>
+            <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadFile(this)" />
+        </md-button>
+        <ng-include ng-if="!isNewFolder" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-title flex="none">
         <md-card-title-text>
-            <span class="md-headline" ng-if="!isNewFolder && !isRootFolder" ng-bind="folderName"></span>
-            <span class="md-headline" ng-if="isRootFolder" translate>TRK_FOLDERS_ROOTFOLDER</span>
+            <span class="md-headline" ng-hide="isNewFolder"><span ng-bind="folderName"></span></span>
             <span class="md-headline" ng-if="isNewFolder" translate>TRK_FOLDERS_NEW_FOLDER</span>
         </md-card-title-text>
     </md-card-title>
-<!-- TODO: Einbindung von relations-anchor in Doku aufnehmen -->
-    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewFolder && (canWriteDocuments || !isRootFolder)">
-        <md-fab-trigger>
-            <md-button class="md-fab md-accent" aria-label="MENU">
-                <md-tooltip md-direction="left"><span translate>TRK_FOLDERS_MORE_ACTIONS</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
-            </md-button>
-        </md-fab-trigger>
-        <md-fab-actions>
-            <md-button ng-if="canWriteDocuments" class="md-fab md-raised md-mini" ng-click="newFolder()" aria-label="ADD FOLDER">
-                <md-tooltip md-direction="left"><span translate>TRK_FOLDERS_CREATE_NEW_FOLDER</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Add Folder.svg"></md-icon>
-            </md-button>
-            <md-button ng-if="canWriteDocuments" class="md-fab md-raised md-mini" aria-label="UPLOAD FILE">
-                <md-tooltip md-direction="left"><span translate>TRK_FOLDERS_UPLOAD_DOCUMENT</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Upload.svg"></md-icon>
-                <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadFile(this)" />
-            </md-button>
-            <!-- FAB für Verknüpfungen -->
-            <ng-include ng-if="!isRootFolder" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
-        </md-fab-actions>
-    </md-fab-speed-dial>
-    <md-button class="md-icon-button close" ng-if="!isRootFolder" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
 
-    <md-tabs flex ng-if="!isNewFolder && !isRootFolder">
+    <script type="text/ng-template" id="FoldersFormTemplate">
+        <md-card-content>
+
+            <form name="folderForm" layout="column">
+
+                <md-input-container flex>
+                    <label translate>TRK_FOLDERS_NAME</label>
+                    <input ng-model="folder.name" name="name">
+                </md-input-container>
+
+                <md-card-actions layout="row" layout-align="end center">
+                    <md-button class="md-raised md-accent" ng-if="isNewFolder" ng-click="createFolder()"><span translate>TRK_FOLDERS_CREATE</span></md-button>
+                    <md-button class="md-raised md-accent" ng-if="!isNewFolder && canWriteDocuments" ng-click="saveFolder()"><span translate>TRK_FOLDERS_SAVE</span></md-button>
+                    <md-button class="md-raised md-warn" ng-if="!isNewFolder && canWriteDocuments" ng-click="deleteFolder()"><span translate>TRK_FOLDERS_DELETE</span></md-button>
+                </md-card-actions>
+
+            </form>
+
+        </md-card-content>
+    </script>
+
+    <md-tabs flex ng-if="!isNewFolder">
         <md-tab>
             <md-tab-label><span translate>TRK_FOLDERS_CONTENT</span></md-tab-label>
-            <md-tab-body><md-card-content ng-include="'partial/Office/FolderCardContentTab.html'"></md-card-content></md-tab-body>
+            <md-tab-body>
+                <md-card-content>
+                    <md-list-item ng-click="selectElement(element)" ng-repeat="element in folder.elements" aria-label="{{element.name}}">
+                        <md-icon md-svg-src="/css/icons/material/{{element.type == 'f' ? 'Folder' : 'Document'}}.svg"></md-icon>
+                        <p ng-bind="element.name"></p>
+                        <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
+                    </md-list-item>
+                </md-card-content>
+            </md-tab-body>
         </md-tab>
         <md-tab>
             <md-tab-label><span translate>TRK_FOLDERS_DETAILS</span></md-tab-label>
-            <md-tab-body><ng-include src="'partial/Office/FolderCardDetailsTab.html'"></ng-include></md-tab-body>
+            <md-tab-body><ng-include src="'FoldersFormTemplate'"></ng-include></md-tab-body>
         </md-tab>
-        <!-- Tab für Verknüpfungsliste -->
         <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
     </md-tabs>
 
-    <md-card-content ng-if="isRootFolder" ng-include="'partial/Office/FolderCardContentTab.html'"></md-card-content>
-
-    <ng-include flex ng-if="isNewFolder" src="'partial/Office/FolderCardDetailsTab.html'"></ng-include>
+    <ng-include flex ng-if="isNewFolder" src="'FoldersFormTemplate'"></ng-include>
 
     <div class="progress-panel" ng-if="isUploading">
         <md-progress-circular md-mode="{{uploadMode}}" value="{{uploadProgress}}"></md-progress-circular>

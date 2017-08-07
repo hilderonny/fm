@@ -1,7 +1,7 @@
-app.controller('AdministrationUserCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationUserCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.resetUserNameError = function() {
-        $scope.usersForm.un.$setValidity('nameInUse', true);
+        if ($scope.usersForm) $scope.usersForm.un.$setValidity('nameInUse', true);
     }
 
     // Click on Create-button to create a new user
@@ -30,6 +30,7 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
             $translate(['TRK_USERS_USER_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_CREATED).hideDelay(1000).position('bottom right'));
             });
+            utils.setLocation('/users/' + createdUser._id);
         });
     }
 
@@ -118,6 +119,7 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
                             break;
                         }
                     }
+                    utils.setLocation('/users/' + $scope.params.userId);
                 });
             });
         } else {
@@ -130,10 +132,7 @@ app.controller('AdministrationUserCardController', function($scope, $http, $mdDi
             });
         }
         // Check the permissions for the details page for handling button visibility
-        $http.get('/api/permissions/canWrite/PERMISSION_ADMINISTRATION_USER').then(function (response) {
-            $scope.canWriteUserDetails = response.data;
-        });
-
+        $scope.canWriteUserDetails = $rootScope.canWrite('PERMISSION_ADMINISTRATION_USER');
     }
 
     $scope.load();

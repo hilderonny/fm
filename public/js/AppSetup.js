@@ -1,5 +1,5 @@
 // Setup app. Must be included before all controllers
-var app = angular.module('app', ['ngMaterial', 'ngMessages', 'ngSanitize', 'pascalprecht.translate', 'angularMoment'] ); // Include app dependency on ngMaterial and error messages, see https://material.angularjs.org/latest/demo/input and https://angular-translate.github.io/docs/#/guide/02_getting-started
+var app = angular.module('app', ['ngMaterial', 'ngMessages', 'ngSanitize', 'pascalprecht.translate', 'angularMoment', 'ngRoute'] ); // Include app dependency on ngMaterial and error messages, see https://material.angularjs.org/latest/demo/input and https://angular-translate.github.io/docs/#/guide/02_getting-started
 
 // Define theme
 app.config(function($mdThemingProvider) {
@@ -31,7 +31,10 @@ app.config(['$httpProvider', function($httpProvider) {
               // Eine andere Idee, den Response abzufragen und nach einem speziellen
               // ForceReload - Inhalt oder Header zu checken, würde das Problem mit den 403
               // aus weggenommenen Rechten nicht lösen.
-              if (rejection.status === 403 && rejection.config.url.startsWith('/api/')) {
+              // Wird an die URL #ignore403 angehangen, werden die Fehler ignoriert.
+              // Das wird z.B. bei der Benutzerliste für Benutzergruppen verwendet, wenn
+              // man zwar die Benutzergruppe aber keine Benutzer sehen darf.
+              if (rejection.status === 403 && rejection.config.url.startsWith('/api/') && !rejection.config.url.endsWith('#ignore403')) {
                 location.reload();
               }
               return rejection;
@@ -84,3 +87,5 @@ app.directive('compareTo', function() {
     }
   };
 });
+
+app.directUrlMappings = {};

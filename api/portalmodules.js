@@ -10,116 +10,70 @@
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
+var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var fs = require('fs');
+var co = require('../utils/constants');
 
-/**
- * List all available portal module names for a given portal
- */
-router.get('/available', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), (req, res) => {
-    if (!req.query.portalId || !validateId.validateId(req.query.portalId)) {
-        return res.sendStatus(400);
-    }
-    var moduleConfig = JSON.parse(fs.readFileSync('./config/module-config.json').toString());
-    var availablePortalModuleKeys = Object.keys(moduleConfig.modules);
-    req.db.get('portals').findOne(req.query.portalId).then((portal) => {
-        if (!portal) {
-            res.sendStatus(400);
-            return;
-        }
-        req.db.get('portalmodules').find({ portalId: portal._id }, req.query.fields).then((portalModules) => {
-            portalModules.forEach((portalModule) => {
-                // Return only those modules which are not already assigned
-                availablePortalModuleKeys.splice(availablePortalModuleKeys.indexOf(portalModule.module), 1);
-            });
-            res.send(availablePortalModuleKeys);
-            return;
+router.get('/forPortal/:id', auth(co.permissions.LICENSESERVER_PORTAL, 'r', co.modules.licenseserver), validateId, validateSameClientId(co.collections.portals), function(req, res) {
+    var portal;
+    var portalModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
+    req.db.get(co.collections.portals).findOne(req.params.id).then(function(p) {
+        portal = p;
+        // Obtain the portal modules for the portal
+        return req.db.get(co.collections.portalmodules).find({ 
+            portalId: portal._id,
+            module: { $in: portalModuleKeys }
         });
-    });
-});
-
-/**
- * List all portal module assignments for a given portal.
- */
-router.get('/', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), (req, res) => {
-    if (!req.query.portalId || !validateId.validateId(req.query.portalId)) {
-        return res.sendStatus(400);
-    }
-    req.db.get('portals').findOne(req.query.portalId).then((portal) => {
-        if (!portal) {
-            return res.sendStatus(400);
-        }
-        req.db.get('portalmodules').find({ portalId: portal._id }, req.query.fields).then((portalModules) => {
-            return res.send(portalModules);
+    }).then((portalModulesOfPortal) => {
+        var result = portalModuleKeys.map((key) => {
+            var existingPortalModule = portalModulesOfPortal.find((p) => p.module === key);
+            return {
+                _id: existingPortalModule ? existingPortalModule._id : null,
+                clientId: portal.clientId,
+                portalId: portal._id,
+                active: existingPortalModule ? true : false,
+                module: key
+            };
         });
-    });
-});
-
-/**
- * Get single portal module with given id
- */
-router.get('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), validateId, (req, res) => {
-    req.db.get('portalmodules').findOne(req.params.id, req.query.fields).then((portalModule) => {
-        if (!portalModule) {
-            return res.sendStatus(404);
-        }
-        return res.send(portalModule);
+        res.send(result);
     });
 });
 
 /**
  * Create a new portal module
  */
-router.post('/', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), function(req, res) {
+router.post('/', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licenseserver), function(req, res) {
     var portalModule = req.body;
     if (!portalModule || Object.keys(portalModule).length < 2 || !portalModule.portalId || !validateId.validateId(portalModule.portalId) || !portalModule.module) { // At least portalId and module
         return res.sendStatus(400);
     }
-    req.db.get('portals').findOne(portalModule.portalId).then((portal) => {
-        if (!portal) {
-            return res.sendStatus(400);
+    req.db.get(co.collections.portals).findOne(portalModule.portalId).then((portal) => {
+        if (!portal || `${portal.clientId ? portal.clientId : 'null'}` !== `${req.user.clientId}`) {
+            return Promise.reject(400);
         }
         delete portalModule._id; // Ids are generated automatically
-        portalModule.portalId = portal._id; // Make it a real id
+        portalModule.portalId = portal._id;
+        portalModule.clientId = portal.clientId;
         // Prüfen, ob so eine Zuordnung schon existiert.
-        req.db.get('portalmodules').find(portalModule).then(function(existingAssignments) {
-            if (existingAssignments.length > 0) {
-                return res.sendStatus(409); // Diese Zuordnung gibt es schon
-            }
-            req.db.insert('portalmodules', portalModule).then((insertedPortalModule) => {
-                return res.send(insertedPortalModule);
-            });
-        });
-    });
-});
-
-/**
- * Update portal module details
- */
-router.put('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, function(req, res) {
-    var portalModule = req.body;
-    if (!portalModule || Object.keys(portalModule).length < 1) {
-        return res.sendStatus(400);
-    }
-    delete portalModule._id; // When portal object also contains the _id field
-    delete portalModule.portalId; // When portal object also contains the portalId field
-    // For the case that only the _id had to be updated, return an error
-    if (Object.keys(portalModule).length < 1) {
-        return res.sendStatus(400);
-    }
-    req.db.update('portalmodules', req.params.id, { $set: portalModule }).then((updatedPortalModule) => {
-        if (!updatedPortalModule || updatedPortalModule.lastErrorObject) {
-            return res.sendStatus(404);
+        return req.db.get(co.collections.portalmodules).find(portalModule);
+    }).then(function(existingAssignments) {
+        if (existingAssignments.length > 0) {
+            return Promise.reject(409); // Diese Zuordnung gibt es schon
         }
-        return res.send(updatedPortalModule);
+        return req.db.insert(co.collections.portalmodules, portalModule);
+    }).then((insertedPortalModule) => {
+        res.send(insertedPortalModule);
+    }).catch((status) => {
+        res.sendStatus(status);
     });
 });
 
 /**
  * Delete portal module
  */
-router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), validateId, function(req, res) {
-    req.db.remove('portalmodules', req.params.id).then((result) => {
+router.delete('/:id', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licenseserver), validateId, validateSameClientId(co.collections.portalmodules), function(req, res) {
+    req.db.remove(co.collections.portalmodules, req.params.id).then((result) => {
         if (result.result.n < 1) {
             return res.sendStatus(404);
         }

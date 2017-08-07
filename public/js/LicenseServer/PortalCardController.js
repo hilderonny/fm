@@ -1,37 +1,34 @@
-app.controller('LicenseServerPortalCardController', function($scope, $http, $mdDialog, $element, $translate, $mdToast, utils) {
-    
-    var createPortalModuleCallback = function(createdPortalModule) {
-        $scope.portalModuleAssignments.push(createdPortalModule);
-        $scope.selectPortalModule(createdPortalModule);
-        checkAvailableModules();
-    };
-    
-    var savePortalModuleCallback = function(savedPortalModule) {
-        $scope.selectedPortalModule.module = savedPortalModule.module;
-        checkAvailableModules();
-    };
-    
-    var deletePortalModuleCallback = function() {
-        for (var i = 0; i < $scope.portalModuleAssignments.length; i++) {
-            var portalModule = $scope.portalModuleAssignments[i];
-            if (portalModule._id === $scope.selectedPortalModule._id) {
-                $scope.portalModuleAssignments.splice(i, 1);
-                $scope.selectedPortalModule = false;
-                break;
-            }
-        }
-        checkAvailableModules();
-    };
+app.controller('LicenseServerPortalCardController', function($scope, $rootScope, $http, $mdDialog, $element, $translate, $mdToast, utils) {
 
-    var closePortalModuleCardCallback = function() {
-        $scope.selectedPortalModule = false;
-    };
-
-    var checkAvailableModules = function() {
-        // Available modules for FAB button
-        $http.get('/api/portalmodules/available?portalId=' + $scope.portal._id).then(function(portalModulesResponse) {
-            $scope.areModulesAvailable = portalModulesResponse.data.length > 0;
+    $scope.getPortalModules = function() {
+        return $http.get('/api/portalmodules/forPortal/' + $scope.portal._id).then(function(portalModulesResponse) {
+            $scope.portal.portalModules = portalModulesResponse.data;
+            $scope.portal.portalModules.forEach(function(portalModule) {
+                portalModule.translationKey = 'TRK_MODULE_' + portalModule.module + '_NAME';
+            });
+            return Promise.resolve();
         });
+    };
+
+    $scope.savePortalModule = function(portalModuleToSave, portalModuleToUpdate) {
+        if (portalModuleToSave.active) {
+            $http.post('/api/portalmodules', portalModuleToSave).then(function(response) {
+                portalModuleToUpdate._id = response.data._id;
+                portalModuleToUpdate.active = response.data.active;
+            });
+        } else {
+            $http.delete('/api/portalmodules/' + portalModuleToSave._id).then(function() {
+                delete portalModuleToUpdate._id;
+                portalModuleToUpdate.active = false;
+            });
+        }
+    };
+
+    $scope.switchActive = function(portalModule) {
+        if (!$scope.canWritePortals) return;
+        var tempPortalModule = JSON.parse(JSON.stringify(portalModule));
+        tempPortalModule.active = !tempPortalModule.active;
+        $scope.savePortalModule(tempPortalModule, portalModule);
     };
 
     // Click on Create-button to create a new portal
@@ -40,8 +37,9 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
             name: $scope.portal.name,
             isActive: $scope.portal.isActive
         };
+        var createdPortal;
         $http.post('/api/portals', portalToSend).then(function(response) {
-            var createdPortal = response.data;
+            createdPortal = response.data;
             $scope.isNewPortal = false;
             $scope.portal._id = createdPortal._id;
             $scope.portal.licenseKey = createdPortal.licenseKey;
@@ -50,15 +48,12 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
             if ($scope.params.createPortalCallback) {
                 $scope.params.createPortalCallback(createdPortal);
             }
-            // portal module assignments
-            $http.get('/api/portalmodules?portalId=' + createdPortal._id).then(function(portalModulesResponse) {
-                portalModulesResponse.data.forEach(function(portalModule) {
-                    $scope.portalModuleAssignments.push(portalModule);
-                });
-                $translate(['TRK_PORTALS_PORTAL_CREATED']).then(function(translations) {
-                    $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_PORTAL_CREATED).hideDelay(1000).position('bottom right'));
-                });
-            });
+            return $scope.getPermissions();
+        }).then(function() {
+            return $translate(['TRK_PORTALS_PORTAL_CREATED']);
+        }).then(function(translations) {
+            $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_PORTAL_CREATED).hideDelay(1000).position('bottom right'));
+            utils.setLocation('/portals/' + createdPortal._id);
         });
     };
 
@@ -128,30 +123,6 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
         });
     };
 
-    // Click on module in module list shows module details
-    $scope.selectPortalModule = function(selectedPortalModule) {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('LicenseServer/PortalModuleCard', {
-            portalModuleId: selectedPortalModule._id,
-            savePortalModuleCallback: savePortalModuleCallback,
-            deletePortalModuleCallback: deletePortalModuleCallback,
-            closeCallback: closePortalModuleCardCallback
-        });
-        $scope.selectedPortalModule = selectedPortalModule;
-    };
-
-    // Click on add module button opens detail dialog with new module assignment
-    $scope.newModuleAssignment = function() {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('LicenseServer/PortalModuleCard', {
-            portalId: $scope.portal._id,
-            createPortalModuleCallback: createPortalModuleCallback,
-            savePortalModuleCallback: savePortalModuleCallback,
-            deletePortalModuleCallback: deletePortalModuleCallback,
-            closeCallback: closePortalModuleCardCallback
-        });
-    };
-
     // Loads the portal details or prepares the empty dialog for a new portal
     // Params:
     // - $scope.params.portalId : ID of the portal to load, when not set, a new portal is to be created
@@ -169,19 +140,16 @@ app.controller('LicenseServerPortalCardController', function($scope, $http, $mdD
                 $scope.portal = completePortal;
                 $scope.portalName = completePortal.name; // Prevent updating the label when changing the name input value
                 $scope.relationsEntity = { type:'portals', id:completePortal._id };
-                checkAvailableModules();
-                // portal module assignments
-                $http.get('/api/portalmodules?portalId=' + $scope.portal._id).then(function(portalModulesResponse) {
-                    $scope.portalModuleAssignments = portalModulesResponse.data;
-                });
+                return $scope.getPortalModules();
+            }).then(function() {
+                utils.setLocation('/portals/' + $scope.params.portalId);
             });
         } else {
             // New portal
             $scope.isNewPortal = true;
-            $scope.portal = { name : "", isActive : true };
-            $scope.portalModuleAssignments = [];
-            //checkAvailableModules();
+            $scope.portal = { name : "", isActive : true, portalModules: [] };
         }
+        $scope.canWritePortals = $rootScope.canWrite('PERMISSION_LICENSESERVER_PORTAL');
     };
 
     $scope.load();

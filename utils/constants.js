@@ -209,10 +209,13 @@ module.exports.permissions = {
      */
     BIM_FMOBJECT: 'PERMISSION_BIM_FMOBJECT',
     /**
+     * Dynamische Verknüpfungen erstellen und ansehen
+     */
+    CORE_RELATIONS: 'PERMISSION_CORE_RELATIONS',
+    /**
      * Permission to show and edit CRM
      */
     CRM_BUSINESSPARTNERS:"PERMISSION_CRM_BUSINESSPARTNERS",
-      
     /**
      * Permission to show and edit portals on the license server
      */

@@ -1,4 +1,7 @@
 <md-card ng-cloak ng-controller="AdministrationSettingSetListCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+    
+    <md-toolbar class="md-toolbar-tools md-accent">
+    </md-toolbar>
 
     <md-card-title flex="none">
         <md-card-title-text>
@@ -17,6 +20,7 @@
                 <md-list-item ng-repeat="settingSetItem in settingSet.items" ng-click="selectSettingSetItem(settingSetItem)" ng-class="{active: selectedSettingSetItem === settingSetItem}" aria-label="{{ settingSetItem.title }}">
                     <md-icon md-svg-src="/css/icons/material/{{settingSetItem.icon}}.svg" aria-label="{{ settingSetItem.title }} "></md-icon>
                     <p><span translate="{{ settingSetItem.title }}"></span></p>
+                    <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
                 </md-list-item>
 
                 <md-divider></md-divider>

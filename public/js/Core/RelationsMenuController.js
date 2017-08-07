@@ -1,4 +1,4 @@
-app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, $mdDialog, $translate, $mdToast, moment) {
+app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http, $mdPanel, $mdDialog, $translate, $mdToast, moment) {
 
     /**
      * Liste aller möglicher Referenztypen für das Menü für neue Verknüpfungen.
@@ -127,7 +127,7 @@ app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, 
                     return {
                         icon:'material/User', 
                         firstLine:user.name,
-                        secondLine:user.userGroup[0].name,
+                        secondLine: user.userGroup.name,
                         type:'users',
                         id:user._id
                     };
@@ -226,10 +226,13 @@ app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, 
      */
     $scope.onNewLinkClick = function(evt) {
         var nodeToHandle = evt.currentTarget;
-        while (nodeToHandle && !nodeToHandle.classList.contains('relations-anchor')) {
+        /*
+        while (nodeToHandle && nodeToHandle.tagName.toLowerCase() !== 'md-toolbar') {
             nodeToHandle = nodeToHandle.parentNode;
+            console.log(nodeToHandle.tagName);
         }
-        var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_END, $mdPanel.yPosition.ALIGN_TOPS);
+        */
+        var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW);
         var parentScope = $scope;
         $mdPanel.open({
             attachTo: angular.element(document.body),
@@ -289,13 +292,9 @@ app.controller('CoreRelationsMenuController', function($scope, $http, $mdPanel, 
      * Prüft die Referenztypen, ob der angemeldete Benutzer Lesezugriff auf die Zielobjektlisten hat und gibt nur
      * erlaubte Elemente in einem Promise zurück.
      */
-    $http.get('/api/permissions/forLoggedInUser').then(function(response) {
-        var permissions = response.data;
-        $scope.availableReferenceTypes = allReferenceTypes.filter(function(referenceType) {
-            return !!permissions.find(function(permission) { // !! is to convert undefined to false
-                return permission.canRead && referenceType.requiredReadPermission === permission.key;
-            });
-        });
+    $scope.canWriteRelations = $rootScope.canWrite('PERMISSION_CORE_RELATIONS');
+    $scope.availableReferenceTypes = allReferenceTypes.filter(function(referenceType) {
+        return $rootScope.canRead(referenceType.requiredReadPermission);
     });
 
 });

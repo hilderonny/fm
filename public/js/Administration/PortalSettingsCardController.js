@@ -1,4 +1,4 @@
-app.controller('AdministrationPortalSettingsCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationPortalSettingsCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     // User clicks on close button
     $scope.closeCard = function() {
@@ -85,6 +85,8 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $h
                 licenseServer: response.data.licenseserverurl, 
                 licenseKey: response.data.licensekey 
             };
+            $scope.canWritePortalSettings = $rootScope.canWrite('PERMISSION_SETTINGS_PORTAL');
+            utils.setLocation('/settings/TRK_SETTINGSET_PORTAL_GENERAL');
         });
     };
 
