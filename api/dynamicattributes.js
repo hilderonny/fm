@@ -149,19 +149,11 @@ router.get('/types', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r',
  */
 router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', 'base'), (req, res) => {
     var models = [];
-    //TODO solve problem with asynchonous execution!!!
-    /*Array.from(co.collections).forEach(function(collectionItem){
-        if(collectionItem.canHaveAttributes == true){
-            var modelObject = {name: collectionItem.name, icon: collectionItem.icon};
-            models.push(modelObject);
-        }
-    });*/
-    var models = [
-        {name: 'users', icon: 'User'}, 
-        {name: 'usergroups', icon: 'User Group Man Man'},
-        {name: 'folders', icon: 'Document'}
-    ];
-   res.send(models);
+    Object.keys(co.collections).forEach((key) => {
+        var collection = co.collections[key];
+        if (collection.canHaveAttributes) models.push(collection);
+    });
+    res.send(models);
 });
 
 /**

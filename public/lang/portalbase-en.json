@@ -16,5 +16,6 @@
     "TRK_SETTINGS_VERSION_ON_SERVER" : "Version on license server",
     "TRK_SETTINGS_WAIT_FOR_UPDATE_COMPLETION" : "The update process has been started. Please wait about 2 minutes until the update was installed and reload the page afterwards!",
     "TRK_SETTINGSET_PORTAL_GENERAL" : "Portal settings",
+    "TRK_MODEL_portals": "Portals",
     "TRK_MODULE_portalbase_NAME" : "Portal base"
 }

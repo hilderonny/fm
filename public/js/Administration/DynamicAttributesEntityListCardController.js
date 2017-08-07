@@ -18,10 +18,12 @@ app.controller('AdministrationDynamicAttributesModelListCardController', functio
         });
         $scope.selectedModel = selectedModel;
     };
+
     //TODo check and fix problem with confusion between folders and documents database table
     $http.get('/api/dynamicattributes/models').then(function(response){
         $scope.models = response.data;
         console.log( $scope.models);
+        utils.setLocation('/settings/TRK_SETTINGSET_DYNAMICATTRIBUTES');
     });
 
 });

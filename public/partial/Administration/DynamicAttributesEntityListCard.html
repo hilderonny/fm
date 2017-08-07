@@ -1,18 +1,21 @@
 <md-card ng-cloak ng-controller="AdministrationDynamicAttributesModelListCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
     <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" translate>TRK_SETTINGSET_DYNAMICATTRIBUTES</span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
     <md-card-content>
         <md-list class="lines-beetween-items">
             <md-list-item ng-repeat="model in models | orderBy: 'title'" ng-click = "selectModel(model)" ng-class="{active:selectedModel == model}" aria-label="{{model.name}}">
                 <md-icon md-svg-src="/css/icons/material/{{model.icon}}.svg"></md-icon>
-                <p translate="TRK_DA_MODEL_{{model.name}}"></p>
+                <p translate="TRK_MODEL_{{model.name}}"></p>
             </md-list-item>
         </md-list>
     </md-card-content>

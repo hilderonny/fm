@@ -35,6 +35,8 @@
     "TRK_FOLDERS_UPLOAD_DOCUMENT" : "Upload dokument",
     "TRK_MENU_OFFICE" : "Office",
     "TRK_MENU_OFFICE_DOCUMENTS" : "Documents",
+    "TRK_MODEL_documents": "Documents",
+    "TRK_MODEL_folders": "Folders",
     "TRK_MODULE_documents_NAME" : "Documents",
     "TRK_NO" : "No",
     "TRK_YES" : "Yes"

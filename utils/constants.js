@@ -101,7 +101,7 @@ module.exports.apis = {
  * var collections = require('../utils/constants').collections;
  */
 module.exports.collections = {
-    activities:{name:'activities', icon:'X.png', canHaveAttributes:true},
+    activities:{name:'activities', icon:'Planner', canHaveAttributes:true},
     /**
      * Modulzuordnungen für Mandanten
      */
@@ -109,11 +109,11 @@ module.exports.collections = {
     /**
      * Mandanten
      */
-    clients:{name:'clients', canHaveAttributes:false},
+    clients:{name:'clients', icon:'Briefcase', canHaveAttributes:true},
     /**
      * Dokumente
      */
-    documents:{name:'documents',canHaveAttributes:false},
+    documents:{name:'documents', icon: 'Document', canHaveAttributes:true},
     /**
      * Mögliche Werte für dynamische Attribute vom Typ picklist
      */
@@ -126,11 +126,11 @@ module.exports.collections = {
     /**
      * FM Objekte
      */
-    fmobjects:{name:'fmobjects', icon:'X.png', canHaveAttributes:true},
+    fmobjects:{name:'fmobjects', icon:'Cottage', canHaveAttributes:true},
     /**
      * Verzeichnisse
      */
-    folders:{name:'folders',icon:'X.png', canHaveAttributes:true},
+    folders:{name:'folders', icon:'Folder', canHaveAttributes:true},
     markers:{name:'markers', canHaveAttributes:false},
     /**
      * Zugriffsberechtigungen für Benutzergruppen
@@ -143,7 +143,7 @@ module.exports.collections = {
     /**
      * List of all portals registered to the license server. Only relevant on license server.
      */
-    portals:{name:'portals', canHaveAttributes:false},
+    portals:{name:'portals', icon: 'Server', canHaveAttributes:true},
     /**
      * Relations between database entities
      */
@@ -152,11 +152,11 @@ module.exports.collections = {
     /**
      * Usergroups for users
      */
-    usergroups:{name:'usergroups', icon:'X.png', canHaveAttributes: true},
+    usergroups:{name:'usergroups', icon:'User Group Man Man', canHaveAttributes: true},
     /**
      * Users which can login to the system
      */
-    users:{name:'users', icon:'X.png', canHaveAttributes: true}
+    users:{name:'users', icon:'User', canHaveAttributes: true}
 };
 
 /**

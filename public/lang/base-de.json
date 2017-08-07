@@ -1,8 +1,5 @@
 {   
     "TRK_CANCEL" : "Abbrechen",
-    "TRK_DA_MODEL_folders": "Dokumente",
-    "TRK_DA_MODEL_users": "Benutzer",
-    "TRK_DA_MODEL_usergroups": "Benutzergruppen",
     "TRK_DA_OPTION_CREATE": "Element erstellen",
     "TRK_DA_OPTION_SAVE": "Element speichern",
     "TRK_DA_OPTION_DELETE": "Element löschen",
@@ -35,6 +32,8 @@
     "TRK_MENU_ADMINISTRATION_USERS" : "Benutzer",
     "TRK_MENU_ADMINISTRATION_USERGROUPS" : "Benutzergruppen",
     "TRK_MENU_LOGOUT" : "Abmelden",
+    "TRK_MODEL_usergroups": "Benutzergruppen",
+    "TRK_MODEL_users": "Benutzer",
     "TRK_MODULE_base_NAME" : "Basis",
     "TRK_NO" : "Nein",
     "TRK_OK" : "OK",
