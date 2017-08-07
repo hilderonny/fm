@@ -211,7 +211,7 @@ function findPermissionKeyInModuleConfig(permissionKey, errors, fileName) {
     if (!found) errors.push(`Translation key TRK_${permissionKey} for permission defined in ${fileName} is not used in module-config`);
 }
 
-describe('Translations', function describeTranslations() {
+describe.only('Translations', function describeTranslations() {
     var itFunction = it;//process.env.IGNORE_FAILED_TRANSLATION_TESTS === 'true' ? skipIfFailed : it;
     var translationDefinitions = collectTranslationDefinitions();
     // Iterate over modules

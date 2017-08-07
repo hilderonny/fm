@@ -196,6 +196,21 @@ th.preparePermissions = () => {
 };
 
 /**
+ * Creates 3 business partners for each existing client plus for the portal (without client) and returns
+ * a promise.
+ * The names of the business partners have following schema: [IndexOfClient]_[IndexOfBusinessPartner].
+ */
+th.prepareBusinessPartners = () => {
+    var businessPartners = [];
+    th.dbObjects.clients.forEach((client) => {
+        businessPartners.push({ name: client.name + '_0', clientId: client._id });
+        businessPartners.push({ name: client.name + '_1', clientId: client._id });
+    });
+    businessPartners.push({ name: '_0', clientId: null });
+    return th.bulkInsert(co.collections.businesspartners, businessPartners);
+};
+
+/**
  * Deletes the canRead flag of a permission of the usergroup of the user with the given name.
  */
 th.removeReadPermission = (userName, permissionKey) => {
@@ -524,6 +539,18 @@ th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoD
     });
 };
 
+th.createRelationsToBusinessPartner = (entityType, entity) => {
+    return db.get(co.collections.businesspartners).findOne({name:th.defaults.businessPartner}).then(function(businessPartner) {
+        var relations = [
+            { type1: entityType, id1: entity._id, type2: co.collections.businesspartners, id2: businessPartner._id, clientId: businessPartner.clientId },
+            { type1: co.collections.businesspartners, id1: businessPartner._id, type2: entityType, id2: entity._id, clientId: businessPartner.clientId }
+        ];
+        return db.get(co.collections.relations).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+    }).then(function() {
+        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
+    });
+};
+
 th.createRelationsToUser = (entityType, entity) => {
     return db.get(co.collections.users).findOne({name:th.defaults.user}).then(function(user) {
         var relations = [
@@ -551,6 +578,7 @@ th.getModuleForApi = function(api) {
 th.defaults = {
     activity: '1_0_0_0',
     adminUser: '1_0_ADMIN0',
+    businessPartner: '1_0',
     /**
      * Standardmandant '1'
      */

@@ -9,7 +9,7 @@ app.controller('AdministrationBPCardController', function($scope, $http, $mdDial
             isJuristic: $scope.partner.isJuristic
         };
 
-        $http.post('/api/busniesspartner', sendpartner).then(function(response){
+        $http.post('/api/businesspartner', sendpartner).then(function(response){
             var createdPartner= response.data;
             $scope.isNewPartner=false;
             $scope.partner._id = createdPartner._id;
@@ -35,7 +35,7 @@ app.controller('AdministrationBPCardController', function($scope, $http, $mdDial
              rolle: $scope.partner.rolle,
              isJuristic: $scope.partner.isJuristic
         };        
-        $http.put('/api/busniesspartner/'+ $scope.partner._id, sendpartner).then(function(response){
+        $http.put('/api/businesspartner/'+ $scope.partner._id, sendpartner).then(function(response){
 
             var savedPartner= response.data;
             $scope.partnerName= $scope.partner.name;
@@ -58,7 +58,7 @@ app.controller('AdministrationBPCardController', function($scope, $http, $mdDial
                 .ok(translations.TRK_YES)
                 .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function(){
-                    $http.delete('/api/busniesspartner/'+ $scope.partner._id).then(function(response){
+                    $http.delete('/api/businesspartner/'+ $scope.partner._id).then(function(response){
                         if ($scope.params.deleteBPCallback) {
                             $scope.params.deleteBPCallback();
                         }
@@ -159,7 +159,7 @@ $scope.load = function(){
 
     if($scope.params.partnerId)
     {
-        $http.get('/api/busniesspartner/' + $scope.params.partnerId +'?fields = id+name')
+        $http.get('/api/businesspartner/' + $scope.params.partnerId +'?fields = id+name')
 .then(function(partnerResponse){
     var completePartner=partnerResponse.data;
     $scope.isNewPartner=false;

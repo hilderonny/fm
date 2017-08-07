@@ -9,6 +9,10 @@ module.exports.apis = {
      */
     activities: 'activities',
     /**
+     * Geschäftspartner
+     */
+    businesspartners: 'businesspartners',
+    /**
      * API for assigning modules to clients
      */
     clientmodules: 'clientmodules',
@@ -98,7 +102,10 @@ module.exports.apis = {
  */
 module.exports.collections = {
     activities:'activities',
-    busniesspartner: 'busniesspartner',
+    /**
+     * Geschäftspartner
+     */
+    businesspartners: 'businesspartners',
     /**
      * Modulzuordnungen für Mandanten
      */
@@ -163,6 +170,10 @@ module.exports.modules = {
      */
     base: 'base',
     /**
+     * Geschäftspartner-Modul samt Personen
+     */
+    businesspartners: 'businesspartners',
+    /**
      * Modul für Mandantenverwaltung
      */
     clients: 'clients',
@@ -215,7 +226,7 @@ module.exports.permissions = {
     /**
      * Permission to show and edit CRM
      */
-    CRM_BUSINESSPARTNERS:"PERMISSION_CRM_BUSINESSPARTNERS",
+    CRM_BUSINESSPARTNERS: 'PERMISSION_CRM_BUSINESSPARTNERS',
     /**
      * Permission to show and edit portals on the license server
      */

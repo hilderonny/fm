@@ -137,8 +137,8 @@
             ]
         },
         
-        "busniesspartner" : {
-            "api":[ "busniesspartner", "partneraddress"],
+        "businesspartners" : {
+            "api":[ "businesspartners", "partneraddress"],
            
             "public": [
                 "css/icons/material/Briefcase.svg",

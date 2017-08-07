@@ -130,7 +130,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             return new Promise(function(resolve, reject) {
                 var targetIds = {};
                 relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/busniesspartner/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                $http.get('/api/businesspartner/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
                     var partners = response.data;
                     if (!partners || partners.length < 1) return resolve(false);
                     var relations = {

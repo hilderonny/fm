@@ -52,7 +52,7 @@ $scope.newBP = function(){
 $scope.load = function(){
     $scope.selectedPartner= false;    
     //retrieve data from db
-   $http.get('/api/busniesspartner?fields=_id+name').then(function(response){
+   $http.get('/api/businesspartner?fields=_id+name').then(function(response){
        $scope.partners = response.data;   
         if ($scope.params.selectedPartnerId) {
                 for (var i = 0; i < $scope.partners.length; i++) {

@@ -27,7 +27,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
             });
         } },
         { icon: 'Business', translationKey: 'BP_BP', requiredReadPermission: 'PERMISSION_CRM_BUSINESSPARTNERS', dialogFunction: function() {
-            $http.get('/api/busniesspartner').then(function(response) {
+            $http.get('/api/businesspartner').then(function(response) {
                 var listItems = response.data.map(function(partner) {
                     return {
                         icon:'material/Business', 
