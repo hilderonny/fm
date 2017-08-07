@@ -36,7 +36,7 @@ function prepareFolderStructure(db, filePath, parentFolderId, clientId, foldersT
             parentFolderId: parentFolderId,
             clientId: clientId
         };
-        documentsAndFoldersCreatePromises.push(db.insert(co.collections.folders, folder).then(function(insertedFolder) {
+        documentsAndFoldersCreatePromises.push(db.insert(co.collections.folders.name, folder).then(function(insertedFolder) {
             // Verzeichnis in Liste nachzubearbeitender Elemente aufnehmen, dabei im Parent gucken
             foldersToCreateWithDocumentList[parentPath].folders.push(insertedFolder);
             foldersToCreateWithDocumentList[filePath].instance = insertedFolder;
@@ -127,11 +127,11 @@ function extractDocument(db, zipDocument) {
 
 
 // Extract a specific document and create folder and document structure and returns the newly created folders and documents
-router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), validateId, validateSameClientId(co.collections.documents), (req, res) => {
+router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), validateId, validateSameClientId(co.collections.documents.name), (req, res) => {
     existingFolders = {};
     newFoldersInDocumentFolder = [];
     newDocumentsInDocumentFolder = [];
-    req.db.get(co.collections.documents).findOne(req.params.id).then((document) => {
+    req.db.get(co.collections.documents.name).findOne(req.params.id).then((document) => {
         if (!document.isExtractable) {
             return res.sendStatus(400);
         }

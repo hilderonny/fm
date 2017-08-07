@@ -147,11 +147,11 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     };
     if (document.parentFolderId) { 
         // Need to check whether the parent folder which this document is to be assigned to exists
-        req.db.get(co.collections.folders).findOne(document.parentFolderId).then((parentFolder) => {
+        req.db.get(co.collections.folders.name).findOne(document.parentFolderId).then((parentFolder) => {
             if (!parentFolder) {
                 return res.sendStatus(400);
             }
-            req.db.insert(co.collections.documents, document).then((insertedDocument) => {
+            req.db.insert(co.collections.documents.name, document).then((insertedDocument) => {
                 documentsHelper.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
                 res.send({
                     _id: insertedDocument._id,
@@ -161,7 +161,7 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
             });
         });
     } else {
-        req.db.insert(co.collections.documents, document).then((insertedDocument) => {
+        req.db.insert(co.collections.documents.name, document).then((insertedDocument) => {
             documentsHelper.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
             res.send({
                 _id: insertedDocument._id,

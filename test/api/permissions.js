@@ -174,8 +174,8 @@ describe('API permissions', function(){
 
         var api = `${co.apis.permissions}/forUserGroup`;
 
-        th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups);
-        th.apiTests.getId.clientDependentNegative(api, co.collections.usergroups);
+        th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups.name);
+        th.apiTests.getId.clientDependentNegative(api, co.collections.usergroups.name);
 
         xit('responds with all permissions where the states are correctly set', function() {
         });

@@ -31,8 +31,8 @@ describe('API portalmodules', function(){
 
         var api = `${co.apis.portalmodules}/forPortal`;
 
-        th.apiTests.getId.defaultNegative(api, co.permissions.LICENSESERVER_PORTAL, co.collections.portals);
-        th.apiTests.getId.clientDependentNegative(api, co.collections.portals);
+        th.apiTests.getId.defaultNegative(api, co.permissions.LICENSESERVER_PORTAL, co.collections.portals.name);
+        th.apiTests.getId.clientDependentNegative(api, co.collections.portals.name);
 
         xit('responds with all portal modules where the states are correctly set', function() {
         });

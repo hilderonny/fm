@@ -87,7 +87,7 @@ describe('API folders', function() {
             var token, clientFromDatabase;
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((t) => {
                 token = t;
-                return db.get(co.collections.clients).findOne({name: '1'});
+                return db.get(co.collections.clients.name).findOne({name: '1'});
             }).then((c) => {
                 clientFromDatabase = c;
                 return th.get(`/api/folders?token=${token}`).expect(200);
@@ -104,7 +104,7 @@ describe('API folders', function() {
 
         it('responds with object containing only documents when no folders exist', function() {
             // First we need to delete all folders from the test preparations
-            return db.get(co.collections.folders).remove().then(() => {
+            return db.get(co.collections.folders.name).remove().then(() => {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then((token) =>{
                 return th.get(`/api/folders?token=${token}`).expect(200);
@@ -122,7 +122,7 @@ describe('API folders', function() {
 
         it('responds with object containing only folders when no documents exist', function() {
             // First we need to delete all folders from the test preparations
-            return db.get(co.collections.documents).remove().then(() => {
+            return db.get(co.collections.documents.name).remove().then(() => {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then((token) =>{
                 return th.get(`/api/folders?token=${token}`).expect(200);
@@ -142,8 +142,8 @@ describe('API folders', function() {
 
         it('responds with object containing empty array when no folders or documents exist', function() {
             // First we need to delete all folders from the test preparations
-            return db.get(co.collections.folders).remove().then(() => {
-                return db.get(co.collections.documents).remove();
+            return db.get(co.collections.folders.name).remove().then(() => {
+                return db.get(co.collections.documents.name).remove();
             }).then(() => {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then((token) =>{
@@ -161,7 +161,7 @@ describe('API folders', function() {
         var api = `${co.apis.folders}/allFoldersAndDocuments`;
 
         function createTestFolders() {
-            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
+            return db.get(co.collections.clients.name.name).findOne({name:th.defaults.client}).then(function(client) {
                 var clientId = client._id;
                 var testObjects = ['testFolder1', 'testFolder2', 'testFolder3'].map(function(name) {
                     return {
@@ -347,7 +347,7 @@ describe('API folders', function() {
             //Note: delivered subfolders are from one lever below the current folder
             //The actual complete folder structure can be deeper 
             var folderFromDatabase;
-            return db.get(co.collections.folders).findOne({name: '1_0_0'}).then((f)=>{ 
+            return db.get(co.collections.folders.name).findOne({name: '1_0_0'}).then((f)=>{ 
                 folderFromDatabase = f;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then((token)=>{
@@ -810,7 +810,7 @@ describe('API folders', function() {
         it('responds with 204 without deleting documents or sibling folders on the same level', function(){
             //Note: folder 1_1_1 had 2 sibling folders and 3 sibling documents; parent folder is 1_1
             var folderId, parentId, token;
-            return db.get(co.collections.folders).findOne({name: '1_1_1'}).then(function(folderFromDatabase){
+            return db.get(co.collections.folders.name).findOne({name: '1_1_1'}).then(function(folderFromDatabase){
                 folderId = folderFromDatabase._id;
                 parentId = folderFromDatabase.parentFolderId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
