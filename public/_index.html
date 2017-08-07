@@ -32,16 +32,16 @@
 
                     <md-input-container>
                         <label translate="TRK_LOGIN_USERNAME"></label>
-                        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ng-model="username" />
+                        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ng-model="username" tabindex="1" autofocus />
                     </md-input-container>
 
                     <md-input-container>
                         <label translate="TRK_LOGIN_PASSWORD"></label>
-                        <input type="password" ng-model="password" />
+                        <input type="password" ng-model="password" tabindex="2" />
                     </md-input-container>
 
                     <div layout="row" layout-align="center right">
-                        <md-button type="submit" class="md-raised md-primary" ng-click="doLogin()" ng-disabled="isLoggingIn">
+                        <md-button type="submit" class="md-raised md-primary" tabindex="3" ng-click="doLogin()" ng-disabled="isLoggingIn">
                             <md-progress-circular ng-if="isLoggingIn" class="md-primary" md-diameter="20px"></md-progress-circular>
                             <span ng-hide="isLoggingIn" translate>TRK_LOGIN_LOGIN</span>
                         </md-button>
