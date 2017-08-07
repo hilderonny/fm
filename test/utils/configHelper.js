@@ -113,6 +113,7 @@ describe('UTILS configHelper', function() {
                     co.permissions.ADMINISTRATION_SETTINGS,
                     co.permissions.ADMINISTRATION_USER,
                     co.permissions.ADMINISTRATION_USERGROUP,
+                    co.permissions.CORE_RELATIONS,
                     co.permissions.SETTINGS_USER,
                     co.permissions.OFFICE_ACTIVITY,
                     co.permissions.OFFICE_DOCUMENT

@@ -12,6 +12,7 @@
                 "css/icons/material/Delete.svg",
                 "css/icons/material/Edit.svg",
                 "css/icons/material/Exit.svg",
+                "css/icons/material/Forward.svg",
                 "css/icons/material/Menu.svg",
                 "css/icons/material/Menu black.svg",
                 "css/icons/material/Plus Math.svg",
@@ -38,9 +39,6 @@
                 "partial/Administration/SettingSetListCard.html",
                 "partial/Administration/UserCard.html",
                 "partial/Administration/UsergroupCard.html",
-                "partial/Administration/UsergroupCardDetailsTab.html",
-                "partial/Administration/UsergroupCardPermissionsTab.html",
-                "partial/Administration/UsergroupCardUsersTab.html",
                 "partial/Administration/UsergrouplistCard.html",
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
@@ -59,11 +57,11 @@
                 "node_modules/angular-messages/angular-messages.min.js",
                 "node_modules/moment/min/moment.min.js",
                 "node_modules/angular-moment/angular-moment.min.js",
+                "node_modules/angular-route/angular-route.min.js",
                 "node_modules/angular-sanitize/angular-sanitize.min.js",
                 "node_modules/angular-translate/dist/angular-translate.min.js",
                 "node_modules/angular-translate/dist/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js",
                 "node_modules/moment/locale/de.js",
-                "node_modules/moment/locale/bg.js",
                 "public/js/AppSetup.js",
                 "public/js/Utils.js",
                 "public/js/MainController.js",
@@ -81,7 +79,7 @@
                 "public/js/Core/RelationsMenuController.js",
                 "public/js/Core/RelationsTabController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar" ],
+            "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_ADMINISTRATION",
@@ -93,6 +91,7 @@
                 }
             ],
             "utils": [ "apiHelper", "configHelper", "constants", "relationsHelper" ],
+            "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
                 { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Settings", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
@@ -105,15 +104,13 @@
                 "css/icons/material/Planner.svg",
                 "css/icons/office/Planner.svg",
                 "partial/Office/ActivityCard.html",
-                "partial/Office/ActivityCardDetailsTab.html",
-                "partial/Office/ActivityList.html",
                 "partial/Office/CalendarCard.html"
             ],
             "include" : [
                 "public/js/Office/ActivityCardController.js",
                 "public/js/Office/CalendarCardController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar"],
+            "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_OFFICE",
@@ -134,18 +131,14 @@
                 "css/icons/office/Add User Male.svg",
                 "css/icons/office/Briefcase.svg",
                 "css/icons/office/Module.svg",
-                "partial/Administration/AdministratorCard.html",
                 "partial/Administration/ClientCard.html",
-                "partial/Administration/ClientModuleCard.html",
                 "partial/Administration/ClientListCard.html"
             ],
             "include" : [
-                "public/js/Administration/AdministratorCardController.js",
                 "public/js/Administration/ClientCardController.js",
-                "public/js/Administration/ClientModuleCardController.js",
                 "public/js/Administration/ClientListCardController.js"
             ],
-            "languages" : [ "en", "de", "bg","ar" ],
+            "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_PORTAL",
@@ -170,21 +163,21 @@
                 "css/icons/office/Folder.svg",
                 "css/icons/office/Upload.svg",
                 "partial/Office/DocumentCard.html",
-                "partial/Office/FolderCard.html",
-                "partial/Office/FolderCardContentTab.html",
-                "partial/Office/FolderCardDetailsTab.html"
+                "partial/Office/DocumentListCard.html",
+                "partial/Office/FolderCard.html"
             ],
             "include" : [
                 "public/js/Office/DocumentCardController.js",
+                "public/js/Office/DocumentListCardController.js",
                 "public/js/Office/FolderCardController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar" ],
+            "languages" : [ "en", "de" ],
             "utils": [ "documentsHelper" ],
             "menu": [
                 {
                     "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/FolderCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT" }
+                        { "mainCard": "Office/DocumentListCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT" }
                     ]
                 }
             ]
@@ -207,16 +200,14 @@
                 "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg",
                 "partial/BIM/FmobjectCard.html",
-                "partial/BIM/FmobjectCardDetails.html",
                 "partial/BIM/FmObjectList.html",
-                "partial/BIM/HierarchyCard.html",
-                "partial/BIM/HierarchyCardLevel.html"
+                "partial/BIM/HierarchyCard.html"
             ],
             "include" : [
                 "public/js/BIM/FmobjectCardController.js",
                 "public/js/BIM/HierarchyCardController.js"
             ],
-            "languages" : ["en", "de", "bg", "ar"],
+            "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_BIM",
@@ -230,20 +221,20 @@
         "licenseserver" : {
             "api" : [ "portalmodules", "portals", "triggerUpdate", "update" ],
             "public" : [
-                "css/icons/material/Server.svg",
-                "css/icons/office/Server.svg",
+                "css/icons/material/Checkmark.svg",
                 "css/icons/material/Module.svg",
+                "css/icons/material/Server.svg",
+                "css/icons/material/Unavailable.svg",
                 "css/icons/office/Module.svg",
+                "css/icons/office/Server.svg",
                 "partial/LicenseServer/PortalCard.html",
-                "partial/LicenseServer/PortalModuleCard.html",
                 "partial/LicenseServer/PortalListCard.html"
             ],
             "include" : [
                 "public/js/LicenseServer/PortalCardController.js",
-                "public/js/LicenseServer/PortalModuleCardController.js",
                 "public/js/LicenseServer/PortalListCardController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar" ],
+            "languages" : [ "en", "de" ],
             "menu" : [
                 {
                     "title": "TRK_MENU_LICENSESERVER",
@@ -260,14 +251,12 @@
             "public" : [
                 "css/icons/material/Settings.svg",
                 "css/icons/office/Settings.svg",
-                "partial/Administration/PortalSettingsCard.html",
-                "partial/Administration/PortalSettingsCardLicenseTab.html",
-                "partial/Administration/PortalSettingsCardUpdatesTab.html"
+                "partial/Administration/PortalSettingsCard.html"
             ],
             "include" : [
                 "public/js/Administration/PortalSettingsCardController.js"
             ],
-            "languages" : [ "en", "de", "bg", "ar" ],
+            "languages" : [ "en", "de" ],
             "settingsets" : [
                 { "mainCard": "Administration/PortalSettingsCard", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "type": "SETTINGSET_TYPE_PORTAL", "icon": "Server", "permission": "PERMISSION_SETTINGS_PORTAL" }
             ]

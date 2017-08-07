@@ -1,0 +1,32 @@
+<md-card ng-cloak ng-controller="OfficeDocumentListCardController" style="background-image:url(/css/icons/office/Document.svg);">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-if="canWriteDocuments" ng-click="newFolder()" aria-label="ADD FOLDER">
+            <md-tooltip md-direction="bottom"><span translate>TRK_FOLDERS_CREATE_NEW_FOLDER</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Add Folder.svg"></md-icon>
+            <p translate>TRK_FOLDERS_FOLDER</p>
+        </md-button>
+        <md-button ng-if="canWriteDocuments" aria-label="UPLOAD FILE">
+            <md-tooltip md-direction="bottom"><span translate>TRK_FOLDERS_UPLOAD_DOCUMENT</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Upload.svg"></md-icon>
+            <p translate>TRK_FOLDERS_UPLOAD</p>
+            <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadFile(this)" />
+        </md-button>
+    </md-toolbar>
+
+    <md-card-content>
+        <md-list>
+            <md-list-item ng-click="selectElement(element)" ng-repeat="element in elements" ng-class="[{active:selectedElement==element}, 'level-'+element.level]" aria-label="{{element.name}}">
+                <md-icon md-svg-src="/css/icons/material/{{element.type == 'f' ? 'Folder' : 'Document'}}.svg"></md-icon>
+                <p ng-bind="element.name"></p>
+                <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
+            </md-list-item>
+        </md-list>
+    </md-card-content>
+
+    <div class="progress-panel" ng-if="isUploading">
+        <md-progress-circular md-mode="{{uploadMode}}" value="{{uploadProgress}}"></md-progress-circular>
+        <span>{{uploadProgress}} %</span>
+    </div>
+
+</md-card>

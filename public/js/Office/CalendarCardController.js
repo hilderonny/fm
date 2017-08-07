@@ -1,4 +1,4 @@
-app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
+app.controller('OfficeCalendarCardController', function($scope, $rootScope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
     
     // Event callbacks
     var saveActivityCallback = function(savedActivity) {
@@ -8,21 +8,16 @@ app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog
         $scope.selectedActivity.isDone = savedActivity.isDone;
     };
     var deleteActivityCallback = function() {
-        for (var i = 0; i < $scope.activityListActivities.length; i++) {
-            var activity = $scope.activityListActivities[i];
-            if (activity._id === $scope.selectedActivity._id) {
-                $scope.activityListActivities.splice(i, 1);
-                $scope.selectedActivity = false;
-                break;
-            }
-        }
+        $scope.activityListActivities.splice($scope.activityListActivities.indexOf($scope.selectedActivity), 1);
+        closeActivityCardCallback();
     };
     var createActivityCallback = function(createdActivity) {
         $scope.activityListActivities.push(createdActivity);
-        $scope.selectedActivity = createdActivity;
+        $scope.selectActivity(createdActivity);
     };
     var closeActivityCardCallback = function() {
         $scope.selectedActivity = false;
+        utils.setLocation('/activities');
     };
 
     // Calculate some edge dates for filtering in CalendarCard.html
@@ -57,40 +52,25 @@ app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog
     // Click on activity in user list shows activity details
     $scope.selectActivity = function(selectedActivity, event) {
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('Office/ActivityCard', {
+        utils.addCardWithPermission('Office/ActivityCard', {
             activityId: selectedActivity._id,
             saveActivityCallback: saveActivityCallback,
             deleteActivityCallback: deleteActivityCallback,
-            closeCallback: closeActivityCardCallback,
-            isSelection: $scope.params.isSelection,
-            selectButtonText: $scope.params.selectButtonText,
-            selectCallback: $scope.params.selectCallback
+            closeCallback: closeActivityCardCallback
+        }, 'PERMISSION_OFFICE_ACTIVITY').then(function() {
+            $scope.selectedActivity = selectedActivity;
         });
-        $scope.selectedActivity = selectedActivity;
     }
 
     // Click on new activity button opens detail dialog with new activity data
     $scope.newActivity = function() {
+        $scope.selectedActivity = null;
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('Office/ActivityCard', {
+        utils.addCardWithPermission('Office/ActivityCard', {
             createActivityCallback: createActivityCallback,
-            saveActivityCallback: saveActivityCallback,
-            deleteActivityCallback: deleteActivityCallback,
-            closeCallback: closeActivityCardCallback,
-            isSelection: $scope.params.isSelection,
-            selectButtonText: $scope.params.selectButtonText,
-            selectCallback: $scope.params.selectCallback
-        });
+            closeCallback: closeActivityCardCallback
+        }, 'PERMISSION_OFFICE_ACTIVITY');
     }
-
-    // User clicks on close button
-    $scope.closeCard = function() {
-        if ($scope.params.closeCallback) {
-            $scope.params.closeCallback();
-        }
-        utils.removeCardsToTheRightOf($element);
-        utils.removeCard($element);
-    };
    
     // Parameters:
     // - $scope.params.isSelection : When true, the card will not edit activities but show a select button and call the selectCallback when clicked
@@ -100,15 +80,21 @@ app.controller('OfficeCalendarCardController', function($scope, $http, $mdDialog
         // Load activities
         $http.get('api/activities').then(function(response) {
             $scope.activityListActivities = response.data;
-        });
-        $http.get('/api/permissions/canWrite/PERMISSION_OFFICE_ACTIVITY').then(function (response) {
-            $scope.canWriteActivities = response.data;
+            $scope.canWriteActivities = $rootScope.canWrite('PERMISSION_OFFICE_ACTIVITY');
+            // Check preselection
+            utils.handlePreselection($scope, $scope.activityListActivities, $scope.selectActivity);
+            if (!$scope.params.preselection) utils.setLocation('/activities');
         });
     }
 
     $scope.load();
 
 });
+
+app.directUrlMappings.activities = {
+    mainMenu: 'TRK_MENU_OFFICE',
+    subMenu: 'TRK_MENU_OFFICE_ACTIVITIES'
+};
 
 // Special controller for defining list parameters for overdue list
 app.controller('OfficeCalendarCardOverDueController', function($scope) {

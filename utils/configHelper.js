@@ -1,4 +1,5 @@
 var moduleConfig = require('../config/module-config.json');
+var co = require('../utils/constants');
 
 /**
  * Returns a list of all permission keys available to the given client.
@@ -32,6 +33,8 @@ module.exports.getAvailablePermissionKeysForClient = function(clientId, db) {
                     });
                 }
             });
+            // Special handle permission for relations, aber nur, wenn für den Mandanten Module freigeschaltet sind
+            if (Object.keys(modules).length > 0) permissionKeys.push(co.permissions.CORE_RELATIONS);
             resolve(permissionKeys);
         });
     });

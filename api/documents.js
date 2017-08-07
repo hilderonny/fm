@@ -123,7 +123,7 @@ router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validat
 });
 
 // Create a document via file upload
-router.post('/', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), upload.single('file'), function(req, res) { // https://github.com/expressjs/multer
+router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), upload.single('file'), function(req, res) { // https://github.com/expressjs/multer
     var file = req.file;
     if (!file) {
         return res.sendStatus(400);
@@ -131,7 +131,7 @@ router.post('/', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), upload.si
     var user = req.user;
     var clientId = user && user.clientId ? user.clientId.toString() : null;
     var parentFolderId = req.body.parentFolderId;
-    if (!parentFolderId || parentFolderId === 'undefined') {
+    if (!parentFolderId) {
         parentFolderId = null; // Assign to root folder, when no parent folder ID is given
     }
     if (parentFolderId !== null && !validateId.validateId(parentFolderId)) {
@@ -147,19 +147,27 @@ router.post('/', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), upload.si
     };
     if (document.parentFolderId) { 
         // Need to check whether the parent folder which this document is to be assigned to exists
-        req.db.get('folders').findOne(document.parentFolderId).then((parentFolder) => {
+        req.db.get(co.collections.folders).findOne(document.parentFolderId).then((parentFolder) => {
             if (!parentFolder) {
                 return res.sendStatus(400);
             }
-            req.db.insert('documents', document).then((insertedDocument) => {
+            req.db.insert(co.collections.documents, document).then((insertedDocument) => {
                 documentsHelper.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
-                res.send(insertedDocument);
+                res.send({
+                    _id: insertedDocument._id,
+                    type: 'd',
+                    name: insertedDocument.name
+                });
             });
         });
     } else {
-        req.db.insert('documents', document).then((insertedDocument) => {
+        req.db.insert(co.collections.documents, document).then((insertedDocument) => {
             documentsHelper.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
-            res.send(insertedDocument);
+            res.send({
+                _id: insertedDocument._id,
+                type: 'd',
+                name: insertedDocument.name
+            });
         });
     }
 });

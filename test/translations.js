@@ -6,7 +6,7 @@ var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
 var moduleConfig = require('../config/module-config.json');
-var constants = require('../utils/constants');
+var co = require('../utils/constants');
 
 var rootPath = path.dirname(__dirname);
 
@@ -138,6 +138,9 @@ function findTranslationKeysForModule(moduleName) {
             });
         }
     });
+    if (mod.permissions) mod.permissions.forEach(function (permission) {
+        addTranslationKeyIfNotExists(translationKeys, `TRK_${permission}`);
+    });
     if (mod.settingsets) mod.settingsets.forEach(function eachSettingSet(settingSet) {
         if (settingSet.title) addTranslationKeyIfNotExists(translationKeys, settingSet.title);
     });
@@ -195,6 +198,9 @@ function findPermissionKeyInModuleConfig(permissionKey, errors, fileName) {
                 });
             }
         });
+        if (mod.permissions && mod.permissions.indexOf(permissionKey) >= 0) {
+            found = true;
+        }
         if (mod.settingsets) mod.settingsets.forEach(function eachSettingSet(settingSet) {
             if (settingSet.permission === permissionKey) {
                 found = true;
@@ -266,7 +272,6 @@ describe('Translations', function describeTranslations() {
                         }
                         var keyIsUsed = translationKeys.indexOf(translationKeyInFile) >= 0;
                         if (!keyIsUsed) errors.push(`Translation key ${translationKeyInFile} defined in ${fileName} is not used anywhere`);
-
                     });
 
                     if (errors.length > 0) {
@@ -280,4 +285,5 @@ describe('Translations', function describeTranslations() {
         });
 
     });
+
 });

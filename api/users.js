@@ -28,7 +28,7 @@ var rh = require('../utils/relationsHelper');
  * Wenn als Query-Parameter "joinUserGroup=true" angegeben ist, werden in der Property "userGroup"
  * auch noch die Daten der Benutzergruppe der Benutzer zurück gegeben.
  */
-router.get('/', auth('PERMISSION_ADMINISTRATION_USER', 'r', 'base'), (req, res) => {
+router.get('/', auth(co.permissions.ADMINISTRATION_USER, 'r', 'base'), (req, res) => {
     var clientId = req.user.clientId; // clientId === null means that the user is a portal user
     // Aggregate-Pipeline: https://www.mongodb.com/blog/post/joins-and-other-aggregation-enhancements-coming-in-mongodb-3-2-part-1-of-3-introduction
     var aggregateSteps = [

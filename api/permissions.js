@@ -20,56 +20,6 @@ var co = require('../utils/constants');
 var configHelper = require('../utils/configHelper');
 
 /**
- * Checks whether the currently logged in user has read permissions on the
- * given permission key. Used for handling link and button visibility on client.
- */
-router.get('/canRead/:key', auth(false, false, 'base'), (req, res) => {
-    // Als Erstes prüfen, ob der Mandant überhaupt Zugriff auf das Modul hat, welches die Berechtigung verwendet
-    configHelper.isPermissionAvailableToClient(req.user.clientId, req.params.key, req.db).then(function(permissionIsAvailable) {
-        if (!permissionIsAvailable) {
-            res.send(false);
-            return;
-        }
-        if (req.user.isAdmin) {
-            res.send(true);
-            return;
-        }
-        req.db.get('permissions').findOne({ key: req.params.key, userGroupId: req.user.userGroupId, canRead: true}).then((permission) => {
-            if (!permission) {
-                res.send(false);
-                return;
-            }
-            res.send(true);
-        });
-    });
-});
-
-/**
- * Checks whether the currently logged in user has write permissions on the
- * given permission key. Used for handling link and button visibility on client.
- */
-router.get('/canWrite/:key', auth(false, false, 'base'), (req, res) => {
-    // Als Erstes prüfen, ob der Mandant überhaupt Zugriff auf das Modul hat, welches die Berechtigung verwendet
-    configHelper.isPermissionAvailableToClient(req.user.clientId, req.params.key, req.db).then(function(permissionIsAvailable) {
-        if (!permissionIsAvailable) {
-            res.send(false);
-            return;
-        }
-        if (req.user.isAdmin) {
-            res.send(true);
-            return;
-        }
-        req.db.get('permissions').findOne({ key: req.params.key, userGroupId: req.user.userGroupId, canWrite: true}).then((permission) => {
-            if (!permission) {
-                res.send(false);
-                return;
-            }
-            res.send(true);
-        });
-    });
-});
-
-/**
  * Liefert alle Berechtigungen für den angemeldeten Benutzer. Wird für Verweise verwendet, um
  * Verweismenü zu filtern.
  */
@@ -78,7 +28,7 @@ router.get('/forLoggedInUser', auth(false, false, 'base'), (req, res) => {
         // Bei Administratoren werden alle Permissions einfach zurück gegeben
         if (req.user.isAdmin) {
             var adminPermissions = permissionKeysForClient.map(function(permissionKey) {
-                return { key:permissionKey, canRead:true, canWrite:true, clientId:req.user.clientid, userGroupId: req.user.userGroupId };
+                return { key:permissionKey, canRead:true, canWrite:true, clientId:req.user.clientId, userGroupId: req.user.userGroupId };
             });
             res.send(adminPermissions);
         } else {
@@ -93,61 +43,33 @@ router.get('/forLoggedInUser', auth(false, false, 'base'), (req, res) => {
     });
 });
 
-/**
- * Get all permissions assigned to an usergroup with the given ID.
- * The permissions in the database are filtered by the permissions
- * available to the client for the case that a permission was
- * set and later the corresponding module was removed from the client
- * or from the portal.
- * Used for listing all assigned permissions for a specific user group.
- */
-router.get('/assigned/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'base'), validateId, validateSameClientId('usergroups'), function(req, res) {
-    // Filter permission keys for portal and client of user group
-    req.db.get('usergroups').findOne(req.params.id).then(function(userGroup) {
-        configHelper.getAvailablePermissionKeysForClient(userGroup.clientId, req.db).then(function(permissionKeysForClient) {
-            // Obtain the permissions for the user group
-            req.db.get('permissions').find({ 
+router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r', 'base'), validateId, validateSameClientId('usergroups'), function(req, res) {
+    var userGroup, permissionKeysForClient;
+    req.db.get('usergroups').findOne(req.params.id).then(function(ug) {
+        userGroup = ug;
+        return configHelper.getAvailablePermissionKeysForClient(userGroup.clientId, req.db);
+    }).then(function(keys) {
+        permissionKeysForClient = keys;
+        // Obtain the permissions for the user group
+        return req.db.get('permissions').find({ 
+            userGroupId: userGroup._id,
+            key: { $in: permissionKeysForClient } // Filter out permissions which are not available to the portal and client of the user group
+        });
+    }).then((permissionsOfUserGroup) => {
+        var result = permissionKeysForClient.map((key) => {
+            var existingPermission = permissionsOfUserGroup.find((p) => p.key === key);
+            return {
+                _id: existingPermission ? existingPermission._id : null,
+                clientId: userGroup.clientId,
                 userGroupId: userGroup._id,
-                key: { $in: permissionKeysForClient } // Filter out permissions which are not available to the portal and client of the user group
-            }).then((permissionsOfUserGroup) => {
-                res.send(permissionsOfUserGroup);
-            });
+                canRead: existingPermission ? existingPermission.canRead : false,
+                canWrite: existingPermission ? existingPermission.canWrite : false,
+                key: key
+            };
         });
+        res.send(result);
     });
 });
-
-/**
- * Get all available permissions for a specific user group.
- * Only those permissions, which were not already assigned and which are
- * available to the client of the user group are returned.
- * When the parameter selectedPermissionKey is given, the permission of the
- * selected one will also be contained in the result. This is the case for
- * selecting an existing permission where the combobox contains the selected
- * permission itself.
- */
-router.get('/available/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'base'), validateId, validateSameClientId('usergroups'), function(req, res) {
-    var userGroupId = req.params.id;
-    // Obtain available permissions for the portal and client
-    req.db.get('usergroups').findOne(req.params.id).then(function(userGroup) {
-        configHelper.getAvailablePermissionKeysForClient(userGroup.clientId, req.db).then(function(permissionKeysForClient) {
-            // Filter out permissions which were already assigned to the user group
-            req.db.get('permissions').find({ userGroupId: userGroup._id }).then((permissionsOfUserGroup) => {
-                var permissionKeysOfUserGroup = permissionsOfUserGroup.map((permission) => permission.key);
-                var availablePermissionKeys = permissionKeysForClient.filter((key) => permissionKeysOfUserGroup.indexOf(key) < 0);
-                // Add possobly selected permission to the list of available ones
-                if (req.query.selectedPermissionKey) {
-                    availablePermissionKeys.push(req.query.selectedPermissionKey);
-                }
-                res.send(availablePermissionKeys);
-            });
-        });
-    });
-
-
-});
-
-// Get a specific permission
-apiHelper.createDefaultGetIdRoute(router, 'permissions', 'PERMISSION_ADMINISTRATION_USERGROUP', 'base');
 
 // Create a permission
 router.post('/', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', 'base'), function(req, res) {

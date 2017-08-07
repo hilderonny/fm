@@ -88,7 +88,7 @@ describe('API menu', function() {
                             title: 'TRK_MENU_OFFICE',
                             items: [
                                 { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                                { mainCard: 'Office/FolderCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                                { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
                             ]
                         },
                         {
@@ -134,7 +134,7 @@ describe('API menu', function() {
                     title: 'TRK_MENU_OFFICE',
                     items: [
                         { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                        { mainCard: 'Office/FolderCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                        { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
                     ]
                 },
                 {

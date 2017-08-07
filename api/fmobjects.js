@@ -37,7 +37,7 @@ router.get('/', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), (req, res) =>
                 pos: fmObject.pos,
                 children: []
             };
-            if (fmObject.parentId) {
+            if (fmObject.parentId && allFmObjects[fmObject.parentId]) {
                 allFmObjects[fmObject.parentId].children.push(allFmObjects[fmObject._id]);
             } else {
                 rootFmObjects.push(allFmObjects[fmObject._id]);

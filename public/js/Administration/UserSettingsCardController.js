@@ -1,4 +1,4 @@
-app.controller('AdministrationUserSettingsCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationUserSettingsCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     
     // User clicks on close button
     $scope.closeCard = function() {
@@ -25,10 +25,7 @@ app.controller('AdministrationUserSettingsCardController', function($scope, $htt
             });
         });
     };
-
-        // Check the permissions for the details page for handling button visibility
-        $http.get('/api/permissions/canWrite/PERMISSION_SETTINGS_USER').then(function (response) {
-            $scope.canWriteUserDetails = response.data;
-        });
+    $scope.canWriteUserDetails = $rootScope.canWrite('PERMISSION_SETTINGS_USER');
+    utils.setLocation('/settings/TRK_SETTINGSET_USER_GENERAL');
 
 });

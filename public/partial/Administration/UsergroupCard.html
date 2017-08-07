@@ -1,49 +1,71 @@
-<md-card ng-cloak ng-controller="AdministrationUsergroupCardController" style="background-image:url('/css/icons/office/User Group Man Man.svg');">
+<md-card ng-cloak ng-controller="AdministrationUsergroupCardController" style="background-image:url('/css/icons/office/User Group Man Man.svg');" class="list-details-details">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <ng-include ng-if="!isNewUserGroup" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
     
-    <md-card-title flex="none" class="withfab">
+    <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" ng-if="!isNewUserGroup"><span ng-bind="userGroupName"></span></span>
             <span class="md-headline" ng-if="isNewUserGroup" translate>TRK_USERGROUPS_NEW_USERGROUP</span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewUserGroup">
-        <md-fab-trigger>
-            <md-button class="md-fab md-accent" aria-label="MENU">
-                <md-tooltip md-direction="left"><span translate>TRK_USERGROUPS_MORE_ACTIONS</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Menu black.svg"></md-icon>
-            </md-button>
-        </md-fab-trigger>
-        <md-fab-actions>
-            <md-button class="md-fab md-raised md-mini" ng-if="canAddPermission" ng-click="newPermission()" aria-label="ADD PERMISSION">
-                <md-tooltip md-direction="left"><span translate>TRK_USERGROUPS_ADD_NEW_PERMISSION</span></md-tooltip>
-                <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-            </md-button>
-            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
-        </md-fab-actions>
-    </md-fab-speed-dial>
-
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
-
     <md-tabs flex>
         <md-tab>
             <md-tab-label><span translate>TRK_USERGROUPS_DETAILS</span></md-tab-label>
             <md-tab-body>
-                <ng-include src="'partial/Administration/UsergroupCardDetailsTab.html'"></ng-include>
+                <form name="userGroupsForm">
+
+                    <md-card-content layout="column">
+
+                        <md-input-container flex>
+                            <label translate>TRK_USERGROUPS_NAME</label>
+                            <input ng-model="userGroup.name" name="name">
+                        </md-input-container>
+
+                    </md-card-content>
+
+                    <md-card-actions layout="row" layout-align="end center">
+                        <md-button class="md-raised md-accent" ng-if="isNewUserGroup && canWriteUserGroup" ng-click="createUserGroup()" ng-disabled="userGroupsForm.$invalid"><span translate>TRK_USERGROUPS_CREATE</span></md-button>
+                        <md-button class="md-raised md-accent" ng-if="!isNewUserGroup && canWriteUserGroup" ng-click="saveUserGroup()" ng-disabled="userGroupsForm.$invalid"><span translate>TRK_USERGROUPS_SAVE</span></md-button>
+                        <md-button class="md-raised md-warn" ng-if="!isNewUserGroup && userGroup.users.length == 0 && canWriteUserGroup" ng-click="deleteUserGroup()"><span translate>TRK_USERGROUPS_DELETE</span></md-button>
+                    </md-card-actions>
+
+                </form>
             </md-tab-body>
         </md-tab>
         <md-tab ng-if="!isNewUserGroup">
             <md-tab-label><span translate>TRK_USERGROUPS_PERMISSIONS</span></md-tab-label>
             <md-tab-body>
-                <md-card-content ng-include="'partial/Administration/UsergroupCardPermissionsTab.html'"></md-card-content>
+                <md-card-content>
+                    <md-list class="lines-beetween-items">
+                        <md-list-item ng-repeat="permission in userGroup.permissions | orderBy: 'translationKey | translate'" aria-label="{{permission.key}}">
+                            <p translate="{{ permission.translationKey }}"></p>
+                            <md-button ng-class="{'md-icon-button':true,disabled:!permission.canRead}" aria-label="READ" ng-click="switchRead(permission)">
+                                <md-icon md-svg-src="/css/icons/material/Search.svg"></md-icon>
+                            </md-button>
+                            <md-button ng-class="{'md-icon-button':true,disabled:!permission.canWrite}" aria-label="WRITE" ng-click="switchWrite(permission)">
+                                <md-icon md-svg-src="/css/icons/material/Edit.svg"></md-icon>
+                            </md-button>
+                        </md-list-item>
+                    </md-list>
+                </md-card-content>
             </md-tab-body>
         </md-tab>
-        <md-tab ng-if="!isNewUserGroup">
+        <md-tab ng-if="!isNewUserGroup && canReadUser">
             <md-tab-label><span translate>TRK_USERGROUPS_USERS</span></md-tab-label>
             <md-tab-body>
-                <md-card-content ng-include="'partial/Administration/UsergroupCardUsersTab.html'"></md-card-content>
+                <md-card-content>
+                    <md-list class="lines-beetween-items">
+                        <md-list-item ng-repeat="user in userGroup.users | orderBy: 'name'" ng-click="selectUser(user)" ng-class="{active:selectedUser == user}" aria-label="{{user.name}}">
+                            <md-icon md-svg-src="/css/icons/material/User.svg"></md-icon>
+                            <p ng-bind="user.name"></p>
+                        </md-list-item>
+                    </md-list>
+                </md-card-content>
             </md-tab-body>
         </md-tab>
         <ng-include ng-if="!isNewUserGroup" src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>

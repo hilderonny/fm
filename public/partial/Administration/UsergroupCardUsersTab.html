@@ -1,6 +1,0 @@
-<md-list class="lines-beetween-items">
-    <md-list-item ng-repeat="user in userGroup.users | orderBy: 'name'" ng-click="selectUser(user)" ng-class="{active:selectedUser == user}" aria-label="{{user.name}}">
-        <md-icon md-svg-src="/css/icons/material/User.svg"></md-icon>
-        <p ng-bind="user.name"></p>
-    </md-list-item>
-</md-list>

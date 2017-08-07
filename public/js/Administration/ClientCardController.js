@@ -1,36 +1,70 @@
-app.controller('AdministrationClientCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
-    
-    var createClientModuleCallback = function(createdClientModule) {
-        $scope.clientModules.push(createdClientModule);
-        $scope.selectClientModule(createdClientModule);
-        checkAvailableModules();
+app.controller('AdministrationClientCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+
+    $scope.getClientModules = function() {
+        return $http.get('/api/clientmodules/forClient/' + $scope.client._id).then(function(clientModulesResponse) {
+            $scope.client.clientModules = clientModulesResponse.data;
+            $scope.client.clientModules.forEach(function(clientModule) {
+                clientModule.translationKey = 'TRK_MODULE_' + clientModule.module + '_NAME';
+            });
+            return Promise.resolve();
+        });
     };
-    
-    var saveClientModuleCallback = function(savedClientModule) {
-        $scope.selectedClientModule.module = savedClientModule.module;
-        checkAvailableModules();
-    };
-    
-    var deleteClientModuleCallback = function() {
-        for (var i = 0; i < $scope.clientModules.length; i++) {
-            var clientModule = $scope.clientModules[i];
-            if (clientModule._id === $scope.selectedClientModule._id) {
-                $scope.clientModules.splice(i, 1);
-                $scope.selectedClientModule = false;
-                break;
-            }
+
+    $scope.saveClientModule = function(clientModuleToSave, clientModuleToUpdate) {
+        if (clientModuleToSave.active) {
+            $http.post('/api/clientmodules', clientModuleToSave).then(function(response) {
+                clientModuleToUpdate._id = response.data._id;
+                clientModuleToUpdate.active = response.data.active;
+            });
+        } else {
+            $http.delete('/api/clientmodules/' + clientModuleToSave._id).then(function() {
+                delete clientModuleToUpdate._id;
+                clientModuleToUpdate.active = false;
+            });
         }
-        checkAvailableModules();
     };
 
-    var closeClientModuleCardCallback = function() {
-        $scope.selectedClientModule = false;
+    $scope.switchActive = function(clientModule) {
+        if (!$scope.canWriteClients) return;
+        var tempClientModule = JSON.parse(JSON.stringify(clientModule));
+        tempClientModule.active = !tempClientModule.active;
+        $scope.saveClientModule(tempClientModule, clientModule);
     };
 
-    var checkAvailableModules = function() {
-        // Available modules for FAB button
-        $http.get('/api/clientmodules/available?clientId=' + $scope.client._id).then(function(clientModulesResponse) {
-            $scope.areModulesAvailable = clientModulesResponse.data.length > 0;
+    $scope.newAdmin = function() {
+        var parentScope = $scope;
+        $mdDialog.show({
+            controller: function ($scope) { // https://github.com/angular/material/issues/1531#issuecomment-74640529
+                $scope.parentScope = parentScope;
+                parentScope.administrator = { name: '', pass: '' };
+            },
+            controllerAs: 'ctrl',
+            templateUrl: 'CreateAdministratorDialog',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true
+        });
+    };
+
+    $scope.onCancelClick = function() {
+        $scope.administrator = null; 
+        $mdDialog.cancel();
+    };
+
+    $scope.onOkClick = function(childScope) {
+        var administratorToSend = { 
+            name: $scope.administrator.name, 
+            pass: $scope.administrator.pass,
+            clientId: $scope.params.clientId
+        };
+        $http.post('/api/clients/newadmin', administratorToSend).then(function(response) {
+            if (response.status === 409) {
+                childScope.administratorsForm.name.$setValidity('nameInUse', false);
+                return Promise.reject();
+            }
+            return $translate(['TRK_CLIENTS_ADMINISTRATORCREATED']);
+        }).then(function(translations) {
+            $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_ADMINISTRATORCREATED).hideDelay(1000).position('bottom right'));
+            $mdDialog.hide();
         });
     };
 
@@ -40,8 +74,9 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
             name: $scope.client.name,
             comment:$scope.client.comment 
         };
+        var createdClient;
         $http.post('/api/clients', clientToSend).then(function(response) {
-            var createdClient = response.data;
+            createdClient = response.data;
             $scope.isNewClient = false;
             $scope.client._id = createdClient._id;
             $scope.clientName = $scope.client.name;
@@ -49,14 +84,12 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
             if ($scope.params.createClientCallback) {
                 $scope.params.createClientCallback(createdClient);
             }
-            // Update automatically created client module assignments and check for available modules
-            $http.get('/api/clientmodules?clientId=' + $scope.client._id).then(function(clientModulesResponse) {
-                $scope.clientModules = clientModulesResponse.data;
-                checkAvailableModules();
-            });
-            $translate(['TRK_CLIENTS_CLIENTCREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENTCREATED).hideDelay(1000).position('bottom right'));
-            });
+            return $scope.getClientModules();
+        }).then(function() {
+            return $translate(['TRK_CLIENTS_CLIENTCREATED']);
+        }).then(function(translations) {
+            $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENTCREATED).hideDelay(1000).position('bottom right'));
+            utils.setLocation('/clients/' + createdClient._id);
         });
     };
 
@@ -109,38 +142,6 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
         utils.removeCard($element);
     };
 
-    // Click on new admin button opens detail dialog with new administrator data
-    $scope.newAdmin = function() {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/AdministratorCard', {
-            clientId: $scope.client._id
-        });
-    };
-
-    // Click on module in module list shows module details
-    $scope.selectClientModule = function(selectedClientModule) {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/ClientModuleCard', {
-            clientModuleId: selectedClientModule._id,
-            saveClientModuleCallback: saveClientModuleCallback,
-            deleteClientModuleCallback: deleteClientModuleCallback,
-            closeCallback: closeClientModuleCardCallback
-        });
-        $scope.selectedClientModule = selectedClientModule;
-    };
-
-    // Click on add module button opens detail dialog with new module assignment
-    $scope.addModule = function() {
-        utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/ClientModuleCard', {
-            clientId: $scope.client._id,
-            createClientModuleCallback: createClientModuleCallback,
-            saveClientModuleCallback: saveClientModuleCallback,
-            deleteClientModuleCallback: deleteClientModuleCallback,
-            closeCallback: closeClientModuleCardCallback
-        });
-    };
-
     // Loads the client details or prepares the empty dialog for a new client
     // Params:
     // - $scope.params.clientId : ID of the client to load, when not set, a new client is to be created
@@ -158,18 +159,16 @@ app.controller('AdministrationClientCardController', function($scope, $http, $md
                 $scope.client = completeClient;
                 $scope.clientName = completeClient.name; // Prevent updating the label when changing the name input value
                 $scope.relationsEntity = { type:'clients', id:completeClient._id };
-                checkAvailableModules();
-                // client module assignments
-                $http.get('/api/clientmodules?clientId=' + $scope.client._id).then(function(clientModulesResponse) {
-                    $scope.clientModules = clientModulesResponse.data;
-                });
+                return $scope.getClientModules();
+            }).then(function() {
+                utils.setLocation('/clients/' + $scope.params.clientId);
             });
         } else {
             // New client
             $scope.isNewClient = true;
-            $scope.client = { name : "", comment:'' };
-            $scope.clientModules = [];
+            $scope.client = { name : "", comment:'', clientModules: [] };
         }
+        $scope.canWriteClients = $rootScope.canWrite('PERMISSION_ADMINISTRATION_CLIENT');
     };
 
     $scope.load();
