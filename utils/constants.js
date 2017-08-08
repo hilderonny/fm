@@ -49,6 +49,10 @@ module.exports.apis = {
      */
     menu: 'menu',
     /**
+     * API für Adressen von Geschäftspartnern
+     */
+    partneraddress: 'partneraddress',
+    /**
      * API for providing permissions to usergroups
      */
     permissions: 'permissions',

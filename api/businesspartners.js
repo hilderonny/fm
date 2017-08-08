@@ -27,7 +27,7 @@ var rh = require('../utils/relationsHelper');
  * @example
  * $http.get('/api/businesspartner/forIds?ids=ID1,ID2,ID3')...
  */
-router.get('/forIds', auth(false, false, co.modules.businesspartner), (req, res) => {
+router.get('/forIds', auth(false, false, co.modules.businesspartners), (req, res) => {
     // Zuerst Berechtigung prüfen
     auth.canAccess(req.user._id, co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners, req.db).then(function(accessAllowed) {
         if (!accessAllowed) {
@@ -51,7 +51,7 @@ router.get('/forIds', auth(false, false, co.modules.businesspartner), (req, res)
 /**
  * List of all business partners
  */
-router.get('/', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r') , (req, res) =>{
+router.get('/', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners) , (req, res) =>{
     var clientId = req.user.clientId;
      req.db.get(co.collections.businesspartners).find({clientId: clientId}).then((partner)=> {
         return res.send(partner);
@@ -90,6 +90,7 @@ router.put('/:id' , auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.bu
         return res.sendStatus(400);
     }
     delete partner._id;
+    delete partner.clientId;
     if (Object.keys(partner).length < 1) {
         return res.sendStatus(400);
     }

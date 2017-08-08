@@ -79,7 +79,7 @@ var collectModuleConfigReferencedFiles = () => {
     return files;
 };
 
-describe.only('module-config.json', function() {
+describe('module-config.json', function() {
 
     it('all references target existing files (files referenced but missing?)', (done) => {
         // Alle Referenzen prüfen, ob dafür auch die Dateien existieren

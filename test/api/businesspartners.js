@@ -1,7 +1,5 @@
 /**
  * UNIT Tests for api/businesspartners
- * @example npm run-script testlocal
- * @see http://softwareengineering.stackexchange.com/a/223376 for running async tasks in parallel
  */
 var assert = require('assert');
 var th = require('../testhelpers');
@@ -40,7 +38,7 @@ describe('API businesspartners', function() {
                 var currentUserClientId = currentUser.clientId.toString();
                 businessPartners.forEach((businessPartner) => {
                     ['name', 'clientId', 'industry', 'rolle', 'isJuristic'].forEach((propertyName) => {
-                        assert.ok(businessPartner[propertyName]);
+                        assert.ok(typeof(businessPartner[propertyName]) !== 'undefined');
                     });
                     // Check clientId for correctness
                     assert.strictEqual(businessPartner.clientId, currentUserClientId);
@@ -167,8 +165,9 @@ describe('API businesspartners', function() {
                 var testObject = {
                     _id: businessPartner._id.toString(),
                     name: 'newBusinessPartner',
-                    // TODO: industry, rolle
-                    isJuristic: true
+                    industry: 'newIndustry',
+                    isJuristic: true,
+                    rolle: 'newRole'
                 };
                 return Promise.resolve(testObject);
             });
@@ -180,8 +179,9 @@ describe('API businesspartners', function() {
         it('responds with a correct business partner with the updated business partner and its new properties', function() {
             var updatedBusinessPartner = {
                 name: 'newBusinessPartnerName',
-                // TODO: industry, rolle
-                isJuristic: false
+                industry: 'newBusinessPartnerIndustry',
+                isJuristic: false,
+                rolle: 'newBusinessPartnerRole'
             };
             var businessPartnerFromDatabase;
             return db.get(co.collections.businesspartners).findOne({name: th.defaults.businessPartner}).then(function(user) {

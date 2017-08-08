@@ -74,7 +74,7 @@ var testAppPackager = (moduleNames, version, done) => {
     });
 };
 
-describe.only('UTILS App packager', function() {
+describe('UTILS App packager', function() {
     it('returns a ZIP file with all modules when no module list is given', function(done) {
         testAppPackager(false, 'Testversion', done);
     });

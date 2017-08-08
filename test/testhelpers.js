@@ -48,24 +48,7 @@ var generateLicenseKey = () => {
  */
 th.cleanDatabase = () => {
     th.dbObjects = {};
-    var promises = [
-        'activities',
-        'clientmodules',
-        'clients',
-        'documents',
-        'dynamicattributes',
-        'dynamicattributeoptions',
-        'dynamicattributevalues',
-        'fmobjects',
-        'folders',
-        'permissions',
-        'portalmodules',
-        'portals',
-        'relations',
-        'usergroups',
-        'users',
-        'markers'
-    ].map((key) => db.get(key).drop());
+    var promises = Object.keys(co.collections).map((key) => db.get(co.collections[key]).drop());
     return Promise.all(promises); // Wait for all drop Promises to complete
 };
 
@@ -127,6 +110,7 @@ th.prepareClientModules = () => {
         clientModules.push({ clientId: client._id, module: co.modules.documents });
         clientModules.push({ clientId: client._id, module: co.modules.fmobjects });
         clientModules.push({ clientId: client._id, module: co.modules.licenseserver });
+        clientModules.push({ clientId: client._id, module: co.modules.businesspartners });
     });
     return th.bulkInsert('clientmodules', clientModules);
 };
@@ -181,16 +165,9 @@ th.prepareUsers = () => {
 th.preparePermissions = () => {
     var permissions = [];
     th.dbObjects.usergroups.forEach((userGroup) => {
-        permissions.push({ key: co.permissions.ADMINISTRATION_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.ADMINISTRATION_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.ADMINISTRATION_USERGROUP, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.BIM_FMOBJECT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.OFFICE_ACTIVITY, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.OFFICE_DOCUMENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.LICENSESERVER_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.SETTINGS_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.SETTINGS_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.SETTINGS_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        Object.keys(co.permissions).forEach((permissionKey) => {
+            permissions.push({ key: co.permissions[permissionKey], userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        });
     });
     return th.bulkInsert('permissions', permissions);
 };
@@ -203,8 +180,8 @@ th.preparePermissions = () => {
 th.prepareBusinessPartners = () => {
     var businessPartners = [];
     th.dbObjects.clients.forEach((client) => {
-        businessPartners.push({ name: client.name + '_0', clientId: client._id });
-        businessPartners.push({ name: client.name + '_1', clientId: client._id });
+        businessPartners.push({ name: client.name + '_0', clientId: client._id, industry: 'Industry 0', isJuristic: true, rolle: 'Role 0' });
+        businessPartners.push({ name: client.name + '_1', clientId: client._id, industry: 'Industry 1', isJuristic: false, rolle: 'Role 1' });
     });
     businessPartners.push({ name: '_0', clientId: null });
     return th.bulkInsert(co.collections.businesspartners, businessPartners);

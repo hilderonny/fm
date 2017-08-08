@@ -32,11 +32,12 @@
     "TRK_BP_NEW_BP_ADDRESS" : "Neue Addresse",
     "TRK_BP_NEWPARTNER" : "Neu Geschäftspartner",
     "TRK_BP_ROLE":"Rolle",
-     "TRK_BP_REALLY_DELETE_BP_ADDRESS" : "Soll die Adresse wirklich gelöscht werden?",
+    "TRK_BP_REALLY_DELETE_BP_ADDRESS" : "Soll die Adresse wirklich gelöscht werden?",
     "TRK_BP_REALLYDELETEPARTNER" : "Soll der Mandant \"{{partnerName}}\" wirklich gelöscht werden?",
     "TRK_BP_SAVE" : "Speichern",
     "TRK_BP_SELECT_BP" : "Patrner Auswählen",
     "TRK_MENU_CRM" :"CRM",
+    "TRK_MENU_CRM_BUSINESSPARTNERS" :"Geschäftspartner",
     "TRK_NO" : "Nein",
     "TRK_YES" : "Ja"
 }

@@ -9,7 +9,7 @@ var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var ch = require('../../utils/configHelper');
 
-describe.only('API permissions', function(){
+describe('API permissions', function(){
 
     // Clear and prepare database with clients, user groups, users and permissions
     beforeEach(() => {
