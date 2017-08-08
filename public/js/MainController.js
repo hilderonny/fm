@@ -21,12 +21,12 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             if (menuItem.action) {
                 menuItem.action();
             } else {
-                angular.element(document.querySelector('#cardcanvas')).empty();
+                utils.removeAllCards();
                 utils.addCardWithPermission(menuItem.mainCard, null, menuItem.permission);
                 $mdSidenav('left').close();
             }
         } else {
-            angular.element(document.querySelector('#cardcanvas')).empty();
+            utils.removeAllCards();
             $mdSidenav('left').close();
             utils.setLocation('/');
         }
