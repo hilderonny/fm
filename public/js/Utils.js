@@ -103,9 +103,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         removeAllCards: function() {
             var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
-            while(cardCanvas.children().length > 1) {
-                utils.removeCard(cardCanvas.children()[0]);
-            }
+            var cards = cardCanvas.children();
+            angular.forEach(cards, function(index, key) {
+                var card = cards[key];
+                utils.removeCard(angular.element(card));
+            });
         },
 
         /**
