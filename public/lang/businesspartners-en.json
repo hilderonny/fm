@@ -33,6 +33,7 @@
     "TRK_BUSINESSPARTNERS_SELECT_BUSINESSPARTNER" : "Select business partner",
     "TRK_MENU_CRM" :"CRM",
     "TRK_MENU_CRM_BUSINESSPARTNERS" :"Business partners",
+    "TRK_MODULE_businesspartners_NAME" : "Business partners",
     "TRK_NO" : "No",
     "TRK_YES" : "Yes"
 }
