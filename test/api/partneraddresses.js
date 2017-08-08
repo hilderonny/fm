@@ -7,7 +7,7 @@ var db = require('../../middlewares/db');
 var bcryptjs =  require('bcryptjs');
 var co = require('../../utils/constants');
 
-describe.only('API partneraddresses', function() {
+describe('API partneraddresses', function() {
 
     // Clear and prepare database with clients, user groups and users
     beforeEach(() => {
@@ -28,8 +28,30 @@ describe.only('API partneraddresses', function() {
         th.apiTests.getId.defaultNegative(api, co.permissions.CRM_BUSINESSPARTNERS, co.collections.businesspartners);
         th.apiTests.getId.clientDependentNegative(api, co.collections.businesspartners);
         
-        xit('returns all addresses for the given business partner', function() {
-
+        it('returns all addresses for the given business partner', function() {
+            var businessPartnerFromDatabase, addressesFromDatabase;
+            return db.get(co.collections.businesspartners).findOne({name: th.defaults.businessPartner}).then(function(bp) {
+                businessPartnerFromDatabase = bp;
+                return db.get(co.collections.partneraddresses).find({partnerId: bp._id});
+            }).then((addresses) => {
+                addressesFromDatabase = addresses;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.partneraddresses}/forBusinessPartner/${businessPartnerFromDatabase._id}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var addressesFromRequest = response.body;
+                assert.strictEqual(addressesFromRequest.length, addressesFromDatabase.length);
+                for (var i = 0; i < addressesFromDatabase.length; i++) {
+                    assert.strictEqual(addressesFromRequest[i]._id, addressesFromDatabase[i]._id.toString());
+                    assert.strictEqual(addressesFromRequest[i].addressee, addressesFromDatabase[i].addressee);
+                    assert.strictEqual(addressesFromRequest[i].street, addressesFromDatabase[i].street);
+                    assert.strictEqual(addressesFromRequest[i].postcode, addressesFromDatabase[i].postcode);
+                    assert.strictEqual(addressesFromRequest[i].city, addressesFromDatabase[i].city);
+                    assert.strictEqual(addressesFromRequest[i].type, addressesFromDatabase[i].type);
+                }
+                return Promise.resolve();
+            });
+            
         });
 
     });
@@ -39,8 +61,21 @@ describe.only('API partneraddresses', function() {
         th.apiTests.getId.defaultNegative(co.apis.partneraddresses, co.permissions.CRM_BUSINESSPARTNERS, co.collections.partneraddresses);
         th.apiTests.getId.clientDependentNegative(co.apis.partneraddresses, co.collections.partneraddresses);
          
-        xit('returns the address with all details for the given id', function() {
-
+        it('returns the address with all details for the given id', function() {
+            var addressFromDatabase;
+            return db.get(co.collections.partneraddresses).findOne({addressee: th.defaults.partnerAddress}).then((address) => {
+                addressFromDatabase = address;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.get(`/api/${co.apis.partneraddresses}/${addressFromDatabase._id}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var addressFromRequest = response.body;
+                assert.strictEqual(addressFromRequest._id, addressFromDatabase._id.toString());
+                ['addressee', 'street', 'postcode', 'city', 'type'].forEach((k) => {
+                    assert.strictEqual(addressFromRequest[k], addressFromDatabase[k]);
+                });
+                return Promise.resolve();
+            });
         });
        
     });
@@ -63,16 +98,42 @@ describe.only('API partneraddresses', function() {
 
         th.apiTests.post.defaultNegative(co.apis.partneraddresses, co.permissions.CRM_BUSINESSPARTNERS, createPostTestAddress);
                 
-        xit('responds without giving a partnerId with 400', function() {
-
+        it('responds without giving a partnerId with 400', function() {
+            var addressToSend;
+            return createPostTestAddress().then((address) => {
+                addressToSend = address;
+                delete addressToSend.partnerId;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.post(`/api/${co.apis.partneraddresses}?token=${token}`).send(addressToSend).expect(400);
+            });
         });
                 
-        xit('responds with not existing partnerId with 400', function() {
-
+        it('responds with not existing partnerId with 400', function() {
+            var addressToSend;
+            return createPostTestAddress().then((address) => {
+                addressToSend = address;
+                addressToSend.partnerId = '999999999999999999999999';
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.post(`/api/${co.apis.partneraddresses}?token=${token}`).send(addressToSend).expect(400);
+            });
         });
 
-        xit('responds with correct data with inserted address containing an _id field', function() {
-
+        it('responds with correct data with inserted address containing an _id field', function() {
+            var addressToSend;
+            return createPostTestAddress().then((address) => {
+                addressToSend = address;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.post(`/api/${co.apis.partneraddresses}?token=${token}`).send(addressToSend).expect(200);
+            }).then((response) => {
+                var addressFromApi = response.body;
+                assert.ok(addressFromApi._id);
+                ['addressee', 'street', 'postcode', 'city', 'type'].forEach((k) => {
+                    assert.strictEqual(addressFromApi[k], addressToSend[k]);
+                });
+            });
         });
 
     });
@@ -97,12 +158,45 @@ describe.only('API partneraddresses', function() {
         th.apiTests.put.defaultNegative(co.apis.partneraddresses, co.permissions.CRM_BUSINESSPARTNERS, createPutTestAddress);
         th.apiTests.put.clientDependentNegative(co.apis.partneraddresses, createPutTestAddress);
 
-        xit('updates the address and returns the updated entity', function() {
-
+        it('updates the address and returns the updated entity', function() {
+            var addressToSend;
+            return createPutTestAddress().then((address) => {
+                addressToSend = address;
+                addressToSend.addressee = 'updated addressee';
+                addressToSend.street = 'updated street';
+                addressToSend.postcode = 'updated postcode';
+                addressToSend.city = 'updated city';
+                addressToSend.type = 'updated type';
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.put(`/api/${co.apis.partneraddresses}/${addressToSend._id.toString()}?token=${token}`).send(addressToSend).expect(200);
+            }).then((response) => {
+                var addressFromApi = response.body;
+                Object.keys(addressToSend).forEach((k) => {
+                    assert.strictEqual(addressFromApi[k], addressToSend[k]);
+                });
+            });
         });
 
-        xit('does not change the partner when a new partnerId is given', function() {
-
+        it('does not change the partner when a new partnerId is given', function() {
+            var addressToSend, newPartnerId;
+            return db.get(co.collections.businesspartners).findOne({name:'1_1'}).then((partner) => {
+                newPartnerId = partner._id.toString();
+                return createPutTestAddress();
+            }).then((address) => {
+                addressToSend = address;
+                addressToSend.partnerId = newPartnerId;
+                addressToSend.street = 'updated street';
+                addressToSend.postcode = 'updated postcode';
+                addressToSend.city = 'updated city';
+                addressToSend.type = 'updated type';
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token) {
+                return th.put(`/api/${co.apis.partneraddresses}/${addressToSend._id.toString()}?token=${token}`).send(addressToSend).expect(200);
+            }).then((response) => {
+                var addressFromApi = response.body;
+                assert.notEqual(addressFromApi.partnerId, newPartnerId);
+            });
         });
         
     });
@@ -115,15 +209,13 @@ describe.only('API partneraddresses', function() {
                 address.addressee = 'address to delete';
                 return db.get(co.collections.partneraddresses).insert(address);
             }).then(function(insertedAddress) {
-                return th.createRelationsToPartnerAddress(co.collections.partneraddresses, insertedAddress);
-            }).then(function(insertedUser) {
-                return Promise.resolve(insertedUser._id);
+                return Promise.resolve(insertedAddress._id);
             });
         }
 
         th.apiTests.delete.defaultNegative(co.apis.partneraddresses, co.permissions.CRM_BUSINESSPARTNERS, getDeleteAddressId);
         th.apiTests.delete.clientDependentNegative(co.apis.partneraddresses, getDeleteAddressId);
-        th.apiTests.delete.defaultPositive(co.apis.partneraddresses, co.collections.partneraddresses, getDeleteAddressId);
+        th.apiTests.delete.defaultPositive(co.apis.partneraddresses, co.collections.partneraddresses, getDeleteAddressId, true);
         
     });
 

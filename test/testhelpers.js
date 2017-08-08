@@ -537,18 +537,6 @@ th.createRelationsToBusinessPartner = (entityType, entity) => {
     });
 };
 
-th.createRelationsToPartnerAddress = (entityType, entity) => {
-    return db.get(co.collections.partneraddresses).findOne({name:th.defaults.partnerAddress}).then(function(partnerAddress) {
-        var relations = [
-            { type1: entityType, id1: entity._id, type2: co.collections.partneraddresses, id2: partnerAddress._id, clientId: partnerAddress.clientId },
-            { type1: co.collections.partneraddresses, id1: partnerAddress._id, type2: entityType, id2: entity._id, clientId: partnerAddress.clientId }
-        ];
-        return db.get(co.collections.relations).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
-    }).then(function() {
-        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
-    });
-};
-
 th.createRelationsToUser = (entityType, entity) => {
     return db.get(co.collections.users).findOne({name:th.defaults.user}).then(function(user) {
         var relations = [

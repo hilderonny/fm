@@ -21,7 +21,7 @@ var fs = require('fs');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 
-router.get('/forBusinessPartner/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateId, function(req, res) {
+router.get('/forBusinessPartner/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.businesspartners), function(req, res) {
     req.db.get(co.collections.businesspartners).findOne(req.params.id).then((businessPartner) => {
         if (!businessPartner) {
             return Promise.reject();
@@ -75,7 +75,7 @@ router.put('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.bus
     });
 });
 
-router.delete('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), validateId, function(req, res) {
+router.delete('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), validateId, validateSameClientId(co.collections.partneraddresses), function(req, res) {
     var id = monk.id(req.params.id);  
     req.db.remove(co.collections.partneraddresses, id).then((result) => {
         res.sendStatus(204);
