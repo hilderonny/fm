@@ -115,21 +115,21 @@
             "public": [
                 "css/icons/material/Business.svg",
                 "css/icons/office/Business.svg",               
-                "partial/Administration/BPAddressCard.html",
-                "partial/Administration/BPCard.html",
-                "partial/Administration/BPListCard.html"
+                "partial/CRM/BPAddressCard.html",
+                "partial/CRM/BPCard.html",
+                "partial/CRM/BPListCard.html"
             ],
             "include":[
-                "public/js/Administration/BPAddressCardController.js",
-                "public/js/Administration/BPCardController.js",
-                "public/js/Administration/BPListCardController.js"
+                "public/js/CRM/BPAddressCardController.js",
+                "public/js/CRM/BPCardController.js",
+                "public/js/CRM/BPListCardController.js"
             ],
             "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_CRM",
                     "items": [
-                        { "mainCard": "Administration/BPListCard", "icon": "Business", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS" }
+                        { "mainCard": "CRM/BPListCard", "icon": "Business", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS" }
                     ]
                 }
             ]
@@ -156,7 +156,7 @@
                 {
                     "title": "TRK_MENU_PORTAL",
                     "items": [
-                        { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "TRK_MENU_ADMINISTRATION_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT" }
+                        { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "TRK_MENU_PORTAL_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT" }
                     ]
                 }
             ]

@@ -1,4 +1,4 @@
-app.controller('AdministrationBPAddressCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('CRMBPAddressCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
  // Click on Create-button to create a new address
     $scope.createBPAddress = function() {

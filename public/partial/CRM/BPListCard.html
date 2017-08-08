@@ -1,0 +1,19 @@
+<md-card ng-cloak ng-controller="CRMBPListCardController" style="background-image:url('/css/icons/office/Business.svg');">
+    
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-click="newBP()" aria-label="ADD BUSINESS PARTNER" ng-if="canWritePartnerDetails">
+            <md-tooltip md-direction="bottom"><span translate>TRK_BUSINESSPARTNERS_CREATE_NEW_BUSINESSPARTNER</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+            <p translate>TRK_BUSINESSPARTNERS_BUSINESSPARTNERS</p>
+        </md-button>
+    </md-toolbar>
+    
+    <md-card-content>
+        <md-list class="lines-beetween-items">
+            <md-list-item ng-repeat="partner in partners | orderBy: 'name' " ng-click="selectPartner(partner)" ng-class="selectedPartner == partner ? 'active' : false" aria-label="{{partner.name}}">
+                <md-icon md-svg-src="drafts/icons/Business.svg"></md-icon>
+                <p ng-bind="partner.name"></p>
+            </md-list-item>
+        </md-list>
+    </md-card-content>
+</md-card>

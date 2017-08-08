@@ -94,7 +94,7 @@ describe('API menu', function() {
                         {
                             title: 'TRK_MENU_PORTAL',
                             items: [
-                                { mainCard: 'Administration/ClientListCard', icon: 'Briefcase', title: 'TRK_MENU_ADMINISTRATION_CLIENTS'}
+                                { mainCard: 'Administration/ClientListCard', icon: 'Briefcase', title: 'TRK_MENU_PORTAL_CLIENTS'}
                             ]
                         },
                         {
