@@ -183,8 +183,17 @@ th.prepareBusinessPartners = () => {
         businessPartners.push({ name: client.name + '_0', clientId: client._id, industry: 'Industry 0', isJuristic: true, rolle: 'Role 0' });
         businessPartners.push({ name: client.name + '_1', clientId: client._id, industry: 'Industry 1', isJuristic: false, rolle: 'Role 1' });
     });
-    businessPartners.push({ name: '_0', clientId: null });
+    businessPartners.push({ name: '_0', clientId: null, industry: 'Industry 2', isJuristic: false, rolle: 'Role 2' });
     return th.bulkInsert(co.collections.businesspartners, businessPartners);
+};
+
+th.preparePartnerAddresses = () => {
+    var partnerAddresses = [];
+    th.dbObjects.businesspartners.forEach((businessPartner) => {
+        partnerAddresses.push({ addressee: businessPartner.name + '_0', partnerId: businessPartner._id, clientId: businessPartner.clientId, street: 'Street', postcode: '12345', city: 'City', type: 'Primaryaddress' });
+        partnerAddresses.push({ addressee: businessPartner.name + '_1', partnerId: businessPartner._id, clientId: businessPartner.clientId, street: 'Another street', postcode: '34567', city: 'Another city', type: 'Postaddress' });
+    });
+    return th.bulkInsert(co.collections.partneraddresses, partnerAddresses);
 };
 
 /**
@@ -528,6 +537,18 @@ th.createRelationsToBusinessPartner = (entityType, entity) => {
     });
 };
 
+th.createRelationsToPartnerAddress = (entityType, entity) => {
+    return db.get(co.collections.partneraddresses).findOne({name:th.defaults.partnerAddress}).then(function(partnerAddress) {
+        var relations = [
+            { type1: entityType, id1: entity._id, type2: co.collections.partneraddresses, id2: partnerAddress._id, clientId: partnerAddress.clientId },
+            { type1: co.collections.partneraddresses, id1: partnerAddress._id, type2: entityType, id2: entity._id, clientId: partnerAddress.clientId }
+        ];
+        return db.get(co.collections.relations).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+    }).then(function() {
+        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
+    });
+};
+
 th.createRelationsToUser = (entityType, entity) => {
     return db.get(co.collections.users).findOne({name:th.defaults.user}).then(function(user) {
         var relations = [
@@ -574,6 +595,7 @@ th.defaults = {
     getUserGroup: function() { return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}); },
     otherClient: '0',
     otherUser: '0_0_0',
+    partnerAddress: '1_0_0',
     password: 'test',
     /**
      * Standardportal 'p1'

@@ -26,17 +26,17 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 $scope.showListDialog('ACTIVITIES_SELECT_ACTIVITY', listItems); // Dialog für einfache Listen öffnen
             });
         } },
-        { icon: 'Business', translationKey: 'BP_BP', requiredReadPermission: 'PERMISSION_CRM_BUSINESSPARTNERS', dialogFunction: function() {
-            $http.get('/api/businesspartner').then(function(response) {
+        { icon: 'Business', translationKey: 'BUSINESSPARTNERS_BUSINESSPARTNERS', requiredReadPermission: 'PERMISSION_CRM_BUSINESSPARTNERS', dialogFunction: function() {
+            $http.get('/api/businesspartners').then(function(response) {
                 var listItems = response.data.map(function(partner) {
                     return {
                         icon:'material/Business', 
                         firstLine:partner.name,
-                        type:'partners',
+                        type:'businesspartners',
                         id:partner._id
                     };
                 });
-                $scope.showListDialog('BP_SELECT_BP', listItems);
+                $scope.showListDialog('BUSINESSPARTNERS_SELECT_BUSINESSPARTNER', listItems);
             });
         } },
         { icon: 'Briefcase', translationKey: 'CLIENTS_CLIENT', requiredReadPermission: 'PERMISSION_ADMINISTRATION_CLIENT', dialogFunction: function() {

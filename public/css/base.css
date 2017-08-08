@@ -61,11 +61,11 @@ md-card md-toolbar button md-icon {
     min-width: 20px;
 }
 
-md-card > md-card-content {
+md-card md-card-content {
     overflow: auto;
     flex-direction: column;
     flex: 1;
-    background-color: rgba(255,255,255,0.97);
+    background-color: rgba(255,255,255,0.9);
 }
 
 md-card.list-details-details {
@@ -224,7 +224,10 @@ md-sidenav > div {
 }
 
 md-tabs {
-    background-color: rgba(255,255,255,0.95);
+    background-color: rgba(255,255,255,0.9);
+}
+md-tabs md-card-content {
+    background-color: transparent;
 }
 
 md-toolbar.transparent {

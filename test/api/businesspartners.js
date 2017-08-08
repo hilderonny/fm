@@ -18,6 +18,7 @@ describe('API businesspartners', function() {
             .then(th.prepareUsers)
             .then(th.preparePermissions)
             .then(th.prepareBusinessPartners)
+            .then(th.preparePartnerAddresses)
             .then(th.prepareRelations);
     });
 
@@ -57,8 +58,9 @@ describe('API businesspartners', function() {
                 var testObjects = ['testBusinessPartner1', 'testBusinessPartner2', 'testBusinessPartner3'].map(function(name) {
                     return {
                         name: name,
-                        // TODO: Industry, Rolle
+                        industry: 'Geschäftsbereich',
                         isJuristic: true,
+                        rolle: 'Lieferent',
                         clientId: clientId
                     }
                 });
@@ -126,8 +128,9 @@ describe('API businesspartners', function() {
         function createPostTestBusinessPartner() {
             var testObject = {
                 name: 'newBusinessPartner',
-                // TODO: industry, rolle
-                isJuristic: true
+                industry: 'Geschäftsbereich',
+                isJuristic: true,
+                rolle: 'Lieferent'
             };
             return Promise.resolve(testObject);
         }
@@ -218,6 +221,21 @@ describe('API businesspartners', function() {
         th.apiTests.delete.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS, getDeleteBusinessPartnerId);
         th.apiTests.delete.clientDependentNegative(co.apis.businesspartners, getDeleteBusinessPartnerId);
         th.apiTests.delete.defaultPositive(co.apis.businesspartners, co.collections.businesspartners, getDeleteBusinessPartnerId);
+
+        it('also deletes all addresses of the business partner', function() {
+            var businessPartnerId;
+            return db.get(co.collections.businesspartners).findOne({name:th.defaults.businessPartner}).then(function(bp) {
+                businessPartnerId = bp._id;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then((token) => {
+                return th.del(`/api/${co.apis.businesspartners}/${businessPartnerId.toString()}?token=${token}`).expect(204);
+            }).then(() => {
+                return db.get(co.collections.partneraddresses).find({partnerId:businessPartnerId});
+            }).then((addresses) => {
+                assert.equal(addresses.length, 0);
+                return Promise.resolve();
+            });
+        });
         
     });
 

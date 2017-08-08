@@ -51,7 +51,7 @@ module.exports.apis = {
     /**
      * API für Adressen von Geschäftspartnern
      */
-    partneraddress: 'partneraddress',
+    partneraddresses: 'partneraddresses',
     /**
      * API for providing permissions to usergroups
      */
@@ -134,6 +134,10 @@ module.exports.collections = {
      */
     folders:'folders',
     markers:'markers',
+    /**
+     * Adressen von Geschäftspartnern
+     */
+    partneraddresses: 'partneraddresses',
     /**
      * Zugriffsberechtigungen für Benutzergruppen
      */

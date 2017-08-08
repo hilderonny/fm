@@ -1,4 +1,4 @@
-<md-card ng-cloak  ng-controller="CRMBPCardController"  style="background-image:url('/css/icons/office/Briefcase.svg');" class="list-details-details">
+<md-card ng-cloak  ng-controller="CRMBPCardController"  style="background-image:url('/css/icons/office/Business.svg');" class="list-details-details">
 
     <md-toolbar class="md-toolbar-tools md-accent">
         <md-button ng-if="!isNewPartner" ng-click="addAddress()"  aria-label="ADD ADDRESS">
@@ -61,14 +61,14 @@
             <md-tab-body>
                 <md-card-content>
                     <md-list class="lines-beetween-items">
-                <md-list-item ng-repeat="partnerAddress in partner.partnerAddresses | orderBy:'street'" class="md-2-line" ng-click="selectBPAddress(partnerAddress)" ng-class="{active:selectedBPAddress == partnerAddress}">
-                    <md-icon md-svg-src="{{typeIcons[partnerAddress.type]}}" ></md-icon>
-                    <div class="md-list-item-text multiline">
-                        <h3 ng-bind="partnerAddress.street"></h3>
-                        <p><span ng-bind="partnerAddress.postcode"></span> <span ng-bind="partnerAddress.city"></span></p>   
-                    </div>
-                    <md-divider ng-if="!$last"></md-divider>
-                </md-list-item> 
+                        <md-list-item ng-repeat="partnerAddress in partner.partnerAddresses | orderBy:'street'" class="md-2-line" ng-click="selectBPAddress(partnerAddress)" ng-class="{active:selectedBPAddress == partnerAddress}" aria-label="SELECT ADDRESS">
+                            <md-icon md-svg-src="{{typeIcons[partnerAddress.type]}}" ></md-icon>
+                            <div class="md-list-item-text multiline">
+                                <h3 ng-bind="partnerAddress.street"></h3>
+                                <p><span ng-bind="partnerAddress.postcode"></span> <span ng-bind="partnerAddress.city"></span></p>   
+                            </div>
+                            <md-divider ng-if="!$last"></md-divider>
+                        </md-list-item> 
                     </md-list>
                 </md-card-content>
             </md-tab-body>

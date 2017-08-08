@@ -25,7 +25,7 @@ var rh = require('../utils/relationsHelper');
  * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
  * einfach eine leere Liste zurück gegeben.
  * @example
- * $http.get('/api/businesspartner/forIds?ids=ID1,ID2,ID3')...
+ * $http.get('/api/businesspartners/forIds?ids=ID1,ID2,ID3')...
  */
 router.get('/forIds', auth(false, false, co.modules.businesspartners), (req, res) => {
     // Zuerst Berechtigung prüfen
@@ -106,9 +106,11 @@ router.put('/:id' , auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.bu
 router.delete('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners),validateId, validateSameClientId(co.collections.businesspartners),function(req,res){
     var partnerId = monk.id(req.params.id);  
     req.db.remove(co.collections.businesspartners, req.params.id).then((result) => {
-        rh.deleteAllRelationsForEntity(co.collections.businesspartners, partnerId).then(function() {
-            res.sendStatus(204);
-        });
+        return req.db.remove(co.collections.partneraddresses, {partnerId:partnerId});
+    }).then(() => {
+        return rh.deleteAllRelationsForEntity(co.collections.businesspartners, partnerId);
+    }).then(function() {
+        res.sendStatus(204);
     });
 });
 

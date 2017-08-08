@@ -111,7 +111,7 @@
         },
         
         "businesspartners" : {
-            "api":[ "businesspartners", "partneraddress"],
+            "api":[ "businesspartners", "partneraddresses"],
             "public": [
                 "css/icons/material/Business.svg",
                 "css/icons/office/Business.svg",               

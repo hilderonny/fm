@@ -44,9 +44,9 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
 
     // Deleting existing partner
     $scope.deletePartner = function(){
-         // confirming the deletion process
-          $translate (['TRK_BUSINESSPARTNERS_BUSINESSPARTNER_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations){
-              $translate('TRK_BUSINESSPARTNERS_REALLY_DELETE_BUSINESSPARTNER', {partnerName: $scope.partnerName}).then(function(TRK_BUSINESSPARTNERS_REALLY_DELETE_BUSINESSPARTNER){
+        // confirming the deletion process
+        $translate (['TRK_BUSINESSPARTNERS_BUSINESSPARTNER_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations){
+            $translate('TRK_BUSINESSPARTNERS_REALLY_DELETE_BUSINESSPARTNER', {partnerName: $scope.partnerName}).then(function(TRK_BUSINESSPARTNERS_REALLY_DELETE_BUSINESSPARTNER){
                 var confirm = $mdDialog.confirm()
                 .title(TRK_BUSINESSPARTNERS_REALLY_DELETE_BUSINESSPARTNER)
                 .ok(translations.TRK_YES)
@@ -59,11 +59,10 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_BUSINESSPARTNERS_BUSINESSPARTNER_DELETED).hideDelay(1000).position('bottom right'));
-
                     });
                 });
-              });
-          });
+            });
+        });
     };
 
     var createBPAddressCallback = function(createdPartnerAddress){
@@ -132,7 +131,7 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
                 $scope.partner = completePartner;
                 $scope.partnerName = completePartner.name;    
                 $scope.relationsEntity = {type:'businesspartners', id:completePartner._id };
-                $http.get('/api/partneraddresses?partnerId=' + completePartner._id).then(function(partnerAddressResponse){
+                $http.get('/api/partneraddresses/forBusinessPartner/' + completePartner._id).then(function(partnerAddressResponse){
                     completePartner.partnerAddresses = partnerAddressResponse.data;
                     utils.setLocation('/businesspartners/' + $scope.params.partnerId);
                 });     
