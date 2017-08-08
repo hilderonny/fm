@@ -71,49 +71,59 @@ describe('API menu', function() {
         });
     });
 
-    it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', function(done) {
-        th.removeAllPermissions('_0_0', 'PERMISSION_BIM_FMOBJECT').then(function() {
-            th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                th.get(`/api/menu?token=${token}`).expect(200).end(function(err, res) {
-                    var menuStructureFromApi = res.body;
-                    var userMenu = [
-                        {
-                            title: 'TRK_MENU_ADMINISTRATION',
-                            items: [
-                                { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
-                                { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
-                            ]
-                        },
-                        {
-                            title: 'TRK_MENU_OFFICE',
-                            items: [
-                                { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                                { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
-                            ]
-                        },
-                        {
-                            title: 'TRK_MENU_PORTAL',
-                            items: [
-                                { mainCard: 'Administration/ClientListCard', icon: 'Briefcase', title: 'TRK_MENU_PORTAL_CLIENTS'}
-                            ]
-                        },
-                        {
-                            title: 'TRK_MENU_LICENSESERVER',
-                            items: [
-                                { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
-                            ]
-                        }
-                    ];
-                    compareMenuStructures(menuStructureFromApi, userMenu);
-                    done();
-                });
-            });
+    it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', function() {
+        return th.removeAllPermissions('_0_0', co.permissions.BIM_FMOBJECT).then(function() {
+            return th.removeAllPermissions('_0_0', co.permissions.ADMINISTRATION_SETTINGS);
+        }).then(function() {
+            return th.doLoginAndGetToken('_0_0', 'test');
+        }).then((token) => {
+            return th.get(`/api/menu?token=${token}`).expect(200);
+        }).then((res) => {
+            var menuStructureFromApi = res.body;
+            var userMenu = [
+                {
+                    title: 'TRK_MENU_ADMINISTRATION',
+                    items: [
+                        { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
+                        { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
+                    ]
+                },
+                {
+                    title: 'TRK_MENU_OFFICE',
+                    items: [
+                        { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
+                        { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                    ]
+                },
+                {
+                    title: 'TRK_MENU_CRM',
+                    items: [
+                        { mainCard: 'CRM/BPListCard', icon: 'Business', title: 'TRK_MENU_CRM_BUSINESSPARTNERS'}
+                    ]
+                },
+                {
+                    title: 'TRK_MENU_PORTAL',
+                    items: [
+                        { mainCard: 'Administration/ClientListCard', icon: 'Briefcase', title: 'TRK_MENU_PORTAL_CLIENTS'}
+                    ]
+                },
+                {
+                    title: 'TRK_MENU_LICENSESERVER',
+                    items: [
+                        { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
+                    ]
+                }
+            ];
+            compareMenuStructures(menuStructureFromApi, userMenu);
+            return Promise.resolve();
         });
     });
 
     it('responds to GET/ with client admin user logged in with all menu items available to the users client', function() {
         return th.removeClientModule('0', 'fmobjects').then(function() { // Remove fmobjects module
             return th.removeClientModule('0', 'clients');
+        }).then(function() {
+            return th.removeClientModule('0', 'businesspartners');
         }).then(function() {
             return th.doLoginAndGetToken('0_0_ADMIN0', 'test');
         }).then((token) => { // X_Y_ADMINZ is always an admin
@@ -150,10 +160,14 @@ describe('API menu', function() {
     });
 
     it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', function() {
-        return th.removeClientModule('0', 'fmobjects').then(function() { // Remove fmobjects module
-            return th.removeClientModule('0', 'clients');
+        return th.removeClientModule('0', co.modules.fmobjects).then(function() { // Remove fmobjects module
+            return th.removeClientModule('0', co.modules.clients);
         }).then(function() {
-            return th.removeAllPermissions('0_0_0', 'PERMISSION_OFFICE_DOCUMENT');
+            return th.removeClientModule('0', co.modules.businesspartners);
+        }).then(function() {
+            return th.removeAllPermissions('0_0_0', co.permissions.OFFICE_DOCUMENT);
+        }).then(function() {
+            return th.removeAllPermissions('0_0_0', co.permissions.ADMINISTRATION_SETTINGS);
         }).then(function() {
             return th.doLoginAndGetToken('0_0_0', 'test');
         }).then((token) => {

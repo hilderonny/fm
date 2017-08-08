@@ -9,7 +9,7 @@ var co = require('../../utils/constants');
 var mc = require('../../config/module-config.json');
 var rimraf = require('rimraf');
 
-describe('API portalmanagement', function() {
+describe.only('API portalmanagement', function() {
     
     function prepareTests() {
         var userGroup;
