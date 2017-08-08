@@ -9,15 +9,13 @@ var co = require('../../utils/constants');
 var mc = require('../../config/module-config.json');
 var rimraf = require('rimraf');
 
-describe.only('API portalmanagement', function() {
+describe('API portalmanagement', function() {
     
     function prepareTests() {
         var userGroup;
         return th.defaults.getUserGroup().then(function(ug) {
             userGroup = ug;
             return db.insert(co.collections.clientmodules, { clientId: userGroup.clientId, module: co.modules.portalbase });
-        }).then(function() {
-            return db.insert(co.collections.permissions, { key: co.permissions.ADMINISTRATION_SETTINGS, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         });
     }
 
