@@ -1,4 +1,4 @@
-<md-card ng-cloak ng-controller="AdministrationDynamicAttributesCardController">
+<md-card ng-cloak ng-controller="AdministrationDynamicAttributesCardController" style="background-image:url('/css/icons/office/View Details.svg');">
     
     <md-toolbar class="md-toolbar-tools md-accent">
         <md-button ng-click="newAttribute()" aria-label="ADD ATTRIBUTE" ng-if="canWriteDynamicAttributes">
@@ -16,11 +16,13 @@
         </md-card-title-text>
     </md-card-title>
 
-    <md-list class="lines-beetween-items">
-        <md-list-item ng-repeat="attribute in attributes | orderBy: ['name_en']" ng-click="selectAttribute(attribute)" ng-class="{active:selectedAttribute == attribute}" aria-label="{{attribute.name_en}}">
-            <md-icon md-svg-src="/css/icons/material/{{attribute.icon}}.svg"></md-icon>
-            <p ng-bind="attribute.name_en"></p>
-        </md-list-item>
-    </md-list>
+    <md-card-content>
+        <md-list class="lines-beetween-items">
+            <md-list-item ng-repeat="attribute in attributes | orderBy: ['name_en']" ng-click="selectAttribute(attribute)" ng-class="{active:selectedAttribute == attribute}" aria-label="{{attribute.name_en}}">
+                <md-icon md-svg-src="/css/icons/material/{{attribute.icon}}.svg"></md-icon>
+                <p ng-bind="attribute.name_en"></p>
+            </md-list-item>
+        </md-list>
+    </md-card-content>
 
 </md-card>

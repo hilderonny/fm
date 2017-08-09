@@ -23,6 +23,7 @@
                 "css/icons/material/User Group Man Man.svg",
                 "css/icons/material/Search.svg",
                 "css/icons/material/Settings.svg",
+                "css/icons/material/View Details.svg",
                 "css/icons/office/Add Link.svg",
                 "css/icons/office/Cancel.svg",
                 "css/icons/office/Delete.svg",
@@ -34,6 +35,7 @@
                 "css/icons/office/User Group Man Man.svg",
                 "css/icons/office/Search.svg",
                 "css/icons/office/Settings.svg",
+                "css/icons/office/View Details.svg",
                 "partial/Administration/DynamicAttributeCreationFormCard.html",
                 "partial/Administration/DynamicAttributesCard.html",
                 "partial/Administration/DynamicAttributeElementCard.html",
@@ -95,7 +97,7 @@
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
-                { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Settings", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
+                { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "View Details", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
             ]
         },
 
