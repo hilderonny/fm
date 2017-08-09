@@ -1,7 +1,7 @@
 <md-card ng-cloak ng-controller="AdministrationAttributeCreationCardController">
     
     <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button ng-click="newAttributeElement()" aria-label="ADD LIST ELEMENT" ng-if="attributeType == 'DYNAMICATTRIBUTES_TYPE_PICKLIST' && !isNewAttribute">
+        <md-button ng-click="newAttributeElement()" aria-label="ADD LIST ELEMENT" ng-if="attributeType == 'picklist' && !isNewAttribute">
             <md-tooltip md-direction="bottom"><span translate>TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTEELEMENT</span></md-tooltip>
             <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
             <p translate>TRK_DYNAMICATTRIBUTES_ATTRIBUTEELEMENT</p>
@@ -23,9 +23,9 @@
 
             <form name="dynamicAttributesForm" layout="column">
 
-                <md-input-container flex>
-                    <label ng-if="isNewAttribute" translate>TRK_DYNAMICATTRIBUTES_TYPE</label>
-                    <md-select ng-if="isNewAttribute" ng-model="dynamicattribute.type">
+                <md-input-container flex ng-if="isNewAttribute">
+                    <label translate>TRK_DYNAMICATTRIBUTES_TYPE</label>
+                    <md-select ng-model="dynamicattribute.type">
                         <md-option ng-value="type" ng-repeat="type in types">
                             <span translate="TRK_DYNAMICATTRIBUTES_TYPE_{{type}}"></span>
                         </md-option>
@@ -52,7 +52,7 @@
         </md-card-content>
     </script>    
     
-    <md-tabs ng-if="!isNewAttribute && attributeType === 'DYNAMICATTRIBUTES_TYPE_PICKLIST'" flex>
+    <md-tabs ng-if="!isNewAttribute && attributeType === 'picklist'" flex>
         <md-tab>
             <md-tab-label><span>DETAILS</span></md-tab-label>
             <md-tab-body><ng-include src="'DynamicAttributeDetailsTemplate'"></ng-include></md-tab-body>
@@ -71,6 +71,6 @@
         </md-tab>
     </md-tabs>
 
-    <ng-include flex ng-if="isNewAttribute || attributeType !== 'DYNAMICATTRIBUTES_TYPE_PICKLIST'" src="'DynamicAttributeDetailsTemplate'"></ng-include>
+    <ng-include flex ng-if="isNewAttribute || attributeType !== 'picklist'" src="'DynamicAttributeDetailsTemplate'"></ng-include>
 
 </md-card>

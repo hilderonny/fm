@@ -15,6 +15,7 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
 
     var createDynamicAttributeCallback = function(savedAttribute) {
         $scope.attributes.push(savedAttribute);
+        savedAttribute.icon = $scope.icons[savedAttribute.type];
         $scope.selectAttribute(savedAttribute);
     };
 
@@ -54,12 +55,21 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
         });
     };
 
+    $scope.icons = {
+        text: 'Text Box',
+        boolean: 'Checked Checkbox',
+        picklist: 'List'
+    };
+
     $scope.load = function(){
         $scope.modelName = $scope.params.modelName;
         $scope.title =  $scope.params.title;
         $scope.icon = $scope.params.icon;
         $http.get('/api/dynamicattributes/model/' + $scope.params.modelName).then(function(attributesFromDataBank){
             $scope.attributes = attributesFromDataBank.data;
+            $scope.attributes.forEach(function(attr) {
+                attr.icon = $scope.icons[attr.type];
+            });
         });
         // Check the permissions for the details page for handling button visibility
         $scope.canWriteDynamicAttributes = $rootScope.canWrite('PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');

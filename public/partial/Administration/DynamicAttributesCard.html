@@ -18,8 +18,8 @@
 
     <md-list class="lines-beetween-items">
         <md-list-item ng-repeat="attribute in attributes | orderBy: ['name_en']" ng-click="selectAttribute(attribute)" ng-class="{active:selectedAttribute == attribute}" aria-label="{{attribute.name_en}}">
-            <md-icon md-svg-src="/css/icons/material/{{icon}}.svg"></md-icon>
-            <div class="md-list-item-text multiline"><p ng-bind="attribute.name_en"></p><p translate="TRK_DYNAMICATTRIBUTES_TYPE_{{attribute.type}}"></p></div>
+            <md-icon md-svg-src="/css/icons/material/{{attribute.icon}}.svg"></md-icon>
+            <p ng-bind="attribute.name_en"></p>
         </md-list-item>
     </md-list>
 
