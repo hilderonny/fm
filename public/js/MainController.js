@@ -128,7 +128,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
         $mdDateLocale.shortDays = localeData.weekdaysShort();
         $mdDateLocale.firstDayOfWeek = localeData.firstDayOfWeek();
         $translate.use(lang);
-        $scope.currentLanguage = lang;
+        $rootScope.currentLanguage = lang;
         $rootScope.langDirection = (lang==='ar'?'rtl':'ltr');
         $rootScope.$emit('localeChanged', lang); // Tell the activity controller to update its date picker
     }
@@ -137,7 +137,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
 
     $scope.setLang($translate.proposedLanguage());
 
-    if ($rootScope.languages.indexOf($scope.currentLanguage) < 0) {
+    if ($rootScope.languages.indexOf($rootScope.currentLanguage) < 0) {
         $scope.setLang('en'); // Fallback
     }
 

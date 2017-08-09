@@ -11,61 +11,63 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
 
     $scope.createAttribute = function(){
         var attributeToSend = { 
-            name_en: $scope.dynamicattribute.name_en, 
             modelName: $scope.params.modelName,
             type: $scope.dynamicattribute.type
         };
-        $http.post('/api/dynamicattributes', attributeToSend).then(function successCallback(response) {
-            if (response.status === 409) {
-                //$scope.usersForm.un.$setValidity('nameInUse', false);
-                return;
+        Object.keys($scope.dynamicattribute).forEach(function(key) {
+            if (key.indexOf('name_') === 0) {
+                attributeToSend[key] = $scope.dynamicattribute[key];
             }
+        });
+        $http.post('/api/dynamicattributes', attributeToSend).then(function successCallback(response) {
             var createdAttribute = response.data;
             $scope.isNewAttribute = false;
             $scope.dynamicattribute._id = createdAttribute._id;
-            $scope.dynamicattribute.name_en = createdAttribute.name_en;
-            //$scope.relationsEntity = { type:'dynamicattributes', id:createdAttribute._id };
+            $scope.attributeName = createdAttribute.name_en;
+            $scope.attributeType = createdAttribute.type;
             if ($scope.params.createDynamicAttributeCallback) {
                 $scope.params.createDynamicAttributeCallback(createdAttribute);
             }
-            //TODO use the right translation key
-            $translate(['TRK_USERS_USER_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_DYNAMICATTRIBUTES_ATTRIBUTE_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_ATTRIBUTE_CREATED).hideDelay(1000).position('bottom right'));
             });
         });
     };
 
     $scope.saveAttribute = function(){
-        var attributeToSend = { name_en: $scope.dynamicattribute.name_en };
+        var attributeToSend = { };
+        Object.keys($scope.dynamicattribute).forEach(function(key) {
+            if (key.indexOf('name_') === 0) {
+                attributeToSend[key] = $scope.dynamicattribute[key];
+            }
+        });
         $http.put('/api/dynamicattributes/' + $scope.dynamicattribute._id, attributeToSend).then(function(response) {
             var savedAttribute = response.data;
             $scope.attributeName = $scope.dynamicattribute.name_en;
             if ($scope.params.saveDynamicAttributeCallback) {
                 $scope.params.saveDynamicAttributeCallback(savedAttribute);
             }
-            //TODO use the right translation key
-            $translate(['TRK_USERGROUPS_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_DYNAMICATTRIBUTES_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
         });
     };
 
     $scope.deleteAttribute = function(){
-        $translate(['TRK_USERGROUPS_USERGROUP_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
-            $translate('TRK_USERGROUPS_REALLY_DELETE_USERGROUP', { attributeName: $scope.attributeName }).then(function(TRK_USERGROUPS_REALLY_DELETE_USERGROUP) {
+        $translate(['TRK_DYNAMICATTRIBUTES_ATTRIBUTE_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+            $translate('TRK_DYNAMICATTRIBUTES_REALLY_DELETE_ATTRIBUTE', { attributeName: $scope.attributeName }).then(function(TRK_DYNAMICATTRIBUTES_REALLY_DELETE_ATTRIBUTE) {
                 var confirm = $mdDialog.confirm()
-                    .title(TRK_USERGROUPS_REALLY_DELETE_USERGROUP)
+                    .title(TRK_DYNAMICATTRIBUTES_REALLY_DELETE_ATTRIBUTE)
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
                     $http.delete('/api/dynamicattributes/' + $scope.params.dynamicAttributeId).then(function(response) {
-                        if ($scope.params.deletDynamicAttributeCallback) {
-                            $scope.params.deletDynamicAttributeCallback();
+                        if ($scope.params.deleteDynamicAttributeCallback) {
+                            $scope.params.deleteDynamicAttributeCallback();
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        //TODO use the right translation key
-                        $mdToast.show($mdToast.simple().textContent(translations.TRK_USERGROUPS_USERGROUP_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_ATTRIBUTE_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });
@@ -75,35 +77,22 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     $scope.newAttributeElement = function(){
         utils.removeCardsToTheRightOf($element);
         utils.removeCard($element);
-        utils.addCard('Administration/DynamicAttributeElementCard', {
+        utils.addCardWithPermission('Administration/DynamicAttributeElementCard', {
             dynamicAttributeId: $scope.params.dynamicAttributeId
-        });
+        }, 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');
     };
     $scope.selectAttributeElement = function(selectedAttributeElement){
         utils.removeCardsToTheRightOf($element);
         //utils.removeCard($element);
-        utils.addCard('Administration/DynamicAttributeElementCard', {
+        utils.addCardWithPermission('Administration/DynamicAttributeElementCard', {
           dynamicAttributeElementId: selectedAttributeElement._id,
           dynamicAttributeId: $scope.params.dynamicAttributeId
-        });
+        }, 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');
     };
 
-    //TODO check if needed 
-    //try unisng utils instead???
-    $scope.types = [
-        'DYNAMICATTRIBUTES_TYPE_TEXT',
-        'DYNAMICATTRIBUTES_TYPE_BOOLEAN',
-        'DYNAMICATTRIBUTES_TYPE_PICKLIST'
-    ];
+    $scope.types = [ 'text', 'boolean', 'picklist' ];
 
     $scope.languages = $rootScope.languages;
-
-    // Check the permissions for the details page for handling button visibility
-    //TODO ask if this permission check is not pointless in this case!?
-    $http.get('/api/permissions/canWrite/PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function (response) {
-        $scope.canWriteAttributeDetails = response.data;
-    });
-
 
     //TODO have a look at UsergroupCardController.js
     //Loads dynamicAttribute details or prepares for an empty dialog for a new dynamicAttribute
@@ -124,28 +113,24 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
                 $scope.dynamicattribute = completeAttribute;
                 $scope.attributeName = completeAttribute.name_en; 
                 $scope.attributeType = completeAttribute.type;
+                if ($scope.attributeType === 'picklist') {
+                    $http.get('/api/dynamicattributes/options/' + $scope.params.dynamicAttributeId).then(function(attributeOptionsFromDataBank){
+                        $scope.elements = attributeOptionsFromDataBank.data;
+                    }); 
+                }
             });
-           
-
-        }
-        else{
+        } else {
             //new dynamicAttribute
             $scope.isNewAttribute = true;
-            $scope.dynamicattribute = {name_en: '', type: 'text'};
+            $scope.dynamicattribute = {type: $scope.types[0]};
+            $scope.languages.forEach(function(language) {
+                $scope.dynamicattribute['name_' + language] = '';
+            });
         }
-        $scope.modelName = 'users';
+        // Check the permissions for the details page for handling button visibility
+        $scope.canWriteDynamicAttributes = $rootScope.canWrite('PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');
     };
 
-    $scope.loadElements = function(){
-        //Get list of existing attribute options (so-called elements)
-        if($scope.params.dynamicAttributeId){
-        $http.get('/api/dynamicattributes/options/' + $scope.params.dynamicAttributeId).then(function(attributeOptionsFromDataBank){
-            $scope.elements = attributeOptionsFromDataBank.data;
-            console.log(attributeOptionsFromDataBank.data);
-        }); 
-        }
-    }
-    $scope.loadElements();
     $scope.load();
 
 });
