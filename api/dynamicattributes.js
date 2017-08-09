@@ -85,6 +85,12 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
             foreignField: 'dynamicAttributeId',
             as: 'valueInstance'
         } },
+        { $lookup: { // Eventuelle Optionen für Picklisten suchen
+            from: co.collections.dynamicattributeoptions.name,
+            localField: '_id',
+            foreignField: 'dynamicAttributeId',
+            as: 'options'
+        } },
         { $project: { // Erst mal Felder filtern und Werte suchen
             _id: 0,
             type: '$$ROOT', // Der Typ steckt im Feld type drin, anders geht das nicht mit project, siehe https://stackoverflow.com/questions/19431773/include-all-existing-fields-and-add-new-fields-to-document
@@ -99,16 +105,20 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
             preserveNullAndEmptyArrays: true // Falls es keinen Wert gibt, null zurück geben
         } },
         { $addFields: { // Den Wert direkt als Attribut zurück geben
-            value: { $ifNull: [ '$valueInstance.value', null ] }
+            value: { $ifNull: [ '$valueInstance.value', null ] },
+            options: '$type.options'
         } },
-        { $lookup: { // Eventuelle Optionen für Picklisten suchen
-            from: co.collections.dynamicattributeoptions.name,
-            localField: '_id',
-            foreignField: 'dynamicAttributeId',
-            as: 'options'
+        { $match: { // Nur Attribute des zugehörigen Modells
+            'type.modelName': req.params.modelName
         } },
         { $project: { // Das temporäre Wertefeld brauchen wir nicht mehr
-            'type.valueInstance': 0
+            'options.clientId': 0,
+            'options.dynamicAttributeId': 0,
+            'type.clientId': 0,
+            'type.modelName': 0,
+            'type.valueInstance': 0,
+            'type.options': 0,
+            valueInstance: 0
         } }
     ]).then(function(valuesForEntity) {
         res.send(valuesForEntity);
@@ -184,35 +194,6 @@ router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w
 });
 
 /**
- * Creates a new dynamic attribute. Required properties are modelName, name_en and type.
- */
-router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), (req, res) => {
-    var dynamicAttribute = req.body;
-    if (!dynamicAttribute || !dynamicAttribute.type || !dynamicAttribute.modelName || !dynamicAttribute.name_en) {
-        return res.sendStatus(400);
-    }
-    // Ids are generated automatically
-    delete dynamicAttribute._id; 
-    dynamicAttribute.clientId = req.user.clientId; 
-
-     req.db.insert('dynamicattributes', dynamicAttribute).then(function(insertedDynamicAttribute){
-         //console.log(insertedDynamicAttribute);
-
-         req.db.get(dynamicAttribute.modelName).find({clientId: req.user.clientId}).then(function(allEntities){
-            allEntities.forEach(function(entity){
-                var emptyValue = {entityId: entity._id, 
-                                  clientId: req.user.clientId,
-                                  dynamicAttributeId: insertedDynamicAttribute._id,
-                                  value: null,
-                                  modelName: dynamicAttribute.modelName};
-                    req.db.insert('dynamicattributevalues', emptyValue);
-            });
-         });
-         return res.send(insertedDynamicAttribute);
-     });
-});
-
-/**
  * Creates a new set of values for dynamic attributes for an entity of type MODELNAME and with the given _id.
  */
 router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateModelName, validateId, validateSameClientId(), (req, res) => {
@@ -239,6 +220,35 @@ router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMI
     }).catch((error) => {
         res.sendStatus(400);
     });
+});
+
+/**
+ * Creates a new dynamic attribute. Required properties are modelName, name_en and type.
+ */
+router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), (req, res) => {
+    var dynamicAttribute = req.body;
+    if (!dynamicAttribute || !dynamicAttribute.type || !dynamicAttribute.modelName || !dynamicAttribute.name_en) {
+        return res.sendStatus(400);
+    }
+    // Ids are generated automatically
+    delete dynamicAttribute._id; 
+    dynamicAttribute.clientId = req.user.clientId; 
+
+     req.db.insert('dynamicattributes', dynamicAttribute).then(function(insertedDynamicAttribute){
+         //console.log(insertedDynamicAttribute);
+
+         req.db.get(dynamicAttribute.modelName).find({clientId: req.user.clientId}).then(function(allEntities){
+            allEntities.forEach(function(entity){
+                var emptyValue = {entityId: entity._id, 
+                                  clientId: req.user.clientId,
+                                  dynamicAttributeId: insertedDynamicAttribute._id,
+                                  value: null,
+                                  modelName: dynamicAttribute.modelName};
+                    req.db.insert('dynamicattributevalues', emptyValue);
+            });
+         });
+         return res.send(insertedDynamicAttribute);
+     });
 });
 
 /**
