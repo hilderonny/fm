@@ -1,33 +1,38 @@
 <md-card ng-cloak ng-controller="AdministrationAttributeElementCardController" style="background-image:url('/css/icons/office/Settings.svg');">
+    
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
 
     <md-card-title flex="none">
         <md-card-title-text>
-            <span class="md-headline" ng-if="!isNewElement" translate>TRK_DYNAMICATTRIBUTES_EDIT_ATTRIBUTEELEMENT</span>
+            <span class="md-headline" ng-if="!isNewElement"><span ng-bind="elementText"></span></span>
             <span class="md-headline" ng-if="isNewElement" translate>TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTEELEMENT</span>
         </md-card-title-text>
     </md-card-title>
 
-    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-    </md-button>
-        <md-tab-body><!--ng-include src="'partial/Administration/AttributeDetailsTab.html'"></ng-include-->
-            <md-card-content layout="column">
-                </md-input-container>
-                    <md-card-content  layout = "column" >
-                        <md-input-container flex ng-repeat="language in languages">
-                            <label translate = "TRK_DYNAMICATTRIBUTES_NAME_{{language}}"> </label>
-                            <input ng-if = "language =='en'" ng-model="attributeelement.text_en" ng-required="true">
-                            <input ng-if = "language !='en'" ng-model="attributeelement.translations[0]" >
-                        </md-input-container>
-                    </md-card-content>  
-            </md-card-content>
+    <md-card-content>
 
-    <!-- TODO: check if any additional permission is needed -->
-    <md-card-actions layout="row" layout-align="end center">
-        <!--md-button class="md-raised md-accent" ng-if="!isNewElement  && params.isSelection && params.selectCallback" ng-click="params.selectCallback(attribute)"><span translate>{{params.selectButtonText}}</span></md-button-->
-        <md-button class="md-raised md-accent" ng-if="isNewElement " ng-click="createAttributeElement()"><span translate>TRK_DA_OPTION_CREATE</span></md-button>
-        <md-button class="md-raised md-accent" ng-if="!isNewElement" ng-click="saveAttributeElement()"><span translate>TRK_DA_OPTION_SAVE</span></md-button>
-        <md-button class="md-raised md-warn" ng-if="!isNewElement" ng-click="deleteAttributeElement()"><span translate>TRK_DA_OPTION_DELETE</span></md-button>
-    </md-card-actions>
+        <form name="dynamicAttributeElementsForm" layout="column">
+
+            <md-input-container flex ng-repeat="language in languages">
+                <label translate = "TRK_DYNAMICATTRIBUTES_NAME_{{language}}"> </label>
+                <input ng-if = "language ==='en'" name="textEn" ng-model="attributeelement.text_en" ng-required="true">
+                <div ng-messages="dynamicAttributeElementsForm.textEn.$error">
+                    <div ng-message="required" translate>TRK_DYNAMICATTRIBUTES_PLEASE_ENTER_ENGLISH_TEXT</div>
+                </div>
+                <input ng-if = "language !== 'en'" ng-model="attributeelement['text_' + language]" >
+            </md-input-container>
+
+            <md-card-actions layout="row" layout-align="end center">
+                <md-button class="md-raised md-accent" ng-if="isNewElement && canWriteDynamicAttributes" ng-click="createAttributeElement()" ng-disabled="dynamicAttributeElementsForm.$invalid"><span translate>TRK_DYNAMICATTRIBUTES_CREATE</span></md-button>
+                <md-button class="md-raised md-accent" ng-if="!isNewElement && canWriteDynamicAttributes" ng-click="saveAttributeElement()" ng-disabled="dynamicAttributeElementsForm.$invalid"><span translate>TRK_DYNAMICATTRIBUTES_SAVE</span></md-button>
+                <md-button class="md-raised md-warn" ng-if="!isNewElement && canWriteDynamicAttributes" ng-click="deleteAttributeElement()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
+            </md-card-actions>
+
+        </form>
+
+    </md-card-content>
 
 </md-card>

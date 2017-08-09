@@ -1,5 +1,23 @@
 app.controller('AdministrationAttributeCreationCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     
+    var saveDynamicAttributeElementCallback = function(updatedElement) {
+        $scope.selectedElement.text_en = updatedElement.text_en;
+    };
+
+    var createDynamicAttributeElementCallback = function(createdElement) {
+        $scope.elements.push(createdElement);
+        $scope.selectAttributeElement(createdElement);
+    };
+
+    var deleteDynamicAttributeElementCallback = function() {
+        $scope.elements.splice($scope.elements.indexOf($scope.selectedElement), 1);
+        closeDynamicAttributeElementCardCallback();
+    };
+
+    var closeDynamicAttributeElementCardCallback = function() {
+        $scope.selectedElement = null;
+    };
+
     // User clicks on close button
     $scope.closeCard = function() {
         if ($scope.params.closeCallback) {
@@ -76,25 +94,29 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
 
     $scope.newAttributeElement = function(){
         utils.removeCardsToTheRightOf($element);
-        utils.removeCard($element);
         utils.addCardWithPermission('Administration/DynamicAttributeElementCard', {
-            dynamicAttributeId: $scope.params.dynamicAttributeId
+            dynamicAttributeId: $scope.params.dynamicAttributeId,
+            createDynamicAttributeElementCallback: createDynamicAttributeElementCallback,
+            closeCallback: closeDynamicAttributeElementCardCallback
         }, 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');
     };
+
     $scope.selectAttributeElement = function(selectedAttributeElement){
         utils.removeCardsToTheRightOf($element);
-        //utils.removeCard($element);
         utils.addCardWithPermission('Administration/DynamicAttributeElementCard', {
-          dynamicAttributeElementId: selectedAttributeElement._id,
-          dynamicAttributeId: $scope.params.dynamicAttributeId
-        }, 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');
+            dynamicAttributeElementId: selectedAttributeElement._id,
+            saveDynamicAttributeElementCallback: saveDynamicAttributeElementCallback,
+            deleteDynamicAttributeElementCallback: deleteDynamicAttributeElementCallback,
+            closeCallback: closeDynamicAttributeElementCardCallback
+        }, 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES').then(function() {
+            $scope.selectedElement = selectedAttributeElement;
+        });
     };
 
     $scope.types = [ 'text', 'boolean', 'picklist' ];
 
     $scope.languages = $rootScope.languages;
 
-    //TODO have a look at UsergroupCardController.js
     //Loads dynamicAttribute details or prepares for an empty dialog for a new dynamicAttribute
     //Params:
     //... 

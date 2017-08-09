@@ -28,12 +28,6 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
         $scope.selectedAttribute = null;
     };
 
-    var upateListOfAttributes  = function(){
-        $http.get('/api/dynamicattributes/model/' + $scope.params.modelName).then(function(attributesFromDataBank){
-            $scope.attributes = attributesFromDataBank.data;
-        });
-    };
-
     $scope.newAttribute = function(){
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/DynamicAttributeCreationFormCard', {
