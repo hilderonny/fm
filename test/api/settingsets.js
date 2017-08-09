@@ -81,7 +81,7 @@ describe('API settingsets', function(){
                         { 
                             type: co.settingSetTypes.CLIENT, 
                             items: [
-                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'Settings', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
+                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                             ]
                         },
                         {
@@ -112,7 +112,7 @@ describe('API settingsets', function(){
                         { 
                             type: co.settingSetTypes.CLIENT, 
                             items: [
-                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'Settings', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
+                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                             ]
                         },
                         {
@@ -143,7 +143,7 @@ describe('API settingsets', function(){
                         { 
                             type: co.settingSetTypes.CLIENT, 
                             items: [
-                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'Settings', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
+                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                             ]
                         }
                     ];
@@ -163,7 +163,7 @@ describe('API settingsets', function(){
                             { 
                                 type: co.settingSetTypes.CLIENT, 
                                 items: [
-                                    { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'Settings', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
+                                    { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                                 ]
                             },
                             { 

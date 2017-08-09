@@ -8,8 +8,7 @@ var db = require('../../middlewares/db');
 var bcryptjs =  require('bcryptjs');
 var co = require('../../utils/constants');
 
-
-describe('API dynamicattributes', function() {
+describe.only('API dynamicattributes', function() {
 
     var optionApi = `${co.apis.dynamicattributes}/option`;
     var optionsApi = `${co.apis.dynamicattributes}/options`;

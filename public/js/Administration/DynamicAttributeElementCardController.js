@@ -27,8 +27,8 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
             if ($scope.params.createDynamicAttributeElementCallback) {
                 $scope.params.createDynamicAttributeElementCallback(createdElement);
             }
-            $translate(['TRK_DYNAMICATTRIBUTES_OPTION_CREATED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_OPTION_CREATED).hideDelay(1000).position('bottom right'));
+            $translate(['TRK_DYNAMICATTRIBUTES_ATTRIBUTEELEMENT_CREATED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_ATTRIBUTEELEMENT_CREATED).hideDelay(1000).position('bottom right'));
             });
         });
     };

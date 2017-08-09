@@ -492,14 +492,12 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
  */
 th.prepareDynamicAttributes = function() {
     var dynamicAttributes = [];
-    th.dbObjects.users.forEach(function(user){
-        var userAttribute = {modelName: 'users', 
-                             name_en: 'gender',
-                             clientId: user.clientId,
-                             type: 'picklist'};
-        dynamicAttributes.push(userAttribute);
-    return th.bulkInsert('dynamicattributes', dynamicAttributes);
+    th.dbObjects.users.forEach(function(user) {
+        dynamicAttributes.push({ modelName: co.collections.users.name, name_en: 'textattribute', clientId: user.clientId, type: 'text' });
+        dynamicAttributes.push({ modelName: co.collections.users.name, name_en: 'booleanattribute', clientId: user.clientId, type: 'boolean' });
+        dynamicAttributes.push({ modelName: co.collections.users.name, name_en: 'booleanattribute', clientId: user.clientId, type: 'picklist' });
     });
+    return th.bulkInsert(co.collections.dynamicattributes.name, dynamicAttributes);
 };
 
 /**
@@ -510,12 +508,12 @@ th.prepareDynamicAttributes = function() {
 th.prepareDynamicAttributeOptions = function() {
     var dynamicAttributeOptions = [];
     th.dbObjects.dynamicattributes.forEach(function(attribute){
-        if (attribute.type == 'picklist') {
+        if (attribute.type === 'picklist') {
             dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'female', clientId: attribute.clientId});
             dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clientId: attribute.clientId});
         }
     });
-    return th.bulkInsert('dynamicattributeoptions', dynamicAttributeOptions);
+    return th.bulkInsert(co.collections.dynamicattributeoptions.name, dynamicAttributeOptions);
 };
 
 /**
@@ -523,9 +521,20 @@ th.prepareDynamicAttributeOptions = function() {
  */
 th.prepareDynamicAttributeValues = function() {
     var dynamicAttributeValues = [];
-    th.dbObjects.dynamicattributes.forEach(function(attribute){
-    })
-    return th.bulkInsert('dynamicattributevalues', dynamicAttributeValues);
+    th.dbObjects.dynamicattributes.forEach(function(attribute) {
+        th.dbObjects.users.forEach(function(user) {
+            var value;
+            if (attribute.type === 'text') {
+                value = user.name + ' text';
+            } else if (attribute.type === 'boolean') {
+                value = true;
+            } else if (attribute.type === 'picklist') {
+                value = th.dbObjects.dynamicattributeoptions.find((o) => o.dynamicAttributeId.toString() === attribute._id.toString())._id;
+            }
+            dynamicAttributeValues.push({dynamicAttributeId: attribute._id, entityId: user._id, clientId: attribute.clientId, value: value });
+        });
+    });
+    return th.bulkInsert(co.collections.dynamicattributevalues.name, dynamicAttributeValues);
 };
 
 th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoDatabase) => {
