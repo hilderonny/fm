@@ -260,6 +260,11 @@ router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
     delete dynamicAttributeOption._id;
     delete dynamicAttributeOption.dynamicAttributeId;
     delete dynamicAttributeOption.clientId; //clientId should not be changed
+
+    if(Object.keys(dynamicAttributeOption).length < 1){
+        return res.sendStatus(400);
+    }
+
     req.db.update(co.collections.dynamicattributeoptions.name, monk.id(req.params.id), { $set: dynamicAttributeOption }).then((updatedAttributeValue) => {
         res.send(updatedAttributeValue);
     }); 
@@ -270,19 +275,20 @@ router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
  * For this case the attribute needs to be deleted and a new one is to be created.
  * Also changing the model is not supported. Only the name_* properties can be updated.
  */
-router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
+router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateId, validateSameClientId(co.collections.dynamicattributes.name), (req, res) => {
     var dynamicAttributeId = monk.id(req.params.id);
     var dynamicAttribute = req.body;
 
     delete dynamicAttribute._id;
-    delete dynamicAttribute.modelname;
+    delete dynamicAttribute.modelName;
     delete dynamicAttribute.type;
+    delete dynamicAttribute.clientId;
 
     if(Object.keys(dynamicAttribute).length < 1){
         return res.sendStatus(400);
     }
 
-    req.db.update('dynamicattributes', dynamicAttributeId, { $set: dynamicAttribute }).then((UpdatedAttribute) => {
+    req.db.update(co.collections.dynamicattributes.name, dynamicAttributeId, { $set: dynamicAttribute }).then((UpdatedAttribute) => {
         return res.send(UpdatedAttribute);
     }); 
 

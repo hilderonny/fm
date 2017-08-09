@@ -111,19 +111,23 @@ describe('API dynamicattributes', function() {
         th.apiTests.getId.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributeoptions.name);
         th.apiTests.getId.clientDependentNegative(optionApi, co.collections.dynamicattributeoptions.name);
 
-        it('responds with all details of the dynamic attribute option', function(done) {
-            db.get(co.collections.dynamicattributes.name).findOne({type: 'picklist'}).then(function(attributeFromDB){
-                db.get('dynamicattributeoptions').findOne({dynamicAttributeId: attributeFromDB._id}).then(function(attributeOptionFromDB){
-                    th.doLoginAndGetToken('0_0_0', 'test').then(function(token){
-                        th.get(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).then(function(res, err){
-                            if(err){return done(err);}
-                            var attributeOptionFromApi = res.body;
-                            //console.log(attributeOptionFromApi);
-                            //TODO implement actual comparisson
-                            done();     
-                        });
-                    });
+        it('responds with all details of the dynamic attribute option', function() {
+            var attributeOptionFromDB;
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then((client) => {
+                return db.get(co.collections.dynamicattributes.name).findOne({type: 'picklist', clientId: client._id});
+            }).then(function(attributeFromDB){
+                return db.get(co.collections.dynamicattributeoptions.name).findOne({dynamicAttributeId: attributeFromDB._id});
+            }).then(function(option){
+                attributeOptionFromDB = option;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token){
+                return th.get(`/api/dynamicattributes/option/${attributeOptionFromDB._id}?token=${token}`).expect(200);
+            }).then(function(res){
+                var attributeOptionFromApi = res.body;
+                ['_id', 'dynamicAttributeId', 'clientId', 'text_en'].forEach((key) => {
+                    assert.strictEqual(attributeOptionFromApi[key].toString(), attributeOptionFromDB[key].toString());
                 });
+                return Promise.resolve();
             });
         });
 
@@ -134,22 +138,27 @@ describe('API dynamicattributes', function() {
         th.apiTests.getId.defaultNegative(optionsApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
         th.apiTests.getId.clientDependentNegative(optionsApi, co.collections.dynamicattributes.name);
 
-        it('responds with a list of all options and their details of the dynamic attribute', function(done) {
-            db.get('clients').findOne({name: '0'}).then(function(client0){
-                db.get(co.collections.dynamicattributes.name).findOne({type: 'picklist', clientId: client0._id}).then(function(attributeFromDB){
-                    db.get('dynamicattributeoptions').find({dynamicAttributeId: attributeFromDB._id}).then(function(OptionsFromDB){
-                        testHelpers.doLoginAndGetToken('0_0_0', 'test').then(function(token){ //user from client 0
-                            superTest(server).get(`/api/dynamicattributes/options/${attributeFromDB._id}?token=${token}`).then(function(res, err){
-                                if(err){return done(err);}
-                                var OptionsFromApi = res.body;
-                                console.log(OptionsFromApi);
-                                console.log('Test fails for now :(');
-                                //TODO implement actual comparisson 
-                                done();
-                            });
-                        });    
+        it('responds with a list of all options and their details of the dynamic attribute', function() {
+            var attributeFromDB, optionsFromDb;
+            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client){
+                return db.get(co.collections.dynamicattributes.name).findOne({type: 'picklist', clientId: client._id});
+            }).then(function(attribute){
+                attributeFromDB = attribute;
+                return db.get(co.collections.dynamicattributeoptions.name).find({dynamicAttributeId: attributeFromDB._id});
+            }).then(function(options){
+                optionsFromDb = options;
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+            }).then(function(token){
+                return th.get(`/api/dynamicattributes/options/${attributeFromDB._id}?token=${token}`).expect(200);
+            }).then(function(res){
+                var optionsFromApi = res.body;
+                assert.strictEqual(optionsFromApi.length, optionsFromDb.length);
+                for (var i = 0; i < optionsFromApi.length; i++) {
+                    ['_id', 'dynamicAttributeId', 'clientId', 'text_en'].forEach((key) => {
+                        assert.strictEqual(optionsFromApi[i][key].toString(), optionsFromDb[i][key].toString());
                     });
-                });
+                }
+                return Promise.resolve();
             });
         });
 
@@ -447,95 +456,6 @@ describe('API dynamicattributes', function() {
 
     });
 
-    describe('PUT/values/:modelName/:id', function() {
-
-        it('responds without authentication with 403', function() {
-            return db.get('users').findOne({name: '0_0_0'}).then(function(entity){
-                var updatedAttributevalue = {gender: 'male'}; 
-                var modelName = 'users';
-                return th.put(`/api/dynamicattributes/values/${modelName}/${entity._id}`).expect(403);
-            });
-        });
-
-        it('responds without write permission with 403', function() {
-            return db.get('users').findOne({name: '0_0_0'}).then(function(entity){
-                var updatedAttributevalue = {gender: 'male'}; 
-                var modelName = 'users';
-                return th.removeWritePermission('0_0_0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES).then(function(){
-                    return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
-                        return th.put(`/api/dynamicattributes/values/${modelName}/${entity._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('users').findOne({name: '0_0_0'}).then(function(entity){
-                var updatedAttributevalue = {gender: 'male'}; 
-                var modelName = 'users';
-                return th.removeClientModule('0', 'base').then(function(){
-                    return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
-                        return th.put(`/api/dynamicattributes/values/${modelName}/${entity._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('users').findOne({name: '0_0_0'}).then(function(entity){
-                var updatedAttributevalue = {gender: 'male'}; 
-                var modelName = 'users';
-                return th.removeClientModule('0', 'base').then(function(){
-                    return th.doLoginAndGetToken('0_0_ADMIN0', 'test').then(function(token){ 
-                        return th.put(`/api/dynamicattributes/values/${modelName}/${entity._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        //TODO test fails because tested functionality is not implemented yet
-        it('responds with an id of an existing entity which does not belong to the same client as the logged in user with 403', function() {
-            return db.get('users').findOne({name: '0_0_0'}).then(function(entity){
-                var updatedAttributevalue = {gender: 'male'}; 
-                var modelName = 'users';
-                return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
-                    return th.put(`/api/dynamicattributes/values/${modelName}/${entity._id}?token=${token}`).expect(403);
-                });           
-            });      
-        });
-
-        xit('responds without giving a model name and entity id with 400', function() {
-        });
-
-        xit('responds without giving an entity id but with giving a modelName with 400', function() {
-        });
-        
-        xit('responds with invalid modelName with 400', function() {
-        });
-        
-        xit('responds with invalid entity id with 400', function() {
-        });
-
-        xit('responds with not existing entity id with 403', function() {
-        });
-
-        xit('responds containg values with new _id\'s with updated records but with old _id\'s', function() {
-        });
-
-        xit('responds containg values with new clientId\'s with updated records but with old clientId\'s', function() {
-        });
-
-        xit('responds containg values with new dynamicAttributeId\'s with updated records but with old dynamicAttributeId\'s', function() {
-        });
-
-        xit('responds containg values with new entityId\'s with updated records but with old entityId\'s', function() {
-        });
-
-        xit('responds with a list of updated dynamic attribute values', function() {
-        });
-
-    });
-
     describe('DELETE/:id', function() {
 
         function createDeleteTestDynamicAttribute() {
@@ -624,9 +544,9 @@ describe('API dynamicattributes', function() {
             });
         });
 
-        it('responds without giving an entity id but with giving a modelName with 400', function() {
+        it('responds without giving an entity id but with giving a modelName with 404', function() {
             return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
-                return th.del(`/api/dynamicattributes/values/users?token=${token}`).expect(400);
+                return th.del(`/api/dynamicattributes/values/users?token=${token}`).expect(404);
             });
         });
         
