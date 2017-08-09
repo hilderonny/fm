@@ -492,11 +492,15 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
  */
 th.prepareDynamicAttributes = function() {
     var dynamicAttributes = [];
-    th.dbObjects.users.forEach(function(user) {
-        dynamicAttributes.push({ modelName: co.collections.users.name, name_en: 'textattribute', clientId: user.clientId, type: 'text' });
-        dynamicAttributes.push({ modelName: co.collections.users.name, name_en: 'booleanattribute', clientId: user.clientId, type: 'boolean' });
-        dynamicAttributes.push({ modelName: co.collections.users.name, name_en: 'booleanattribute', clientId: user.clientId, type: 'picklist' });
+    var modelName = co.collections.users.name;
+    th.dbObjects.clients.forEach(function(client) {
+        dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: client._id, type: 'text' });
+        dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: client._id, type: 'boolean' });
+        dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: client._id, type: 'picklist' });
     });
+    dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: null, type: 'text' });
+    dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: null, type: 'boolean' });
+    dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: null, type: 'picklist' });
     return th.bulkInsert(co.collections.dynamicattributes.name, dynamicAttributes);
 };
 
@@ -523,6 +527,9 @@ th.prepareDynamicAttributeValues = function() {
     var dynamicAttributeValues = [];
     th.dbObjects.dynamicattributes.forEach(function(attribute) {
         th.dbObjects.users.forEach(function(user) {
+            if (attribute.clientId === null && user.clientId !== null) return;
+            if (attribute.clientId !== null && user.clientId === null) return;
+            if ('' + attribute.clientId !== '' + user.clientId) return;
             var value;
             if (attribute.type === 'text') {
                 value = user.name + ' text';
@@ -598,9 +605,17 @@ th.defaults = {
      */
     getPortal: function() { return db.get(co.collections.portals.name).findOne({name:th.defaults.portal}); },
     /**
+     * Standardbenutzer '1_0_0' aus Datenbank auslesen und per Promise zurück geben
+     */
+    getUser: function() { return db.get(co.collections.users.name).findOne({name:th.defaults.user}); },
+    /**
      * Standardbenutzergruppe '1_0' aus Datenbank auslesen und per Promise zurück geben
      */
     getUserGroup: function() { return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}); },
+    /**
+     * Anmeldung mit STandardbenutzer durchführen
+     */
+    login: function() { return th.doLoginAndGetToken(th.defaults.user, th.defaults.password); },
     otherClient: '0',
     otherUser: '0_0_0',
     password: 'test',

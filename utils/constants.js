@@ -249,26 +249,6 @@ module.exports.permissions = {
 };
 
 /**
- * List of all possible dynamic attribute types. Used for validation in dynamicattributes API.
- */
-module.exports.dynamicAttributeTypes = {
-    text: 'DYNAMICATTRIBUTES_TYPE_TEXT',
-    boolean: 'DYNAMICATTRIBUTES_TYPE_BOOLEAN',
-    picklist: 'DYNAMICATTRIBUTES_TYPE_PICKLIST'
-};
-
-/**
- * List of all possible models that can have dynamic attribute. Used for option selection in dynamicattributes API.
- * TODO: use constants.collections instead
- */
-
-module.exports.models = [
-    'folders',
-    'usergroups',
-    'users'
-];
-
-/**
  * Auflistung von Einstellungsarten, die bestimmen, in welchem Abschnitt die Einstellungen angezeigt werden
  */
 module.exports.settingSetTypes = {

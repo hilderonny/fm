@@ -49,7 +49,7 @@ function validateModelName(req, res, next) {
  */
 router.get('/model/:modelName', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateModelName, (req, res) => {
     var modelName = req.params.modelName;
-    req.db.get(co.collections.dynamicattributes.name).find({modelName: modelName}).then(function(dynamicattributes){
+    req.db.get(co.collections.dynamicattributes.name).find({modelName: modelName, clientId: req.user.clientId}).then(function(dynamicattributes){
         res.send(dynamicattributes);
     });
 });
@@ -109,12 +109,13 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
             options: '$type.options'
         } },
         { $match: { // Nur Attribute des zugehörigen Modells
-            'type.modelName': req.params.modelName
+            'type.modelName': req.params.modelName,
+            'type.clientId': req.user.clientId
         } },
         { $project: { // Das temporäre Wertefeld brauchen wir nicht mehr
             'options.clientId': 0,
             'options.dynamicAttributeId': 0,
-            'type.clientId': 0,
+            //'type.clientId': 0,
             'type.modelName': 0,
             'type.valueInstance': 0,
             'type.options': 0,
@@ -123,15 +124,6 @@ router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMIC
     ]).then(function(valuesForEntity) {
         res.send(valuesForEntity);
     });
-});
-
-/**
- * Returns a list of all possible option types (currently only text, boolean and picklist)
- */
-router.get('/types', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), (req, res) => {
-     //res.send(co.dynamicAttributeTypes.map(function(k) { return co.dynamicAttributeTypes[k]; } ));
-    //res.send(co.dynamicAttributeTypes.map((k) => co.dynamicAttributeTypes[k]));
-    res.send(Object.keys(co.dynamicAttributeTypes));
 });
 
 /**
