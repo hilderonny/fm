@@ -313,7 +313,7 @@ router.delete('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUT
 router.delete('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateModelName, validateId, validateSameClientId(), (req, res) => {
     var modelName = req.params.modelName;
     var entityId = req.params.id;
-    req.db.remove(co.collections.dynamicattributevalues.name, {entityId: entityId}).then(function(result){
+    req.db.remove(co.collections.dynamicattributevalues.name, {entityId: monk.id(entityId)}).then(function(result){
         return res.sendStatus(204);
     });
 });
