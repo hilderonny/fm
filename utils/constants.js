@@ -265,3 +265,21 @@ module.exports.settingSetTypes = {
      */
     USER: 'SETTINGSET_TYPE_USER'
 };
+
+/**
+ * Erlaubte Typen von dynamischen Attributen
+ */
+module.exports.dynamicAttributeTypes = {
+    /**
+     * Value kann ein beliebiger string sein
+     */
+    text: 'text',
+    /**
+     * Value kann true oder false sein
+     */
+    boolean: 'boolean',
+    /**
+     * Value kann eine ObjectId auf eine Entität sein
+     */
+    picklist: 'picklist'
+};

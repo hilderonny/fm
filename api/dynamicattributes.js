@@ -174,7 +174,7 @@ router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w
     dynamicAttributeOption.dynamicAttributeId = monk.id(dynamicAttributeOption.dynamicAttributeId);
     req.db.get(co.collections.dynamicattributes.name).findOne(dynamicAttributeOption.dynamicAttributeId).then(function(dynamicAttribute){
         if (!dynamicAttribute) return Promise.reject();
-        if (dynamicAttribute.type != 'picklist') return Promise.reject();
+        if (dynamicAttribute.type != co.dynamicAttributeTypes.picklist) return Promise.reject();
         delete dynamicAttributeOption._id; // Ids are generated automatically
         dynamicAttributeOption.clientId = req.user.clientId; 
         return req.db.insert(co.collections.dynamicattributeoptions.name, dynamicAttributeOption);
@@ -192,7 +192,14 @@ router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMI
     var modelName = req.params.modelName;
     var entity;
     var dynamicAttributeValues = req.body;
-    req.db.get(modelName).findOne(req.params.id).then((e) => {
+    req.db.get(co.collections.clients.name).findOne(req.user.clientId).then((client) => {
+        if (dynamicAttributeValues.find((dav) => !validateId.validateId(dav.daId))) return Promise.reject();; // Mindestens ein Wert hat eine ungültige Attribut-Id
+        return req.db.get(co.collections.dynamicattributes.name).find({ clientId: req.user.clientId, _id: { $in: dynamicAttributeValues.map((dav) => dav.daId) }});
+    }).then((dynamicAttributes) => {
+        var attributeIds = dynamicAttributes.map((da) => da._id.toString());
+        if (dynamicAttributeValues.find((dav) => attributeIds.indexOf(dav.daId) < 0)) return Promise.reject();; // Mindestens ein Wert hat eine nicht existierende oder nicht dem Mandanten zugehörige Attribut-Id
+        return req.db.get(modelName).findOne(req.params.id);
+    }).then((e) => {
         if (!e) return Promise.reject();
         entity = e;
         return req.db.remove(co.collections.dynamicattributevalues.name, {entityId: entity._id});
@@ -208,7 +215,7 @@ router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMI
         }});
         return req.db.get(co.collections.dynamicattributevalues.name).bulkWrite(bulkData);
     }).then((bulkResult) => {
-        res.sendStatus(200);
+        res.send(Object.keys(bulkResult.insertedIds).map((key) => bulkResult.insertedIds[key]));
     }).catch((error) => {
         res.sendStatus(400);
     });
@@ -219,7 +226,7 @@ router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMI
  */
 router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), (req, res) => {
     var dynamicAttribute = req.body;
-    if (!dynamicAttribute || !dynamicAttribute.type || !dynamicAttribute.modelName || !dynamicAttribute.name_en) {
+    if (!dynamicAttribute || !dynamicAttribute.type || !co.dynamicAttributeTypes[dynamicAttribute.type] || !dynamicAttribute.modelName || !co.collections[dynamicAttribute.modelName] || !dynamicAttribute.name_en) {
         return res.sendStatus(400);
     }
     // Ids are generated automatically
@@ -320,7 +327,7 @@ router.delete('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w'
     var dynamicAttributeId = req.params.id;
     // TODO: check implementation
     req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(existingAttributeFromDB){
-        if(existingAttributeFromDB.type == 'picklist'){
+        if(existingAttributeFromDB.type == co.dynamicAttributeTypes.picklist){
             //delete options
             req.db.remove('dynamicattributeoptions', {dynamicAttributeId: dynamicAttributeId}).then(function(result){
                 //delete actual attribure

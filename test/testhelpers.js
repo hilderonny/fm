@@ -496,11 +496,11 @@ th.prepareDynamicAttributes = function() {
     th.dbObjects.clients.forEach(function(client) {
         dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: client._id, type: 'text' });
         dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: client._id, type: 'boolean' });
-        dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: client._id, type: 'picklist' });
+        dynamicAttributes.push({ modelName: modelName, name_en: 'picklistattribute', clientId: client._id, type: 'picklist' });
     });
     dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: null, type: 'text' });
     dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: null, type: 'boolean' });
-    dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: null, type: 'picklist' });
+    dynamicAttributes.push({ modelName: modelName, name_en: 'picklistattribute', clientId: null, type: 'picklist' });
     return th.bulkInsert(co.collections.dynamicattributes.name, dynamicAttributes);
 };
 
@@ -599,7 +599,7 @@ th.defaults = {
     /**
      * Standardmandant '1' aus Datenbank auslesen und per Promise zurück geben
      */
-    getClient: function() { return db.get(co.collections.clients.name).findOne({name:th.defaults.client}); },
+    getClient: function(clientName) { return db.get(co.collections.clients.name).findOne({name:clientName || th.defaults.client}); },
     /**
      * Standardportal 'p1' aus Datenbank auslesen und per Promise zurück geben
      */
@@ -607,7 +607,7 @@ th.defaults = {
     /**
      * Standardbenutzer '1_0_0' aus Datenbank auslesen und per Promise zurück geben
      */
-    getUser: function() { return db.get(co.collections.users.name).findOne({name:th.defaults.user}); },
+    getUser: function(userName) { return db.get(co.collections.users.name).findOne({name:userName || th.defaults.user}); },
     /**
      * Standardbenutzergruppe '1_0' aus Datenbank auslesen und per Promise zurück geben
      */
@@ -615,7 +615,7 @@ th.defaults = {
     /**
      * Anmeldung mit STandardbenutzer durchführen
      */
-    login: function() { return th.doLoginAndGetToken(th.defaults.user, th.defaults.password); },
+    login: function(userName) { return th.doLoginAndGetToken(userName || th.defaults.user, th.defaults.password); },
     otherClient: '0',
     otherUser: '0_0_0',
     password: 'test',

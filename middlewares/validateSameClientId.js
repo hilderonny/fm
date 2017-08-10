@@ -1,4 +1,5 @@
 var monk = require('monk');
+var co = require('../utils/constants');
 
 /**
  * Middleware zum Prüfen, ob der angemeldete Benutzer zum gleichen Mandanten
@@ -16,10 +17,10 @@ module.exports = (tableName) => {
     return (req, res, next) => {
         // When tableName is not given, try to extract it from the request.
         // With dynamic attributes it is given as parameter "modelName"
-        if (!tableName) {
-            tableName = req.params.modelName;
-        }
-        req.db.get(tableName).find({ _id: req.params.id, clientId: req.user.clientId }).then((result) => {
+        var tableNameToUse = tableName || req.params.modelName; // Muss lokale Variable verwenden, da tableName ansonsten noch vom vorhergehenden Aufruf gesetzt wäre
+        // Check whether the collection exists
+        if (!co.collections[tableNameToUse]) return res.sendStatus(403);
+        req.db.get(tableNameToUse).find({ _id: req.params.id, clientId: req.user.clientId }).then((result) => {
             if (result.length < 1) {
                 return res.sendStatus(403);
             } else {
