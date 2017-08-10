@@ -557,7 +557,17 @@ describe.only('API dynamicattributes', function() {
         th.apiTests.delete.defaultNegative(co.apis.dynamicattributes, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttribute);
         th.apiTests.delete.clientDependentNegative(co.apis.dynamicattributes, createDeleteTestDynamicAttribute);
 
-        xit('responds with a correct id with 204 and deletes the dynamic attribute, all of its dynamic attribute options and all of its dynamic attribute values from the database', function() {
+        it('responds with a correct id with 204 and deletes the dynamic attribute, all of its dynamic attribute options and all of its dynamic attribute values from the database', async function() {
+            var token = await th.defaults.login();
+            var client = await th.defaults.getClient();
+            var attribute = await th.dbObjects.dynamicattributes.find((da) => da.clientId !== null && da.clientId.toString() === client._id.toString() && da.type === co.dynamicAttributeTypes.picklist);
+            await th.del(`/api/${co.apis.dynamicattributes}/${attribute._id}?token=${token}`).expect(204);
+            var attributeAfterDeletion = await db.get(co.collections.dynamicattributes.name).findOne(attribute._id);
+            var options = await db.get(co.collections.dynamicattributeoptions.name).find({dynamicAttributeId:attribute._id});
+            var values = await db.get(co.collections.dynamicattributevalues.name).find({dynamicAttributeId:attribute._id});
+            assert.ok(!attributeAfterDeletion);
+            assert.strictEqual(options.length, 0);
+            assert.strictEqual(values.length, 0);
         });
 
     });
@@ -577,20 +587,28 @@ describe.only('API dynamicattributes', function() {
         th.apiTests.delete.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttributeOption);
         th.apiTests.delete.clientDependentNegative(optionApi, createDeleteTestDynamicAttributeOption);
 
-        xit('responds with a correct id with 204 and deletes the dynamic attribute option and all dynamic attribute values which use it from the database', function() {
+        it.only('responds with a correct id with 204 and deletes the dynamic attribute option and all dynamic attribute values which use it from the database', async function() {
+            var token = await th.defaults.login();
+            var client = await th.defaults.getClient();
+            var option = await th.dbObjects.dynamicattributeoptions.find((dao) => dao.clientId !== null && dao.clientId.toString() === client._id.toString());
+            await th.del(`/api/${optionApi}/${option._id}?token=${token}`).expect(204);
+            var optionAfterDeletion = await db.get(co.collections.dynamicattributeoptions.name).findOne(option._id);
+            var values = await db.get(co.collections.dynamicattributevalues.name).find({value:option._id});
+            assert.ok(!optionAfterDeletion);
+            assert.strictEqual(values.length, 0);
         });
 
     });
 
-    describe('DELETE/values/:modelName/:id', function() {
+    describe.only('DELETE/values/:modelName/:id', function() {
 
-        it('responds without authentication with 403', function() {
+        it('responds without authentication with 403', async function() {
             return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
                 return th.del(`/api/${co.apis.dynamicattributes}/values/users/${userFromDB._id}`).expect(403);
             });
         });
 
-        it('responds without write permission with 403', function() {
+        it('responds without write permission with 403', async function() {
             return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
                 return th.removeWritePermission('0_0_0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES).then(function(){
                     return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){
@@ -600,7 +618,7 @@ describe.only('API dynamicattributes', function() {
             });
         });
 
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async function() {
             return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
                 return th.removeClientModule('0', 'base').then(function(){
                     return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){
@@ -610,7 +628,7 @@ describe.only('API dynamicattributes', function() {
             });
         });
 
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async function() {
             return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
                 return th.removeClientModule('0', 'base').then(function(){
                     return th.doLoginAndGetToken('0_0_ADMIN0', 'test').then(function(token){
@@ -620,7 +638,7 @@ describe.only('API dynamicattributes', function() {
             });
         });
 
-        it('responds with an id of an existing entity which does not belong to the same client as the logged in user with 403', function() {
+        it('responds with an id of an existing entity which does not belong to the same client as the logged in user with 403', async function() {
             return db.get('users').findOne({name: '1_0_0'}).then(function(userFromDB){ //client 1 
                 return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ //client 0 
                     return th.del(`/api/${co.apis.dynamicattributes}/values/users/${userFromDB._id}?token=${token}`).expect(403);
@@ -628,19 +646,19 @@ describe.only('API dynamicattributes', function() {
             });
         });
 
-        it('responds without giving a model name and entity id with 400', function() {
+        it('responds without giving a model name and entity id with 400', async function() {
             return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
                 return th.del(`/api/${co.apis.dynamicattributes}/values?token=${token}`).expect(400);
             });
         });
 
-        it('responds without giving an entity id but with giving a modelName with 404', function() {
+        it('responds without giving an entity id but with giving a modelName with 404', async function() {
             return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
                 return th.del(`/api/${co.apis.dynamicattributes}/values/users?token=${token}`).expect(404);
             });
         });
         
-        it('responds with invalid modelName with 400', function() {
+        it('responds with invalid modelName with 400', async function() {
             return db.get('users').findOne({name: '0_0_0'}).then(function(userFromDB){
                 return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
                     var fakeModelName = 'lalala';
@@ -650,19 +668,19 @@ describe.only('API dynamicattributes', function() {
             });
         });
         
-        it('responds with invalid entity id with 400', function() {
+        it('responds with invalid entity id with 400', async function() {
             return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
                 return th.del(`/api/${co.apis.dynamicattributes}/values/users/invalidId?token=${token}`).expect(400);
             });
         });
 
-        it('responds with not existing entity id with 403', function() {
+        it('responds with not existing entity id with 403', async function() {
             return th.doLoginAndGetToken('0_0_0', 'test').then(function(token){ 
                 return th.del(`/api/${co.apis.dynamicattributes}/values/users/999999999999999999999999?token=${token}`).expect(403);
             });
         });
 
-        xit('responds with correct modelName and id with 204 and deletes all dynamic attribute values for the entity from the database', function() {
+        it('responds with correct modelName and id with 204 and deletes all dynamic attribute values for the entity from the database', async function() {
         });
 
     });

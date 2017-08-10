@@ -323,28 +323,14 @@ router.delete('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNA
  * All existing dynamicattributevalues which exist for the attribute are also deleted.
  * When the dynamic attribute is of type picklist, all of its options are also deleted.
  */
-router.delete('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
-    var dynamicAttributeId = req.params.id;
-    // TODO: check implementation
-    req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(existingAttributeFromDB){
-        if(existingAttributeFromDB.type == co.dynamicAttributeTypes.picklist){
-            //delete options
-            req.db.remove('dynamicattributeoptions', {dynamicAttributeId: dynamicAttributeId}).then(function(result){
-                //delete actual attribure
-                req.db.remove('dynamicattributes', {_id: dynamicAttributeId}).then(function(result){
-                   return res.sendStatus(204);
-                });
-            });
-        }
-        else{
-            //delete attribute values
-            req.db.remove('dynamicattributevalues', {dynamicAttributeId: dynamicAttributeId}).then(function(result){
-                //delete actual attribure
-                req.db.remove('dynamicattributes', {_id: dynamicAttributeId}).then(function(result){
-                   return res.sendStatus(204);
-                });
-            });
-        }
+router.delete('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateId, validateSameClientId(co.collections.dynamicattributes.name), (req, res) => {
+    var dynamicAttributeId = monk.id(req.params.id);
+    req.db.remove(co.collections.dynamicattributes.name, {_id: dynamicAttributeId}).then(() => {
+        return req.db.remove(co.collections.dynamicattributeoptions.name, {dynamicAttributeId: dynamicAttributeId});
+    }).then(() => {
+        return req.db.remove(co.collections.dynamicattributevalues.name, {dynamicAttributeId: dynamicAttributeId});
+    }).then(() => {
+        res.sendStatus(204);
     });
 });
 
