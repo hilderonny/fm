@@ -52,8 +52,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             size: $scope.fmObject.size, 
             pos: $scope.fmObject.pos
         };
-        $http.put('/api/fmobjects/' + $scope.fmObject._id, fmObjectToSend).then(function(response) {
-            var savedFmObject = response.data;
+        utils.saveEntity($scope, 'fmobjects', $scope.params.fmObjectId, '/api/fmobjects/', fmObjectToSend).then(function(savedFmObject) {
             $scope.fmObjectName = $scope.fmObject.name;
             if ($scope.params.saveFmObjectCallback) {
                 $scope.params.saveFmObjectCallback(savedFmObject);
@@ -116,6 +115,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
                 $scope.fmObject = completeFmObject;
                 $scope.fmObjectName = completeFmObject.name; // Prevent updating the label when changing the input value 
                 $scope.relationsEntity = { type:'fmobjects', id:completeFmObject._id };
+                utils.loadDynamicAttributes($scope, 'fmobjects', $scope.params.fmObjectId);
                 utils.setLocation('/fmobjects/' + $scope.params.fmObjectId);
             });
         } else {

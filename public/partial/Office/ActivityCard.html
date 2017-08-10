@@ -54,6 +54,8 @@
                             <textarea ng-model="activity.comment" rows="5"></textarea>
                         </md-input-container>
 
+                    <ng-include flex ng-if="!isNewActivity" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
+                    
                     </md-card-content>
 
                     <md-card-actions layout="row" layout-align="end center">

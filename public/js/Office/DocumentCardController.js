@@ -8,8 +8,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
     // Click on Save-button to save an existing document
     $scope.saveDocument = function() {
         var documentToSend = { name: $scope.document.name, isShared: $scope.document.isShared };
-        $http.put('/api/documents/' + $scope.document._id, documentToSend).then(function(response) {
-            var savedDocument = response.data;
+        utils.saveEntity($scope, 'documents', $scope.document._id, '/api/documents/', documentToSend).then(function(savedDocument) {
             $scope.documentName = savedDocument.name;
             if ($scope.params.saveDocumentCallback) {
                 $scope.params.saveDocumentCallback(savedDocument);
@@ -91,6 +90,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             $scope.relationsEntity = { type:'documents', id:document._id };
             // Berechtigungen ermitteln
             $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
+            utils.loadDynamicAttributes($scope, 'documents', $scope.params.documentId);
             utils.setLocation('/documents/' + $scope.params.documentId);
         });
     }
