@@ -29,8 +29,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
     // Click on Save-button to save an existing folder
     $scope.saveFolder = function() {
         var folderToSend = { name: $scope.folder.name };
-        $http.put('/api/folders/' + $scope.folder._id, folderToSend).then(function(response) {
-            var savedFolder = response.data;
+        utils.saveEntity($scope, 'folders', $scope.folder._id, '/api/folders/', folderToSend).then(function(savedFolder) {
             $scope.folderName = $scope.folder.name;
             if ($scope.params.saveFolderCallback) {
                 $scope.params.saveFolderCallback(savedFolder);
@@ -138,6 +137,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
                 $scope.folderName = completeFolder.name; // Prevent updating the label when changing the name input value
                 $scope.relationsEntity = { type:'folders', id:completeFolder._id };
             }).then(function() {
+                utils.loadDynamicAttributes($scope, 'folders', $scope.params.folderId);
                 utils.setLocation('/documents/' + $scope.params.folderId);
             });
         } else {

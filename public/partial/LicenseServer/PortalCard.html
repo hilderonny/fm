@@ -32,6 +32,8 @@
                     <textarea ng-model="portal.licenseKey" rows="5" ng-readonly="true"></textarea>
                 </md-input-container>
 
+                <ng-include flex ng-if="!isNewPortal" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>      
+                 
                 <a ng-if="!isNewPortal" href="/api/update/download?licenseKey={{portal.licenseKey}}" translate>TRK_PORTALS_DOWNLOAD_PACKAGE</a>
 
 

@@ -42,8 +42,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
             isAdmin: $scope.user.isAdmin, 
             userGroupId: $scope.user.userGroup._id 
         };
-        $http.put('/api/users/' + $scope.user._id, userToSend).then(function(response) {
-            var savedUser = response.data;
+         utils.saveEntity($scope, 'users', $scope.user._id, '/api/users/', userToSend).then(function(savedUser) {
             $scope.user.pass = '';
             $scope.user.pass2 = '';
             $scope.userName = $scope.user.name;
@@ -119,6 +118,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
                             break;
                         }
                     }
+                    utils.loadDynamicAttributes($scope, 'users', $scope.params.userId);
                     utils.setLocation('/users/' + $scope.params.userId);
                 });
             });

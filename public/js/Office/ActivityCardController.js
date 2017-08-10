@@ -45,8 +45,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
             activityToSend.task = $scope.activity.task;
             activityToSend.type = $scope.activity.type;
         }
-        $http.put('/api/activities/' + $scope.activity._id, activityToSend).then(function(response) {
-            var savedActivity = response.data;
+        utils.saveEntity($scope, 'activities', $scope.activity._id, '/api/activities/', activityToSend).then(function(savedActivity) {
             $scope.activityName = $scope.activity.name;
             if ($scope.params.saveActivityCallback) {
                 $scope.params.saveActivityCallback(savedActivity);
@@ -106,6 +105,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                 $scope.activity = completeActivity;
                 $scope.activityName = completeActivity.name; // Prevent updating the label when changing the input value 
                 $scope.relationsEntity = { type:'activities', id:completeActivity._id };
+                utils.loadDynamicAttributes($scope, 'activities', $scope.params.activityId);
                 utils.setLocation('/activities/' + completeActivity._id);
             });
         } else {
