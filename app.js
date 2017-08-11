@@ -41,7 +41,9 @@ var prepareIncludes = (fs) => {
         });
         var template = fs.readFileSync('./public/_index.html').toString();
         var replaced = template.replace('        <script src="js/include.js"></script>', incJs);
-        fs.writeFileSync('./public/index.html', replaced);
+        var replacedAgain = replaced.replace('###PORTALNAME###', localConfig.portalName).replace('###PORTALLOGO###', localConfig.portalLogo);        
+      
+        fs.writeFileSync('./public/index.html', replacedAgain);
     } else {
         console.log('Minifying client JavaScript. Can take up to 15 seconds. Please wait ...');
         var includes = [];
