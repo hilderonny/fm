@@ -26,6 +26,7 @@
     "TRK_CLIENTS_USERNAMEINUSE" : "This user name is already taken.",
     "TRK_MENU_ADMINISTRATION_CLIENTS" : "Clients",
     "TRK_MENU_PORTAL" : "Portal",
+    "TRK_MODEL_clients": "Clients",
     "TRK_MODULE_clients_NAME" : "Clients",
     "TRK_NO" : "No",
     "TRK_YES" : "Yes"

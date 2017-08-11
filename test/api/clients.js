@@ -139,8 +139,8 @@ describe('API clients', function() {
             return Promise.resolve(testObjects);
         }
 
-        th.apiTests.getForIds.defaultNegative(co.apis.clients, co.permissions.ADMINISTRATION_CLIENT, co.collections.clients, createTestClients);
-        th.apiTests.getForIds.defaultPositive(co.apis.clients, co.collections.clients, createTestClients);
+        th.apiTests.getForIds.defaultNegative(co.apis.clients, co.permissions.ADMINISTRATION_CLIENT, co.collections.clients.name, createTestClients);
+        th.apiTests.getForIds.defaultPositive(co.apis.clients, co.collections.clients.name, createTestClients);
 
     });
 
@@ -621,15 +621,15 @@ describe('API clients', function() {
     describe('DELETE/:id', function() {
 
         function getDeleteClientId() {
-            return db.get(co.collections.clients).insert({ name: 'newClient' }).then(function(client) {
-                return th.createRelationsToUser(co.collections.clients, client);
+            return db.get(co.collections.clients.name).insert({ name: 'newClient' }).then(function(client) {
+                return th.createRelationsToUser(co.collections.clients.name, client);
             }).then(function(insertedClient) {
                 return Promise.resolve(insertedClient._id);
             });
         }
 
         th.apiTests.delete.defaultNegative(co.apis.clients, co.permissions.ADMINISTRATION_CLIENT, getDeleteClientId);
-        th.apiTests.delete.defaultPositive(co.apis.clients, co.collections.clients, getDeleteClientId);
+        th.apiTests.delete.defaultPositive(co.apis.clients, co.collections.clients.name, getDeleteClientId);
 
         it('responds with 204 and deletes all dependent objects (activities, clientmodules, documents, fmobjects, folders, permissions, usergroups, users)', function() {
             var clientIdToDelete;
@@ -640,7 +640,7 @@ describe('API clients', function() {
                 return th.del(`/api/${co.apis.clients}/${clientIdToDelete.toString()}?token=${token}`).expect(204);
             }).then(function() {
                 return new Promise(function(resolve, reject) {
-                    var dependentCollections = Object.keys(co.collections);
+                    var dependentCollections = Object.keys(co.collections).map((key) => co.collections[key].name);
                     async.eachSeries(dependentCollections, (dependentCollection, callback) => {
                         db.get(dependentCollection).count({ clientId: clientIdToDelete }, (err, count) => {
                             if (err) {

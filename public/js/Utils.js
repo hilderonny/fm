@@ -123,6 +123,30 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             }
         },
 
+        loadDynamicAttributes: function(scope, modelName, entityId) {
+            $http.get('/api/dynamicattributes/values/' + modelName + '/' + entityId).then(function(response) {
+                scope.dynamicAttributes = response.data;
+            });
+        },
+
+        saveEntity: function(scope, modelName, entityId, api, entityToSend) {
+            var savedEntity;
+            return $http.put(api + entityId, entityToSend).then(function(saveEntityResponse) {
+                savedEntity = saveEntityResponse.data;
+                var dynamicAttributesToSend = [];
+                // Nur die Daten senden, die zwingend notwendig sind. Der Rest kann von der API ermittelt werden
+                scope.dynamicAttributes.forEach(function(da) {
+                    dynamicAttributesToSend.push({
+                        daId: da.type._id,
+                        type: da.type.type, // API needs this
+                        value: da.value
+                    });
+                });
+                return $http.post('/api/dynamicattributes/values/' + modelName + '/' + entityId, dynamicAttributesToSend);
+            }).then(function() {
+                return Promise.resolve(savedEntity);
+            });
+        },
         handlePreselection: function($scope, collection, selectFunction) {
             // Check preselection
             if ($scope.params.preselection) {

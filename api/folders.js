@@ -23,7 +23,7 @@ router.get('/', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents),
     var clientId = req.user.clientId; // clientId === null means that the user is a portal user
     var rootElements = [];
     var allFolders = {};
-    req.db.get(co.collections.folders).find({ clientId: clientId }, { sort : { name : 1 } }).then((folders) => {
+    req.db.get(co.collections.folders.name).find({ clientId: clientId }, { sort : { name : 1 } }).then((folders) => {
         folders.forEach((f) => {
             allFolders[f._id] = {
                 _id: f._id,
@@ -41,7 +41,7 @@ router.get('/', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents),
                 rootElements.push(allFolders[f._id]);
             }
         });
-        return req.db.get(co.collections.documents).find({ clientId: clientId }, { sort : { name : 1 } });
+        return req.db.get(co.collections.documents.name).find({ clientId: clientId }, { sort : { name : 1 } });
     }).then(function(documents) {
         documents.forEach((d) => {
             var docToSend = {
@@ -125,18 +125,18 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
 router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), validateId, validateSameClientId('folders'), (req, res) => {
     var id = monk.id(req.params.id);
     var folder;
-    req.db.get(co.collections.folders).findOne(id).then((f) => {
+    req.db.get(co.collections.folders.name).findOne(id).then((f) => {
         folder = f;
         folder.elements = [];
         // Database element is available here in every case, because validateSameClientId already checked for existence
-        return req.db.get(co.collections.folders).find({ parentFolderId: id }, { sort : { name : 1 } });
+        return req.db.get(co.collections.folders.name).find({ parentFolderId: id }, { sort : { name : 1 } });
     }).then((subfolders) => {
         folder.elements = folder.elements.concat(subfolders.map((subFolder) => { return {
             _id: subFolder._id,
             type: 'f',
             name: subFolder.name
         }}));
-        return req.db.get(co.collections.documents).find({ parentFolderId: id }, { sort : { name : 1 } });
+        return req.db.get(co.collections.documents.name).find({ parentFolderId: id }, { sort : { name : 1 } });
     }).then((documents) => {
         folder.elements = folder.elements.concat(documents.map((document) => { return {
             _id: document._id,
@@ -215,7 +215,7 @@ var removeFolder = (db, folder) => {
         var documentPromises = documents.map((document) => documentsApi.deleteDocument(db, document));
         return Promise.all(documentPromises);
     }));
-    promises.push(rh.deleteAllRelationsForEntity(co.collections.folders, folder._id));
+    promises.push(rh.deleteAllRelationsForEntity(co.collections.folders.name, folder._id));
     // Delete the folder itself
     promises.push(db.remove('folders', folder._id));
     return Promise.all(promises);

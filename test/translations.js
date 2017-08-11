@@ -95,12 +95,13 @@ function extractTranslationKeysFromFile(filePath, translationKeys) {
 // TODO: Änderungen in Doku aufnehmen
 function getHardToFindTranslationKeysForModule(moduleName) {
     switch(moduleName) {
-        case 'activities': return [ 'TRK_ACTIVITIES_ACTIVITY', 'TRK_ACTIVITIES_SELECT_ACTIVITY' ];
-        case 'base': return [ 'TRK_USERGROUPS_USERGROUP', 'TRK_USERS_USER', 'TRK_USERGROUPS_SELECT_USERGROUP', 'TRK_USERS_SELECT_USER' ];
-        case 'clients' : return [ 'TRK_CLIENTS_CLIENT', 'TRK_CLIENTS_SELECT_CLIENT' ];
-        case 'documents' : return [ 'TRK_DOCUMENTS_DOCUMENT', 'TRK_DOCUMENTS_DOCUMENTS', 'TRK_DOCUMENTS_SELECT_FOLDER_OR_DOCUMENT', 'TRK_FOLDERS_FOLDER', 'TRK_FOLDERS_FOLDERS' ];
-        case 'fmobjects' : return [ 'TRK_FMOBJECTS_FM_OBJECT', 'TRK_FMOBJECTS_FM_OBJECTS', 'TRK_FMOBJECTS_SELECT_FM_OBJECT' ];
+        case 'activities': return [ 'TRK_ACTIVITIES_ACTIVITY', 'TRK_ACTIVITIES_SELECT_ACTIVITY', 'TRK_MODEL_activities' ];
+        case 'base': return [ 'TRK_USERGROUPS_USERGROUP', 'TRK_USERS_USER', 'TRK_USERGROUPS_SELECT_USERGROUP', 'TRK_USERS_SELECT_USER', 'TRK_MODEL_users', 'TRK_MODEL_usergroups', 'TRK_DYNAMICATTRIBUTES_NAME_de', 'TRK_DYNAMICATTRIBUTES_NAME_en', 'TRK_DYNAMICATTRIBUTES_TYPE_text', 'TRK_DYNAMICATTRIBUTES_TYPE_boolean', 'TRK_DYNAMICATTRIBUTES_TYPE_picklist' ];
+        case 'clients' : return [ 'TRK_CLIENTS_CLIENT', 'TRK_CLIENTS_SELECT_CLIENT', 'TRK_MODEL_clients' ];
+        case 'documents' : return [ 'TRK_DOCUMENTS_DOCUMENT', 'TRK_DOCUMENTS_DOCUMENTS', 'TRK_DOCUMENTS_SELECT_FOLDER_OR_DOCUMENT', 'TRK_FOLDERS_FOLDER', 'TRK_FOLDERS_FOLDERS', 'TRK_MODEL_documents', 'TRK_MODEL_folders' ];
+        case 'fmobjects' : return [ 'TRK_FMOBJECTS_FM_OBJECT', 'TRK_FMOBJECTS_FM_OBJECTS', 'TRK_FMOBJECTS_SELECT_FM_OBJECT', 'TRK_MODEL_fmobjects' ];
         case 'licenseserver' : return [ 'TRK_PORTALS_PORTAL', 'TRK_PORTALS_SELECT_PORTAL' ];
+        case 'portalbase' : return [ 'TRK_MODEL_portals' ];
         default: return [];
     }
 }
@@ -242,9 +243,9 @@ describe('Translations', function describeTranslations() {
                     var keyCollection = translationDefinitions.moduleLanguageKey[moduleName][language];
                     translationKeys.forEach(function eachTranslationKey(translationKey) {
 
-                        // Constructed translations result in finding "TRK_" or "TRK_MODULE_".
-                        // They normally  represent type lists and are ignored hiere
-                        if (['TRK_', 'TRK_MODULE_'].indexOf(translationKey) >= 0) return;
+                        // Constructed translations result in finding "TRK_".
+                        // They normally  represent type lists and are ignored here
+                        if (['TRK_', 'TRK_MODULE_', 'TRK_DYNAMICATTRIBUTES_NAME_', 'TRK_MODEL_', 'TRK_DYNAMICATTRIBUTES_TYPE_'].indexOf(translationKey) >= 0) return;
                         
                         var keyExists = keyCollection.indexOf(translationKey) >= 0;
                         var message = `Translation key ${translationKey} is not defined in file ${fileName}`;

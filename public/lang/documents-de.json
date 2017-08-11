@@ -35,6 +35,8 @@
     "TRK_FOLDERS_UPLOAD_DOCUMENT" : "Dokument hochladen",
     "TRK_MENU_OFFICE" : "Büro",
     "TRK_MENU_OFFICE_DOCUMENTS" : "Dokumente",
+    "TRK_MODEL_documents": "Dokumente",
+    "TRK_MODEL_folders": "Verzeichnisse",
     "TRK_MODULE_documents_NAME" : "Dokumente",
     "TRK_NO" : "Nein",
     "TRK_YES" : "Ja"

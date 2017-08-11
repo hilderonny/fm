@@ -16,5 +16,6 @@
     "TRK_SETTINGS_VERSION_ON_SERVER" : "Version auf Lizenzserver",
     "TRK_SETTINGS_WAIT_FOR_UPDATE_COMPLETION" : "Der Update-Vorgang wurde gestartet. Bitte warten Sie zwei Minuten bis das Update installiert wurde und laden Sie dann die Seite neu!",
     "TRK_SETTINGSET_PORTAL_GENERAL" : "Portaleinstellungen",
+    "TRK_MODEL_portals": "Portale",
     "TRK_MODULE_portalbase_NAME" : "Portal-Basismodul"
 }

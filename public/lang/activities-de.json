@@ -29,6 +29,7 @@
     "TRK_ACTIVITIES_TYPE_WARRANTY" : "Gewährleistung",
     "TRK_MENU_OFFICE" : "Büro",
     "TRK_MENU_OFFICE_ACTIVITIES" : "Termine",
+    "TRK_MODEL_activities": "Termine",
     "TRK_MODULE_activities_NAME" : "Termine",
     "TRK_NO" : "Nein",
     "TRK_YES" : "Ja"

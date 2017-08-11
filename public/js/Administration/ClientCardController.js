@@ -99,8 +99,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
             name: $scope.client.name,
             comment:$scope.client.comment
         };
-        $http.put('/api/clients/' + $scope.client._id, clientToSend).then(function(response) {
-            var savedClient = response.data;
+        utils.saveEntity($scope, 'clients', $scope.client._id, '/api/clients/', clientToSend).then(function(savedClient) {
             $scope.clientName = $scope.client.name;
             if ($scope.params.saveClientCallback) {
                 $scope.params.saveClientCallback(savedClient);
@@ -161,6 +160,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
                 $scope.relationsEntity = { type:'clients', id:completeClient._id };
                 return $scope.getClientModules();
             }).then(function() {
+                utils.loadDynamicAttributes($scope, 'clients', $scope.params.clientId);
                 utils.setLocation('/clients/' + $scope.params.clientId);
             });
         } else {

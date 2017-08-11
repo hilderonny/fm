@@ -26,6 +26,8 @@
                             <input ng-model="userGroup.name" name="name">
                         </md-input-container>
 
+                        <ng-include flex ng-if="!isNewUserGroup" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
+
                     </md-card-content>
 
                     <md-card-actions layout="row" layout-align="end center">

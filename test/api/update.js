@@ -14,8 +14,8 @@ var lc = JSON.parse(fs.readFileSync('./config/localconfig.json'));
 describe('API update', function() {
 
     function preparePortal() {
-        return db.insert(co.collections.portals, { name: 'Updatetestportal', isActive: true, licenseKey: 'TestKey' }).then(function(portal) {
-            return db.insert(co.collections.portalmodules, {portalId: portal._id, module: co.modules.base});
+        return db.insert(co.collections.portals.name, { name: 'Updatetestportal', isActive: true, licenseKey: 'TestKey' }).then(function(portal) {
+            return db.insert(co.collections.portalmodules.name, {portalId: portal._id, module: co.modules.base});
         });
     }
     
@@ -40,13 +40,13 @@ describe('API update', function() {
         });
 
         it('responds with 403 when portal for licenseKey is inactive', function() {
-            return db.update(co.collections.portals, {name: 'Updatetestportal'}, {isActive:false}).then(function(portal) {
+            return db.update(co.collections.portals.name, {name: 'Updatetestportal'}, {isActive:false}).then(function(portal) {
                 return th.get(`/api/${co.apis.update}/version?licenseKey=${portal.licenseKey}`).expect(403);
             });
         });
 
         it('responds with version defined in package.json', function() {
-            return db.get(co.collections.portals).findOne({name: 'Updatetestportal'}).then(function(portal) {
+            return db.get(co.collections.portals.name).findOne({name: 'Updatetestportal'}).then(function(portal) {
                 return th.get(`/api/${co.apis.update}/version?licenseKey=${portal.licenseKey}`).expect(200);
             }).then(function(response) {
                 assert.strictEqual(response.text, pj.version);
@@ -66,16 +66,16 @@ describe('API update', function() {
         });
 
         it('responds with 403 when portal for licenseKey is inactive', function() {
-            return db.update(co.collections.portals, {name: 'Updatetestportal'}, {isActive:false}).then(function(portal) {
+            return db.update(co.collections.portals.name, {name: 'Updatetestportal'}, {isActive:false}).then(function(portal) {
                 return th.get(`/api/${co.apis.update}/download?licenseKey=${portal.licenseKey}`).expect(403);
             });
         });
 
         it('responds with 404 when portal of licensekey has no module assigned', function() {
             var portal;
-            return db.get(co.collections.portals).findOne({name: 'Updatetestportal'}).then(function(p) {
+            return db.get(co.collections.portals.name).findOne({name: 'Updatetestportal'}).then(function(p) {
                 portal = p;
-                return db.remove(co.collections.portalmodules, {portalId:portal._id});
+                return db.remove(co.collections.portalmodules.name, {portalId:portal._id});
             }).then(function() {
                 return th.get(`/api/${co.apis.update}/download?licenseKey=${portal.licenseKey}`).expect(404);
             });
@@ -83,7 +83,7 @@ describe('API update', function() {
 
         it('responds with ZIP file containing files for all modules available for the portal of the licensekey', function() {
             var filesInPackage = [];
-            return db.get(co.collections.portals).findOne({name: 'Updatetestportal'}).then(function(portal) {
+            return db.get(co.collections.portals.name).findOne({name: 'Updatetestportal'}).then(function(portal) {
                 return new Promise(function(resolve, reject) {
                     var httpsPort = process.env.HTTPS_PORT || lc.httpsPort || 443;
                     var url = `https://localhost:${httpsPort}/api/${co.apis.update}/download?licenseKey=${portal.licenseKey}`;

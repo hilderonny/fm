@@ -24,7 +24,7 @@ describe('API permissions', function(){
     var validPermisionKey = 'PERMISSION_BIM_FMOBJECT';
 
     function getUserGroup() {
-        return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup});
+        return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup});
     }
 
     function testGetId(subApi) {
@@ -110,7 +110,7 @@ describe('API permissions', function(){
             return getUserGroup().then(function(ug) {
                 userGroup = ug;
                 // Erst mal alle vorbereiteten Berechtigungen löschen
-                return db.get(co.collections.permissions).remove({userGroupId: userGroup._id});
+                return db.get(co.collections.permissions.name).remove({userGroupId: userGroup._id});
             }).then(function() {
                 // Jetzt alle Berechtigungen außer FMOBJECTS, ACTIVITES und SETTINGS_PORTAL (hat Mandant aber kein Zugriff drauf) hinzufügen
                 var permissionKeys = Object.keys(co.permissions).filter((k) => [co.permissions.BIM_FMOBJECT, co.permissions.OFFICE_ACTIVITY, co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0);
@@ -121,7 +121,7 @@ describe('API permissions', function(){
                     canRead: true,
                     canWrite: true
                 }});
-                return db.get(co.collections.permissions).bulkWrite(permissionsToCreate.map((p) => { return {insertOne:{document:p}} }));
+                return db.get(co.collections.permissions.name).bulkWrite(permissionsToCreate.map((p) => { return {insertOne:{document:p}} }));
             }).then(function(createdPermissions) {
                 return th.doLoginAndGetToken(th.defaults.adminUser, th.defaults.password);
             }).then(function(token) {
@@ -142,7 +142,7 @@ describe('API permissions', function(){
             return getUserGroup().then(function(ug) {
                 userGroup = ug;
                 // Erst mal alle vorbereiteten Berechtigungen löschen
-                return db.get(co.collections.permissions).remove({userGroupId: userGroup._id});
+                return db.get(co.collections.permissions.name).remove({userGroupId: userGroup._id});
             }).then(function() {
                 // Jetzt alle Berechtigungen außer FMOBJECTS, ACTIVITES und SETTINGS_PORTAL (hat Mandant aber kein Zugriff drauf) hinzufügen
                 var permissionKeys = Object.keys(co.permissions).filter((k) => [co.permissions.BIM_FMOBJECT, co.permissions.OFFICE_ACTIVITY, co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0);
@@ -153,7 +153,7 @@ describe('API permissions', function(){
                     canRead: true,
                     canWrite: true
                 }});
-                return db.get(co.collections.permissions).bulkWrite(permissionsToCreate.map((p) => { return {insertOne:{document:p}} }));
+                return db.get(co.collections.permissions.name).bulkWrite(permissionsToCreate.map((p) => { return {insertOne:{document:p}} }));
             }).then(function(createdPermissions) {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -174,8 +174,8 @@ describe('API permissions', function(){
 
         var api = `${co.apis.permissions}/forUserGroup`;
 
-        th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups);
-        th.apiTests.getId.clientDependentNegative(api, co.collections.usergroups);
+        th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups.name);
+        th.apiTests.getId.clientDependentNegative(api, co.collections.usergroups.name);
 
         xit('responds with all permissions where the states are correctly set', function() {
         });
@@ -185,13 +185,13 @@ describe('API permissions', function(){
     describe('POST/', function(){
 
         it('responds without any content with 400', function() {
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                 return th.post('/api/permissions?token=' + token).send().expect(400);
             });
         });
 
         it('responds without giving a permission userGroupId with 400', function() {
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                 newPermission = {canRead: true, canWrite: false};
                 return th.post('/api/permissions?token=' + token).send(newPermission).expect(400);
             });
@@ -199,7 +199,7 @@ describe('API permissions', function(){
 
         it('responds without giving a permission key with 400', function() {
             return db.get('users').findOne({name: '1_0_0'}).then((userFromDatabase) => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                     newPermission = {userGroupId: userFromDatabase.userGroupId, canRead: true, canWrite: false};
                     return th.post('/api/permissions?token=' + token).send(newPermission).expect(400);
                 });
@@ -208,7 +208,7 @@ describe('API permissions', function(){
 
         it('responds with off-the-list permission key with 400', function() {
             return db.get('users').findOne({name: '1_0_0'}).then((userFromDatabase) => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                     newPermission = {userGroupId: userFromDatabase.userGroupId, canRead: true, canWrite: false, key: 'MADE_UP_KEY'};
                     return th.post('/api/permissions?token=' + token).send(newPermission).expect(400);
                 });
@@ -217,7 +217,7 @@ describe('API permissions', function(){
 
 
         it('responds with non-existing userGroupId with 400', function() {
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                 var newPermission = {userGroupId: '999999999999999999999999', key: validPermisionKey}; 
                 return th.post('/api/permissions?token=' + token).send(newPermission).expect(400);
             });
@@ -227,7 +227,7 @@ describe('API permissions', function(){
         //Get an exsiting user to obtain a valid userGroupId for client (2)
             return db.get('users').findOne({name: '0_0_0'}).then ((userFromDatabase) => {
                 //Login as representative for  another client (1); i.e. not client (2) whose userGroup is used for the request
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => { 
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => { 
                     var newPermission = {userGroupId: userFromDatabase.userGroupId, key: validPermisionKey, canRead: true };
                     return th.post(`/api/permissions?token=${token}`).send(newPermission).expect(400);
                 });
@@ -244,7 +244,7 @@ describe('API permissions', function(){
             return db.get('usergroups').findOne({ name : '1_0' }).then((usergroupFromDatabase) => {
                 // Remove the corresponding permission
                 return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                         var newPermission = {userGroupId: usergroupFromDatabase._id, canRead: true };
                         return th.post('/api/permissions?token=' + token).send(newPermission).expect(403);
                     });
@@ -281,14 +281,14 @@ describe('API permissions', function(){
             return getUserGroup().then(function(userGroup) {
                 userGroupFromDatabase = userGroup;
                 newPermission.userGroupId = userGroup._id.toString();
-                return db.get(co.collections.permissions).remove({userGroupId:userGroup._id,key:validPermisionKey});
+                return db.get(co.collections.permissions.name).remove({userGroupId:userGroup._id,key:validPermisionKey});
             }).then(function() {
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 return th.post('/api/permissions?token=' + token).send(newPermission).expect(200);
             }).then(function(response) {
                 permissionFromApi = response.body;
-                return db.get('permissions').find({key: validPermisionKey, userGroupId: userGroupFromDatabase._id, canWrite: false}, {sort: {date: -1}, limit: 1});
+                return db.get(co.collections.permissions.name).find({key: validPermisionKey, userGroupId: userGroupFromDatabase._id, canWrite: false}, {sort: {date: -1}, limit: 1});
             }).then((permissionsFromDatabase) =>{ // http://stackoverflow.com/a/28753115
                 var permissionFromDatabase = permissionsFromDatabase[0];
                 var keyCountFromApi = Object.keys(permissionFromApi).length;
@@ -311,9 +311,9 @@ describe('API permissions', function(){
             return getUserGroup().then(function(userGroup) {
                 userGroupFromDatabase = userGroup;
                 newPermission.userGroupId = userGroup._id.toString();
-                return db.get(co.collections.permissions).remove({userGroupId:userGroup._id,key:validPermisionKey});
+                return db.get(co.collections.permissions.name).remove({userGroupId:userGroup._id,key:validPermisionKey});
             }).then(function() {
-                return db.get(co.collections.clients).findOne({name:th.defaults.otherClient});
+                return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient});
             }).then(function(client) {
                 otherClient = client;
                 newPermission.clientId = client._id.toString();
@@ -322,7 +322,7 @@ describe('API permissions', function(){
                 return th.post('/api/permissions?token=' + token).send(newPermission).expect(200);
             }).then(function(response) {
                 permissionFromApi = response.body;
-                return db.get('permissions').find({key: validPermisionKey, userGroupId: userGroupFromDatabase._id, canWrite: false}, {sort: {date: -1}, limit: 1});
+                return db.get(co.collections.permissions.name).find({key: validPermisionKey, userGroupId: userGroupFromDatabase._id, canWrite: false}, {sort: {date: -1}, limit: 1});
             }).then((permissionsFromDatabase) =>{ // http://stackoverflow.com/a/28753115
                 var permissionFromDatabase = permissionsFromDatabase[0];
                 assert.ok( permissionFromDatabase, 'New permission was not created');
@@ -340,7 +340,7 @@ describe('API permissions', function(){
             var existingPermission;
             return getUserGroup().then(function(userGroup) {
                 newPermission.userGroupId = userGroup._id.toString();
-                return db.get(co.collections.permissions).findOne({userGroupId:userGroup._id, key:co.permissions.OFFICE_ACTIVITY});
+                return db.get(co.collections.permissions.name).findOne({userGroupId:userGroup._id, key:co.permissions.OFFICE_ACTIVITY});
             }).then(function(permission) {
                 existingPermission = permission;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -356,7 +356,7 @@ describe('API permissions', function(){
     describe('PUT/:id', function(){
 
         it('responds with an invalid id with 400', function(){
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
                 var newPermission = {canRead: true, canWrite: false};
                 return th.put(`/api/permissions/invalidId?token=${token}`).send(newPermission).expect(400);
             });
@@ -364,8 +364,8 @@ describe('API permissions', function(){
 
         it('responds without any content with 400', function(){
             return db.get('users').findOne({name: '1_0_0'}).then((userFromDatabase) =>{
-                return db.get('permissions').findOne({ key : 'PERMISSION_ADMINISTRATION_USER', clientId: userFromDatabase.clientId }).then((permissionFromDatabase) => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+                return db.get(co.collections.permissions.name).findOne({ key : 'PERMISSION_ADMINISTRATION_USER', clientId: userFromDatabase.clientId }).then((permissionFromDatabase) => {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
                         var newPermission = {};
                         return th.put(`/api/permissions/${permissionFromDatabase._id}?token=${token}`).send(newPermission).expect(400);
                     });
@@ -375,8 +375,8 @@ describe('API permissions', function(){
 
         it('responds with off-the-list key with 400', function(){
             return db.get('users').findOne({name: '1_0_0'}).then((userFromDatabase) =>{
-                return db.get('permissions').findOne({ key : 'PERMISSION_ADMINISTRATION_USER', clientId: userFromDatabase.clientId }).then((permissionFromDatabase) => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+                return db.get(co.collections.permissions.name).findOne({ key : 'PERMISSION_ADMINISTRATION_USER', clientId: userFromDatabase.clientId }).then((permissionFromDatabase) => {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
                         var newPermission = {key: 'MADE_UP_KEY', canRead: true};
                         return th.put(`/api/permissions/${permissionFromDatabase._id}?token=${token}`).send(newPermission).expect(400);
                     });
@@ -385,7 +385,7 @@ describe('API permissions', function(){
         });
 
         it('responds without authentication with 403', function() {
-            return db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER'}).then((permissionFromDatabase) => {
+            return db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER'}).then((permissionFromDatabase) => {
                 var Id = permissionFromDatabase._id.toString();
                 var updatedPermission = {permissionId: permissionFromDatabase._id, canRead: true };
                 return th.put('/api/permissions/' + Id)
@@ -395,10 +395,10 @@ describe('API permissions', function(){
         });
 
         it('responds without write permission with 403', function() {
-            return db.get('permissions').findOne({ key: 'PERMISSION_ADMINISTRATION_USER' }).then((permissionFromDatabase) => {
+            return db.get(co.collections.permissions.name).findOne({ key: 'PERMISSION_ADMINISTRATION_USER' }).then((permissionFromDatabase) => {
                 //Remove the corresponding permission
                 return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                         var updatedPermission = {permissionId: permissionFromDatabase._id, canRead: true };
                         return th.put(`/api/permissions/${permissionFromDatabase._id}?token=${token}`).send(updatedPermission).expect(403);
                     });
@@ -409,8 +409,8 @@ describe('API permissions', function(){
         it('responds with an id of an existing permission which does not belong to the same client as the logged in user with 403', function() {
             //permission.clientId != user.clientId
             return db.get('clients').findOne({name: '0'}).then((clientFormDB) => {
-                return db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', clientId: clientFormDB._id}).then((permissionFromDatabase) => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER', clientId: clientFormDB._id}).then((permissionFromDatabase) => {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) =>{
                         var permissionId = permissionFromDatabase._id.toString();
                         var updatedPermission = {canRead: 'false'};
                         return th.put(`/api/folders/${permissionId}?token=${token}`).send(updatedPermission).expect(403);
@@ -422,14 +422,14 @@ describe('API permissions', function(){
         it('responds with non-existing id with 403', function(){
             // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
             // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
                 var updatedPermission = { canRead: true };
                 return th.put('/api/permissions/999999999999999999999999?token=' + token).send(updatedPermission).expect(403);
             });
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('permissions').findOne({key: validPermisionKey}).then(function(permissionFromDB){
+            return db.get(co.collections.permissions.name).findOne({key: validPermisionKey}).then(function(permissionFromDB){
                 return th.removeClientModule('1', 'base').then(function(){
                     return th.doLoginAndGetToken('1_0_1', 'test').then(function(token){
                         var updatedPermission = {key: validPermisionKey, canRead: false};
@@ -440,7 +440,7 @@ describe('API permissions', function(){
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('permissions').findOne({key: validPermisionKey}).then(function(permissionFromDB){
+            return db.get(co.collections.permissions.name).findOne({key: validPermisionKey}).then(function(permissionFromDB){
                 return th.removeClientModule('1', 'base').then(function(){
                     return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var updatedPermission = {key: validPermisionKey, canRead: false};
@@ -453,8 +453,8 @@ describe('API permissions', function(){
         it('responds with the updated permission according to the sent update data', function(done) {
             db.get('usergroups').findOne({name: '1_0'}).then((usergroupFromDatabase) => {
                 //find unique Permission as a combination of its key and userGroupId to further use its _id
-                db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: usergroupFromDatabase._id}).then((permissionFromDatabase) => {         
-                    th.doLoginAndGetToken('1_0_0', 'test').then((token) => { 
+                db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: usergroupFromDatabase._id}).then((permissionFromDatabase) => {         
+                    th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => { 
                         var updatedPermission = {
                             _id: '888888888888888888888888',
                             key: 'PERMISSION_ADMINISTRATION_USERGROUP',
@@ -490,8 +490,8 @@ describe('API permissions', function(){
         it('responds with update data containing userGroupId field with UNCHANGED userGroupId', function(done) {
             db.get('usergroups').findOne({name: '1_0'}).then((usergroupFromDatabase) => {
                 //find unique Permission as a combination of its key and userGroupId to further use its _id
-                db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: usergroupFromDatabase._id}).then((permissionFromDatabase) => {         
-                    th.doLoginAndGetToken('1_0_0', 'test').then((token) => { 
+                db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: usergroupFromDatabase._id}).then((permissionFromDatabase) => {         
+                    th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => { 
                         //try to update userGroupId, which should not be possible
                         var updatedPermission = {
                             _id: '888888888888888888888888',
@@ -524,8 +524,8 @@ describe('API permissions', function(){
         it('responds with update data containing _id field with UNCHANGED _id', function(done) {
             db.get('usergroups').findOne({name: '1_0'}).then((usergroupFromDatabase) => {
                 //find unique Permission as a combination of its key and userGroupId to further use its _id
-                db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: usergroupFromDatabase._id}).then((permissionFromDatabase) => {         
-                    th.doLoginAndGetToken('1_0_0', 'test').then((token) => { 
+                db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: usergroupFromDatabase._id}).then((permissionFromDatabase) => {         
+                    th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => { 
                         //try to update _id, which should not be possible
                         var updatedPermission = {
                             _id: '888888888888888888888888',
@@ -557,8 +557,8 @@ describe('API permissions', function(){
         it('responds with update data containing clientId field with UNCHANGED clientId', function(done) {
             db.get('usergroups').findOne({name: '1_0'}).then((usergroupFromDatabase) => {
                 //find unique Permission as a combination of its key and userGroupId to further use its _id
-                db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: usergroupFromDatabase._id}).then((permissionFromDatabase) => {         
-                    th.doLoginAndGetToken('1_0_0', 'test').then((token) => { 
+                db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: usergroupFromDatabase._id}).then((permissionFromDatabase) => {         
+                    th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => { 
                         //try to update clientId, which should not be possible
                         var updatedPermission = {
                             _id: '888888888888888888888888',
@@ -593,7 +593,7 @@ describe('API permissions', function(){
     describe('DELETE/:id', function(){
 
         it('responds with an invalid id with 400', function() {
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                 return th.del('/api/permissions/invalidId?token=' + token).expect(400);
             });
         });
@@ -601,8 +601,8 @@ describe('API permissions', function(){
         it('responds with an id of an existing permission which does not belong to the same client as the logged in user with 403', function() {
             //permission.clientId != user.clientId
             return db.get('clients').findOne({name: '0'}).then((clientFormDB) => {
-                return db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', clientId: clientFormDB._id}).then((permissionFromDatabase) => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
+                return db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER', clientId: clientFormDB._id}).then((permissionFromDatabase) => {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) =>{
                         var permissionId = permissionFromDatabase._id.toString();
                         return th.del(`/api/folders/${permissionId}?token=${token}`).expect(403);
                     });
@@ -612,16 +612,16 @@ describe('API permissions', function(){
 
         it('responds without authentication with 403', function() {
             // Load a valid permission id so we have a valid request and do not get a 404
-            return db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER'}).then((permission) => {
+            return db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER'}).then((permission) => {
                 return th.del('/api/permissions/' + permission._id.toString()).expect(403);
             });
         });
 
         it('responds without write permission with 403', function() {
-            return db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER'}).then((permission) => {
+            return db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER'}).then((permission) => {
                 // Remove the corresponding permission
                 return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_USERGROUP').then(() => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                         return th.del(`/api/permissions/${permission._id}?token=${token}`).expect(403);
                     });
                 });
@@ -631,13 +631,13 @@ describe('API permissions', function(){
         it('responds with an id that does not exist with 403', function() {
             // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
             // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                 return th.del('/api/permissions/999999999999999999999999?token=' + token).expect(403);
             });
         }); 
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('permissions').findOne({key: validPermisionKey}).then(function(permissionFromDB){
+            return db.get(co.collections.permissions.name).findOne({key: validPermisionKey}).then(function(permissionFromDB){
                 return th.removeClientModule('1', 'base').then(function(){
                     return th.doLoginAndGetToken('1_0_1', 'test').then(function(token){
                         return th.del(`/api/permissions/${permissionFromDB._id}?token=${token}`).expect(403);
@@ -647,7 +647,7 @@ describe('API permissions', function(){
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('permissions').findOne({key: validPermisionKey}).then(function(permissionFromDB){
+            return db.get(co.collections.permissions.name).findOne({key: validPermisionKey}).then(function(permissionFromDB){
                 return th.removeClientModule('1', 'base').then(function(){
                     return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         return th.del(`/api/permissions/${permissionFromDB._id}?token=${token}`).expect(403);
@@ -659,8 +659,8 @@ describe('API permissions', function(){
         it('responds with a correct id with 204', function() {
             //find unique Permission as a combination of its key and userGroupId to further use its _id
             return db.get('usergroups').findOne({name: '1_0'}).then((userGroupFromDB) => {
-            return db.get('permissions').findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: userGroupFromDB._id}).then((permissionFromDatabase) => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+            return db.get(co.collections.permissions.name).findOne({key: 'PERMISSION_ADMINISTRATION_USER', userGroupId: userGroupFromDB._id}).then((permissionFromDatabase) => {
+                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
                     return th.del(`/api/permissions/${permissionFromDatabase._id}?token=${token}`).expect(204);
                     });
                 });

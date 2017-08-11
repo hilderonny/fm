@@ -48,24 +48,7 @@ var generateLicenseKey = () => {
  */
 th.cleanDatabase = () => {
     th.dbObjects = {};
-    var promises = [
-        'activities',
-        'clientmodules',
-        'clients',
-        'documents',
-        'dynamicattributes',
-        'dynamicattributeoptions',
-        'dynamicattributevalues',
-        'fmobjects',
-        'folders',
-        'permissions',
-        'portalmodules',
-        'portals',
-        'relations',
-        'usergroups',
-        'users',
-        'markers'
-    ].map((key) => db.get(key).drop());
+    var promises = Object.keys(co.collections).map((key) => db.get(co.collections[key].name).drop());
     return Promise.all(promises); // Wait for all drop Promises to complete
 };
 
@@ -189,6 +172,7 @@ th.preparePermissions = () => {
         permissions.push({ key: co.permissions.OFFICE_DOCUMENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: co.permissions.LICENSESERVER_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: co.permissions.SETTINGS_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        permissions.push({ key: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: co.permissions.SETTINGS_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         permissions.push({ key: co.permissions.SETTINGS_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
     });
@@ -235,7 +219,7 @@ th.removeAllPermissions = (userName, permissionKey) => {
  */
 
 th.preparePortals = () => {
-    return db.get(co.collections.clients).findOne({name:th.defaults.client}).then(function(client) {
+    return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
         var portals = [
             {name: 'p1', isActive: true, licenseKey: 'LicenseKey1', clientId: client._id},
             {name: 'p2', isActive: false, licenseKey: 'LicenseKey2', clientId: client._id}
@@ -466,7 +450,7 @@ th.prepareDocuments = () => {
         documents.push({ name: client.name + '_0', clientId: client._id });
         documents.push({ name: client.name + '_1', clientId: client._id });
     });
-    return th.bulkInsert('documents', documents);
+    return th.bulkInsert(co.collections.documents.name, documents);
 };
 
 /**
@@ -480,7 +464,7 @@ th.prepareRelations = function() {
             relations.push({ type1: key1, id1: th.dbObjects[key1][0]._id, type2: key2, id2: th.dbObjects[key2][0]._id });
         });
     });
-    return th.bulkInsert('relations', relations);
+    return th.bulkInsert(co.collections.relations.name, relations);
 };
 
 /**
@@ -503,6 +487,63 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
     });
 };
 
+/**
+ * Creates 3 dynamic  attributes (one for each currently existing type)
+ */
+th.prepareDynamicAttributes = function() {
+    var dynamicAttributes = [];
+    var modelName = co.collections.users.name;
+    th.dbObjects.clients.forEach(function(client) {
+        dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: client._id, type: 'text' });
+        dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: client._id, type: 'boolean' });
+        dynamicAttributes.push({ modelName: modelName, name_en: 'picklistattribute', clientId: client._id, type: 'picklist' });
+    });
+    dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: null, type: 'text' });
+    dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: null, type: 'boolean' });
+    dynamicAttributes.push({ modelName: modelName, name_en: 'picklistattribute', clientId: null, type: 'picklist' });
+    return th.bulkInsert(co.collections.dynamicattributes.name, dynamicAttributes);
+};
+
+/**
+ * Creates 2 options (elements) for an attribute of type picklist;
+ *      attribute.modelName: 'users',
+ *      attribute.name_en: 'gender'
+ */
+th.prepareDynamicAttributeOptions = function() {
+    var dynamicAttributeOptions = [];
+    th.dbObjects.dynamicattributes.forEach(function(attribute){
+        if (attribute.type === 'picklist') {
+            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'female', clientId: attribute.clientId});
+            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clientId: attribute.clientId});
+        }
+    });
+    return th.bulkInsert(co.collections.dynamicattributeoptions.name, dynamicAttributeOptions);
+};
+
+/**
+ * Creates dummy example values
+ */
+th.prepareDynamicAttributeValues = function() {
+    var dynamicAttributeValues = [];
+    th.dbObjects.dynamicattributes.forEach(function(attribute) {
+        th.dbObjects.users.forEach(function(user) {
+            if (attribute.clientId === null && user.clientId !== null) return;
+            if (attribute.clientId !== null && user.clientId === null) return;
+            if ('' + attribute.clientId !== '' + user.clientId) return;
+            var value;
+            if (attribute.type === 'text') {
+                value = user.name + ' text';
+            } else if (attribute.type === 'boolean') {
+                value = true;
+            } else if (attribute.type === 'picklist') {
+                value = th.dbObjects.dynamicattributeoptions.find((o) => o.dynamicAttributeId.toString() === attribute._id.toString())._id;
+            }
+            dynamicAttributeValues.push({dynamicAttributeId: attribute._id, entityId: user._id, clientId: attribute.clientId, value: value });
+        });
+    });
+    return th.bulkInsert(co.collections.dynamicattributevalues.name, dynamicAttributeValues);
+};
+
 th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoDatabase) => {
     var entity1;
     return db.get(entityType1).findOne({ name: nameType1 }).then((entity) => {
@@ -517,7 +558,7 @@ th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoD
             clientId: entity1.clientId
         };
         if (insertIntoDatabase) {
-            return db.get(co.collections.relations).insert(relation);
+            return db.get(co.collections.relations.name).insert(relation);
         } else {
             return Promise.resolve(relation);
         }
@@ -525,12 +566,12 @@ th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoD
 };
 
 th.createRelationsToUser = (entityType, entity) => {
-    return db.get(co.collections.users).findOne({name:th.defaults.user}).then(function(user) {
+    return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
         var relations = [
-            { type1: entityType, id1: entity._id, type2: co.collections.users, id2: user._id, clientId: user.clientId },
-            { type1: co.collections.users, id1: user._id, type2: entityType, id2: entity._id, clientId: user.clientId }
+            { type1: entityType, id1: entity._id, type2: co.collections.users.name, id2: user._id, clientId: user.clientId },
+            { type1: co.collections.users.name, id1: user._id, type2: entityType, id2: entity._id, clientId: user.clientId }
         ];
-        return db.get(co.collections.relations).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+        return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
     }).then(function() {
         return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
     });
@@ -558,15 +599,23 @@ th.defaults = {
     /**
      * Standardmandant '1' aus Datenbank auslesen und per Promise zurück geben
      */
-    getClient: function() { return db.get(co.collections.clients).findOne({name:th.defaults.client}); },
+    getClient: function(clientName) { return db.get(co.collections.clients.name).findOne({name:clientName || th.defaults.client}); },
     /**
      * Standardportal 'p1' aus Datenbank auslesen und per Promise zurück geben
      */
-    getPortal: function() { return db.get(co.collections.portals).findOne({name:th.defaults.portal}); },
+    getPortal: function() { return db.get(co.collections.portals.name).findOne({name:th.defaults.portal}); },
+    /**
+     * Standardbenutzer '1_0_0' aus Datenbank auslesen und per Promise zurück geben
+     */
+    getUser: function(userName) { return db.get(co.collections.users.name).findOne({name:userName || th.defaults.user}); },
     /**
      * Standardbenutzergruppe '1_0' aus Datenbank auslesen und per Promise zurück geben
      */
-    getUserGroup: function() { return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}); },
+    getUserGroup: function() { return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}); },
+    /**
+     * Anmeldung mit STandardbenutzer durchführen
+     */
+    login: function(userName) { return th.doLoginAndGetToken(userName || th.defaults.user, th.defaults.password); },
     otherClient: '0',
     otherUser: '0_0_0',
     password: 'test',
@@ -706,7 +755,7 @@ th.apiTests = {
                 var testObjectIds, insertedTestObjects, testObjects;
                 return createTestObjects().then(function(objects) {
                     testObjects = objects;
-                    return db.get(co.collections.clients).findOne({name:th.defaults.otherClient});
+                    return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient});
                 }).then(function(otherClient) {
                     testObjects.push({
                         clientId:otherClient._id
@@ -813,7 +862,7 @@ th.apiTests = {
             it('responds with 403 when the object with the given ID does not belong to the client of the logged in user', function() {
                 var insertedId;
                 // Get other client
-                return db.get(co.collections.clients).findOne({name:th.defaults.otherClient}).then(function(client) {
+                return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient}).then(function(client) {
                     // Create an object for the other client
                     return db.get(collection).insert({clientId:client._id});
                 }).then(function(insertedObject) {
@@ -1009,7 +1058,7 @@ th.apiTests = {
                 var otherClientId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                     loginToken = token;
-                    return db.get(co.collections.clients).findOne({name:th.defaults.otherClient});
+                    return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient});
                 }).then(function(client) {
                     otherClientId = client._id.toString();
                     return createTestObject();
@@ -1110,7 +1159,6 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
-            // TODO: Prüfung von Relationen scheint nicht zu stimmen.
             if (!skipRelations) it('All relations, where the element is the source (type1, id1), are also deleted', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
@@ -1118,12 +1166,12 @@ th.apiTests = {
                     return getId();
                 }).then(function(id) {
                     objectId = id;
-                    return db.get(co.collections.relations).find({type1:collection,id1:objectId});
+                    return db.get(co.collections.relations.name).find({type1:collection,id1:objectId});
                 }).then(function(relationsBefore) {
                     assert.notEqual(relationsBefore.length, 0, 'There are no relations set up to test. Have a look into the testHelpers.prepare... functions.');
                     return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
                 }).then(function() {
-                    return db.get(co.collections.relations).find({type1:collection,id1:objectId});
+                    return db.get(co.collections.relations.name).find({type1:collection,id1:objectId});
                 }).then(function(relationsAfter) {
                     assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
                     return Promise.resolve();
@@ -1136,12 +1184,12 @@ th.apiTests = {
                     return getId();
                 }).then(function(id) {
                     objectId = id;
-                    return db.get(co.collections.relations).find({type2:collection,id2:objectId});
+                    return db.get(co.collections.relations.name).find({type2:collection,id2:objectId});
                 }).then(function(relationsBefore) {
                     assert.notEqual(relationsBefore.length, 0, 'There are no relations set up to test. Have a look into the testHelpers.prepare... functions.');
                     return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
                 }).then(function() {
-                    return db.get(co.collections.relations).find({type2:collection,id2:objectId});
+                    return db.get(co.collections.relations.name).find({type2:collection,id2:objectId});
                 }).then(function(relationsAfter) {
                     assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
                     return Promise.resolve();

@@ -34,6 +34,7 @@
     "TRK_FMOBJECTS_Z" : "Z",
     "TRK_MENU_BIM" : "FM",
     "TRK_MENU_BIM_FMOBJECTS" : "FM Objekte",
+    "TRK_MODEL_fmobjects": "FM Objekte",
     "TRK_MODULE_fmobjects_NAME" : "FM Objekte",
     "TRK_NO" : "Nein",
     "TRK_YES" : "Ja"

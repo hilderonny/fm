@@ -31,8 +31,8 @@ describe('API relations', function() {
     describe('GET/:entityType/:id', function() {
 
         function createGetTestRelation() {
-            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, th.defaults.user).then(function(preparedRelation) {
-                return db.get(co.collections.relations).insert(preparedRelation);
+            return th.createRelation(co.collections.activities.name, th.defaults.activity, co.collections.users.name, th.defaults.user).then(function(preparedRelation) {
+                return db.get(co.collections.relations.name).insert(preparedRelation);
             });
         }
 
@@ -145,7 +145,7 @@ describe('API relations', function() {
     describe('POST/', function() {
 
         function createPostTestRelation() {
-            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, th.defaults.user);
+            return th.createRelation(co.collections.activities.name, th.defaults.activity, co.collections.users.name, th.defaults.user);
         }
 
         th.apiTests.post.defaultNegative(co.apis.relations, false, createPostTestRelation);
@@ -231,7 +231,7 @@ describe('API relations', function() {
 
         it('responds with 403 when the type1 entity for the given id1 does not belong to the client of the user', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
-                return th.createRelation(co.collections.activities, '0_0_0_0', co.collections.users, th.defaults.user).then((preparedRelation)=>{
+                return th.createRelation(co.collections.activities.name, '0_0_0_0', co.collections.users.name, th.defaults.user).then((preparedRelation)=>{
                     return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(403);
                 });
             });
@@ -239,7 +239,7 @@ describe('API relations', function() {
 
         it('responds with 403 when the type2 entity for the given id2 does not belong to the client of the user', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token)=>{
-                return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, '0_0_0').then((preparedRelation)=>{
+                return th.createRelation(co.collections.activities.name, th.defaults.activity, co.collections.users.name, '0_0_0').then((preparedRelation)=>{
                     return th.post(`/api/${co.apis.relations}?token=${token}`).send(preparedRelation).expect(403);
                 });
             });
@@ -262,7 +262,7 @@ describe('API relations', function() {
                 return th.post(`/api/${co.apis.relations}?token=${token}`).send(newRelation).expect(200);
             }).then(function(response) {
                 var relationFromApi = response.body; 
-                db.get(co.collections.relations).findOne(relationFromApi._id).then((relationAfterCreation)=>{
+                db.get(co.collections.relations.name).findOne(relationFromApi._id).then((relationAfterCreation)=>{
                     assert.ok(relationAfterCreation, 'New Relation wasn not created');
                     assert.strictEqual(relationAfterCreation.type1, relationFromApi.type1,`type1 (${relationFromApi.type1} from API, differs from type1 ${relationAfterCreation.type1} in database)` );
                     assert.strictEqual(relationAfterCreation.id1.toString(), relationFromApi.id1.toString(),`Id1 (${relationFromApi.id1} from API, differs from id1 ${relationAfterCreation.id1} in database)`  );
@@ -275,7 +275,7 @@ describe('API relations', function() {
 
         it('responds with 200 and creates a relation between two entities of same types', function() {
             var preparedRelation;
-            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.activities, '1_0_0_1').then(function(relation) {
+            return th.createRelation(co.collections.activities.name, th.defaults.activity, co.collections.activities.name, '1_0_0_1').then(function(relation) {
                 preparedRelation = relation;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -288,7 +288,7 @@ describe('API relations', function() {
                 return th.post(`/api/${co.apis.relations}?token=${token}`).send(newRelation).expect(200);
             }).then(function(response) {
                 var relationFromApi = response.body; 
-                db.get(co.collections.relations).findOne(relationFromApi._id).then(function(relationAfterCreation){
+                db.get(co.collections.relations.name).findOne(relationFromApi._id).then(function(relationAfterCreation){
                     assert.ok(relationAfterCreation, 'New Relation wasn not created');
                     assert.strictEqual(relationAfterCreation.type1, relationFromApi.type2,`type1 (${relationFromApi.type2} from API, differs from type2 ${relationAfterCreation.type1} in database)` );
                     assert.strictEqual(relationAfterCreation.id1.toString(), relationFromApi.id1.toString(),`Id1 (${relationFromApi.id1} from API, differs from id1 ${relationAfterCreation.id1} in database)`  );
@@ -301,7 +301,7 @@ describe('API relations', function() {
 
         it('responds with 200 and creates a relation between the same entities (id1=id2 and type1=type2)', function() {
             var preparedRelation;
-            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.activities, th.defaults.activity).then(function(relation) {
+            return th.createRelation(co.collections.activities.name, th.defaults.activity, co.collections.activities.name, th.defaults.activity).then(function(relation) {
                 preparedRelation = relation;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -314,7 +314,7 @@ describe('API relations', function() {
                 return th.post(`/api/${co.apis.relations}?token=${token}`).send(newRelation).expect(200);
             }).then(function(response) {
                 var relationFromApi = response.body; 
-                db.get(co.collections.relations).findOne(relationFromApi._id).then(function(relationAfterCreation){
+                db.get(co.collections.relations.name).findOne(relationFromApi._id).then(function(relationAfterCreation){
                     assert.ok(relationAfterCreation, 'New Relation wasn not created');
                     assert.strictEqual(relationAfterCreation.type1, relationFromApi.type2,`type1 (${relationFromApi.type2} from API, differs from type2 ${relationAfterCreation.type1} in database)` );
                     assert.strictEqual(relationAfterCreation.id1.toString(), relationFromApi.id2.toString(),`Id1 (${relationFromApi.id2} from API, differs from id1 ${relationAfterCreation.id1} in database)`  );
@@ -328,7 +328,7 @@ describe('API relations', function() {
         it('responds with 200 but does not create a relation between two entities where a relation already exists', function() {
             var relationFromDatabase;
             return createPostTestRelation().then(function(preparedRelation) {
-                return db.get(co.collections.relations).insert(preparedRelation);
+                return db.get(co.collections.relations.name).insert(preparedRelation);
             }).then(function(createdRelation) {
                 relationFromDatabase = createdRelation;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -351,14 +351,14 @@ describe('API relations', function() {
 
         it('responds with 404', function() { 
             var relationFromDatabase;
-            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, th.defaults.user).then(function(preparedRelation) {
-                return db.get(co.collections.relations).insert(preparedRelation);
+            return th.createRelation(co.collections.activities.name, th.defaults.activity, co.collections.users.name, th.defaults.user).then(function(preparedRelation) {
+                return db.get(co.collections.relations.name).insert(preparedRelation);
             }).then(function(createdRelation) {
                 relationFromDatabase = createdRelation;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
                 var updatedRelation = {
-                    type1: co.collections.activities
+                    type1: co.collections.activities.name
                 };                                
                 return th.put(`/api/${co.apis.relations}/${relationFromDatabase._id.toString()}?token=${token}`).send(updatedRelation).expect(404);
             });              
@@ -368,8 +368,8 @@ describe('API relations', function() {
     describe('DELETE/', function() {
 
         function getDeleteRelationId() {
-            return th.createRelation(co.collections.activities, th.defaults.activity, co.collections.users, th.defaults.user).then(function(preparedRelation) {
-                return db.get(co.collections.relations).insert(preparedRelation);
+            return th.createRelation(co.collections.activities.name, th.defaults.activity, co.collections.users.name, th.defaults.user).then(function(preparedRelation) {
+                return db.get(co.collections.relations.name).insert(preparedRelation);
             }).then(function(createdRelation) {
                 return Promise.resolve(createdRelation._id);
             });
@@ -377,7 +377,7 @@ describe('API relations', function() {
 
         th.apiTests.delete.defaultNegative(co.apis.relations, false, getDeleteRelationId);
         th.apiTests.delete.clientDependentNegative(co.apis.relations, getDeleteRelationId);
-        th.apiTests.delete.defaultPositive(co.apis.relations, co.collections.relations, getDeleteRelationId, true);
+        th.apiTests.delete.defaultPositive(co.apis.relations, co.collections.relations.name, getDeleteRelationId, true);
 
     });
 

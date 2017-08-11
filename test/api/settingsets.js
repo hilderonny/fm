@@ -73,15 +73,21 @@ describe('API settingsets', function(){
                     var settingSetsFromApi = res.body;
                     var expectedSettingSets = [
                         { 
-                            type: 'SETTINGSET_TYPE_USER', 
+                            type: co.settingSetTypes.USER, 
                             items: [
-                                { mainCard: 'Administration/UserSettingsCard', icon: 'User', title: 'TRK_SETTINGSET_USER_GENERAL', permission: 'PERMISSION_SETTINGS_USER' }
+                                { mainCard: 'Administration/UserSettingsCard', icon: 'User', title: 'TRK_SETTINGSET_USER_GENERAL', permission: co.permissions.SETTINGS_USER }
+                            ]
+                        },
+                        { 
+                            type: co.settingSetTypes.CLIENT, 
+                            items: [
+                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                             ]
                         },
                         {
-                            type: 'SETTINGSET_TYPE_PORTAL',
+                            type: co.settingSetTypes.PORTAL,
                             items: [
-                                { mainCard: 'Administration/PortalSettingsCard', icon: 'Server', title: 'TRK_SETTINGSET_PORTAL_GENERAL', permission: 'PERMISSION_SETTINGS_PORTAL' }
+                                { mainCard: 'Administration/PortalSettingsCard', icon: 'Server', title: 'TRK_SETTINGSET_PORTAL_GENERAL', permission: co.permissions.SETTINGS_PORTAL }
                             ]
                         }
                     ];
@@ -101,6 +107,12 @@ describe('API settingsets', function(){
                             type: 'SETTINGSET_TYPE_USER', 
                             items: [
                                 { mainCard: 'Administration/UserSettingsCard', icon: 'User', title: 'TRK_SETTINGSET_USER_GENERAL', permission: 'PERMISSION_SETTINGS_USER' }
+                            ]
+                        },
+                        { 
+                            type: co.settingSetTypes.CLIENT, 
+                            items: [
+                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                             ]
                         },
                         {
@@ -127,6 +139,12 @@ describe('API settingsets', function(){
                             items: [
                                 { mainCard: 'Administration/UserSettingsCard', icon: 'User', title: 'TRK_SETTINGSET_USER_GENERAL', permission: 'PERMISSION_SETTINGS_USER' }
                             ]
+                        },
+                        { 
+                            type: co.settingSetTypes.CLIENT, 
+                            items: [
+                                { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
+                            ]
                         }
                     ];
                     compareSettingSets(settingSetsFromApi, expectedSettingSets);
@@ -142,6 +160,12 @@ describe('API settingsets', function(){
                         if (err) return done(err);
                         var settingSetsFromApi = res.body;
                         var expectedSettingSets = [
+                            { 
+                                type: co.settingSetTypes.CLIENT, 
+                                items: [
+                                    { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
+                                ]
+                            },
                             { 
                                 type: 'SETTINGSET_TYPE_PORTAL',
                                 items: [

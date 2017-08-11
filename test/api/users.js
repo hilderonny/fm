@@ -36,7 +36,7 @@ describe('API users', function() {
                 // Check whether all users of the current client and all of their details are contained in the response
                 assert.strictEqual(users.length, 4, `Number of users differ (actual ${users.length}, expected 4)`); // 2 user groups with 2 users each;
                 // Get client of current user
-                return db.get(co.collections.users).findOne({name: th.defaults.user});
+                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
             }).then((currentUser) => {
                 var currentUserClientId = currentUser.clientId.toString();
                 users.forEach((user) => {
@@ -61,7 +61,7 @@ describe('API users', function() {
                 // Check whether all users of the current client and all of their details are contained in the response
                 assert.strictEqual(users.length, 4, `Number of users differ (actual ${users.length}, expected 4)`); // 2 user groups with 2 users each;
                 // Get client of current user
-                return db.get(co.collections.users).findOne({name: th.defaults.user});
+                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
             }).then((currentUser) => {
                 var currentUserClientId = currentUser.clientId.toString();
                 users.forEach((user) => {
@@ -84,7 +84,7 @@ describe('API users', function() {
     describe('GET/forIds', function() {
 
         function createTestUsers() {
-            return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}).then(function(userGroup) {
+            return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}).then(function(userGroup) {
                 var userGroupId = userGroup._id;
                 var clientId = userGroup.clientId;
                 var testObjects = ['testUser1', 'testUser2', 'testUser3'].map(function(name) {
@@ -99,13 +99,13 @@ describe('API users', function() {
             });
         }
 
-        th.apiTests.getForIds.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users, createTestUsers);
-        th.apiTests.getForIds.clientDependentNegative(co.apis.users, co.collections.users, createTestUsers);
+        th.apiTests.getForIds.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users.name, createTestUsers);
+        th.apiTests.getForIds.clientDependentNegative(co.apis.users, co.collections.users.name, createTestUsers);
 
         it('returns a list of users with all details except password for the given IDs', function() {
             var testUserIds, insertedUsers;
             return createTestUsers().then(function(objects) {
-                return th.bulkInsert(co.collections.users, objects);
+                return th.bulkInsert(co.collections.users.name, objects);
             }).then(function(objects) {
                 insertedUsers = objects;
                 testUserIds = objects.map((to) => to._id.toString());
@@ -138,7 +138,7 @@ describe('API users', function() {
 
         it('responds with list of all users of the given usergroup containing all details', function() {
             var currentUserGroupId, users;
-            return db.get(co.collections.usergroups).findOne({name: th.defaults.userGroup}).then(function(userGroup) {
+            return db.get(co.collections.usergroups.name).findOne({name: th.defaults.userGroup}).then(function(userGroup) {
                 currentUserGroupId = userGroup._id.toString();
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -168,12 +168,12 @@ describe('API users', function() {
 
     describe('GET/:id', function() {
 
-        th.apiTests.getId.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users);
-        th.apiTests.getId.clientDependentNegative(co.apis.users, co.collections.users);
+        th.apiTests.getId.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users.name);
+        th.apiTests.getId.clientDependentNegative(co.apis.users, co.collections.users.name);
 
         it('responds with existing user id with all details of the user', function() {
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -191,7 +191,7 @@ describe('API users', function() {
         it('responds with existing user id and specific fields with details of user containing only the given fields', function() {
             var userFromDatabase;
             var keys = ['_id', 'name']; 
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -212,7 +212,7 @@ describe('API users', function() {
     describe('POST/', function() {
 
         function createPostTestUser() {
-            return db.get(co.collections.usergroups).findOne({name:th.defaults.userGroup}).then(function(userGroup) {
+            return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}).then(function(userGroup) {
                 var testObject = {
                     name: 'newUser',
                     pass: 'newPassword',
@@ -317,7 +317,7 @@ describe('API users', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                 return th.post(`/api/${api}?token=${token}`).send(objectToSend).expect(200);
             }).then(function() {
-                return db.get(co.collections.users).findOne({name: th.defaults.user});
+                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
             }).then(function(userAfterPasswordChange) {
                 assert.ok(bcryptjs.compareSync(objectToSend.pass, userAfterPasswordChange.pass));
                 return Promise.resolve();
@@ -331,7 +331,7 @@ describe('API users', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                 return th.post(`/api/${api}?token=${token}`).send(objectToSend).expect(200);
             }).then(function() {
-                return db.get(co.collections.users).findOne({name: th.defaults.user});
+                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
             }).then(function(userAfterPasswordChange) {
                 assert.ok(bcryptjs.compareSync(objectToSend.pass, userAfterPasswordChange.pass));
                 return Promise.resolve();
@@ -343,7 +343,7 @@ describe('API users', function() {
     describe('PUT/:id', function() {
 
         function createPutTestUser() {
-            return db.get(co.collections.users).findOne({name:th.defaults.user}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
                 var testObject = {
                     _id: user._id.toString(), // Needed in testHelpers to construct the URL with ID
                     name: 'newUserName',
@@ -362,7 +362,7 @@ describe('API users', function() {
                 pass: 'newpass'
             };
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -389,7 +389,7 @@ describe('API users', function() {
                 name: 'newName'
             };
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -407,7 +407,7 @@ describe('API users', function() {
                 userGroupId: 'invalidId'
             };
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -420,7 +420,7 @@ describe('API users', function() {
                 userGroupId: '999999999999999999999999'
             };
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -433,7 +433,7 @@ describe('API users', function() {
                 name: th.defaults.user
             };
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -447,7 +447,7 @@ describe('API users', function() {
                 pass: 'newPass'
             };
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
             }).then(function(token) {
@@ -463,9 +463,9 @@ describe('API users', function() {
         it('responds with a new userGroup with an updated user with the new userGroupId', function() {
             var updatedUser = {};
             var userFromDatabase;
-            return db.get(co.collections.users).findOne({name: '1_1_0'}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
                 userFromDatabase = user;
-                return db.get(co.collections.usergroups).findOne({name:'1_1'});
+                return db.get(co.collections.usergroups.name).findOne({name:'1_1'});
             }).then(function(userGroup) {
                 updatedUser.userGroupId = userGroup._id.toString();
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
@@ -483,12 +483,12 @@ describe('API users', function() {
     describe('DELETE/:id', function() {
 
         function getDeleteUserId() {
-            return db.get(co.collections.users).findOne({name:th.defaults.user}).then(function(user) {
+            return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
                 delete user._id;
                 user.name = 'newUserToDelete';
-                return db.get(co.collections.users).insert(user);
+                return db.get(co.collections.users.name).insert(user);
             }).then(function(insertedUser) {
-                return th.createRelationsToUser(co.collections.users, insertedUser);
+                return th.createRelationsToUser(co.collections.users.name, insertedUser);
             }).then(function(insertedUser) {
                 return Promise.resolve(insertedUser._id);
             });
@@ -496,7 +496,7 @@ describe('API users', function() {
 
         th.apiTests.delete.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, getDeleteUserId);
         th.apiTests.delete.clientDependentNegative(co.apis.users, getDeleteUserId);
-        th.apiTests.delete.defaultPositive(co.apis.users, co.collections.users, getDeleteUserId);
+        th.apiTests.delete.defaultPositive(co.apis.users, co.collections.users.name, getDeleteUserId);
         
     });
 

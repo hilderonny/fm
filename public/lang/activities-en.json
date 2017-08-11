@@ -29,6 +29,7 @@
     "TRK_ACTIVITIES_TYPE_WARRANTY" : "Warranty",
     "TRK_MENU_OFFICE" : "Office",
     "TRK_MENU_OFFICE_ACTIVITIES" : "Activities",
+    "TRK_MODEL_activities": "Activities",
     "TRK_MODULE_activities_NAME" : "Activities",
     "TRK_NO" : "No",
     "TRK_YES" : "Yes"

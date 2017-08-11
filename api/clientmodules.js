@@ -17,13 +17,13 @@ var co = require('../utils/constants');
 router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), validateId, function(req, res) {
     var client;
     var clientModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
-    req.db.get(co.collections.clients).findOne(req.params.id).then(function(c) {
+    req.db.get(co.collections.clients.name).findOne(req.params.id).then(function(c) {
         if (!c) {
             return Promise.reject();
         }
         client = c;
         // Obtain the client modules for the client
-        return req.db.get(co.collections.clientmodules).find({ 
+        return req.db.get(co.collections.clientmodules.name).find({ 
             clientId: client._id,
             module: { $in: clientModuleKeys }
         });
@@ -51,18 +51,18 @@ router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clie
     if (!clientModule || Object.keys(clientModule).length < 2 || !clientModule.clientId || !validateId.validateId(clientModule.clientId) || !clientModule.module) { // At least clientId and module
         return res.sendStatus(400);
     }
-    req.db.get(co.collections.clients).findOne(clientModule.clientId).then((client) => {
+    req.db.get(co.collections.clients.name).findOne(clientModule.clientId).then((client) => {
         if (!client) {
             return res.sendStatus(400);
         }
         // Prüfen, ob so eine Zuordnung schon besteht
-        req.db.get(co.collections.clientmodules).findOne({clientId:client._id, module:clientModule.module}).then(function(existingClientModule) {
+        req.db.get(co.collections.clientmodules.name).findOne({clientId:client._id, module:clientModule.module}).then(function(existingClientModule) {
             if (existingClientModule) {
                 return res.send(existingClientModule); // Zuordnung besteht bereits, einfach zurück schicken
             }
             delete clientModule._id; // Ids are generated automatically
             clientModule.clientId = client._id; // Make it a real id
-            req.db.insert(co.collections.clientmodules, clientModule).then((insertedClientModule) => {
+            req.db.insert(co.collections.clientmodules.name, clientModule).then((insertedClientModule) => {
                 return res.send(insertedClientModule);
             });
         });
@@ -73,7 +73,7 @@ router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clie
  * Delete client module
  */
 router.delete('/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), validateId, function(req, res) {
-    req.db.remove(co.collections.clientmodules, req.params.id).then((result) => {
+    req.db.remove(co.collections.clientmodules.name, req.params.id).then((result) => {
         if (result.result.n < 1) {
             return res.sendStatus(404);
         }

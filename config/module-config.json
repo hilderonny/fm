@@ -2,24 +2,28 @@
     "modules" : {
 
         "base": {
-            "api" : [ "login", "menu", "permissions", "usergroups", "users", "relations", "settingsets", "translations" ],
+            "api" : [ "dynamicattributes", "login", "menu", "permissions", "usergroups", "users", "relations", "settingsets", "translations" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
             "public" : [
                 "css/base.css",
                 "css/logo_avorium_komplett.svg",
                 "css/icons/material/Add Link.svg",
                 "css/icons/material/Cancel.svg",
+                "css/icons/material/Checked Checkbox.svg",
                 "css/icons/material/Delete.svg",
                 "css/icons/material/Edit.svg",
                 "css/icons/material/Exit.svg",
                 "css/icons/material/Forward.svg",
+                "css/icons/material/List.svg",
                 "css/icons/material/Menu.svg",
                 "css/icons/material/Menu black.svg",
                 "css/icons/material/Plus Math.svg",
+                "css/icons/material/Text Box.svg",
                 "css/icons/material/User.svg",
                 "css/icons/material/User Group Man Man.svg",
                 "css/icons/material/Search.svg",
                 "css/icons/material/Settings.svg",
+                "css/icons/material/View Details.svg",
                 "css/icons/office/Add Link.svg",
                 "css/icons/office/Cancel.svg",
                 "css/icons/office/Delete.svg",
@@ -31,18 +35,24 @@
                 "css/icons/office/User Group Man Man.svg",
                 "css/icons/office/Search.svg",
                 "css/icons/office/Settings.svg",
+                "css/icons/office/View Details.svg",
+                "partial/Administration/DynamicAttributeCreationFormCard.html",
+                "partial/Administration/DynamicAttributesCard.html",
+                "partial/Administration/DynamicAttributeElementCard.html",
+                "partial/Administration/DynamicAttributesEntityListCard.html",
                 "partial/Administration/SettingSetListCard.html",
                 "partial/Administration/UserCard.html",
                 "partial/Administration/UsergroupCard.html",
                 "partial/Administration/UsergrouplistCard.html",
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
+                "partial/Core/DynamicAttributesTab.html",
                 "partial/Core/RelationsMenu.html",
                 "partial/Core/RelationsTab.html",
                 "_index.html",
                 "chat.html"
             ],
-            "root" : [ "app.js", "package.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "config/localconfig.json.template" ],
+            "root" : [ "app.js", "package.json", "package-lock.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "config/localconfig.json.template" ],
             "include" : [
                 "node_modules/angular/angular.min.js",
                 "node_modules/angular-aria/angular-aria.min.js",
@@ -59,6 +69,10 @@
                 "public/js/AppSetup.js",
                 "public/js/Utils.js",
                 "public/js/MainController.js",
+                "public/js/Administration/DynamicAttributesCardController.js",
+                "public/js/Administration/DynamicAttributeCreationFormCardController.js",
+                "public/js/Administration/DynamicAttributeElementCardController.js",
+                "public/js/Administration/DynamicAttributesEntityListCardController.js",
                 "public/js/Administration/SettingSetListCardController.js",
                 "public/js/Administration/UserCardController.js",
                 "public/js/Administration/UsergroupCardController.js",
@@ -82,7 +96,8 @@
             "utils": [ "apiHelper", "configHelper", "constants", "relationsHelper" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
-                { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"}
+                { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
+                { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "View Details", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
             ]
         },
 

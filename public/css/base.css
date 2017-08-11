@@ -102,6 +102,7 @@ md-icon {
 
 md-input-container {
     margin-bottom:8px;
+    display: block;
 }
 
 md-input-container .md-errors-spacer {

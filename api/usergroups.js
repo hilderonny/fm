@@ -97,7 +97,7 @@ router.delete('/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'w', 'base'), 
                 // Delete permissions too
                 return req.db.remove('permissions', {userGroupId: id});
             }).then(() => {
-                return rh.deleteAllRelationsForEntity(co.collections.usergroups, id);
+                return rh.deleteAllRelationsForEntity(co.collections.usergroups.name, id);
             }).then(function() {
                 res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
             });

@@ -36,7 +36,7 @@ function prepareFolderStructure(db, filePath, parentFolderId, clientId, foldersT
             parentFolderId: parentFolderId,
             clientId: clientId
         };
-        documentsAndFoldersCreatePromises.push(db.insert(co.collections.folders, folder).then(function(insertedFolder) {
+        documentsAndFoldersCreatePromises.push(db.insert(co.collections.folders.name, folder).then(function(insertedFolder) {
             // Verzeichnis in Liste nachzubearbeitender Elemente aufnehmen, dabei im Parent gucken
             foldersToCreateWithDocumentList[parentPath].folders.push(insertedFolder);
             foldersToCreateWithDocumentList[filePath].instance = insertedFolder;
@@ -75,12 +75,12 @@ function extractDocument(db, zipDocument) {
                     folderWithChildren.folders.forEach(function(childFolder) {
                         if (key === './') createdFoldersInSameFolderAsZipDocument.push(childFolder);
                         childFolder.parentFolderId = parentFolderId;
-                        documentsAndFoldersUpdatePromises.push(db.update(co.collections.folders, childFolder._id, childFolder));
+                        documentsAndFoldersUpdatePromises.push(db.update(co.collections.folders.name, childFolder._id, childFolder));
                     });
                     folderWithChildren.documents.forEach(function(childDocument) {
                         if (key === './') createdDocumentsInSameFolderAsZipDocument.push(childDocument);
                         childDocument.parentFolderId = parentFolderId;
-                        documentsAndFoldersUpdatePromises.push(db.update(co.collections.documents, childDocument._id, childDocument));
+                        documentsAndFoldersUpdatePromises.push(db.update(co.collections.documents.name, childDocument._id, childDocument));
                     });
                 });
                 // Warten, bis alle Updates ausgeführt wurden, dann Aufruf zurück geben
@@ -112,7 +112,7 @@ function extractDocument(db, zipDocument) {
                     parentFolderId: zipDocument.parentFolderId, // Erst mal in das gewählte Stammverzeichnis packen. Die werden später noch umgehangen
                     isExtractable: mimeType === 'application/x-zip-compressed' || mimeType === 'application/zip'
                 };
-                documentsAndFoldersCreatePromises.push(db.insert(co.collections.documents, document).then((insertedDocument) => {
+                documentsAndFoldersCreatePromises.push(db.insert(co.collections.documents.name, document).then((insertedDocument) => {
                     foldersToCreateWithDocumentList[parentPath].documents.push(insertedDocument);
                     var documentPath = documentsHelper.getDocumentPath(insertedDocument._id);
                     documentsHelper.createPath(path.dirname(documentPath));
@@ -127,11 +127,11 @@ function extractDocument(db, zipDocument) {
 
 
 // Extract a specific document and create folder and document structure and returns the newly created folders and documents
-router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), validateId, validateSameClientId(co.collections.documents), (req, res) => {
+router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), validateId, validateSameClientId(co.collections.documents.name), (req, res) => {
     existingFolders = {};
     newFoldersInDocumentFolder = [];
     newDocumentsInDocumentFolder = [];
-    req.db.get(co.collections.documents).findOne(req.params.id).then((document) => {
+    req.db.get(co.collections.documents.name).findOne(req.params.id).then((document) => {
         if (!document.isExtractable) {
             return res.sendStatus(400);
         }

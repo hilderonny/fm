@@ -229,7 +229,7 @@ router.delete('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), valid
     var id = monk.id(req.params.id);
     req.db.remove('users', req.params.id).then((result) => {
         // Database element is available here in every case, because validateSameClientId already checked for existence
-        rh.deleteAllRelationsForEntity(co.collections.users, id).then(function() {
+        rh.deleteAllRelationsForEntity(co.collections.users.name, id).then(function() {
             res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
         });
     });

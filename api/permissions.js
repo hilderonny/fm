@@ -82,17 +82,17 @@ router.post('/', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', 'base'), fun
         permission.clientId = req.user.clientId; // Assing the new userGroup to the same client as the logged in user
         permission.userGroupId = monk.id(permission.userGroupId); // Make it a real ID
         // Check whether userGroup exists
-        req.db.get(co.collections.usergroups).findOne({ _id: permission.userGroupId, clientId: permission.clientId}).then((existingUserGroup) => {
+        req.db.get(co.collections.usergroups.name).findOne({ _id: permission.userGroupId, clientId: permission.clientId}).then((existingUserGroup) => {
             if (!existingUserGroup) {
                 // User group does not not exist or is in another client
                 return res.sendStatus(400);
             }
             // Prüfen, ob so eine Berechtigung schon besteht
-            req.db.get(co.collections.permissions).findOne({userGroupId:existingUserGroup._id, key:permission.key}).then(function(existingPermission) {
+            req.db.get(co.collections.permissions.name).findOne({userGroupId:existingUserGroup._id, key:permission.key}).then(function(existingPermission) {
                 if (existingPermission) {
                     return res.send(existingPermission); // Berechtigung besteht bereits, einfach zurück schicken
                 }
-                req.db.insert(co.collections.permissions, permission).then((insertedPermission) => {
+                req.db.insert(co.collections.permissions.name, permission).then((insertedPermission) => {
                     return res.send(insertedPermission);
                 });
             });

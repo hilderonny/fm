@@ -21,6 +21,10 @@ module.exports.apis = {
      */
     documents: 'documents',
     /**
+     * API zum Administrieren von dynamischen Attributen an Datenbankentitäten
+     */
+    dynamicattributes: 'dynamicattributes',
+    /**
      * API for extracting zipped documents
      */
     extractdocument: 'extractdocument',
@@ -97,56 +101,62 @@ module.exports.apis = {
  * var collections = require('../utils/constants').collections;
  */
 module.exports.collections = {
-    activities:'activities',
+    activities:{name:'activities', icon:'Planner', canHaveAttributes:true},
     /**
      * Modulzuordnungen für Mandanten
      */
-    clientmodules:'clientmodules',
+    clientmodules:{name: 'clientmodules', canHaveAttributes:false},
     /**
      * Mandanten
      */
-    clients:'clients',
+    clients:{name:'clients', icon:'Briefcase', canHaveAttributes:true},
     /**
      * Dokumente
      */
-    documents:'documents',
-    dynamicattributeoptions:'dynamicattributeoptions',
-    dynamicattributes:'dynamicattributes',
-    dynamicattributevalues:'dynamicattributevalues',
+    documents:{name:'documents', icon: 'Document', canHaveAttributes:true},
+    /**
+     * Mögliche Werte für dynamische Attribute vom Typ picklist
+     */
+    dynamicattributeoptions:{name:'dynamicattributeoptions', canHaveAttributes:false},
+    /**
+     * Definitionen von dynamischen Attributen an Entitäten
+     */
+    dynamicattributes:{name:'dynamicattributes', canHaveAttributes:false},
+    dynamicattributevalues:{name:'dynamicattributevalues', canHaveAttributes:false},
     /**
      * FM Objekte
      */
-    fmobjects:'fmobjects',
+    fmobjects:{name:'fmobjects', icon:'Cottage', canHaveAttributes:true},
     /**
      * Verzeichnisse
      */
-    folders:'folders',
-    markers:'markers',
+    folders:{name:'folders', icon:'Folder', canHaveAttributes:true},
+    markers:{name:'markers', canHaveAttributes:false},
     /**
      * Zugriffsberechtigungen für Benutzergruppen
      */
-    permissions:'permissions',
+    permissions:{name:'permissions', canHaveAttributes:false},
     /**
      * Modules assigned to portals
      */
-    portalmodules:'portalmodules',
+    portalmodules:{name:'portalmodules', canHaveAttributes:false},
     /**
      * List of all portals registered to the license server. Only relevant on license server.
      */
-    portals:'portals',
+    portals:{name:'portals', icon: 'Server', canHaveAttributes:true},
     /**
      * Relations between database entities
      */
-    relations:'relations',
-    settingsets:'settingsets',
+    relations:{name:'relations', canHaveAttributes:false},
+    settingsets:{name:'settingsets', canHaveAttributes:false},
     /**
      * Usergroups for users
      */
-    usergroups:'usergroups',
+    usergroups:{name:'usergroups', icon:'User Group Man Man', canHaveAttributes: true},
     /**
      * Users which can login to the system
      */
-    users:'users'
+    users:{name:'users', icon:'User', canHaveAttributes: true}
 };
 
 /**
@@ -225,6 +235,10 @@ module.exports.permissions = {
      */
     SETTINGS_CLIENT: 'PERMISSION_SETTINGS_CLIENT',
     /**
+     * Permission to view and edit dynamic attribute definitions and picklist options
+     */
+    SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
+    /**
      * Permission to show and change the settings of the portal (license key, etc.)
      */
     SETTINGS_PORTAL: 'PERMISSION_SETTINGS_PORTAL',
@@ -235,20 +249,37 @@ module.exports.permissions = {
 };
 
 /**
- * List of all possible dynamic attribute types. Used for validation in dynamicattributes API.
+ * Auflistung von Einstellungsarten, die bestimmen, in welchem Abschnitt die Einstellungen angezeigt werden
  */
-module.exports.dynamicAttributeTypes = [
-    'text',
-    'boolean',
-    'picklist'
-];
+module.exports.settingSetTypes = {
+    /**
+     * Mandantenebene
+     */
+    CLIENT: 'SETTINGSET_TYPE_CLIENT',
+    /**
+     * Portalebene
+     */
+    PORTAL: 'SETTINGSET_TYPE_PORTAL',
+    /**
+     * Benutzerebene
+     */
+    USER: 'SETTINGSET_TYPE_USER'
+};
 
 /**
- * List of all possible models that can have dynamic attribute. Used for option selection in dynamicattributes API.
+ * Erlaubte Typen von dynamischen Attributen
  */
-
-module.exports.models = [
-    'documents',
-    'usergroups',
-    'users'
-];
+module.exports.dynamicAttributeTypes = {
+    /**
+     * Value kann ein beliebiger string sein
+     */
+    text: 'text',
+    /**
+     * Value kann true oder false sein
+     */
+    boolean: 'boolean',
+    /**
+     * Value kann eine ObjectId auf eine Entität sein
+     */
+    picklist: 'picklist'
+};

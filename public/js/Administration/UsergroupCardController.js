@@ -35,8 +35,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
     // Click on Save-button to save an existing userGroup
     $scope.saveUserGroup = function() {
         var userGroupToSend = { name: $scope.userGroup.name };
-        $http.put('/api/usergroups/' + $scope.userGroup._id, userGroupToSend).then(function(response) {
-            var savedUsergroup = response.data;
+        utils.saveEntity($scope, 'usergroups', $scope.userGroup._id, '/api/usergroups/', userGroupToSend).then(function(savedUsergroup) {
             $scope.userGroupName = $scope.userGroup.name;
             if ($scope.params.saveUserGroupCallback) {
                 $scope.params.saveUserGroupCallback(savedUsergroup);
@@ -143,6 +142,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
                 $scope.userGroup.users = usersResponse.data;
                 return $scope.getPermissions();
             }).then(function() {
+                utils.loadDynamicAttributes($scope, 'usergroups', $scope.params.userGroupId);
                 utils.setLocation('/usergroups/' + $scope.params.userGroupId);
             });
         } else {

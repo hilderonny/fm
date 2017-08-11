@@ -31,8 +31,8 @@ describe('API portalmodules', function(){
 
         var api = `${co.apis.portalmodules}/forPortal`;
 
-        th.apiTests.getId.defaultNegative(api, co.permissions.LICENSESERVER_PORTAL, co.collections.portals);
-        th.apiTests.getId.clientDependentNegative(api, co.collections.portals);
+        th.apiTests.getId.defaultNegative(api, co.permissions.LICENSESERVER_PORTAL, co.collections.portals.name);
+        th.apiTests.getId.clientDependentNegative(api, co.collections.portals.name);
 
         xit('responds with all portal modules where the states are correctly set', function() {
         });
@@ -42,7 +42,7 @@ describe('API portalmodules', function(){
     describe('POST/', function() {
 
         it('responds without assigning any portalmodule data with 400', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
                 return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
                     return th.post(`/api/portalmodules?token=${token}`).send().expect(400);
                 });
@@ -51,7 +51,7 @@ describe('API portalmodules', function(){
         });
 
         it('responds without assigning particular module data with 400', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
                 return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
                     var newModule = {
                         portalId: portalFromDB._id
@@ -62,7 +62,7 @@ describe('API portalmodules', function(){
         });
 
         it('responds without assigning portalId data with 400', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
                 return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
                     var newModule = {
                         module: 'activities'
@@ -73,7 +73,7 @@ describe('API portalmodules', function(){
         });
 
         it('responds with assigning non-existing portalId with 400', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
                 return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
                     var newModule = {
                         module: 'activities',
@@ -85,9 +85,9 @@ describe('API portalmodules', function(){
         });
 
         it('responds with valid data but without write permission with 403', function(){
-            return db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
                 return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
                         //both module and portalId have to be provided
                         var newModule = {
                             module: 'activities',
@@ -100,7 +100,7 @@ describe('API portalmodules', function(){
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
                 return th.removeClientModule('1', 'licenseserver').then(function(){
                     return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
                         var newModule = {portalId: portalFromDB._id,
@@ -112,7 +112,7 @@ describe('API portalmodules', function(){
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
                 return th.removeClientModule('1', 'licenseserver').then(function(){
                     return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                         var newModule = {portalId: portalFromDB._id,
@@ -194,7 +194,7 @@ describe('API portalmodules', function(){
         it('responds with valid data but without write permission with 403', function(){
             return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
                 return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
+                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
                         var id = portalFromDB._id;
                         return th.del(`/api/portalmodules/${id}?token=${token}`).expect(403);
                     });
@@ -203,8 +203,8 @@ describe('API portalmodules', function(){
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get('portalmodules').findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
                     return th.removeClientModule('1', 'licenseserver').then(function(){
                         return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                             var id = portalModuleFromDB._id;
@@ -216,8 +216,8 @@ describe('API portalmodules', function(){
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get('portalmodules').findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
                     return th.removeClientModule('1', 'licenseserver').then(function(){
                         return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
                             var id = portalModuleFromDB._id;
@@ -235,8 +235,8 @@ describe('API portalmodules', function(){
         });
 
         it('responds with correct existing id with 204', function(done){
-            db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                db.get('portalmodules').findOne({module: 'documents', portalId: portalFromDB._id}).then(function(portalModuleFromDB){
+            db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
+                db.get(co.collections.portalmodules.name).findOne({module: 'documents', portalId: portalFromDB._id}).then(function(portalModuleFromDB){
                     th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
                         var id = portalModuleFromDB._id;
                         th.del(`/api/portalmodules/${id}?token=${token}`).expect(204).end(function(err,res){
@@ -244,7 +244,7 @@ describe('API portalmodules', function(){
                                 done(err);
                                 return;
                             }
-                            db.get('portalmodules').findOne({_id: id}).then((stillExistingPortalModule) => {
+                            db.get(co.collections.portalmodules.name).findOne({_id: id}).then((stillExistingPortalModule) => {
                                 assert.ok(!stillExistingPortalModule, 'portal module has not been deleted from database');
                                 done();
                             });

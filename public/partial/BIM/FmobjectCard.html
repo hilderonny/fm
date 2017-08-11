@@ -77,7 +77,8 @@
                             </md-input-container>
                         </md-card-content>  
                     </md-divider>
-
+                    
+                    <ng-include flex ng-if="!isNewFmObject" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
                 </md-card-content>
 
                 <md-card-actions layout="row" layout-align="end center">

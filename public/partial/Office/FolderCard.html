@@ -33,7 +33,7 @@
                     <label translate>TRK_FOLDERS_NAME</label>
                     <input ng-model="folder.name" name="name">
                 </md-input-container>
-
+                <ng-include flex ng-if="!isNewFolder" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>
                 <md-card-actions layout="row" layout-align="end center">
                     <md-button class="md-raised md-accent" ng-if="isNewFolder" ng-click="createFolder()"><span translate>TRK_FOLDERS_CREATE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="!isNewFolder && canWriteDocuments" ng-click="saveFolder()"><span translate>TRK_FOLDERS_SAVE</span></md-button>

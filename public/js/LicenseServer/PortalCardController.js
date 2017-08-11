@@ -63,8 +63,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
             name: $scope.portal.name,
             isActive: $scope.portal.isActive
         };
-        $http.put('/api/portals/' + $scope.portal._id, portalToSend).then(function(response) {
-            var savedPortal = response.data;
+        utils.saveEntity($scope, 'portals',  $scope.portal._id, '/api/portals/', portalToSend).then(function(savedPortal) {
             $scope.portalName = $scope.portal.name;
             if ($scope.params.savePortalCallback) {
                 $scope.params.savePortalCallback(savedPortal);
@@ -142,6 +141,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
                 $scope.relationsEntity = { type:'portals', id:completePortal._id };
                 return $scope.getPortalModules();
             }).then(function() {
+                utils.loadDynamicAttributes($scope, 'portals', $scope.params.portalId);
                 utils.setLocation('/portals/' + $scope.params.portalId);
             });
         } else {
