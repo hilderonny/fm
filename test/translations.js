@@ -97,6 +97,7 @@ function getHardToFindTranslationKeysForModule(moduleName) {
     switch(moduleName) {
         case 'activities': return [ 'TRK_ACTIVITIES_ACTIVITY', 'TRK_ACTIVITIES_SELECT_ACTIVITY', 'TRK_MODEL_activities' ];
         case 'base': return [ 'TRK_USERGROUPS_USERGROUP', 'TRK_USERS_USER', 'TRK_USERGROUPS_SELECT_USERGROUP', 'TRK_USERS_SELECT_USER', 'TRK_MODEL_users', 'TRK_MODEL_usergroups', 'TRK_DYNAMICATTRIBUTES_NAME_de', 'TRK_DYNAMICATTRIBUTES_NAME_en', 'TRK_DYNAMICATTRIBUTES_TYPE_text', 'TRK_DYNAMICATTRIBUTES_TYPE_boolean', 'TRK_DYNAMICATTRIBUTES_TYPE_picklist' ];
+        case 'businesspartners': return [ 'TRK_BUSINESSPARTNERS_SELECT_BUSINESSPARTNER', 'TRK_MODEL_businesspartners', 'TRK_MODEL_partneraddresses' ];
         case 'clients' : return [ 'TRK_CLIENTS_CLIENT', 'TRK_CLIENTS_SELECT_CLIENT', 'TRK_MODEL_clients' ];
         case 'documents' : return [ 'TRK_DOCUMENTS_DOCUMENT', 'TRK_DOCUMENTS_DOCUMENTS', 'TRK_DOCUMENTS_SELECT_FOLDER_OR_DOCUMENT', 'TRK_FOLDERS_FOLDER', 'TRK_FOLDERS_FOLDERS', 'TRK_MODEL_documents', 'TRK_MODEL_folders' ];
         case 'fmobjects' : return [ 'TRK_FMOBJECTS_FM_OBJECT', 'TRK_FMOBJECTS_FM_OBJECTS', 'TRK_FMOBJECTS_SELECT_FM_OBJECT', 'TRK_MODEL_fmobjects' ];
@@ -184,6 +185,12 @@ function collectPermissionTranslationKeys(translationKeys) {
     });
 }
 
+function collectBusinessPartnersTranslationKeys(translationKeys) {
+    ['Primaryaddress','Postaddress','Delivaryaddress','Billaddress'].forEach((key) => {
+        addTranslationKeyIfNotExists(translationKeys, 'TRK_BUSINESSPARTNERS_ADDRESS_TYPE_' + key);
+    });
+}
+
 function findPermissionKeyInModuleConfig(permissionKey, errors, fileName) {
     var found = false;
     Object.keys(moduleConfig.modules).forEach(function eachModule(moduleName) {
@@ -227,6 +234,9 @@ describe('Translations', function describeTranslations() {
             if (moduleName === 'base') {
                 collectPermissionTranslationKeys(translationKeys);
             }
+            if (moduleName === 'businesspartners') {
+                collectBusinessPartnersTranslationKeys(translationKeys);
+            }
             // Iterate over languages defined in the module
             if (mod.languages) mod.languages.forEach(function eachLanguage(language) {
 
@@ -245,7 +255,7 @@ describe('Translations', function describeTranslations() {
 
                         // Constructed translations result in finding "TRK_".
                         // They normally  represent type lists and are ignored here
-                        if (['TRK_', 'TRK_MODULE_', 'TRK_DYNAMICATTRIBUTES_NAME_', 'TRK_MODEL_', 'TRK_DYNAMICATTRIBUTES_TYPE_'].indexOf(translationKey) >= 0) return;
+                        if (['TRK_', 'TRK_MODULE_', 'TRK_DYNAMICATTRIBUTES_NAME_', 'TRK_MODEL_', 'TRK_DYNAMICATTRIBUTES_TYPE_', 'TRK_BUSINESSPARTNERS_ADDRESS_TYPE_'].indexOf(translationKey) >= 0) return;
                         
                         var keyExists = keyCollection.indexOf(translationKey) >= 0;
                         var message = `Translation key ${translationKey} is not defined in file ${fileName}`;

@@ -29,6 +29,28 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
                 return Promise.resolve(relations);
             });
         },
+        businesspartners: function(relationList) {
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/businesspartners/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var partners = response.data;
+                if (!partners || partners.length < 1) return resolve(false);
+                var relations = {
+                    title: 'BUSINESSPARTNERS_BUSINESSPARTNERS',
+                    items: partners.map(function(partner) {
+                        return {
+                            icon:'material/Business', 
+                            firstLine:partner.name,
+                            id:partner._id,
+                            relationId:targetIds[partner._id].relationId,
+                            targetUrl:'/businesspartners/' + partner._id
+                        };
+                    })
+                }
+                $scope.relations.businesspartners = relations;
+                return Promise.resolve(relations);
+            });
+        },
         clients: function(relationList) {
             var targetIds = {};
             relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
@@ -192,7 +214,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
                 $scope.relations.users = relations;
                 return Promise.resolve(relations);
             });
-        },
+        }        
     };
 
     /**

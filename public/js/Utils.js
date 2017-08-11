@@ -101,6 +101,15 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             }
         },
 
+        removeAllCards: function() {
+            var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
+            var cards = cardCanvas.children();
+            angular.forEach(cards, function(index, key) {
+                var card = cards[key];
+                utils.removeCard(angular.element(card));
+            });
+        },
+
         /**
          * Wartet darauf, dass eine Karte gerendert wird und scrollt diese dann ins Blickfeld
          */

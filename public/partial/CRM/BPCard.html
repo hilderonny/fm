@@ -1,0 +1,83 @@
+<md-card ng-cloak  ng-controller="CRMBPCardController"  style="background-image:url('/css/icons/office/Business.svg');" class="list-details-details">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-if="!isNewPartner" ng-click="addAddress()"  aria-label="ADD ADDRESS">
+            <md-tooltip md-direction="bottom"><span translate>TRK_BUSINESSPARTNERS_ADD_ADDRESS</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+            <p translate>TRK_BUSINESSPARTNERS_ADDRESS</p>
+        </md-button>       
+        <ng-include ng-if="!isNewPartner" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" ng-if="!isNewPartner"><span ng-bind="partnerName"></span></span>
+            <span class="md-headline" ng-if="isNewPartner" translate>TRK_BUSINESSPARTNERS_NEW_BUSINESSPARTNER</span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <script type ="text/ng-template" id ="PartnersFormTemplate">
+        <md-card-content>
+            <form name = "partnersForm" Layout ="column">
+
+                <md-input-container flex>
+                    <label translate>TRK_BUSINESSPARTNERS_NAME</label>
+                    <input ng-model ="partner.name" name ="name">
+                </md-input-container>
+
+                <md-input-container flex ng-disabled="partnersForm.$invalid">
+                <label translate>TRK_BUSINESSPARTNERS_INDUSTRY</label>
+                <input ng-model ="partner.industry" name ="name">
+                </md-input-container>
+
+                <md-input-container flex ng-disabled="partnersForm.$invalid">
+                    <md-checkbox ng-model="partner.isJuristic"><span translate>TRK_BUSINESSPARTNERS_IS_JURISTIC</span></md-checkbox>
+                </md-input-container>
+
+                <md-input-container flex  ng-disabled="partnersForm.$invalid">
+                    <label translate>TRK_BUSINESSPARTNERS_ROLE</label>
+                <input ng-model ="partner.rolle" name ="name">
+                </md-input-container>
+
+                <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
+
+                <md-card-actions layout="row" layout-align="end center">
+                    <md-button class="md-raised md-accent" ng-if="isNewPartner && canWriteBusinessPartnerDetails" ng-click="createPartner()" ng-disabled="partnersForm.$invalid"><span translate>TRK_BUSINESSPARTNERS_CREATE</span></md-button>
+                    <md-button class="md-raised md-accent" ng-if="!isNewPartner && canWriteBusinessPartnerDetails" ng-click="savePartner()" ng-disabled="partnersForm.$invalid"><span translate>TRK_BUSINESSPARTNERS_SAVE</span></md-button>
+                    <md-button class="md-raised md-warn" ng-if="!isNewPartner && canWriteBusinessPartnerDetails" ng-click="deletePartner()"><span translate>TRK_BUSINESSPARTNERS_DELETE</span></md-button>
+                </md-card-actions>
+
+            </form>
+        </md-card-content>
+    </script>
+
+    <md-tabs flex ng-if="!isNewPartner">
+        <md-tab>
+            <md-tab-label><span translate>TRK_BUSINESSPARTNERS_DETAILS</span></md-tab-label>
+            <md-tab-body><ng-include src="'PartnersFormTemplate'"></ng-include></md-tab-body>
+        </md-tab>
+        <md-tab>
+            <md-tab-label><span translate>TRK_BUSINESSPARTNERS_ADDRESSES</span></md-tab-label>
+            <md-tab-body>
+                <md-card-content>
+                    <md-list class="lines-beetween-items">
+                        <md-list-item ng-repeat="partnerAddress in partner.partnerAddresses | orderBy:'street'" class="md-2-line" ng-click="selectBPAddress(partnerAddress)" ng-class="{active:selectedBPAddress == partnerAddress}" aria-label="SELECT ADDRESS">
+                            <md-icon md-svg-src="{{typeIcons[partnerAddress.type]}}" ></md-icon>
+                            <div class="md-list-item-text multiline">
+                                <h3 ng-bind="partnerAddress.street"></h3>
+                                <p><span ng-bind="partnerAddress.postcode"></span> <span ng-bind="partnerAddress.city"></span></p>   
+                            </div>
+                            <md-divider ng-if="!$last"></md-divider>
+                        </md-list-item> 
+                    </md-list>
+                </md-card-content>
+            </md-tab-body>
+        </md-tab>
+        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
+    </md-tabs>
+
+    <ng-include flex ng-if="isNewPartner" src="'PartnersFormTemplate'"></ng-include>
+
+</md-card>

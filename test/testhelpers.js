@@ -110,6 +110,7 @@ th.prepareClientModules = () => {
         clientModules.push({ clientId: client._id, module: co.modules.documents });
         clientModules.push({ clientId: client._id, module: co.modules.fmobjects });
         clientModules.push({ clientId: client._id, module: co.modules.licenseserver });
+        clientModules.push({ clientId: client._id, module: co.modules.businesspartners });
     });
     return th.bulkInsert('clientmodules', clientModules);
 };
@@ -164,19 +165,35 @@ th.prepareUsers = () => {
 th.preparePermissions = () => {
     var permissions = [];
     th.dbObjects.usergroups.forEach((userGroup) => {
-        permissions.push({ key: co.permissions.ADMINISTRATION_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.ADMINISTRATION_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.ADMINISTRATION_USERGROUP, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.BIM_FMOBJECT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.OFFICE_ACTIVITY, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.OFFICE_DOCUMENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.LICENSESERVER_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.SETTINGS_CLIENT, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.SETTINGS_PORTAL, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        permissions.push({ key: co.permissions.SETTINGS_USER, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        Object.keys(co.permissions).forEach((permissionKey) => {
+            permissions.push({ key: co.permissions[permissionKey], userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
+        });
     });
     return th.bulkInsert('permissions', permissions);
+};
+
+/**
+ * Creates 3 business partners for each existing client plus for the portal (without client) and returns
+ * a promise.
+ * The names of the business partners have following schema: [IndexOfClient]_[IndexOfBusinessPartner].
+ */
+th.prepareBusinessPartners = () => {
+    var businessPartners = [];
+    th.dbObjects.clients.forEach((client) => {
+        businessPartners.push({ name: client.name + '_0', clientId: client._id, industry: 'Industry 0', isJuristic: true, rolle: 'Role 0' });
+        businessPartners.push({ name: client.name + '_1', clientId: client._id, industry: 'Industry 1', isJuristic: false, rolle: 'Role 1' });
+    });
+    businessPartners.push({ name: '_0', clientId: null, industry: 'Industry 2', isJuristic: false, rolle: 'Role 2' });
+    return th.bulkInsert(co.collections.businesspartners.name, businessPartners);
+};
+
+th.preparePartnerAddresses = () => {
+    var partnerAddresses = [];
+    th.dbObjects.businesspartners.forEach((businessPartner) => {
+        partnerAddresses.push({ addressee: businessPartner.name + '_0', partnerId: businessPartner._id, clientId: businessPartner.clientId, street: 'Street', postcode: '12345', city: 'City', type: 'Primaryaddress' });
+        partnerAddresses.push({ addressee: businessPartner.name + '_1', partnerId: businessPartner._id, clientId: businessPartner.clientId, street: 'Another street', postcode: '34567', city: 'Another city', type: 'Postaddress' });
+    });
+    return th.bulkInsert(co.collections.partneraddresses.name, partnerAddresses);
 };
 
 /**
@@ -565,6 +582,18 @@ th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoD
     });
 };
 
+th.createRelationsToBusinessPartner = (entityType, entity) => {
+    return db.get(co.collections.businesspartners.name).findOne({name:th.defaults.businessPartner}).then(function(businessPartner) {
+        var relations = [
+            { type1: entityType, id1: entity._id, type2: co.collections.businesspartners.name, id2: businessPartner._id, clientId: businessPartner.clientId },
+            { type1: co.collections.businesspartners.name, id1: businessPartner._id, type2: entityType, id2: entity._id, clientId: businessPartner.clientId }
+        ];
+        return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+    }).then(function() {
+        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
+    });
+};
+
 th.createRelationsToUser = (entityType, entity) => {
     return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
         var relations = [
@@ -592,6 +621,7 @@ th.getModuleForApi = function(api) {
 th.defaults = {
     activity: '1_0_0_0',
     adminUser: '1_0_ADMIN0',
+    businessPartner: '1_0',
     /**
      * Standardmandant '1'
      */
@@ -618,6 +648,7 @@ th.defaults = {
     login: function(userName) { return th.doLoginAndGetToken(userName || th.defaults.user, th.defaults.password); },
     otherClient: '0',
     otherUser: '0_0_0',
+    partnerAddress: '1_0_0',
     password: 'test',
     /**
      * Standardportal 'p1'

@@ -26,6 +26,19 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 $scope.showListDialog('ACTIVITIES_SELECT_ACTIVITY', listItems); // Dialog für einfache Listen öffnen
             });
         } },
+        { icon: 'Business', translationKey: 'BUSINESSPARTNERS_BUSINESSPARTNERS', requiredReadPermission: 'PERMISSION_CRM_BUSINESSPARTNERS', dialogFunction: function() {
+            $http.get('/api/businesspartners').then(function(response) {
+                var listItems = response.data.map(function(partner) {
+                    return {
+                        icon:'material/Business', 
+                        firstLine:partner.name,
+                        type:'businesspartners',
+                        id:partner._id
+                    };
+                });
+                $scope.showListDialog('BUSINESSPARTNERS_SELECT_BUSINESSPARTNER', listItems);
+            });
+        } },
         { icon: 'Briefcase', translationKey: 'CLIENTS_CLIENT', requiredReadPermission: 'PERMISSION_ADMINISTRATION_CLIENT', dialogFunction: function() {
             $http.get('/api/clients').then(function(response) {
                 var listItems = response.data.map(function(client) {
@@ -81,6 +94,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 $scope.showHierarchyDialog('FMOBJECTS_SELECT_FM_OBJECT', viewModel); // Dialog für Hierarchien öffnen
             });
         } },
+        
         { icon: 'Server', translationKey: 'PORTALS_PORTAL', requiredReadPermission: 'PERMISSION_LICENSESERVER_PORTAL', dialogFunction: function() {
             $http.get('/api/portals').then(function(response) {
                 var listItems = response.data.map(function(portal) {
@@ -104,7 +118,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                         id:usergroup._id
                     };
                 });
-                $scope.showListDialog('USERGROUPS_SELECT_USERGROUP', listItems);
+                $scope.showListDialog(' ', listItems);
             });
         } },
         { icon: 'User', translationKey: 'USERS_USER', requiredReadPermission: 'PERMISSION_ADMINISTRATION_USER', dialogFunction: function() {
@@ -120,8 +134,9 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 });
                 $scope.showListDialog('USERS_SELECT_USER', listItems);
             });
-        } }
+        } }        
     ];
+
 
     /**
      * Erstellt nach einer Auswahl eine Verknüpfung via API-Abfrage und

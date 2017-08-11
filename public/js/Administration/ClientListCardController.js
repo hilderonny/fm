@@ -59,5 +59,5 @@ app.controller('AdministrationClientListCardController', function($scope, $rootS
 
 app.directUrlMappings.clients = {
     mainMenu: 'TRK_MENU_PORTAL',
-    subMenu: 'TRK_MENU_ADMINISTRATION_CLIENTS'
+    subMenu: 'TRK_MENU_PORTAL_CLIENTS'
 };

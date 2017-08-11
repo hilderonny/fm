@@ -24,7 +24,7 @@
     "TRK_CLIENTS_SELECT_CLIENT" : "Mandant auswählen",
     "TRK_CLIENTS_USERNAME" : "Benutzername",
     "TRK_CLIENTS_USERNAMEINUSE" : "Der Benutzername ist bereits vergeben",
-    "TRK_MENU_ADMINISTRATION_CLIENTS" : "Mandanten",
+    "TRK_MENU_PORTAL_CLIENTS" : "Mandanten",
     "TRK_MENU_PORTAL" : "Portal",
     "TRK_MODEL_clients": "Mandanten",
     "TRK_MODULE_clients_NAME" : "Mandantenverwaltung",

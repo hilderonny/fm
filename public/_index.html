@@ -91,9 +91,9 @@
                 <div translate="TRK_LOGIN_LOGGED_IN_AS" translate-value-username="{{username}}"></div>
             </md-sidenav>
 
-            <md-content flex layout="row" id="cardcanvas" ng-if="currentMenuItem"></md-content>
+            <md-content flex layout="row" id="cardcanvas" ng-show="currentMenuItem"></md-content>
 
-            <md-content flex layout="row" id="dashboard" ng-if="!currentMenuItem">
+            <md-content flex layout="row" id="dashboard" ng-show="!currentMenuItem">
                 <div>
                     <ng-repeat ng-repeat="menuItem in menu">
 

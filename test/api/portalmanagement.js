@@ -16,8 +16,6 @@ describe('API portalmanagement', function() {
         return th.defaults.getUserGroup().then(function(ug) {
             userGroup = ug;
             return db.insert(co.collections.clientmodules.name, { clientId: userGroup.clientId, module: co.modules.portalbase });
-        }).then(function() {
-            return db.insert(co.collections.permissions.name, { key: co.permissions.ADMINISTRATION_SETTINGS, userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         });
     }
 

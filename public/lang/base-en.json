@@ -47,6 +47,7 @@
     "TRK_PERMISSION_ADMINISTRATION_USERGROUP" : "Administration - User groups",
     "TRK_PERMISSION_BIM_FMOBJECT" : "BIM - FM Objects",
     "TRK_PERMISSION_CORE_RELATIONS" : "General - Relations",
+    "TRK_PERMISSION_CRM_BUSINESSPARTNERS":"CRM - Business Partners",
     "TRK_PERMISSION_LICENSESERVER_PORTAL" : "License server - Portals",
     "TRK_PERMISSION_OFFICE_ACTIVITY" : "Office - Activities",
     "TRK_PERMISSION_OFFICE_DOCUMENT" : "Office - Documents",

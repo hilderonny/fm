@@ -189,6 +189,20 @@ describe('module-config.json', function() {
         return Promise.resolve();
     });
 
+    it('contains all material icons for collections defined in constants', function() {
+        var errors = [];
+        Object.keys(co.collections).forEach((key) => {
+            var collection = co.collections[key];
+            if (!collection.canHaveAttributes) return; // Nur relevant bei dynamischen Attributen
+            var filePath = `public/css/icons/material/${collection.icon}.svg`;
+            if (!fs.existsSync(path.join(rootPath, filePath))) errors.push(`File "${filePath}" does not exist.`);
+        });
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n'));
+        }
+        return Promise.resolve();
+    });
+
     /* TODO: Wieder rein nehmen, wenn die Mandantenlogos und damit auch die PERMISSION_SETTINGS_CLIENT Berechtigung kommen */
     it.skip('permissions match with those in constants', function() {
         var permissionsFromConfig = [], errors = [];

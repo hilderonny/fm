@@ -9,6 +9,10 @@ module.exports.apis = {
      */
     activities: 'activities',
     /**
+     * Geschäftspartner
+     */
+    businesspartners: 'businesspartners',
+    /**
      * API for assigning modules to clients
      */
     clientmodules: 'clientmodules',
@@ -48,6 +52,10 @@ module.exports.apis = {
      * API für retrieving menu structure
      */
     menu: 'menu',
+    /**
+     * API für Adressen von Geschäftspartnern
+     */
+    partneraddresses: 'partneraddresses',
     /**
      * API for providing permissions to usergroups
      */
@@ -103,6 +111,10 @@ module.exports.apis = {
 module.exports.collections = {
     activities:{name:'activities', icon:'Planner', canHaveAttributes:true},
     /**
+     * Geschäftspartner
+     */
+    businesspartners:{name:'businesspartners', icon:'Business', canHaveAttributes:true},
+    /**
      * Modulzuordnungen für Mandanten
      */
     clientmodules:{name: 'clientmodules', canHaveAttributes:false},
@@ -132,6 +144,10 @@ module.exports.collections = {
      */
     folders:{name:'folders', icon:'Folder', canHaveAttributes:true},
     markers:{name:'markers', canHaveAttributes:false},
+    /**
+     * Adressen von Geschäftspartnern
+     */
+    partneraddresses:{name:'partneraddresses', icon:'Address Book', canHaveAttributes:true},
     /**
      * Zugriffsberechtigungen für Benutzergruppen
      */
@@ -171,6 +187,10 @@ module.exports.modules = {
      * Grundmodul, welches in allen Installationen vorhanden ist
      */
     base: 'base',
+    /**
+     * Geschäftspartner-Modul samt Personen
+     */
+    businesspartners: 'businesspartners',
     /**
      * Modul für Mandantenverwaltung
      */
@@ -221,6 +241,10 @@ module.exports.permissions = {
      * Dynamische Verknüpfungen erstellen und ansehen
      */
     CORE_RELATIONS: 'PERMISSION_CORE_RELATIONS',
+    /**
+     * Permission to show and edit CRM
+     */
+    CRM_BUSINESSPARTNERS: 'PERMISSION_CRM_BUSINESSPARTNERS',
     /**
      * Permission to show and edit portals on the license server
      */
