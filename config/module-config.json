@@ -52,7 +52,7 @@
                 "_index.html",
                 "chat.html"
             ],
-            "root" : [ "app.js", "package.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "config/localconfig.json.template" ],
+            "root" : [ "app.js", "package.json", "package-lock.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "config/localconfig.json.template" ],
             "include" : [
                 "node_modules/angular/angular.min.js",
                 "node_modules/angular-aria/angular-aria.min.js",
