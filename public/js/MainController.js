@@ -3,7 +3,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
 
     $scope.$mdMedia = $mdMedia; // https://github.com/angular/material/issues/2341#issuecomment-93680762
 
-    $scope.logo = '/css/logo_avorium_komplett.svg';
+
 
     window.onbeforeunload = function(e) { // Shows up dialog to leave the site
         //return false;
