@@ -21,6 +21,10 @@ module.exports.apis = {
      */
     clients: 'clients',
     /**
+     * API für Kommunikationswege
+     */
+    communications: 'communications',
+    /**
      * API for edititing documents
      */
     documents: 'documents',
@@ -57,9 +61,13 @@ module.exports.apis = {
      */
     partneraddresses: 'partneraddresses',
     /**
-     * API for providing permissions to usergroups
+     * API Für Personen
      */
     permissions: 'permissions',
+    /**
+     * API for providing permissions to persons
+     */
+    persons: 'persons',
     /**
      * API for handling local portal settings like license key or checking for available updates
      */
@@ -153,6 +161,10 @@ module.exports.collections = {
      */
     permissions:{name:'permissions', canHaveAttributes:false},
     /**
+     * Personen
+     */
+    persons:{name:'persons', icon:'Collaborator Male', canHaveAttributes:true},
+    /**
      * Modules assigned to portals
      */
     portalmodules:{name:'portalmodules', canHaveAttributes:false},
@@ -242,9 +254,13 @@ module.exports.permissions = {
      */
     CORE_RELATIONS: 'PERMISSION_CORE_RELATIONS',
     /**
-     * Permission to show and edit CRM
+     * Geschäftspartner bearbeiten
      */
     CRM_BUSINESSPARTNERS: 'PERMISSION_CRM_BUSINESSPARTNERS',
+    /**
+     * Personen bearbeiten
+     */
+    CRM_PERSONS: 'PERMISSION_CRM_PERSONS',
     /**
      * Permission to show and edit portals on the license server
      */

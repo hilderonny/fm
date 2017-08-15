@@ -48,6 +48,7 @@
     "TRK_PERMISSION_BIM_FMOBJECT" : "BIM - FM Objekte",
     "TRK_PERMISSION_CORE_RELATIONS" : "Allgemein - Verknüpfungen",
     "TRK_PERMISSION_CRM_BUSINESSPARTNERS":"CRM - Geschäftspartner",
+      "TRK_PERMISSION_CRM_PERSONS":"CRM - PERSONEN",
     "TRK_PERMISSION_LICENSESERVER_PORTAL" : "Lizenzserver - Portale",
     "TRK_PERMISSION_OFFICE_ACTIVITY" : "Büro - Termine",
     "TRK_PERMISSION_OFFICE_DOCUMENT" : "Büro - Dokumente",

@@ -178,6 +178,35 @@
             ]
         },
 
+        "persons" : {
+            "api":[ "persons", "communications"],
+           
+            "public": [
+                "css/icons/material/Briefcase.svg",
+                "css/icons/office/Briefcase.svg",
+                "partial/Administration/communicationCard.html",
+                "partial/Administration/PersonCard.html",
+                "partial/Administration/PersonListCard.html"
+            ],
+
+             "include":[
+                 "public/js/Administration/CommunicationCardController.js",
+                "public/js/Administration/PersonListCardController.js",
+                "public/js/Administration/PersonCardController.js"
+            ],
+            
+            "languages" : [ "en", "de", "bg", "ar" ],
+            "menu": [
+                {
+                    "title": "TRK_MENU_CRM",
+                    "items": [
+                        { "mainCard": "Administration/PersonListCard", "icon": "Briefcase", "title": "TRK_MENU_ADMINISTRATION_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS" }
+                    ]
+                }
+            ]
+
+        },
+
         "documents": {
             "api" : [ "documents", "extractdocument", "folders" ],
             "public" : [

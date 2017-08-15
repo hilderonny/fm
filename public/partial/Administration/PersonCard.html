@@ -1,0 +1,104 @@
+<md-card ng-cloak ng-controller="AdministrationPersonCardController" style="background-image:url('/css/icons/office/Briefcase.svg');">
+
+    <md-card-title flex="none" class="withfab">
+        <md-card-title-text>
+            <span class="md-headline" ng-hide="isNewPerson">
+            <!-- ToDo: find a way to split the last and first name by comme  -->
+            <span ng-bind= "personLastname"></span>
+            <span ng-bind="personFirstname"></span>
+            </span>
+            <span class="md-headline" ng-if="isNewPerson" translate>TRK_PERSONS_NEWPERSON </span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-fab-speed-dial md-direction="down" class="md-scale relations-anchor" ng-if="!isNewPerson">
+        <md-fab-trigger>
+            <md-button class="md-fab md-accent" aria-label="MENU">
+                <md-tooltip md-direction="left">
+                    <span translate>TRK_PERSONS_MORE_ACTIONS</span>
+                </md-tooltip>
+                <md-icon md-svg-src="/css/icons/material/Menu black.svg"> </md-icon>
+            </md-button>
+        </md-fab-trigger>
+
+        <md-fab-actions>
+            <md-button class="md-fab md-raised md-mini" ng-click="addCommunication()" aria-label="ADD Communication">
+                <md-tooltip md-direction="left"> <span translate>TRK_PERSONS_ADD_COMMUNICATION</span>
+                </md-tooltip>
+                <md-icon md-svg-src="/drafts/icons/Email.svg"></md-icon>
+            </md-button>
+            <ng-include src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        </md-fab-actions>
+    </md-fab-speed-dial>
+
+    <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
+        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+    </md-button>
+
+    <script type="text/ng-template" id="PersonsFormTemplate">
+        <md-card-content>
+            <form name="personsForm" Layout="column">
+
+                <md-input-container flex>
+                    <label translate>TRK_PERSONS_LAST_NAME </label>
+                    <input ng-model="person.lastname" name="lastname">
+                </md-input-container>
+
+                <md-input-container flex ng-disabled="personsForm.$invalid">
+                    <label translate>TRK_PERSONS_FIRST_NAME </label>
+                    <input ng-model="person.firstname" name="firstname">
+                </md-input-container>
+
+                <md-input-container flex ng-disabled="personsForm.$invalid">
+                    <label translate>TRK_PERSONS_DESCRIPTION </label>
+                    <input ng-model="person.description" name="desc">
+                </md-input-container>
+
+                <md-card-actions layout="row" layout-align="end center">
+                    <md-button class="md-raised md-accent" ng-if="isNewPerson" ng-click="createPerson()" ng-disabled="personsForm.$invalid">
+                        <span translate>TRK_PERSONS_CREATE </span>
+                    </md-button>
+
+                    <md-button class="md-raised md-accent" ng-if="!isNewPerson" ng-click="savePerson()" ng-disabled="personsForm.$invalid">
+                        <span translate>TRK_PERSONS_SAVE</span>
+                    </md-button>
+
+                    <md-button class="md-raised md-warn" ng-if="!isNewPerson" ng-click="deletePerson()" ng-disabled="personsForm.$invalid">
+                        <span translate>TRK_PERSONS_DELETE</span>
+                    </md-button>
+
+                </md-card-actions>
+            </form>
+        </md-card-content>
+    </script>
+
+    <md-tabs flex ng-if="!isNewPerson">
+        <md-tab>
+            <md-tab-label>
+                <span translate>TRK_PERSONS_DETAILS</span>
+            </md-tab-label>
+            <md-tab-body>
+                <ng-include src="'PersonsFormTemplate'"> </ng-include>
+            </md-tab-body>
+        </md-tab>
+        <md-tab>
+            <md-tab-label><span translate>TRK_PERSONS_COMMUNICATIONS</span></md-tab-label>
+            <md-tab-body>
+                <md-list class="lines-between-items">
+                    <md-list-item ng-repeat="communication in communications | orderBy:'contact'" class="md-2-line" ng-click="selectCommunication(communication)" ng-class="{active:selectedCommunication == communication}">
+                        <md-icon md-svg-src="{{communication.icon}}"></md-icon>
+                        <div class="md-list-item-text multiline">
+                            <h3>{{communication.contact}}</h3>
+                            <p translate="TRK_PERSONS_COMM_{{communication.selectedTypeName}}_TYPE"> </p>
+                        </div>
+                        <md-divider ng-if="!$last"></md-divider>
+                    </md-list-item>
+                </md-list>
+            </md-tab-body>
+        </md-tab>
+               <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
+    </md-tabs>
+
+    <ng-include flex ng-if="isNewPerson" src="'PersonsFormTemplate'"></ng-include>
+
+</md-card>
