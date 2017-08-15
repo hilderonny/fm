@@ -6,6 +6,8 @@
     "licensekey": "License key you obtained from avorium",
     "licenseserverurl": "URL of the license server to fetch updates from, e.g. 'https://fm.avorium.de'",
     "npmInstallCommand": "Full commandline to do install required libraries, e.g. '\"C:\\Program Files\\nodejs\\npm.cmd\" install'",
+    "portalLogo": "URL of the pPortal's logo to be shown on the login page, can be relative 'images/logo.png' or absolute URL 'http://...'",
+    "portalName": "Portal's name to be shown on the loing page,e.g 'AVT FAcility Management '",
     "recreatePortalAdmin": "Set to true to automatically create an user 'admin' with password 'admin' when you locked you out from the portal.",
     "redirectHTTPtoHTTPS": "Set to true to let the HTTP listener redirect all requests to the secure HTTPS listener",
     "serviceName": "Name of the windows service when installed as such one, e.g. 'Avorium FM'",
