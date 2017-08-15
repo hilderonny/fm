@@ -126,26 +126,35 @@
         },
         
         "businesspartners" : {
-            "api":[ "businesspartners", "partneraddresses"],
+            "api":[ "businesspartners", "partneraddresses", "persons", "communications"],
             "public": [
                 "css/icons/material/Address Book.svg",
                 "css/icons/material/Business.svg",
+                "css/icons/material/Collaborator Male.svg",
                 "css/icons/office/Business.svg",               
+                "css/icons/office/Collaborator Male.svg",
                 "partial/CRM/BPAddressCard.html",
                 "partial/CRM/BPCard.html",
-                "partial/CRM/BPListCard.html"
+                "partial/CRM/BPListCard.html",
+                "partial/CRM/CommunicationCard.html",
+                "partial/CRM/PersonCard.html",
+                "partial/CRM/PersonListCard.html"
             ],
             "include":[
                 "public/js/CRM/BPAddressCardController.js",
                 "public/js/CRM/BPCardController.js",
-                "public/js/CRM/BPListCardController.js"
+                "public/js/CRM/BPListCardController.js",
+                "public/js/CRM/CommunicationCardController.js",
+                "public/js/CRM/PersonCardController.js",
+                "public/js/CRM/PersonListCardController.js"
             ],
             "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_CRM",
                     "items": [
-                        { "mainCard": "CRM/BPListCard", "icon": "Business", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS" }
+                        { "mainCard": "CRM/BPListCard", "icon": "Business", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS" },
+                        { "mainCard": "CRM/PersonListCard", "icon": "Collaborator Male", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS" }
                     ]
                 }
             ]
@@ -176,35 +185,6 @@
                     ]
                 }
             ]
-        },
-
-        "persons" : {
-            "api":[ "persons", "communications"],
-           
-            "public": [
-                "css/icons/material/Briefcase.svg",
-                "css/icons/office/Briefcase.svg",
-                "partial/Administration/communicationCard.html",
-                "partial/Administration/PersonCard.html",
-                "partial/Administration/PersonListCard.html"
-            ],
-
-             "include":[
-                 "public/js/Administration/CommunicationCardController.js",
-                "public/js/Administration/PersonListCardController.js",
-                "public/js/Administration/PersonCardController.js"
-            ],
-            
-            "languages" : [ "en", "de", "bg", "ar" ],
-            "menu": [
-                {
-                    "title": "TRK_MENU_CRM",
-                    "items": [
-                        { "mainCard": "Administration/PersonListCard", "icon": "Briefcase", "title": "TRK_MENU_ADMINISTRATION_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS" }
-                    ]
-                }
-            ]
-
         },
 
         "documents": {

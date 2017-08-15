@@ -1,4 +1,4 @@
-app.controller('AdministrationCommunicationCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('CRMCommunicationCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
 // Click on Create-button to create a new address
     $scope.createCommunication = function() {

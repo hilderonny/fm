@@ -1,4 +1,4 @@
-app.controller('AdministrationPersonListCardController', function($scope, $http, $mdDialog, $element,$translate, utils){
+app.controller('CRMPersonListCardController', function($scope, $http, $mdDialog, $element,$translate, utils){
 
 
 var savePersonCallback = function(savedPerson) {

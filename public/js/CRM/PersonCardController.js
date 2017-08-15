@@ -1,4 +1,4 @@
-app.controller('AdministrationPersonCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('CRMPersonCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
 
     $scope.createPerson = function(){
