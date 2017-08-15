@@ -94,8 +94,8 @@ router.put('/:id' , auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.bu
     if (Object.keys(partner).length < 1) {
         return res.sendStatus(400);
     }
-    req.db.update(co.collections.businesspartners.name, req.params.id, { $set: partner }).then((updatedParnter) => {
-        res.send(updatedParnter);
+    req.db.update(co.collections.businesspartners.name, req.params.id, { $set: partner }).then((updatedPartner) => {
+        res.send(updatedPartner);
     });
 });
 

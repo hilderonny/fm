@@ -1,3 +1,10 @@
+/**
+ * {
+ *  firstname,
+ *  lastname,
+ *  description
+ * }
+ */
 var router = require('express').Router(); //Express Router to handle all of our API routes
 var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
@@ -5,11 +12,11 @@ var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var async = require('async');
 var bcryptjs = require('bcryptjs');
-var constants = require('../utils/constants');
+var co = require('../utils/constants');
 
-router.get('/forIds', auth(false, false, 'persons'), (req, res) => {
+router.get('/forIds', auth(false, false, co.modules.businesspartners), (req, res) => {
     // Zuerst Berechtigung prüfen
-    auth.canAccess(req.user._id, 'PERMISSION_CRM_PERSONS', 'r', 'persons', req.db).then(function(accessAllowed) {
+    auth.canAccess(req.user._id, co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners, req.db).then(function(accessAllowed) {
         if (!accessAllowed) {
             return res.send([]);
         }
@@ -19,7 +26,7 @@ router.get('/forIds', auth(false, false, 'persons'), (req, res) => {
         var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
         var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
         var userId = req.user._id;
-        req.db.get('persons').find({
+        req.db.get(co.collections.persons.name).find({
             _id: { $in: ids },
             clientId: clientId,
         }).then((persons) => {
@@ -31,9 +38,9 @@ router.get('/forIds', auth(false, false, 'persons'), (req, res) => {
 /**
  * List of  all persons
  */
-router.get('/', auth('PERMISSION_CRM_PERSONS', 'r') , (req, res) =>{
+router.get('/', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners) , (req, res) =>{
     var clientId = req.user.clientId;
-     req.db.get('persons').find({clientId: clientId}).then((persons)=> {
+     req.db.get(co.collections.persons.name).find({clientId: clientId}).then((persons)=> {
         return res.send(persons);
     })  ;
 });
@@ -42,8 +49,8 @@ router.get('/', auth('PERMISSION_CRM_PERSONS', 'r') , (req, res) =>{
 /**
  * Get single person with given id
 */
-router.get('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'r','persons'), validateId, validateSameClientId('persons'),(req, res) => {
-    req.db.get('persons').findOne(req.params.id, req.query.fields).then((person) => {
+router.get('/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.persons.name),(req, res) => {
+    req.db.get(co.collections.persons.name).findOne(req.params.id, req.query.fields).then((person) => {
         res.send(person);
     });
 }); 
@@ -52,14 +59,14 @@ router.get('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'r','persons'), vali
 /**
  * creating business person details
  */
-router.post('/', auth('PERMISSION_CRM_PERSONS', 'w','persons'), function(req, res){
+router.post('/', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), function(req, res){
     var person = req.body;
     if (!person || Object.keys(person).length < 1) {
         return res.sendStatus(400);
     }
     delete person._id;
     person.clientId = req.user.clientId;
-    req.db.insert('persons', person).then((insertedPerson) => {
+    req.db.insert(co.collections.persons.name, person).then((insertedPerson) => {
         return res.send(insertedPerson);
     });
 });
@@ -67,39 +74,31 @@ router.post('/', auth('PERMISSION_CRM_PERSONS', 'w','persons'), function(req, re
 /**
  * Updating person details
  */
-router.put('/:id' , auth('PERMISSION_CRM_PERSONS', 'w','persons'),validateId,validateSameClientId('persons'),function(req,res){
-var person = req.body;
-if(!person || Object.keys(person).length < 1) {
-    return res.sendStatus(400);
-}
-delete person._id;
-if (Object.keys(person).length<1){
-    req.db.get('persons').findOne(req.params.id, req.query.fields).then((person) => {
-        if(!person){
-
-            // Person with given ID not found
-             return res.sendStatus(404);
-         }
-            return res.send(person);
-    });
-         
-}else {
-        req.db.update('persons', req.params.id, { $set: person }).then((updatedPerson) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-            res.send(updatedPerson);
-        });
+router.put('/:id' , auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners),validateId,validateSameClientId(co.collections.persons.name),function(req,res){
+    var person = req.body;
+    if(!person || Object.keys(person).length < 1) {
+        return res.sendStatus(400);
     }
-
-
+    delete person._id;
+    delete person.clientId;
+    if (Object.keys(person).length < 1) {
+        return res.sendStatus(400);
+    }
+    req.db.update(co.collections.persons.name, req.params.id, { $set: person }).then((updatedPerson) => {
+        res.send(updatedPerson);
+    });
 });
 
 /**
  * Delete person
  */
 
-router.delete('/:id', auth('PERMISSION_CRM_PERSONS', 'w','persons'),validateId,validateSameClientId('persons'), function(req,res){
+router.delete('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners),validateId,validateSameClientId(co.collections.persons.name), function(req,res){
     var personId= monk.id(req.params.id);
-    req.db.remove('relations', { $or: [ {id1:personId}, {id2:personId} ] }).then(function() {
-        return req.db.remove('persons', personId)
+    req.db.remove(co.collections.relations.name, { $or: [ {id1:personId}, {id2:personId} ] }).then(function() {
+        return req.db.remove(co.collections.communications.name, {personId:personId});
+    }).then(function() {
+        return req.db.remove(co.collections.persons.name, personId)
     }).then(function() {
         res.sendStatus(204);
     });

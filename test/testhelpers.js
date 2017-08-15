@@ -196,6 +196,25 @@ th.preparePartnerAddresses = () => {
     return th.bulkInsert(co.collections.partneraddresses.name, partnerAddresses);
 };
 
+th.preparePersons = () => {
+    var persons = [];
+    th.dbObjects.clients.forEach((client) => {
+        persons.push({ firstname: 'First 0', lastname: client.name + '_0', description: 'Description 0', clientId: client._id });
+        persons.push({ firstname: 'First 1', lastname: client.name + '_1', description: 'Description 1', clientId: client._id });
+    });
+    persons.push({ firstname: 'First 2', lastname: '_0', description: 'Description 2', clientId: null });
+    return th.bulkInsert(co.collections.persons.name, persons);
+};
+
+th.preparePersonCommunications = () => {
+    var communications = [];
+    th.dbObjects.persons.forEach((person) => {
+        communications.push({ contact: person.name + '_0', personId: person._id, clientId: person.clientId, medium: 'email', type: 'work' });
+        communications.push({ contact: person.name + '_1', personId: person._id, clientId: person.clientId, medium: 'phone', type: 'other' });
+    });
+    return th.bulkInsert(co.collections.communications.name, communications);
+};
+
 /**
  * Deletes the canRead flag of a permission of the usergroup of the user with the given name.
  */
@@ -594,6 +613,18 @@ th.createRelationsToBusinessPartner = (entityType, entity) => {
     });
 };
 
+th.createRelationsToPerson = (entityType, entity) => {
+    return db.get(co.collections.persons.name).findOne({lastname:th.defaults.person}).then(function(person) {
+        var relations = [
+            { type1: entityType, id1: entity._id, type2: co.collections.persons.name, id2: person._id, clientId: person.clientId },
+            { type1: co.collections.persons.name, id1: person._id, type2: entityType, id2: entity._id, clientId: person.clientId }
+        ];
+        return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+    }).then(function() {
+        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
+    });
+};
+
 th.createRelationsToUser = (entityType, entity) => {
     return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
         var relations = [
@@ -650,6 +681,7 @@ th.defaults = {
     otherUser: '0_0_0',
     partnerAddress: '1_0_0',
     password: 'test',
+    person: '1_0',
     /**
      * Standardportal 'p1'
      */
