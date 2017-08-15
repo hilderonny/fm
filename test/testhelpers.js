@@ -209,8 +209,8 @@ th.preparePersons = () => {
 th.preparePersonCommunications = () => {
     var communications = [];
     th.dbObjects.persons.forEach((person) => {
-        communications.push({ contact: person.name + '_0', personId: person._id, clientId: person.clientId, medium: 'email', type: 'work' });
-        communications.push({ contact: person.name + '_1', personId: person._id, clientId: person.clientId, medium: 'phone', type: 'other' });
+        communications.push({ contact: person.lastname + '_0', personId: person._id, clientId: person.clientId, medium: 'email', type: 'work' });
+        communications.push({ contact: person.lastname + '_1', personId: person._id, clientId: person.clientId, medium: 'phone', type: 'other' });
     });
     return th.bulkInsert(co.collections.communications.name, communications);
 };
@@ -682,6 +682,7 @@ th.defaults = {
     partnerAddress: '1_0_0',
     password: 'test',
     person: '1_0',
+    personCommunication: '1_0_0',
     /**
      * Standardportal 'p1'
      */

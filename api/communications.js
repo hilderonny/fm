@@ -18,10 +18,10 @@ var co = require('../utils/constants');
 var dah = require('../utils/dynamicAttributesHelper');
 
 /**
- List all parnter address of a given partner.
+ List all communications for a given person
  **/
 router.get('/forPerson/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.persons.name), (req, res) => {
-    req.db.get(co.collections.persons.name).findOne(req.query.personId).then((person) => {
+    req.db.get(co.collections.persons.name).findOne(req.params.id).then((person) => {
         if (!person) {
             return Promise.reject();
         }
@@ -78,7 +78,7 @@ router.put('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspart
     delete communication._id;
     delete communication.personId;
     delete communication.clientId;
-    if (Object.keys(address).length < 1) {
+    if (Object.keys(communication).length < 1) {
         return res.sendStatus(400);
     }
     req.db.update(co.collections.communications.name, req.params.id, { $set: communication }).then((updatedComm) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
