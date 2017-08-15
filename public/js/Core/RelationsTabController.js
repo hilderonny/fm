@@ -149,35 +149,25 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             });
         },
         persons: function(relationList) {
-            return new Promise(function(resolve, reject) {
-                var targetIds = {};
-                relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
-                $http.get('/api/persons/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
-                    var persons = response.data;
-                    if (!persons || persons.length < 1) return resolve(false);
-                    var relations = {
-                        title: 'PERSONS_PERSONS',
-                        items: persons.map(function(person) {
-                            return {
-                                icon:'material/User', 
-                                firstLine:person.lastname + ","+ person.firstname,
-                                id:person._id,
-                                relationId:targetIds[person._id].relationId,
-                                onSelect: function() {
-                                    var item = this;
-                                    return utils.replaceCardWithPermission($element, 'Administration/PersonCard', {
-                                        personId: person._id,
-                                        savePersonCallback: $scope.loadRelations,
-                                        deletePersonCallback:$scope.loadRelations,
-                                        closeCallback: function() { $scope.selectedElement = null; }
-                                    }, 'PERMISSION_CRM_PERSONS');
-                                }
-                            };
-                        })
-                    }
-                    $scope.relations.persons = relations;
-                    resolve(relations);
-                });
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/persons/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var persons = response.data;
+                if (!persons || persons.length < 1) return resolve(false);
+                var relations = {
+                    title: 'PERSONS_PERSONS',
+                    items: persons.map(function(person) {
+                        return {
+                            icon:'material/Collaborator Male', 
+                            firstLine:person.lastname + ", "+ person.firstname,
+                            id:person._id,
+                            relationId:targetIds[person._id].relationId,
+                            targetUrl:'/persons/' + person._id
+                        };
+                    })
+                }
+                $scope.relations.persons = relations;
+                return Promise.resolve(relations);
             });
         },
         portals: function(relationList) {

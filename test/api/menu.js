@@ -98,7 +98,8 @@ describe('API menu', function() {
                 {
                     title: 'TRK_MENU_CRM',
                     items: [
-                        { mainCard: 'CRM/BPListCard', icon: 'Business', title: 'TRK_MENU_CRM_BUSINESSPARTNERS'}
+                        { mainCard: 'CRM/BPListCard', icon: 'Business', title: 'TRK_MENU_CRM_BUSINESSPARTNERS'},
+                        { mainCard: 'CRM/PersonListCard', icon: 'Collaborator Male', title: 'TRK_MENU_CRM_PERSONS'}
                     ]
                 },
                 {

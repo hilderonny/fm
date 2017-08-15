@@ -1,11 +1,3 @@
-/**
- * CRUD API for Persons management
- * 
- * 
- * 
- * }
- */
-
 var router = require('express').Router(); //Express Router to handle all of our API routes
 var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
@@ -15,16 +7,6 @@ var async = require('async');
 var bcryptjs = require('bcryptjs');
 var constants = require('../utils/constants');
 
-
-
-/**
- * Liefert eine Liste von Terminen für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
- * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
- * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
- * einfach eine leere Liste zurück gegeben.
- * @example
- * $http.get('/api/busniesspartner/forIds?ids=ID1,ID2,ID3')...
- */
 router.get('/forIds', auth(false, false, 'persons'), (req, res) => {
     // Zuerst Berechtigung prüfen
     auth.canAccess(req.user._id, 'PERMISSION_CRM_PERSONS', 'r', 'persons', req.db).then(function(accessAllowed) {
@@ -123,10 +105,4 @@ router.delete('/:id', auth('PERMISSION_CRM_PERSONS', 'w','persons'),validateId,v
     });
 });
 
-
-
 module.exports = router;
-
-
-
-

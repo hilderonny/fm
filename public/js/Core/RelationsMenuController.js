@@ -94,13 +94,12 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 $scope.showHierarchyDialog('FMOBJECTS_SELECT_FM_OBJECT', viewModel); // Dialog für Hierarchien öffnen
             });
         } },
-
-        { icon: 'User', translationKey: 'PERSONS_PERSONS', requiredReadPermission: 'PERMISSION_CRM_PERSONS', dialogFunction: function() {
+        { icon: 'Collaborator Male', translationKey: 'PERSONS_PERSON', requiredReadPermission: 'PERMISSION_CRM_PERSONS', dialogFunction: function() {
             $http.get('/api/persons').then(function(response) {
                 var listItems = response.data.map(function(person) {
                     return {
-                        icon:'material/User', 
-                        firstLine:person.lastname + ","+ person.firstname,
+                        icon:'material/Collaborator Male', 
+                        firstLine:person.lastname + ", "+ person.firstname,
                         type:'persons',
                         id:person._id
                     };
@@ -108,7 +107,6 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 $scope.showListDialog('PERSONS_SELECT_PERSON', listItems);
             });
         } },
-        
         { icon: 'Server', translationKey: 'PORTALS_PORTAL', requiredReadPermission: 'PERMISSION_LICENSESERVER_PORTAL', dialogFunction: function() {
             $http.get('/api/portals').then(function(response) {
                 var listItems = response.data.map(function(portal) {
