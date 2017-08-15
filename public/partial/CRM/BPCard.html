@@ -27,18 +27,18 @@
                     <input ng-model ="partner.name" name ="name">
                 </md-input-container>
 
-                <md-input-container flex ng-disabled="partnersForm.$invalid">
+                <md-input-container flex>
                 <label translate>TRK_BUSINESSPARTNERS_INDUSTRY</label>
-                <input ng-model ="partner.industry" name ="name">
+                <input ng-model ="partner.industry" name ="industry">
                 </md-input-container>
 
-                <md-input-container flex ng-disabled="partnersForm.$invalid">
+                <md-input-container flex>
                     <md-checkbox ng-model="partner.isJuristic"><span translate>TRK_BUSINESSPARTNERS_IS_JURISTIC</span></md-checkbox>
                 </md-input-container>
 
-                <md-input-container flex  ng-disabled="partnersForm.$invalid">
+                <md-input-container flex>
                     <label translate>TRK_BUSINESSPARTNERS_ROLE</label>
-                <input ng-model ="partner.rolle" name ="name">
+                <input ng-model ="partner.rolle" name ="rolle">
                 </md-input-container>
 
                 <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   

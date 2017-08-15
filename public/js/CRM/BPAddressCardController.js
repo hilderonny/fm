@@ -58,7 +58,6 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_BUSINESSPARTNERS_ADDRESS_DELETED).hideDelay(1000).position('bottom right'));
-
                     });
                 });
             });
@@ -72,7 +71,7 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
         }
         utils.removeCardsToTheRightOf($element);
         utils.removeCard($element);
-    }
+    };
 
     $scope.addressTypes = ['Primaryaddress','Postaddress','Delivaryaddress','Billaddress'];
 
@@ -89,6 +88,8 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
             $scope.isNewAddress = true;
             $scope.partnerAddress = { addressee:'', street:'', postcode: '', city: '', type: $scope.addressTypes[0] };
         }
+        // Check the permissions for the details page for handling button visibility
+        $scope.canWriteBusinessPartnerDetails = $rootScope.canWrite('PERMISSION_CRM_BUSINESSPARTNERS');
     };
 
     $scope.load();

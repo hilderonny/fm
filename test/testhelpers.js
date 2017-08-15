@@ -1174,7 +1174,7 @@ th.apiTests = {
                 });
             });
         },
-        defaultPositive: function(api, collection, getId, skipRelations) {
+        defaultPositive: function(api, collection, getId, skipRelations, skipDynamicAttributes) {
             it('deletes the object and return 204', function() {
                 var loginToken, objectId;
                 return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
@@ -1225,6 +1225,9 @@ th.apiTests = {
                     assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
                     return Promise.resolve();
                 });
+            });
+            if (!skipDynamicAttributes) xit('Deletes all dynamic attribute values for the entity', function() {
+                // Helper "dynamicAttribtuesHelper" bauen, der die Values löscht und diesen in den Löschfunktionen der APIs verwenden!
             });
         }
     }

@@ -119,6 +119,10 @@ describe('API partneraddresses', function() {
                 return th.post(`/api/${co.apis.partneraddresses}?token=${token}`).send(addressToSend).expect(400);
             });
         });
+        
+        xit('responds with 400 when the partner of the address does not belong to the same client as the logged in user', function() {
+
+        });
 
         it('responds with correct data with inserted address containing an _id field', function() {
             var addressToSend;

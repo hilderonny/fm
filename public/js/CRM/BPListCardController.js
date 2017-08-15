@@ -29,7 +29,7 @@ app.controller('CRMBPListCardController', function($scope, $rootScope, $http, $m
         }, 'PERMISSION_CRM_BUSINESSPARTNERS');
     }
 
- // Click on client in client list shows client details
+    // Click on client in client list shows client details
     $scope.selectPartner = function(selectedPartner) {
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('CRM/BPCard', {
@@ -52,7 +52,7 @@ app.controller('CRMBPListCardController', function($scope, $rootScope, $http, $m
             utils.handlePreselection($scope, $scope.partners, $scope.selectPartner);
             if (!$scope.params.preselection) utils.setLocation('/businesspartners');
         });
-    }
+    };
 
     $scope.load();
 });

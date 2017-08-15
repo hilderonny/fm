@@ -107,11 +107,11 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
     };
 
     $scope.typeIcons = {
-        'Primaryaddress' : 'drafts/icons/Rating.svg',
-        'Postaddress': 'drafts/icons/Post Office.svg',
-        'Delivaryaddress': 'drafts/icons/Truck.svg',
-        'Billaddress': 'drafts/icons/Purchase Order.svg'
-    }
+        'Primaryaddress' : '/css/icons/material/Rating.svg',
+        'Postaddress': '/css/icons/material/Post Office.svg',
+        'Delivaryaddress': '/css/icons/material/Truck.svg',
+        'Billaddress': '/css/icons/material/Purchase Order.svg'
+    };
 
     $scope.closeCard = function() {
         if ($scope.params.closeCallback) {

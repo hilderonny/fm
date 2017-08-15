@@ -131,6 +131,10 @@ module.exports.collections = {
      */
     clients:{name:'clients', icon:'Briefcase', canHaveAttributes:true},
     /**
+     * Kommunikationswege von Personen
+     */
+    communications:{name:'communications', icon:'Phone', canHaveAttributes:true},
+    /**
      * Dokumente
      */
     documents:{name:'documents', icon: 'Document', canHaveAttributes:true},

@@ -1,41 +1,40 @@
-<md-card ng-cloak ng-controller= "CRMCommunicationCardController" style="background-image:url('/css/icons/office/Briefcase.svg');">
+<md-card ng-cloak ng-controller= "CRMCommunicationCardController" style="background-image:url('/css/icons/office/Collaborator Male.svg');" class="list-details-details">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <div flex></div>
+        <md-button class="close-card" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
     <md-card-title flex="none">
         <md-card-title-text>
+            <span class="md-headline" ng-if= "!isNewComm"><span ng-bind="contact"></span></span>
             <span class="md-headline" ng-if= "isNewComm" translate>TRK_PERSONS_NEW_COMMUNICATION</span>
-            <span class="md-headline" ng-if= "!isNewComm"  translate>TRK_PERSONS_COMMUNICATION_DETAILS</span>
         </md-card-title-text>
     </md-card-title>
 
-   <md-button class="md-icon-button close" ng-click="closeCard()" aria-label="CLOSE CARD">
-        <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
-  </md-button>
-
     <md-card-content >
         <form layout = "column">
-             <md-input-container flex>
-                <label translate>TRK_PERSONS_COMM_MEDIUM </label>  
-                <md-select ng-model ="communication.selectedMedium" >  
-                    <md-option ng-value="cm" ng-repeat="cm in communicationMediums"> 
-                         <span translate="TRK_PERSONS_COMM_{{cm.name}}_MEDIUM"></span>
-                    </md-option>  
-                </md-select>
-             </md-input-container>
             <md-input-container flex>
-                <label translate>TRK_PERSONS_COMM_CONTACT </label>  
+                <label translate>TRK_PERSONS_COMMUNICATION_MEDIUM</label>  
+                <md-select ng-model ="communication.selectedMedium" >  
+                    <md-option ng-value="cm" ng-repeat="cm in communicationMediums"><span translate="TRK_PERSONS_COMMUNICATION_MEDIUM_{{cm.name}}"></span></md-option>  
+                </md-select>
+            </md-input-container>
+
+            <md-input-container flex>
+                <label translate>TRK_PERSONS_COMMUNICATION_CONTACT</label>  
                 <input ng-model ="communication.contact" name="contact">        
             </md-input-container>         
 
-             <md-input-container flex>
-                <label translate>TRK_PERSONS_COMM_TYPE </label>  
+            <md-input-container flex>
+                <label translate>TRK_PERSONS_COMMUNICATION_TYPE</label>  
                 <md-select ng-model ="communication.selectedType" >  
-                    <md-option ng-value="t" ng-repeat="t in communication.selectedMedium.types"> 
-                        <span translate="TRK_PERSONS_COMM_{{t.name}}_TYPE"></span>
-                    </md-option>  
+                    <md-option ng-value="t" ng-repeat="t in communication.selectedMedium.types"><span translate="TRK_PERSONS_COMMUNICATION_TYPE_{{t.name}}"></span></md-option>  
                 </md-select>
-             </md-input-container>        
+            </md-input-container>        
             
-             <md-card-actions layout="row" layout-align="end center">
-                <md-button class="md-raised md-accent" ng-if= "isNewComm"  ng-click ="createCommunication()"><span translate>TRK_PERSONS_CREATE_COMM</span></md-button>
+            <md-card-actions layout="row" layout-align="end center" ng-if="canWritePersons">
+                <md-button class="md-raised md-accent" ng-if= "isNewComm"  ng-click ="createCommunication()"><span translate>TRK_PERSONS_CREATE</span></md-button>
                 <md-button class="md-raised md-accent" ng-if= "!isNewComm" ng-click = "saveCommunication()" ><span translate>TRK_PERSONS_SAVE</span></md-button>
                 <md-button class="md-raised md-warn"   ng-if= "!isNewComm" ng-click = "deleteCommunication()"><span translate>TRK_PERSONS_DELETE</span></md-button>
             </md-card-actions>    

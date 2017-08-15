@@ -17,9 +17,7 @@ var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
-var fs = require('fs');
 var co = require('../utils/constants');
-var rh = require('../utils/relationsHelper');
 
 router.get('/forBusinessPartner/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.businesspartners.name), function(req, res) {
     req.db.get(co.collections.businesspartners.name).findOne(req.params.id).then((businessPartner) => {
@@ -45,15 +43,16 @@ router.post('/', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.busin
     if (!address || Object.keys(address).length < 1 || !address.partnerId || !validateId.validateId(address.partnerId)) {
         return res.sendStatus(400);
     }
-    req.db.get(co.collections.businesspartners.name).findOne(address.partnerId).then((businessPartner) => {
+    address.partnerId = monk.id(address.partnerId); // Make it a real id
+    req.db.get(co.collections.businesspartners.name).findOne({_id:address.partnerId,clientId:req.user.clientId}).then((businessPartner) => {
         if (!businessPartner) {
             return Promise.reject();
         }
         delete address._id; // Ids are generated automatically
-        address.partnerId = businessPartner._id; // Make it a real id
+        address.clientId = req.user.clientId; // Make it a real id
         return req.db.insert(co.collections.partneraddresses.name, address);
     }).then((insertedAddress) => {
-        return res.send(insertedAddress);
+        res.send(insertedAddress);
     }, () => {
         res.sendStatus(400);
     });

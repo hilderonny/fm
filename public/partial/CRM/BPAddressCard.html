@@ -45,7 +45,7 @@
 
             <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
 
-             <md-card-actions layout="row" layout-align="end center">
+             <md-card-actions layout="row" layout-align="end center" ng-if="canWriteBusinessPartnerDetails">
                 <md-button class="md-raised md-accent" ng-if= "isNewAddress"  ng-click ="createBPAddress()"><span translate>TRK_BUSINESSPARTNERS_CREATE</span></md-button>
                 <md-button class="md-raised md-accent" ng-if= "!isNewAddress" ng-click = "saveBPAddress()" ><span translate>TRK_BUSINESSPARTNERS_SAVE</span></md-button>
                 <md-button class="md-raised md-warn"  ng-if= "!isNewAddress" ng-click="deleteBPAddress()" ><span translate>TRK_BUSINESSPARTNERS_DELETE</span></md-button>
