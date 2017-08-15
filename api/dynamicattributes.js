@@ -213,7 +213,10 @@ router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMI
                 value: dav.type === co.dynamicAttributeTypes.picklist && dav.value !== null ? monk.id(dav.value) : dav.value
             } }
         }});
-        return req.db.get(co.collections.dynamicattributevalues.name).bulkWrite(bulkData);
+        if (bulkData.length < 1) {
+            return Promise.resolve({insertedIds:[]});// Wenn keine DAs definiert wurden, sind auch keine hier.
+        } 
+        return req.db.get(co.collections.dynamicattributevalues.name).bulkWrite(bulkData); 
     }).then((bulkResult) => {
         res.send(Object.keys(bulkResult.insertedIds).map((key) => bulkResult.insertedIds[key]));
     }).catch((error) => {

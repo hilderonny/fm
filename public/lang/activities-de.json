@@ -1,7 +1,8 @@
 {
     "TRK_ACTIVITIES_ACTIVITY" : "Termin",
     "TRK_ACTIVITIES_ACTIVITY_CREATED" : "Termin erstellt",
-    "TRK_ACTIVITIES_ACTIVITIY_DELETED" : "Termin gelöscht",
+    "TRK_ACTIVITIES_ACTIVITY_DELETED" : "Termin gelöscht",
+    "TRK_ACTIVITIES_ACTIVITIES" : "Termine",
     "TRK_ACTIVITIES_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_ACTIVITIES_COMMENT" : "Kommentar",
     "TRK_ACTIVITIES_CREATE" : "Erstellen",

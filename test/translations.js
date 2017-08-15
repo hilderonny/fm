@@ -95,13 +95,13 @@ function extractTranslationKeysFromFile(filePath, translationKeys) {
 // TODO: Änderungen in Doku aufnehmen
 function getHardToFindTranslationKeysForModule(moduleName) {
     switch(moduleName) {
-        case 'activities': return [ 'TRK_ACTIVITIES_ACTIVITY', 'TRK_ACTIVITIES_SELECT_ACTIVITY', 'TRK_MODEL_activities' ];
-        case 'base': return [ 'TRK_USERGROUPS_USERGROUP', 'TRK_USERS_USER', 'TRK_USERGROUPS_SELECT_USERGROUP', 'TRK_USERS_SELECT_USER', 'TRK_MODEL_users', 'TRK_MODEL_usergroups', 'TRK_DYNAMICATTRIBUTES_NAME_de', 'TRK_DYNAMICATTRIBUTES_NAME_en', 'TRK_DYNAMICATTRIBUTES_TYPE_text', 'TRK_DYNAMICATTRIBUTES_TYPE_boolean', 'TRK_DYNAMICATTRIBUTES_TYPE_picklist' ];
-        case 'businesspartners': return [ 'TRK_BUSINESSPARTNERS_SELECT_BUSINESSPARTNER', 'TRK_MODEL_businesspartners', 'TRK_MODEL_communications', 'TRK_MODEL_partneraddresses', 'TRK_MODEL_persons' ];
-        case 'clients' : return [ 'TRK_CLIENTS_CLIENT', 'TRK_CLIENTS_SELECT_CLIENT', 'TRK_MODEL_clients' ];
-        case 'documents' : return [ 'TRK_DOCUMENTS_DOCUMENT', 'TRK_DOCUMENTS_DOCUMENTS', 'TRK_DOCUMENTS_SELECT_FOLDER_OR_DOCUMENT', 'TRK_FOLDERS_FOLDER', 'TRK_FOLDERS_FOLDERS', 'TRK_MODEL_documents', 'TRK_MODEL_folders' ];
+        case 'activities': return [ 'TRK_ACTIVITIES_ACTIVITY', 'TRK_ACTIVITIES_ACTIVITIES', 'TRK_ACTIVITIES_SELECT_ACTIVITY', 'TRK_MODEL_activities' ];
+        case 'base': return [ 'TRK_USERGROUPS_USERGROUP', 'TRK_USERGROUPS_USERGROUPS', 'TRK_USERS_USER', 'TRK_USERS_USERS', 'TRK_USERGROUPS_SELECT_USERGROUP', 'TRK_USERS_SELECT_USER', 'TRK_MODEL_users', 'TRK_MODEL_usergroups', 'TRK_DYNAMICATTRIBUTES_NAME_de', 'TRK_DYNAMICATTRIBUTES_NAME_en', 'TRK_DYNAMICATTRIBUTES_TYPE_text', 'TRK_DYNAMICATTRIBUTES_TYPE_boolean', 'TRK_DYNAMICATTRIBUTES_TYPE_picklist' ];
+        case 'businesspartners': return [ 'TRK_BUSINESSPARTNERS_BUSINESSPARTNER', 'TRK_BUSINESSPARTNERS_BUSINESSPARTNERS', 'TRK_PERSONS_PERSON', 'TRK_PERSONS_PERSONS', 'TRK_BUSINESSPARTNERS_SELECT_BUSINESSPARTNER', 'TRK_PERSONS_SELECT_PERSON', 'TRK_MODEL_businesspartners', 'TRK_MODEL_communications', 'TRK_MODEL_partneraddresses', 'TRK_MODEL_persons' ];
+        case 'clients' : return [ 'TRK_CLIENTS_CLIENT', 'TRK_CLIENTS_CLIENTS', 'TRK_CLIENTS_SELECT_CLIENT', 'TRK_MODEL_clients' ];
+        case 'documents' : return [ 'TRK_DOCUMENTS_DOCUMENT', 'TRK_DOCUMENTS_DOCUMENTS', 'TRK_DOCUMENTS_DOCUMENTS', 'TRK_DOCUMENTS_SELECT_FOLDER_OR_DOCUMENT', 'TRK_FOLDERS_FOLDER', 'TRK_FOLDERS_FOLDERS', 'TRK_MODEL_documents', 'TRK_MODEL_folders' ];
         case 'fmobjects' : return [ 'TRK_FMOBJECTS_FM_OBJECT', 'TRK_FMOBJECTS_FM_OBJECTS', 'TRK_FMOBJECTS_SELECT_FM_OBJECT', 'TRK_MODEL_fmobjects' ];
-        case 'licenseserver' : return [ 'TRK_PORTALS_PORTAL', 'TRK_PORTALS_SELECT_PORTAL' ];
+        case 'licenseserver' : return [ 'TRK_PORTALS_PORTAL', 'TRK_PORTALS_PORTALS', 'TRK_PORTALS_SELECT_PORTAL' ];
         case 'portalbase' : return [ 'TRK_MODEL_portals' ];
         default: return [];
     }

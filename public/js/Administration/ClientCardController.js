@@ -86,9 +86,9 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
             }
             return $scope.getClientModules();
         }).then(function() {
-            return $translate(['TRK_CLIENTS_CLIENTCREATED']);
+            return $translate(['TRK_CLIENTS_CLIENT_CREATED']);
         }).then(function(translations) {
-            $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENTCREATED).hideDelay(1000).position('bottom right'));
+            $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENT_CREATED).hideDelay(1000).position('bottom right'));
             utils.setLocation('/clients/' + createdClient._id);
         });
     };
@@ -112,7 +112,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
 
     // Click on delete button to delete an existing client
     $scope.deleteClient = function() {
-        $translate(['TRK_CLIENTS_CLIENTDELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+        $translate(['TRK_CLIENTS_CLIENT_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
             $translate('TRK_CLIENTS_REALLYDELETECLIENT', { clientName: $scope.clientName }).then(function(TRK_CLIENTS_REALLYDELETECLIENT) {
                 var confirm = $mdDialog.confirm()
                     .title(TRK_CLIENTS_REALLYDELETECLIENT)
@@ -125,7 +125,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENTDELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENT_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });

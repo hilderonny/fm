@@ -18,6 +18,7 @@
     "TRK_PORTALS_PORTAL" : "Portal",
     "TRK_PORTALS_PORTAL_CREATED" : "Portal created",
     "TRK_PORTALS_PORTAL_DELETED" : "Portal deleted",
+    "TRK_PORTALS_PORTALS" : "Portals",
     "TRK_PORTALS_REALLY_DELETE_PORTAL" : "Do you really want to delete the portal \"{{portalName}}\"?",
     "TRK_PORTALS_REALLY_GENERATE_LICENSEKEY" : "Do you really want to create a new license key? This change will be saved immediately and the old license key will not be usable afterwards.",
     "TRK_PORTALS_SAVE" : "Save",

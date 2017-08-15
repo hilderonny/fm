@@ -58,7 +58,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
 
     // Click on delete button to delete an existing activity
     $scope.deleteActivity = function() {
-        $translate(['TRK_ACTIVITIES_ACTIVITIY_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
+        $translate(['TRK_ACTIVITIES_ACTIVITY_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
             $translate('TRK_ACTIVITIES_REALLY_DELETE_ACTIVITIY', { activityName: $scope.activityName }).then(function(TRK_ACTIVITIES_REALLY_DELETE_ACTIVITIY) {
                 var confirm = $mdDialog.confirm()
                     .title(TRK_ACTIVITIES_REALLY_DELETE_ACTIVITIY)
@@ -71,7 +71,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                         }
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
-                        $mdToast.show($mdToast.simple().textContent(translations.TRK_ACTIVITIES_ACTIVITIY_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_ACTIVITIES_ACTIVITY_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 });
             });

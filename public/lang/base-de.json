@@ -82,6 +82,7 @@
     "TRK_USERGROUPS_USERGROUP" : "Benutzergruppe",
     "TRK_USERGROUPS_USERGROUP_CREATED" : "Benutzergruppe erstellt",
     "TRK_USERGROUPS_USERGROUP_DELETED" : "Benutzergruppe gelöscht",
+    "TRK_USERGROUPS_USERGROUPS" : "Benutzergruppen",
     "TRK_USERGROUPS_USERS" : "Benutzer",
     "TRK_USERS_ADMINISTRATOR" : "Administrator",
     "TRK_USERS_CHANGES_SAVED" : "Änderungen gespeichert",
@@ -105,5 +106,6 @@
     "TRK_USERS_USER_CREATED" : "Benutzer erstellt",
     "TRK_USERS_USER_DELETED" : "Benutzer gelöscht",
     "TRK_USERS_USERGROUP" : "Benutzergruppe",
+    "TRK_USERS_USERS" : "Benutzer",
     "TRK_YES" : "Ja"
 }

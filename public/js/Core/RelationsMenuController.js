@@ -26,7 +26,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 $scope.showListDialog('ACTIVITIES_SELECT_ACTIVITY', listItems); // Dialog für einfache Listen öffnen
             });
         } },
-        { icon: 'Business', translationKey: 'BUSINESSPARTNERS_BUSINESSPARTNERS', requiredReadPermission: 'PERMISSION_CRM_BUSINESSPARTNERS', dialogFunction: function() {
+        { icon: 'Business', translationKey: 'BUSINESSPARTNERS_BUSINESSPARTNER', requiredReadPermission: 'PERMISSION_CRM_BUSINESSPARTNERS', dialogFunction: function() {
             $http.get('/api/businesspartners').then(function(response) {
                 var listItems = response.data.map(function(partner) {
                     return {

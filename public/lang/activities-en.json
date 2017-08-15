@@ -1,7 +1,8 @@
 {
     "TRK_ACTIVITIES_ACTIVITY" : "Activity",
     "TRK_ACTIVITIES_ACTIVITY_CREATED" : "Activity created",
-    "TRK_ACTIVITIES_ACTIVITIY_DELETED" : "Activity removed",
+    "TRK_ACTIVITIES_ACTIVITY_DELETED" : "Activity removed",
+    "TRK_ACTIVITIES_ACTIVITIES" : "Activities",
     "TRK_ACTIVITIES_CHANGES_SAVED" : "Save changes",
     "TRK_ACTIVITIES_COMMENT" : "Comment",
     "TRK_ACTIVITIES_CREATE" : "Create",

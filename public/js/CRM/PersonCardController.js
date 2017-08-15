@@ -104,8 +104,8 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
     };
 
     $scope.mediumIcons = {
-        'PHONE' : '/css/icons/material/Phone.svg',
-        'EMAIL': '/css/icons/material/Email.svg'
+        'phone' : '/css/icons/material/Phone.svg',
+        'email': '/css/icons/material/Email.svg'
     }; 
 
     $scope.closeCard = function() {
