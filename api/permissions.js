@@ -43,15 +43,15 @@ router.get('/forLoggedInUser', auth(false, false, 'base'), (req, res) => {
     });
 });
 
-router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r', 'base'), validateId, validateSameClientId(co.collections.usergroups), function(req, res) {
+router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r', 'base'), validateId, validateSameClientId(co.collections.usergroups.name), function(req, res) {
     var userGroup, permissionKeysForClient;
-    req.db.get(co.collections.usergroups).findOne(req.params.id).then(function(ug) {
+    req.db.get(co.collections.usergroups.name).findOne(req.params.id).then(function(ug) {
         userGroup = ug;
         return configHelper.getAvailablePermissionKeysForClient(userGroup.clientId, req.db);
     }).then(function(keys) {
         permissionKeysForClient = keys;
         // Obtain the permissions for the user group
-        return req.db.get(co.collections.permissions).find({ 
+        return req.db.get(co.collections.permissions.name).find({ 
             userGroupId: userGroup._id,
             key: { $in: permissionKeysForClient } // Filter out permissions which are not available to the portal and client of the user group
         });
