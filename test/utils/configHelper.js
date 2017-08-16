@@ -37,8 +37,7 @@ describe('UTILS configHelper', function() {
     }
 
     describe('getAvailablePermissionKeysForClient', function() {
-        // TODO: Wieder aktivieren, sobald PERMISSION_SETTINGS_CLIENT verfügbar ist
-        it.skip('Returns all permission keys of the module config file when clientId is null', function() {
+        it('Returns all permission keys of the module config file when clientId is null', function() {
             moduleConfig.modules.testModule = {
                 menu: [ { title: 'TestTitle', items: [ { mainCard: 'TestCard', icon: 'TestIcon', title: 'TestTitle', permission: co.permissions.OFFICE_ACTIVITY } ] } ],
             };

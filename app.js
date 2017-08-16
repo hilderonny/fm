@@ -56,7 +56,7 @@ var prepareIncludes = (fs) => {
         var minifiedJs = require('uglify-js').minify(includes, { mangle:false, compress:false, outSourceMap:"include.js.map", output: { max_line_len: 100000 } });
         fs.writeFileSync('./public/js/include.js', minifiedJs.code);
         fs.writeFileSync('./public/js/include.js.map', minifiedJs.map);
-        fs.writeFileSync('./public/index.html', fs.readFileSync('./public/_index.html')); // Simply copy the index template
+        fs.writeFileSync('./public/index.html', fs.readFileSync('./public/_index.html').toString().replace('###PORTALNAME###', localConfig.portalName).replace('###PORTALLOGO###', localConfig.portalLogo));
     }
 };
 

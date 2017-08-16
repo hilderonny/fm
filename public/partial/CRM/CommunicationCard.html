@@ -33,6 +33,8 @@
                 </md-select>
             </md-input-container>        
             
+            <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
+
             <md-card-actions layout="row" layout-align="end center" ng-if="canWritePersons">
                 <md-button class="md-raised md-accent" ng-if= "isNewComm"  ng-click ="createCommunication()"><span translate>TRK_PERSONS_CREATE</span></md-button>
                 <md-button class="md-raised md-accent" ng-if= "!isNewComm" ng-click = "saveCommunication()" ><span translate>TRK_PERSONS_SAVE</span></md-button>

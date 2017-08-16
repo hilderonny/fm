@@ -116,6 +116,17 @@ th.prepareClientModules = () => {
 };
 
 /**
+ * Mandanteneinstellungen vorbereiten
+ */
+th.prepareClientSettings = () => {
+    var clientSettings = [];
+    th.dbObjects.clients.forEach((client) => {
+        clientSettings.push({ clientId: client._id, logourl: 'http://' + client.name });
+    });
+    return th.bulkInsert('clientsettings', clientSettings);
+};
+
+/**
  * Removes the access to a module from the given client
  */
 th.removeClientModule = (clientName, module) => {
@@ -601,6 +612,18 @@ th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoD
         } else {
             return Promise.resolve(relation);
         }
+    });
+};
+
+th.createRelationsToActivity = (entityType, entity) => {
+    return db.get(co.collections.activities.name).findOne({name:th.defaults.activity}).then(function(activity) {
+        var relations = [
+            { type1: entityType, id1: entity._id, type2: co.collections.activities.name, id2: activity._id, clientId: activity.clientId },
+            { type1: co.collections.activities.name, id1: activity._id, type2: entityType, id2: entity._id, clientId: activity.clientId }
+        ];
+        return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+    }).then(function() {
+        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
     });
 };
 

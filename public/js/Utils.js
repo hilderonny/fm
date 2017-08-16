@@ -39,32 +39,6 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
-        // Add a card to the card canvas
-        // TODO: Raus damit und durch addCardWithPermission ersetzen
-        addCard: function(cardUrl, params, doneCallback) {
-            var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
-            utils.cardsToAdd.push(cardToAdd);
-            $http.get('/partial/' + cardUrl + '.html', { cache: true}).then(function(response) {
-                // Check whether the card should still be shown. When the dummy object is no longer
-                // in the array, the request tooks too long and the user has done something other meanwhile
-                if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response
-                var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
-                var card = angular.element(response.data);
-                var domCard = card[0];
-                cardCanvas.append(card);
-                var newScope = $rootScope.$new(true);
-                newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
-                // Compile (render) the new card and attach its new controller
-                $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
-                window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
-                // Scroll card in view, but wait until the card is put into the dom
-                utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
-                if (doneCallback) {
-                    doneCallback(card);
-                }
-            });
-        },
-
         // Removes all cards right to the given one
         removeCardsToTheRightOf: function(card) {
             // Erst mal sehen, ob der Parameter überhaupt eine Karte ist

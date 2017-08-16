@@ -19,10 +19,13 @@ var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
+var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
+var dah = require('../utils/dynamicAttributesHelper');
 
 // TODO: Mechanismus überlegen, der die createdByUserId und participantUserIdsin richtige ObjectIDs umwandelt
 // Get all activities of the current client, which were created by the current user or where the current user is a participant of
-router.get('/', auth('PERMISSION_OFFICE_ACTIVITY', 'r', 'activities'), (req, res) => {
+router.get('/', auth(co.permissions.OFFICE_ACTIVITY, 'r', co.modules.activities), (req, res) => {
     var userId = req.user._id;
     var clientId = req.user.clientId; // clientId === null means that the user is a portal user
     var query = { 
@@ -32,7 +35,7 @@ router.get('/', auth('PERMISSION_OFFICE_ACTIVITY', 'r', 'activities'), (req, res
             { participantUserIds: userId } // Array query, see https://docs.mongodb.com/manual/tutorial/query-arrays/#query-an-array-for-an-element
         ]
     };
-    req.db.get('activities').find(query, req.query.fields).then((activities) => {
+    req.db.get(co.collections.activities.name).find(query, req.query.fields).then((activities) => {
         res.send(activities);
     });
 });
@@ -45,9 +48,9 @@ router.get('/', auth('PERMISSION_OFFICE_ACTIVITY', 'r', 'activities'), (req, res
  * @example
  * $http.get('/api/activities/forIds?ids=ID1,ID2,ID3')...
  */
-router.get('/forIds', auth(false, false, 'activities'), (req, res) => {
+router.get('/forIds', auth(false, false, co.modules.activities), (req, res) => {
     // Zuerst Berechtigung prüfen
-    auth.canAccess(req.user._id, 'PERMISSION_OFFICE_ACTIVITY', 'r', 'activities', req.db).then(function(accessAllowed) {
+    auth.canAccess(req.user._id, co.permissions.OFFICE_ACTIVITY, 'r', co.modules.activities, req.db).then(function(accessAllowed) {
         if (!accessAllowed) {
             return res.send([]);
         }
@@ -57,7 +60,7 @@ router.get('/forIds', auth(false, false, 'activities'), (req, res) => {
         var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
         var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
         var userId = req.user._id;
-        req.db.get('activities').find({
+        req.db.get(co.collections.activities.name).find({
             _id: { $in: ids },
             clientId: clientId,
             $or: [ // Nur die Termine, die der Benutzer auch angelegt hat
@@ -71,8 +74,8 @@ router.get('/forIds', auth(false, false, 'activities'), (req, res) => {
 });
 
 // Get a specific activity
-router.get('/:id', auth('PERMISSION_OFFICE_ACTIVITY', 'r', 'activities'), validateId, validateSameClientId('activities'), (req, res) => {
-    req.db.get('activities').findOne(req.params.id, req.query.fields).then((activity) => {
+router.get('/:id', auth(co.permissions.OFFICE_ACTIVITY, 'r', co.modules.activities), validateId, validateSameClientId(co.collections.activities.name), (req, res) => {
+    req.db.get(co.collections.activities.name).findOne(req.params.id, req.query.fields).then((activity) => {
         // Database element is available here in every case, because validateSameClientId already checked for existence
         activity.fullyEditable = activity.createdByUserId.equals(req.user._id); // Flag to show whether the client can edit all properties or only isDone and comment
         res.send(activity);
@@ -80,7 +83,7 @@ router.get('/:id', auth('PERMISSION_OFFICE_ACTIVITY', 'r', 'activities'), valida
 });
 
 // Create an activity
-router.post('/', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), function(req, res) {
+router.post('/', auth(co.permissions.OFFICE_ACTIVITY, 'w', co.modules.activities), function(req, res) {
     var activity = req.body;
     if (!activity || Object.keys(activity).length < 1) {
         return res.sendStatus(400);
@@ -94,13 +97,13 @@ router.post('/', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), function
     } else {
         activity.participantUserIds = [];
     }
-    req.db.insert('activities', activity).then((insertedActivity) => {
+    req.db.insert(co.collections.activities.name, activity).then((insertedActivity) => {
         res.send(insertedActivity);
     });
 });
 
 // Update an activity
-router.put('/:id', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), validateId, validateSameClientId('activities'), function(req, res) {
+router.put('/:id', auth(co.permissions.OFFICE_ACTIVITY, 'w', co.modules.activities), validateId, validateSameClientId(co.collections.activities.name), function(req, res) {
     var activity = req.body;
     delete activity._id; // When activity object also contains the _id field
     delete activity.clientId; // Prevent assignment of the activity to another client
@@ -109,7 +112,7 @@ router.put('/:id', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), valida
         return res.sendStatus(400);
     }
     // Load the activity from database to retreive the userId of the creator
-    req.db.get('activities').findOne(req.params.id).then((existingActivity) => {
+    req.db.get(co.collections.activities.name).findOne(req.params.id).then((existingActivity) => {
         // Database element is available here in every case, because validateSameClientId already checked for existence
         // Forbid the change of specific activity data when the current user is not the creator
         if (!existingActivity.createdByUserId.equals(req.user._id) && (
@@ -124,7 +127,7 @@ router.put('/:id', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), valida
         if (activity.participantUserIds) {
             activity.participantUserIds = activity.participantUserIds.filter(validateId.validateId).map(function(id) { return monk.id(id); });
         }
-        req.db.update('activities', req.params.id, { $set: activity }).then((updatedActivity) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
+        req.db.update(co.collections.activities.name, req.params.id, { $set: activity }).then((updatedActivity) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
             res.send(updatedActivity);
         });
     });
@@ -133,19 +136,14 @@ router.put('/:id', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), valida
 /**
  * Löscht einen Termin und alle zugehörigen Verknüpfungen
  */
-router.delete('/:id', auth('PERMISSION_OFFICE_ACTIVITY', 'w', 'activities'), validateId, validateSameClientId('activities'), function(req, res) {
+router.delete('/:id', auth(co.permissions.OFFICE_ACTIVITY, 'w', co.modules.activities), validateId, validateSameClientId(co.collections.activities.name), function(req, res) {
     var activityId = monk.id(req.params.id);
-    req.db.get('activities').findOne(activityId, '_id createdByUserId').then((activity) => {
-        // Database element is available here in every case, because validateSameClientId already checked for existence
-        if (!activity.createdByUserId.equals(req.user._id)) { // Only the creator can delete an activity
-            return res.sendStatus(403); // Forbidden
-        }
-        // Eventuell vorhandene Verknüpfungen ebenfalls löschen
-        req.db.remove('relations', { $or: [ {id1:activityId}, {id2:activityId} ] }).then(function() {
-            return req.db.remove('activities', activityId);
-        }).then(function() {
-            res.sendStatus(204);
-        });
+    req.db.remove(co.collections.activities.name, activityId).then((result) => {
+        return rh.deleteAllRelationsForEntity(co.collections.activities.name, activityId);
+    }).then(() => {
+        return dah.deleteAllDynamicAttributeValuesForEntity(activityId);
+    }).then(() => {
+        res.sendStatus(204);
     });
 });
 

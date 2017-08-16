@@ -51,6 +51,7 @@ describe('API menu', function() {
         return th.cleanDatabase()
             .then(th.prepareClients)
             .then(th.prepareClientModules)
+            .then(th.prepareClientSettings)
             .then(th.prepareUserGroups)
             .then(th.prepareUsers)
             .then(th.preparePermissions);
@@ -63,7 +64,7 @@ describe('API menu', function() {
     it('responds to GET/ with portal admin user logged in with all menu items', function(done) {
         th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
             th.get(`/api/menu?token=${token}`).expect(200).end(function(err, res) {
-                var menuStructureFromApi = res.body;
+                var menuStructureFromApi = res.body.menu;
                 var fullMenu = extractMenu();
                 compareMenuStructures(menuStructureFromApi, fullMenu);
                 done();
@@ -79,7 +80,7 @@ describe('API menu', function() {
         }).then((token) => {
             return th.get(`/api/menu?token=${token}`).expect(200);
         }).then((res) => {
-            var menuStructureFromApi = res.body;
+            var menuStructureFromApi = res.body.menu;
             var userMenu = [
                 {
                     title: 'TRK_MENU_ADMINISTRATION',
@@ -130,7 +131,7 @@ describe('API menu', function() {
         }).then((token) => { // X_Y_ADMINZ is always an admin
             return th.get(`/api/menu?token=${token}`).expect(200);
         }).then(function(response) {
-            var menuStructureFromApi = response.body;
+            var menuStructureFromApi = response.body.menu;
             // Module "ronnyseins" must not be in here, because it is never available to any client.
             var userMenu = [
                 {
@@ -174,7 +175,7 @@ describe('API menu', function() {
         }).then((token) => {
             return th.get(`/api/menu?token=${token}`).expect(200);
         }).then(function(response) {
-            var menuStructureFromApi = response.body;
+            var menuStructureFromApi = response.body.menu;
             var userMenu = [
                 {
                     title: 'TRK_MENU_ADMINISTRATION',
@@ -199,8 +200,25 @@ describe('API menu', function() {
             compareMenuStructures(menuStructureFromApi, userMenu);
             return Promise.resolve();
         });
+
+    });
+            
+    it('GET/ contains the logo URL of the client when set', async () => {
+        var loggedInUser = await th.defaults.getUser();
+        var settingsFromDatabase = await db.get(co.collections.clientsettings.name).findOne({clientId: loggedInUser.clientId });
+        var token = await th.defaults.login();
+        var menuFromApi = (await th.get(`/api/${co.apis.menu}?token=${token}`).expect(200)).body;
+        assert.strictEqual(menuFromApi.logourl, settingsFromDatabase.logourl);
     });
 
+    it('GET/ contains the default logo URL of the client when not set', async () => {
+        var loggedInUser = await th.defaults.getUser();
+        // Eventuell vorhandene Einstellungen löschen
+        await db.get(co.collections.clientsettings.name).remove({clientId: loggedInUser.clientId });
+        var token = await th.defaults.login();
+        var menuFromApi = (await th.get(`/api/${co.apis.menu}?token=${token}`).expect(200)).body;
+        assert.strictEqual(menuFromApi.logourl, 'css/logo_avorium_komplett.svg');
+    });
 
     it('responds to POST with 404', function() {
         return th.post('/api/menu').expect(404);
