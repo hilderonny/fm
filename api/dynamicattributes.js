@@ -76,7 +76,7 @@ router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES
 /**
  * Returns all values of the dynamic attributes of an entity of a model MODELNAME with the given _id.
  */
-router.get('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateId, validateSameClientId(), (req, res) => {
+router.get('/values/:modelName/:id', auth(false, false, co.modules.base), validateId, validateSameClientId(), (req, res) => {
     var entityId = monk.id(req.params.id);
     req.db.get(co.collections.dynamicattributes.name).aggregate([
         { $lookup: { // In Typen nachgucken, damit wir auch solche Werte bekommen, für die nix in der Datenbank steht
@@ -188,7 +188,7 @@ router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w
 /**
  * Creates a new set of values for dynamic attributes for an entity of type MODELNAME and with the given _id.
  */
-router.post('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateModelName, validateId, validateSameClientId(), (req, res) => {
+router.post('/values/:modelName/:id', auth(false, false, co.modules.base), validateModelName, validateId, validateSameClientId(), (req, res) => {
     var modelName = req.params.modelName;
     var entity;
     var dynamicAttributeValues = req.body;
