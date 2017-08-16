@@ -21,6 +21,7 @@ var path = require('path');
 var documentsHelper = require('../utils/documentsHelper');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
+var dah = require('../utils/dynamicAttributesHelper');
 
 var downloadDocument = (response, document) => {
     var options = {
@@ -218,8 +219,10 @@ router.deleteDocument = (db, document) => {
         fs.unlink(filePath, (err) => {
             // Remove relations from database
             rh.deleteAllRelationsForEntity(co.collections.documents.name, document._id).then(() => {
-                // Remove document from database
-                db.remove('documents', document._id).then(resolve);
+                dah.deleteAllDynamicAttributeValuesForEntity(document._id).then(() => {
+                    // Remove document from database
+                    db.remove('documents', document._id).then(resolve);
+                });
             });
         });
     });

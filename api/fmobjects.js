@@ -20,6 +20,7 @@ var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
+var dah = require('../utils/dynamicAttributesHelper');
 
 // Get all FM objects and their recursive children of the current client as hierarchy. Only _id, name and type are returned
 router.get('/', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), (req, res) => {
@@ -162,6 +163,7 @@ var removeFmObject = (db, fmObject) => {
     }));
     // Delete relations
     promises.push(rh.deleteAllRelationsForEntity(co.collections.fmobjects.name, fmObject._id));
+    promises.push(dah.deleteAllDynamicAttributeValuesForEntity(fmObject._id));
     // Delete the FM object itself
     promises.push(db.remove(co.collections.fmobjects.name, fmObject._id));
     return Promise.all(promises);

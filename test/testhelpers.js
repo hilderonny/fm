@@ -526,9 +526,9 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
 /**
  * Creates 3 dynamic  attributes (one for each currently existing type)
  */
-th.prepareDynamicAttributes = function() {
+th.prepareDynamicAttributes = function(collectionName) {
     var dynamicAttributes = [];
-    var modelName = co.collections.users.name;
+    var modelName = collectionName ? collectionName : co.collections.users.name;
     th.dbObjects.clients.forEach(function(client) {
         dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: client._id, type: 'text' });
         dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: client._id, type: 'boolean' });
@@ -559,22 +559,25 @@ th.prepareDynamicAttributeOptions = function() {
 /**
  * Creates dummy example values
  */
-th.prepareDynamicAttributeValues = function() {
+th.prepareDynamicAttributeValues = function(collectionName) {
     var dynamicAttributeValues = [];
+    var modelName = collectionName ? collectionName : co.collections.users.name;
     th.dbObjects.dynamicattributes.forEach(function(attribute) {
-        th.dbObjects.users.forEach(function(user) {
-            if (attribute.clientId === null && user.clientId !== null) return;
-            if (attribute.clientId !== null && user.clientId === null) return;
-            if ('' + attribute.clientId !== '' + user.clientId) return;
+        th.dbObjects[modelName].forEach(function(entity) {
+            if (modelName !== co.collections.clients.name) { // Sonderbehandlung bei Mandanten
+                if (attribute.clientId === null && entity.clientId !== null) return;
+                if (attribute.clientId !== null && entity.clientId === null) return;
+                if ('' + attribute.clientId !== '' + entity.clientId) return;
+            }
             var value;
             if (attribute.type === 'text') {
-                value = user.name + ' text';
+                value = 'text';
             } else if (attribute.type === 'boolean') {
                 value = true;
             } else if (attribute.type === 'picklist') {
                 value = th.dbObjects.dynamicattributeoptions.find((o) => o.dynamicAttributeId.toString() === attribute._id.toString())._id;
             }
-            dynamicAttributeValues.push({dynamicAttributeId: attribute._id, entityId: user._id, clientId: attribute.clientId, value: value });
+            dynamicAttributeValues.push({dynamicAttributeId: attribute._id, entityId: entity._id, clientId: attribute.clientId, value: value });
         });
     });
     return th.bulkInsert(co.collections.dynamicattributevalues.name, dynamicAttributeValues);
@@ -1259,8 +1262,19 @@ th.apiTests = {
                     return Promise.resolve();
                 });
             });
-            if (!skipDynamicAttributes) xit('Deletes all dynamic attribute values for the entity', function() {
-                // Helper "dynamicAttribtuesHelper" bauen, der die Values löscht und diesen in den Löschfunktionen der APIs verwenden!
+            if (!skipDynamicAttributes) it('Deletes all dynamic attribute values for the entity', async function() {
+                var objectId = await getId();
+                // DA's vorbereiten
+                var entity = await db.get(collection).findOne(objectId);
+                assert.ok(entity, 'Entity was not inserted into database');
+                th.dbObjects[collection].push(entity); // Ist in der Regel nicht drin, wird aber von den folgenden Hilfsfunktionen verwendet
+                await th.prepareDynamicAttributes(collection);
+                await th.prepareDynamicAttributeOptions();
+                await th.prepareDynamicAttributeValues(collection);
+                var token = await th.defaults.login();
+                await th.del(`/api/${api}/${objectId.toString()}?token=${token}`).expect(204);
+                var dynamicAttributeValuesAfter = await db.get(co.collections.dynamicattributevalues.name).find({entityId:objectId});
+                assert.strictEqual(dynamicAttributeValuesAfter.length, 0, 'There are still dynamic attribute values left');
             });
         }
     }

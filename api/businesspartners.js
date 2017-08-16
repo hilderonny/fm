@@ -18,6 +18,7 @@ var async = require('async');
 var bcryptjs = require('bcryptjs');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
+var dah = require('../utils/dynamicAttributesHelper');
 
 /**
  * Liefert eine Liste von Partners für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
@@ -109,7 +110,9 @@ router.delete('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.
         return req.db.remove(co.collections.partneraddresses.name, {partnerId:partnerId});
     }).then(() => {
         return rh.deleteAllRelationsForEntity(co.collections.businesspartners.name, partnerId);
-    }).then(function() {
+    }).then(() => {
+        return dah.deleteAllDynamicAttributeValuesForEntity(partnerId);
+    }).then(() => {
         res.sendStatus(204);
     });
 });

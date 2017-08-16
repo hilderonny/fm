@@ -13,6 +13,7 @@ var monk = require('monk');
 var async = require('async');
 var bcryptjs = require('bcryptjs');
 var co = require('../utils/constants');
+var dah = require('../utils/dynamicAttributesHelper');
 
 router.get('/forIds', auth(false, false, co.modules.businesspartners), (req, res) => {
     // Zuerst Berechtigung prüfen
@@ -99,6 +100,8 @@ router.delete('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businessp
         return req.db.remove(co.collections.communications.name, {personId:personId});
     }).then(function() {
         return req.db.remove(co.collections.persons.name, personId)
+    }).then(() => {
+        return dah.deleteAllDynamicAttributeValuesForEntity(personId);
     }).then(function() {
         res.sendStatus(204);
     });

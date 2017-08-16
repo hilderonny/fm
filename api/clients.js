@@ -14,6 +14,7 @@ var async = require('async');
 var bcryptjs = require('bcryptjs');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
+var dah = require('../utils/dynamicAttributesHelper');
 
 /**
  * List all clients
@@ -168,7 +169,9 @@ router.delete('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), 
                 return;
             }
             rh.deleteAllRelationsForEntity(co.collections.clients.name, clientId).then(function() {
-                res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+                dah.deleteAllDynamicAttributeValuesForEntity(clientId).then(() => {
+                    res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+                });
             });
         });
     });
