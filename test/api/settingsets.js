@@ -81,6 +81,7 @@ describe('API settingsets', function(){
                         { 
                             type: co.settingSetTypes.CLIENT, 
                             items: [
+                                { mainCard: "Administration/ClientSettingsCard", title: "TRK_SETTINGSET_CLIENT", icon: "Briefcase", permission: co.permissions.SETTINGS_CLIENT},
                                 { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                             ]
                         },
@@ -112,6 +113,7 @@ describe('API settingsets', function(){
                         { 
                             type: co.settingSetTypes.CLIENT, 
                             items: [
+                                { mainCard: "Administration/ClientSettingsCard", title: "TRK_SETTINGSET_CLIENT", icon: "Briefcase", permission: co.permissions.SETTINGS_CLIENT},
                                 { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                             ]
                         },
@@ -143,6 +145,7 @@ describe('API settingsets', function(){
                         { 
                             type: co.settingSetTypes.CLIENT, 
                             items: [
+                                { mainCard: "Administration/ClientSettingsCard", title: "TRK_SETTINGSET_CLIENT", icon: "Briefcase", permission: co.permissions.SETTINGS_CLIENT},
                                 { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                             ]
                         }
@@ -163,6 +166,7 @@ describe('API settingsets', function(){
                             { 
                                 type: co.settingSetTypes.CLIENT, 
                                 items: [
+                                    { mainCard: "Administration/ClientSettingsCard", title: "TRK_SETTINGSET_CLIENT", icon: "Briefcase", permission: co.permissions.SETTINGS_CLIENT},
                                     { mainCard: 'Administration/DynamicAttributesEntityListCard', icon: 'View Details', title: 'TRK_SETTINGSET_DYNAMICATTRIBUTES', permission: co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES }
                                 ]
                             },

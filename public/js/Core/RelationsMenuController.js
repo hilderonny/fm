@@ -130,7 +130,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                         id:usergroup._id
                     };
                 });
-                $scope.showListDialog(' ', listItems);
+                $scope.showListDialog('USERGROUPS_SELECT_USERGROUP', listItems);
             });
         } },
         { icon: 'User', translationKey: 'USERS_USER', requiredReadPermission: 'PERMISSION_ADMINISTRATION_USER', dialogFunction: function() {

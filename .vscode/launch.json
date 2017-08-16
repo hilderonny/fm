@@ -23,6 +23,26 @@
             "outDir": null
         },
         {
+            "name":"Simulate production",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/app.js",
+            "stopOnEntry": false,
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": null,
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "production"
+            },
+            "console": "internalConsole",
+            "sourceMaps": true,
+            "outDir": null
+        },
+        {
             "name": "Debug Client Side",
             "type": "chrome",
             "request": "launch",

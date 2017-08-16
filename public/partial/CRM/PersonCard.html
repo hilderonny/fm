@@ -37,6 +37,8 @@
                     <input ng-model="person.description" name="description">
                 </md-input-container>
 
+                <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
+
                 <md-card-actions layout="row" layout-align="end center">
                     <md-button class="md-raised md-accent" ng-if="isNewPerson && canWritePersons" ng-click="createPerson()"><span translate>TRK_PERSONS_CREATE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="!isNewPerson && canWritePersons" ng-click="savePerson()"><span translate>TRK_PERSONS_SAVE</span></md-button>

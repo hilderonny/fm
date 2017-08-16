@@ -2,12 +2,13 @@
     "modules" : {
 
         "base": {
-            "api" : [ "dynamicattributes", "login", "menu", "permissions", "usergroups", "users", "relations", "settingsets", "translations" ],
+            "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "settingsets", "translations", "usergroups", "users" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
             "public" : [
                 "css/base.css",
                 "css/logo_avorium_komplett.svg",
                 "css/icons/material/Add Link.svg",
+                "css/icons/material/Briefcase.svg",
                 "css/icons/material/Cancel.svg",
                 "css/icons/material/Checked Checkbox.svg",
                 "css/icons/material/Delete.svg",
@@ -25,6 +26,7 @@
                 "css/icons/material/Settings.svg",
                 "css/icons/material/View Details.svg",
                 "css/icons/office/Add Link.svg",
+                "css/icons/office/Briefcase.svg",
                 "css/icons/office/Cancel.svg",
                 "css/icons/office/Delete.svg",
                 "css/icons/office/Edit.svg",
@@ -36,6 +38,7 @@
                 "css/icons/office/Search.svg",
                 "css/icons/office/Settings.svg",
                 "css/icons/office/View Details.svg",
+                "partial/Administration/ClientSettingsCard.html",
                 "partial/Administration/DynamicAttributeCreationFormCard.html",
                 "partial/Administration/DynamicAttributesCard.html",
                 "partial/Administration/DynamicAttributeElementCard.html",
@@ -69,6 +72,7 @@
                 "public/js/AppSetup.js",
                 "public/js/Utils.js",
                 "public/js/MainController.js",
+                "public/js/Administration/ClientSettingsCardController.js",
                 "public/js/Administration/DynamicAttributesCardController.js",
                 "public/js/Administration/DynamicAttributeCreationFormCardController.js",
                 "public/js/Administration/DynamicAttributeElementCardController.js",
@@ -97,6 +101,7 @@
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
+                { "mainCard": "Administration/ClientSettingsCard", "title": "TRK_SETTINGSET_CLIENT", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Briefcase", "permission": "PERMISSION_SETTINGS_CLIENT"},
                 { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "View Details", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
             ]
         },
@@ -133,6 +138,10 @@
                 "css/icons/material/Collaborator Male.svg",
                 "css/icons/material/Email.svg",
                 "css/icons/material/Phone.svg",
+                "css/icons/material/Post Office.svg",
+                "css/icons/material/Purchase Order.svg",
+                "css/icons/material/Rating.svg",
+                "css/icons/material/Truck.svg",
                 "css/icons/office/Business.svg",               
                 "css/icons/office/Collaborator Male.svg",
                 "partial/CRM/BPAddressCard.html",

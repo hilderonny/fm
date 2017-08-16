@@ -116,6 +116,17 @@ th.prepareClientModules = () => {
 };
 
 /**
+ * Mandanteneinstellungen vorbereiten
+ */
+th.prepareClientSettings = () => {
+    var clientSettings = [];
+    th.dbObjects.clients.forEach((client) => {
+        clientSettings.push({ clientId: client._id, logourl: 'http://' + client.name });
+    });
+    return th.bulkInsert('clientsettings', clientSettings);
+};
+
+/**
  * Removes the access to a module from the given client
  */
 th.removeClientModule = (clientName, module) => {

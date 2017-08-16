@@ -21,6 +21,10 @@ module.exports.apis = {
      */
     clients: 'clients',
     /**
+     * API für Mandanteneinstellungen
+     */
+    clientsettings: 'clientsettings',
+    /**
      * API für Kommunikationswege
      */
     communications: 'communications',
@@ -126,6 +130,10 @@ module.exports.collections = {
      * Modulzuordnungen für Mandanten
      */
     clientmodules:{name: 'clientmodules', canHaveAttributes:false},
+    /**
+     * Einstellungen für Mandanten
+     */
+    clientsettings:{name: 'clientsettings', canHaveAttributes:false},
     /**
      * Mandanten
      */

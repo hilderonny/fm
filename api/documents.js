@@ -21,13 +21,15 @@ var path = require('path');
 var documentsHelper = require('../utils/documentsHelper');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
+var mime = require('send').mime;
 
 var downloadDocument = (response, document) => {
     var options = {
         headers: {
-            'Content-disposition': 'attachment; filename=' + document.name
+            'Content-disposition' : 'attachment; filename=' + document.name,
+            'Content-Type' : mime.lookup(document.name)
         }
-    }
+    };
     return response.sendFile(documentsHelper.getDocumentPath(document._id), options);
 };
 

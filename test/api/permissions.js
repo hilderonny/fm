@@ -129,7 +129,7 @@ describe('API permissions', function(){
             }).then(function(response) {
                 var permissionsFromApi = response.body.map((p) => p.key);
                 // Die ausgenommen Berechtigungen stehen dem Mandanten nicht zur Verfügung
-                var expectedPermissions = Object.keys(co.permissions).filter((k) => [co.permissions.SETTINGS_CLIENT, co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0).map((k) => co.permissions[k]);
+                var expectedPermissions = Object.keys(co.permissions).filter((k) => [co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0).map((k) => co.permissions[k]);
                 assert.strictEqual(permissionsFromApi.length, expectedPermissions.length);
                 permissionsFromApi.forEach(function(permission) {
                     assert.ok(expectedPermissions.indexOf(permission) >= 0);
@@ -160,7 +160,7 @@ describe('API permissions', function(){
                 return th.get(`${api}?token=${token}`).expect(200);
             }).then(function(response) {
                 var permissionsFromApi = response.body.map((p) => p.key);
-                var expectedPermissions = Object.keys(co.permissions).filter((k) => [co.permissions.BIM_FMOBJECT, co.permissions.OFFICE_ACTIVITY, co.permissions.SETTINGS_CLIENT, co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0).map((k) => co.permissions[k]);
+                var expectedPermissions = Object.keys(co.permissions).filter((k) => [co.permissions.BIM_FMOBJECT, co.permissions.OFFICE_ACTIVITY, co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0).map((k) => co.permissions[k]);
                 assert.strictEqual(permissionsFromApi.length, expectedPermissions.length);
                 permissionsFromApi.forEach(function(permission) {
                     assert.ok(expectedPermissions.indexOf(permission) >= 0);
