@@ -11,11 +11,11 @@ app.controller('AdministrationDynamicAttributesModelListCardController', functio
     //User clicks on ceratin list item to select particular model
     $scope.selectModel = function(selectedModel){
         utils.removeCardsToTheRightOf($element);
-        utils.addCard('Administration/DynamicAttributesCard', {
+        utils.addCardWithPermission('Administration/DynamicAttributesCard', {
             modelName: selectedModel.name,
             icon: selectedModel.icon, //TODO check if you need this parameter
             title: selectedModel.title
-        });
+        }, 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');
         $scope.selectedModel = selectedModel;
     };
 

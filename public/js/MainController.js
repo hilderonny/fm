@@ -78,7 +78,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             localStorage.setItem("loginCredentials", JSON.stringify(user));
             // Loads the menu structure from the server
             $http.get('/api/menu').then(function (response) {
-                $scope.menu = response.data;
+                $scope.menu = response.data.menu;
                 $scope.menu.push({
                     "title": "TRK_MENU_LOGOUT",
                     "icon": "Exit",
@@ -88,6 +88,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                         utils.setLocation('/');
                     }
                 });
+                $scope.logourl = response.data.logourl;
                 // Ermittelt zentral alle Berechtigungen für den angemeldeten Benutzer.
                 // Diese können dann per $rootScope.permissions[key] abgefragt werden.
                 return $http.get('/api/permissions/forLoggedInUser');
