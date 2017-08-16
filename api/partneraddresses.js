@@ -18,6 +18,7 @@ var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var co = require('../utils/constants');
+var dah = require('../utils/dynamicAttributesHelper');
 
 router.get('/forBusinessPartner/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.businesspartners.name), function(req, res) {
     req.db.get(co.collections.businesspartners.name).findOne(req.params.id).then((businessPartner) => {
@@ -77,6 +78,8 @@ router.put('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.bus
 router.delete('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), validateId, validateSameClientId(co.collections.partneraddresses.name), function(req, res) {
     var id = monk.id(req.params.id);  
     req.db.remove(co.collections.partneraddresses.name, id).then((result) => {
+        return dah.deleteAllDynamicAttributeValuesForEntity(id);
+    }).then(() => {
         res.sendStatus(204);
     });
 });

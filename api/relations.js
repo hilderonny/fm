@@ -12,6 +12,7 @@ var validateId = require('../middlewares/validateid');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var co = require('../utils/constants');
+var dah = require('../utils/dynamicAttributesHelper');
 
 /**
  * Sucht alle Verknüpfungen zu einer Entität einer bestimmten ID und liefert diese als Liste
@@ -82,8 +83,11 @@ router.post('/', auth(false, false, 'base'), (req, res) => {
 /**
  * Löscht eine Verknüpfung mit einer bestimmten ID
  */  
-router.delete('/:id', auth(false, false, 'base'), validateId, validateSameClientId('relations'), function(req, res) {
-    req.db.remove('relations', req.params.id).then((result) => {
+router.delete('/:id', auth(false, false, co.modules.base), validateId, validateSameClientId(co.collections.relations.name), function(req, res) {
+    var id = monk.id(req.params.id);
+    req.db.remove(co.collections.relations.name, id).then((result) => {
+        return dah.deleteAllDynamicAttributeValuesForEntity(id);
+    }).then(() => {
         res.sendStatus(204);
     });
 });

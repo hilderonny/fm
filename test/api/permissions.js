@@ -177,7 +177,34 @@ describe('API permissions', function(){
         th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups.name);
         th.apiTests.getId.clientDependentNegative(api, co.collections.usergroups.name);
 
-        xit('responds with all permissions where the states are correctly set', function() {
+        it('responds with all permissions where the states are correctly set', async function() {
+            var userGroup = await th.defaults.getUserGroup();
+            var token = await th.defaults.login();
+            var permissionsFromDatabase = await db.get(co.collections.permissions.name).find({userGroupId: userGroup._id});
+            var permissionsFromApi = (await th.get(`/api/${co.apis.permissions}/forUserGroup/${userGroup._id}?token=${token}`).expect(200)).body;
+            // Dieser Test geht davon aus, dass alle möglichen Berechtigungen in der Datenbank vorhanden sind
+            // Derzeit werden SETTINGS_CLIENT und SETTINGS_PORTAL nirgends verwendet.
+            var keysFromDatabase = permissionsFromDatabase.filter((k) => [co.permissions.SETTINGS_CLIENT, co.permissions.SETTINGS_PORTAL].indexOf(k.key) < 0).map((p) => p.key);
+            var keysFromApi = permissionsFromApi.map((p) => p.key);
+            keysFromDatabase.forEach((key) => {
+                assert.ok(keysFromApi.indexOf(key) >= 0, `Permission ${key} not returned by API. Configured in "permissions" attribute of module in module-config?`);
+            });
+            keysFromApi.forEach((key) => {
+                assert.ok(keysFromDatabase.indexOf(key) >= 0, `Permission ${key} not prepared in database`);
+            });
+        });
+
+        it('responds with all permissions even when some of them are not defined in database', async function() {
+            var userGroup = await th.defaults.getUserGroup();
+            var token = await th.defaults.login();
+            var keyToCheck = co.permissions.OFFICE_DOCUMENT;
+            // Berechtigungen aus Datenbank löschen
+            await db.remove(co.collections.permissions.name, {key:keyToCheck});
+            var permissionsFromApi = (await th.get(`/api/${co.apis.permissions}/forUserGroup/${userGroup._id}?token=${token}`).expect(200)).body;
+            var relevantPermission = permissionsFromApi.find((p) => p.key === keyToCheck);
+            assert.ok(relevantPermission);
+            assert.strictEqual(relevantPermission.canRead, false);
+            assert.strictEqual(relevantPermission.canWrite, false);
         });
 
     });

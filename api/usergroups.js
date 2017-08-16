@@ -14,6 +14,7 @@ var monk = require('monk');
 var apiHelper = require('../utils/apiHelper');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
+var dah = require('../utils/dynamicAttributesHelper');
 
 // Get all user groups of the current client
 router.get('/', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'r', 'base'), (req, res) => {
@@ -98,6 +99,8 @@ router.delete('/:id', auth('PERMISSION_ADMINISTRATION_USERGROUP', 'w', 'base'), 
                 return req.db.remove('permissions', {userGroupId: id});
             }).then(() => {
                 return rh.deleteAllRelationsForEntity(co.collections.usergroups.name, id);
+            }).then(() => {
+                return dah.deleteAllDynamicAttributeValuesForEntity(id);
             }).then(function() {
                 res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
             });

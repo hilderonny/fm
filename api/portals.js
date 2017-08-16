@@ -17,6 +17,7 @@ var async = require('async');
 var hat = require('hat');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
+var dah = require('../utils/dynamicAttributesHelper');
 
 // Generate license key with hat, https://github.com/substack/node-hat
 var generateLicenseKey = () => {
@@ -138,7 +139,9 @@ router.delete('/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserve
     }, (err) => {
         req.db.remove('portals', req.params.id).then((result) => {
             rh.deleteAllRelationsForEntity(co.collections.portals.name, portalId).then(function() {
-                res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+                dah.deleteAllDynamicAttributeValuesForEntity(portalId).then(() => {
+                    res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+                });
             });
         });
     });

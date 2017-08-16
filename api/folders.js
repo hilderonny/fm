@@ -18,6 +18,7 @@ var monk = require('monk');
 var documentsApi = require('./documents');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
+var dah = require('../utils/dynamicAttributesHelper');
 
 router.get('/', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), (req, res) => {
     var clientId = req.user.clientId; // clientId === null means that the user is a portal user
@@ -216,6 +217,7 @@ var removeFolder = (db, folder) => {
         return Promise.all(documentPromises);
     }));
     promises.push(rh.deleteAllRelationsForEntity(co.collections.folders.name, folder._id));
+    promises.push(dah.deleteAllDynamicAttributeValuesForEntity(folder._id));
     // Delete the folder itself
     promises.push(db.remove('folders', folder._id));
     return Promise.all(promises);

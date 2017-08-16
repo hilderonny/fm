@@ -130,9 +130,10 @@ describe('API dynamicattributes', function() {
     describe('GET/values/:modelName/:id', function() {
 
         var api = co.apis.dynamicattributes + '/values/users';
-        th.apiTests.getId.defaultNegative(api, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.users.name);
+
+        th.apiTests.getId.defaultNegative(api, false, co.collections.users.name);
         th.apiTests.getId.clientDependentNegative(api, co.collections.users.name);
-    
+        
         it('responds without giving a model name and entity id with 400', async function() {
             var token = await th.defaults.login();
             await th.get(`/api/${co.apis.dynamicattributes}/values/?token=${token}`).expect(400);
