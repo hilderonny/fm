@@ -203,9 +203,9 @@ describe('module-config.json', function() {
         return Promise.resolve();
     });
 
-    /* TODO: Wieder rein nehmen, wenn die Mandantenlogos und damit auch die PERMISSION_SETTINGS_CLIENT Berechtigung kommen */
-    it.skip('permissions match with those in constants', function() {
+    it('permissions match with those in constants', function() {
         var permissionsFromConfig = [], errors = [];
+        // Aus den Menüs holen
         Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].menu).forEach((modMenus) => {
             if (modMenus) modMenus.forEach(function(menu) {
                 menu.items.forEach(function(item) {
@@ -213,9 +213,16 @@ describe('module-config.json', function() {
                 });
             });
         });
+        // Aus den SettingSets holen
         Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].settingsets).forEach((modSettingSets) => {
-            if (modSettingSets) modSettingSets.forEach(function(modSettingSets) {
-                if (modSettingSets.permission && permissionsFromConfig.indexOf(modSettingSets.permission) < 0) permissionsFromConfig.push(modSettingSets.permission);
+            if (modSettingSets) modSettingSets.forEach(function(modSettingSet) {
+                if (modSettingSet.permission && permissionsFromConfig.indexOf(modSettingSet.permission) < 0) permissionsFromConfig.push(modSettingSet.permission);
+            });
+        });
+        // Explizit defnierte Berechtigungen holen
+        Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].permissions).forEach((permissions) => {
+            if (permissions) permissions.forEach(function(permission) {
+                if (permissionsFromConfig.indexOf(permission) < 0) permissionsFromConfig.push(permission);
             });
         });
         // Alle in der config definierten Zugriffsrechte müssen als Konstanten vorhanden sein

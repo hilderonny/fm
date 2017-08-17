@@ -704,6 +704,9 @@ th.defaults = {
      */
     login: function(userName) { return th.doLoginAndGetToken(userName || th.defaults.user, th.defaults.password); },
     otherClient: '0',
+    /**
+     * Benutzer eines anderen Mandanten
+     */
     otherUser: '0_0_0',
     partnerAddress: '1_0_0',
     password: 'test',

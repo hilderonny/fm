@@ -116,8 +116,10 @@ describe('API communications', function() {
             });
         });
         
-        xit('responds with 400 when the person of the communication does not belong to the same client as the logged in user', function() {
-
+        it('responds with 400 when the person of the communication does not belong to the same client as the logged in user', async function() {
+            var communicationToSend = await createPostTestCommunication();
+            var token = await th.defaults.login(th.defaults.otherUser);
+            await th.post(`/api/${co.apis.communications}?token=${token}`).send(communicationToSend).expect(400);
         });
 
         it('responds with correct data with inserted communication containing an _id field', function() {

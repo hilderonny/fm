@@ -120,8 +120,10 @@ describe('API partneraddresses', function() {
             });
         });
         
-        xit('responds with 400 when the partner of the address does not belong to the same client as the logged in user', function() {
-
+        it('responds with 400 when the partner of the address does not belong to the same client as the logged in user', async function() {
+            var addressToSend = await createPostTestAddress();
+            var token = await th.defaults.login(th.defaults.otherUser);
+            await th.post(`/api/${co.apis.partneraddresses}?token=${token}`).send(addressToSend).expect(400);
         });
 
         it('responds with correct data with inserted address containing an _id field', function() {
