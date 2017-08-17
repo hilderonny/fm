@@ -5,6 +5,7 @@
     "TRK_NO" : "Nein",
     "TRK_PORTALS_ACTIVE" : "Aktiv",
     "TRK_PORTALS_CHANGES_SAVED" : "Änderungen gespeichert",
+    "TRK_PORTALS_COMMENT" : "Kommentar", 
     "TRK_PORTALS_CREATE" : "Erstellen",
     "TRK_PORTALS_CREATE_NEW_PORTAL" : "Neues Portal erstellen",
     "TRK_PORTALS_DELETE" : "Löschen",
@@ -23,5 +24,6 @@
     "TRK_PORTALS_REALLY_GENERATE_LICENSEKEY" : "Soll wirklich ein neuer Lizenzschlüssel generiert werden? Diese Änderung wird sofort gespeichert und der alte Schlüssel ist danach nicht mehr verwendbar.",
     "TRK_PORTALS_SAVE" : "Speichern",
     "TRK_PORTALS_SELECT_PORTAL" : "Portal auswählen",
+    "TRK_PORTALS_URL" : "URL",
     "TRK_YES" : "Ja"
 }

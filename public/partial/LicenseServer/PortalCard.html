@@ -27,6 +27,17 @@
                     <md-checkbox ng-model="portal.isActive"><span translate>TRK_PORTALS_ACTIVE</span></md-checkbox>
                 </md-input-container>
 
+                <md-input-container flex>
+                    <label translate>TRK_PORTALS_URL</label>
+                    <textarea ng-model="portal.url" name="url" rows="1"></textarea>
+                </md-input-container>
+
+                <md-input-container flex>
+                    <label translate>TRK_PORTALS_COMMENT</label>
+                    <textarea ng-model="portal.comment" name="comment" rows="5"></textarea>
+                </md-input-container>
+
+
                 <md-input-container flex ng-if="!isNewPortal">
                     <label translate>TRK_PORTALS_LICENSEKEY</label>
                     <textarea ng-model="portal.licenseKey" rows="5" ng-readonly="true"></textarea>
