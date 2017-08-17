@@ -72,7 +72,31 @@ describe('API clientmodules', function() {
             });
         });
 
-        xit('responds with all modules where the assignment states are correctly set', function() {
+        it('responds with all client modules where the states are correctly set', async function() {
+            var client = await th.defaults.getClient();
+            var token = await th.defaults.login();
+            var clientModulesFromDatabase = await db.get(co.collections.clientmodules.name).find({clientId: client._id});
+            var clientModulesFromApi = (await th.get(`/api/${co.apis.clientmodules}/forClient/${client._id}?token=${token}`).expect(200)).body;
+            var keysFromDatabase = clientModulesFromDatabase.map((p) => p.key);
+            var keysFromApi = clientModulesFromApi.map((p) => p.key);
+            keysFromDatabase.forEach((key) => {
+                assert.ok(keysFromApi.indexOf(key) >= 0, `Client module ${key} not returned by API.`);
+            });
+            keysFromApi.forEach((key) => {
+                assert.ok(keysFromDatabase.indexOf(key) >= 0, `Client module ${key} not prepared in database`);
+            });
+        });
+
+        it('responds with all client modules even when some of them are not defined in database', async function() {
+            var client = await th.defaults.getClient();
+            var token = await th.defaults.login();
+            var moduleToCheck = co.modules.documents;
+            // Zugriff aus Datenbank löschen
+            await db.remove(co.collections.clientmodules.name, {module:moduleToCheck});
+            var clientModulesFromApi = (await th.get(`/api/${co.apis.clientmodules}/forClient/${client._id}?token=${token}`).expect(200)).body;
+            var relevantClientModule = clientModulesFromApi.find((p) => p.module === moduleToCheck);
+            assert.ok(relevantClientModule);
+            assert.strictEqual(relevantClientModule.active, false);
         });
 
     });

@@ -129,7 +129,7 @@ describe('API permissions', function(){
             }).then(function(response) {
                 var permissionsFromApi = response.body.map((p) => p.key);
                 // Die ausgenommen Berechtigungen stehen dem Mandanten nicht zur Verfügung
-                var expectedPermissions = Object.keys(co.permissions).filter((k) => [co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0).map((k) => co.permissions[k]);
+                var expectedPermissions = Object.keys(co.permissions).map((k) => co.permissions[k]);
                 assert.strictEqual(permissionsFromApi.length, expectedPermissions.length);
                 permissionsFromApi.forEach(function(permission) {
                     assert.ok(expectedPermissions.indexOf(permission) >= 0);
@@ -183,7 +183,7 @@ describe('API permissions', function(){
             var permissionsFromDatabase = await db.get(co.collections.permissions.name).find({userGroupId: userGroup._id});
             var permissionsFromApi = (await th.get(`/api/${co.apis.permissions}/forUserGroup/${userGroup._id}?token=${token}`).expect(200)).body;
             // Dieser Test geht davon aus, dass alle möglichen Berechtigungen in der Datenbank vorhanden sind
-            var keysFromDatabase = permissionsFromDatabase.filter((k) => [co.permissions.SETTINGS_PORTAL].indexOf(k.key) < 0).map((p) => p.key);
+            var keysFromDatabase = permissionsFromDatabase.map((p) => p.key);
             var keysFromApi = permissionsFromApi.map((p) => p.key);
             keysFromDatabase.forEach((key) => {
                 assert.ok(keysFromApi.indexOf(key) >= 0, `Permission ${key} not returned by API. Configured in "permissions" attribute of module in module-config?`);

@@ -104,13 +104,9 @@ th.prepareClients = () => {
 th.prepareClientModules = () => {
     var clientModules = [];
     th.dbObjects.clients.forEach((client) => {
-        clientModules.push({ clientId: client._id, module: co.modules.base });
-        clientModules.push({ clientId: client._id, module: co.modules.activities });
-        clientModules.push({ clientId: client._id, module: co.modules.clients });
-        clientModules.push({ clientId: client._id, module: co.modules.documents });
-        clientModules.push({ clientId: client._id, module: co.modules.fmobjects });
-        clientModules.push({ clientId: client._id, module: co.modules.licenseserver });
-        clientModules.push({ clientId: client._id, module: co.modules.businesspartners });
+        Object.keys(co.modules).forEach((key) => {
+            clientModules.push({ clientId: client._id, module: co.modules[key] });
+        });
     });
     return th.bulkInsert('clientmodules', clientModules);
 };

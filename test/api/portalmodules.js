@@ -34,7 +34,31 @@ describe('API portalmodules', function(){
         th.apiTests.getId.defaultNegative(api, co.permissions.LICENSESERVER_PORTAL, co.collections.portals.name);
         th.apiTests.getId.clientDependentNegative(api, co.collections.portals.name);
 
-        xit('responds with all portal modules where the states are correctly set', function() {
+        it('responds with all portal modules where the states are correctly set', async function() {
+            var portal = await th.defaults.getPortal();
+            var token = await th.defaults.login();
+            var portalModulesFromDatabase = await db.get(co.collections.portalmodules.name).find({portalId: portal._id});
+            var portalModulesFromApi = (await th.get(`/api/${co.apis.portalmodules}/forPortal/${portal._id}?token=${token}`).expect(200)).body;
+            var keysFromDatabase = portalModulesFromDatabase.map((p) => p.key);
+            var keysFromApi = portalModulesFromApi.map((p) => p.key);
+            keysFromDatabase.forEach((key) => {
+                assert.ok(keysFromApi.indexOf(key) >= 0, `Portal module ${key} not returned by API.`);
+            });
+            keysFromApi.forEach((key) => {
+                assert.ok(keysFromDatabase.indexOf(key) >= 0, `Portal module ${key} not prepared in database`);
+            });
+        });
+
+        it('responds with all portal modules even when some of them are not defined in database', async function() {
+            var portal = await th.defaults.getPortal();
+            var token = await th.defaults.login();
+            var moduleToCheck = co.modules.documents;
+            // Zugriff aus Datenbank löschen
+            await db.remove(co.collections.portalmodules.name, {module:moduleToCheck});
+            var portalModulesFromApi = (await th.get(`/api/${co.apis.portalmodules}/forPortal/${portal._id}?token=${token}`).expect(200)).body;
+            var relevantPortalModule = portalModulesFromApi.find((p) => p.module === moduleToCheck);
+            assert.ok(relevantPortalModule);
+            assert.strictEqual(relevantPortalModule.active, false);
         });
 
     });

@@ -121,86 +121,70 @@ describe('API menu', function() {
         });
     });
 
-    it('responds to GET/ with client admin user logged in with all menu items available to the users client', function() {
-        return th.removeClientModule('0', 'fmobjects').then(function() { // Remove fmobjects module
-            return th.removeClientModule('0', 'clients');
-        }).then(function() {
-            return th.removeClientModule('0', 'businesspartners');
-        }).then(function() {
-            return th.doLoginAndGetToken('0_0_ADMIN0', 'test');
-        }).then((token) => { // X_Y_ADMINZ is always an admin
-            return th.get(`/api/menu?token=${token}`).expect(200);
-        }).then(function(response) {
-            var menuStructureFromApi = response.body.menu;
-            // Module "ronnyseins" must not be in here, because it is never available to any client.
-            var userMenu = [
-                {
-                    title: 'TRK_MENU_ADMINISTRATION',
-                    items: [
-                        { mainCard: 'Administration/SettingSetListCard', icon: 'Settings', title: 'TRK_MENU_ADMINISTRATION_SETTINGS' },
-                        { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
-                        { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
-                    ]
-                },
-                {
-                    title: 'TRK_MENU_OFFICE',
-                    items: [
-                        { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                        { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
-                    ]
-                },
-                {
-                    title: 'TRK_MENU_LICENSESERVER',
-                    items: [
-                        { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
-                    ]
-                }
-            ];
-            compareMenuStructures(menuStructureFromApi, userMenu);
-            return Promise.resolve();
-        });
+    it('responds to GET/ with client admin user logged in with all menu items available to the users client', async function() {
+        await th.removeClientModule('0', 'fmobjects');
+        await th.removeClientModule('0', 'clients');
+        await th.removeClientModule('0', 'businesspartners');
+        await th.removeClientModule('0', 'ronnyseins');
+        var token = await th.doLoginAndGetToken('0_0_ADMIN0', 'test');
+        var menuStructureFromApi = (await th.get(`/api/menu?token=${token}`).expect(200)).body.menu;
+        // Module "ronnyseins" must not be in here, because it is never available to any client.
+        var userMenu = [ // Die Sortierung wird durch th.prepareClientModules bestimmt, welches die Module alphabetisch sortiert.
+            {
+                title: 'TRK_MENU_OFFICE',
+                items: [
+                    { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
+                    { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                ]
+            },
+            {
+                title: 'TRK_MENU_ADMINISTRATION',
+                items: [
+                    { mainCard: 'Administration/SettingSetListCard', icon: 'Settings', title: 'TRK_MENU_ADMINISTRATION_SETTINGS' },
+                    { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
+                    { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
+                ]
+            },
+            {
+                title: 'TRK_MENU_LICENSESERVER',
+                items: [
+                    { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
+                ]
+            }
+        ];
+        compareMenuStructures(menuStructureFromApi, userMenu);
     });
 
-    it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', function() {
-        return th.removeClientModule('0', co.modules.fmobjects).then(function() { // Remove fmobjects module
-            return th.removeClientModule('0', co.modules.clients);
-        }).then(function() {
-            return th.removeClientModule('0', co.modules.businesspartners);
-        }).then(function() {
-            return th.removeAllPermissions('0_0_0', co.permissions.OFFICE_DOCUMENT);
-        }).then(function() {
-            return th.removeAllPermissions('0_0_0', co.permissions.ADMINISTRATION_SETTINGS);
-        }).then(function() {
-            return th.doLoginAndGetToken('0_0_0', 'test');
-        }).then((token) => {
-            return th.get(`/api/menu?token=${token}`).expect(200);
-        }).then(function(response) {
-            var menuStructureFromApi = response.body.menu;
-            var userMenu = [
-                {
-                    title: 'TRK_MENU_ADMINISTRATION',
-                    items: [
-                        { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
-                        { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
-                    ]
-                },
-                {
-                    title: 'TRK_MENU_OFFICE',
-                    items: [
-                        { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'}
-                    ]
-                },
-                {
-                    title: 'TRK_MENU_LICENSESERVER',
-                    items: [
-                        { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
-                    ]
-                }
-            ];
-            compareMenuStructures(menuStructureFromApi, userMenu);
-            return Promise.resolve();
-        });
-
+    it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', async function() {
+        await th.removeClientModule('0', co.modules.fmobjects);
+        await th.removeClientModule('0', co.modules.clients);
+        await th.removeClientModule('0', co.modules.businesspartners);
+        await th.removeAllPermissions('0_0_0', co.permissions.OFFICE_DOCUMENT);
+        await th.removeAllPermissions('0_0_0', co.permissions.ADMINISTRATION_SETTINGS);
+        var token = await th.doLoginAndGetToken('0_0_0', 'test');
+        var menuStructureFromApi = (await th.get(`/api/menu?token=${token}`).expect(200)).body.menu;
+        var userMenu = [
+            {
+                title: 'TRK_MENU_OFFICE',
+                items: [
+                    { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'}
+                ]
+            },
+            {
+                title: 'TRK_MENU_ADMINISTRATION',
+                items: [
+                    { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
+                    { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
+                ]
+            },
+            {
+                title: 'TRK_MENU_LICENSESERVER',
+                items: [
+                    { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
+                ]
+            }
+        ];
+        compareMenuStructures(menuStructureFromApi, userMenu);
     });
             
     it('GET/ contains the logo URL of the client when set', async () => {
