@@ -35,7 +35,9 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
     $scope.createPortal = function() {
         var portalToSend = { 
             name: $scope.portal.name,
-            isActive: $scope.portal.isActive
+            isActive: $scope.portal.isActive,
+            url: $scope.portal.url,
+            comment: $scope.portal.comment
         };
         var createdPortal;
         $http.post('/api/portals', portalToSend).then(function(response) {
@@ -43,6 +45,8 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
             $scope.isNewPortal = false;
             $scope.portal._id = createdPortal._id;
             $scope.portal.licenseKey = createdPortal.licenseKey;
+            $scope.portal.url = createdPortal.url,
+            $scope.portal.comment = createdPortal.comment,
             $scope.portalName = $scope.portal.name;
             $scope.relationsEntity = { type:'portals', id:createdPortal._id };
             if ($scope.params.createPortalCallback) {
@@ -61,7 +65,9 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
     $scope.savePortal = function() {
         var portalToSend = { 
             name: $scope.portal.name,
-            isActive: $scope.portal.isActive
+            isActive: $scope.portal.isActive,
+            url: $scope.portal.url,
+            comment: $scope.portal.comment
         };
         utils.saveEntity($scope, 'portals',  $scope.portal._id, '/api/portals/', portalToSend).then(function(savedPortal) {
             $scope.portalName = $scope.portal.name;
@@ -133,7 +139,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
         // Switch between creation of a new portal and loading of an existing portal
         if ($scope.params.portalId) {
             // Existing portal
-            $http.get('/api/portals/' + $scope.params.portalId + '?fields=_id+name+isActive+licenseKey').then(function(portalResponse) {
+            $http.get('/api/portals/' + $scope.params.portalId).then(function(portalResponse) {
                 var completePortal = portalResponse.data;
                 $scope.isNewPortal = false;
                 $scope.portal = completePortal;
@@ -147,7 +153,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
         } else {
             // New portal
             $scope.isNewPortal = true;
-            $scope.portal = { name : "", isActive : true, portalModules: [] };
+            $scope.portal = { name : "", isActive : true, portalModules: [], url : "", comment: "" };
         }
         $scope.canWritePortals = $rootScope.canWrite('PERMISSION_LICENSESERVER_PORTAL');
     };
