@@ -44,6 +44,7 @@
     "node-windows": "^0.1.12",
     "nodemon": "^1.11.0",
     "request": "^2.79.0",
+    "send": "^0.15.4",
     "socket.io": "^1.7.2",
     "stl-obj-viewer": "^0.0.1",
     "uglify-js": "^2.8.29",
