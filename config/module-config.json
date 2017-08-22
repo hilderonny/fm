@@ -53,7 +53,8 @@
                 "partial/Core/RelationsMenu.html",
                 "partial/Core/RelationsTab.html",
                 "_index.html",
-                "chat.html"
+                "chat.html",
+                "favicon.png"
             ],
             "root" : [ "app.js", "package.json", "package-lock.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "config/localconfig.json.template" ],
             "include" : [
