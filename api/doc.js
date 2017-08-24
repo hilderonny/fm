@@ -5,11 +5,9 @@ var router = require('express').Router();
 var moduleConfig = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
 var co = require('../utils/constants');
 
-var extractDocMenu = (moduleNames) => {
+var extractDocMenu = () => {
     var fullMenu = [];
-    if (!moduleNames) { // When no module filters are given
-        moduleNames = Object.keys(moduleConfig.modules);
-    }
+    var moduleNames = Object.keys(moduleConfig.modules);
     moduleNames.forEach((moduleName) => {
         var appModule = moduleConfig.modules[moduleName];
         // Entweder versteckte Dokumentationen, wi Releasenotes in eigenem Attribut ...
@@ -18,7 +16,7 @@ var extractDocMenu = (moduleNames) => {
         });
         // ... oder als Attribut an irgendeinem Menüeintrag
         if (appModule.menu) appModule.menu.forEach((menu) => {
-            if (menu.items) menu.items.forEach((item) => {
+            menu.items.forEach((item) => {
                 if (item.docCard) fullMenu.push({
                     docCard: item.docCard,
                     icon: item.icon,
