@@ -29,6 +29,10 @@ module.exports.apis = {
      */
     communications: 'communications',
     /**
+     * API für Dokumentation
+     */
+    doc: 'doc',
+    /**
      * API for edititing documents
      */
     documents: 'documents',

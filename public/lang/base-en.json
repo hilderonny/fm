@@ -24,6 +24,7 @@
     "TRK_DYNAMICATTRIBUTES_TYPE_boolean": "Boolean",
     "TRK_DYNAMICATTRIBUTES_TYPE_picklist": "Pick list",
     "TRK_ENTER_SEARCH_TERM" : "Enter search term",
+    "TRK_HELP": "Help",
     "TRK_LOGIN_FAILED_TITLE" : "Login failed",
     "TRK_LOGIN_FAILED_CONTENT" : "The username or password is not correct.",
     "TRK_LOGIN_FAILED_AGAIN" : "Try again?",
