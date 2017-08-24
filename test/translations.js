@@ -146,6 +146,9 @@ function findTranslationKeysForModule(moduleName) {
     if (mod.settingsets) mod.settingsets.forEach(function eachSettingSet(settingSet) {
         if (settingSet.title) addTranslationKeyIfNotExists(translationKeys, settingSet.title);
     });
+    if (mod.doc) mod.doc.forEach((docMenu) => {
+        if (docMenu.title) addTranslationKeyIfNotExists(translationKeys, docMenu.title);
+    });
 
     return translationKeys;
 }

@@ -1,0 +1,18 @@
+<md-card ng-cloak ng-controller="DocListController">
+
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" translate>TRK_HELP</span>
+        </md-card-title-text>
+    </md-card-title>
+                
+    <md-card-content>
+        <md-list class="lines-beetween-items">
+            <md-list-item ng-repeat="menuItem in menu | orderBy: 'index'" ng-click="selectMenuItem(menuItem)" ng-class="selectedMenuItem == menuItem ? 'active' : false" aria-label="{{menuItem.title}}">
+                <md-icon md-svg-src="/css/icons/material/{{menuItem.icon}}.svg"></md-icon>
+                <p><span translate="{{ menuItem.title }}"></span></p>
+            </md-list-item>
+        </md-list>
+    </md-card-content>
+    
+</md-card>

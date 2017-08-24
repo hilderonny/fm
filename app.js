@@ -150,7 +150,7 @@ var init = () => {
 };
 
 // Install required dependencies
-if (process.env.NODE_ENV !== 'test' && localConfig.npmInstallCommand) {
+if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'development' && localConfig.npmInstallCommand) {
     console.log('Installing dependencies with npm ...\n');
     require('child_process').exec(localConfig.npmInstallCommand, (error, stdout, stderr) => {
         if (error) {
