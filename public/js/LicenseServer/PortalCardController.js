@@ -52,7 +52,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
             if ($scope.params.createPortalCallback) {
                 $scope.params.createPortalCallback(createdPortal);
             }
-            return $scope.getPermissions();
+            return $scope.getPortalModules();
         }).then(function() {
             return $translate(['TRK_PORTALS_PORTAL_CREATED']);
         }).then(function(translations) {
@@ -144,6 +144,8 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
                 $scope.isNewPortal = false;
                 $scope.portal = completePortal;
                 $scope.portalName = completePortal.name; // Prevent updating the label when changing the name input value
+                // Zeitstempel in Datum umwandeln
+                if ($scope.portal.lastNotification) $scope.portal.lastNotification = new Date($scope.portal.lastNotification).toLocaleString();
                 $scope.relationsEntity = { type:'portals', id:completePortal._id };
                 return $scope.getPortalModules();
             }).then(function() {

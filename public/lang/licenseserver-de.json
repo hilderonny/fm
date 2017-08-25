@@ -12,6 +12,7 @@
     "TRK_PORTALS_DETAILS" : "Details",
     "TRK_PORTALS_DOWNLOAD_PACKAGE" : "Paket herunterladen",
     "TRK_PORTALS_GENERATE_LICENSEKEY" : "Lizenzschlüssel generieren",
+    "TRK_PORTALS_LAST_NOTIFICATION": "Letzte Meldung",
     "TRK_PORTALS_LICENSEKEY" : "Lizenzschlüssel",
     "TRK_PORTALS_MODULES" : "Module",
     "TRK_PORTALS_NAME" : "Name",
@@ -25,5 +26,6 @@
     "TRK_PORTALS_SAVE" : "Speichern",
     "TRK_PORTALS_SELECT_PORTAL" : "Portal auswählen",
     "TRK_PORTALS_URL" : "URL",
+    "TRK_PORTALS_VERSION": "Installierte Version",
     "TRK_YES" : "Ja"
 }

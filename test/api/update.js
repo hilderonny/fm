@@ -26,6 +26,7 @@ describe('API update', function() {
             .then(th.prepareUserGroups)
             .then(th.prepareUsers)
             .then(th.preparePermissions)
+            .then(th.preparePortals)
             .then(preparePortal);
     });
 
@@ -119,13 +120,57 @@ describe('API update', function() {
     });
 
     describe('POST/', function() {
-
+        
         it('responds with 404', function() {
             return th.post(`/api/${co.apis.update}`).send({}).expect(404);
         });
 
     });
 
+    describe('POST/heartbeat', function() {
+        
+        it('responds with 400 when no content is sent', async function() {
+            await th.post(`/api/${co.apis.update}/heartbeat`).expect(400);
+        });
+        
+        it('responds with 400 when no license key is given', async function() {
+            var content = {
+                version: '0.8.15'
+            };
+            await th.post(`/api/${co.apis.update}/heartbeat`).send(content).expect(400);
+        });
+        
+        it('responds with 400 when no version is given', async function() {
+            var portal = await th.defaults.getPortal();
+            var content = {
+                licenseKey: portal.licenseKey
+            };
+            await th.post(`/api/${co.apis.update}/heartbeat`).send(content).expect(400);
+        });
+        
+        it('responds with 403 when there is no portal for the given license key', async function() {
+            var content = {
+                licenseKey: 'invalidLicenseKey',
+                version: '0.8.15'
+            };
+            await th.post(`/api/${co.apis.update}/heartbeat`).send(content).expect(403);
+        });
+        
+        it('returns with 200 and updates the version and lastNotification timestamp in the database', async function() {
+            var portalBefore = await th.defaults.getPortal();
+            var content = {
+                licenseKey: portalBefore.licenseKey,
+                version: '0.8.15'
+            };
+            var timeBeforeUpdate = Date.now();
+            await th.post(`/api/${co.apis.update}/heartbeat`).send(content).expect(200);
+            var portalAfter = await th.defaults.getPortal();
+            assert.strictEqual(portalAfter.version, content.version);
+            assert.ok(portalAfter.lastNotification >= timeBeforeUpdate);
+        });
+
+    });
+        
     describe('PUT/', function() {
 
         it('responds with 404', function() {

@@ -6,6 +6,10 @@
  *  name
  *  isActive
  *  licenseKey
+ *  version
+ *  lastNotification
+ *  url
+ *  comment
  * }
  */
 var router = require('express').Router();
@@ -28,7 +32,7 @@ var generateLicenseKey = () => {
  * List all portals
  */
 router.get('/', auth('PERMISSION_LICENSESERVER_PORTAL', 'r', 'licenseserver'), (req, res) => {
-    req.db.get('portals').find({}, req.query.fields).then((portals) => {
+    req.db.get('portals').find().then((portals) => {
         return res.send(portals);
     });
 });

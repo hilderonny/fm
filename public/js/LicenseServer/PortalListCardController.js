@@ -38,7 +38,11 @@ app.controller('LicenseServerPortalListCardController', function($scope, $rootSc
             createPortalCallback: createPortalCallback,
             closeCallback: closePortalCardCallback
         }, 'PERMISSION_LICENSESERVER_PORTAL');
-    }
+    };
+
+    $scope.getLastAccessTime = function(portal) {
+        return portal.lastNotification ? new Date(portal.lastNotification).toLocaleString() : '';
+    };
 
     // Loads the portals list from the server
     // Params:
