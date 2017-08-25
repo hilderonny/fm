@@ -37,6 +37,25 @@
                     <textarea ng-model="portal.comment" name="comment" rows="5"></textarea>
                 </md-input-container>
 
+                <md-input-container flex ng-if="!isNewPortal">
+                    <span translate>TRK_PORTALS_VERSION</span>
+                    <input ng-model="portal.version" ng-readonly="true" aria-label="VERSION"/>
+                </md-input-container>
+
+                <md-input-container flex ng-if="!isNewPortal">
+                    <span translate>TRK_PORTALS_LAST_NOTIFICATION</span>
+                    <input ng-model="portal.lastNotification" ng-readonly="true" aria-label="LAST NOTIFICATION TIME"/>
+                </md-input-container>
+
+                <md-input-container flex ng-if="!isNewPortal">
+                    <span translate>TRK_PORTALS_VERSION</span>
+                    <input ng-model="portal.version" ng-readonly="true" aria-label="VERSION"/>
+                </md-input-container>
+
+                <md-input-container flex ng-if="!isNewPortal">
+                    <span translate>TRK_PORTALS_LAST_NOTIFICATION</span>
+                    <input ng-model="portal.lastNotification" ng-readonly="true" aria-label="LAST NOTIFICATION TIME"/>
+                </md-input-container>
 
                 <md-input-container flex ng-if="!isNewPortal">
                     <label translate>TRK_PORTALS_LICENSEKEY</label>

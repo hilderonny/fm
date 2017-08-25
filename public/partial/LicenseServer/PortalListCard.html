@@ -12,7 +12,7 @@
         <md-list class="lines-beetween-items">
             <md-list-item ng-repeat="portal in portals | orderBy: 'name'" ng-click="selectPortal(portal)" ng-class="{active:selectedPortal === portal,strikethrough:!portal.isActive}" aria-label="{{portal.name}}">
                 <md-icon md-svg-src="/css/icons/material/Server.svg"></md-icon>
-                <p ng-bind="portal.name"></p>
+                <div class="md-list-item-text multiline"><p>{{portal.name}}</p><p>{{portal.version}} / {{getLastAccessTime(portal)}}</p></div>
             </md-list-item>
         </md-list>
     </md-card-content>

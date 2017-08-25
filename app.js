@@ -80,6 +80,7 @@ var init = () => {
     app.use(db.handler); // Datenbankverbindung -> req.db
     app.use(require('./middlewares/extracttoken')); // Authentifizierung und Authorisierung -> req.user{_id}
     app.use(require('body-parser').json()); // JSON Request-Body-Parser -> req.body
+    app.use(require('body-parser').urlencoded({extended:true})); // parse application/x-www-form-urlencoded
     // Include APIs configured in module-config.json
     var apis = extractApisFromModuleConfig();
     apis.forEach((api) => {
@@ -147,10 +148,19 @@ var init = () => {
     // Store time of start in cached localconfig to force reload of clients after server restart
     localConfig.startTime = Date.now();
     console.log(`Server started at ${localConfig.startTime}.`)
+
+    //Update local 'version' and 'lastNotification' of portal 
+    var request = require('request');
+    var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
+    var localVersion = packageJson.version;
+    var url =`${localConfig.licenseserverurl}/api/update/heartbeat`;
+    var key = localConfig.licensekey;
+    var data = {"licenseKey":  key.toString(), "version": localVersion.toString()};
+    request.post({url: url, form:  {"licenseKey":  key.toString(), "version": localVersion.toString()}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
 };
 
 // Install required dependencies
-if (process.env.NODE_ENV !== 'test' && localConfig.npmInstallCommand) {
+if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'development' && localConfig.npmInstallCommand) {
     console.log('Installing dependencies with npm ...\n');
     require('child_process').exec(localConfig.npmInstallCommand, (error, stdout, stderr) => {
         if (error) {
