@@ -48,16 +48,6 @@
                 </md-input-container>
 
                 <md-input-container flex ng-if="!isNewPortal">
-                    <span translate>TRK_PORTALS_VERSION</span>
-                    <input ng-model="portal.version" ng-readonly="true" aria-label="VERSION"/>
-                </md-input-container>
-
-                <md-input-container flex ng-if="!isNewPortal">
-                    <span translate>TRK_PORTALS_LAST_NOTIFICATION</span>
-                    <input ng-model="portal.lastNotification" ng-readonly="true" aria-label="LAST NOTIFICATION TIME"/>
-                </md-input-container>
-
-                <md-input-container flex ng-if="!isNewPortal">
                     <label translate>TRK_PORTALS_LICENSEKEY</label>
                     <textarea ng-model="portal.licenseKey" rows="5" ng-readonly="true"></textarea>
                 </md-input-container>
