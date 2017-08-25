@@ -155,8 +155,7 @@ var init = () => {
     var localVersion = packageJson.version;
     var url =`${localConfig.licenseserverurl}/api/update/heartbeat`;
     var key = localConfig.licensekey;
-    var data = {"licenseKey":  key.toString(), "version": localVersion.toString()};
-    request.post({url: url, form:  {"licenseKey":  key.toString(), "version": localVersion.toString()}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
+    request.post({url: url, form:  {"licenseKey":  key, "version": localVersion}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
 };
 
 // Install required dependencies
