@@ -54,7 +54,9 @@
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Core/RelationsMenu.html",
                 "partial/Core/RelationsTab.html",
+                "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
+                "partial/Doc/UserGroups.html",
                 "_index.html",
                 "chat.html",
                 "favicon.png"
@@ -134,6 +136,7 @@
             "public" : [
                 "css/icons/material/Planner.svg",
                 "css/icons/office/Planner.svg",
+                "partial/Doc/Activities.html",
                 "partial/Office/ActivityCard.html",
                 "partial/Office/CalendarCard.html"
             ],
@@ -172,7 +175,9 @@
                 "partial/CRM/BPListCard.html",
                 "partial/CRM/CommunicationCard.html",
                 "partial/CRM/PersonCard.html",
-                "partial/CRM/PersonListCard.html"
+                "partial/CRM/PersonListCard.html",
+                "partial/Doc/BusinessPartners.html",
+                "partial/Doc/Persons.html"
             ],
             "include":[
                 "public/js/CRM/BPAddressCardController.js",
@@ -204,7 +209,8 @@
                 "css/icons/office/Briefcase.svg",
                 "css/icons/office/Module.svg",
                 "partial/Administration/ClientCard.html",
-                "partial/Administration/ClientListCard.html"
+                "partial/Administration/ClientListCard.html",
+                "partial/Doc/Clients.html"
             ],
             "include" : [
                 "public/js/Administration/ClientCardController.js",
@@ -234,6 +240,7 @@
                 "css/icons/office/Download.svg",
                 "css/icons/office/Folder.svg",
                 "css/icons/office/Upload.svg",
+                "partial/Doc/Documents.html",
                 "partial/Office/DocumentCard.html",
                 "partial/Office/DocumentListCard.html",
                 "partial/Office/FolderCard.html"
@@ -273,7 +280,8 @@
                 "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg",
                 "partial/BIM/FmobjectCard.html",
                 "partial/BIM/FmObjectList.html",
-                "partial/BIM/HierarchyCard.html"
+                "partial/BIM/HierarchyCard.html",
+                "partial/Doc/FmObjects.html"
             ],
             "include" : [
                 "public/js/BIM/FmobjectCardController.js",
@@ -299,6 +307,7 @@
                 "css/icons/material/Unavailable.svg",
                 "css/icons/office/Module.svg",
                 "css/icons/office/Server.svg",
+                "partial/Doc/Portals.html",
                 "partial/LicenseServer/PortalCard.html",
                 "partial/LicenseServer/PortalListCard.html"
             ],
