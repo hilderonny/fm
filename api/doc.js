@@ -10,7 +10,7 @@ var extractDocMenu = () => {
     var moduleNames = Object.keys(moduleConfig.modules);
     moduleNames.forEach((moduleName) => {
         var appModule = moduleConfig.modules[moduleName];
-        // Entweder versteckte Dokumentationen, wi Releasenotes in eigenem Attribut ...
+        // Entweder versteckte Dokumentationen, wie Releasenotes in eigenem Attribut ...
         if (appModule.doc) appModule.doc.forEach((docCard) => {
             fullMenu.push(docCard);
         });
