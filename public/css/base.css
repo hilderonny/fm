@@ -281,7 +281,6 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
 }
 
 #dashboard > div {
-    align-self: center;
     text-align: center;
     margin: 0 auto;
 }
@@ -551,7 +550,7 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
 }
 
 /* Anpassungen speziell für Desktop, nutzt den Platz besser aus */
-@media (min-width: 600px) {
+@media (min-width: 800px) {
     md-sidenav {
         width: 240px;
         max-width: 240px;
@@ -733,5 +732,9 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
 
     md-list.hierarchy > md-list-item > ng-include {
         padding-left: 20px;
+    }
+
+    #dashboard > div {
+        align-self: center;
     }
 }
