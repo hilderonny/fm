@@ -18,7 +18,7 @@
             <h1 ng-if="isLoggedIn" translate="{{title}}"></h1>
             <span flex></span>
             <md-button ng-repeat="language in languages" ng-class="{active:currentLanguage==language}" aria-label="{{language}}" class="md-icon-button lang" ng-click="setLang(language)" ng-bind="language"></md-button>
-            <md-button aria-label="HELP" ng-href="/#/doc/{{currentMenuItem.docCard}}">
+            <md-button class="md-icon-button" aria-label="HELP" ng-href="/#/doc/{{currentMenuItem.docCard}}">
                 <md-tooltip md-direction="bottom"><span translate>TRK_HELP</span></md-tooltip>
                 <md-icon md-svg-src="/css/icons/material/Help.svg"></md-icon>
             </md-button>
