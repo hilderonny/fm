@@ -1,7 +1,32 @@
-<md-card ng-cloak class="list-details-details">
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu Benutzern</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
     <md-card-content>
 
-        <h1>Benutzer</h1>
+        <p>Benutzer ...</p>
+
+        <ul>
+            <li><a href="/#/doc/Users#list">Benutzerliste</a></li>
+            <li><a href="/#/doc/Users#create">Benutzer anlegen</a></li>
+            <li><a href="/#/doc/Users#edit">Benutzer bearbeiten</a></li>
+        </ul>
+
+        <h2><a name="list"/>Benutzerliste</h2>
+        <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. <img src="/css/images/Users_add_button.png"/> At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+        <img src="/css/images/Users_list.png"/>
+
+        <h2><a name="create"/>Benutzer anlegen</h2>
+        <img src="/css/images/Users_createuser.png"/>
+        
+        <h2><a name="edit"/>Benutzer bearbeiten</h2>
+        <img src="/css/images/Users_edituser.png"/>
+        <p>...</p>
+        <p>Nach dem Löschen eines Benutzers kann dieser sich nicht mehr mit seinen Anmeldedaten am System anmelden</p>
                 
     </md-card-content>
 </md-card>

@@ -7,6 +7,10 @@
             "public" : [
                 "css/base.css",
                 "css/logo_avorium_komplett.svg",
+                "css/images/Users_add_button.png",
+                "css/images/Users_createuser.png",
+                "css/images/Users_edituser.png",
+                "css/images/Users_list.png",
                 "css/icons/material/Add Link.svg",
                 "css/icons/material/Briefcase.svg",
                 "css/icons/material/Cancel.svg",
@@ -119,7 +123,8 @@
                 { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 }
             ],
             "include" : [
-                "public/js/Doc/ListController.js"
+                "public/js/Doc/ListController.js",
+                "public/js/Doc/CardController.js"
             ],
             "languages" : [ "de" ],
             "public" : [

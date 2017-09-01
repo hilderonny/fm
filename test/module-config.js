@@ -268,11 +268,11 @@ describe('module-config.json', function() {
             if (url.indexOf('http:') === 0 || url.indexOf('https:') === 0 || url.indexOf('data:') === 0) return; // Referenzen und Inline-Bilder ignorieren
             if (url.indexOf('/') === 0) url = url.substr(1);
             // Gucken, ob Datei in public-Part enthalten ist
-            if (pub.indexOf(url) < 0) errors.push(`File "${url}" not referenced in public part of module "${modName}".`);
+            if (pub.indexOf(url) < 0) errors.push(`Image "${url}" not referenced in public part of module "${modName}".`);
             // Datei finden
             var imagePath = path.join(__dirname, '../public', url);
             if (!fs.existsSync(imagePath)) {
-                errors.push(`File "${imagePath}" referenced in documentation file ${fullPath} does not exist`);
+                errors.push(`Image "${imagePath}" referenced in documentation file ${fullPath} does not exist`);
             }
         });
     }
@@ -298,7 +298,7 @@ describe('module-config.json', function() {
                 if (mod.public.indexOf(docFileName) < 0) errors.push(`File "${docFileName}" not referenced in public part of module "${k}".`);
                 if (!doc.icon) errors.push(`Fehlendes "icon" Attribut im "doc"-Abschnitt des Moduls "${k}".`);
                 var iconFileName = `css/icons/material/${doc.icon}.svg`;
-                if (mod.public.indexOf(iconFileName) < 0) errors.push(`File "${iconFileName}" not referenced in public part of module "${k}".`);
+                if (mod.public.indexOf(iconFileName) < 0) errors.push(`Icon "${iconFileName}" not referenced in public part of module "${k}".`);
                 checkDocumentationImageLinks(k, mod.public, docFileName, errors);
             });
         });
