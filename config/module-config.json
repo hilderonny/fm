@@ -7,6 +7,7 @@
             "public" : [
                 "css/base.css",
                 "css/logo_avorium_komplett.svg",
+                "css/images/Settings_clients.png",
                 "css/images/Users_add_button.png",
                 "css/images/Users_createuser.png",
                 "css/images/Users_edituser.png",

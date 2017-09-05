@@ -1,7 +1,30 @@
-<md-card ng-cloak class="list-details-details">
+<md-card ng-cloak class="list-details-details doc">
     <md-card-content>
 
         <h1>Einstellungen</h1>
-                
+        <ul>
+            <li><a href="/#/doc/Settings#users">Benutzereinstellungen</a></li>
+            <li><a href="/#/doc/Settings#clients">Mandanteneinstellungen</a></li>
+            <li><a href="/#/doc/Settings#dynamicAttributes">Dynamische Attribute</a></li>
+        </ul>
+
+        <h2><a name="users"/>Benutzereinstellungen</h2>
+
+        <h2><a name="clients"/>Mandanteneinstellungen</h2>
+
+        <img src="/css/images/Settings_clients.png"/>
+        <p>In den Mandanteneinstellungen kann das Logo geändert werden, welches über dem Menü eingeblendet wird.</p>
+        <p>Im Feld <b>URL des Logos</b> wird dazu entweder eine relative Adresse zu einem Bild, welches sich auf 
+        dem Portalserver selbst befindet, eine Adresse eines freigegebenen Dokumentes oder eine vollständige
+        Adresse eines Bildes auf einem anderen Server angegeben, z.B:</p>
+        <ul>
+            <li>css/logo_avorium_komplett.svg (relative URL auf dem Server)</li>
+            <li>http://iproconsult.com/fileadmin/templates/ipro/ipro_logo.png (absolute URL)</li>
+            <li>https://fm.avorium.de/api/documents/share/59ae4a8039525091fcb84d89 (freigegebenes Dokument)</li>
+        </ul>
+        <p>Nach anschließendem Speichern und Neuladen der Seite wird das neue Logo links über dem Menü angezeigt.</p>
+        
+        <h2><a name="dynamicAttributes"/>Dynamische Attribute</h2>
+        
     </md-card-content>
 </md-card>
