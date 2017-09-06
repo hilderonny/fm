@@ -213,6 +213,12 @@
                 "css/icons/office/Add User Male.svg",
                 "css/icons/office/Briefcase.svg",
                 "css/icons/office/Module.svg",
+                "css/images/Clients_add_button.png",
+                "css/images/Clients_createadmin.png",
+                "css/images/Clients_createclient.png",
+                "css/images/Clients_editclient.png",
+                "css/images/Clients_list.png",
+                "css/images/Clients_modules.png",
                 "partial/Administration/ClientCard.html",
                 "partial/Administration/ClientListCard.html",
                 "partial/Doc/Clients.html"
