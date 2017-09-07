@@ -2,7 +2,7 @@
     "modules" : {
 
         "base": {
-            "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "settingsets", "translations", "usergroups", "users" ],
+            "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
             "public" : [
                 "css/base.css",
@@ -17,6 +17,7 @@
                 "css/icons/material/Forward.svg",
                 "css/icons/material/List.svg",
                 "css/icons/material/Menu.svg",
+                "css/icons/material/Menu2.svg",
                 "css/icons/material/Menu black.svg",
                 "css/icons/material/Plus Math.svg",
                 "css/icons/material/Text Box.svg",

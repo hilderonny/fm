@@ -204,6 +204,7 @@ md-list-item.active, md-list-item > div.active {
     background-color: lightgrey;
 }
 
+
 md-list-item.level-1 { margin-left: 16px; }
 md-list-item.level-2 { margin-left: 32px; }
 md-list-item.level-3 { margin-left: 48px; }
@@ -215,6 +216,11 @@ md-list-item.level-7 { margin-left: 112px; }
 md-list-item.strikethrough h3, md-list-item.strikethrough h4, md-list-item.strikethrough p {
     color:#bbbbbb;
     text-decoration: line-through;
+}
+
+md-list-item.switch {
+    display: block;
+    text-align: center;
 }
 
 md-sidenav {
@@ -256,6 +262,33 @@ md-toolbar button.lang {
 
 md-toolbar button.lang.active, md-toolbar button.lang:hover {
     opacity: 1;
+}
+
+md-toolbar md-input-container {
+    margin:0px;
+}
+
+md-toolbar md-input-container input {
+    color:white !important;
+}
+
+.searchresults {
+    position: absolute;
+    top:34px;
+    left:0;
+    max-width: 100%;
+    z-index: 1;
+    color:initial;
+    right:0;
+}
+
+.searchresults .context-menu {
+    width:100%;
+}
+
+.searchresults md-icon {
+    color:initial !important;
+    fill:initial !important;
 }
 
 :focus {
@@ -485,6 +518,22 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
     cursor: pointer;
 }
 
+.largedevice {
+    display:initial;
+}
+
+.smalldevice {
+    display:none;
+}
+
+@media (max-width: 959px) and (min-width: 0) and (orientation: portrait) {
+    
+    .searchresults {
+        top:45px;
+    }
+    
+}
+    
 /** Handsets portrait **/
 
 @media (max-width: 599px) {
@@ -546,6 +595,21 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
     #dashboard .md-button {
         width: 160px;
         height: 160px;
+    }
+
+    .largedevice {
+        display:none;
+    }
+    
+    .smalldevice {
+        display:initial;
+    }
+
+    .searchresults {
+        top: 56px;
+        position: fixed;
+        left: 5px;
+        right: 5px;
     }
 }
 
@@ -737,4 +801,12 @@ md-toolbar button.lang.active, md-toolbar button.lang:hover {
     #dashboard > div {
         align-self: center;
     }
+}
+
+@media (min-width: 1280px) {
+
+    md-toolbar {
+        z-index:100;
+    }
+
 }

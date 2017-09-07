@@ -89,6 +89,10 @@ module.exports.apis = {
      */
     relations: 'relations',
     /**
+     * API for instant search
+     */
+    search: 'search',
+    /**
      * API for retrieving settings and setting sets
      */
     settingsets: 'settingsets',

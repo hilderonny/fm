@@ -10,16 +10,42 @@
     </head>
 	<body ng-controller="MainController" ng-cloak layout="column">
 
-
+        <script type="text/ng-template" id="moreMenuContent.html">
+            <md-list class="context-menu" role="list">
+                <md-list-item class="switch">
+                    <md-button ng-repeat="language in parentScope.languages" ng-class="{'md-primary':parentScope.currentLanguage==language}" aria-label="{{language}}" class="md-raised" ng-click="parentScope.setLang(language)" ng-bind="language"></md-button>
+                </md-list-item>
+            </md-list>
+        </script>
+            
         <md-toolbar layout="row" ng-class="{transparent:!isLoggedIn,portal:isLoggedIn&&isPortal}" class="md-toolbar-tools">
             <md-button ng-if="isLoggedIn" class="md-icon-button" ng-click="toggleLeftSidenav()" ng-hide="$mdMedia('gt-md')" aria-label="MENU">
                 <md-icon md-svg-src="/css/icons/material/Menu.svg"></md-icon>
             </md-button>
-            <h1 ng-if="isLoggedIn" translate="{{title}}"></h1>
-            <span flex></span>
-            <md-button ng-repeat="language in languages" ng-class="{active:currentLanguage==language}" aria-label="{{language}}" class="md-icon-button lang" ng-click="setLang(language)" ng-bind="language"></md-button>
+            <h1 ng-if="isLoggedIn && !searchInputVisible" translate="{{title}}"></h1>
+            <span flex ng-if="!searchInputVisible"></span>
+            <md-input-container flex ng-if="searchInputVisible">
+                <label>&nbsp;</label>
+                <input ng-model="searchTerm" focus-me="searchInputVisible" ng-keyup="handleSearchInput($event)" placeholder="{{ 'TRK_ENTER_SEARCH_TERM' | translate }}">
+                <md-panel class="searchresults" ng-if="searchResults.length > 0">
+                    <md-list class="context-menu" role="list">
+                        <md-list-item ng-repeat="searchResult in searchResults" ng-click="onSearchResultClick(searchResult)" aria-label="{{searchResult.name}}">
+                            <md-icon md-svg-src="/css/icons/material/{{searchResult.icon}}.svg"></md-icon>
+                            <p ng-bind-html="searchResult.name"></p>
+                        </md-list-item>
+                    </md-list>
+                </md-panel>
+            </md-input-container>
+            <md-button aria-label="SEARCH" class="md-icon-button" ng-click="searchTerm = '';searchResults=[];searchInputVisible = !searchInputVisible">
+                <md-icon ng-if="!searchInputVisible" md-svg-src="/css/icons/material/Search.svg"></md-icon>
+                <md-icon ng-if="searchInputVisible" md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+            </md-button>
+            <md-button ng-repeat="language in languages" ng-class="{active:currentLanguage==language}" aria-label="{{language}}" class="md-icon-button lang largedevice" ng-click="setLang(language)" ng-bind="language"></md-button>
+            <md-button ng-if="isLoggedIn" class="md-icon-button smalldevice" aria-label="MORE" ng-click="openMoreMenu($event);">
+                <md-icon md-svg-src="/css/icons/material/Menu2.svg"></md-icon>
+            </md-button>
         </md-toolbar>
-
+        
         <div ng-hide="isLoggedIn" layout-align="center center" layout="column" flex layout="row">
             <form class="md-whiteframe-4dp login-dialog" ng-submit="doLogin()">
 

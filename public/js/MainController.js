@@ -1,5 +1,5 @@
 // Controller for main functions
-app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSidenav, $http, $mdDialog, $translate, $mdDateLocale, $location, utils) {
+app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSidenav, $http, $mdDialog, $translate, $mdDateLocale, $location, $mdPanel, $q, utils) {
 
     $scope.$mdMedia = $mdMedia; // https://github.com/angular/material/issues/2341#issuecomment-93680762
 
@@ -88,6 +88,8 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                     "action": function() {
                         localStorage.removeItem("loginCredentials");
                         $scope.isLoggedIn = false;
+                        $scope.searchResults = [];
+                        $scope.searchInputVisible = false;
                         utils.setLocation('/');
                     }
                 });
@@ -158,8 +160,74 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
         if ($scope.isLoggedIn) $scope.handleDirectUrls();
     });
 
+    // Handle more-menu on mobile devices
+    $scope.openMoreMenu = function(evt) {
+        var nodeToHandle = evt.currentTarget;
+        var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_END, $mdPanel.yPosition.BELOW);
+        var parentScope = $scope;
+        $mdPanel.open({
+            attachTo: angular.element(document.body),
+            controller: function ($scope) { $scope.parentScope = parentScope; }, // https://github.com/angular/material/issues/1531#issuecomment-74640529
+            templateUrl: 'moreMenuContent.html',
+            panelClass: 'select-type-menu',
+            position: position,
+            openFrom: evt,
+            clickOutsideToClose: true,
+            escapeToClose: true,
+            focusOnOpen: true,
+            zIndex: 2
+        }).then(function(panelRef) {
+            $scope.moreMenuPanel = panelRef;
+        });
+    };
+
+    $scope.searchRequestCanceler = $q.defer();
+
+    // Sendet Sucheingaben unverzüglich an den Server und verarbeitet die Antwort
+    $scope.handleSearchInput = function(evt) {
+        var searchTerm = evt.target.value;
+        if ($scope.searchInputTimeoutId) {
+            clearTimeout($scope.searchInputTimeoutId);
+        }
+        $scope.searchInputTimeoutId = setTimeout(function() {
+            $scope.searchResults = [];
+            $scope.searchInputTimeoutId = null;
+            // Abbruch bestehender Requests: https://stackoverflow.com/q/35375120/5964970
+            $scope.searchRequestCanceler.resolve('Request cancelled'); // Resolve the previous canceler
+            $scope.searchRequestCanceler = $q.defer();
+            $http({
+                method: 'GET',
+                url: '/api/search?term=' + encodeURIComponent(searchTerm),
+                timeout: $scope.searchRequestCanceler.promise
+            }).then(function(response) {
+                var results = response.data;
+                if (!results) {
+                    return; // Passiert durch Abbruch des Requests, wenn ein neuer gestartet wird
+                }
+                var regexp = new RegExp(searchTerm, 'gi');
+                results.forEach(function(result) {
+                    result.name = result.name.replace(regexp, function(match, offset, string) {
+                        return '<u><b>' + match + '</b></u>'; // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace
+                    });
+                });
+                $scope.searchResults = results;
+            });
+        }, 500);
+    };
+
+    // Klick auf Suchergebnisse öffnet diese per Direkteinsprung
+    $scope.onSearchResultClick = function(searchResult) {
+        var collection = searchResult.collection;
+        if (collection === 'folders') collection = 'documents'; // Beim Direkteinsprung werden Verzeichnisse wie Dokumente gehandhabt
+        var url = '/' + collection + '/' + searchResult._id;
+        utils.setLocation(url, true);
+        $scope.searchInputVisible = false;
+    };
+
     // Try to do a login with information from local storage
     try {
+        $scope.searchResults = [];
+        $scope.searchInputVisible = false;
         var loginCredentials = JSON.parse(localStorage.getItem("loginCredentials"));
         $scope.username = loginCredentials.username;
         $scope.password = loginCredentials.password;
