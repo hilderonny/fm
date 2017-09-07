@@ -34,6 +34,9 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
 
 
     $scope.handleDirectUrls = function() {
+        if (!$scope.path[1]) { // Navigate back to dashboard
+            $scope.menuClick(null);
+        }
         if (app.directUrlMappings[$scope.path[1]]) {
             var mapping = app.directUrlMappings[$scope.path[1]];
             var mainMenu = $scope.menu.find(function(m) { return m.title === mapping.mainMenu; });
