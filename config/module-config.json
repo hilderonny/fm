@@ -7,11 +7,6 @@
             "public" : [
                 "css/base.css",
                 "css/logo_avorium_komplett.svg",
-                "css/images/Search_cancelbutton.png",
-                "css/images/Search_searchbutton.png",
-                "css/images/Search_searchfield.png",
-                "css/images/Search_searchresults.png",
-                "css/images/Search_toolbar.png",
                 "css/images/Settings_clients.png",
                 "css/images/Users_add_button.png",
                 "css/images/Users_createuser.png",
@@ -136,6 +131,11 @@
             "public" : [
                 "css/icons/material/Design.svg",
                 "css/icons/material/News.svg",
+                "css/images/Search_cancelbutton.png",
+                "css/images/Search_searchbutton.png",
+                "css/images/Search_searchfield.png",
+                "css/images/Search_searchresults.png",
+                "css/images/Search_toolbar.png",
                 "partial/Doc/Concepts.html",
                 "partial/Doc/List.html",
                 "partial/Doc/ReleaseNotes.html"
