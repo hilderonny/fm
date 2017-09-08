@@ -96,6 +96,16 @@ app.directUrlMappings.activities = {
     subMenu: 'TRK_MENU_OFFICE_ACTIVITIES'
 };
 
+// Special controller for defining list parameters for all list
+app.controller('OfficeCalendarCardAllController', function($scope) {
+    $scope.activityListFilter = function(activity) {
+        return true; // Einfach alle zurück geben
+    };
+    $scope.activityListShowName = true;
+    $scope.activityListShowType = true;
+    $scope.activityListShowDate = true;
+});
+
 // Special controller for defining list parameters for overdue list
 app.controller('OfficeCalendarCardOverDueController', function($scope) {
     $scope.activityListFilter = function(activity) {

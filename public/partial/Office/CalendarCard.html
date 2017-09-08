@@ -23,15 +23,21 @@
 
     <md-tabs flex>
         <md-tab>
+            <md-tab-label><span translate>TRK_ACTIVITIES_TODAY</span></md-tab-label>
+            <md-tab-body>
+                <md-card-content ng-controller="OfficeCalendarCardTodayController" ng-include="'ActivityList'"></md-card-content>
+            </md-tab-body>
+        </md-tab>
+       <md-tab>
             <md-tab-label><span translate>TRK_ACTIVITIES_OVERDUE</span></md-tab-label>
             <md-tab-body>
                 <md-card-content ng-controller="OfficeCalendarCardOverDueController" ng-include="'ActivityList'"></md-card-content>
             </md-tab-body>
         </md-tab>
         <md-tab>
-            <md-tab-label><span translate>TRK_ACTIVITIES_TODAY</span></md-tab-label>
+            <md-tab-label><span translate>TRK_ACTIVITIES_ALL</span></md-tab-label>
             <md-tab-body>
-                <md-card-content ng-controller="OfficeCalendarCardTodayController" ng-include="'ActivityList'"></md-card-content>
+                <md-card-content ng-controller="OfficeCalendarCardAllController" ng-include="'ActivityList'"></md-card-content>
             </md-tab-body>
         </md-tab>
         <md-tab>
