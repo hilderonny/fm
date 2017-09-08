@@ -224,6 +224,10 @@ module.exports.modules = {
      */
     clients: 'clients',
     /**
+     * Online Dokumentation
+     */
+    doc: 'doc',
+    /**
      * Modul für Dokumenten- und Verzeichnisverwaltung
      */
     documents: 'documents',

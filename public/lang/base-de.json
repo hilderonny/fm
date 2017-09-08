@@ -24,6 +24,7 @@
     "TRK_DYNAMICATTRIBUTES_TYPE_boolean": "Boolescher Wert",
     "TRK_DYNAMICATTRIBUTES_TYPE_picklist": "Auswahlliste",
     "TRK_ENTER_SEARCH_TERM" : "Suchbegriff eingeben",
+    "TRK_HELP" : "Hilfe",
     "TRK_LOGIN_FAILED_TITLE" : "Anmeldung fehlgeschlagen",
     "TRK_LOGIN_FAILED_CONTENT" : "Der Benutzername oder das Passwort ist nicht korrekt.",
     "TRK_LOGIN_FAILED_AGAIN" : "Wiederholen",

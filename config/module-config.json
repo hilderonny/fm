@@ -15,6 +15,7 @@
                 "css/icons/material/Edit.svg",
                 "css/icons/material/Exit.svg",
                 "css/icons/material/Forward.svg",
+                "css/icons/material/Help.svg",
                 "css/icons/material/List.svg",
                 "css/icons/material/Menu.svg",
                 "css/icons/material/Menu2.svg",
@@ -53,6 +54,7 @@
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Core/RelationsMenu.html",
                 "partial/Core/RelationsTab.html",
+                "partial/Doc/Users.html",
                 "_index.html",
                 "chat.html",
                 "favicon.png"
@@ -94,7 +96,7 @@
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
                         { "mainCard": "Administration/SettingSetListCard", "icon": "Settings", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS" },
-                        { "mainCard": "Administration/UserlistCard", "icon": "User", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER" },
+                        { "mainCard": "Administration/UserlistCard", "icon": "User", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users" },
                         { "mainCard": "Administration/UsergrouplistCard", "icon": "User Group Man Man", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP" }
                     ]
                 }
@@ -105,6 +107,25 @@
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
                 { "mainCard": "Administration/ClientSettingsCard", "title": "TRK_SETTINGSET_CLIENT", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Briefcase", "permission": "PERMISSION_SETTINGS_CLIENT"},
                 { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "View Details", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
+            ]
+        },
+
+        "doc": {
+            "api" : [ "doc" ],
+            "doc" : [
+                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "News", "index": 99 },
+                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 }
+            ],
+            "include" : [
+                "public/js/Doc/ListController.js"
+            ],
+            "languages" : [ "de" ],
+            "public" : [
+                "css/icons/material/Design.svg",
+                "css/icons/material/News.svg",
+                "partial/Doc/Concepts.html",
+                "partial/Doc/List.html",
+                "partial/Doc/ReleaseNotes.html"
             ]
         },
 

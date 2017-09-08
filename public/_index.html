@@ -15,6 +15,12 @@
                 <md-list-item class="switch">
                     <md-button ng-repeat="language in parentScope.languages" ng-class="{'md-primary':parentScope.currentLanguage==language}" aria-label="{{language}}" class="md-raised" ng-click="parentScope.setLang(language)" ng-bind="language"></md-button>
                 </md-list-item>
+                <md-list-item>
+                    <md-button aria-label="HELP" ng-href="/#/doc/{{currentMenuItem.docCard}}">
+                        <md-icon md-svg-src="/css/icons/material/Help.svg"></md-icon>
+                        <p translate>TRK_HELP</p>
+                    </md-button>
+                </md-list-item>
             </md-list>
         </script>
             
@@ -41,6 +47,10 @@
                 <md-icon ng-if="searchInputVisible" md-svg-src="/css/icons/material/Delete.svg"></md-icon>
             </md-button>
             <md-button ng-repeat="language in languages" ng-class="{active:currentLanguage==language}" aria-label="{{language}}" class="md-icon-button lang largedevice" ng-click="setLang(language)" ng-bind="language"></md-button>
+            <md-button aria-label="HELP" ng-href="/#/doc/{{currentMenuItem.docCard}}" class="md-icon-button largedevice">
+                <md-tooltip md-direction="bottom"><span translate>TRK_HELP</span></md-tooltip>
+                <md-icon md-svg-src="/css/icons/material/Help.svg"></md-icon>
+            </md-button>
             <md-button ng-if="isLoggedIn" class="md-icon-button smalldevice" aria-label="MORE" ng-click="openMoreMenu($event);">
                 <md-icon md-svg-src="/css/icons/material/Menu2.svg"></md-icon>
             </md-button>
@@ -118,9 +128,9 @@
                 <div translate="TRK_LOGIN_LOGGED_IN_AS" translate-value-username="{{username}}"></div>
             </md-sidenav>
 
-            <md-content flex layout="row" id="cardcanvas" ng-show="currentMenuItem"></md-content>
+            <md-content flex layout="row" id="cardcanvas" ng-show="currentMenuItem || isShowingDoc"></md-content>
 
-            <md-content flex layout="row" id="dashboard" ng-show="!currentMenuItem">
+            <md-content flex layout="row" id="dashboard" ng-show="!currentMenuItem && !isShowingDoc">
                 <div>
                     <ng-repeat ng-repeat="menuItem in menu">
 

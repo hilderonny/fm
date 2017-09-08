@@ -34,11 +34,16 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
 
 
     $scope.handleDirectUrls = function() {
-        if (!$scope.path[1]) { // Navigate back to dashboard
+        var path1 = $scope.path[1];
+        $scope.isShowingDoc = false; // Pauschal ausschalten, wenn vorher aktiv war
+        if (!path1) { // Navigate back to dashboard
             $scope.menuClick(null);
-        }
-        if (app.directUrlMappings[$scope.path[1]]) {
-            var mapping = app.directUrlMappings[$scope.path[1]];
+        } else if (path1 === 'doc') { // Sonderbehandlung für Online-Dokumentation
+            $scope.isShowingDoc = true;
+            angular.element(document.querySelector('#cardcanvas')).empty();
+            utils.addCardWithPermission('Doc/List', { preselection: $scope.path[2], anchor: $scope.path[3] });
+        } else if (app.directUrlMappings[path1]) {
+            var mapping = app.directUrlMappings[path1];
             var mainMenu = $scope.menu.find(function(m) { return m.title === mapping.mainMenu; });
             if (!mainMenu) return;
             var subMenu = mainMenu.items.find(function(mi) { return mi.title === mapping.subMenu; });
@@ -52,11 +57,11 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     $rootScope.permissions = {};
 
     $rootScope.canRead = function(permissionKey) {
-        return $rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canRead;
+        return !permissionKey || ($rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canRead);
     }
 
     $rootScope.canWrite = function(permissionKey) {
-        return $rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canWrite;
+        return !permissionKey || ($rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canWrite);
     }
 
     // User clicked on login button

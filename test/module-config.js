@@ -61,7 +61,14 @@ var collectModuleConfigReferencedFiles = () => {
                     files.insert(`public/css/icons/material/${item.icon}.svg`);
                     files.insert(`public/css/icons/office/${item.icon}.svg`);
                 }
+                if (item.docCard) files.insert(`public/partial/Doc/${item.docCard}.html`);
             });
+        });
+        if (module.doc) module.doc.forEach((doc) => {
+            if (doc.docCard) files.insert(`public/partial/Doc/${doc.docCard}.html`);
+            if (doc.icon) {
+                files.insert(`public/css/icons/material/${doc.icon}.svg`);
+            }
         });
         // Setting target cards and icons
         if (module.settingsets) module.settingsets.forEach((settingSet) => {
