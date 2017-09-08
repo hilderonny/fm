@@ -1,8 +1,0 @@
-<md-list class="lines-beetween-items fmobjects-3">
-    <md-list-item ng-repeat="fmobject in fmobjects | orderBy: ['name']" ng-click="selectFmObject(fmobject, $event)" ng-class="{active:fmObjectListSelectedFmObject._id.toString() === fmobject._id.toString()}" aria-label="{{fmobject.name}}">
-        <md-icon md-svg-src="/css/icons/fm/{{fmobject.type}}.svg"></md-icon>
-        <div class="md-list-item-text">
-            <h3 ng-bind="fmobject.name"></h3>
-        </div>
-    </md-list-item>
-</md-list>
