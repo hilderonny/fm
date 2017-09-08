@@ -14,14 +14,23 @@
         </md-button>
     </md-toolbar>
 
-    <md-card-content>
-        <md-list>
-            <md-list-item ng-click="selectElement(element)" ng-repeat="element in elements" ng-class="[{active:selectedElement==element}, 'level-'+element.level]" aria-label="{{element.name}}">
-                <md-icon md-svg-src="/css/icons/material/{{element.type == 'f' ? 'Folder' : 'Document'}}.svg"></md-icon>
-                <p ng-bind="element.name"></p>
-                <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
+    <script type="text/ng-template" id="documentHierarchyList.html">
+        <md-list class="hierarchy">
+            <md-list-item flex layout="column" ng-repeat="child in child.children">
+                <div flex layout="row" ng-class="{active:selectedElement==child}">
+                    <md-icon ng-click="child.isOpen = true" ng-if="!child.isOpen && child.children.length > 0" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>
+                    <md-icon ng-click="child.isOpen = false" ng-if="child.isOpen" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
+                    <md-icon ng-if="child.children.length < 1"></md-icon>
+                    <img ng-click="selectElement(child)" ng-src="/css/icons/{{child.icon}}.svg" />
+                    <p class="nowrap" ng-bind="child.name" ng-click="selectElement(child)"></p>
+                </div>
+                <ng-include flex src="'documentHierarchyList.html'" ng-if="child.isOpen"></ng-include>
             </md-list-item>
         </md-list>
+    </script>
+    
+    <md-card-content>
+        <ng-include flex src="'documentHierarchyList.html'"></ng-include>
     </md-card-content>
 
     <div class="progress-panel" ng-if="isUploading">
@@ -29,4 +38,6 @@
         <span>{{uploadProgress}} %</span>
     </div>
 
+    <resize-handle></resize-handle>
+    
 </md-card>
