@@ -82,9 +82,9 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
 
     $scope.selectElement = function(element) {
         utils.removeCardsToTheRightOf($element);
-        if (element.type === 'f') {
+        if (element.type === 'folders') {
             utils.addCardWithPermission('Office/FolderCard', {
-                folderId: element._id,
+                folderId: element.id,
                 createFolderCallback: createFolderCallback,
                 saveFolderCallback: saveElementCallback,
                 deleteFolderCallback: deleteElementCallback,
@@ -95,7 +95,7 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
             });
         } else {
             utils.addCardWithPermission('Office/DocumentCard', {
-                documentId: element._id,
+                documentId: element.id,
                 saveDocumentCallback: saveElementCallback,
                 deleteDocumentCallback: deleteElementCallback,
                 extractDocumentCallback: extractDocumentCallback,
@@ -104,8 +104,14 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
                 $scope.selectedElement = element;
             });
         }
+        // Hierarchie aufklappen, wenn nötig
+        var currentElement = element;
+        while (currentElement.parentFolder && !currentElement.parentFolder.isOpen) {
+            currentElement = currentElement.parentFolder;
+            currentElement.isOpen = true;
+        }
     };
-
+                        
     // Performs the upload of the selected file
     $scope.uploadFile = function(fileinput) { // http://stackoverflow.com/a/17923521
         var file = fileinput.files[0];
@@ -148,20 +154,39 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
     };
 
     $scope.load = function() {
-        $http.get('/api/folders').then(function(response) {
-            var rootElements = response.data;
-            $scope.elements = [];
-            var flattenElements = function(element, level) {
-                $scope.elements.push(element);
-                element.level = level;
-                if (element.children) element.children.forEach(function(e) { flattenElements(e, level + 1) });
-            };
-            rootElements.forEach(function(e) {
-                flattenElements(e, 0);
+        $http.get('/api/folders/allFoldersAndDocuments').then(function(response) {
+            var folderOrDocument = response.data;
+            var allFoldersAndDocuments = {};
+            response.data.forEach(function(folderOrDocument) {
+                var viewModel = {
+                    icon: folderOrDocument.type === 'folder' ? 'material/Folder' : 'material/Document',
+                    name: folderOrDocument.name,
+                    type: folderOrDocument.type === 'folder' ? 'folders' : 'documents',
+                    id: folderOrDocument._id,
+                    parentFolderId: folderOrDocument.parentFolderId,
+                    children: []
+                }
+                allFoldersAndDocuments[folderOrDocument._id] = viewModel;
             });
+            var rootElement = { children: [] };
+            Object.keys(allFoldersAndDocuments).forEach(function(key) {
+                var folderOrDocument = allFoldersAndDocuments[key];
+                if (folderOrDocument.parentFolderId) {
+                    var parentFolder = allFoldersAndDocuments[folderOrDocument.parentFolderId];
+                    parentFolder.children.push(folderOrDocument);
+                    folderOrDocument.parentFolder = parentFolder;
+                } else {
+                    rootElement.children.push(folderOrDocument);
+                }
+            });
+            $scope.child = rootElement;
             $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
-            utils.handlePreselection($scope, $scope.elements, $scope.selectElement);
-            if (!$scope.params.preselection) utils.setLocation('/documents');
+            if ($scope.params.preselection) {
+                var elementToSelect = allFoldersAndDocuments[$scope.params.preselection];
+                if (elementToSelect) $scope.selectElement(elementToSelect);
+            } else {
+                utils.setLocation('/documents');
+            }
         });
     };
 

@@ -5,16 +5,32 @@ button > md-progress-circular {
     margin:auto;
 }
 
+resize-handle {
+    display: block;
+    background-color: transparent;
+    position: absolute;
+    top: 0;
+    right: 0px;
+    height: 100%;
+    width: 4px;
+    cursor: col-resize;
+}
+
+resize-handle:hover {
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
 md-card {
     position:relative;
     width: 360px;
-    min-width: 360px;
+    min-width: 100px;
     flex: 0 0 360px;
     display: flex;
     border:none;
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
+    margin:0;
 }
 
 md-card.fullwidth:first-child {
@@ -270,6 +286,13 @@ md-toolbar md-input-container {
 
 md-toolbar md-input-container input {
     color:white !important;
+}
+
+.nowrap {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
 }
 
 .searchresults {
@@ -565,6 +588,15 @@ md-toolbar md-input-container input {
         text-align: left;
     }
 
+    resize-handle {
+        display: none;
+    }
+    
+    .nowrap {
+        white-space: initial;
+        overflow: initial;
+    }
+
     .login-dialog {
         border: none;
         box-shadow: none;
@@ -666,7 +698,6 @@ md-toolbar md-input-container input {
         border-radius: initial;
         flex: 0 0 320px;
         width:320px;
-        min-width: 320px;
     }
 
     md-card > md-fab-speed-dial {

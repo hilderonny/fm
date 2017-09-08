@@ -20,55 +20,10 @@ var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
 
-router.get('/', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), (req, res) => {
-    var clientId = req.user.clientId; // clientId === null means that the user is a portal user
-    var rootElements = [];
-    var allFolders = {};
-    req.db.get(co.collections.folders.name).find({ clientId: clientId }, { sort : { name : 1 } }).then((folders) => {
-        folders.forEach((f) => {
-            allFolders[f._id] = {
-                _id: f._id,
-                type: 'f', // Traffic sparen, anstelle von "folder"
-                name: f.name,
-                children: []
-            };
-        });
-        folders.forEach((f) => {
-            if (f.parentFolderId) {
-                var parentFolder = allFolders[f.parentFolderId];
-                if (!parentFolder.children) parentFolder.children = [];
-                parentFolder.children.push(allFolders[f._id]);
-            } else {
-                rootElements.push(allFolders[f._id]);
-            }
-        });
-        return req.db.get(co.collections.documents.name).find({ clientId: clientId }, { sort : { name : 1 } });
-    }).then(function(documents) {
-        documents.forEach((d) => {
-            var docToSend = {
-                _id: d._id,
-                type: 'd', // Traffic sparen, anstelle von "folder"
-                name: d.name
-            };
-            if (d.parentFolderId) {
-                var parentFolder = allFolders[d.parentFolderId];
-                if (!parentFolder) return; // Wenn aus irgendeinem Grund die Verzeichnisse aus der Datenbank gelöscht wurden ...
-                if (!parentFolder.children) parentFolder.children = [];
-                parentFolder.children.push(docToSend);
-            } else {
-                rootElements.push(docToSend);
-            }
-        });
-        return res.send(rootElements);
-    });
-    // https://docs.mongodb.com/manual/tutorial/model-tree-structures-with-materialized-paths/
-});
-
 /**
  * Gibt alle Verzeichnisse und Dokumente zurück. Wird für den Dialog
  * zum Erstellen von Verknüpfungen verwendet
  */
-// TODO: Mit GET/ zusammenführen
 router.get('/allFoldersAndDocuments', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), function(req, res) {
     var clientId = req.user.clientId; // clientId === null means that the user is a portal user
     req.db.get('folders').find({ clientId: clientId }).then((folders) => {
