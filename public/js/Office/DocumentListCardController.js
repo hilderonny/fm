@@ -7,7 +7,8 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
             type: 'folders',
             id: createdFolder._id,
             parentFolderId: createdFolder.parentFolderId,
-            children: []
+            children: [],
+            parentFolder: $scope.selectedElement
         };
         if ($scope.selectedElement) {
             $scope.selectedElement.children.push(viewModel);
@@ -25,7 +26,8 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
             type: 'documents',
             id: uploadedDocument._id,
             parentFolderId: uploadedDocument.parentFolderId,
-            children: []
+            children: [],
+            parentFolder: $scope.selectedElement
         };
         if ($scope.selectedElement) {
             $scope.selectedElement.children.push(viewModel);
@@ -41,16 +43,8 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
     };
 
     var deleteElementCallback = function() {
-        var index = $scope.child.children.indexOf($scope.selectedElement);
-        var deleteCount = 1;
-        for (var i = index + 1; i < $scope.child.children.length; i++) {
-            if ($scope.child.children[i].level > $scope.selectedElement.level) {
-                deleteCount++;
-            } else {
-                break; //Wichtig, da sonst Unterelemente in kommenden Pfaden ebenfalls gelöscht würden
-            }
-        }
-        $scope.child.children.splice($scope.child.children.indexOf($scope.selectedElement), deleteCount);
+        var parentChildren = $scope.selectedElement.parentFolder ? $scope.selectedElement.parentFolder.children : $scope.child.children;
+        parentChildren.splice(parentChildren.indexOf($scope.selectedElement), 1);
         closeElementCallback();
     };
 

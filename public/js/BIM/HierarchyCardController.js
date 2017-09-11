@@ -5,28 +5,31 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
         $scope.selectedFmObject.name = savedFmObject.name;
         $scope.selectedFmObject.type = savedFmObject.type;
     };
+
     var deleteFmObjectCallback = function() {
-        var idx = $scope.flatFmObjects.indexOf($scope.selectedFmObject);
-        while ($scope.flatFmObjects[idx+1] && $scope.flatFmObjects[idx+1].level > $scope.selectedFmObject.level) {
-            $scope.flatFmObjects.splice(idx + 1, 1);
-        }
-        $scope.flatFmObjects.splice(idx, 1);
+        var parentChildren = $scope.selectedFmObject.parent ? $scope.selectedFmObject.parent.children : $scope.child.children;
+        parentChildren.splice(parentChildren.indexOf($scope.selectedFmObject), 1);
         closeFmObjectCallback();
     };
+
     var createFmObjectCallback = function(createdFmObject) {
-        if ($scope.selectedFmObject) {
-            if (!$scope.selectedFmObject.children) $scope.selectedFmObject.children = [];
-            var indexToInsert = $scope.flatFmObjects.indexOf($scope.selectedFmObject) + 1;
-            while ($scope.flatFmObjects[indexToInsert] && $scope.flatFmObjects[indexToInsert].level > $scope.selectedFmObject.level) indexToInsert++;
-            $scope.flatFmObjects.splice(indexToInsert, 0, createdFmObject);
-            $scope.selectedFmObject.children.push(createdFmObject);
-            createdFmObject.level = $scope.selectedFmObject.level + 1;
-        } else {
-            createdFmObject.level = 0;
-            $scope.flatFmObjects.push(createdFmObject);
+        var element = {
+            icon: 'fm/' + createdFmObject.type,
+            name: createdFmObject.name,
+            type: 'fmobjects',
+            id: createdFmObject._id,
+            children: createdFmObject.children ? createdFmObject.children.map(handleFmObject) : [],
+            parent: $scope.selectedFmObject
         }
-        $scope.selectFmObject(createdFmObject);
+        if ($scope.selectedFmObject) {
+            $scope.selectedFmObject.children.push(element);
+            $scope.selectedFmObject.isOpen = true;
+        } else {
+            $scope.child.children.push(element);
+        }
+        $scope.selectFmObject(element);
     };
+    
     var closeFmObjectCallback = function() {
         $scope.selectedFmObject = false;
         utils.setLocation('/fmobjects');
@@ -97,6 +100,7 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
                 }
             });
             $scope.child = viewModel;
+            $scope.canWriteFmObjects = $rootScope.canWrite('PERMISSION_BIM_FMOBJECT');
             if ($scope.params.preselection) {
                 var elementToSelect = allFmObjects[$scope.params.preselection];
                 if (elementToSelect) $scope.selectFmObject(elementToSelect);
@@ -104,26 +108,6 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
                 utils.setLocation('/fmobjects');
             }
         });
-    /*
-        var rootFmObjects;
-        $http.get('/api/fmobjects').then(function(response) {
-            rootFmObjects = response.data;
-            // Check write permission
-            $scope.canWriteFmObjects = $rootScope.canWrite('PERMISSION_BIM_FMOBJECT');
-            // Check preselection
-            $scope.flatFmObjects = [];
-            var flattenFmObjects = function(fmObject, level) {
-                $scope.flatFmObjects.push(fmObject); // Root-Objekt ignorieren
-                fmObject.level = level;
-                if (fmObject.children) fmObject.children.forEach(function(f) { flattenFmObjects(f, level + 1) });
-            };
-            rootFmObjects.forEach(function(fmo) {
-                flattenFmObjects(fmo, 0);
-            });
-            utils.handlePreselection($scope, $scope.flatFmObjects, $scope.selectFmObject);
-            if (!$scope.params.preselection) utils.setLocation('/fmobjects');
-        });
-        */
     }
 
     $scope.load();

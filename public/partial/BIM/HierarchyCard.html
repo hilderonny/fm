@@ -13,7 +13,7 @@
             <md-list-item flex layout="column" ng-repeat="child in child.children">
                 <div flex layout="row" ng-class="{active:selectedFmObject==child}">
                     <md-icon ng-click="child.isOpen = true" ng-if="!child.isOpen && child.children.length > 0" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>
-                    <md-icon ng-click="child.isOpen = false" ng-if="child.isOpen" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
+                    <md-icon ng-click="child.isOpen = false" ng-if="child.isOpen && child.children.length > 0" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
                     <md-icon ng-if="child.children.length < 1"></md-icon>
                     <img ng-click="selectFmObject(child)" ng-src="/css/icons/{{child.icon}}.svg" />
                     <p class="nowrap" ng-bind="child.name" ng-click="selectFmObject(child)"></p>
