@@ -351,7 +351,6 @@
                 "css/images/FM_hierarchy.png",
                 "css/images/FM_new.png",
                 "partial/BIM/FmobjectCard.html",
-                "partial/BIM/FmObjectList.html",
                 "partial/BIM/HierarchyCard.html",
                 "partial/Doc/FmObjects.html"
             ],
