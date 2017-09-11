@@ -712,6 +712,8 @@ th.defaults = {
      * Standardportal 'p1'
      */
     portal: 'p1',
+    portalAdminUser: '_0_0',
+    portalUser: '_0_ADMIN0',
     user: '1_0_0',
     userGroup: '1_0'
 };

@@ -61,7 +61,14 @@ var collectModuleConfigReferencedFiles = () => {
                     files.insert(`public/css/icons/material/${item.icon}.svg`);
                     files.insert(`public/css/icons/office/${item.icon}.svg`);
                 }
+                if (item.docCard) files.insert(`public/partial/Doc/${item.docCard}.html`);
             });
+        });
+        if (module.doc) module.doc.forEach((doc) => {
+            if (doc.docCard) files.insert(`public/partial/Doc/${doc.docCard}.html`);
+            if (doc.icon) {
+                files.insert(`public/css/icons/material/${doc.icon}.svg`);
+            }
         });
         // Setting target cards and icons
         if (module.settingsets) module.settingsets.forEach((settingSet) => {
@@ -234,6 +241,66 @@ describe('module-config.json', function() {
         Object.keys(co.permissions).forEach(function(key) {
             var permission = co.permissions[key];
             if (permissionsFromConfig.indexOf(permission) < 0) errors.push(`Permission ${permission} is not defined in module-config`);
+        });
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n'));
+        }
+        return Promise.resolve();
+    });
+
+    /**
+     * Sucht in der gegebenen HTML-Datei alle Verweise auf Bilder und prüft, ob diese
+     * (wenn sie lokal verwiesen sind) auch im public-Part des Moduls verwiesen sind.
+     */
+    function checkDocumentationImageLinks(modName, pub, fileName, errors) {
+        var fullPath = path.join(__dirname, '../public', fileName);
+        if (!fs.existsSync(fullPath)) {
+            errors.push(`File "${fullPath}" referenced as doc in module-config does not exist`);
+            return;
+        }
+        var fileContent = fs.readFileSync(fullPath, 'utf8');
+        var matches = fileContent.match(/<img([\w\W]+?)[\/]?>/g);
+        if (matches) matches.forEach(function eachMatch(match) {
+            // Leerzeichen entfernen
+            var stringToCheck = match.replace(/ /g, '').replace(/'/g,'"'); // Alle Anführungszeichen in doppelte umwandeln
+            var url = stringToCheck.substr(stringToCheck.indexOf('src="') + 5);
+            url = url.substr(0, url.indexOf('"'));
+            if (url.indexOf('http:') === 0 || url.indexOf('https:') === 0 || url.indexOf('data:') === 0) return; // Referenzen und Inline-Bilder ignorieren
+            if (url.indexOf('/') === 0) url = url.substr(1);
+            // Gucken, ob Datei in public-Part enthalten ist
+            if (pub.indexOf(url) < 0) errors.push(`Image "${url}" not referenced in public part of module "${modName}".`);
+            // Datei finden
+            var imagePath = path.join(__dirname, '../public', url);
+            if (!fs.existsSync(imagePath)) {
+                errors.push(`Image "${imagePath}" referenced in documentation file ${fullPath} does not exist`);
+            }
+        });
+    }
+
+    it('contains all documentation files defined for modules in correspondig public part', function() {
+        var errors = [];
+        Object.keys(moduleConfig.modules).forEach((k) => {
+            var mod = moduleConfig.modules[k];
+            // Doku-Links aus Menü holen
+            if (mod.menu) mod.menu.forEach(function(menu) {
+                menu.items.forEach(function(item) {
+                    if (item.docCard) {
+                        var fileName = `partial/Doc/${item.docCard}.html`;
+                        if (mod.public.indexOf(fileName) < 0) errors.push(`File "${fileName}" not referenced in public part of module "${k}".`);
+                        checkDocumentationImageLinks(k, mod.public, fileName, errors);
+                    }
+                });
+            });
+            // Versteckte Doku-Links extrahieren
+            if (mod.doc) mod.doc.forEach((doc) => {
+                if (!doc.docCard) errors.push(`Fehlendes "docCard" Attribut im "doc"-Abschnitt des Moduls "${k}".`);
+                var docFileName = `partial/Doc/${doc.docCard}.html`;
+                if (mod.public.indexOf(docFileName) < 0) errors.push(`File "${docFileName}" not referenced in public part of module "${k}".`);
+                if (!doc.icon) errors.push(`Fehlendes "icon" Attribut im "doc"-Abschnitt des Moduls "${k}".`);
+                var iconFileName = `css/icons/material/${doc.icon}.svg`;
+                if (mod.public.indexOf(iconFileName) < 0) errors.push(`Icon "${iconFileName}" not referenced in public part of module "${k}".`);
+                checkDocumentationImageLinks(k, mod.public, docFileName, errors);
+            });
         });
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));

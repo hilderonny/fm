@@ -1,0 +1,54 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu Mandanten</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-content>
+
+        <p>TODO: Einleitungstext ...</p>
+
+        <ul>
+            <li><a href="/#/doc/Clients#create">Mandant erstellen</a></li>
+            <li><a href="/#/doc/Clients#edit">Mandant bearbeiten</a></li>
+            <li><a href="/#/doc/Clients#addAdmin">Administrator erstellen</a></li>
+        </ul>
+
+        <h2><a name="create"/>Mandant erstellen</h2>
+
+        <img src="/css/images/Clients_createclient.png"/>
+
+        <p>Um neue Mandanten zu erstellen, muss man als Portalbenutzer angemeldet sein. Nur diesen steht das Modul zur Mandantenbearbeitung zur Verfügung.</p>
+        <p>Ein Mandant kann erstellt werden, indem man auf das <img src="/css/images/Clients_add_button.png" alt="Mandant erstellen" />-Symbol im Modul <b>Mandanten</b> klickt. Daraufhin wird eine Karte angezeigt, in welcher man dem Mandanten einen Namen geben kann und einen Kommentar zu diesem schreiben kann. Im Kommentar können beispielsweise der Name und die Telefonnummer des Hauptansprechpartners stehen.</p>
+        
+        <p>Nach einem Klick auf <b>Erstellen</b> wird der Mandant angelegt und bekommt auch gleich das Basis-Modul zugewiesen. Anschließend werden eine Erfolgsmeldung und die Karte zum <a href="/#/doc/Clients#edit">Bearbeiten des Mandanten</a> angezeigt, in welcher zusätzlich Administratoren und Modulzuordnungen erstellt werden können.</p>
+
+        <h2><a name="edit"/>Mandant bearbeiten</h2>
+        
+        <img src="/css/images/Clients_list.png"/>
+        <img src="/css/images/Clients_editclient.png"/>
+
+        <p>Man kann einen existierenden Mandanten bearbeiten, indem man dessen Namen in der Mandantenliste (vorheriges Bild) anklickt. Dieser wird dann in einer Detailkarte (nachfolgendes Bild) angezeigt.</p>
+        <p>In dieser Detailkarte kann man den Namen des Mandanten und dessen Kommentar ändern oder ihn löschen.</p>
+        <p>Zusätzlich werden Buttons zum <a href="/#/doc/Clients#addAdmin">Erstellen von Administratoren</a> für den Mandanten und zum Erstellen von <a href="https://localhost/#/doc/Concepts#relations">Verknüpfungen</a> sowie Tabs, welche für den Mandanten verfügbare Module und bestehende Verknüpfungen anzeigen, dargestellt.</p>
+        <p>Beim Klick auf <b>Löschen</b> wird eine Sicherheitsabfrage angezeigt, welche man bestätigen muss, um nicht aus Versehen einen Mandanten zu löschen. <span style="color:red">Wird ein Mandant gelöscht, werden auch alle seine Daten unwiederbringlich aus dem System entfernt.</span></p>
+        
+        <img src="/css/images/Clients_modules.png"/>
+
+        <p>Im Tab <b>Module</b> werden alle Module im System aufgelistet. Ob ein Mandant Zugriff auf ein Modul besitzt, erkennt man an dem rechts stehenden Symbol. Ein Haken bedeutet, der Mandant und dessen Benutzer können das Modul benutzen.</p>
+        <p>Die Freischaltung oder Deaktivierung von Modulen erfolgt, indem man einfach auf das Symbol rechts klickt. Dieses ändert daraufhin sein Aussehen und die Änderungen werden ohne zusätzliches Speichern angewandt.</p>
+        <p>Grundlegend spiegeln die Module die Einträge im Hauptmenü wider. Lediglich das <b>Basis</b>-Modul sollte immer aktiviert sein, da dieses die Grundfunktionen zum Anmelden, zur Benutzerverwaltung sowie zu den Grundeinstellungen beinhaltet.</p>
+        
+        <h2><a name="addAdmin"/>Administrator erstellen</h2>
+
+        <img src="/css/images/Clients_createadmin.png"/>
+
+        <p>Ein neu angelegter Mandant hat zunächst keine Benutzer, die sich anmelden könnten. Daher muss als erster Schritt nach dem Anlegen eines Mandanten ein Administrator für eben diesen erstellt werden. Dies geschieht über das entsprechende Symbol in der Titelzeile der Detailkarte.</p>
+        <p>Es wird ein Dialog angezeigt, in welchem man den Benutzernamen des neuen Administrators und ein initiales Passwort vergeben muss. Man muss darauf achten, dass der Name des neuen Administrators nicht schon von irgend einem anderen Benutzer im System (auch von anderen Mandanten) verwendet wird. Ansonsten wird beim Speichern eine Fehlermeldung angezeigt.</p>
+        <p>Im Nachhinein besteht für den Portalbetreiber keine Möglichkeit mehr, den Administrator des Mandanten zu ändern. Er kann höchstens einen neuen anlegen.</p>
+        <p>Dem künftigen Administrator des Mandanten sind anschließend diese Benutzerdaten auszuhändigen und er ist darauf hinzuweisen, dass er sein Passwort umgehend ändern sollte.</p>
+        
+    </md-card-content>
+</md-card>

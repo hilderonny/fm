@@ -29,6 +29,10 @@ module.exports.apis = {
      */
     communications: 'communications',
     /**
+     * API für Dokumentation
+     */
+    doc: 'doc',
+    /**
      * API for edititing documents
      */
     documents: 'documents',
@@ -223,6 +227,10 @@ module.exports.modules = {
      * Modul für Mandantenverwaltung
      */
     clients: 'clients',
+    /**
+     * Online Dokumentation
+     */
+    doc: 'doc',
     /**
      * Modul für Dokumenten- und Verzeichnisverwaltung
      */

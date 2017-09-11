@@ -15,6 +15,7 @@
                 "css/icons/material/Edit.svg",
                 "css/icons/material/Exit.svg",
                 "css/icons/material/Forward.svg",
+                "css/icons/material/Help.svg",
                 "css/icons/material/List.svg",
                 "css/icons/material/Menu.svg",
                 "css/icons/material/Menu2.svg",
@@ -39,6 +40,29 @@
                 "css/icons/office/Search.svg",
                 "css/icons/office/Settings.svg",
                 "css/icons/office/View Details.svg",
+                "css/images/Settings_clients.png",
+                "css/images/Settings_dynamicattributes.png",
+                "css/images/Settings_dynamicattributes_addattribute.png",
+                "css/images/Settings_dynamicattributes_addlistelement.png",
+                "css/images/Settings_dynamicattributes_editlistelement.png",
+                "css/images/Settings_dynamicattributes_entity.png",
+                "css/images/Settings_dynamicattributes_listelements.png",
+                "css/images/Settings_dynamicattributes_newattribute.png",
+                "css/images/Settings_dynamicattributes_picklist.png",
+                "css/images/Settings_dynamicattributes_textboolean.png",
+                "css/images/Settings_portals.png",
+                "css/images/Settings_portals_update.png",
+                "css/images/Settings_users.png",
+                "css/images/Users_add_button.png",
+                "css/images/Users_createuser.png",
+                "css/images/Users_edituser.png",
+                "css/images/Users_list.png",
+                "css/images/Usergroups_add.png",
+                "css/images/Usergroups_editdetails.png",
+                "css/images/Usergroups_list.png",
+                "css/images/Usergroups_newusergroup.png",
+                "css/images/Usergroups_permissions.png",
+                "css/images/Usergroups_userlist.png",
                 "partial/Administration/ClientSettingsCard.html",
                 "partial/Administration/DynamicAttributeCreationFormCard.html",
                 "partial/Administration/DynamicAttributesCard.html",
@@ -53,6 +77,9 @@
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Core/RelationsMenu.html",
                 "partial/Core/RelationsTab.html",
+                "partial/Doc/Settings.html",
+                "partial/Doc/Users.html",
+                "partial/Doc/UserGroups.html",
                 "_index.html",
                 "chat.html",
                 "favicon.png"
@@ -93,9 +120,9 @@
                 {
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
-                        { "mainCard": "Administration/SettingSetListCard", "icon": "Settings", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS" },
-                        { "mainCard": "Administration/UserlistCard", "icon": "User", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER" },
-                        { "mainCard": "Administration/UsergrouplistCard", "icon": "User Group Man Man", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP" }
+                        { "mainCard": "Administration/SettingSetListCard", "icon": "Settings", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
+                        { "mainCard": "Administration/UserlistCard", "icon": "User", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users" },
+                        { "mainCard": "Administration/UsergrouplistCard", "icon": "User Group Man Man", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups" }
                     ]
                 }
             ],
@@ -108,11 +135,47 @@
             ]
         },
 
+        "doc": {
+            "api" : [ "doc" ],
+            "doc" : [
+                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "News", "index": 99 },
+                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 }
+            ],
+            "include" : [
+                "public/js/Doc/ListController.js",
+                "public/js/Doc/CardController.js"
+            ],
+            "languages" : [ "de" ],
+            "public" : [
+                "css/icons/material/Design.svg",
+                "css/icons/material/News.svg",
+                "css/images/Relations_add.png",
+                "css/images/Relations_hierarchydialog.png",
+                "css/images/Relations_list.png",
+                "css/images/Relations_listdialog.png",
+                "css/images/Relations_menu.png",
+                "css/images/Relations_otherside.png",
+                "css/images/Search_cancelbutton.png",
+                "css/images/Search_searchbutton.png",
+                "css/images/Search_searchfield.png",
+                "css/images/Search_searchresults.png",
+                "css/images/Search_toolbar.png",
+                "css/images/Settings_dynamicattributes_values.png",
+                "partial/Doc/Concepts.html",
+                "partial/Doc/List.html",
+                "partial/Doc/ReleaseNotes.html"
+            ]
+        },
+
         "activities": {
             "api" : [ "activities" ],
             "public" : [
                 "css/icons/material/Planner.svg",
                 "css/icons/office/Planner.svg",
+                "css/images/Activities_add.png",
+                "css/images/Activities_calendar.png",
+                "css/images/Activities_new.png",
+                "partial/Doc/Activities.html",
                 "partial/Office/ActivityCard.html",
                 "partial/Office/CalendarCard.html"
             ],
@@ -125,7 +188,7 @@
                 {
                     "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/CalendarCard", "icon": "Planner", "title": "TRK_MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY" }
+                        { "mainCard": "Office/CalendarCard", "icon": "Planner", "title": "TRK_MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY", "docCard" : "Activities" }
                     ]
                 }
 
@@ -146,12 +209,29 @@
                 "css/icons/material/Truck.svg",
                 "css/icons/office/Business.svg",               
                 "css/icons/office/Collaborator Male.svg",
+                "css/images/Businesspartners_add.png",
+                "css/images/Businesspartners_addaddress.png",
+                "css/images/Businesspartners_addresslist.png",
+                "css/images/Businesspartners_edit.png",
+                "css/images/Businesspartners_editaddress.png",
+                "css/images/Businesspartners_list.png",
+                "css/images/Businesspartners_new.png",
+                "css/images/Persons_add.png",
+                "css/images/Persons_addcomm.png",
+                "css/images/Persons_commlist.png",
+                "css/images/Persons_edit.png",
+                "css/images/Persons_editcomm.png",
+                "css/images/Persons_list.png",
+                "css/images/Persons_new.png",
+                "css/images/Persons_newcomm.png",
                 "partial/CRM/BPAddressCard.html",
                 "partial/CRM/BPCard.html",
                 "partial/CRM/BPListCard.html",
                 "partial/CRM/CommunicationCard.html",
                 "partial/CRM/PersonCard.html",
-                "partial/CRM/PersonListCard.html"
+                "partial/CRM/PersonListCard.html",
+                "partial/Doc/BusinessPartners.html",
+                "partial/Doc/Persons.html"
             ],
             "include":[
                 "public/js/CRM/BPAddressCardController.js",
@@ -166,8 +246,8 @@
                 {
                     "title": "TRK_MENU_CRM",
                     "items": [
-                        { "mainCard": "CRM/BPListCard", "icon": "Business", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS" },
-                        { "mainCard": "CRM/PersonListCard", "icon": "Collaborator Male", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS" }
+                        { "mainCard": "CRM/BPListCard", "icon": "Business", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners" },
+                        { "mainCard": "CRM/PersonListCard", "icon": "Collaborator Male", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons" }
                     ]
                 }
             ]
@@ -182,8 +262,15 @@
                 "css/icons/office/Add User Male.svg",
                 "css/icons/office/Briefcase.svg",
                 "css/icons/office/Module.svg",
+                "css/images/Clients_add_button.png",
+                "css/images/Clients_createadmin.png",
+                "css/images/Clients_createclient.png",
+                "css/images/Clients_editclient.png",
+                "css/images/Clients_list.png",
+                "css/images/Clients_modules.png",
                 "partial/Administration/ClientCard.html",
-                "partial/Administration/ClientListCard.html"
+                "partial/Administration/ClientListCard.html",
+                "partial/Doc/Clients.html"
             ],
             "include" : [
                 "public/js/Administration/ClientCardController.js",
@@ -194,7 +281,7 @@
                 {
                     "title": "TRK_MENU_PORTAL",
                     "items": [
-                        { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "TRK_MENU_PORTAL_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT" }
+                        { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "TRK_MENU_PORTAL_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT", "docCard" : "Clients" }
                     ]
                 }
             ]
@@ -213,6 +300,14 @@
                 "css/icons/office/Download.svg",
                 "css/icons/office/Folder.svg",
                 "css/icons/office/Upload.svg",
+                "css/images/Documents_addfolder.png",
+                "css/images/Documents_editdocument.png",
+                "css/images/Documents_editfolder.png",
+                "css/images/Documents_hierarchy.png",
+                "css/images/Documents_newfolder.png",
+                "css/images/Documents_upload.png",
+                "css/images/Documents_uploadmobile.png",
+                "partial/Doc/Documents.html",
                 "partial/Office/DocumentCard.html",
                 "partial/Office/DocumentListCard.html",
                 "partial/Office/FolderCard.html"
@@ -228,7 +323,7 @@
                 {
                     "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/DocumentListCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT" }
+                        { "mainCard": "Office/DocumentListCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents" }
                     ]
                 }
             ]
@@ -250,8 +345,15 @@
                 "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg",
+                "css/images/FM_add.png",
+                "css/images/FM_addsub.png",
+                "css/images/FM_edit.png",
+                "css/images/FM_hierarchy.png",
+                "css/images/FM_new.png",
                 "partial/BIM/FmobjectCard.html",
-                "partial/BIM/HierarchyCard.html"
+                "partial/BIM/FmObjectList.html",
+                "partial/BIM/HierarchyCard.html",
+                "partial/Doc/FmObjects.html"
             ],
             "include" : [
                 "public/js/BIM/FmobjectCardController.js",
@@ -262,7 +364,7 @@
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "BIM/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT" }
+                        { "mainCard": "BIM/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects" }
                     ]
                 }
             ]
@@ -277,6 +379,12 @@
                 "css/icons/material/Unavailable.svg",
                 "css/icons/office/Module.svg",
                 "css/icons/office/Server.svg",
+                "css/images/Portals_add.png",
+                "css/images/Portals_edit.png",
+                "css/images/Portals_list.png",
+                "css/images/Portals_modules.png",
+                "css/images/Portals_new.png",
+                "partial/Doc/Portals.html",
                 "partial/LicenseServer/PortalCard.html",
                 "partial/LicenseServer/PortalListCard.html"
             ],
@@ -289,7 +397,7 @@
                 {
                     "title": "TRK_MENU_LICENSESERVER",
                     "items": [
-                        { "mainCard": "LicenseServer/PortalListCard", "icon": "Server", "title": "TRK_MENU_LICENSESERVER_PORTALS", "permission" : "PERMISSION_LICENSESERVER_PORTAL" }
+                        { "mainCard": "LicenseServer/PortalListCard", "icon": "Server", "title": "TRK_MENU_LICENSESERVER_PORTALS", "permission" : "PERMISSION_LICENSESERVER_PORTAL", "docCard" : "Portals" }
                     ]
                 }
             ],

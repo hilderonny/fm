@@ -1,0 +1,48 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Versionshinweise</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-content>
+
+        <h2><a name="1.7"/>1.7</h2>
+
+        <h2><a name="1.6"/>1.6</h2>
+        <ul>
+            <li>Geschäftspartner und Personen sind nun verfügbar</li>
+            <li>Kommentarfeld in Portaladministration eingefügt</li>
+            <li>Mandanten können eigene Logos festlegen, die im Menü angezeigt werden</li>
+            <li>Portale können über die Konfiguration eigene Logos und Titel für die Anmeldeseite definieren</li>
+            <li>Fehler behoben, durch den in manchen Fällen Detailkarten nicht angezeigt wurden</li>
+        </ul>
+
+        <h2><a name="1.5"/>1.5</h2>
+        <ul>
+            <li>Direkteinstiege zu Entitäten über deren URLs ist nun möglich</li>
+            <li>Entitäten können nun <a href="/#/doc/Concepts#dynamicAttributes">dynamische Attribute</a> haben</li>
+            <li>Die Anmeldeseite kann nun auch ausschließlich mit der tastatur bedient werden</li>
+            <li>In der Mandantenverwaltung können nun Kommentare zu Mandanten eingefügt werden</li>
+            <li>Kartendesign zu Listen-Detail-Ansicht vereinfacht</li>
+            <li>Fehler behoben, durch den keine Unterelemente von FM Objekten erzeugt werden konnten</li>
+        </ul>
+
+        <h2><a name="1.4"/>1.4</h2>
+        <ul>
+            <li><a href="/#/doc/Concepts#relations">Verknüpfungen</a> zwischen Entitäten sind nun möglich</li>
+            <li>Fehler behoben, durch den Dokumente auf oberster Ebene nicht hochgeladen werden konnten</li>
+        </ul>
+
+        <h2><a name="1.3"/>1.3</h2>
+        <ul>
+            <li>Erste öffentlich verfügbare Version</li>
+            <li>Irreführende Fehlermeldungen korrigiert</li>
+            <li>Sicherheitsabfragen für Löschvorgänge korrigiert</li>
+            <li>Fehler behoben, durch den keine Dokumente heruntergeladen werden konnten</li>
+            <li>Fehler behoben, durch den das Anklicken von Dokumenten zu einer Endlos-Ladeschleife führte</li>
+        </ul>
+            
+    </md-card-content>
+</md-card>

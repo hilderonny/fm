@@ -1,5 +1,5 @@
 // Define utils factory, http://stackoverflow.com/a/26109991
-app.factory('utils', function($compile, $rootScope, $http, $translate, $location) {
+app.factory('utils', function($compile, $rootScope, $http, $translate, $location, $anchorScroll) {
     var utils = {
 
         // On slow connections clicking on list items multiply adds multiple cards
@@ -35,6 +35,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
                 // Scroll card in view, but wait until the card is put into the dom
                 utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+                utils.scrollToAnchor(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
                 return Promise.resolve(card);
             });
         },
@@ -102,6 +103,20 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             } else {
                 if (counter > 0) {
                     setTimeout(function() { utils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
+                }
+            }
+        },
+
+        /**
+         * Wartet auf Rendern der Karte und springt den aktuellen in der URL angegebenen Anker an
+         */
+        scrollToAnchor: function(domCard, cardCanvas, counter) {
+            if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
+                $anchorScroll();
+                return;
+            } else {
+                if (counter > 0) {
+                    setTimeout(function() { utils.scrollToAnchor(domCard, cardCanvas, counter - 1) }, 100);
                 }
             }
         },

@@ -55,7 +55,7 @@ router.get('/forIds', auth(false, false, 'clients'), (req, res) => {
  * Get single client with given id
  */
 router.get('/:id', auth('PERMISSION_ADMINISTRATION_CLIENT', 'r', 'clients'), validateId, (req, res) => {
-    req.db.get('clients').findOne(req.params.id, req.query.fields).then((client) => {
+    req.db.get('clients').findOne(req.params.id).then((client) => {
         if (!client) {
             // Client with given ID not found
             return res.sendStatus(404);

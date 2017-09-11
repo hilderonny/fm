@@ -1,0 +1,46 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Konzepte</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-content>
+
+        <p>TODO: Einleitungstext ...</p>
+
+        <ul>
+            <li><a href="/#/doc/Concepts#dynamicAttributes">Dynamische Attribute</a></li>
+            <li><a href="/#/doc/Concepts#search">Suche</a></li>
+            <li><a href="/#/doc/Concepts#relations">Verknüpfungen</a></li>
+        </ul>
+
+        <h2><a name="dynamicAttributes"/>Dynamische Attribute</h2>
+        <p>Beschrieben in Settings - DA</p>
+        <img src="/css/images/Settings_dynamicattributes_values.png"/>
+        
+        <h2><a name="search"/>Suche</h2>
+
+        <img src="/css/images/Search_toolbar.png"/>
+        <p>Die eingebaute Suchfunktion wird über das <img src="/css/images/Search_searchbutton.png"/>-Symbol in der Toolbar aufgerufen.</p>
+        <p>Hiermit lassen sich Objekte jeglicher Art durch Eingabe eines Teils ihres Namens finden.</p>
+
+        <img src="/css/images/Search_searchfield.png"/>
+        <p>Sobald man auf das Lupensymbol klickt, wird dieses durch ein <img src="/css/images/Search_cancelbutton.png"/>-Symbol ersetzt und ein Textfeld zur Eingabe von Suchbegriffen angezeigt. Ein Klick auf das Kreuz-Symbol beendet die Suche wieder.</p>
+
+        <img src="/css/images/Search_searchresults.png"/>
+        <p>Sobald man beginnt, einen Suchbegriff einzugeben, wird die Suche im Hintergrund gestartet. Es wird dabei in allen Datenbankobjekten in deren Namen der eingegebene Begriff gesucht. Groß- und Kleinschreibung werden hierbei nicht unterschieden.</p>
+        <p>Werden Objekte mit dem gesuchten Begriff gefunden, werden diese in einer Liste unterhalb des Suchfeldes angezeigt und der Suchgbegriff wird im Objektnamen jeweils fett markiert und unterstrichen. Die Symbole neben den Suchbegriffen stellen dabei die Art des Objektes dar.</p>
+        <p>Klickt man ein Suchergebnis in der Liste an, wird dessen Detailseite geöffnet. Mit Hilfe der Zurück-Funktion des Browsers kann man danach wieder auf die vorhergehende Seite zurück kehren.</p>
+        
+        <h2><a name="relations"/>Verknüpfungen</h2>
+        <img src="/css/images/Relations_add.png"/>
+        <img src="/css/images/Relations_hierarchydialog.png"/>
+        <img src="/css/images/Relations_list.png"/>
+        <img src="/css/images/Relations_listdialog.png"/>
+        <img src="/css/images/Relations_menu.png"/>
+        <img src="/css/images/Relations_otherside.png"/>
+            
+    </md-card-content>
+</md-card>

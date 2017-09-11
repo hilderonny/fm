@@ -94,6 +94,38 @@ md-card-content > md-grid-list {
     height:100%;
 }
 
+md-card.doc md-card-content {
+    padding-top:10px;
+}
+
+md-card.doc md-card-content > img {
+    max-width: 100%;
+    margin-bottom: 10px;
+    box-shadow: 0 0 1px 0 #000;
+    border: 3px solid #fff;
+}
+
+md-card.doc md-card-content > img:nth-of-type(even) {
+    max-width: 100%;
+    float: left;
+    margin-right: 10px;
+}
+
+md-card.doc md-card-content > img:nth-of-type(odd) {
+    max-width: 100%;
+    float: right;
+    margin-left: 10px;
+}
+
+md-card.doc md-card-content h1, md-card-content h2 {
+    clear: both;
+    background-color: rgb(240,240,240);
+}
+
+md-card.doc md-card-content li {
+    word-break: break-word;
+}
+
 md-card-title, md-card > ng-include {
     background-color: rgba(255,255,255,0.97);
 }
@@ -573,6 +605,10 @@ md-toolbar md-input-container input {
         border: 1px solid black;
     }
 
+    md-card.doc md-card-content > img {
+        float:initial !important;
+    }
+    
     md-list.activities-3 h3 {
         margin:0;
         flex: 1;
