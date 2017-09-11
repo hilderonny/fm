@@ -3,7 +3,9 @@ app.controller('DocListController', function($scope, $rootScope, $http, $mdDialo
     // Click on user in user list shows user details
     $scope.selectMenuItem = function(menuItem, preserveHash) {
         utils.removeCardsToTheRightOf($element);
-        utils.addCardWithPermission('Doc/' + menuItem.docCard, null, 'PERMISSION_ADMINISTRATION_USER').then(function() {
+        utils.addCardWithPermission('Doc/' + menuItem.docCard, {
+            closeCallback: function() { $scope.selectedMenuItem = null; }
+        }, 'PERMISSION_ADMINISTRATION_USER').then(function() {
             if (!preserveHash) utils.setLocation('/doc/' + menuItem.docCard);
             $scope.selectedMenuItem = menuItem;
         });

@@ -15,11 +15,9 @@
                 <md-list-item class="switch">
                     <md-button ng-repeat="language in parentScope.languages" ng-class="{'md-primary':parentScope.currentLanguage==language}" aria-label="{{language}}" class="md-raised" ng-click="parentScope.setLang(language)" ng-bind="language"></md-button>
                 </md-list-item>
-                <md-list-item>
-                    <md-button aria-label="HELP" ng-href="/#/doc/{{currentMenuItem.docCard}}">
-                        <md-icon md-svg-src="/css/icons/material/Help.svg"></md-icon>
-                        <p translate>TRK_HELP</p>
-                    </md-button>
+                <md-list-item aria-label="HELP" ng-href="/#/doc/{{parentScope.currentMenuItem.docCard}}" ng-click="parentScope.moreMenuPanel.close();">
+                    <md-icon md-svg-src="/css/icons/material/Help.svg"></md-icon>
+                    <p translate>TRK_HELP</p>
                 </md-list-item>
             </md-list>
         </script>
