@@ -2,6 +2,7 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
     
     // Event callbacks
     var saveFmObjectCallback = function(savedFmObject) {
+        $scope.selectedFmObject.icon = 'fm/' + savedFmObject.type,
         $scope.selectedFmObject.name = savedFmObject.name;
         $scope.selectedFmObject.type = savedFmObject.type;
     };
