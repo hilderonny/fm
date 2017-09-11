@@ -1,44 +1,39 @@
 app.controller('OfficeDocumentListCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
     
     var createFolderCallback = function(createdFolder) {
-        var folderElement = {
-            _id: createdFolder._id,
-            type: 'f',
+        var viewModel = {
+            icon: 'material/Folder',
             name: createdFolder.name,
+            type: 'folders',
+            id: createdFolder._id,
+            parentFolderId: createdFolder.parentFolderId,
             children: []
         };
         if ($scope.selectedElement) {
-            if (!$scope.selectedElement.children) $scope.selectedElement.children = [];
-            var indexToInsert = $scope.elements.indexOf($scope.selectedElement) + 1;
-            while ($scope.elements[indexToInsert] && $scope.elements[indexToInsert].level > $scope.selectedElement.level) indexToInsert++;
-            $scope.elements.splice(indexToInsert, 0, folderElement);
-            $scope.selectedElement.children.push(folderElement);
-            folderElement.level = $scope.selectedElement.level + 1;
+            $scope.selectedElement.children.push(viewModel);
+            $scope.selectedElement.isOpen = true;
         } else {
-            folderElement.level = 0;
-            $scope.elements.push(folderElement);
+            $scope.child.children.push(viewModel);
         }
-        $scope.selectElement(folderElement);
+        $scope.selectElement(viewModel);
     };
 
     var uploadDocumentCallback = function(uploadedDocument) {
-        var documentElement = {
-            _id: uploadedDocument._id,
-            type: 'd',
-            name: uploadedDocument.name
+        var viewModel = {
+            icon: 'material/Document',
+            name: uploadedDocument.name,
+            type: 'documents',
+            id: uploadedDocument._id,
+            parentFolderId: uploadedDocument.parentFolderId,
+            children: []
         };
         if ($scope.selectedElement) {
-            if (!$scope.selectedElement.children) $scope.selectedElement.children = [];
-            var indexToInsert = $scope.elements.indexOf($scope.selectedElement) + 1;
-            while ($scope.elements[indexToInsert] && $scope.elements[indexToInsert].level > $scope.selectedElement.level) indexToInsert++;
-            $scope.elements.splice(indexToInsert, 0, documentElement);
-            $scope.selectedElement.children.push(documentElement);
-            documentElement.level = $scope.selectedElement.level + 1;
+            $scope.selectedElement.children.push(viewModel);
+            $scope.selectedElement.isOpen = true;
         } else {
-            documentElement.level = 0;
-            $scope.elements.push(documentElement);
+            $scope.child.children.push(viewModel);
         }
-        $scope.selectElement(documentElement);
+        $scope.selectElement(viewModel);
     };
 
     var saveElementCallback = function(savedElement) {
@@ -46,16 +41,16 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
     };
 
     var deleteElementCallback = function() {
-        var index = $scope.elements.indexOf($scope.selectedElement);
+        var index = $scope.child.children.indexOf($scope.selectedElement);
         var deleteCount = 1;
-        for (var i = index + 1; i < $scope.elements.length; i++) {
-            if ($scope.elements[i].level > $scope.selectedElement.level) {
+        for (var i = index + 1; i < $scope.child.children.length; i++) {
+            if ($scope.child.children[i].level > $scope.selectedElement.level) {
                 deleteCount++;
             } else {
                 break; //Wichtig, da sonst Unterelemente in kommenden Pfaden ebenfalls gelöscht würden
             }
         }
-        $scope.elements.splice($scope.elements.indexOf($scope.selectedElement), deleteCount);
+        $scope.child.children.splice($scope.child.children.indexOf($scope.selectedElement), deleteCount);
         closeElementCallback();
     };
 
@@ -140,8 +135,8 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
             if (e.target.readyState === 4) {
                 $scope.isUploading = false;
                 var uploadedDocument = e.target.response;
-                $scope.elements.push(uploadedDocument);
-                $scope.selectElement(uploadedDocument);
+                $scope.selectedElement = null;
+                uploadDocumentCallback(uploadedDocument);
                 $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function(translations) {
                     $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
                 });
