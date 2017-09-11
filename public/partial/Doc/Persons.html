@@ -1,7 +1,34 @@
-<md-card ng-cloak class="list-details-details">
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu Personen</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
     <md-card-content>
 
-        <h1>Personen</h1>
-                
+        <p>TODO: Einleitungstext ...</p>
+        
+        <ul>
+            <li><a href="/#/doc/Persons#list">Personenliste</a></li>
+            <li><a href="/#/doc/Persons#edit">Person bearbeiten</a></li>
+            <li><a href="/#/doc/Persons#comm">Kommunikationswege</a></li>
+        </ul>
+
+        <h2><a name="list"/>Personenliste</h2>
+        <img src="/css/images/Persons_list.png"/>
+        <img src="/css/images/Persons_add.png"/>
+
+        <h2><a name="edit"/>Person bearbeiten</h2>
+        <img src="/css/images/Persons_new.png"/>
+        <img src="/css/images/Persons_edit.png"/>
+        <img src="/css/images/Persons_commlist.png"/>
+        <img src="/css/images/Persons_addcomm.png"/>
+        
+        <h2><a name="comm"/>Kommunikationswege</h2>
+        <img src="/css/images/Persons_newcomm.png"/>
+        <img src="/css/images/Persons_editcomm.png"/>
+        
     </md-card-content>
 </md-card>

@@ -1,7 +1,15 @@
-<md-card ng-cloak class="list-details-details doc">
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu Mandanten</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
     <md-card-content>
 
-        <h1>Mandanten</h1>
+        <p>TODO: Einleitungstext ...</p>
+
         <ul>
             <li><a href="/#/doc/Clients#create">Mandant erstellen</a></li>
             <li><a href="/#/doc/Clients#edit">Mandant bearbeiten</a></li>

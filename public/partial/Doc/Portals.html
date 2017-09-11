@@ -1,7 +1,31 @@
-<md-card ng-cloak class="list-details-details">
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu Portalen</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
     <md-card-content>
 
-        <h1>Portale</h1>
-                
+        <p>TODO: Einleitungstext ...</p>
+
+        <ul>
+            <li><a href="/#/doc/Portals#list">Portalliste</a></li>
+            <li><a href="/#/doc/Portals#edit">Portal bearbeiten</a></li>
+            <li><a href="/#/doc/Portals#modules">Module</a></li>
+        </ul>
+
+        <h2><a name="list"/>Portalliste</h2>
+        <img src="/css/images/Portals_list.png"/>
+        <img src="/css/images/Portals_add.png"/>
+
+        <h2><a name="edit"/>Portal bearbeiten</h2>
+        <img src="/css/images/Portals_new.png"/>
+        <img src="/css/images/Portals_edit.png"/>
+
+        <h2><a name="modules"/>Module</h2>
+        <img src="/css/images/Portals_modules.png"/>
+        
     </md-card-content>
 </md-card>

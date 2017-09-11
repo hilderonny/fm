@@ -1,7 +1,28 @@
-<md-card ng-cloak class="list-details-details">
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu FM Objekten</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
     <md-card-content>
 
-        <h1>FM Objekte</h1>
-                
+        <p>TODO: Einleitungstext ...</p>
+
+        <ul>
+            <li><a href="/#/doc/FmObjects#list">Hierarchie</a></li>
+            <li><a href="/#/doc/FmObjects#edit">FM Objekt bearbeiten</a></li>
+        </ul>
+
+        <h2><a name="list"/>Hierarchie</h2>
+        <img src="/css/images/FM_hierarchy.png"/>
+        <img src="/css/images/FM_add.png"/>
+        
+        <h2><a name="edit"/>FM Objekt bearbeiten</h2>
+        <img src="/css/images/FM_new.png"/>
+        <img src="/css/images/FM_edit.png"/>
+        <img src="/css/images/FM_addsub.png"/>
+        
     </md-card-content>
 </md-card>
