@@ -103,4 +103,33 @@ app.directive('focusMe', function($timeout) {
     }
   };
 });
+
+/**
+ * Resize-handle für Karten. Wird bei Listen eingesetzt.
+ * <md-card>
+ *  ...
+ *  <resize-handle></resize-handle>
+ * </md-card>
+ */
+app.directive('resizeHandle', function() {
+  return function(scope, element, attrs) {
+    element.bind('mousedown', function(evt) {
+      scope.isResizing = true;
+      scope.resizeStartX = evt.pageX;
+      scope.resizeStartWidth = this.parentNode.offsetWidth;
+    });
+    document.body.addEventListener('mousemove', function(evt) {
+      if (!scope.isResizing) return;
+      var delta = evt.pageX - scope.resizeStartX;
+      var flex = '0 0 ' + (scope.resizeStartWidth + delta) + 'px';
+      element[0].parentNode.style.flex = flex;
+      evt.preventDefault();
+      return false;
+    });
+    document.body.addEventListener('mouseup', function(evt) {
+      scope.isResizing = false;
+    });
+  }
+});
+
 app.directUrlMappings = {};

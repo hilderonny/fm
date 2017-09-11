@@ -11,9 +11,11 @@
     <md-card-content>
         <md-list class="lines-beetween-items">
             <md-list-item ng-repeat="partner in partners | orderBy: 'name' " ng-click="selectPartner(partner)" ng-class="selectedPartner == partner ? 'active' : false" aria-label="{{partner.name}}">
-                <md-icon md-svg-src="drafts/icons/Business.svg"></md-icon>
+                <md-icon md-svg-src="/css/icons/material/Business.svg"></md-icon>
                 <p ng-bind="partner.name"></p>
             </md-list-item>
         </md-list>
     </md-card-content>
+
+    <resize-handle></resize-handle>
 </md-card>
