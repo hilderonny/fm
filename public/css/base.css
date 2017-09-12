@@ -131,6 +131,15 @@ md-card.doc md-card-content ul {
     display: table;
 }
 
+md-card.doc md-card-content th {
+    text-align: left;
+    vertical-align: top;
+}
+
+md-card.doc md-card-content table {
+    border-spacing: 10px;
+}
+
 md-card-title, md-card > ng-include {
     background-color: rgba(255,255,255,0.97);
 }

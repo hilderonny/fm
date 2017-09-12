@@ -13,6 +13,7 @@
                 "css/icons/material/Cancel.svg",
                 "css/icons/material/Checked Checkbox.svg",
                 "css/icons/material/Delete.svg",
+                "css/icons/material/Dictionary.svg",
                 "css/icons/material/Edit.svg",
                 "css/icons/material/Exit.svg",
                 "css/icons/material/Forward.svg",
@@ -135,8 +136,9 @@
         "doc": {
             "api" : [ "doc" ],
             "doc" : [
-                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "News", "index": 99 },
-                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 }
+                { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "Dictionary", "index": 97 },
+                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 },
+                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "News", "index": 99 }
             ],
             "include" : [
                 "public/js/Doc/ListController.js",
