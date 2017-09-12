@@ -127,6 +127,10 @@ md-card.doc md-card-content li {
     word-break: break-word;
 }
 
+md-card.doc md-card-content ul {
+    display: table;
+}
+
 md-card-title, md-card > ng-include {
     background-color: rgba(255,255,255,0.97);
 }
