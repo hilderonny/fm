@@ -8,7 +8,11 @@
 
     <md-card-content>
 
-        <p>TODO: Einleitungstext ...</p>
+        <p>
+            Personen dienen der Beschreibung von, nun ja, Personen halt. Hier können Kontakte zu Personen
+            von Geschäftspartnern samt deren Kommunikationswegen gepflegt werden. Die Beziehungen zu den
+            Geschäftspartnern werden dabei über <a href="/#/doc/Concepts#relations">Verknüpfungen</a> gepflegt.
+        </p>
         
         <ul>
             <li><a href="/#/doc/Persons#list">Personenliste</a></li>
@@ -18,17 +22,34 @@
 
         <h2><a name="list"/>Personenliste</h2>
         <img src="/css/images/Persons_list.png"/>
-        <img src="/css/images/Persons_add.png"/>
+        <p>
+            Die Liste führt alle Personen auf, die dem eigenen Mandanten bekannt sind. Dabei werden
+            Nachname und Vorname ausgewiesen.
+        </p>
+
+        <p>
+            Der Button <img src="/css/images/Persons_add.png"/> öffnet eine Karte zum Erstellen einer neuen Person.
+        </p>
 
         <h2><a name="edit"/>Person bearbeiten</h2>
-        <img src="/css/images/Persons_new.png"/>
         <img src="/css/images/Persons_edit.png"/>
-        <img src="/css/images/Persons_commlist.png"/>
-        <img src="/css/images/Persons_addcomm.png"/>
+        <p>
+            Neben Nach- und Vornamen einer Person können im Tab "Kommunikationswege" die Kontaktdaten für die
+            Person gepflegt werden. Werden weitere Informationen zur Person benötigt, bietet es sich an, diese
+            über <a href="/#/doc/Concepts#dynamicAttributes">dynamische Attribute</a> anzugeben.
+        </p>
         
         <h2><a name="comm"/>Kommunikationswege</h2>
-        <img src="/css/images/Persons_newcomm.png"/>
-        <img src="/css/images/Persons_editcomm.png"/>
+        <img src="/css/images/Persons_commlist.png"/>
+        <p>
+            Die Liste der Kommunikationswege enthält alle Kontakteinträge der Person. Das Symbol stellt das
+            Medium des Kommunikationsweges dar (Telefon oder E-Mail). In der ersten Zeile wird die E-Mail-Adresse
+            oder die Telefonnummer angezeigt und in der zweiten Zeile findet man den Typ (Arbeit, Mobil, Privat).
+        </p>
+        <p>
+            Ein neuer Kommunikationsweg kann über den <img src="/css/images/Persons_addcomm.png"/>-Button
+            angelegt werden.
+        </p>
         
     </md-card-content>
 </md-card>
