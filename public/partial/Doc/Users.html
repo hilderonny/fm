@@ -8,25 +8,81 @@
 
     <md-card-content>
 
-        <p>Benutzer ...</p>
+        <p>
+            Benutzer dienen zum Anmelden am System und bestehen aus einem Benutzernamen und einem Passwort.
+            Sie können echte Personen (Klaus Meier) oder Funktionen (Personalleiter) repräsentieren, je nachdem,
+            wie ein Mandant sein Personal organisiert. 
+        </p>
+
+        <p>
+            Benutzernamen müssen im gesamten Portal mandantenübergreifend eindeutig sein. Es ist also nicht möglich,
+            dass mehrere Mandanten jeweils einen Benutzer mit dem Namen "admin" haben, weder die Mandanten selbst, noch
+            das Portal.
+        </p>
+
+        <p>
+            Jeder Benutzer gehört genau einer <a href="/#/doc/UserGroups">Benutzergruppe</a> an, über die seine
+            Zugriffsrechte auf Programmfunktionen gesteuert werden.
+        </p>
 
         <ul>
             <li><a href="/#/doc/Users#list">Benutzerliste</a></li>
-            <li><a href="/#/doc/Users#create">Benutzer anlegen</a></li>
             <li><a href="/#/doc/Users#edit">Benutzer bearbeiten</a></li>
         </ul>
 
         <h2><a name="list"/>Benutzerliste</h2>
-        <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. <img src="/css/images/Users_add_button.png"/> At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
         <img src="/css/images/Users_list.png"/>
+        <p>
+            Die Benutzerliste wird als erste Karte angezeigt, sobald man im Menü auf <b>Benutzer</b> klickt.
+            Diese listet alle Benutzer des eigenen Mandanten auf. Ist man als Portalbenutzer angemeldet (erkennbar
+            an der roten Toolbar), so werden einem nur Portalbenutzer angezeigt. Ist man als Benutzer eines
+            Mandanten angemeldet (erkennbar an der blauen Toolbar), so werden nur die Benutzer des Mandanten, zu dem
+            man selbst gehört, angezeigt.
+        </p>
 
-        <h2><a name="create"/>Benutzer anlegen</h2>
-        <img src="/css/images/Users_createuser.png"/>
+        <p>
+            Ein Klick auf einen Benutzer öffnet dessen Detailkarte. Klickt man auf den 
+            <img src="/css/images/Users_add_button.png"/>-Button in der Toolbar, wird eine Karte zum Anlegen eines
+            neuen Benutzers eingeblendet.
+        </p>
         
         <h2><a name="edit"/>Benutzer bearbeiten</h2>
         <img src="/css/images/Users_edituser.png"/>
-        <p>...</p>
-        <p>Nach dem Löschen eines Benutzers kann dieser sich nicht mehr mit seinen Anmeldedaten am System anmelden</p>
+        <p>
+            Beim Erstellen eines Benutzers ist die Eingabe eines Benutzernamens und eines initialen Passwortes Pflicht.
+            Das Passwort muss zweimal eingegeben werden, um Tippfehler zu vermeiden. Normalerweise erstellen Administratoren
+            neue Benutzer und teilen den Personen, die den Benutzeraccount verwenden sollen, die Anmeldedaten (Benutzername
+            und Passwort) mit. Anschließend müssen sich die Benutzer mit den Daten anmelden und sofort ihr Initialpasswort
+            ändern.
+        </p>
+        
+        <p>
+            Beim Bearbeiten eines existierenden Benutzers kann der Administrator dem Benutzer ein neues Passwort vergeben,
+            indem er dieses zweimal in die Passwortfelder einträgt und den Benutzer speichert. Lässt man die Passwortfelder
+            leer und speichert ab, so wird das bestehende Passwort nicht überschrieben. Diese Funktion ist für den Fall,
+            dass ein Benutzer mal sein Passwort vergisst, gedacht.
+        </p>
+
+        <p>
+            Benutzer werden einer Benutzergruppe zugewiesen, über die die Zugriffsberechtigungen im System bestimmt werden.
+            Wird ein bestehender Benutzer einer neuen Benutzergruppe zugewiesen, erhält er ab dem Speicherzeitpunkt deren
+            Berechtigungen. Das wirkt sich sofort aus, auch wenn der Benutzer gerade angemeldet ist. In diesem Fall wird beim
+            Benutzer bei der nächsten Aktion kurz der Anmeldebildschirm angezeigt und anschließend sieht er nur noch die Module,
+            auf die seine neue Benutzergruppe Zugriff hat.
+        </p>
+
+        <p>
+            Bekommt ein Benutzer die <b>Administrator</b>-Eigenschaft, so hat er Zugriff auf alle Funktionen, die seinem
+            Mandanten zur Verfügung stehen, unabhängig von den Berechtigungen seiner Benutzergruppe. Diese Eigenschaft ist
+            daher nur Administratorbenutzern selbst zu vergeben und nicht freizügig zu verwenden.
+        </p>
+
+        <p>
+            Das Löschen eines Benutzers führt zum vollständigen Entfernen seiner Daten aus dem System. Soll ein Benutzer nur
+            vorübergehend deaktiviert werden, so kann das geschehen, indem man eine spezielle Benutzergruppe erstellt, die
+            keinerlei Rechte hat, und den Benutzer dieser Gruppe zuweisen. Nach dem Löschen kann der Benutzername wieder für
+            einen anderen Benutzer verwendet werden.
+        </p>
                 
     </md-card-content>
 </md-card>
