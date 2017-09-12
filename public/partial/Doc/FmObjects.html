@@ -8,7 +8,12 @@
 
     <md-card-content>
 
-        <p>TODO: Einleitungstext ...</p>
+        <p>
+            FM Objekte sind Informationsbrocken, die in irgendeiner Weise etwas mit Facility Management
+            (FM, "Gebäudeverwaltung") zu tun haben. In diesem Modul können diese Objekte hierarchisch
+            strukturiert und mit Hilfe von <a href="/#/doc/Concepts#dynamicAttributes">dynamischen Attributen</a>
+            und <a href="/#/doc/Concepts#relations">Verknüpfungen</a> um Zusatzinformationen angereichert werden.
+        </p>
 
         <ul>
             <li><a href="/#/doc/FmObjects#list">Hierarchie</a></li>
@@ -17,12 +22,38 @@
 
         <h2><a name="list"/>Hierarchie</h2>
         <img src="/css/images/FM_hierarchy.png"/>
-        <img src="/css/images/FM_add.png"/>
+        <p>
+            Die Hierchieansicht zeigt die Struktur der FM-Objekte an und stellt deren Typen mit Hilfe von
+            Symbolen dar. Ein Klick auf ein Dreieckssymbol klappt die untergeordnete Hierarchieebene
+            auf oder zu. Klickt man den Namen eines Objektes an, wird dessen Detailseite angezeigt.
+        </p>
+
+        <p>
+            Ein Klick auf den <img src="/css/images/FM_add.png"/>-Button öffnet eine Karte zum Neuanlegen
+            eines FM-Objektes auf der obersten Hierarchieebene.
+        </p>
         
         <h2><a name="edit"/>FM Objekt bearbeiten</h2>
-        <img src="/css/images/FM_new.png"/>
         <img src="/css/images/FM_edit.png"/>
-        <img src="/css/images/FM_addsub.png"/>
+        <p>
+            Im einfachsten Fall besitzt ein FM Objekt einen Namen und einen Typ. Der Typ beeinflusst das Icon,
+            welches in der Hierarchie angezeigt wird. Aktuell gibt es folgende Typen.
+        </p>
+
+        <ul>
+            <li>Projekt</li>
+            <li>Liegenschaft</li>
+            <li>Gebäude</li>
+            <li>Etage</li>
+            <li>Raum</li>
+            <li>Fläche</li>
+            <li>Inventar</li>
+        </ul>
+
+        <p>
+            Zum Anlegen von Unterobjekten eines FM-Objektes klickt man in der Toolbar der Detailkarte
+            auf den <img src="/css/images/FM_addsub.png"/>-Button.
+        </p>
         
     </md-card-content>
 </md-card>
