@@ -5,6 +5,7 @@
             "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
             "public" : [
+                "css/angular-material.min.css",
                 "css/base.css",
                 "css/logo_avorium_komplett.svg",
                 "css/icons/material/Add Link.svg",
