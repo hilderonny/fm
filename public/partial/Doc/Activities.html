@@ -8,23 +8,51 @@
 
     <md-card-content>
 
-        <p>Termine ...</p>
+        <p>Im Terminmodul können zeitlich festgelegte Termine gepflegt werden. Zusammen mit dem Konzept der
+            <a href="/#/doc/Concepts#relations">Verknüpfungen</a> bieten sich hier mächtige Möglichkeiten,
+            Termine, Dokumente, Verantwortliche und FM-Objekte miteinander in Beziehung zu bringen.
+        </p>
+
         <ul>
             <li><a href="/#/doc/Activities#list">Terminliste</a></li>
             <li><a href="/#/doc/Activities#edit">Termin erstellen und bearbeiten</a></li>
         </ul>
 
         <h2><a name="list"/>Terminliste</h2>
-
         <img src="/css/images/Activities_calendar.png"/>
+        <p>
+            Die Terminliste führt alle Termine eines Benutzers auf und kann über die Tabs auf unterschiedliche
+            Art gefiltert werden. Es werden derzeit nur die Termine des angemeldeten Benutzers angezeigt.
+            Termine, die andere Benutzer desselben Mandanten angelegt haben, werden nicht aufgeführt.
+        </p>
 
-        <p><img src="/css/images/Activities_add.png" /></p>
+        <p>
+            Mit dem <img src="/css/images/Activities_add.png" />-Button kann ein neuer Termin angelegt werden.
+        </p>
 
         <h2><a name="edit"/>Termin erstellen und bearbeiten</h2>
 
         <img src="/css/images/Activities_new.png"/>
 
-        <p></p>
+        <p>
+            Beim Anlegen und Bearbeiten von Terminen wählt man das Datum des Termins aus. Termine werden dabei
+            als ganztägige Ereignisse (so lautet die Bezeichnung in Outlook) gehandhabt. Das Datum bestimmt,
+            in welchen Tabs der Terminliste der Termin sichtbar ist.
+        </p>
+
+        <p>
+            Gibt man einen Typ an, so wird dieser in der Terminliste als Zusatzinformation eingeblendet.
+            Der Typ fungiert als Unterscheidungsmerkmal in der Terminliste.
+        </p>
+
+        <p>
+            Selektiert man das Feld "Erledigt", so wird der Termin in der Liste in grau und durchgestrichen
+            angezeigt.
+        </p>
+
+        <p>
+            Die Felder "Aufgabe" und "Kommentar" dienen der näheren Erläuterung des Termins und sind keine Pflichtfelder.
+        </p>
                         
     </md-card-content>
 </md-card>
