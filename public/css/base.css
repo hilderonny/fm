@@ -169,6 +169,13 @@ md-input-container {
 
 md-input-container img {
     max-width:100%;
+    max-height: 300px;
+    display: block;
+    margin: auto;
+}
+
+md-input-container img[role='button'] {
+    cursor: pointer;
 }
 
 md-input-container .md-errors-spacer {

@@ -1,4 +1,4 @@
-app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, utils) {
+app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $mdPanel, $translate, $mdDialog, utils) {
 
     $scope.types = [
         'FMOBJECTS_TYPE_PROJECT',
@@ -27,7 +27,8 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             type: $scope.fmObject.type, 
             parentId: $scope.fmObject.parentId,
             size: $scope.fmObject.size,
-            pos: $scope.fmObject.pos 
+            pos: $scope.fmObject.pos,
+            previewImageId: $scope.fmObject.previewImageId
         };
         $http.post('/api/fmobjects', fmObjectToSend).then(function(response) {
             var createdFmObject = response.data;
@@ -50,7 +51,8 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             name: $scope.fmObject.name, 
             type: $scope.fmObject.type, 
             size: $scope.fmObject.size, 
-            pos: $scope.fmObject.pos
+            pos: $scope.fmObject.pos,
+            previewImageId: $scope.fmObject.previewImageId
         };
         utils.saveEntity($scope, 'fmobjects', $scope.params.fmObjectId, '/api/fmobjects/', fmObjectToSend).then(function(savedFmObject) {
             $scope.fmObjectName = $scope.fmObject.name;
@@ -96,6 +98,76 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
         utils.removeCard($element);
     };
 
+    // Dialog zur Bildauswahl öffnen
+    $scope.openImageSelectionDialog = function() {
+        var parentScope = $scope;
+        $http.get('/api/folders/allFoldersAndDocuments?type=image').then(function(response) {
+            var folderOrDocument = response.data;
+            var allFoldersAndDocuments = {};
+            response.data.forEach(function(folderOrDocument) {
+                var viewModel = {
+                    icon: folderOrDocument.type === 'folder' ? 'material/Folder' : 'material/Document',
+                    name: folderOrDocument.name,
+                    type: folderOrDocument.type === 'folder' ? 'folders' : 'documents',
+                    id: folderOrDocument._id,
+                    parentFolderId: folderOrDocument.parentFolderId,
+                    children: []
+                }
+                allFoldersAndDocuments[folderOrDocument._id] = viewModel;
+            });
+            var rootElement = { children: [] };
+            Object.keys(allFoldersAndDocuments).forEach(function(key) {
+                var folderOrDocument = allFoldersAndDocuments[key];
+                if (folderOrDocument.parentFolderId) {
+                    var parent = allFoldersAndDocuments[folderOrDocument.parentFolderId];
+                    parent.children.push(folderOrDocument);
+                    folderOrDocument.parent = parent;
+                } else {
+                    rootElement.children.push(folderOrDocument);
+                }
+            });
+            if ($scope.fmObject.previewImageId) {
+                var element = allFoldersAndDocuments[$scope.fmObject.previewImageId];
+                $scope.selectedImage = element;
+                while (element.parent) {
+                    element = element.parent;
+                    element.isOpen = true;
+                }
+            }
+            $mdDialog.show({
+                controller: function ($scope) {
+                    $scope.parentScope = parentScope;
+                    $scope.child = rootElement;
+                },
+                controllerAs: 'ctrl',
+                templateUrl: 'imageSelectDialog.html',
+                parent: angular.element(document.body),
+                clickOutsideToClose:true
+            }).then(function(resolve) { // Nach Auswahl
+                $scope.fmObject.previewImageId = $scope.selectedImage ? $scope.selectedImage.id : null;
+                $scope.selectedElement = null; 
+            }, function(reject) { // Beim Abbrechen
+                $scope.selectedElement = null; 
+            });
+        });
+    };
+
+    // Dialog abbrechen
+    $scope.onDialogCancelClick = function() {
+        $mdDialog.cancel();
+    }
+
+    // Auswahl treffen und Dialog schließen
+    $scope.onDialogOkClick = function() {
+        $mdDialog.hide();
+    };
+
+    // Öffnet das Vorschaubild in separatem Fenster
+    $scope.openImage = function() {
+        window.open('/api/documents/' + $scope.fmObject.previewImageId + '?action=download&token=' + $scope.token);
+    };
+
+
     // Loads the FM object details or prepares the empty dialog for a new FM object
     // Params:
     // - $scope.params.fmObjectId : ID of the FM object to load, when not set, a new FM object is to be created
@@ -127,6 +199,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             }
         }
         $scope.canWriteFmObjects = $rootScope.canWrite('PERMISSION_BIM_FMOBJECT');
+        $scope.token = $http.defaults.headers.common['x-access-token'];
     };
 
     $scope.load();

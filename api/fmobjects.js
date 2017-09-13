@@ -102,6 +102,7 @@ router.post('/', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), function(req
     }
     delete fmObject._id; // Ids are generated automatically
     fmObject.clientId = req.user.clientId; // Assing the new FM object to the same client as the logged in user
+    if (fmObject.previewImageId) fmObject.previewImageId = monk.id(fmObject.previewImageId);
     // Check the parentId for existence
     var insertFmObject = function() {
         req.db.insert(co.collections.fmobjects.name, fmObject).then((insertedFmObject) => {
@@ -130,6 +131,7 @@ router.put('/:id', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), validateId
     }
     delete fmObject._id; // When fmObject object also contains the _id field
     delete fmObject.clientId; // Prevent assignment of the fmObject to another client
+    if (fmObject.previewImageId) fmObject.previewImageId = monk.id(fmObject.previewImageId);
     // For the case that only the _id had to be updated, return an error and do not handle any further
     if (Object.keys(fmObject).length < 1) {
         return res.sendStatus(400);

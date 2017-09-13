@@ -289,6 +289,15 @@ describe('API fmobjects', function() {
             });
         });
 
+        it('Converts a given previewImageId into an ObjectId', async function() {
+            var document = await db.get(co.collections.documents.name).findOne({name:'1_0_0'});
+            var token = await th.defaults.login();
+            var newFMobject = { name: 'O1', previewImageId:document._id.toString() };
+            var fmObjectFromApi = (await th.post(`/api/${co.apis.fmobjects}?token=${token}`).send(newFMobject).expect(200)).body;
+            var fmObjectFromDatabase = await db.get(co.collections.fmobjects.name).findOne(fmObjectFromApi._id);
+            assert.strictEqual(typeof(fmObjectFromDatabase.previewImageId), 'object');
+        });
+
     });
 
     describe('PUT/:id', function() {
@@ -336,6 +345,16 @@ describe('API fmobjects', function() {
             });
         });
 
+        it('Converts a given previewImageId into an ObjectId', async function() {
+            var document = await db.get(co.collections.documents.name).findOne({name:'1_0_0'});
+            var token = await th.defaults.login();
+            var fmObjectFromDatabaseBeforeUpdate = await db.get(co.collections.fmobjects.name).findOne({name:'1_0_0'});
+            var updatedFmObject = { previewImageId:document._id.toString() };
+            await th.put(`/api/${co.apis.fmobjects}/${fmObjectFromDatabaseBeforeUpdate._id}?token=${token}`).send(updatedFmObject).expect(200);
+            var fmObjectFromDatabaseAfterUpdate = await db.get(co.collections.fmobjects.name).findOne(fmObjectFromDatabaseBeforeUpdate._id);
+            assert.strictEqual(typeof(fmObjectFromDatabaseAfterUpdate.previewImageId), 'object');
+        });
+            
     });
 
     describe('DELETE/:id', function() {
