@@ -1,4 +1,5 @@
 {
+    "TRK_CANCEL" : "Abbrechen",
     "TRK_FMOBJECTS_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_FMOBJECTS_CREATE" : "Erstellen",
     "TRK_FMOBJECTS_DELETE" : "Löschen",
@@ -15,10 +16,12 @@
     "TRK_FMOBJECTS_NEW_SUBELEMENT" : "Unterelement",
     "TRK_FMOBJECTS_NEW_SUBELEMENT_IN_THIS_LEVEL" : "Neues Unterelement erstellen",
     "TRK_FMOBJECTS_NAME" : "Name",
+    "TRK_FMOBJECTS_NO_IMAGE" : "Kein Bild",
     "TRK_FMOBJECTS_POSITION" : "Position",
     "TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT" : "Sollen das FM Objekt \"{{fmObjectName}}\" und alle Unterobjekte wirklich gelöscht werden?",
     "TRK_FMOBJECTS_SAVE" : "Speichern",
     "TRK_FMOBJECTS_SELECT_FM_OBJECT" : "FM Objekt auswählen",
+    "TRK_FMOBJECTS_SELECT_IMAGE" : "Bild auswählen",
     "TRK_FMOBJECTS_SIZE" : "Größe",
     "TRK_FMOBJECTS_TYPE" : "Typ",
     "TRK_FMOBJECTS_TYPE_AREA" : "Fläche",
@@ -37,5 +40,6 @@
     "TRK_MODEL_fmobjects": "FM Objekte",
     "TRK_MODULE_fmobjects_NAME" : "FM Objekte",
     "TRK_NO" : "Nein",
+    "TRK_OK" : "OK",
     "TRK_YES" : "Ja"
 }

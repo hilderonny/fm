@@ -93,6 +93,15 @@ var db = {
         });
     },
     /**
+     * Updates all objects matching the query
+     */
+    updateMany: (collection, query, update) => {
+        return monkDb.get(collection).update(query, { $set: update }, { multi: true }).then((res) => {
+            monkDb.emit('update', collection, res);
+            return Promise.resolve(res);
+        });
+    },
+    /**
      * Removes an object from a given collection. Fires the "remove" event with the collection and the query
      * on completion: db.on('remove', (collection, query) => { ... });.
      * All elements matching the given filter are removed.

@@ -222,8 +222,11 @@ router.deleteDocument = (db, document) => {
             // Remove relations from database
             rh.deleteAllRelationsForEntity(co.collections.documents.name, document._id).then(() => {
                 dah.deleteAllDynamicAttributeValuesForEntity(document._id).then(() => {
-                    // Remove document from database
-                    db.remove('documents', document._id).then(resolve);
+                    // Remove references in FM objects
+                    db.updateMany(co.collections.fmobjects.name, { previewImageId: document._id }, { previewImageId: null } ).then(() => {
+                        // Remove document from database
+                        db.remove(co.collections.documents.name, document._id).then(resolve);
+                    });
                 });
             });
         });

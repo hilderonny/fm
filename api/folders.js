@@ -30,7 +30,9 @@ router.get('/allFoldersAndDocuments', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'd
         folders.forEach(function(folder) { // Um zwischen Verzeichnissen und Dokumenten zu unterscheiden
             folder.type = 'folder';
         })
-        req.db.get('documents').find({ clientId: clientId }).then((documents) => {
+        var filter = { clientId: clientId };
+        if (req.query.type) filter.type = { $regex : new RegExp('^' + req.query.type) } // Wenn nur Bilder angefragt werden
+        req.db.get('documents').find(filter).then((documents) => {
             documents.forEach(function(document) { // Um zwischen Verzeichnissen und Dokumenten zu unterscheiden
                 document.type = 'document';
             })

@@ -1,4 +1,5 @@
 {
+    "TRK_CANCEL" : "Abbrechen",
     "TRK_FMOBJECTS_CHANGES_SAVED" : "Changes saved",
     "TRK_FMOBJECTS_CREATE" : "Create",
     "TRK_FMOBJECTS_DELETE" : "Delete",
@@ -15,10 +16,12 @@
     "TRK_FMOBJECTS_NEW_SUBELEMENT" : "Sub element",
     "TRK_FMOBJECTS_NEW_SUBELEMENT_IN_THIS_LEVEL" : "Create new sub element",
     "TRK_FMOBJECTS_NAME" : "Name",
+    "TRK_FMOBJECTS_NO_IMAGE" : "Kein Bild",
     "TRK_FMOBJECTS_POSITION" : "Position",
     "TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT" : "Do you really want to delete the FM object \"{{fmObjectName}}\" and all of its child objects?",
     "TRK_FMOBJECTS_SAVE" : "Save",
     "TRK_FMOBJECTS_SELECT_FM_OBJECT" : "Select FM object",
+    "TRK_FMOBJECTS_SELECT_IMAGE" : "Select image",
     "TRK_FMOBJECTS_SIZE" : "Size",
     "TRK_FMOBJECTS_TYPE" : "Type",
     "TRK_FMOBJECTS_TYPE_AREA" : "Area",
@@ -37,5 +40,6 @@
     "TRK_MODEL_fmobjects": "FM objects",
     "TRK_MODULE_fmobjects_NAME" : "FM objects",
     "TRK_NO" : "No",
+    "TRK_OK" : "OK",
     "TRK_YES" : "Yes"
 }

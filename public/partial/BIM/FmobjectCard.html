@@ -1,5 +1,39 @@
 <md-card ng-cloak ng-controller="BIMFmobjectCardController" style="background-image:url('/css/icons/office/Cottage.svg');" class="list-details-details">
 
+    <script type="text/ng-template" id="imageSelectList.html">
+        <md-list class="hierarchy">
+            <md-list-item flex layout="column" ng-repeat="child in child.children">
+                <div flex layout="row" ng-class="{active:parentScope.selectedImage === child}">
+                    <md-icon ng-click="child.isOpen = true" ng-if="!child.isOpen && child.children.length > 0" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>
+                    <md-icon ng-click="child.isOpen = false" ng-if="child.isOpen" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
+                    <md-icon ng-if="child.children.length < 1"></md-icon>
+                    <img ng-click="child.type === 'folders' ? child.isOpen = (!child.isOpen && child.children.length > 0) : parentScope.selectedImage = child" ng-src="/css/icons/{{child.icon}}.svg" />
+                    <p ng-bind="child.name" ng-click="child.type === 'folders' ? child.isOpen = (!child.isOpen && child.children.length > 0) : parentScope.selectedImage = child"></p>
+                </div>
+                <ng-include flex src="'imageSelectList.html'" ng-if="child.isOpen"></ng-include>
+            </md-list-item>
+        </md-list>
+    </script>
+    
+    <script type="text/ng-template" id="imageSelectDialog.html">
+        <md-dialog aria-label="SELECT ELEMENT">
+            <md-toolbar class="md-toolbar-tools">
+                <h2 translate="TRK_FMOBJECTS_SELECT_IMAGE"></h2>
+            </md-toolbar>
+            <md-dialog-content>
+                <div class="md-dialog-content">
+                    <ng-include flex src="'imageSelectList.html'"></ng-include>
+                </div>
+            </md-dialog-content>
+            <md-dialog-actions layout="row">
+                <span flex></span>
+                <md-button class="md-raised md-accent" ng-if="parentScope.selectedImage" ng-click="parentScope.selectedImage = null;parentScope.onDialogOkClick()"><span translate>TRK_FMOBJECTS_NO_IMAGE</span></md-button>
+                <md-button class="md-raised md-accent" ng-if="parentScope.selectedImage" ng-click="parentScope.onDialogOkClick()"><span translate>TRK_OK</span></md-button>
+                <md-button class="md-raised" ng-click="parentScope.onDialogCancelClick()"><span translate>TRK_CANCEL</span></md-button>
+            </md-dialog-actions>
+        </md-dialog>
+    </script>
+    
     <md-toolbar class="md-toolbar-tools md-accent">
         <md-button ng-click="newFmObject()" aria-label="ADD FM OBJECT" ng-if="canWriteFmObjects && !isNewFmObject">
             <md-tooltip md-direction="bottom"><span translate>TRK_FMOBJECTS_NEW_SUBELEMENT_IN_THIS_LEVEL</span></md-tooltip>
@@ -26,6 +60,13 @@
 
                     <form name="fmObjectForm" layout="column">
 
+                        <md-input-container flex>
+                            <img ng-if="fmObject.previewImageId" ng-src="/api/documents/{{fmObject.previewImageId}}?action=download&token={{token}}" ng-click="openImage()"/>
+                        </md-input-container>
+                        <md-card-actions layout="row" layout-align="end center">
+                            <md-button class="md-raised" ng-click="openImageSelectionDialog()"><span translate>TRK_FMOBJECTS_SELECT_IMAGE</span></md-button>
+                        </md-card-actions>
+                                
                         <md-input-container flex>
                             <label translate>TRK_FMOBJECTS_NAME</label>
                             <input ng-model="fmObject.name">

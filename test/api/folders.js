@@ -86,6 +86,17 @@ describe('API folders', function() {
             });
         });
 
+        it('returns only those documents matching the given type parameter (startsWith)', async function() {
+            var client = await th.defaults.getClient();
+            var document = { clientId: client._id, name: 'SpecialTypeDoc', type: 'image/jpeg' };
+            await db.insert(co.collections.documents.name, document);
+            var token = await th.defaults.login();
+            var resultFromApi = (await th.get(`/api/${co.apis.folders}/allFoldersAndDocuments?type=image&token=${token}`).expect(200)).body;
+            var documents = resultFromApi.filter((e) => e.type === 'document');
+            assert.strictEqual(documents.length, 1);
+            assert.strictEqual(documents[0].name, document.name);
+        });
+
     });
 
     describe('GET/forIds', function() {
