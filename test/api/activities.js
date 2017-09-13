@@ -56,47 +56,25 @@ describe('API activities', function() {
 
         // Positive tests
 
-        it('returns all activities with all details of the users client where the user is creator or participant', function(done) {
-           th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-               db.get('clients').findOne({name: '1'}).then((clientFromDatabase)=>{
-                    var clientId = clientFromDatabase._id;                    
-                    db.get('users').findOne({name:'1_0_0'}).then((loggedinUser)=>{
-                        var userId = loggedinUser._id;                      
-                        db.get('activities').find({ clientId: clientId, createdByUserId: userId
-                        }).then((allactivitiesFromDatabase)=>{
-                            th
-                                .get(`/api/activities?token=${token}`)
-                                .expect(200)
-                                .end(function(err, res){
-                                    if(err){
-                                        done(err);
-                                        return;
-                                    }
-                                    var allactivitiesFromApi = res.body;
-                                    assert.strictEqual(allactivitiesFromApi.length, allactivitiesFromDatabase.length, `Number of activities differ (${allactivitiesFromApi.length} from API, ${allactivitiesFromDatabase.length} in database)` );
-                                    allactivitiesFromDatabase.forEach((activityFromDatabase) => {
-                                        var activityFound = false;
-                                        for(var i = 0; i < allactivitiesFromApi.length; i++){
-                                            var activityFromApi = allactivitiesFromApi[i];
-                                            if(activityFromApi._id !== activityFromDatabase._id.toString()){
-                                                continue;
-                                            }
-                                            activityFound = true;
-                                            Object.keys(activityFromDatabase).forEach((key)=>{
-                                                var valueFromDatabase = activityFromDatabase[key].toString();
-                                                var valueFromApi = activityFromApi[key].toString();
-                                                assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of activity ${activityFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-                                            });                                    
-                                        }
-                                        assert.ok(activityFound, `Activity "${activityFromDatabase.name}" was not returned by API`);
-                                    });
-                                    done();
-                                });
-                        }).catch(done);
-                   });
-                   
-                });
-            });       
+        function compareActivities(activityFromApi, activityFromDatabase) {
+            Object.keys(activityFromDatabase).forEach((key)=>{
+                var valueFromDatabase = activityFromDatabase[key].toString();
+                var valueFromApi = activityFromApi[key].toString();
+                assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of activity ${activityFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
+            });                                    
+        }
+
+        it('returns all activities with all details of the logged in user and public activities of the client', async function() {
+            var user = await th.defaults.getUser();
+            var token = await th.defaults.login(user.name);
+            var userActivities = await db.get(co.collections.activities.name).find({createdByUserId: user._id});
+            var clientActivities = await db.get(co.collections.activities.name).find({clientId: user.clientId, isForAllUsers: true});
+            var activitiesFromRequest = (await th.get(`/api/${co.apis.activities}?token=${token}`).expect(200)).body;
+            userActivities.concat(clientActivities).forEach((activity) => {
+                activityFromRequest = activitiesFromRequest.find((a) => a._id === activity._id.toString());
+                assert.ok(activityFromRequest);
+                compareActivities(activityFromRequest, activity);
+            });
         });
 
     });
@@ -165,7 +143,7 @@ describe('API activities', function() {
             db.get('users').findOne({name:'1_0_0'}).then(function(user) {
                 th.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
                     db.get('clients').findOne({name:'1'}).then(function(client) {
-                        db.get('activities').find({clientId:client._id, $or: [ { createdByUserId: user._id }, { participantUserIds: user._id } ]}).then((allactivities)=>{
+                        db.get('activities').find({clientId:client._id, $or: [ { createdByUserId: user._id }, { isForAllUsers: true } ]}).then((allactivities)=>{
                             var ids = allactivities.map(function(activity) { return activity._id.toString() }).join(',');
                             ids += ',faulty';
                             th.get(`/api/activities/forIds?token=${token}&ids=${ids}`).expect(200).end(function(err, res){
@@ -184,7 +162,7 @@ describe('API activities', function() {
             db.get('users').findOne({name:'1_0_0'}).then(function(user) {
                 th.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
                     db.get('clients').findOne({name:'1'}).then(function(client) {
-                        db.get('activities').find({clientId:client._id, $or: [ { createdByUserId: user._id }, { participantUserIds: user._id } ]}).then((allactivities)=>{
+                        db.get('activities').find({clientId:client._id, $or: [ { createdByUserId: user._id }, { isForAllUsers: true } ]}).then((allactivities)=>{
                             var ids = allactivities.map(function(activity) { return activity._id.toString() }).join(',');
                             ids += ',999999999999999999999999';
                             th.get(`/api/activities/forIds?token=${token}&ids=${ids}`).expect(200).end(function(err, res){
@@ -204,7 +182,7 @@ describe('API activities', function() {
                 th.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
                     db.get('clients').findOne({name:'1'}).then(function(client) {
                         db.get('activities').find().then((allactivities)=>{
-                            db.get('activities').find({clientId:client._id, $or: [ { createdByUserId: user._id }, { participantUserIds: user._id } ]}).then((allactivitiesofclient)=>{
+                            db.get('activities').find({clientId:client._id, $or: [ { createdByUserId: user._id }, { isForAllUsers: true } ]}).then((allactivitiesofclient)=>{
                                 var ids = allactivities.map(function(activity) { return activity._id.toString() }).join(',');
                                 th.get(`/api/activities/forIds?token=${token}&ids=${ids}`).expect(200).end(function(err, res){
                                     var activitiesFromRequest = res.body;
@@ -220,12 +198,12 @@ describe('API activities', function() {
 
         // Positive tests
 
-        it('returns a list of activities with all details for the given IDs', function(done) {
+        it('returns a list of activities with all details for the given IDs when the user has access to it or when they are public', function(done) {
             // Es werden von der API nur solche Termine geliefert, bei denen der Benutzer Ersteller oder Teilnehmer ist
             db.get('users').findOne({name:'1_0_0'}).then(function(user) {
                 th.doLoginAndGetToken('1_0_0', 'test').then(function(token) {
                     db.get('clients').findOne({name:'1'}).then(function(client) {
-                        db.get('activities').find({clientId:client._id, $or: [ { createdByUserId: user._id }, { participantUserIds: user._id } ]}).then((allactivities)=>{
+                        db.get('activities').find({clientId:client._id, $or: [ { createdByUserId: user._id }, { isForAllUsers: true } ]}).then((allactivities)=>{
                             var ids = allactivities.map(function(activity) { return activity._id.toString() }).join(',');
                             th.get(`/api/activities/forIds?token=${token}&ids=${ids}`).expect(200).end(function(err, res){
                                 var activitiesFromRequest = res.body;
@@ -315,6 +293,12 @@ describe('API activities', function() {
             });
         }); 
 
+        it('returns 403 when the user is not the creator of the activitiy and when the activity is not public', async function() {
+            var token = await th.defaults.login(); // Login mit Benutzer 1_0_0
+            var activity = await db.get(co.collections.activities.name).findOne({name:'1_1_0_0'});
+            return th.get(`/api/${co.apis.activities}/${activity._id}?token=${token}`).expect(403);
+        });
+
         // Positive tests
 
         it('returns all details of the activity with the given _id', function(done) {
@@ -337,7 +321,7 @@ describe('API activities', function() {
             });
         });
      
-        it('attribute "fullyEditable" is true when the user is the creator of the activity', function(done) {
+        it('attribute "currentUserCanWrite" is true when the user is the creator of the activity', function(done) {
             db.get('activities').findOne({name: '1_1_0_0'}).then((activity)=>{
                 th.doLoginAndGetToken('1_1_0','test').then((token)=>{
                     var id = activity._id;
@@ -346,27 +330,18 @@ describe('API activities', function() {
                         .expect(200)
                         .end(function(err,res){
                             var activityFromRequest = res.body;
-                            assert.ok(activityFromRequest.fullyEditable, 'Flag fullyEditable is false but should be true');
+                            assert.ok(activityFromRequest.currentUserCanWrite, 'Flag currentUserCanWrite is false but should be true');
                             done();
                         });
                 }).catch(done);
             });
         });
 
-        it('attribute "fullyEditable" is false when the user is only a participant of the activity', function(done) {
-            th.addUserAsParticipantToActivity('1_0_0', '1_1_0_0').then(function(activity) {
-                th.doLoginAndGetToken('1_0_0','test').then((token)=>{
-                    var id = activity._id;
-                    th
-                        .get(`/api/activities/${id}?token=${token}`)
-                        .expect(200)
-                        .end(function(err,res){
-                            var activityFromRequest = res.body;
-                            assert.ok(!activityFromRequest.fullyEditable, 'Flag fullyEditable is true but should be false');
-                            done();
-                        });
-                }).catch(done);
-            });
+        it('attribute "currentUserCanWrite" is false when the user is not the creator of the activity and when the activity is public', async function() {
+            var token = await th.defaults.login(); // Login mit Benutzer 1_0_0
+            var activityFromDatabase = await db.get(co.collections.activities.name).findOne({name:'1_1_0_1'});
+            var activityFromRequest = (await th.get(`/api/${co.apis.activities}/${activityFromDatabase._id}?token=${token}`).expect(200)).body;
+            assert.ok(!activityFromRequest.currentUserCanWrite, 'Flag currentUserCanWrite is true but should be false');
         });
 
     });
@@ -450,33 +425,6 @@ describe('API activities', function() {
                             done();
                         }).catch(done);
                     });
-            });
-        }); 
-
-        it('creates the activity and sets only correct participantUserIds', function(done) {
-            db.get('users').findOne({name:'1_0_ADMIN0'}).then((user_1_0_ADMIN0) =>{
-                db.get('users').findOne({name:'1_1_0'}).then((user_1_1_0) =>{
-                    th.doLoginAndGetToken('1_0_0','test').then((token) => {
-                        var newActivity={
-                            name:'newActivity',
-                            participantUserIds: [ user_1_0_ADMIN0._id.toString(), 'faultyId', user_1_1_0._id.toString() ]
-                        };
-                        th.post('/api/activities?token='+token).send(newActivity).expect(200).end(function(err, res){
-                            if(err){
-                                done(err);
-                                return;
-                            }
-                            var activityFromApi = res.body;
-                            db.get('activities').findOne(activityFromApi._id).then((activityafterCreation)=>{
-                                assert.ok(activityafterCreation, 'New activity was not created');
-                                assert.strictEqual(activityafterCreation.participantUserIds.length, 2, 'Number of participant IDs is not correct');
-                                assert.strictEqual(activityafterCreation.participantUserIds[0].toString(), user_1_0_ADMIN0._id.toString(), 'First participant does not match');
-                                assert.strictEqual(activityafterCreation.participantUserIds[1].toString(), user_1_1_0._id.toString(), 'Second participant does not match');
-                                done();
-                            }).catch(done);
-                        });
-                    });
-                });
             });
         }); 
 
@@ -628,59 +576,12 @@ describe('API activities', function() {
 
         });
 
-        it('responds with 403 when the user is not the creator and tries to update the "date" attribute of the activity', function() {
+        it('responds with 403 when the user is not the creator', function() {
              return db.get('activities').findOne({name: '1_1_0_0'}).then((activity) =>{
                 return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
                     var id=activity._id.toString();
                     var updatedActivity  = {
-                        date:'newdate'
-                    }
-                    return th
-                        .put(`/api/activities/${id}?token=${token}`)
-                        .send(updatedActivity)
-                        .expect(403);
-                });
-            });
-        });
-
-           it('responds with 403 when the user is not the creator and tries to update the "participantUserIds" attribute of the activity', function() {
-            return db.get('activities').findOne({name: '1_1_0_0'}).then((activity) =>{
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    var id=activity._id.toString();
-                    var updatedActivity  = {
-                        participantUserIds:'newparticipantUserIds'
-                    }
-                    return th
-                        .put(`/api/activities/${id}?token=${token}`)
-                        .send(updatedActivity)
-                        .expect(403);
-                });
-            });
-
-        });
-
-        it('responds with 403 when the user is not the creator and tries to update the "task" attribute of the activity', function() {
-            return db.get('activities').findOne({name: '1_1_0_0'}).then((activity) =>{
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    var id=activity._id.toString();
-                    var updatedActivity  = {
-                        task:'newTask'
-                    }
-                    return th
-                        .put(`/api/activities/${id}?token=${token}`)
-                        .send(updatedActivity)
-                        .expect(403);
-                });
-            });
-            
-        });
-
-        it('responds with 403 when the user is not the creator and tries to update the "type" attribute of the activity', function() {
-            return db.get('activities').findOne({name: '1_1_0_0'}).then((activity) =>{
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    var id=activity._id.toString();
-                    var updatedActivity  = {
-                        type:'newType'
+                        name: 'newName'
                     }
                     return th
                         .put(`/api/activities/${id}?token=${token}`)
@@ -726,32 +627,6 @@ describe('API activities', function() {
             });
         });
 
-        it('updates all custom attributes (except date, participantUserIds, task and type) of the activity when the user is not the creator (no need to be a participant)', function(done) {
-            db.get('activities').findOne({name:'1_1_0_0'}).then((activityFromDatabaseBeforeUpdate)=>{
-                th.doLoginAndGetToken('1_0_0','test').then((token)=>{
-                    var id = activityFromDatabaseBeforeUpdate._id;
-                    var updatedActivity= {
-                        name: 'newName'
-                    };
-                    th
-                        .put(`/api/activities/${id}?token=${token}`)
-                        .send(updatedActivity)
-                        .expect(200)
-                        .end(function(err, res){
-                            if(err){
-                                done(err);
-                                return;
-                            }
-                            var activityFromApi = res.body;
-                            db.get('activities').findOne(id).then((activityFromDatabaseAfterUpdate)=>{
-                                assert.strictEqual(updatedActivity.name, activityFromDatabaseAfterUpdate.name, `name (${updatedActivity.name} from API, differs from name ${activityFromDatabaseAfterUpdate.name} in database)`);
-                                done();
-                            }).catch(done);                             
-                        });
-                });
-            });
-        });
-
     });
 
     describe('DELETE/:id', function() {
@@ -772,5 +647,10 @@ describe('API activities', function() {
         th.apiTests.delete.clientDependentNegative(co.apis.activities, getDeleteActivityId);
         th.apiTests.delete.defaultPositive(co.apis.activities, co.collections.activities.name, getDeleteActivityId);
     
+        it('returns 403 when the user is not the creator of the activity', async function() {
+            var token = await th.defaults.login(); // Login mit Benutzer 1_0_0
+            var activityFromDatabase = await db.get(co.collections.activities.name).findOne({name:'1_1_0_1'});
+            return th.del(`/api/${co.apis.activities}/${activityFromDatabase._id}?token=${token}`).expect(403);
+        });
     });
 });

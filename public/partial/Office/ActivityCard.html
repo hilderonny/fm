@@ -21,17 +21,17 @@
 
                     <md-card-content layout="column">
 
-                        <md-input-container ng-if="activity.fullyEditable">
+                        <md-input-container>
                             <label translate>TRK_ACTIVITIES_DATE</label>
                             <md-datepicker ng-model="activity.date" md-open-on-focus></md-datepicker>
                         </md-input-container>
 
-                        <md-input-container flex ng-if="activity.fullyEditable">
+                        <md-input-container flex>
                             <label translate>TRK_ACTIVITIES_NAME</label>
                             <input ng-model="activity.name" />
                         </md-input-container>
 
-                        <md-input-container flex ng-if="activity.fullyEditable">
+                        <md-input-container flex>
                             <label translate>TRK_ACTIVITIES_TYPE</label>
                             <md-select ng-model="activity.type">
                                 <md-option ng-value="type" ng-repeat="type in types">
@@ -40,9 +40,13 @@
                             </md-select>
                         </md-input-container>
 
-                        <md-input-container flex ng-if="activity.fullyEditable">
+                        <md-input-container flex>
                             <label translate>TRK_ACTIVITIES_TASK</label>
                             <textarea ng-model="activity.task" rows="5"></textarea>
+                        </md-input-container>
+
+                        <md-input-container flex>
+                            <md-checkbox ng-model="activity.isForAllUsers"><span translate>TRK_ACTIVITIES_VIEWABLE_BY_ALL_USERS</span></md-checkbox>
                         </md-input-container>
 
                         <md-input-container flex>
@@ -52,6 +56,11 @@
                         <md-input-container flex>
                             <label translate>TRK_ACTIVITIES_COMMENT</label>
                             <textarea ng-model="activity.comment" rows="5"></textarea>
+                        </md-input-container>
+
+                        <md-input-container flex ng-if="!isNewActivity">
+                            <span translate>TRK_ACTIVITIES_CREATOR</span>
+                            <input ng-model="activity.creator" ng-readonly="true" aria-label="CREATOR"/>
                         </md-input-container>
 
                     <ng-include flex ng-if="!isNewActivity" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
