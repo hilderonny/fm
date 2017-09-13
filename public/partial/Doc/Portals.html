@@ -14,6 +14,7 @@
             <li><a href="/#/doc/Portals#list">Portalliste</a></li>
             <li><a href="/#/doc/Portals#edit">Portal bearbeiten</a></li>
             <li><a href="/#/doc/Portals#modules">Module</a></li>
+            <li><a href="/#/doc/Portals#installation">Installation</a></li>
         </ul>
 
         <h2><a name="list"/>Portalliste</h2>
@@ -62,8 +63,28 @@
         <p>
             Hier werden für das Portal die technischen Module freigeschaltet. Je nachdem, was hier angeklickt ist, ändert
             sich der Inhalt des Update-Paketes, welches man herunterladen oder welches das Portal anfragen kann.
-            Das Anklicken des Symbols hinter einem Modul genügt, um das entsprechende Modul freizuschalten oder zu sperren.
+            Das Anklicken des Symbols hinter einem Modul genügt, um das entscodechende Modul freizuschalten oder zu sperren.
         </p>
+        
+        <h2><a name="installation"/>Installation</h2>
+
+        <ol>
+            <li>MongoDB installieren</li>
+            <li>NodeJS 8.x.x installieren</li>
+            <li><code>npm install -g npm@5.0.3</code> ausführen. Das ist die stabilste NPM - Version</li>
+            <li>Updatepaket vom Lizenzserver herunterladen und an Portalbetreiber senden</li>
+            <li>ZIP-Datei irgendwo auf der Platte extrahieren</li>
+            <li>Datei localconfig.json.template zu localconfig.json kopieren und an Portalbedürfnisse anpassen</li>
+            <li>Im Hauptverzeichnis <code>npm install</code> ausführen</li>
+            <li>Hintergrunddienst mit <code>node installwindowsservice.js</code> installieren</li>
+            <li>IIS Manager: Server Farm erstellen (ggf. benötigte Tools mit Web Platform Installer installieren)</li>
+            <li>IIS Manager: Server einrichten und Portweiterleitung auf NodeJS-Anwendung konfigurieren</li>
+            <li>IIS Manager: Auf Serverlevel die URL_Rewrite-Regeln anpassen (Bedingungen für HTTP_HOST)</li>
+            <li>IIS Manager: Umleitungsregeln von HTTP auf HTTPS einrichten</li>
+            <li>IIS Manager: SSL-Zertifikat installieren und bereitstellen</li>
+            <li>IIS Manager: In Standardwebsite Bindings für den Domainnamen (HTTP und HTTPS) erstellen</li>
+            <li>Hintergrunddienst starten</li>
+        </ol>
         
     </md-card-content>
 </md-card>
