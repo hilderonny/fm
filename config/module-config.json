@@ -5,6 +5,7 @@
             "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
             "public" : [
+                "css/angular-material.min.css",
                 "css/base.css",
                 "css/logo_avorium_komplett.svg",
                 "css/icons/material/Add Link.svg",
@@ -46,23 +47,19 @@
                 "css/images/Settings_dynamicattributes_addlistelement.png",
                 "css/images/Settings_dynamicattributes_editlistelement.png",
                 "css/images/Settings_dynamicattributes_entity.png",
+                "css/images/Settings_dynamicattributes_entitylist.png",
                 "css/images/Settings_dynamicattributes_listelements.png",
                 "css/images/Settings_dynamicattributes_newattribute.png",
-                "css/images/Settings_dynamicattributes_picklist.png",
-                "css/images/Settings_dynamicattributes_textboolean.png",
                 "css/images/Settings_portals.png",
                 "css/images/Settings_portals_update.png",
                 "css/images/Settings_users.png",
                 "css/images/Users_add_button.png",
-                "css/images/Users_createuser.png",
                 "css/images/Users_edituser.png",
                 "css/images/Users_list.png",
                 "css/images/Usergroups_add.png",
                 "css/images/Usergroups_editdetails.png",
                 "css/images/Usergroups_list.png",
-                "css/images/Usergroups_newusergroup.png",
                 "css/images/Usergroups_permissions.png",
-                "css/images/Usergroups_userlist.png",
                 "partial/Administration/ClientSettingsCard.html",
                 "partial/Administration/DynamicAttributeCreationFormCard.html",
                 "partial/Administration/DynamicAttributesCard.html",
@@ -138,8 +135,9 @@
         "doc": {
             "api" : [ "doc" ],
             "doc" : [
-                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "News", "index": 99 },
-                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 }
+                { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "Dictionary", "index": 97 },
+                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 },
+                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "News", "index": 99 }
             ],
             "include" : [
                 "public/js/Doc/ListController.js",
@@ -148,13 +146,11 @@
             "languages" : [ "de" ],
             "public" : [
                 "css/icons/material/Design.svg",
+                "css/icons/material/Dictionary.svg",
                 "css/icons/material/News.svg",
                 "css/images/Relations_add.png",
-                "css/images/Relations_hierarchydialog.png",
                 "css/images/Relations_list.png",
-                "css/images/Relations_listdialog.png",
                 "css/images/Relations_menu.png",
-                "css/images/Relations_otherside.png",
                 "css/images/Search_cancelbutton.png",
                 "css/images/Search_searchbutton.png",
                 "css/images/Search_searchfield.png",
@@ -163,7 +159,8 @@
                 "css/images/Settings_dynamicattributes_values.png",
                 "partial/Doc/Concepts.html",
                 "partial/Doc/List.html",
-                "partial/Doc/ReleaseNotes.html"
+                "partial/Doc/ReleaseNotes.html",
+                "partial/Doc/Terms.html"
             ]
         },
 
@@ -213,17 +210,12 @@
                 "css/images/Businesspartners_addaddress.png",
                 "css/images/Businesspartners_addresslist.png",
                 "css/images/Businesspartners_edit.png",
-                "css/images/Businesspartners_editaddress.png",
                 "css/images/Businesspartners_list.png",
-                "css/images/Businesspartners_new.png",
                 "css/images/Persons_add.png",
                 "css/images/Persons_addcomm.png",
                 "css/images/Persons_commlist.png",
                 "css/images/Persons_edit.png",
-                "css/images/Persons_editcomm.png",
                 "css/images/Persons_list.png",
-                "css/images/Persons_new.png",
-                "css/images/Persons_newcomm.png",
                 "partial/CRM/BPAddressCard.html",
                 "partial/CRM/BPCard.html",
                 "partial/CRM/BPListCard.html",
@@ -304,7 +296,6 @@
                 "css/images/Documents_editdocument.png",
                 "css/images/Documents_editfolder.png",
                 "css/images/Documents_hierarchy.png",
-                "css/images/Documents_newfolder.png",
                 "css/images/Documents_upload.png",
                 "css/images/Documents_uploadmobile.png",
                 "partial/Doc/Documents.html",
@@ -349,7 +340,6 @@
                 "css/images/FM_addsub.png",
                 "css/images/FM_edit.png",
                 "css/images/FM_hierarchy.png",
-                "css/images/FM_new.png",
                 "partial/BIM/FmobjectCard.html",
                 "partial/BIM/HierarchyCard.html",
                 "partial/Doc/FmObjects.html"
@@ -382,7 +372,6 @@
                 "css/images/Portals_edit.png",
                 "css/images/Portals_list.png",
                 "css/images/Portals_modules.png",
-                "css/images/Portals_new.png",
                 "partial/Doc/Portals.html",
                 "partial/LicenseServer/PortalCard.html",
                 "partial/LicenseServer/PortalListCard.html"

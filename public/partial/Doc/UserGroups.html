@@ -8,7 +8,15 @@
 
     <md-card-content>
 
-        <p>TODO: Einleitungstext ...</p>
+        <p>
+            Benutzergruppen dienen zur Festlegung von Berechtigungen auf Systemfunktionen für eine
+            Menge von Benutzern. Sie werden funktional oder organisatorisch aufgebaut. Man kann
+            beispielsweise eine Benutzergruppe "Administrtatoren" einrichten, für welche Zugriff
+            auf administrative Funktionen wie Benutzerverwaltung oder Benutzergruppenverwaltung
+            freigeschaltet sind. Alle Benutzer dieser Gruppe können dann diese Funktionen verwenden.
+            Oder man kann eine Benutzergruppe "Mitarbeiter" einrichten, die nur Zugriff auf die Dokumenten-
+            und FM-Objekt-Module hat.
+        </p>
 
         <ul>
             <li><a href="/#/doc/UserGroups#list">Benutzergruppenliste</a></li>
@@ -18,15 +26,50 @@
 
         <h2><a name="list"/>Benutzergruppenliste</h2>
         <img src="/css/images/Usergroups_list.png"/>
-        <p><img src="/css/images/Usergroups_add.png"/></p>
+        <p>
+            Die Benutzergruppenliste wird angezeigt, wenn man im Menü auf das Benutzergruppensymbol klickt.
+            Hier werden alle Benutzergruppen des eigenen Mandanten angezeigt. Klickt man eine Benutzergruppe
+            an, wird dessen Detailkarte eingeblendet.
+        </p>
+        <p>
+            Mit dem <img src="/css/images/Usergroups_add.png"/>-Button in der Toolbar kann eine neue
+            Benutzergruppe erstellt werden.
+        </p>
         
         <h2><a name="edit"/>Benutzergruppe bearbeiten</h2>
-        <img src="/css/images/Usergroups_newusergroup.png"/>
         <img src="/css/images/Usergroups_editdetails.png"/>
-        <img src="/css/images/Usergroups_userlist.png"/>
+        <p>
+            Eine Benutzergruppe hat einen Namen, der aber nicht eindeutig sein muss (wäre aber hilfreich
+            zur Unterscheidung). Weiterhin werden im Tab "Benutzer" alle Benutzer aufgelistet, die momentan
+            der Benutzergruppe angehören. Klickt man in dieser Liste auf einen Benutzer, wird dessen Detailkarte
+            angezeigt.
+        </p>
+
+        <p>
+            Im "Details"-Tab kann der Name der Benutzergruppe geändert oder die Benutzergruppe gelöscht werden.
+            Ein Löschen ist jedoch nur möglich, wenn der Benutzergruppe keine Benutzer angehören.
+        </p>
 
         <h2><a name="permissions"/>Berechtigungen festlegen</h2>
         <img src="/css/images/Usergroups_permissions.png"/>
+        <p>
+            Im "Berechtigungen"-Tab der Benutzergruppenkarte werden alle im System existierenden Berechtigungen
+            aufgelistet. Das Lupensymbol zeigt an, ob die Benutzergruppe Leserechte auf eine Funktion hat (also
+            ob Benutzer der Gruppe sich die Seiten der Funktion ansehen dürfen). Das Stiftsymbol repräsentiert
+            die Schreibberechtigung auf eine Funktion.
+        </p>
+
+        <p>
+            Eine Berechtigung ist inaktiv, wenn dessen Symbol grau und durchgestrichen ist. Schreibrechte erfordern
+            stets auch Leserechte. Daher wird das Leserecht automatisch aktiviert, wenn das Schreibrecht für eine
+            Funktion angeschaltet wird. Andersherum wird das Schreibrecht automatisch entfernt, wenn das Leserecht
+            deaktiviert wird.
+        </p>
+
+        <p>
+            Das Ändern der Berechtigungen geschieht durch Anklicken des entsprechenden Symbols und wird sofort
+            durchgeführt, ohne dass explizit gespeichert weden muss.
+        </p>
 
     </md-card-content>
 </md-card>

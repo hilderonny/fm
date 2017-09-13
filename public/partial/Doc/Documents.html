@@ -8,7 +8,12 @@
 
     <md-card-content>
 
-        <p>Dokumente ...</p>
+        <p>
+            Das Dokumentenmodul dient zum Speichern von Dateien, strukturiert in Verzeichnissen, und ist in etwa vergleichbar mit Dropbox.
+            Die Dokumente können im Portal gespeichert und bei Bedarf für Externe freigegeben werden. Aber richtig sinnvoll werden die
+            Dokumente erst im Zusammenhang mit <a href="/#/doc/Concepts#relations">Verknüpfungen</a>, da mit diesen Dokumente mit anderen
+            Entitäten wie FM Objekten, Geschäftspartnern oder Terminen in Zusammenhang gebracht werden können.
+        </p>
         <ul>
             <li><a href="/#/doc/Documents#hierarchy">Hierarchie</a></li>
             <li><a href="/#/doc/Documents#folders">Verzeichnisse</a></li>
@@ -17,16 +22,79 @@
 
         <h2><a name="hierarchy"/>Hierarchie</h2>
         <img src="/css/images/Documents_hierarchy.png"/>
-        <img src="/css/images/Documents_addfolder.png"/>
-        <img src="/css/images/Documents_upload.png"/>
 
+        <p>
+            Klickt man im Menü auf das Dokumentensymbol, wired els Erstes eine Karte mit
+            der Dokumentenhierarchie angezeigt. Diese ähnelt dem Dateiexplorer aus Windows.
+        </p>
+
+        <p>
+            Mit dem <img src="/css/images/Documents_addfolder.png"/>-Button in der Toolbar
+            kann auf der obersten Ebene ein neues Verzeichnis erstellt werden. Dabei ist es
+            irrelevant, ob bereits ein Verzeichnis oder Dokument selektiert ist. Das neue
+            Verzeichnis wird stets in der obersten Ebene erstellt.
+        </p>
+
+        <img src="/css/images/Documents_uploadmobile.png"/>
+
+        <p>
+            Der <img src="/css/images/Documents_upload.png"/>-Button öffnet einen Dialog,
+            in welchem man vom lokalen Speicher eine Datei hochladen kann. Auf dem PC wird
+            dabei der Standard-Öffnen-Dialog angezeigt, auf Mobilgeräten wird je nach Plattform
+            eine Auswahl an Apps angeboten, mit welcher Fotos, Videos oder andere Dateiarten
+            hochgeladen werden können.
+        </p>
+
+        <p>
+            Nach dem Upload wird die Datei in der obersten Ebene abgelegt. Das Ablegen von Dateien
+            Unterverzeichnissen und das Erstellen von Unterverzeichnissen in anderen wird im
+            folgenden Abschnitt beschrieben.
+        </p>
+            
         <h2><a name="folders"/>Verzeichnisse</h2>
-        <img src="/css/images/Documents_newfolder.png"/>
         <img src="/css/images/Documents_editfolder.png"/>
+        <p>
+            Wird ein Verzeichnis in der Hierarchie angeklickt, so wird eine Karte mit den
+            Detailinformationen des Verzeichnisses eingeblendet. In einzelnen Tabs werden
+            die direkten Inhalte des Verzeichnisses, Eigenschaften wie Name und dynamische
+            Attribute sowie <a href="/#/doc/Concepts#relations">Verknüpfungen</a> zu 
+            anderen Entitäten angezeigt.
+        </p>
+
+        <p>
+            Mit den Buttons in der Toolbar können in dem gerade gewählten Verzeichnis neue
+            Unterverzeichnisse erzeugt oder Dokumente in dieses Verzeichnis hochgeladen
+            werden.
+        </p>
+
+        <p>
+            Klickt man im <b>Inhalt</b>-Tab ein Verzeichnis oder Dokument an, werden dessen
+            Details angezeigt. Im <b>Details</b>-Tab kann der Name des Verzeichnisses
+            geändert werden oder das Verzeichnis samt seiner enthaltenen Unterverzeichnisse
+            und Dokumente gelöscht werden.
+        </p>
 
         <h2><a name="documents"/>Dokumente</h2>
-        <img src="/css/images/Documents_uploadmobile.png"/>
         <img src="/css/images/Documents_editdocument.png"/>
+        <p>
+            In der Detailansicht von Dokumenten können dessen Name geändert, das Dokument
+            gelöscht oder öffentlich freigegeben werden. Bei der Freigabe wird in der Karte
+            ein Link angezeigt, welcher extern ohne Anmeldung zugänglich ist. Damit können
+            Dokumente Personen zugänglich gemacht werden, welche keinen eigenen Zugang zum
+            System haben.
+        </p>
+
+        <p>
+            Der <b>Herunterladen</b>-Button macht genau das, was er aussagt. Er lädt das
+            Dokument lokal herunter.
+        </p>
+
+        <p>
+            Das Ändern des Dokumentennamens bzw. der Dateiendung ändert nichts an der
+            Art der Datei. Auch wenn man einer Bilddatei die Dateinamenerweiterung ".docx"
+            gibt, bleibt diese dennoch eine Bilddatei und würde beim Öffnen mit Word
+            eine Fehlermeldung verursachen.
+        </p>
         
     </md-card-content>
 </md-card>

@@ -100,11 +100,12 @@ md-card.doc md-card-content {
 
 md-card.doc md-card-content > img {
     max-width: 100%;
+    width: 300px;
     margin-bottom: 10px;
     box-shadow: 0 0 1px 0 #000;
     border: 3px solid #fff;
 }
-
+    
 md-card.doc md-card-content > img:nth-of-type(even) {
     max-width: 100%;
     float: left;
@@ -124,6 +125,19 @@ md-card.doc md-card-content h1, md-card-content h2 {
 
 md-card.doc md-card-content li {
     word-break: break-word;
+}
+
+md-card.doc md-card-content ul {
+    display: table;
+}
+
+md-card.doc md-card-content th, md-card.doc md-card-content td {
+    text-align: left;
+    vertical-align: top;
+}
+
+md-card.doc md-card-content table {
+    border-spacing: 10px;
 }
 
 md-card-title, md-card > ng-include {

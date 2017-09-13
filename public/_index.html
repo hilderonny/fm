@@ -2,7 +2,7 @@
 <html ng-app="app"  dir="{{langDirection}}"  >
     <head>
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-        <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+        <link rel="stylesheet" href="css/angular-material.min.css">
         <link rel="stylesheet" href="css/base.css">
         <link rel="stylesheet" href="css/local.css">
         <script src="js/include.js"></script>
@@ -104,7 +104,7 @@
 
                         <ng-repeat ng-repeat="menuItem in menu">
 
-                            <md-subheader ng-if="menuItem.items"><span translate="{{ menuItem.title }}"></span></md-subheader>
+                            <md-subheader class="md-no-sticky" ng-if="menuItem.items"><span translate="{{ menuItem.title }}"></span></md-subheader>
                             <md-list-item ng-if="menuItem.items" ng-repeat="subMenuItem in menuItem.items" ng-click="menuClick(subMenuItem)" ng-class="{active: currentMenuItem === subMenuItem}" aria-label="{{ subMenuItem.title }}">
                                 <md-icon md-svg-src="/css/icons/material/{{subMenuItem.icon}}.svg" aria-label="{{ subMenuItem.title }} "></md-icon>
                                 <p><span translate="{{ subMenuItem.title }}"></span></p>

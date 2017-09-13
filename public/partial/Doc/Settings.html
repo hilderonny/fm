@@ -8,8 +8,6 @@
 
     <md-card-content>
 
-        <p>TODO: Einleitungstext ...</p>
-
         <ul>
             <li><a href="/#/doc/Settings#users">Benutzereinstellungen</a></li>
             <li><a href="/#/doc/Settings#clients">Mandanteneinstellungen</a></li>
@@ -19,6 +17,17 @@
 
         <h2><a name="users"/>Benutzereinstellungen</h2>
         <img src="/css/images/Settings_users.png"/>
+        <p>
+            In den Benutzereinstellungen kann jeder Benutzer sein eigenes Passwort ändern.
+            Dazu muss das neue Passwort zweimal eingegeben werden, um Tippfehler zu vermeiden.
+            Nach dem Speichern kann der Benutzer zwar weiter mit dem System arbeiten (da er ja
+            bereits angemeldet ist), bei einer erneuten Anmeldung muss er sich jedoch mit dem
+            neuen Passwort einloggen.
+        </p>
+        <p>
+            Neue Benutzer sollten unverzüglich nach Erhalt ihrer Anmeldedaten von ihrem Administrator
+            ihr eigenes Passwort ändern, da ja das Initialpasswort auch dem Administrator bekannt ist.
+        </p>
         
         <h2><a name="clients"/>Mandanteneinstellungen</h2>
 
@@ -36,17 +45,108 @@
 
         <h2><a name="portals"/>Portaleinstellungen</h2>
         <img src="/css/images/Settings_portals.png"/>
+        <p>
+            Die Portaleinstellungen stehen nur dem Portalbetreiber und seinen Benutzern (erkennbar an der roten
+            Titelleiste) zur Verfügung und legen Parameter fest, die für den Betrieb des Portals relevant sind.
+        </p>
+        <p>
+            Hier wird die URL des Lizenzservers und der Lizenzschlüssel des Portals eingetragen. Beides ist für den
+            Erhalt von Updates notwendig und beide Informationen erhält man vom Betreiber des Lizenzservers.
+        </p>
+
         <img src="/css/images/Settings_portals_update.png"/>
+        <p>
+            Im "Update"-Tab kann man das Portal aktualisieren. Mit dem <b>Updates suchen</b>-Button wird der
+            Lizenzserver nach neuen Versionen angefragt. Nach einem Klick auf diesen Button werden die aktuell
+            im Portal installierte Version und die auf dem Lizenzserver aktuell verfügbare Version angezeigt.
+            Anschließend ist der <b>Installieren</b>-Button aktiv.
+        </p>
+
+        <p>
+            Klickt man auf den <b>Installieren</b>-Button, lädt das Portal automatisch die aktuellste Version
+            vom Lizenzserver herunter und installiert diese. Anschließend wird das Portal neu gestartet.
+            Dieser Prozess läuft im Hintergrund ab und kann einige Minuten dauern. 
+        </p>
+
+        <p>
+            Mit dem <b>Update hochladen</b>-Button können Updates eingespielt werden, die der Portalbetreiber
+            als ZIP-Datei vom Lizenzserverbetreiber erhalten hat. Diese Vorgehensweise ist für Portale in
+            abgeschotteten Netzwerken, die keinen Zugang zum Lizenzserver haben, sinnvoll.
+        </p>
         
         <h2><a name="dynamicAttributes"/>Dynamische Attribute</h2>
-        <img src="/css/images/Settings_dynamicattributes_addattribute.png"/>
-        <img src="/css/images/Settings_dynamicattributes_addlistelement.png"/>
-        <img src="/css/images/Settings_dynamicattributes_editlistelement.png"/>
+        <img src="/css/images/Settings_dynamicattributes_entitylist.png"/>
+        <p>
+            Dynamische Attribute erweitern die Eigenschaften von Entitäten wie Dokumenten, Benutzern, etc.
+            Eine nähere Erläuterung des Prinzips ist unter <a href="/#/doc/Concepts#dynamicAttributes">Konzepte</a>
+            zu finden.
+        </p>
+
+        <p>
+            Auf der Listenkarte werden alle im System verfügbaren Entitäten aufgeführt, denen dynamische Attribute
+            zugeordnet werden können. Klickt man eine Entität an, wird eine Karte mit den zugeordneten Attributen
+            eingeblendet.
+        </p>
+
         <img src="/css/images/Settings_dynamicattributes_entity.png"/>
-        <img src="/css/images/Settings_dynamicattributes_listelements.png"/>
+
+        <p>
+            Über den <img src="/css/images/Settings_dynamicattributes_addattribute.png"/>-Button können der Entität
+            neue dynamische Attribute angefügt werden. Ein Klick auf ein Attribut öffnet dessen Detailseite, auf der
+            man dessen Eigenschaften bearbeiten kann.
+        </p>
+
+        <p>
+            Die Symbole in der Liste stellen dabei die Art des Attributes dar, also welche Inhalte dieses aufnehmen
+            kann und wie es auf der Detailseite eines Entitätsobjektes dargestellt wird. In der Liste werden immer die
+            Bezeichnungen der Attribute in der Fallback-Sprache (englisch) angezeigt.
+        </p>
+ 
         <img src="/css/images/Settings_dynamicattributes_newattribute.png"/>
-        <img src="/css/images/Settings_dynamicattributes_picklist.png"/>
-        <img src="/css/images/Settings_dynamicattributes_textboolean.png"/>
+
+        <p>
+            Beim Erstellen neuer Attribute wählt man zunächst den Typ des Attributes aus. Der Typ kann im Nachhinein
+            nicht mehr geändert werden. Folgende Typen sind derzeit verfügbar.
+        </p>
+
+        <ul>
+            <li><b>Textfeld</b> - Einfaches Feld zur Eingabe von Texten beliebiger Art</li>
+            <li><b>Boolescher Wert</b> - Checkbox mit Ja / Nein - Bedeutung</li>
+            <li><b>Auswahlliste</b> - Auswahlfeld, aus welchem man eine von mehreren Werten selektieren kann</li>
+        </ul>
+
+        <p>
+            Beim Anlegen muss auch die Bezeichnung eingegeben werden, die später als Label über dem Attribut angezeigt
+            wird. Es muss immer mindestens die englische Bezeichnung eingegeben werden, da diese als Fallback dient,
+            wenn die Bezeichnungen in anderen Sprachen nicht gepflegt sind. Je nachdem, welche Sprachen im System
+            verfügbar sind, werden entsprechend weitere Bezeichnungsfelder angezeigt.
+        </p>
+
+        <p>
+            <b>Tipp:</b> Falls im Portal ausschließlich Deutsch als Sprache verwendet wird, genügt es, im Feld
+            "Bezeichnung EN" die deutsche Bezeichnung einzugeben und die anderen Bezeichnugsfelder einfach leer zu lassen.
+        </p>
+
+        <img src="/css/images/Settings_dynamicattributes_listelements.png"/>
+        <p>
+            Beim Bearbeiten existierender dynamischer Attribute können nur die Bezeichnungen geändert werden. Ist das
+            Attribut vom Typ "Auswahlliste", wird zusätzlich ein Tab "Listenelemente" angezeigt, in dem die möglichen
+            Optionen der Auswahlliste gepflegt werden.
+        </p>
+        
+        <p>
+            Mit Hilfe des <img src="/css/images/Settings_dynamicattributes_addlistelement.png"/>-Buttons können in
+            diesem Tab neue Optionen erstellt werden. Klickt man eine Option der Liste an, wird dessen Detailseite
+            angezeigt. In der Liste werden die englischen Fallback-Bezeichnungen der Listenelemente angezeigt.
+        </p>
+        
+        <img src="/css/images/Settings_dynamicattributes_editlistelement.png"/>
+        
+        <p>
+            Wie bei den Attributen selbst bestehen die Optionen eigentlich nur aus einer Bezeichnung, die später
+            bei der jeweiligen Entität als Element der Auswahlliste angezeigt wird. Es muss stets das 
+            "Bezeichnung EN"-Feld gepflegt sein, da dieses als Fallback dient.
+        </p>
         
     </md-card-content>
 </md-card>

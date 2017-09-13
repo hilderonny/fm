@@ -8,7 +8,7 @@
 
     <md-card-content>
 
-        <p>TODO: Einleitungstext ...</p>
+        <p>Dieses Modul ist ausschließlich für den Lizenzserver relevant und dient der Verwaltung von Portalinstallationen</p>
 
         <ul>
             <li><a href="/#/doc/Portals#list">Portalliste</a></li>
@@ -18,14 +18,52 @@
 
         <h2><a name="list"/>Portalliste</h2>
         <img src="/css/images/Portals_list.png"/>
-        <img src="/css/images/Portals_add.png"/>
+        <p>
+            In der Portalliste werden alle existierenden Portale aufgelistet. In der ersten Zeile steht der Name des Portals
+            und die zweite Zeile beinhaltet die derzeit auf dem Portal installierte Version sowie den Zeitpunkt der letzten
+            Meldung des Portals beim Lizenzserver.
+        </p>
+
+        <p>
+            Neue Portale werden über den <img src="/css/images/Portals_add.png"/>-Button angelegt.
+        </p>
 
         <h2><a name="edit"/>Portal bearbeiten</h2>
-        <img src="/css/images/Portals_new.png"/>
         <img src="/css/images/Portals_edit.png"/>
+        <p>
+            Nur Portale, die als <b>Aktiv</b> markiert sind, erhalten auf Anfrage Updates ausgeliefert.
+            Bei inaktiven Portalen erzeugt das Abrufen von Updates eine Fehlermeldung in den Portaleinstellungen.
+        </p>
+
+        <p>
+            Die URL dient nur zur Information, um schnell zu erfahren, wo genau das Portal nun installiert ist.
+        </p>
+
+        <p>
+            Die Daten zur installierten Version und zum Zeitpuntk der letzten Meldung können nicht bearbeitet werden.
+            Diese werden automatisch aktualisiert, sobald ein Portal neu gestartet wird oder der Administrator beim
+            Lizenzserver nach Updates suchen lässt.
+        </p>
+
+        <p>
+            Der Lizenzschlüssel dient zur Validierung, dass ein Portal auch das ist, welches es vorgibt zu sein. Dieser
+            muss bei der Anfrage nach Updates vom Portal gesendet werden. Nur bei Korrektheit werden Updates ausgeliefert.
+        </p>
+
+        <p>
+            "Paket herunterladen" führt dazu, dass für das Portal eine ZIP-Datei erzeugt wird, die genau die Module
+            enthält, die für das Portal freigeschaltet sind. Dieses Paket ist identisch mit demjenigen, welches das Portal
+            bei der Frage nach Updates erhält und kann verwendet werden, wenn das Portal selbst keine direkte Verbindung
+            mit dem Lizenzserver aufnehmen kann, etwa weil es sich in einem abgeschirmten Netzwerk befindet.
+        </p>
 
         <h2><a name="modules"/>Module</h2>
         <img src="/css/images/Portals_modules.png"/>
+        <p>
+            Hier werden für das Portal die technischen Module freigeschaltet. Je nachdem, was hier angeklickt ist, ändert
+            sich der Inhalt des Update-Paketes, welches man herunterladen oder welches das Portal anfragen kann.
+            Das Anklicken des Symbols hinter einem Modul genügt, um das entsprechende Modul freizuschalten oder zu sperren.
+        </p>
         
     </md-card-content>
 </md-card>
