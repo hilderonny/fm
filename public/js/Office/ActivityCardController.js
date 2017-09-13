@@ -15,7 +15,8 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
             task: $scope.activity.task, 
             isDone: $scope.activity.isDone, 
             type: $scope.activity.type, 
-            comment: $scope.activity.comment 
+            comment: $scope.activity.comment,
+            isForAllUsers: $scope.activity.isForAllUsers
         };
         $http.post('/api/activities', activityToSend).then(function(response) {
             var createdActivity = response.data;
@@ -39,12 +40,12 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
     // Click on Save-button to save an existing activity
     $scope.saveActivity = function() {
         var activityToSend = { isDone: $scope.activity.isDone, comment: $scope.activity.comment };
-        if ($scope.activity.fullyEditable) {
-            activityToSend.date = $scope.activity.date;
-            activityToSend.name = $scope.activity.name;
-            activityToSend.task = $scope.activity.task;
-            activityToSend.type = $scope.activity.type;
-        }
+        if (!$scope.canWriteActivities) return;
+        activityToSend.date = $scope.activity.date;
+        activityToSend.name = $scope.activity.name;
+        activityToSend.task = $scope.activity.task;
+        activityToSend.type = $scope.activity.type;
+        activityToSend.isForAllUsers = $scope.activity.isForAllUsers;
         utils.saveEntity($scope, 'activities', $scope.activity._id, '/api/activities/', activityToSend).then(function(savedActivity) {
             $scope.activityName = $scope.activity.name;
             if ($scope.params.saveActivityCallback) {
@@ -95,6 +96,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
     // - $scope.params.deleteActivityCallback : Callback function when an existing activity was deleted. No parameters
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
+        $scope.canWriteActivities = $rootScope.canWrite('PERMISSION_OFFICE_ACTIVITY');
         // Switch between creation of a new activity and loading of an existing activity
         if ($scope.params.activityId) {
             // Existing activity
@@ -107,13 +109,13 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                 $scope.relationsEntity = { type:'activities', id:completeActivity._id };
                 utils.loadDynamicAttributes($scope, 'activities', $scope.params.activityId);
                 utils.setLocation('/activities/' + completeActivity._id);
+                if (!completeActivity.currentUserCanWrite) $scope.canWriteActivities = false; // Nur Ersteller darf schreiben
             });
         } else {
             // New activity
             $scope.isNewActivity = true;
-            $scope.activity = { date: new Date(), name: '', task: '', isDone: false, type: 'ACTIVITIES_TYPE_NONE', comment: '', fullyEditable: true };
+            $scope.activity = { date: new Date(), name: '', task: '', isForAllUsers: true, isDone: false, type: 'ACTIVITIES_TYPE_NONE', comment: '' };
         }
-        $scope.canWriteActivities = $rootScope.canWrite('PERMISSION_OFFICE_ACTIVITY');
     };
 
     // Listen on locale changes to update the date picker. Event is fired from MainController

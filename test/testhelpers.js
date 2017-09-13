@@ -304,7 +304,6 @@ th.prepareActivities = () => {
             date: now.toISOString(),
             clientId: user.clientId,
             createdByUserId: user._id,
-            participantUserIds: [],
             name: user.name + '_0',
             type: 'Gewährleistung'
         });
@@ -313,7 +312,7 @@ th.prepareActivities = () => {
             date: now.toISOString(),
             clientId: user.clientId,
             createdByUserId: user._id,
-            participantUserIds: [],
+            isForAllUsers: true, // Für alle benutzer des Mandanten zugänglich
             name: user.name + '_1',
             type: 'Kundenbesuch'
         });
@@ -322,25 +321,11 @@ th.prepareActivities = () => {
             date: now.toISOString(),
             clientId: user.clientId,
             createdByUserId: user._id,
-            participantUserIds: [],
             name: user.name + '_2',
             type: 'Wartung'
         });
     });
     return th.bulkInsert('activities', activities);
-};
-
-/**
- * Fügt einen Benutzer einer Aktivität als Teilnehmer hinzu
- */
-th.addUserAsParticipantToActivity = function(userName, activitiyName) {
-    return new Promise((resolve, reject) => {
-        return db.get('users').findOne({ name: userName }).then((user) => {
-            return db.get('activities').findOneAndUpdate({ name: activitiyName }, { $addToSet: { 
-                participantUserIds: user._id
-            } }).then(resolve);
-        });
-    });
 };
 
 /**
