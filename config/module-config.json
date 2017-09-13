@@ -13,7 +13,6 @@
                 "css/icons/material/Cancel.svg",
                 "css/icons/material/Checked Checkbox.svg",
                 "css/icons/material/Delete.svg",
-                "css/icons/material/Dictionary.svg",
                 "css/icons/material/Edit.svg",
                 "css/icons/material/Exit.svg",
                 "css/icons/material/Forward.svg",
@@ -147,6 +146,7 @@
             "languages" : [ "de" ],
             "public" : [
                 "css/icons/material/Design.svg",
+                "css/icons/material/Dictionary.svg",
                 "css/icons/material/News.svg",
                 "css/images/Relations_add.png",
                 "css/images/Relations_list.png",
