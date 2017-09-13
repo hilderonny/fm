@@ -104,7 +104,7 @@
 
                         <ng-repeat ng-repeat="menuItem in menu">
 
-                            <md-subheader ng-if="menuItem.items"><span translate="{{ menuItem.title }}"></span></md-subheader>
+                            <md-subheader class="md-no-sticky" ng-if="menuItem.items"><span translate="{{ menuItem.title }}"></span></md-subheader>
                             <md-list-item ng-if="menuItem.items" ng-repeat="subMenuItem in menuItem.items" ng-click="menuClick(subMenuItem)" ng-class="{active: currentMenuItem === subMenuItem}" aria-label="{{ subMenuItem.title }}">
                                 <md-icon md-svg-src="/css/icons/material/{{subMenuItem.icon}}.svg" aria-label="{{ subMenuItem.title }} "></md-icon>
                                 <p><span translate="{{ subMenuItem.title }}"></span></p>
