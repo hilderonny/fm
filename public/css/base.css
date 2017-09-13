@@ -131,7 +131,7 @@ md-card.doc md-card-content ul {
     display: table;
 }
 
-md-card.doc md-card-content th {
+md-card.doc md-card-content th, md-card.doc md-card-content td {
     text-align: left;
     vertical-align: top;
 }
