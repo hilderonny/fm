@@ -143,7 +143,7 @@
                 "public/js/Doc/ListController.js",
                 "public/js/Doc/CardController.js"
             ],
-            "languages" : [ "de" ],
+            "languages" : [ "de", "en" ],
             "public" : [
                 "css/icons/material/Design.svg",
                 "css/icons/material/Dictionary.svg",

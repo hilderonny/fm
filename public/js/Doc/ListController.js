@@ -5,7 +5,7 @@ app.controller('DocListController', function($scope, $rootScope, $http, $mdDialo
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Doc/' + menuItem.docCard, {
             closeCallback: function() { $scope.selectedMenuItem = null; }
-        }, 'PERMISSION_ADMINISTRATION_USER').then(function() {
+        }).then(function() {
             if (!preserveHash) utils.setLocation('/doc/' + menuItem.docCard);
             $scope.selectedMenuItem = menuItem;
         });
