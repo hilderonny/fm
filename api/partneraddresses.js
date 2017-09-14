@@ -22,14 +22,10 @@ var dah = require('../utils/dynamicAttributesHelper');
 
 router.get('/forBusinessPartner/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.businesspartners.name), function(req, res) {
     req.db.get(co.collections.businesspartners.name).findOne(req.params.id).then((businessPartner) => {
-        if (!businessPartner) {
-            return Promise.reject();
-        }
+        //we can be sure that businessPartner exists because validateSameClientId() has already checked this
         return req.db.get(co.collections.partneraddresses.name).find({partnerId: businessPartner._id});
     }).then((addresses) => {
         res.send(addresses);
-    }, () => {
-        res.sendStatus(400);
     });
 });
 

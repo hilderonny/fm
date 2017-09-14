@@ -22,14 +22,10 @@ var dah = require('../utils/dynamicAttributesHelper');
  **/
 router.get('/forPerson/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.persons.name), (req, res) => {
     req.db.get(co.collections.persons.name).findOne(req.params.id).then((person) => {
-        if (!person) {
-            return Promise.reject();
-        }
+        //we can be sure that entity exsists because validateSameClientID() has already checked this
         return req.db.get(co.collections.communications.name).find({personId:person._id});
     }).then((allPersoncommunications) => {
         res.send(allPersoncommunications);
-    }, () => {
-        res.sendStatus(400);
     });
 });
 

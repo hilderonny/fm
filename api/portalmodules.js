@@ -74,9 +74,6 @@ router.post('/', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licen
  */
 router.delete('/:id', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licenseserver), validateId, validateSameClientId(co.collections.portalmodules.name), function(req, res) {
     req.db.remove(co.collections.portalmodules.name, req.params.id).then((result) => {
-        if (result.result.n < 1) {
-            return res.sendStatus(404);
-        }
         res.sendStatus(204);
     });
 });
