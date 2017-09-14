@@ -192,6 +192,30 @@ describe('API portalmodules', function(){
             });
         });
 
+        it('responds with portalmodule data containg _id with inserted portalmodule containing auto-generated _id field', function(done){
+            //user defined _id should not be possible
+
+            //clientId of p2 -> null
+            db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
+                th.doLoginAndGetToken(th.defaults.portalUser, th.defaults.password).then(function(token){
+                    var newModule = {portalId: portalFromDB._id,
+                                    module: 'activities',
+                                    _id: '999999999999999999999999'} //send id of valid format but higly unlikely to be recreated by automated generation
+                    th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(200).end(function(err, res){
+                        if(err){
+                            done(err);
+                            return;
+                        }
+                        var portalModuleFromApi = res.body; 
+                        numKeysInitially = Object.keys(newModule).length;
+                        numKeysExpected  = Object.keys(portalModuleFromApi).length;  //_id field is always returned from API
+                        assert.notStrictEqual(portalModuleFromApi['_id'], newModule._id.toString(), 'user-defined _id field was possible');
+                        done();
+                    });
+                }).catch(done);
+            });
+        });
+
         it('responds with 409 when an assignment between a portal and a module already exists', function() {
             // Create an assignment between a portal and a module
             // Try to create another assignment between the same portal and module, must result in an error (409 conflict)

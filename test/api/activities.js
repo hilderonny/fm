@@ -594,36 +594,40 @@ describe('API activities', function() {
         // Positive tests
 
         it('updates all attributes of the activity when the user is the creator', function(done) {
-             db.get('activities').findOne({name: '1_0_0_0'}).then((activityFromDatabaseBeforeUpdate)=>{
-                th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
-                    var id= activityFromDatabaseBeforeUpdate._id;
-                    var updatedActivity = {
-                        name: 'newName',
-                        type: 'newType',
-                        task: 'newTask',
-                        date: 'newDate'
-                    };
-                    th
-                        .put(`/api/activities/${id}?token=${token}`)
-                        .send(updatedActivity)
-                        .expect(200)
-                        .end(function(err, res){
-                            if(err){
-                                done(err);
-                                return;
-                            }
-                            var activityFromApi = res.body;
-                            db.get('activities').findOne(id).then((activityFromDatabaseAfterUpdate)=>{
-                                assert.strictEqual(updatedActivity.name, activityFromDatabaseAfterUpdate.name, `name (${updatedActivity.name} from API, differs from name ${activityFromDatabaseAfterUpdate.name} in database)`);
-                                assert.strictEqual(updatedActivity.type, activityFromDatabaseAfterUpdate.type, `type  (${updatedActivity.type} from API, differs from name ${activityFromDatabaseAfterUpdate.type} in database)` );
-                                assert.strictEqual(updatedActivity.task, activityFromDatabaseAfterUpdate.task, `task  (${updatedActivity.type} from API, differs from name ${activityFromDatabaseAfterUpdate.type} in database)`);
-                                assert.strictEqual(updatedActivity.date, activityFromDatabaseAfterUpdate.date, `date  (${updatedActivity.date} from API, differs from name ${activityFromDatabaseAfterUpdate.date} in database)`);
-                                done();
-                            }).catch(done);
-                        });
+            db.get('users').findOne({name: '1_1_0'}).then((user) => {
+                db.get('activities').findOne({name: '1_0_0_0'}).then((activityFromDatabaseBeforeUpdate)=>{
+                    th.doLoginAndGetToken('1_0_0', 'test').then((token)=>{
+                        var id= activityFromDatabaseBeforeUpdate._id;
+                        var anotherUserOfSameClientID = user._id;
+                        var updatedActivity = {
+                            name: 'newName',
+                            participantUserIds: [ anotherUserOfSameClientID ],
+                            type: 'newType',
+                            task: 'newTask',
+                            date: 'newDate'
+                        };
+                        th
+                            .put(`/api/activities/${id}?token=${token}`)
+                            .send(updatedActivity)
+                            .expect(200)
+                            .end(function(err, res){
+                                if(err){
+                                    done(err);
+                                    return;
+                                }
+                                var activityFromApi = res.body;
+                                db.get('activities').findOne(id).then((activityFromDatabaseAfterUpdate)=>{
+                                    assert.strictEqual(updatedActivity.name, activityFromDatabaseAfterUpdate.name, `name (${updatedActivity.name} from API, differs from name ${activityFromDatabaseAfterUpdate.name} in database)`);
+                                    assert.strictEqual(updatedActivity.type, activityFromDatabaseAfterUpdate.type, `type  (${updatedActivity.type} from API, differs from name ${activityFromDatabaseAfterUpdate.type} in database)` );
+                                    assert.strictEqual(updatedActivity.task, activityFromDatabaseAfterUpdate.task, `task  (${updatedActivity.type} from API, differs from name ${activityFromDatabaseAfterUpdate.type} in database)`);
+                                    assert.strictEqual(updatedActivity.date, activityFromDatabaseAfterUpdate.date, `date  (${updatedActivity.date} from API, differs from name ${activityFromDatabaseAfterUpdate.date} in database)`);
+                                    done();
+                                }).catch(done);
+                            });
+
+                    });
 
                 });
-
             });
         });
 

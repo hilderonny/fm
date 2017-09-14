@@ -84,6 +84,23 @@ describe('API dynamicattributes', function() {
 
     });
 
+    describe('GET/models', function(){
+        var mmodelsApi = co.apis.dynamicattributes + '/models';
+        th.apiTests.get.defaultNegative(mmodelsApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
+
+        it('respods with a list of all models that can have dynamic attributes', async function() {
+            var token = await th.defaults.login();
+            var allModelsFromConfig = co.collections;
+            var relevantModels = Object.values(allModelsFromConfig).filter(function(model){return model.canHaveAttributes});
+            var modelsFromApi = ( await th.get(`/api/${co.apis.dynamicattributes}/models?token=${token}`).expect(200) ).body;
+            for (var i = 0; i < modelsFromApi.length; i++) {
+                ['name', 'icon', 'canHaveAttributes'].forEach((key) => {
+                    assert.strictEqual(modelsFromApi[i][key].toString(), relevantModels[i][key].toString());
+                });
+            }
+        });
+    });
+
     describe('GET/option/:id', function() {
 
         var optionApi = `${co.apis.dynamicattributes}/option`;
@@ -334,9 +351,9 @@ describe('API dynamicattributes', function() {
             } else if (da.type === 'boolean') {
                 value = true;
             } else if (da.type === 'picklist') {
-                value = th.dbObjects.dynamicattributeoptions.find((o) => o.dynamicAttributeId.toString() === da._id.toString())._id;
+                value = th.dbObjects.dynamicattributeoptions.find(function(o) { return o.dynamicAttributeId.toString() === da._id.toString() })._id;
             }
-            values.push({daId: da._id, value: value });
+            values.push({daId: da._id, type: da.type, value: value });
         });
         return values;
     }
@@ -452,8 +469,39 @@ describe('API dynamicattributes', function() {
             await th.post(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).send(valuesToSend).expect(400);
         });
 
+        it('responds to invalid (null) update values with 400', async function() {
+            var valuesToSend = null;
+            var user = await th.defaults.getUser();
+            var token = await th.defaults.login();
+            await th.post(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).send(valuesToSend).expect(400);
+        });
+
+        it('responds to invalid (random string) update values with 400', async function() {
+            var valuesToSend = "ramdom_string";
+            var user = await th.defaults.getUser();
+            var token = await th.defaults.login();
+            await th.post(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).send(valuesToSend).expect(400);
+        });
+
         it('updates the given values', async function() {
             var valuesToSend = await createTestDynamicAttributeValues();
+            var user = await th.defaults.getUser();
+            var token = await th.defaults.login();
+            var valueIds = (await th.post(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).send(valuesToSend).expect(200)).body;
+            var monkedIds = valueIds.map((id) => monk.id(id));
+            var valuesFromDatabase = await db.get(co.collections.dynamicattributevalues.name).find({ _id: { $in : monkedIds } });
+            for (var i = 0; i < valuesToSend.length; i++) {
+                var valueToSend = valuesToSend[i];
+                var valueFromDatabase = valuesFromDatabase[i];
+                assert.ok(valueFromDatabase.clientId);
+                assert.ok(valueFromDatabase.entityId);
+                assert.strictEqual(valueFromDatabase.dynamicAttributeId.toString(), valueToSend.daId.toString());
+                assert.strictEqual(valueFromDatabase.value.toString(), valueToSend.value.toString());
+            }
+        });
+
+        it('updates the given values for empty value list', async function() {
+            var valuesToSend = [];
             var user = await th.defaults.getUser();
             var token = await th.defaults.login();
             var valueIds = (await th.post(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).send(valuesToSend).expect(200)).body;

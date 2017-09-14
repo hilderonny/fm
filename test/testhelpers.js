@@ -265,7 +265,7 @@ th.preparePortals = () => {
     return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
         var portals = [
             {name: 'p1', isActive: true, licenseKey: 'LicenseKey1', clientId: client._id},
-            {name: 'p2', isActive: false, licenseKey: 'LicenseKey2', clientId: client._id}
+            {name: 'p2', isActive: false, licenseKey: 'LicenseKey2', clientId: null} 
         ];
         return th.bulkInsert('portals', portals);
     });
@@ -482,7 +482,7 @@ th.prepareDocuments = () => {
 };
 
 /**
- * Create a relation to each activity for each usergroup in the database.
+ * Create a relations
  */
 th.prepareRelations = function() {
     var relations = [];
@@ -697,8 +697,9 @@ th.defaults = {
      * Standardportal 'p1'
      */
     portal: 'p1',
-    portalAdminUser: '_0_0',
-    portalUser: '_0_ADMIN0',
+    portalActivity: '_0_0_0',
+    portalUser: '_0_0',
+    portalAdminUser: '_0_ADMIN0',
     user: '1_0_0',
     userGroup: '1_0'
 };

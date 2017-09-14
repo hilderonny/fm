@@ -127,7 +127,7 @@ router.get('/values/:modelName/:id', auth(false, false, co.modules.base), valida
 });
 
 /**
- * Returns a list of all possible data models which can have dynamic attributes (currently only...)
+ * Returns a list of all possible data models which can have dynamic attributes
  */
 router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), (req, res) => {
     var models = [];
@@ -136,17 +136,6 @@ router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r'
         if (collection.canHaveAttributes) models.push(collection);
     });
     res.send(models);
-});
-
-/**
- * Returns a dynamic attribute with the given _id
- */
-router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
-    var dynamicAttributeId = req.params.id;
-    req.db.get('dynamicattributes').findOne(dynamicAttributeId).then(function(dynamicattribute){
-        // Database element is available here in every case, because validateSameClientId already checked for existence
-        res.send(dynamicattribute);
-    });
 });
 
 /**
@@ -200,7 +189,6 @@ router.post('/values/:modelName/:id', auth(false, false, co.modules.base), valid
         if (dynamicAttributeValues.find((dav) => attributeIds.indexOf(dav.daId) < 0)) return Promise.reject();; // Mindestens ein Wert hat eine nicht existierende oder nicht dem Mandanten zugehörige Attribut-Id
         return req.db.get(modelName).findOne(req.params.id);
     }).then((e) => {
-        if (!e) return Promise.reject();
         entity = e;
         return req.db.remove(co.collections.dynamicattributevalues.name, {entityId: entity._id});
     }).then(() => {
