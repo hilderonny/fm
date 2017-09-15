@@ -7,7 +7,7 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateid');
+var validateId = require('../middlewares/validateId');
 var fs = require('fs');
 var request = require('request');
 var unzip = require('unzip');

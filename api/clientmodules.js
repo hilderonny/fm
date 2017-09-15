@@ -9,7 +9,7 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateid');
+var validateId = require('../middlewares/validateId');
 var monk = require('monk');
 var fs = require('fs');
 var co = require('../utils/constants');

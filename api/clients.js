@@ -8,7 +8,7 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateid');
+var validateId = require('../middlewares/validateId');
 var monk = require('monk');
 var async = require('async');
 var bcryptjs = require('bcryptjs');

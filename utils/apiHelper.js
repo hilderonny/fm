@@ -1,5 +1,5 @@
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateid');
+var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 
 /**

@@ -9,7 +9,7 @@
  * }
  */
 var router = require('express').Router();
-var validateId = require('../middlewares/validateid');
+var validateId = require('../middlewares/validateId');
 var monk = require('monk');
 
 router.get('/', (req, res) => {
