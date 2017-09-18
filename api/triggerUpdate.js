@@ -53,13 +53,10 @@ router.post('/', upload.single('file'), function(req, res) {
             fs.unlinkSync(filePath);
             // Node-Module installieren
             child_process.exec('npm install');
-            // web.config touchen
-            var webConfigPath = path.join(extractPath, 'web.config');
-            if (fs.existsSync(webConfigPath)) {
-                var webConfigContent = fs.readFileSync(webConfigPath);
-                fs.writeFileSync(webConfigPath, webConfigContent);
-            }
-            return res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
+            // Erst antworten, wenn alles ausgepackt ist
+            res.sendStatus(200);
+            // Prozess beenden und hoffen, dass er automatisch neu gestartet wird
+            process.exit(0);
         });
 });
 
