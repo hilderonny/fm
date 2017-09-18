@@ -14,13 +14,21 @@ var lc = require('../../config/localconfig.json');
 
 describe('API triggerUpdate', function() {
     
+    var oldProcessExit;
+
     beforeEach(() => {
+        oldProcessExit = process.exit;
+        process.exit = (code) => { };
         return th.cleanDatabase()
             .then(th.prepareClients)
             .then(th.prepareClientModules)
             .then(th.prepareUserGroups)
             .then(th.prepareUsers)
             .then(th.preparePermissions);
+    });
+
+    afterEach(() => {
+        process.exit = oldProcessExit;
     });
 
     describe('GET/', function() {
@@ -95,26 +103,11 @@ describe('API triggerUpdate', function() {
             });
         });
 
-        it('responds with 200 and extracts the content of the ZIP file into the updateExtractPath (without existing web.config file)', function() {
+        it('responds with 200 and extracts the content of the ZIP file into the updateExtractPath', function() {
             return prepareFile().then(function(fileContent) {
                 return wh.postFileToUrl(url, 'testfile.zip', fileContent, { secret: secret }, 900000);
             }).then(function(response) {
                 assert.strictEqual(response.statusCode, 200);
-                return checkExtractedFiles(extractPath, [co.modules.base]);
-            });
-        });
-
-        it('responds with 200 and extracts the content of the ZIP file into the updateExtractPath and updates the timestamp of the web.config file when it exists', function() {
-            fs.mkdirSync(extractPath);
-            var webConfigPath = path.join(extractPath, 'web.config');
-            fs.writeFileSync(webConfigPath, 'Dummycontent');
-            var mtimeBeforeUpdate = fs.lstatSync(webConfigPath).mtime.getTime();
-            return prepareFile().then(function(fileContent) {
-                return wh.postFileToUrl(url, 'testfile.zip', fileContent, { secret: secret }, 900000);
-            }).then(function(response) {
-                assert.strictEqual(response.statusCode, 200);
-                var mtimeAfterUpdate = fs.lstatSync(webConfigPath).mtime.getTime();
-                assert.notStrictEqual(mtimeAfterUpdate, mtimeBeforeUpdate, 'web.config was not touched or has not updated time stamp');
                 return checkExtractedFiles(extractPath, [co.modules.base]);
             });
         });
