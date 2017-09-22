@@ -1,23 +1,31 @@
 /**
  * Wrapper for restarting the server each time it stops
+ * See https://github.com/foreverjs/forever-monitor
+ * 
+ * Diese Datei ist nur für Windows-Systeme relevant. Auf Linux werden die deamons
+ * anders konfiguriert.
  */
 process.chdir(__dirname);
-var nodemon = require('nodemon');
 
-// Wait at least 60 seconds before restarting to let the app extract the downloaded update.
-// Otherwise the update process would be interrupted.
-nodemon({
-  script: 'app.js',
-  ext: 'js json',
-  verbose: true,
-  ignore: [ 'coverage/*', 'daemon/*', 'documents/*', 'uploads', 'public/js/include.js' ],
-  delay: 60000,
+var forever = require('forever-monitor');
+var fs = require('fs');
+
+var logpath = __dirname + '/log/';
+
+if (!fs.existsSync(logpath)) fs.mkdirSync(logpath);
+
+var child = new (forever.Monitor)('app.js', {
+  silent: true,
+  args: [],
+  watch: false, // Keine Dateiüberwachung,
+  cwd: __dirname,
+  logFile: logpath + 'logFile',
+  outFile: logpath + 'outFile',
+  errFile: logpath + 'errFile'
 });
 
-nodemon.on('start', function () {
-  console.log('App has started');
-}).on('quit', function () {
-  console.log('App has quit');
-}).on('restart', function (files) {
-  console.log('App restarted due to: ', files);
+child.on('restart', () => {
+  console.log('Restarted.');
 });
+
+child.start();

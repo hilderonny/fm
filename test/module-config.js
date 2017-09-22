@@ -135,6 +135,7 @@ describe('module-config.json', function() {
             'debug.log',
             'documents/',
             'drafts/',
+            'log/',
             'node_modules/',
             'priv.key',
             'pub.cert',
