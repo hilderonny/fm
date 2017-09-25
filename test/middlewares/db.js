@@ -188,22 +188,21 @@ describe('MIDDLEWARE db', function() {
                 return db.get('permissions').find({$query:{userGroupId:newUserGroup._id},$orderby:{key:1}});
             }).then(function(permissions) {
                 // Check permissions
-                assert.equal(permissions.length, 6);
                 var permissionNames = [
                     co.permissions.ADMINISTRATION_CLIENT,
-                    co.permissions.ADMINISTRATION_SETTING,
+                    co.permissions.ADMINISTRATION_SETTINGS,
                     co.permissions.ADMINISTRATION_USER,
                     co.permissions.ADMINISTRATION_USERGROUP,
                     co.permissions.SETTINGS_PORTAL,
                     co.permissions.SETTINGS_USER
                 ];
-                for (var i in permissionNames) {
-                    var permission = permissions[i];
-                    var permissionName = permissionNames[i];
-                    assert.strictEqual(permission.key, permissionName);
+                assert.equal(permissions.length, permissionNames.length);
+                permissionNames.forEach((pn) => {
+                    var permission = permissions.find((p) => p.key === pn);
+                    assert.ok(permission, `Permission ${pn} not found.`);
                     assert.ok(permission.canRead);
                     assert.ok(permission.canWrite);
-                }
+                });
                 return Promise.resolve();
             });
         });
@@ -247,20 +246,20 @@ describe('MIDDLEWARE db', function() {
                 // Check permissions
                 assert.equal(permissions.length, 6);
                 var permissionNames = [
-                    'PERMISSION_ADMINISTRATION_CLIENT',
-                    'PERMISSION_ADMINISTRATION_SETTING',
-                    'PERMISSION_ADMINISTRATION_USER',
-                    'PERMISSION_ADMINISTRATION_USERGROUP',
-                    'PERMISSION_SETTINGS_PORTAL',
-                    'PERMISSION_SETTINGS_USER'
+                    co.permissions.ADMINISTRATION_CLIENT,
+                    co.permissions.ADMINISTRATION_SETTINGS,
+                    co.permissions.ADMINISTRATION_USER,
+                    co.permissions.ADMINISTRATION_USERGROUP,
+                    co.permissions.SETTINGS_PORTAL,
+                    co.permissions.SETTINGS_USER
                 ];
-                for (var i in permissionNames) {
-                    var permission = permissions[i];
-                    var permissionName = permissionNames[i];
-                    assert.strictEqual(permission.key, permissionName);
+                assert.equal(permissions.length, permissionNames.length);
+                permissionNames.forEach((pn) => {
+                    var permission = permissions.find((p) => p.key === pn);
+                    assert.ok(permission, `Permission ${pn} not found.`);
                     assert.ok(permission.canRead);
                     assert.ok(permission.canWrite);
-                }
+                });
                 return Promise.resolve();
             });
         });

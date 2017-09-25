@@ -7,6 +7,7 @@ var dbFile = process.env.MONGO_TEST_DB  || localConfig.dbName || 'db' ;
 var monkDb = require('monk')('localhost/' + dbFile);
 var bcryptjs = require('bcryptjs');
 var fs = require('fs');
+var co = require('../utils/constants');
 
 
 var db = {
@@ -43,12 +44,12 @@ var db = {
             });
         }).then((existingAdminUser) => {
             return monkDb.get('permissions').bulkWrite([
-                { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_CLIENT', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
-                { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_SETTING', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } }, // TODO: Remove
-                { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_USER', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
-                { insertOne: { document: { key:'PERMISSION_ADMINISTRATION_USERGROUP', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
-                { insertOne: { document: { key:'PERMISSION_SETTINGS_PORTAL', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
-                { insertOne: { document: { key:'PERMISSION_SETTINGS_USER', canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } }
+                { insertOne: { document: { key:co.permissions.ADMINISTRATION_CLIENT, canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
+                { insertOne: { document: { key:co.permissions.ADMINISTRATION_SETTINGS, canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } }, // TODO: Remove
+                { insertOne: { document: { key:co.permissions.ADMINISTRATION_USER, canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
+                { insertOne: { document: { key:co.permissions.ADMINISTRATION_USERGROUP, canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
+                { insertOne: { document: { key:co.permissions.SETTINGS_PORTAL, canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } },
+                { insertOne: { document: { key:co.permissions.SETTINGS_USER, canRead:true, canWrite:true, userGroupId:existingAdminUser.userGroupId, clientId:existingAdminUser.clientId  } } }
             ]);
         });
     },
