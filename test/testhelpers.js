@@ -1306,6 +1306,9 @@ th.createFileList = (moduleNames) => {
         if (module.api) module.api.forEach((apiFileName) => {
             fileList.push(`api/${apiFileName}.js`);
         });
+        if (module.doc) module.doc.forEach((docEntry) => {
+            fileList.push(`public/partial/Doc/${docEntry.docCard}.html`);
+        });
         if (module.middlewares) module.middlewares.forEach((middlewareFileName) => {
             fileList.push(`middlewares/${middlewareFileName}.js`);
         });

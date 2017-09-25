@@ -140,6 +140,9 @@ function findTranslationKeysForModule(moduleName) {
             });
         }
     });
+    if (mod.doc) mod.doc.forEach(function (doc) {
+        addTranslationKeyIfNotExists(translationKeys, doc.title);
+    });
     if (mod.permissions) mod.permissions.forEach(function (permission) {
         addTranslationKeyIfNotExists(translationKeys, `TRK_${permission}`);
     });

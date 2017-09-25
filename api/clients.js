@@ -107,18 +107,21 @@ router.post('/newadmin', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'
 /**
  * Create a new client and assigns the base module to it.
  */
-router.post('/', auth('PERMISSION_ADMINISTRATION_CLIENT', 'w', 'clients'), function(req, res) {
+router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), (req, res) => {
     var client = req.body;
     if (!client || Object.keys(client).length < 1) {
-        return res.sendStatus(400);
+        res.sendStatus(400);
+        return;
     }
     delete client._id; // Ids are generated automatically
-    req.db.insert('clients', client).then((insertedClient) => {
-        // Assign base module
-        var baseModuleAssignment = { clientId: insertedClient._id, module: 'base' };
-        req.db.insert('clientmodules', baseModuleAssignment).then((insertedClientModule) => {
-            return res.send(insertedClient);
-        });
+    var insertedClient;
+    req.db.insert(co.collections.clients.name, client).then((c) => {
+        insertedClient = c;
+        return req.db.insert(co.collections.clientmodules.name, { clientId: insertedClient._id, module: co.modules.base });
+    }).then(() => {
+        return req.db.insert(co.collections.clientmodules.name, { clientId: insertedClient._id, module: co.modules.doc });
+    }).then(() => {
+        res.send(insertedClient);
     });
 });
 

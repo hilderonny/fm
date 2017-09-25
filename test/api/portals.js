@@ -7,6 +7,7 @@ var superTest = require('supertest');
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var monk = require('monk');
 
 describe('API portals', function(){
 
@@ -95,6 +96,17 @@ describe('API portals', function(){
 
         th.apiTests.post.defaultNegative(co.apis.portals, co.permissions.LICENSESERVER_PORTAL, createPostTestPortal);
         th.apiTests.post.defaultPositive(co.apis.portals, co.collections.portals.name, createPostTestPortal);
+
+        it('Assignes the modules "base", "portalbase" and "doc" to the newly created portal', async function() {
+            var token = await th.defaults.login(th.defaults.portalAdminUser);
+            var newPortal = await createPostTestPortal();
+            var createdPortal = (await th.post(`/api/${co.apis.portals}?token=${token}`).send(newPortal).expect(200)).body;
+            var createdPortalModules = await db.get(co.collections.portalmodules.name).find({portalId: monk.id(createdPortal._id)});
+            assert.strictEqual(createdPortalModules.length, 3);
+            assert.ok(createdPortalModules.find((m) => m.module === co.modules.base));
+            assert.ok(createdPortalModules.find((m) => m.module === co.modules.doc));
+            assert.ok(createdPortalModules.find((m) => m.module === co.modules.portalbase));
+        });
 
     });
 

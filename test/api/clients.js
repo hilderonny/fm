@@ -317,20 +317,16 @@ describe('API clients', function() {
             });
         });
 
-        it('a client module assignment for the "base" module is created automatically', function(done) {
-            th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                var newClient = { 
-                    name: 'newClient'
-                };
-                th.post('/api/clients?token=' + token).send(newClient).expect(200).end((err, res) => {
-                    if (err) return done(err);
-                    var id = res.body._id;
-                    db.get('clientmodules').findOne({clientId: monk.id(res.body._id)}).then(function(clientModuleFromDatabase){
-                        assert.ok(clientModuleFromDatabase, 'No module assignment to "base" module created.');
-                        done();
-                    });
-                });
-            }).catch(done);
+        it('creates client module assignments for modules "base" and "doc"', async function() {
+            var token = await th.defaults.login(th.defaults.portalAdminUser);
+            var newClient = { 
+                name: 'newClient'
+            };
+            var createdClient = (await th.post(`/api/${co.apis.clients}?token=${token}`).send(newClient).expect(200)).body;
+            var createdClientModules = await db.get(co.collections.clientmodules.name).find({clientId: monk.id(createdClient._id)});
+            assert.strictEqual(createdClientModules.length, 2);
+            assert.ok(createdClientModules.find((m) => m.module === co.modules.base));
+            assert.ok(createdClientModules.find((m) => m.module === co.modules.doc));
         });
 
     });

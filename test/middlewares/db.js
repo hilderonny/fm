@@ -7,6 +7,7 @@ var db = require('../../middlewares/db');
 var localConfig = require('../../config/localconfig.json');
 var fs = require('fs');
 var monk = require('monk');
+var co = require('../../utils/constants');
 
 /**
  * Entfernt die Datenbank aus dem Cache und bindet sie neu ein und führt init() aus.
@@ -189,12 +190,12 @@ describe('MIDDLEWARE db', function() {
                 // Check permissions
                 assert.equal(permissions.length, 6);
                 var permissionNames = [
-                    'PERMISSION_ADMINISTRATION_CLIENT',
-                    'PERMISSION_ADMINISTRATION_SETTING',
-                    'PERMISSION_ADMINISTRATION_USER',
-                    'PERMISSION_ADMINISTRATION_USERGROUP',
-                    'PERMISSION_SETTINGS_PORTAL',
-                    'PERMISSION_SETTINGS_USER'
+                    co.permissions.ADMINISTRATION_CLIENT,
+                    co.permissions.ADMINISTRATION_SETTING,
+                    co.permissions.ADMINISTRATION_USER,
+                    co.permissions.ADMINISTRATION_USERGROUP,
+                    co.permissions.SETTINGS_PORTAL,
+                    co.permissions.SETTINGS_USER
                 ];
                 for (var i in permissionNames) {
                     var permission = permissions[i];

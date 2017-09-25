@@ -90,23 +90,26 @@ router.post('/newkey/:id', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'license
 /**
  * Create a new portal and assign the modules "base" and "portalbase" by default
  */
-router.post('/', auth('PERMISSION_LICENSESERVER_PORTAL', 'w', 'licenseserver'), function(req, res) {
+router.post('/', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licenseserver), (req, res) => {
     var portal = req.body;
     if (!portal || Object.keys(portal).length < 1) {
-        return res.sendStatus(400);
+        res.sendStatus(400);
+        return;
     }
     delete portal._id; // Ids are generated automatically
     // Generate new license key for new portal. Overwrite eventually sent licenseKey
     portal.licenseKey = generateLicenseKey();
     portal.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user, because users can create only users for their own clients
-    req.db.insert('portals', portal).then((insertedPortal) => {
-        var newPortalModules = [
-            { portalId: insertedPortal._id, module: 'base' },
-            { portalId: insertedPortal._id, module: 'portalbase' }
-        ];
-        req.db.insert('portalmodules', newPortalModules).then(() => {
-            return res.send(insertedPortal);
-        });
+    var insertedPortal;
+    req.db.insert(co.collections.portals.name, portal).then((p) => {
+        insertedPortal = p;
+        return req.db.insert(co.collections.portalmodules.name, { portalId: insertedPortal._id, module: co.modules.base });
+    }).then(() => {
+        return req.db.insert(co.collections.portalmodules.name, { portalId: insertedPortal._id, module: co.modules.doc });
+    }).then(() => {
+        return req.db.insert(co.collections.portalmodules.name, { portalId: insertedPortal._id, module: co.modules.portalbase });
+    }).then(() => {
+        res.send(insertedPortal);
     });
 });
 
