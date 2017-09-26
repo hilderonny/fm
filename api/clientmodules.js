@@ -13,6 +13,7 @@ var validateId = require('../middlewares/validateId');
 var monk = require('monk');
 var fs = require('fs');
 var co = require('../utils/constants');
+var dynamicAttributesHelper = require('../utils/dynamicAttributesHelper');
 
 router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), validateId, function(req, res) {
     var client;
@@ -44,7 +45,8 @@ router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.
 });
 
 /**
- * Create a new client module
+ * Zuordnung von Modul zu Mandant erstellen.
+ * Erstellt bzw. aktiviert ggf. vorgegebene dynamische Attribute
  */
 router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), function(req, res) {
     var clientModule = req.body;
@@ -52,32 +54,33 @@ router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clie
         return res.sendStatus(400);
     }
     req.db.get(co.collections.clients.name).findOne(clientModule.clientId).then((client) => {
-        if (!client) {
-            return res.sendStatus(400);
-        }
+        if (!client) return res.sendStatus(400);
         // Prüfen, ob so eine Zuordnung schon besteht
-        req.db.get(co.collections.clientmodules.name).findOne({clientId:client._id, module:clientModule.module}).then(function(existingClientModule) {
-            if (existingClientModule) {
-                return res.send(existingClientModule); // Zuordnung besteht bereits, einfach zurück schicken
-            }
+        req.db.get(co.collections.clientmodules.name).findOne({clientId:client._id, module:clientModule.module}).then((existingClientModule) => {
+            if (existingClientModule) return res.send(existingClientModule); // Zuordnung besteht bereits, einfach zurück schicken
             delete clientModule._id; // Ids are generated automatically
             clientModule.clientId = client._id; // Make it a real id
             req.db.insert(co.collections.clientmodules.name, clientModule).then((insertedClientModule) => {
-                return res.send(insertedClientModule);
+                dynamicAttributesHelper.activateDynamicAttributesForClient(clientModule.clientId, clientModule.module).then(() => {
+                    res.send(insertedClientModule);
+                });
             });
         });
     });
 });
 
 /**
- * Delete client module
+ * Löscht eine Modulzuordnung für einen Mandanten.
+ * Deaktiviert ggf. dynamische Attribute des Moduls.
  */
 router.delete('/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), validateId, function(req, res) {
-    req.db.remove(co.collections.clientmodules.name, req.params.id).then((result) => {
-        if (result.result.n < 1) {
-            return res.sendStatus(404);
-        }
-        res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+    req.db.get(co.collections.clientmodules.name).findOne(req.params.id).then((existingClientModule) => {
+        if (!existingClientModule) return res.sendStatus(404);
+        dynamicAttributesHelper.deactivateDynamicAttributesForClient(existingClientModule.clientId, existingClientModule.module).then(() => {
+            return req.db.remove(co.collections.clientmodules.name, req.params.id);
+        }).then(() => {
+            res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+        });
     });
 });
 

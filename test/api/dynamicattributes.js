@@ -24,6 +24,7 @@ describe('API dynamicattributes', function() {
         await th.prepareDynamicAttributes();
         await th.prepareDynamicAttributeOptions();
         await th.prepareDynamicAttributeValues();
+        await th.preparePredefinedDynamicAttibutesForClient(th.defaults.client);
         return Promise.resolve();
     });
 
@@ -42,6 +43,13 @@ describe('API dynamicattributes', function() {
             ['_id', 'modelName', 'name_en', 'clientId', 'type'].forEach((key) => {
                 assert.strictEqual(attributeFromApi[key].toString(), attributeFromDatabase[key].toString());
             });
+        });
+
+        it('Liefert 404 wenn ein DA zwar existiert, dieses aber inaktiv ist', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Gewicht' });
+            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
+            var token = await th.defaults.login();
+            return th.get(`/api/${co.apis.dynamicattributes}/${da._id}?token=${token}`).expect(404);
         });
 
     });
@@ -73,7 +81,7 @@ describe('API dynamicattributes', function() {
             var modelName = co.collections.users.name;
             var token = await th.defaults.login();
             var client = await th.defaults.getClient();
-            var attributesFromDb = await db.get(co.collections.dynamicattributes.name).find({clientId: client._id});
+            var attributesFromDb = (await db.get(co.collections.dynamicattributes.name).find({clientId: client._id})).filter((a) => !a.isInactive);
             var attributesFromApi = (await th.get(`/api/${co.apis.dynamicattributes}/model/${modelName}?token=${token}`).expect(200)).body;
             for (var i = 0; i < attributesFromApi.length; i++) {
                 ['_id', 'modelName', 'name_en', 'clientId', 'type'].forEach((key) => {
@@ -82,13 +90,30 @@ describe('API dynamicattributes', function() {
             }
         });
 
+        it('Enthält keine inaktiven DAs', async function() {
+            var modelName = co.collections.users.name;
+            var token = await th.defaults.login();
+            var client = await th.defaults.getClient();
+            var attributesFromDb = await db.get(co.collections.dynamicattributes.name).find({clientId: client._id});
+            var attributesFromApi = (await th.get(`/api/${co.apis.dynamicattributes}/model/${modelName}?token=${token}`).expect(200)).body;
+            attributesFromDb.forEach((da) => {
+                var daId = da._id.toString();
+                var fromApi = attributesFromApi.find((daa) => daa._id === daId);
+                if (da.isInactive) {
+                    assert.ok(!fromApi);
+                } else {
+                    assert.ok(fromApi);
+                }
+            });
+        });
+
     });
 
     describe('GET/models', function(){
         var mmodelsApi = co.apis.dynamicattributes + '/models';
         th.apiTests.get.defaultNegative(mmodelsApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
 
-        it('respods with a list of all models that can have dynamic attributes', async function() {
+        it('responds with a list of all models that can have dynamic attributes', async function() {
             var token = await th.defaults.login();
             var allModelsFromConfig = co.collections;
             var relevantModels = Object.values(allModelsFromConfig).filter(function(model){return model.canHaveAttributes});
@@ -119,6 +144,14 @@ describe('API dynamicattributes', function() {
             });
         });
 
+        it('Liefert 404 wenn ein zugehöriges DA zwar existiert, dieses aber inaktiv ist', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Geschlecht' });
+            var dao = await db.get(co.collections.dynamicattributeoptions.name).findOne({ text_en: 'männlich' });
+            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
+            var token = await th.defaults.login();
+            return th.get(`/api/${co.apis.dynamicattributes}/option/${dao._id}?token=${token}`).expect(404);
+        });
+
     });
 
     describe('GET/options/:id', function() {
@@ -140,6 +173,14 @@ describe('API dynamicattributes', function() {
                     assert.strictEqual(optionsFromApi[i][key].toString(), optionsFromDb[i][key].toString());
                 });
             }
+        });
+
+        it('Liefert 404 wenn ein passendes DA zwar existiert, dieses aber inaktiv ist', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Geschlecht' });
+            var dao = await db.get(co.collections.dynamicattributeoptions.name).findOne({ text_en: 'männlich' });
+            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
+            var token = await th.defaults.login();
+            return th.get(`/api/${co.apis.dynamicattributes}/options/${da._id}?token=${token}`).expect(404);
         });
 
     });
@@ -209,6 +250,18 @@ describe('API dynamicattributes', function() {
             }
         });
 
+        it('Enthält keine Werte von inaktiven DAs', async function() {
+            var user = await th.defaults.getUser();
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Geschlecht' });
+            var dav = await db.get(co.collections.dynamicattributevalues.name).find({ dynamicAttributeId: da._id });
+            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
+            var token = await th.defaults.login();
+            var valuesFromApi = (await th.get(`/api/${co.apis.dynamicattributes}/values/users/${user._id}?token=${token}`).expect(200)).body;
+            var daId = da._id.toString();
+            var foundInactive = valuesFromApi.find((v) => v.type._id === daId);
+            assert.ok(!foundInactive);
+        });
+
     });
 
     function createTestDynamicAttribute(type) {
@@ -269,6 +322,27 @@ describe('API dynamicattributes', function() {
             assert.ok(createdAttribute._id);
             Object.keys(attributeToSend).forEach((key) => {
                 assert.strictEqual(createdAttribute[key].toString(), attributeToSend[key].toString());
+            });
+        });
+
+        it('Wenn identifier angegeben ist, wird zwar ein neues erzeugt, aber ohne identifier', async function() {
+            var client = await th.defaults.getClient();
+            var attributeToSend = {
+                modelName: co.collections.users.name,
+                clientId: client._id,
+                type: 'text',
+                name_en: 'Gewicht',
+                identifier: 'gewicht'
+            }
+            var token = await th.defaults.login();
+            var createdAttribute = (await th.post(`/api/${co.apis.dynamicattributes}?token=${token}`).send(attributeToSend).expect(200)).body;
+            assert.ok(createdAttribute._id);
+            Object.keys(attributeToSend).forEach((key) => {
+                if (key === 'identifier') { // Darf nicht drin sein
+                    assert.ok(!createdAttribute[key]);
+                } else {
+                    assert.strictEqual(createdAttribute[key].toString(), attributeToSend[key].toString());
+                }
             });
         });
 
@@ -334,6 +408,27 @@ describe('API dynamicattributes', function() {
             assert.ok(createdOption._id);
             Object.keys(optionToSend).forEach((key) => {
                 assert.strictEqual(createdOption[key].toString(), optionToSend[key].toString());
+            });
+        });
+
+        it('Erstellt eine neue Option, wenn value angegeben ist, aber ohne value (Überschreiben von Vorgaben per API nicht erlaubt).', async function() {
+            var client = await th.defaults.getClient();
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Geschlecht' });
+            var optionToSend = {
+                dynamicAttributeId: da._id,
+                clientId: client._id,
+                text_en: 'weiblich',
+                value: 'weiblich'
+            }
+            var token = await th.defaults.login();
+            var createdOption = (await th.post(`/api/${co.apis.dynamicattributes}/option?token=${token}`).send(optionToSend).expect(200)).body;
+            assert.ok(createdOption._id);
+            Object.keys(optionToSend).forEach((key) => {
+                if (key === 'value') { // Darf nicht drin sein
+                    assert.ok(!createdOption[key]);
+                } else {
+                    assert.strictEqual(createdOption[key].toString(), optionToSend[key].toString());
+                }
             });
         });
 
@@ -517,6 +612,19 @@ describe('API dynamicattributes', function() {
             }
         });
 
+        it('Liefert 400, wenn eines der zugehörigen DA inaktiv ist', async function() {
+            var user = await th.defaults.getUser();
+            var da1 = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Gewicht' });
+            var da2 = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Größe' });
+            await db.update(co.collections.dynamicattributes.name, da1._id, { $set: { isInactive: true } });
+            var valuesToSend = [
+                { daId: da1._id, type: da1.type, value: '100' },
+                { daId: da2._id, type: da2.type, value: '190' }
+            ];
+            var token = await th.defaults.login();
+            th.post(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).send(valuesToSend).expect(400);
+        });
+
     });
 
     describe('PUT/:id', function() {
@@ -556,6 +664,14 @@ describe('API dynamicattributes', function() {
             assert.strictEqual(updatedAttribute.name_de, attributeToSend.name_de);
         });
 
+        it('Liefert 404, wenn das DA inaktiv ist', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Gewicht' });
+            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
+            da.name_en = 'Masse';
+            var token = await th.defaults.login();
+            return th.put(`/api/${co.apis.dynamicattributes}/${da._id}?token=${token}`).send(da).expect(404);
+        });
+
     });
 
     describe('PUT/option/:id', function() {
@@ -591,6 +707,15 @@ describe('API dynamicattributes', function() {
             assert.strictEqual(updatedOption.text_de, optionToSend.text_de);
         });
 
+        it('Liefert 404, wenn das zugehörige DA inaktiv ist', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Geschlecht' });
+            var dao = await db.get(co.collections.dynamicattributeoptions.name).findOne({ text_en: 'männlich' });
+            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
+            var token = await th.defaults.login();
+            dao.text_en = 'sächlich';
+            return th.put(`/api/${co.apis.dynamicattributes}/option/${dao._id}?token=${token}`).send(dao).expect(404);
+        });
+
     });
 
     describe('DELETE/:id', function() {
@@ -619,6 +744,19 @@ describe('API dynamicattributes', function() {
             assert.strictEqual(values.length, 0);
         });
 
+        it('Liefert 405, wenn das DA einen identifier hat', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Gewicht' });
+            var token = await th.defaults.login();
+            return th.del(`/api/${co.apis.dynamicattributes}/${da._id}?token=${token}`).expect(405);
+        });
+
+        it('Liefert 404, wenn das DA inaktiv ist', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Größe' });
+            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
+            var token = await th.defaults.login();
+            return th.del(`/api/${co.apis.dynamicattributes}/${da._id}?token=${token}`).expect(404);
+        });
+
     });
 
     describe('DELETE/option/:id', function() {
@@ -645,6 +783,21 @@ describe('API dynamicattributes', function() {
             var values = await db.get(co.collections.dynamicattributevalues.name).find({value:option._id});
             assert.ok(!optionAfterDeletion);
             assert.strictEqual(values.length, 0);
+        });
+
+        it('Liefert 404, wenn das zugehörige DA inaktiv ist', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Haarfarbe' });
+            var dao = await db.get(co.collections.dynamicattributeoptions.name).findOne({ text_en: 'braun' });
+            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
+            var token = await th.defaults.login();
+            return th.del(`/api/${co.apis.dynamicattributes}/option/${dao._id}?token=${token}`).expect(404);
+        });
+
+        it('Liefert 405, wenn die Option einen value hat', async function() {
+            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Geschlecht' });
+            var dao = await db.get(co.collections.dynamicattributeoptions.name).findOne({ text_en: 'männlich' });
+            var token = await th.defaults.login();
+            return th.del(`/api/${co.apis.dynamicattributes}/option/${dao._id}?token=${token}`).expect(405);
         });
 
     });
