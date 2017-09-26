@@ -2,7 +2,8 @@
  * Middleware that opens a database connection and provides it as req.db in the request.
  */
 var localConfig = require('../config/localconfig.json');
- 
+var moduleConfig = require('../config/module-config.json');
+
 var dbFile = process.env.MONGO_TEST_DB  || localConfig.dbName || 'db' ; 
 var monkDb = require('monk')('localhost/' + dbFile);
 var bcryptjs = require('bcryptjs');
@@ -32,7 +33,6 @@ var db = {
         fs.writeFileSync('./config/localconfig.json', JSON.stringify(localConfig, null, 4));
         var users = monkDb.get('users');
         var userGroups = monkDb.get('usergroups');
-
         return users.remove({name:'admin'}).then(() => {
             return userGroups.insert({ name: 'admin', clientId: null });
         }).then((existingAdminUserGroup) => {

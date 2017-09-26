@@ -533,6 +533,47 @@ th.prepareDynamicAttributes = function(collectionName) {
 };
 
 /**
+ * Erstellt einen Satz vordefinierter DA's für einen Mandanten (Benutzer-collection)
+ * @returns Promise
+ */
+th.preparePredefinedDynamicAttibutesForClient = async function(clientName) {
+    var clientId = (await th.defaults.getClient())._id;
+    var dynamicAttributes = [
+        // Vordefinierte
+        { modelName: co.collections.users.name, name_en: 'Gewicht', clientId: clientId, type: co.dynamicAttributeTypes.text, identifier: 'gewicht' },
+        { modelName: co.collections.users.name, name_en: 'Geschlecht', clientId: clientId, type: co.dynamicAttributeTypes.picklist, identifier: 'geschlecht' },
+        // Manuelle
+        { modelName: co.collections.users.name, name_en: 'Größe', clientId: clientId, type: co.dynamicAttributeTypes.text },
+        { modelName: co.collections.users.name, name_en: 'Haarfarbe', clientId: clientId, type: co.dynamicAttributeTypes.picklist }
+    ];
+    var daRes = await db.get(co.collections.dynamicattributes.name).bulkWrite(dynamicAttributes.map((e) => { return {insertOne:{document:e}} }));
+    for (var i = 0; i < daRes.insertedCount; i++) {
+        dynamicAttributes[i]._id = daRes.insertedIds[i];
+    }
+    var dynamicAttributeOptions = [
+        { dynamicAttributeId: dynamicAttributes[1]._id, text_en: 'männlich', clientId: clientId, value: 'männlich' },
+        { dynamicAttributeId: dynamicAttributes[1]._id, text_en: 'weiblich', clientId: clientId, value: 'weiblich' },
+        { dynamicAttributeId: dynamicAttributes[3]._id, text_en: 'braun', clientId: clientId },
+        { dynamicAttributeId: dynamicAttributes[3]._id, text_en: 'blond', clientId: clientId }
+    ];
+    dynamicAttributes[1].options = [ dynamicAttributeOptions[0], dynamicAttributeOptions[1] ];
+    dynamicAttributes[3].options = [ dynamicAttributeOptions[2], dynamicAttributeOptions[3] ];
+    var daoRes = await db.get(co.collections.dynamicattributeoptions.name).bulkWrite(dynamicAttributeOptions.map((e) => { return {insertOne:{document:e}} }));
+    for (var i = 0; i < daoRes.insertedCount; i++) {
+        dynamicAttributeOptions[i]._id = daoRes.insertedIds[i];
+    }
+    var user = await th.defaults.getUser();
+    var dynamicAttributeValues = [
+        { dynamicAttributeId: dynamicAttributes[0]._id, entityId: user._id, clientId: clientId, value: '60' },
+        { dynamicAttributeId: dynamicAttributes[1]._id, entityId: user._id, clientId: clientId, value: dynamicAttributeOptions[1]._id },
+        { dynamicAttributeId: dynamicAttributes[2]._id, entityId: user._id, clientId: clientId, value: '170' },
+        { dynamicAttributeId: dynamicAttributes[3]._id, entityId: user._id, clientId: clientId, value: dynamicAttributeOptions[2]._id }
+    ]
+    await db.get(co.collections.dynamicattributevalues.name).bulkWrite(dynamicAttributeValues.map((e) => { return {insertOne:{document:e}} }));
+    return Promise.resolve(dynamicAttributes);
+};
+
+/**
  * Creates 2 options (elements) for an attribute of type picklist;
  *      attribute.modelName: 'users',
  *      attribute.name_en: 'gender'

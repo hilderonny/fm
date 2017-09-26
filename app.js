@@ -65,7 +65,14 @@ var init = () => {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
     var db = require('./middlewares/db');
     var nocache = require('./middlewares/nocache');
-    db.init();
+    db.init().then(() => {
+        var dah = require('./utils/dynamicAttributesHelper');
+        // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
+        var promises = [];
+        Object.keys(moduleConfig.modules).forEach((moduleName) => {
+            dah.activateDynamicAttributesForClient(null, moduleName);
+        });
+    });
     // Includes minifizieren
     var fs = require('fs');
     prepareIncludes(fs);

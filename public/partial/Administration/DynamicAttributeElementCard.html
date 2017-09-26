@@ -28,7 +28,7 @@
             <md-card-actions layout="row" layout-align="end center">
                 <md-button class="md-raised md-accent" ng-if="isNewElement && canWriteDynamicAttributes" ng-click="createAttributeElement()" ng-disabled="dynamicAttributeElementsForm.$invalid"><span translate>TRK_DYNAMICATTRIBUTES_CREATE</span></md-button>
                 <md-button class="md-raised md-accent" ng-if="!isNewElement && canWriteDynamicAttributes" ng-click="saveAttributeElement()" ng-disabled="dynamicAttributeElementsForm.$invalid"><span translate>TRK_DYNAMICATTRIBUTES_SAVE</span></md-button>
-                <md-button class="md-raised md-warn" ng-if="!isNewElement && canWriteDynamicAttributes" ng-click="deleteAttributeElement()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
+                <md-button class="md-raised md-warn" ng-if="!isNewElement && canWriteDynamicAttributes && !attributeelement.value" ng-click="deleteAttributeElement()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
             </md-card-actions>
 
         </form>

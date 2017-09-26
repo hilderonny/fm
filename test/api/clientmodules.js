@@ -6,19 +6,52 @@ var fs = require('fs');
 var th = require('../testHelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var moduleConfig = require('../../config/module-config.json');
 
 describe('API clientmodules', function() {
 
     var server = require('../../app');
     
+    /**
+     * Modul-config mit vorgegebenen DAs vorbereiten, wir benutzen ein eigenes Modul "DAtest"
+     */
+    function prepareModuleConfigForDynamicAttributes() {
+        moduleConfig.modules.DAtest = {
+            dynamicattributes: {
+                users: [
+                    {
+                        identifier: 'DAtest_user_1',
+                        name_en: 'DAtest_user_1',
+                        type: co.dynamicAttributeTypes.text
+                    },
+                    {
+                        identifier: 'DAtest_user_2',
+                        name_en: 'DAtest_user_2',
+                        type: co.dynamicAttributeTypes.picklist,
+                        options: [
+                            { text_en: 'DAtest_user_2_1', value: 'DAtest_user_2_1' },
+                            { text_en: 'DAtest_user_2_2', value: 'DAtest_user_2_2' }
+                        ]
+                    }
+                ]
+            }
+        };
+    }
+
     // Clear and prepare database with clients, user groups and users
-    beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions);
+    beforeEach(async function() {
+        await th.cleanDatabase();
+        await th.prepareClients();
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        prepareModuleConfigForDynamicAttributes();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        delete moduleConfig.modules.DAtest;
     });
 
     describe('GET/forClient/:id', function() {
@@ -222,6 +255,55 @@ describe('API clientmodules', function() {
             });
         });
 
+        it('Vorgegebene DAs, die noch nicht existieren, werden angelegt und sind nicht inaktiv', async function() {
+            var client = await th.defaults.getClient();
+            var token = await th.defaults.login();
+            var moduleAssignment = { module: 'DAtest', clientId: client._id.toString() };
+            await th.post(`/api/${co.apis.clientmodules}?token=${token}`).send(moduleAssignment).expect(200);
+            var das = await db.get(co.collections.dynamicattributes.name).find({identifier:{$exists:true}});
+            assert.strictEqual(das.length, 2);
+            assert.ok(das[0].clientId.equals(client._id));
+            assert.ok(das.find((da) => da.identifier === 'DAtest_user_1' && !da.isInactive ));
+            assert.ok(das[1].clientId.equals(client._id));
+            assert.ok(das.find((da) => da.identifier === 'DAtest_user_2' && !da.isInactive ));
+            var daos = await db.get(co.collections.dynamicattributeoptions.name).find({value:{$exists:true}});
+            assert.strictEqual(daos.length, 2);
+            assert.ok(daos.find((dao) => dao.value === 'DAtest_user_2_1' ));
+            assert.ok(daos[0].clientId.equals(client._id));
+            assert.ok(daos.find((dao) => dao.value === 'DAtest_user_2_2' ));
+            assert.ok(daos[1].clientId.equals(client._id));
+        });
+
+        it('Vorgegebene DAs, die bereits aktiv sind, bleiben aktiv', async function() {
+            // DAs vorbereiten
+            var client = await th.defaults.getClient();
+            await db.get(co.collections.dynamicattributes.name).insert({ clientId: client._id, identifier:'DAtest_user_1', name_en:'DAtest_user_1', type: co.dynamicAttributeTypes.text });
+            // Der Rest wie oben
+            var token = await th.defaults.login();
+            var moduleAssignment = { module: 'DAtest', clientId: client._id.toString() };
+            await th.post(`/api/${co.apis.clientmodules}?token=${token}`).send(moduleAssignment).expect(200);
+            var das = await db.get(co.collections.dynamicattributes.name).find({identifier:{$exists:true}});
+            assert.strictEqual(das.length, 2); // Es müssen dennoch 2 DAs vorhanden sein
+            var textAttribute = das.find((da) => da.identifier === 'DAtest_user_1' && !da.isInactive );
+            assert.ok(textAttribute);
+            assert.ok(textAttribute.clientId.equals(client._id));
+        });
+
+        it('Vorgegebene DAs, die inaktiv sind, werden aktiviert', async function() {
+            // DAs vorbereiten
+            var client = await th.defaults.getClient();
+            await db.get(co.collections.dynamicattributes.name).insert({ clientId: client._id, identifier:'DAtest_user_1', name_en:'DAtest_user_1', type: co.dynamicAttributeTypes.text, isInactive: true });
+            // Der Rest wie oben
+            var token = await th.defaults.login();
+            var moduleAssignment = { module: 'DAtest', clientId: client._id.toString() };
+            await th.post(`/api/${co.apis.clientmodules}?token=${token}`).send(moduleAssignment).expect(200);
+            var das = await db.get(co.collections.dynamicattributes.name).find({identifier:{$exists:true}});
+            assert.strictEqual(das.length, 2);
+            var textAttribute = das.find((da) => da.identifier === 'DAtest_user_1' && !da.isInactive ); // Nur aktive rausfiltern, da muss das vorher inaktive mit drin sein
+            assert.ok(textAttribute);
+            assert.ok(textAttribute.clientId.equals(client._id));
+        });
+        
     });
 
     describe('DELETE/:id', function() {
@@ -307,7 +389,23 @@ describe('API clientmodules', function() {
                 });
             });
         });
-    
+
+        it('Vorgegebene DAs werden deaktiviert', async function() {
+            // DAs vorbereiten
+            var client = await th.defaults.getClient();
+            await db.get(co.collections.dynamicattributes.name).insert({ clientId: client._id, identifier:'DAtest_user_1', name_en:'DAtest_user_1', type: co.dynamicAttributeTypes.text });
+            // Modulzuordnung vorbereiten
+            var zuordnung = await db.get(co.collections.clientmodules.name).insert({ module: 'DAtest', clientId: client._id });
+            // Deaktivieren
+            var token = await th.defaults.login();
+            await th.del(`/api/${co.apis.clientmodules}/${zuordnung._id}?token=${token}`).expect(204);
+            var das = await db.get(co.collections.dynamicattributes.name).find({identifier:{$exists:true}});
+            assert.strictEqual(das.length, 1); // Das Attribut muss dennoch vorhanden sein
+            var inactiveAttribute = das.find((da) => da.identifier === 'DAtest_user_1' && da.isInactive );
+            assert.ok(inactiveAttribute);
+            assert.ok(inactiveAttribute.clientId.equals(client._id));
+        });
+        
     });
 
 });
