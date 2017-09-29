@@ -83,6 +83,45 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
         }, 'PERMISSION_OFFICE_DOCUMENT');
     };
 
+   /* var dropArea = document.querySelector("#dragArea");
+    if(dropArea){
+        dropArea.addEventListener('drop', handleDropEvent, false);
+    }
+
+    var filelist  = [];
+    function handleDropEvent(event)
+    {
+        event.stopPropagation();
+        event.preventDefault();
+        
+        for (var i = 0; i < event.dataTransfer.files.length; i++)
+        {
+            filelist.push(event.dataTransfer.files[i]);
+            console.log(i);
+        }
+    }*/
+
+    function dodrop(event)
+    {
+    var dt = event.dataTransfer;
+    var files = dt.files;
+
+    var count = files.length;
+    output("File Count: " + count + "\n");
+
+        for (var i = 0; i < files.length; i++) {
+        output(" File " + i + ":\n(" + (typeof files[i]) + ") : <" + files[i] + " > " +
+                files[i].name + " " + files[i].size + "\n");
+        }
+    }
+
+    function output(text)
+    {
+    document.getElementById("output").textContent += text;
+    //dump(text);
+    }
+
+
     // Performs the upload of the selected file
     $scope.uploadFile = function(fileinput) { // http://stackoverflow.com/a/17923521
         var file = fileinput.files[0];
