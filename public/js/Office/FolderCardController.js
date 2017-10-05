@@ -85,23 +85,22 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
 
    /* var dropArea = document.querySelector("#dragArea");
     if(dropArea){
-        dropArea.addEventListener('drop', handleDropEvent, false);
-    }
-
-    var filelist  = [];
-    function handleDropEvent(event)
-    {
-        event.stopPropagation();
-        event.preventDefault();
-        
-        for (var i = 0; i < event.dataTransfer.files.length; i++)
-        {
-            filelist.push(event.dataTransfer.files[i]);
-            console.log(i);
-        }
+        dropArea.addEventListener('drop',  function(event) {
+                                                        event.stopPropagation();
+                                                        event.preventDefault();
+                                                        var filelist  = [];
+                                                        for (var i = 0; i < event.dataTransfer.files.length; i++)
+                                                        {
+                                                            filelist.push(event.dataTransfer.files[i]);
+                                                            console.log(i);
+                                                        }
+                                            }, false);
     }*/
+   
 
-    function dodrop(event)
+    //HTML attribute 'ondrop' expects global function
+    //https://stackoverflow.com/questions/32538837/ondrop-ondragover-uncaught-referenceerror-ondrop-is-not-defined-angular-h
+    window.dodrop = function(event)
     {
     var dt = event.dataTransfer;
     var files = dt.files;
