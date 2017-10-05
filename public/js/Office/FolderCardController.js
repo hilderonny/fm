@@ -97,73 +97,60 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
                                             }, false);
     }*/
    
-
+    
     //HTML attribute 'ondrop' expects global function
     //https://stackoverflow.com/questions/32538837/ondrop-ondragover-uncaught-referenceerror-ondrop-is-not-defined-angular-h
     window.dodrop = function(event)
     {
-    var dt = event.dataTransfer;
-    var files = dt.files;
-
-    var count = files.length;
-    output("File Count: " + count + "\n");
-
-        for (var i = 0; i < files.length; i++) {
-        output(" File " + i + ":\n(" + (typeof files[i]) + ") : <" + files[i] + " > " +
-                files[i].name + " " + files[i].size + "\n");
-        }
+        var dt = event.dataTransfer;
+        $scope.uploadFile(dt);
     }
-
-    function output(text)
-    {
-    document.getElementById("output").textContent += text;
-    //dump(text);
-    }
-
 
     // Performs the upload of the selected file
     $scope.uploadFile = function(fileinput) { // http://stackoverflow.com/a/17923521
-        var file = fileinput.files[0];
+        for (var i = 0; i < fileinput.files.length; i++) {
+            var file = fileinput.files[i];
 
-        $scope.isUploading = true;
-        $scope.uploadProgress = 0;
-        $scope.uploadMode = 'determinate';
+            $scope.isUploading = true;
+            $scope.uploadProgress = 0;
+            $scope.uploadMode = 'determinate';
 
-        // http://stackoverflow.com/q/13591345
-        var form = new FormData();
-        var xhr = new XMLHttpRequest;
-        // Additional POST variables required by the API script
-        form.append('parentFolderId', $scope.folder._id);
-        form.append('file', file);
+            // http://stackoverflow.com/q/13591345
+            var form = new FormData();
+            var xhr = new XMLHttpRequest;
+            // Additional POST variables required by the API script
+            form.append('parentFolderId', $scope.folder._id);
+            form.append('file', file);
 
-        xhr.upload.onprogress = function(e) {
-            // Event listener for when the file is uploading
-            if (e.lengthComputable) {
-                var progress = Math.round(e.loaded / e.total * 100);
-                $scope.uploadProgress = progress;
-            } else {
-                $scope.uploadMode = 'indeterminate';
-            }
-        };
-
-        xhr.onreadystatechange = function(e) { // https://developer.mozilla.org/de/docs/Web/API/XMLHttpRequest
-            if (e.target.readyState === 4) {
-                $scope.isUploading = false;
-                var uploadedDocument = e.target.response;
-                $scope.folder.elements.push(uploadedDocument);
-                $scope.selectElement(uploadedDocument);
-                if ($scope.params.uploadDocumentCallback) {
-                    $scope.params.uploadDocumentCallback(uploadedDocument);
+            xhr.upload.onprogress = function(e) {
+                // Event listener for when the file is uploading
+                if (e.lengthComputable) {
+                    var progress = Math.round(e.loaded / e.total * 100);
+                    $scope.uploadProgress = progress;
+                } else {
+                    $scope.uploadMode = 'indeterminate';
                 }
-                $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function(translations) {
-                    $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
-                });
             }
-        }
-        xhr.responseType = 'json';
 
-        xhr.open('POST', 'api/documents?token=' + $http.defaults.headers.common['x-access-token']);
-        xhr.send(form);
+            xhr.onreadystatechange = function(e) { // https://developer.mozilla.org/de/docs/Web/API/XMLHttpRequest
+                if (e.target.readyState === 4) {
+                    $scope.isUploading = false;
+                    var uploadedDocument = e.target.response;
+                    $scope.folder.elements.push(uploadedDocument);
+                    $scope.selectElement(uploadedDocument);
+                    if ($scope.params.uploadDocumentCallback) {
+                        $scope.params.uploadDocumentCallback(uploadedDocument);
+                    }
+                    $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function(translations) {
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
+                    });
+                }
+            }
+            xhr.responseType = 'json';
+
+            xhr.open('POST', 'api/documents?token=' + $http.defaults.headers.common['x-access-token']);
+            xhr.send(form);
+        }
     };
 
     $scope.load = function() {
