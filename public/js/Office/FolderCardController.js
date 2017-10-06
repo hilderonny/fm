@@ -82,22 +82,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
             closeCallback: $scope.params.closeElementCallback
         }, 'PERMISSION_OFFICE_DOCUMENT');
     };
-
-   /* var dropArea = document.querySelector("#dragArea");
-    if(dropArea){
-        dropArea.addEventListener('drop',  function(event) {
-                                                        event.stopPropagation();
-                                                        event.preventDefault();
-                                                        var filelist  = [];
-                                                        for (var i = 0; i < event.dataTransfer.files.length; i++)
-                                                        {
-                                                            filelist.push(event.dataTransfer.files[i]);
-                                                            console.log(i);
-                                                        }
-                                            }, false);
-    }*/
    
-    
     //HTML attribute 'ondrop' expects global function
     //https://stackoverflow.com/questions/32538837/ondrop-ondragover-uncaught-referenceerror-ondrop-is-not-defined-angular-h
     window.dodrop = function(event)
@@ -108,7 +93,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
 
     // Performs the upload of the selected file
     $scope.uploadFile = function(fileinput) { // http://stackoverflow.com/a/17923521
-        for (var i = 0; i < fileinput.files.length; i++) {
+        for (var i = 0; i < fileinput.files.length; i++) { //in case user wants to upload multiple files via Drag & Drop
             var file = fileinput.files[i];
 
             $scope.isUploading = true;
