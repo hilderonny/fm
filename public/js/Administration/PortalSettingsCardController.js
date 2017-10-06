@@ -38,6 +38,32 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
         $http.post('/api/portalmanagement/triggerupdate/');
     };
 
+
+    //Set a defaut value for the time variable
+    var defautTimeValue = new Date();
+    defautTimeValue.setHours(0);
+    defautTimeValue.setMinutes(30);
+    defautTimeValue.setSeconds(0);
+    defautTimeValue.getMilliseconds(0);
+    $scope.autoUpdateTime = defautTimeValue; //TODO find out why there are additional numbers appearing after the minutes value (non-zero seconds??)
+
+    //Update time variable  after user enters new input
+    $scope.setTimeForNextUpdateCheck = function(timeValue){
+        if(timeValue){
+            var currentDay = new Date();
+            var year = currentDay.getFullYear();
+            var month = currentDay.getMonth();
+            var day = currentDay.getDate();
+            var minutes = timeValue.getMinutes();
+            var hours = timeValue.getHours();
+            var timeForNextUpdateCheck = new Date(year, month, day, hours, minutes, 0, 0);
+            console.log(timeForNextUpdateCheck);
+        }else{
+            //TODO find a way to rest to defaut value; 
+           // $scope.autoUpdateTime = defautTimeValue;
+        }
+    }
+
     // Uploads an update file and extracts it
     $scope.uploadFile = function(fileinput) { // http://stackoverflow.com/a/17923521
         var file = fileinput.files[0];
