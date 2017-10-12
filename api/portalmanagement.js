@@ -12,7 +12,7 @@ var fs = require('fs');
 var request = require('request');
 var unzip = require('unzip');
 var co = require('../utils/constants');
-//var portalUpdatesHelper = require('../utils/portalUpdatesHelper');
+var portalUpdatesHelper = require('../utils/portalUpdatesHelper');
 
 /**
  * Asks the license server for available updates. Returns a JSON with local and remote update info:
@@ -54,7 +54,7 @@ router.get('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'r', co.modules.por
  * Starts updating the server from the license server
  */
 router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.portalbase), (req, res) => {
-    var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
+    /*var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
     var updateExtractPath = localConfig.updateExtractPath ? localConfig.updateExtractPath : './temp/';
     var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
     var updateRequest = request(url);
@@ -72,9 +72,10 @@ router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', 
     var unzipStream = updateRequest.pipe(unzip.Extract({ path: updateExtractPath }));
     unzipStream.on('close', function() {
         return res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
-    });
-   /* var instantUpdate = true;
-    portalUpdatesHelper.triggerUpdate(instantUpdate, res);*/
+    });*/
+    var instantUpdate = true;
+    portalUpdatesHelper.triggerUpdate(instantUpdate, res);
+    
 });
 
 /**
