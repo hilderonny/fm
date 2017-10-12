@@ -12,6 +12,7 @@ var fs = require('fs');
 var request = require('request');
 var unzip = require('unzip');
 var co = require('../utils/constants');
+//var portalUpdatesHelper = require('../utils/portalUpdatesHelper');
 
 /**
  * Asks the license server for available updates. Returns a JSON with local and remote update info:
@@ -43,7 +44,8 @@ router.get('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'r', co.modules.por
     var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
     var portalSettings = { // Extract only relevant data from localConfig
         licenseserverurl : localConfig.licenseserverurl,
-        licensekey : localConfig.licensekey
+        licensekey : localConfig.licensekey,
+        autoUpdateMode : localConfig.autoUpdateMode
     };
     return res.send(portalSettings);
 });
@@ -56,6 +58,7 @@ router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', 
     var updateExtractPath = localConfig.updateExtractPath ? localConfig.updateExtractPath : './temp/';
     var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
     var updateRequest = request(url);
+   //console.log(updateRequest);
     updateRequest.on('error', function () {
         updateRequest.abort();
         return res.sendStatus(400);
@@ -70,6 +73,8 @@ router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', 
     unzipStream.on('close', function() {
         return res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
     });
+   /* var instantUpdate = true;
+    portalUpdatesHelper.triggerUpdate(instantUpdate, res);*/
 });
 
 /**
@@ -82,8 +87,12 @@ router.put('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.por
     }
     // Load localconfig and update only relevant information
     var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
-    localConfig.licenseserverurl = portalSettings.licenseserverurl;
-    localConfig.licensekey = portalSettings.licensekey;
+    if(portalSettings.licenseserverurl && portalSettings.licensekey){
+        localConfig.licenseserverurl = portalSettings.licenseserverurl;
+        localConfig.licensekey = portalSettings.licensekey;
+    }else if(portalSettings.autoUpdateMode == false || portalSettings.autoUpdateMode == true){ // make sure that portalSettings.autoUpdateMode exists
+        localConfig.autoUpdateMode = portalSettings.autoUpdateMode;
+    }
     fs.writeFileSync('./config/localconfig.json', JSON.stringify(localConfig, null, 4));
     return res.send(portalSettings);
 });

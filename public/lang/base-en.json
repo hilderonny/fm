@@ -63,6 +63,7 @@
     "TRK_RELATIONS_LINKS" : "Links",
     "TRK_RELATIONS_REALLY_DELETE_RELATION" : "Do you really want to delete the link?",
     "TRK_RELATIONS_RELATION_CREATED" : "Link created",
+    "TRK_SETTINGS_AUTOUPDATES" : "Update automatically",
     "TRK_SETTINGS_SAVE" : "Save",
     "TRK_SETTINGSET_DYNAMICATTRIBUTES":"Dynamic attributes",
     "TRK_SETTINGS_SETTINGS" : "Settings",

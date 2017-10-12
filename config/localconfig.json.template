@@ -1,4 +1,5 @@
-{
+{   
+    "autoUpdateMode" : "Set to true to enable automatic search for & intallation of updates",
     "dbName" : "Name of the mongo database, e.g. 'db'",
     "documentspath": "Path where the uploaded documents are stored. Can be relative to app.js or absolute, e.g. 'documents/'",
     "httpPort": "Port where the HTTP handler of the app should listen, e.g. 80. Only useful when useHTTP=true",
