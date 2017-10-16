@@ -44,10 +44,36 @@ app.controller('ronnyseins3DCardController', function($scope, $http, $mdDialog, 
         var modelTypeAttributes = {
             '.dae': 'collada-model',
             '.obj': 'obj-model'
+        
         };
+        entity.doc = doc;
         entity.setAttribute(modelTypeAttributes[doc.extension], '/api/documents/' + doc._id + '?action=download&token=' + $http.defaults.headers.common['x-access-token']);
         if (!doc.waypoints) doc.waypoints = [];
         doc.waypoints.forEach(window.addWayPoint);
+        if (doc.description) {
+            /*
+            entity.addEventListener('raycaster-intersected', function(evt) {
+                var point = evt.detail.intersection.point;
+                console.log(point);
+                var infoPlaneText = document.querySelector('#info-plane-text');
+                var text = infoPlaneText.getAttribute('text');
+                text.value = doc.description;
+                console.log(text.value);
+                infoPlaneText.setAttribute('text', text);
+                var infoPlane = document.querySelector('#info-plane');
+                infoPlane.setAttribute('visible', true);
+                infoPlane.setAttribute('position', {
+                    x: point.x - .6,
+                    y: point.y + .6,
+                    z: point.z + .5
+                });
+                evt.preventDefault();
+                evt.stopPropagation();
+                return false;
+            });
+            //entity.setAttribute('info-dingens', doc.description);
+            */
+        }
     };
 
     $http.get('/api/documents/' + $scope.params.documentId).then(function(response) {
@@ -123,5 +149,49 @@ AFRAME.registerComponent('waypoint-editor', {
     
     remove: function() {
         window.removeEventListener('keyup', this.handleKeyUp);
+    }
+});
+
+AFRAME.registerComponent('info-dingens', {
+    schema: { type: 'string' },
+    init: function () {
+        var el = this.el;
+        var infoDinges = this;
+        el.addEventListener('raycaster-intersection', function(evt) {
+            var intersections = evt.detail.intersections;
+            for (var i = 0; i < intersections.length; i++) {
+                var intersection = intersections[i];
+                var el = intersection.object.el;
+                if (el.doc) {
+                    var infoPlane = document.querySelector('#info-plane');
+                    if (!el.doc.description) {
+                        infoPlane.setAttribute('visible', false);
+                        break;
+                    }
+                    var point = intersection.point;
+                    var infoPlaneText = document.querySelector('#info-plane-text');
+                    var text = infoPlaneText.getAttribute('text');
+                    text.value = el.doc.description;
+                    infoPlaneText.setAttribute('text', text);
+                    infoPlane.setAttribute('visible', true);
+                    infoPlane.setAttribute('position', {
+                        x: point.x - .6,
+                        y: point.y + .6,
+                        z: point.z + .5
+                    });
+                    break;
+                }
+            }
+        });
+        el.addEventListener('raycaster-intersection-cleared', function(evt) {
+            var infoPlane = document.querySelector('#info-plane');
+            infoPlane.setAttribute('visible', false);
+        });
+        this.refreshRaycaster = window.setInterval(function() {
+            el.components.raycaster.refreshObjects();
+        }, 100);
+    },
+    remove: function() {
+        window.clearInterval(this.refreshRaycaster);
     }
 });
