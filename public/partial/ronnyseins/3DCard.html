@@ -6,9 +6,10 @@
     </md-toolbar>
 
     <a-scene embedded>
-        <a-entity mouse-wheel ng-if="extension === '.dae'" collada-model="{{documentSrc}}"></a-entity>
-        <a-entity mouse-wheel ng-if="extension === '.obj'" obj-model="obj:url({{documentSrc}})"></a-entity>
+        <a-entity ng-if="extension === '.dae'" collada-model="{{documentSrc}}"></a-entity>
+        <a-entity ng-if="extension === '.obj'" obj-model="obj:url({{documentSrc}})"></a-entity>
         <a-sky color="#ECECFF"></a-sky>
+        <a-camera waypoint-editor mouse-wheel></a-camera>
     </a-scene>
 
 </md-card>

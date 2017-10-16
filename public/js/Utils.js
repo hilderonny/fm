@@ -133,6 +133,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 savedEntity = saveEntityResponse.data;
                 var dynamicAttributesToSend = [];
                 // Nur die Daten senden, die zwingend notwendig sind. Der Rest kann von der API ermittelt werden
+                if (!scope.dynamicAttributes) return Promise.resolve();
                 scope.dynamicAttributes.forEach(function(da) {
                     dynamicAttributesToSend.push({
                         daId: da.type._id,

@@ -7,7 +7,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
     
     // Click on Save-button to save an existing document
     $scope.saveDocument = function() {
-        var documentToSend = { name: $scope.document.name, isShared: $scope.document.isShared };
+        var documentToSend = { name: $scope.document.name, isShared: $scope.document.isShared, waypoints: $scope.document.waypoints };
         utils.saveEntity($scope, 'documents', $scope.document._id, '/api/documents/', documentToSend).then(function(savedDocument) {
             $scope.documentName = savedDocument.name;
             if ($scope.params.saveDocumentCallback) {
@@ -90,6 +90,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             $scope.document = document;
             $scope.documentName = document.name;
             $scope.documentUrl = window.location.origin + '/api/documents/share/' + $scope.params.documentId;
+            $scope.is3Dmodel =  document.extension === '.dae' || document.extension === '.obj';
             $scope.isPreviewable = [
                 'application/vnd.ms-pki.stl'
             ].indexOf(document.type) >= 0;
