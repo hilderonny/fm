@@ -56,6 +56,13 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
         })
     }
 
+    $scope.viewInAR = function() {
+        utils.removeCardsToTheRightOf($element);
+        utils.addCardWithPermission('ronnyseins/3DCard', {
+            documentId: $scope.document._id
+        }, 'PERMISSION_OFFICE_DOCUMENT');
+    };
+
     // User clicks on close button
     $scope.closeCard = function() {
         if ($scope.params.closeCallback) {

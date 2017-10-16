@@ -1,0 +1,14 @@
+<md-card class="fullsize" ng-cloak ng-controller="ronnyseins3DCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <a-scene embedded>
+        <a-entity mouse-wheel ng-if="extension === '.dae'" collada-model="{{documentSrc}}"></a-entity>
+        <a-entity mouse-wheel ng-if="extension === '.obj'" obj-model="obj:url({{documentSrc}})"></a-entity>
+        <a-sky color="#ECECFF"></a-sky>
+    </a-scene>
+
+</md-card>

@@ -143,6 +143,7 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     // Create document in database and assign user, client and parentFolderId
     var document = { 
         name: file.originalname,
+        extension: file.originalname.substring(file.originalname.lastIndexOf('.')),
         type: file.mimetype, 
         clientId: clientId !== null ? monk.id(clientId) : null,
         isExtractable: file.mimetype === 'application/x-zip-compressed' || file.mimetype === 'application/zip',

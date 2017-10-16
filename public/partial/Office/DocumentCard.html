@@ -7,6 +7,11 @@
             <p translate>TRK_DOCUMENTS_DOWNLOAD</p>
         </md-button>
         <ng-include ng-if="!isNewFolder" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <md-button ng-click="viewInAR()" aria-label="VIEW IN 3D" ng-if="document.extension === '.dae' || document.extension === '.obj'">
+            <md-tooltip md-direction="bottom">In 3D betrachten</md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Virtual Reality.svg"></md-icon>
+            <p>In 3D betrachten</p>
+        </md-button>
         <div flex></div>
         <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
     </md-toolbar>

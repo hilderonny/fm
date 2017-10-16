@@ -418,11 +418,14 @@
                 "css/icons/office/Virtual Reality.svg",
                 "css/icons/material/World Map.svg",
                 "css/icons/office/World Map.svg",
+                "partial/ronnyseins/3DCard.html",
                 "partial/ronnyseins/AugmentedRealityCard.html",
                 "partial/ronnyseins/GoogleMapsCard.html"
             ],
             "include" : [
                 "public/js/lib/babylon.js",
+                "public/js/lib/aframe-v0.7.0.min.js",
+                "public/js/ronnyseins/3DCardController.js",
                 "public/js/ronnyseins/AugmentedRealityCardController.js",
                 "public/js/ronnyseins/GoogleMapsCardController.js"
             ],
