@@ -7,7 +7,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
     
     // Click on Save-button to save an existing document
     $scope.saveDocument = function() {
-        var documentToSend = { name: $scope.document.name, isShared: $scope.document.isShared, waypoints: $scope.document.waypoints };
+        var documentToSend = { name: $scope.document.name, isShared: $scope.document.isShared, description: $scope.document.description };
         utils.saveEntity($scope, 'documents', $scope.document._id, '/api/documents/', documentToSend).then(function(savedDocument) {
             $scope.documentName = savedDocument.name;
             if ($scope.params.saveDocumentCallback) {

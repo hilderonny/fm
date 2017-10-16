@@ -46,6 +46,7 @@ app.controller('ronnyseins3DCardController', function($scope, $http, $mdDialog, 
             '.obj': 'obj-model'
         };
         entity.setAttribute(modelTypeAttributes[doc.extension], '/api/documents/' + doc._id + '?action=download&token=' + $http.defaults.headers.common['x-access-token']);
+        if (!doc.waypoints) doc.waypoints = [];
         doc.waypoints.forEach(window.addWayPoint);
     };
 
@@ -54,7 +55,6 @@ app.controller('ronnyseins3DCardController', function($scope, $http, $mdDialog, 
         window.currentScope = $scope;
         window.utils = utils;
         $scope.document = response.data;
-        if (!$scope.document.waypoints) $scope.document.waypoints = [];
         $scope.loadDocument($scope.document);
         if ($scope.document.waypoints.length > 0) {
             var camera = document.querySelector('a-camera');
