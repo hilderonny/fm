@@ -1,13 +1,25 @@
 app.controller('ronnyseins3DCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
 
-    window.addWayPoint = function(position) {
+    window.addWayPoint = function(waypoint) {
         var scene = document.querySelector('a-scene');
         var entity = document.createElement('a-entity');
         scene.appendChild(entity);
+        entity.waypoint = { x: waypoint.x, y: waypoint.y, z: waypoint.z, rx: waypoint.rx, ry: waypoint.ry };
         entity.setAttribute('geometry', { primitive: 'octahedron' });                
-        entity.setAttribute('position', { x: position.x, y: position.y, z: position.z });
-        entity.setAttribute('scale', { x: 0.2, y: 0.5, z: 0.2 });
-        entity.setAttribute('material', { opacity:0.5, color: '#00ff00', emissive: '#00ff00' });
+        entity.setAttribute('position', { x: waypoint.x, y: waypoint.y, z: waypoint.z });
+        entity.setAttribute('scale', { x: 0.1, y: 0.2, z: 0.1 });
+        entity.setAttribute('material', { opacity:0.3, color: '#00ff00', emissive: '#006600' });
+        entity.addEventListener('mouseenter', function() {
+            entity.setAttribute('material', { opacity:1, color: '#00ff00', emissive: '#00ff00' });
+            entity.fuseTimeout = window.setTimeout(function() {
+                console.log('CLICK');
+                $scope.setCameraPosition(entity.waypoint, false);
+            }, 1500);
+        });
+        entity.addEventListener('mouseleave', function() {
+            window.clearTimeout(entity.fuseTimeout);
+            entity.setAttribute('material', { opacity:0.3, color: '#00ff00', emissive: '#006600' });
+        });
     };
         
     $scope.closeCard = function() {
@@ -69,7 +81,6 @@ AFRAME.registerComponent('waypoint-editor', {
             var position = el.getAttribute('position');
             var rotation = el.getAttribute('rotation');
             window.currentScope.document.waypoints.push({ x: position.x, y: position.y, z: position.z, rx: rotation.x, ry: rotation.y });
-            console.log(window.currentScope.document.waypoints);
             var documentToSend = { waypoints: window.currentScope.document.waypoints };
             window.utils.saveEntity(window.currentScope, 'documents', window.currentScope.document._id, '/api/documents/', documentToSend).then(function(savedDocument) {
                 window.addWayPoint(position);
