@@ -1,4 +1,4 @@
-app.controller('OfficeDocumentCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('OfficeDocumentCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, $location, utils) {
 
     // Click on Download-document-button
     $scope.downloadDocument = function() {
@@ -99,6 +99,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             // Berechtigungen ermitteln
             $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
             utils.loadDynamicAttributes($scope, 'documents', $scope.params.documentId);
+            if ($location.search().view3D) $scope.viewInAR();
             utils.setLocation('/documents/' + $scope.params.documentId);
         });
     }
