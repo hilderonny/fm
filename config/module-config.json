@@ -406,7 +406,8 @@
             "languages" : [ "en", "de" ],
             "settingsets" : [
                 { "mainCard": "Administration/PortalSettingsCard", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "type": "SETTINGSET_TYPE_PORTAL", "icon": "Server", "permission": "PERMISSION_SETTINGS_PORTAL" }
-            ]
+            ],
+            "utils" :["portalUpdatesHelper"]
         },
 
         "ronnyseins" : {

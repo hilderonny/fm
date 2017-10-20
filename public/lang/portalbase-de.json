@@ -1,4 +1,5 @@
-{
+{   
+    "TRK_SETTINGS_AUTOUPDATES" : "Auto-Update",
     "TRK_SETTINGS_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_SETTINGS_CHECK_FOR_UPDATES" : "Updates suchen",
     "TRK_SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE" : "Installieren",
