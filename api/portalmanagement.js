@@ -54,28 +54,8 @@ router.get('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'r', co.modules.por
  * Starts updating the server from the license server
  */
 router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.portalbase), (req, res) => {
-    /*var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
-    var updateExtractPath = localConfig.updateExtractPath ? localConfig.updateExtractPath : './temp/';
-    var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
-    var updateRequest = request(url);
-   //console.log(updateRequest);
-    updateRequest.on('error', function () {
-        updateRequest.abort();
-        return res.sendStatus(400);
-    });
-    updateRequest.on('response', function (response) {
-        if (response.statusCode !== 200) {
-            updateRequest.abort();
-            return res.sendStatus(400);
-        }
-    });
-    var unzipStream = updateRequest.pipe(unzip.Extract({ path: updateExtractPath }));
-    unzipStream.on('close', function() {
-        return res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
-    });*/
     var instantUpdate = true;
     portalUpdatesHelper.triggerUpdate(instantUpdate, res);
-    
 });
 
 /**

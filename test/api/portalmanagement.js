@@ -71,12 +71,12 @@ describe('API portalmanagement', function() {
 
         th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS);
 
-        it('responds with portalsettings (licenseserverurl and licensekey only) from localconfig', function() {
+        it('responds with portalsettings (autoUpdateMode, licenseserverurl and licensekey only) from localconfig', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                 return th.get(`/api/${co.apis.portalmanagement}?token=${token}`).expect(200);
             }).then(function(response) {
                 var result = response.body;
-                assert.strictEqual(Object.keys(result).length, 2);
+                assert.strictEqual(Object.keys(result).length, 3);
                 assert.ok(result.licensekey);
                 assert.strictEqual(result.licensekey, lc.licensekey);
                 assert.ok(result.licenseserverurl);
