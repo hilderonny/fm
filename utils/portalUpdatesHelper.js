@@ -36,6 +36,7 @@ module.exports.triggerUpdate = function(instantUpdate, res){
 
     } else { //when autoupdateMode == false and there wasn't a maual (i.e. via user button click) update trigger
         return; //don't take any actions
+        //TODO should it return res.sendStatus(200)?
     }
 
 };
