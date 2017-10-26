@@ -7,7 +7,7 @@ module.exports.triggerUpdate = function(instantUpdate, res){
     //trigger updates either when 'autoupdate'-checkbox setting is on, or 
     //when user maually wants to trigger updates on button click
     var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());  //require('../config/localconfig.json') cannot be used becuase require is synchronous and only reads the file once, following calls return the result from cache, which prevents unit testing
-    if(localConfig.autoupdateMode || instantUpdate){
+    if(localConfig.autoUpdateMode || instantUpdate){
         return new Promise(function(resolve, reject){
             var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
             var updateRequest = request(url);
@@ -34,7 +34,7 @@ module.exports.triggerUpdate = function(instantUpdate, res){
             });
         });
 
-    } else { //when autoupdateMode == false and there wasn't a maual (i.e. via user button click) update trigger
+    } else { //when autoUpdateMode == false and there wasn't a maual (i.e. via user button click) update trigger
         return; //don't take any actions
         //TODO should it return res.sendStatus(200)?
     }
