@@ -11,32 +11,38 @@ module.exports.triggerUpdate = function(instantUpdate, res){
         return new Promise(function(resolve, reject){
             var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
             var updateRequest = request(url);
-            resolve(updateRequest);
 
-         }).then(function(updateRequest){
-
+            // console.log(updateRequest);
             updateRequest.on('error', function (error) {
+              //  console.log(error);
                 updateRequest.abort();
-                return res.sendStatus(400);
+                res.sendStatus(400);
+                reject();
             });
 
             updateRequest.on('response', function (response) {
                 if (response.statusCode !== 200) {
                     updateRequest.abort();
-                    return res.sendStatus(400);
+                    // console.log("Bad response :(");
+                    res.sendStatus(400);
+                    reject();
                 }else{
                     var updateExtractPath = localConfig.updateExtractPath ? localConfig.updateExtractPath : './temp/';
                     var unzipStream = updateRequest.pipe(unzip.Extract({ path: updateExtractPath }));
+                    console.log(unzipStream);
+                    console.log(updateExtractPath, __dirname);
                     unzipStream.on('close', function() {
-                        return res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
+                        // console.log('Done writing updates!');
+                        res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
+                        resolve();
                     });
                 }
             });
         });
 
     } else { //when autoUpdateMode == false and there wasn't a maual (i.e. via user button click) update trigger
+        //console.log("No actions required!");
         return; //don't take any actions
-        //TODO should it return res.sendStatus(200)?
     }
 
 };

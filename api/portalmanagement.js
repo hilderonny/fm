@@ -71,7 +71,8 @@ router.put('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.por
     if(portalSettings.licenseserverurl && portalSettings.licensekey){
         localConfig.licenseserverurl = portalSettings.licenseserverurl;
         localConfig.licensekey = portalSettings.licensekey;
-    }else if(portalSettings.autoUpdateMode == false || portalSettings.autoUpdateMode == true){ // make sure that portalSettings.autoUpdateMode exists
+    }else if(portalSettings.autoUpdateMode == false ||  portalSettings.autoUpdateMode == true){
+        // make sure that portalSettings.autoUpdateMode exists; it can have only FALSE or TRUE as valid value
         localConfig.autoUpdateMode = portalSettings.autoUpdateMode;
     }
     fs.writeFileSync('./config/localconfig.json', JSON.stringify(localConfig, null, 4));

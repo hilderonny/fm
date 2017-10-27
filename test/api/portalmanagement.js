@@ -298,7 +298,7 @@ describe('API portalmanagement', function() {
             });
         });
 
-        it('responds with 200 and does not update the localconfig file when other properties than licenseserverurl and licensekey are sent', function() {
+        it('responds with 200 and does not update the localconfig file when other properties than licenseserverurl and licensekey, or autoUpdateMode are sent', function() {
             var loginToken, settings;
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                 loginToken = token;
@@ -318,6 +318,40 @@ describe('API portalmanagement', function() {
             });
         });
 
+        it('responds with 200 but does not update the localconfig file when invalid (e.g. null) value for autoUpdateMode is sent', function() {
+            var loginToken, settings;
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                loginToken = token;
+                settings = {
+                    autoUpdateMode: null,
+                    documentspath: 'newdocpath/',
+                    tokensecret: 'newtokensecret',
+                    newproperty: 'newproperty'
+                };
+                return th.put(`/api/${api}?token=${loginToken}`).send(settings).expect(200);
+            }).then(function() {
+                var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
+                assert.strictEqual(updatedLocalConfig.documentspath, lc.documentspath);
+                assert.notStrictEqual(updatedLocalConfig.documentspath, settings.documentspath);
+                assert.strictEqual(updatedLocalConfig.tokensecret, lc.tokensecret);
+                assert.notStrictEqual(updatedLocalConfig.tokensecret, settings.tokensecret);
+                assert.ok(!updatedLocalConfig.newproperty);
+            });
+        });
+
+        it('responds with 200 and updates the autoUpdateMode property in the localconfig.json file with the new sent data', function() {
+            var loginToken;
+            var settings = {autoUpdateMode: false}; //autoUpdateMode should have either TRUE or FALSE as value 
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                loginToken = token;
+            }).then(function() {
+                return th.put(`/api/${api}?token=${loginToken}`).send(settings).expect(200);
+            }).then(function() {
+                var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
+                assert.strictEqual(updatedLocalConfig.autoUpdateMode, settings.autoUpdateMode);
+            });
+        })
+
     });
 
     describe('DELETE/', function() {
@@ -328,6 +362,51 @@ describe('API portalmanagement', function() {
             });
         });
     
+    });
+
+    describe('UTILS portalUpdatesHelper', function() {
+
+        var instantUpdate = false;
+        var portalUpdatesHelper = require('../../utils/portalUpdatesHelper');
+        var res;
+        function checkExtractedFiles(path, moduleNames) {
+            th.createFileList(moduleNames).forEach(function(fileName) {
+                var fullPath = path + fileName;
+                console.log(fullPath, __dirname);
+                console.log(fs.readdirSync('./'));
+                assert.ok(fs.existsSync(fullPath), `File ${fullPath} does not exist`);
+                //console.log(fs.existsSync(fullPath), `File ${fullPath} does not exist`);
+            });
+            return Promise.resolve();
+        }
+
+        function checkNoExtractedFiles(path, moduleNames) {
+            th.createFileList(moduleNames).forEach(function(fileName) {
+                var fullPath = path + fileName;
+                assert.ok(!fs.existsSync(fullPath), `File ${fullPath} exists`);
+            });
+            return Promise.resolve();
+        }
+
+        it('Do not trigger updates when autoUpdateMode is set to FALSE', async function(){
+            //set auroUpdateMode to FALSE
+            lc.autoUpdateMode = false;
+            delete lc.updateExtractPath;
+            saveConfigs();   
+            var result = await portalUpdatesHelper.triggerUpdate(instantUpdate, res);
+            return checkNoExtractedFiles('../../temp/', [co.modules.base]);
+        });
+
+        it.only('Trigger Updates when autoUpdateMode is set to TRUE', async function(){
+            //set auroUpdateMode to TRUE
+            lc.autoUpdateMode = true;
+            delete lc.updateExtractPath;
+            lc.licenseserverurl = 'http://localhost';
+            saveConfigs();
+            var result = await portalUpdatesHelper.triggerUpdate(instantUpdate, res);
+            return checkExtractedFiles('../../temp/', [co.modules.base]);
+        });
+
     });
 
 });
