@@ -364,49 +364,4 @@ describe('API portalmanagement', function() {
     
     });
 
-    describe('UTILS portalUpdatesHelper', function() {
-
-        var instantUpdate = false;
-        var portalUpdatesHelper = require('../../utils/portalUpdatesHelper');
-        var res;
-        function checkExtractedFiles(path, moduleNames) {
-            th.createFileList(moduleNames).forEach(function(fileName) {
-                var fullPath = path + fileName;
-                console.log(fullPath, __dirname);
-                console.log(fs.readdirSync('./'));
-                assert.ok(fs.existsSync(fullPath), `File ${fullPath} does not exist`);
-                //console.log(fs.existsSync(fullPath), `File ${fullPath} does not exist`);
-            });
-            return Promise.resolve();
-        }
-
-        function checkNoExtractedFiles(path, moduleNames) {
-            th.createFileList(moduleNames).forEach(function(fileName) {
-                var fullPath = path + fileName;
-                assert.ok(!fs.existsSync(fullPath), `File ${fullPath} exists`);
-            });
-            return Promise.resolve();
-        }
-
-        it('Do not trigger updates when autoUpdateMode is set to FALSE', async function(){
-            //set auroUpdateMode to FALSE
-            lc.autoUpdateMode = false;
-            delete lc.updateExtractPath;
-            saveConfigs();   
-            var result = await portalUpdatesHelper.triggerUpdate(instantUpdate, res);
-            return checkNoExtractedFiles('../../temp/', [co.modules.base]);
-        });
-
-        it.only('Trigger Updates when autoUpdateMode is set to TRUE', async function(){
-            //set auroUpdateMode to TRUE
-            lc.autoUpdateMode = true;
-            delete lc.updateExtractPath;
-            lc.licenseserverurl = 'http://localhost';
-            saveConfigs();
-            var result = await portalUpdatesHelper.triggerUpdate(instantUpdate, res);
-            return checkExtractedFiles('../../temp/', [co.modules.base]);
-        });
-
-    });
-
 });

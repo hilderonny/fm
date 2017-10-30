@@ -54,8 +54,12 @@ router.get('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'r', co.modules.por
  * Starts updating the server from the license server
  */
 router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.portalbase), (req, res) => {
-    var instantUpdate = true;
-    portalUpdatesHelper.triggerUpdate(instantUpdate, res);
+    portalUpdatesHelper.triggerUpdate(true).then((wasUpdated) => {
+        res.sendStatus(200);
+    }, () => {
+        // error
+        res.sendStatus(400);
+    })
 });
 
 /**
