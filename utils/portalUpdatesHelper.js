@@ -1,4 +1,4 @@
-var unzip = require('unzip');
+var unzip = require('unzip2');
 var request = require('request');
 var fs = require('fs');
 

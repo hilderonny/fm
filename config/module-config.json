@@ -82,7 +82,7 @@
                 "chat.html",
                 "favicon.png"
             ],
-            "root" : [ "app.js", "package.json", "package-lock.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "config/localconfig.json.template" ],
+            "root" : [ "app.js", "package.json", "package-lock.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "triggerupdate.js", "config/localconfig.json.template" ],
             "include" : [
                 "public/js/lib/angular.min.js",
                 "public/js/lib/angular-aria.min.js",

@@ -10,7 +10,7 @@ var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateId');
 var fs = require('fs');
 var request = require('request');
-var unzip = require('unzip');
+var unzip = require('unzip2');
 var co = require('../utils/constants');
 var portalUpdatesHelper = require('../utils/portalUpdatesHelper');
 
