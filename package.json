@@ -32,7 +32,6 @@
     "monk": "^4.0.0",
     "morgan": "^1.7.0",
     "multer": "^1.2.0",
-    "node-windows": "^0.1.12",
     "request": "^2.79.0",
     "send": "^0.15.4",
     "socket.io": "^1.7.2",
