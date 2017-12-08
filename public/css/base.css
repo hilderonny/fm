@@ -84,6 +84,10 @@ md-card md-card-content {
     background-color: rgba(255,255,255,0.9);
 }
 
+md-card > ng-include {
+    background-color: rgba(255,255,255,0.97);
+}
+
 md-card.list-details-details {
     flex: 1;
     width: initial;
@@ -571,6 +575,9 @@ md-toolbar md-input-container input {
     min-width: 16px;
 }
 
+.md-subheader.md-default-theme, .md-subheader {
+    background-color: transparent;
+}
 
 .progress-panel {
     background-color: rgba(255,255,255,0.9);

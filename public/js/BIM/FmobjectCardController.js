@@ -22,6 +22,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
 
     // Click on Create-button to create a new FM object
     $scope.createFmObject = function() {
+        $rootScope.isLoading = true;
         var fmObjectToSend =  { 
             name: $scope.fmObject.name, 
             type: $scope.fmObject.type, 
@@ -42,11 +43,13 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             $translate(['TRK_FMOBJECTS_FM_OBJECT_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_FM_OBJECT_CREATED).hideDelay(1000).position('bottom right'));
             });
+            $rootScope.isLoading = false;
         });
     };
 
     // Click on Save-button to save an existing FM object
     $scope.saveFmObject = function() {
+        $rootScope.isLoading = true;
         var fmObjectToSend = { 
             name: $scope.fmObject.name, 
             type: $scope.fmObject.type, 
@@ -59,7 +62,8 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             if ($scope.params.saveFmObjectCallback) {
                 $scope.params.saveFmObjectCallback(savedFmObject);
             }
-            return $translate(['TRK_FMOBJECTS_CHANGES_SAVED']);
+            $rootScope.isLoading = false;
+            return $translate(['TRK_FMOBJECTS_CHANGES_SAVED']);            
         }).then(function(translations) {
             $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
         });
@@ -78,6 +82,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
                 .cancel(translations.TRK_NO);
             return $mdDialog.show(confirm);
         }).then(function() {
+            $rootScope.isLoading = true;
             return $http.delete('/api/fmobjects/' + $scope.fmObject._id);
         }).then(function(response) {
             if ($scope.params.deleteFmObjectCallback) {
@@ -86,6 +91,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             utils.removeCardsToTheRightOf($element);
             utils.removeCard($element);
             $mdToast.show($mdToast.simple().textContent(translations.TRK_FMOBJECTS_FM_OBJECT_DELETED).hideDelay(1000).position('bottom right'));
+            $rootScope.isLoading = false;
         });
     };
 
@@ -100,6 +106,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
 
     // Dialog zur Bildauswahl öffnen
     $scope.openImageSelectionDialog = function() {
+        $rootScope.isLoading = true;
         var parentScope = $scope;
         $http.get('/api/folders/allFoldersAndDocuments?type=image').then(function(response) {
             var folderOrDocument = response.data;
@@ -133,7 +140,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
                     element = element.parent;
                     element.isOpen = true;
                 }
-            }
+            }  $rootScope.isLoading = false;
             $mdDialog.show({
                 controller: function ($scope) {
                     $scope.parentScope = parentScope;
@@ -147,7 +154,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
                 $scope.fmObject.previewImageId = $scope.selectedImage ? $scope.selectedImage.id : null;
                 $scope.selectedElement = null; 
             }, function(reject) { // Beim Abbrechen
-                $scope.selectedElement = null; 
+                $scope.selectedElement = null;
             });
         });
     };
@@ -177,6 +184,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
     // - $scope.params.deleteFmObjectCallback : Callback function when an existing FM object was deleted. No parameters
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
+        $rootScope.isLoading=true;
         // Switch between creation of a new FM object and loading of an existing FM object
         if ($scope.params.fmObjectId) {
             // Existing FM object
@@ -189,6 +197,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
                 $scope.relationsEntity = { type:'fmobjects', id:completeFmObject._id };
                 utils.loadDynamicAttributes($scope, 'fmobjects', $scope.params.fmObjectId);
                 utils.setLocation('/fmobjects/' + $scope.params.fmObjectId);
+                $rootScope.isLoading = false;
             });
         } else {
             // New FM object
@@ -197,6 +206,7 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             if ($scope.params.parentFmObjectId) {
                 $scope.fmObject.parentId = $scope.params.parentFmObjectId;
             }
+            $rootScope.isLoading=false;
         }
         $scope.canWriteFmObjects = $rootScope.canWrite('PERMISSION_BIM_FMOBJECT');
         $scope.token = $http.defaults.headers.common['x-access-token'];

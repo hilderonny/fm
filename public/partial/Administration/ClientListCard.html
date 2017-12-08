@@ -1,5 +1,5 @@
 <md-card ng-cloak ng-controller="AdministrationClientListCardController" style="background-image:url('/css/icons/office/Briefcase.svg');">
-    
+
     <md-toolbar class="md-toolbar-tools md-accent">
         <md-button ng-click="newClient()" aria-label="ADD CLIENT" ng-if="canWriteClients">
             <md-tooltip md-direction="bottom"><span translate>TRK_CLIENTS_CREATENEWCLIENT</span></md-tooltip>
@@ -8,14 +8,14 @@
         </md-button>
     </md-toolbar>
     
-    <md-card-content>
-        <md-list class="lines-beetween-items">
+    <md-card-content>        
+        <md-list class="lines-beetween-items" >
             <md-list-item ng-repeat="client in clients | orderBy: 'name'" ng-click="selectClient(client)" ng-class="selectedClient == client ? 'active' : false" aria-label="{{client.name}}">
                 <md-icon md-svg-src="/css/icons/material/Briefcase.svg"></md-icon>
                 <p ng-bind="client.name"></p>
             </md-list-item>
-        </md-list>
-    </md-card-content>
-
+        </md-list>    
+    </md-card-content>   
+    
     <resize-handle></resize-handle>
 </md-card>

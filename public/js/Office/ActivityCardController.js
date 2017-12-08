@@ -9,6 +9,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
     
     // Click on Create-button to create a new activity
     $scope.createActivity = function() {
+        $rootScope.isLoading = true;
         var activityToSend =  { 
             date: $scope.activity.date, 
             name: $scope.activity.name, 
@@ -34,11 +35,13 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_ACTIVITIES_ACTIVITY_CREATED).hideDelay(1000).position('bottom right'));
             });
             utils.setLocation('/activities/' + createdActivity._id);
+            $rootScope.isLoading = false;
         });
     };
 
     // Click on Save-button to save an existing activity
     $scope.saveActivity = function() {
+        $rootScope.isLoading = true;
         var activityToSend = { isDone: $scope.activity.isDone, comment: $scope.activity.comment };
         if (!$scope.canWriteActivities) return;
         activityToSend.date = $scope.activity.date;
@@ -52,8 +55,9 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                 $scope.params.saveActivityCallback(savedActivity);
             }
             $translate(['TRK_ACTIVITIES_CHANGES_SAVED']).then(function(translations) {
-                $mdToast.show($mdToast.simple().textContent(translations.TRK_ACTIVITIES_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_ACTIVITIES_CHANGES_SAVED).hideDelay(1000).position('bottom right'));               
             });
+            $rootScope.isLoading = false;
         });
     };
 
@@ -66,6 +70,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
+                    $rootScope.isLoading = true;                    
                     $http.delete('/api/activities/' + $scope.activity._id).then(function(response) {
                         if ($scope.params.deleteActivityCallback) {
                             $scope.params.deleteActivityCallback();
@@ -73,6 +78,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_ACTIVITIES_ACTIVITY_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading = false;                        
                     });
                 });
             });
@@ -97,6 +103,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
         $scope.canWriteActivities = $rootScope.canWrite('PERMISSION_OFFICE_ACTIVITY');
+        $rootScope.isLoading= true;
         // Switch between creation of a new activity and loading of an existing activity
         if ($scope.params.activityId) {
             // Existing activity
@@ -110,11 +117,13 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                 utils.loadDynamicAttributes($scope, 'activities', $scope.params.activityId);
                 utils.setLocation('/activities/' + completeActivity._id);
                 if (!completeActivity.currentUserCanWrite) $scope.canWriteActivities = false; // Nur Ersteller darf schreiben
+                $rootScope.isLoading= false;
             });
         } else {
             // New activity
             $scope.isNewActivity = true;
             $scope.activity = { date: new Date(), name: '', task: '', isForAllUsers: true, isDone: false, type: 'ACTIVITIES_TYPE_NONE', comment: '' };
+            $rootScope.isLoading= false;
         }
     };
 

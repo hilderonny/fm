@@ -48,6 +48,7 @@ app.controller('LicenseServerPortalListCardController', function($scope, $rootSc
     // Params:
     // - $scope.params.selectedPortalId : ID of the portal to select in the list
     $scope.load = function() {
+        $rootScope.isLoading = true;
         $scope.selectedPortal = false;
         $http.get('/api/portals').then(function (response) {
             $scope.portals = response.data;
@@ -65,6 +66,7 @@ app.controller('LicenseServerPortalListCardController', function($scope, $rootSc
             // Check preselection
             utils.handlePreselection($scope, $scope.portals, $scope.selectPortal);
             if (!$scope.params.preselection) utils.setLocation('/portals');
+            $rootScope.isLoading = false;
         });
     }
 

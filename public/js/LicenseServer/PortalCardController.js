@@ -15,11 +15,13 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
             $http.post('/api/portalmodules', portalModuleToSave).then(function(response) {
                 portalModuleToUpdate._id = response.data._id;
                 portalModuleToUpdate.active = response.data.active;
+                $rootScope.isLoading = false;
             });
         } else {
             $http.delete('/api/portalmodules/' + portalModuleToSave._id).then(function() {
                 delete portalModuleToUpdate._id;
                 portalModuleToUpdate.active = false;
+                $rootScope.isLoading = false;
             });
         }
     };
@@ -28,11 +30,13 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
         if (!$scope.canWritePortals) return;
         var tempPortalModule = JSON.parse(JSON.stringify(portalModule));
         tempPortalModule.active = !tempPortalModule.active;
+        $rootScope.isLoading = true;
         $scope.savePortalModule(tempPortalModule, portalModule);
     };
 
     // Click on Create-button to create a new portal
     $scope.createPortal = function() {
+        $rootScope.isLoading = true;
         var portalToSend = { 
             name: $scope.portal.name,
             isActive: $scope.portal.isActive,
@@ -52,17 +56,19 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
             if ($scope.params.createPortalCallback) {
                 $scope.params.createPortalCallback(createdPortal);
             }
-            return $scope.getPortalModules();
+            return $scope.getPortalModules();           
         }).then(function() {
             return $translate(['TRK_PORTALS_PORTAL_CREATED']);
         }).then(function(translations) {
             $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_PORTAL_CREATED).hideDelay(1000).position('bottom right'));
             utils.setLocation('/portals/' + createdPortal._id);
+            $rootScope.isLoading = false;
         });
     };
 
     // Click on Save-button to save an existing portal
     $scope.savePortal = function() {
+        $rootScope.isLoading = true;
         var portalToSend = { 
             name: $scope.portal.name,
             isActive: $scope.portal.isActive,
@@ -77,6 +83,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
             $translate(['TRK_PORTALS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });
+            $rootScope.isLoading = false;
         });
     };
 
@@ -89,6 +96,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
+                    $rootScope.isLoading = true;
                     $http.delete('/api/portals/' + $scope.portal._id).then(function(response) {
                         if ($scope.params.deletePortalCallback) {
                             $scope.params.deletePortalCallback();
@@ -96,7 +104,8 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_PORTAL_DELETED).hideDelay(1000).position('bottom right'));
-                    });
+                        $rootScope.isLoading = false;
+                    }); 
                 });
             });
         });
@@ -119,10 +128,12 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
                 .ok(translations.TRK_YES)
                 .cancel(translations.TRK_NO);
             $mdDialog.show(confirm).then(function() {
+                $rootScope.isLoading = true;
                 $http.post('/api/portals/newkey/' + $scope.portal._id, {}).then(function(response) {
                     var updatedPortal = response.data;
                     $scope.portal.licenseKey = updatedPortal.licenseKey;
                     $mdToast.show($mdToast.simple().textContent(translations.TRK_PORTALS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+                    $rootScope.isLoading = false;
                 });
             });
         });
@@ -136,6 +147,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
     // - $scope.params.deletePortalCallback : Callback function when an existing portal was deleted. No parameters
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
+        $rootScope.isLoading= true;
         // Switch between creation of a new portal and loading of an existing portal
         if ($scope.params.portalId) {
             // Existing portal
@@ -147,15 +159,17 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
                 // Zeitstempel in Datum umwandeln
                 if ($scope.portal.lastNotification) $scope.portal.lastNotification = new Date($scope.portal.lastNotification).toLocaleString();
                 $scope.relationsEntity = { type:'portals', id:completePortal._id };
-                return $scope.getPortalModules();
+                return $scope.getPortalModules();              
             }).then(function() {
                 utils.loadDynamicAttributes($scope, 'portals', $scope.params.portalId);
                 utils.setLocation('/portals/' + $scope.params.portalId);
-            });
+                $rootScope.isLoading = false;
+            });           
         } else {
             // New portal
             $scope.isNewPortal = true;
             $scope.portal = { name : "", isActive : true, portalModules: [], url : "", comment: "" };
+            $rootScope.isLoading = false;
         }
         $scope.canWritePortals = $rootScope.canWrite('PERMISSION_LICENSESERVER_PORTAL');
     };

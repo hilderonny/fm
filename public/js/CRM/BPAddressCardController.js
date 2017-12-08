@@ -1,6 +1,7 @@
 app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.createBPAddress = function() {
+        $rootScope.isLoading = true;
         var BPAddressToSend = {
             partnerId: $scope.params.partnerId,
             addressee: $scope.partnerAddress.addressee,
@@ -19,11 +20,13 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
             }
             $translate(['TRK_BUSINESSPARTNERS_ADDRESS_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_BUSINESSPARTNERS_ADDRESS_CREATED).hideDelay(1000).position('bottom right'));
-            });
+            }); 
+            $rootScope.isLoading = false;
         });
     }
 
     $scope.saveBPAddress = function(){
+        $rootScope.isLoading = true;        
         var BPAddressToSend = {            
             addressee: $scope.partnerAddress.addressee,
             street:$scope.partnerAddress.street,
@@ -38,7 +41,8 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
             }
             $translate(['TRK_BUSINESSPARTNERS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_BUSINESSPARTNERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
-            });            
+            }); 
+            $rootScope.isLoading = false;           
         });
     }
 
@@ -51,6 +55,7 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
                 .ok(translations.TRK_YES)
                 .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function(){
+                    $rootScope.isLoading = true;
                     $http.delete('/api/partneraddresses/'+ $scope.partnerAddress._id).then(function(response){
                         if ($scope.params.deleteBPAddressCallback) {
                             $scope.params.deleteBPAddressCallback();
@@ -58,6 +63,7 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_BUSINESSPARTNERS_ADDRESS_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading = false;
                     });
                 });
             });
@@ -76,6 +82,7 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
     $scope.addressTypes = ['Primaryaddress','Postaddress','Delivaryaddress','Billaddress'];
 
     $scope.load = function(){
+        $rootScope.isLoading= true;
         if($scope.params.partnerAddressId){
             $http.get('/api/partneraddresses/' + $scope.params.partnerAddressId).then(function(response){               
                 var completePartnerAddress = response.data;               
@@ -83,10 +90,12 @@ app.controller('CRMBPAddressCardController', function($scope, $rootScope, $http,
                 $scope.isNewAddress = false;
                 $scope.addressAddressee = $scope.partnerAddress.addressee;
                 utils.loadDynamicAttributes($scope, 'partneraddresses', $scope.params.partnerAddressId);
+                $rootScope.isLoading= false;
             });
         }else {
             $scope.isNewAddress = true;
             $scope.partnerAddress = { addressee:'', street:'', postcode: '', city: '', type: $scope.addressTypes[0] };
+            $rootScope.isLoading= false;
         }
         // Check the permissions for the details page for handling button visibility
         $scope.canWriteBusinessPartnerDetails = $rootScope.canWrite('PERMISSION_CRM_BUSINESSPARTNERS');

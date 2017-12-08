@@ -1,6 +1,7 @@
 app.controller('CRMCommunicationCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.createCommunication = function() {
+        $rootScope.isLoading = true;
         var CommToSend = {
             personId: $scope.params.personId,
             contact: $scope.communication.contact,
@@ -18,10 +19,12 @@ app.controller('CRMCommunicationCardController', function($scope, $rootScope, $h
             $translate(['TRK_PERSONS_PERSON_COMMUNICATION_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_PERSONS_PERSON_COMMUNICATION_CREATED).hideDelay(1000).position('bottom right'));
             });
+            $rootScope.isLoading = false;
         });
     }
 
     $scope.saveCommunication = function(){
+        $rootScope.isLoading = true;
         var CommToSend = {            
             contact: $scope.communication.contact,
             selectedMediumName:$scope.communication.selectedMedium.name,
@@ -34,7 +37,8 @@ app.controller('CRMCommunicationCardController', function($scope, $rootScope, $h
             }
             $translate(['TRK_PERSONS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_PERSONS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
-            });            
+            }); 
+            $rootScope.isLoading = false;           
         });
     };
 
@@ -47,6 +51,7 @@ app.controller('CRMCommunicationCardController', function($scope, $rootScope, $h
                 .ok(translations.TRK_YES)
                 .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function(){
+                    $rootScope.isLoading = true;
                     $http.delete('/api/communications/'+ $scope.communication._id).then(function(response){
                         if ($scope.params.deleteCommunicationCallback) {
                             $scope.params.deleteCommunicationCallback();
@@ -54,6 +59,7 @@ app.controller('CRMCommunicationCardController', function($scope, $rootScope, $h
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_PERSONS_PERSON_COMMUNICATION_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading = false;
                     });
                 });
             });
@@ -88,6 +94,7 @@ app.controller('CRMCommunicationCardController', function($scope, $rootScope, $h
     ];
 
     $scope.load = function(){
+        $rootScope.isLoading   = true;      
         $scope.$watch('communication.selectedMedium', function(newValue, oldValue){
             if ($scope.communication) $scope.communication.selectedType = $scope.communication.selectedMedium.types[0];
         });
@@ -98,10 +105,12 @@ app.controller('CRMCommunicationCardController', function($scope, $rootScope, $h
                 $scope.communication.selectedType = $scope.communication.selectedMedium.types.find(function(type) { return type.name === $scope.communication.selectedTypeName; });
                 $scope.isNewComm = false;     
                 utils.loadDynamicAttributes($scope, 'communications', $scope.params.communicationId);
+                $rootScope.isLoading=false;
             });           
         }else {
             $scope.isNewComm = true;    
             $scope.communication = { selectedMedium: $scope.communicationMediums[0], selectedType: $scope.communicationMediums[0].types[0], contact: ''};
+            $rootScope.isLoading=false;
         };
         // Check the permissions for the details page for handling button visibility
         $scope.canWritePersons = $rootScope.canWrite('PERMISSION_CRM_PERSONS');

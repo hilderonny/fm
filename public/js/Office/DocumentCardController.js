@@ -7,6 +7,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
     
     // Click on Save-button to save an existing document
     $scope.saveDocument = function() {
+        $rootScope.isLoading = true;
         var documentToSend = { name: $scope.document.name, isShared: $scope.document.isShared, description: $scope.document.description };
         utils.saveEntity($scope, 'documents', $scope.document._id, '/api/documents/', documentToSend).then(function(savedDocument) {
             $scope.documentName = savedDocument.name;
@@ -15,7 +16,9 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             }
             $translate(['TRK_DOCUMENTS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_DOCUMENTS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+                $rootScope.isLoading = false;
             });
+            
         });
     }
 
@@ -28,6 +31,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
+                    $rootScope.isLoading = true;
                     $http.delete('/api/documents/' + $scope.document._id).then(function(response) {
                         if ($scope.params.deleteDocumentCallback) {
                             $scope.params.deleteDocumentCallback();
@@ -35,6 +39,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_DOCUMENTS_DOCUMENT_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading = false;
                     });
                 });
             });
@@ -81,6 +86,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
     // - $scope.params.extractDocumentCallback : Callback function when an existing document was extracted. No parameters
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
+        $rootScope.isLoading = true;
         // When no documentId is given, there is an error. So do nothing (Lass ihn dumm sterben, wahaha!)
         if (!$scope.params.documentId) {
             return;
@@ -101,6 +107,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             utils.loadDynamicAttributes($scope, 'documents', $scope.params.documentId);
             if ($location.search().view3D) $scope.viewInAR();
             utils.setLocation('/documents/' + $scope.params.documentId);
+            $rootScope.isLoading = false;
         });
     }
 

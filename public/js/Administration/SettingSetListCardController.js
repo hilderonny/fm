@@ -1,4 +1,4 @@
-app.controller('AdministrationSettingSetListCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationSettingSetListCardController', function($scope,$rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     
     var closeSettingSetCardCallback = function() {
         $scope.selectedSettingSetItem = false;
@@ -17,6 +17,7 @@ app.controller('AdministrationSettingSetListCardController', function($scope, $h
 
     // Loads the setting set list from the server
     $scope.load = function() {
+        $rootScope.isLoading = true;
         $scope.selectedUser = false;
         $http.get('/api/settingsets').then(function (response) {
             $scope.settingSets = response.data;
@@ -31,6 +32,7 @@ app.controller('AdministrationSettingSetListCardController', function($scope, $h
                 });
             }
             if (!$scope.params.preselection) utils.setLocation('/settings');
+            $rootScope.isLoading = false;
         });
     }
 

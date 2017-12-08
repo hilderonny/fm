@@ -7,7 +7,7 @@
 <script type="text/ng-template" id="menuContent.html">
     <md-list class="context-menu" role="list">
         <md-list-item ng-repeat="referenceType in parentScope.availableReferenceTypes" ng-click="parentScope.onMenuClick(referenceType)" aria-label="{{referenceType.translationKey}}"><md-icon md-svg-src="/css/icons/material/{{referenceType.icon}}.svg"></md-icon><p><span translate="TRK_{{referenceType.translationKey}}"></span></p></md-list-item>
-    </md-list>
+    </md-list>    
 </script>
 
 <script type="text/ng-template" id="simpleList.html">
@@ -17,7 +17,7 @@
             <p ng-if="!listItem.secondLine">{{listItem.firstLine}}</p>
             <div ng-if="listItem.secondLine" class="md-list-item-text multiline"><p>{{listItem.firstLine}}</p><p>{{listItem.secondLine}}</p></div>
         </md-list-item>
-    </md-list>
+    </md-list>    
 </script>
 
 <script type="text/ng-template" id="hierarchyList.html">
@@ -48,9 +48,9 @@
         <md-dialog-actions layout="row">
             <span flex></span>
             <md-button class="md-raised md-accent" ng-if="parentScope.selectedElement" ng-click="parentScope.onOkClick()"><span translate>TRK_OK</span></md-button>
-            <md-button class="md-raised" ng-click="parentScope.onCancelClick()"><span translate>TRK_CANCEL</span></md-button>
+            <md-button class="md-raised" ng-click="parentScope.onCancelClick()"><span translate>TRK_CANCEL</span></md-button>        
         </md-dialog-actions>
-    </md-dialog>
+    </md-dialog>    
 </script>
 
 <script type="text/ng-template" id="hierarchyDialog.html">
@@ -67,6 +67,8 @@
             <span flex></span>
             <md-button class="md-raised md-accent" ng-if="parentScope.selectedElement" ng-click="parentScope.onOkClick()"><span translate>TRK_OK</span></md-button>
             <md-button class="md-raised" ng-click="parentScope.onCancelClick()"><span translate>TRK_CANCEL</span></md-button>
-        </md-dialog-actions>
+        </md-dialog-actions>        
     </md-dialog>
 </script>
+
+

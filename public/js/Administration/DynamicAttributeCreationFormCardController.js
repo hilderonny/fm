@@ -28,6 +28,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     };
 
     $scope.createAttribute = function(){
+        $rootScope.isLoading=true;
         var attributeToSend = { 
             modelName: $scope.params.modelName,
             type: $scope.dynamicattribute.type
@@ -48,11 +49,12 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
             }
             $translate(['TRK_DYNAMICATTRIBUTES_ATTRIBUTE_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_ATTRIBUTE_CREATED).hideDelay(1000).position('bottom right'));
-            });
+            });$rootScope.isLoading=false;
         });
     };
 
     $scope.saveAttribute = function(){
+        $rootScope.isLoading=true;
         var attributeToSend = { };
         Object.keys($scope.dynamicattribute).forEach(function(key) {
             if (key.indexOf('name_') === 0) {
@@ -67,7 +69,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
             }
             $translate(['TRK_DYNAMICATTRIBUTES_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
-            });
+            });$rootScope.isLoading=false;
         });
     };
 
@@ -79,6 +81,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
+                    $rootScope.isLoading=true;
                     $http.delete('/api/dynamicattributes/' + $scope.params.dynamicAttributeId).then(function(response) {
                         if ($scope.params.deleteDynamicAttributeCallback) {
                             $scope.params.deleteDynamicAttributeCallback();
@@ -86,6 +89,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_ATTRIBUTE_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading=false;
                     });
                 });
             });
@@ -126,6 +130,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
     // - $scope.params.closeDynamicAttributeCallback : Callback function when the card gets closed via button. No parameters
     //
     $scope.load = function(){
+        $rootScope.isLoading=true;
         //Switch between creation of a new dynamicAttribute and loading of an existing one
         if($scope.params.dynamicAttributeId){
             //Existing dynamicAttribute
@@ -139,7 +144,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
                     $http.get('/api/dynamicattributes/options/' + $scope.params.dynamicAttributeId).then(function(attributeOptionsFromDataBank){
                         $scope.elements = attributeOptionsFromDataBank.data;
                     }); 
-                }
+                }$rootScope.isLoading=false;
             });
         } else {
             //new dynamicAttribute
@@ -147,6 +152,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
             $scope.dynamicattribute = {type: $scope.types[0]};
             $scope.languages.forEach(function(language) {
                 $scope.dynamicattribute['name_' + language] = '';
+                $rootScope.isLoading=false;
             });
         }
         // Check the permissions for the details page for handling button visibility
