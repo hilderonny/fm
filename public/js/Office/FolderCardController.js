@@ -6,6 +6,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
 
     // Click on Create-button to create a new folder
     $scope.createFolder = function() {
+       $rootScope.isLoading = true;
         var folderToSend = { 
             name: $scope.folder.name, 
             parentFolderId: $scope.folder.parentFolderId
@@ -23,11 +24,13 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
             $translate(['TRK_FOLDERS_FOLDER_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_FOLDER_CREATED).hideDelay(1000).position('bottom right'));
             });
+            $rootScope.isLoading = false;
         });
     };
 
     // Click on Save-button to save an existing folder
     $scope.saveFolder = function() {
+        $rootScope.isLoading = true;
         var folderToSend = { name: $scope.folder.name };
         utils.saveEntity($scope, 'folders', $scope.folder._id, '/api/folders/', folderToSend).then(function(savedFolder) {
             $scope.folderName = $scope.folder.name;
@@ -36,8 +39,11 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
             }
             $translate(['TRK_FOLDERS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+                $rootScope.isLoading = false;
             });
+            
         });
+       
     };
 
     // Click on delete button to delete an existing folder
@@ -52,7 +58,8 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
                 .ok(translations.TRK_YES)
                 .cancel(translations.TRK_NO);
             return $mdDialog.show(confirm);
-        }).then(function() {
+        }).then(function() {         
+            $rootScope.isLoading = true;  
             return $http.delete('/api/folders/' + $scope.folder._id);
         }).then(function(response) {
             if ($scope.params.deleteFolderCallback) {
@@ -61,6 +68,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
             utils.removeCardsToTheRightOf($element);
             utils.removeCard($element);
             $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_FOLDER_DELETED).hideDelay(1000).position('bottom right'));
+            $rootScope.isLoading = false;
         });
     };
 
@@ -129,6 +137,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
     };
 
     $scope.load = function() {
+        $rootScope.isLoading = true;
         if ($scope.params.folderId) {
             $http.get('/api/folders/' + $scope.params.folderId).then(function(folderResponse) {
                 var completeFolder = folderResponse.data;
@@ -136,6 +145,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
                 $scope.folder = completeFolder;
                 $scope.folderName = completeFolder.name; // Prevent updating the label when changing the name input value
                 $scope.relationsEntity = { type:'folders', id:completeFolder._id };
+                $rootScope.isLoading = false;
             }).then(function() {
                 utils.loadDynamicAttributes($scope, 'folders', $scope.params.folderId);
                 utils.setLocation('/documents/' + $scope.params.folderId);
@@ -143,6 +153,7 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
         } else {
             $scope.isNewFolder = true;
             $scope.folder = { name : "", parentFolderId: $scope.params.parentFolderId, folders: [], documents: [] };
+            $rootScope.isLoading = false;
         }
         $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
     };

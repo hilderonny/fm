@@ -1,6 +1,7 @@
 app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.createPartner = function(){
+        $rootScope.isLoading = true;
         var sendpartner={
             name: $scope.partner.name,
             industry: $scope.partner.industry,
@@ -18,12 +19,15 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
             }
             $translate(['TRK_BUSINESSPARTNERS_BUSINESSPARTNER_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_BUSINESSPARTNERS_BUSINESSPARTNER_CREATED).hideDelay(1000).position('bottom right'));
+               
             });           
             utils.setLocation('/businesspartners/' + createdPartner._id);
+            $rootScope.isLoading = false;
         });
     };
 
     $scope.savePartner= function(){
+        $rootScope.isLoading = true;
         var sendpartner = {
              name: $scope.partner.name,
              industry: $scope.partner.industry,
@@ -37,6 +41,7 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
             }
             $translate(['TRK_BUSINESSPARTNERS_CHANGES_SAVED']).then(function(translations){
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_BUSINESSPARTNERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+                $rootScope.isLoading = false;
             });
         });        
     };
@@ -51,6 +56,7 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
                 .ok(translations.TRK_YES)
                 .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function(){
+                    $rootScope.isLoading = true;                  
                     $http.delete('/api/businesspartners/'+ $scope.partner._id).then(function(response){
                         if ($scope.params.deleteBPCallback) {
                             $scope.params.deleteBPCallback();
@@ -58,6 +64,8 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_BUSINESSPARTNERS_BUSINESSPARTNER_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading = false;
+                     
                     });
                 });
             });
@@ -122,6 +130,7 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
     }; 
 
     $scope.load = function() {
+        $rootScope.isLoading= true;
         if($scope.params.partnerId)
         {
             $http.get('/api/businesspartners/' + $scope.params.partnerId).then(function(partnerResponse) {
@@ -134,11 +143,13 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
                     completePartner.partnerAddresses = partnerAddressResponse.data;
                     utils.loadDynamicAttributes($scope, 'businesspartners', $scope.params.partnerId);
                     utils.setLocation('/businesspartners/' + $scope.params.partnerId);
+                    $rootScope.isLoading= false;
                 });     
             });
         }else{
             $scope.isNewPartner = true;
             $scope.partner = { name: "", industry: "", isJuristic: false, rolle: "", partnerAddresses: [] };
+            $rootScope.isLoading= false;
         }    
         // Check the permissions for the details page for handling button visibility
         $scope.canWriteBusinessPartnerDetails = $rootScope.canWrite('PERMISSION_CRM_BUSINESSPARTNERS');

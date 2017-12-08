@@ -143,6 +143,7 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
     };
 
     $scope.load = function() {
+        $rootScope.isLoading = true;
         $http.get('/api/folders/allFoldersAndDocuments').then(function(response) {
             var folderOrDocument = response.data;
             var allFoldersAndDocuments = {};
@@ -176,6 +177,7 @@ app.controller('OfficeDocumentListCardController', function($scope, $rootScope, 
             } else {
                 utils.setLocation('/documents');
             }
+            $rootScope.isLoading = false;
         });
     };
 

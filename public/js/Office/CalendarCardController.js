@@ -77,6 +77,7 @@ app.controller('OfficeCalendarCardController', function($scope, $rootScope, $htt
     // - $scope.params.selectButtonText : The translation key text for the select button when isSelection = true
     // - $scope.params.selectCallback : The callback to be called when the select button was pressed (when isSelection = true)
     $scope.load = function() {
+        $rootScope.isLoading= true;
         // Load activities
         $http.get('api/activities').then(function(response) {
             $scope.activityListActivities = response.data;
@@ -84,6 +85,7 @@ app.controller('OfficeCalendarCardController', function($scope, $rootScope, $htt
             // Check preselection
             utils.handlePreselection($scope, $scope.activityListActivities, $scope.selectActivity);
             if (!$scope.params.preselection) utils.setLocation('/activities');
+            $rootScope.isLoading= false;
         });
     }
 

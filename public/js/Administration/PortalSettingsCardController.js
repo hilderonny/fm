@@ -11,6 +11,7 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
 
     // Stores the settings by sending them to the server
     $scope.saveSettings = function() {
+        $rootScope.isLoading=true;
         var settingsToSend = { 
             licenseserverurl: $scope.settings.licenseServer, 
             licensekey: $scope.settings.licenseKey 
@@ -18,16 +19,18 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
         $http.put('/api/portalmanagement/', settingsToSend).then(function(response) {
             $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
-            });
+            });$rootScope.isLoading=false;
         });
     };
 
     // Trigger asking the license server for updates
     $scope.checkForUpdates = function() {
+        $rootScope.isLoading=true;
         $http.get('/api/portalmanagement/checkforupdate/').then(function(response) {
             $scope.versionOnServer = response.data.serverVersion;
             $scope.localVersion = response.data.localVersion;
             $scope.updatesChecked = true;
+            $rootScope.isLoading=false;
         });
     };
 
@@ -80,6 +83,7 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
 
     // Loads the actual settings from the localconfig.json file
     $scope.load = function() {
+        $rootScope.isLoading=true;
         $http.get('/api/portalmanagement/').then(function(response) {
             $scope.settings = { 
                 licenseServer: response.data.licenseserverurl, 
@@ -87,6 +91,7 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
             };
             $scope.canWritePortalSettings = $rootScope.canWrite('PERMISSION_SETTINGS_PORTAL');
             utils.setLocation('/settings/TRK_SETTINGSET_PORTAL_GENERAL');
+            $rootScope.isLoading=false;
         });
     };
 

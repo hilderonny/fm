@@ -77,6 +77,7 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
     };
 
     $scope.load = function() {
+        $rootScope.isLoading = true;
         $http.get('/api/fmobjects').then(function(response) {
             var allFmObjects = {};
             var handleFmObject = function(fmObject) {
@@ -108,6 +109,7 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
             } else {
                 utils.setLocation('/fmobjects');
             }
+            $rootScope.isLoading=false;
         });
     }
 

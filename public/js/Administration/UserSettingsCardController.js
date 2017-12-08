@@ -10,6 +10,7 @@ app.controller('AdministrationUserSettingsCardController', function($scope, $roo
     };
 
     $scope.saveUpdatedPassword = function() {
+        $rootScope.isLoading= true;
         var userToSend = {  
             pass: $scope.user.pass
         };
@@ -22,7 +23,7 @@ app.controller('AdministrationUserSettingsCardController', function($scope, $roo
             }
             $translate(['TRK_USERS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
-            });
+            });$rootScope.isLoading=false;
         });
     };
     $scope.canWriteUserDetails = $rootScope.canWrite('PERMISSION_SETTINGS_USER');

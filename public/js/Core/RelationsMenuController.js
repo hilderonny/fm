@@ -13,6 +13,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
 //TODO: Hierachiedialoge in Doku beschreiben
     var allReferenceTypes = [
         { icon: 'Planner', translationKey: 'ACTIVITIES_ACTIVITY', requiredReadPermission: 'PERMISSION_OFFICE_ACTIVITY', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/activities').then(function(response) { // Liste von Terminen für den Auswahldialog laden
                 var listItems = response.data.map(function(activity) {
                     return { // ViewModel für die Liste erzeugen
@@ -24,9 +25,11 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                     };
                 });
                 $scope.showListDialog('ACTIVITIES_SELECT_ACTIVITY', listItems); // Dialog für einfache Listen öffnen
+                $rootScope.isLoading = false;
             });
         } },
         { icon: 'Business', translationKey: 'BUSINESSPARTNERS_BUSINESSPARTNER', requiredReadPermission: 'PERMISSION_CRM_BUSINESSPARTNERS', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/businesspartners').then(function(response) {
                 var listItems = response.data.map(function(partner) {
                     return {
@@ -37,9 +40,11 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                     };
                 });
                 $scope.showListDialog('BUSINESSPARTNERS_SELECT_BUSINESSPARTNER', listItems);
+                $rootScope.isLoading = false;
             });
         } },
         { icon: 'Briefcase', translationKey: 'CLIENTS_CLIENT', requiredReadPermission: 'PERMISSION_ADMINISTRATION_CLIENT', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/clients').then(function(response) {
                 var listItems = response.data.map(function(client) {
                     return {
@@ -50,9 +55,11 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                     };
                 });
                 $scope.showListDialog('CLIENTS_SELECT_CLIENT', listItems);
+                $rootScope.isLoading = false;
             });
         } },
         { icon: 'Document', translationKey: 'DOCUMENTS_DOCUMENT', requiredReadPermission: 'PERMISSION_OFFICE_DOCUMENT', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/folders/allFoldersAndDocuments').then(function(response) {
                 var folderOrDocument = response.data;
                 var allFoldersAndDocuments = {};
@@ -77,9 +84,11 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                     }
                 });
                 $scope.showHierarchyDialog('DOCUMENTS_SELECT_FOLDER_OR_DOCUMENT', rootElement); // Dialog für Hierarchien öffnen
+                $rootScope.isLoading = false;
             });
         } },
         { icon: 'Cottage', translationKey: 'FMOBJECTS_FM_OBJECT', requiredReadPermission: 'PERMISSION_BIM_FMOBJECT', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/fmobjects').then(function(response) {
                 var handleFmObject = function(fmObject) {
                     return {
@@ -92,9 +101,11 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 };
                 var viewModel = { children: response.data.map(handleFmObject) };
                 $scope.showHierarchyDialog('FMOBJECTS_SELECT_FM_OBJECT', viewModel); // Dialog für Hierarchien öffnen
+                $rootScope.isLoading = false;
             });
         } },
         { icon: 'Collaborator Male', translationKey: 'PERSONS_PERSON', requiredReadPermission: 'PERMISSION_CRM_PERSONS', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/persons').then(function(response) {
                 var listItems = response.data.map(function(person) {
                     return {
@@ -105,9 +116,11 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                     };
                 });
                 $scope.showListDialog('PERSONS_SELECT_PERSON', listItems);
+                $rootScope.isLoading = false;
             });
         } },
         { icon: 'Server', translationKey: 'PORTALS_PORTAL', requiredReadPermission: 'PERMISSION_LICENSESERVER_PORTAL', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/portals').then(function(response) {
                 var listItems = response.data.map(function(portal) {
                     return {
@@ -118,9 +131,11 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                     };
                 });
                 $scope.showListDialog('PORTALS_SELECT_PORTAL', listItems);
+                $rootScope.isLoading = false;
             });
         } },
         { icon: 'User Group Man Man', translationKey: 'USERGROUPS_USERGROUP', requiredReadPermission: 'PERMISSION_ADMINISTRATION_USERGROUP', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/usergroups').then(function(response) {
                 var listItems = response.data.map(function(usergroup) {
                     return {
@@ -131,9 +146,11 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                     };
                 });
                 $scope.showListDialog('USERGROUPS_SELECT_USERGROUP', listItems);
+                $rootScope.isLoading = false;
             });
         } },
         { icon: 'User', translationKey: 'USERS_USER', requiredReadPermission: 'PERMISSION_ADMINISTRATION_USER', dialogFunction: function() {
+            $rootScope.isLoading = true;
             $http.get('/api/users?joinUserGroup=true').then(function(response) {
                 var listItems = response.data.map(function(user) {
                     return {
@@ -145,16 +162,17 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                     };
                 });
                 $scope.showListDialog('USERS_SELECT_USER', listItems);
+                $rootScope.isLoading = false;
             });
         } }        
     ];
-
 
     /**
      * Erstellt nach einer Auswahl eine Verknüpfung via API-Abfrage und
      * aktualisiert die Verknüpfungsliste.
      */
     $scope.createRelation = function(targetType, targetId) {
+        $rootScope.isLoading = true;
         var sourceType = $scope.relationsEntity.type;
         var sourceId = $scope.relationsEntity.id;
         var relationToSend =  { 
@@ -173,6 +191,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
             } else if ($scope.$parent.onRelationListChanged) { 
                 $scope.$parent.onRelationListChanged();
             }
+           // $rootScope.isLoading = false;
         });
     };
 
@@ -284,6 +303,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
      */
     $scope.onOkClick = function() {
         $mdDialog.hide();
+       // $scope.isLoading = true;
     };
 
     /**

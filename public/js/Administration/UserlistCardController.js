@@ -43,6 +43,7 @@ app.controller('AdministrationUserlistCardController', function($scope, $rootSco
     // Params:
     // - $scope.params.preselection : ID of the user to select in the list
     $scope.load = function() {
+        $rootScope.isLoading= true;
         $scope.selectedUser = false;
         $http.get('/api/users').then(function (response) {
             $scope.users = response.data;
@@ -52,6 +53,7 @@ app.controller('AdministrationUserlistCardController', function($scope, $rootSco
             // Check preselection
             utils.handlePreselection($scope, $scope.users, $scope.selectUser);
             if (!$scope.params.preselection) utils.setLocation('/users');
+            $rootScope.isLoading= false; 
         });
     }
 

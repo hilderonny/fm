@@ -1,7 +1,7 @@
 app.controller('AdministrationUsergrouplistCardController', function($scope, $rootScope, $http, $mdDialog, $element, utils) {
     
     var saveUserGroupCallback = function(savedUserGroup) {
-        $scope.selectedUserGroup.name = savedUserGroup.name;
+        $scope.selectedUserGroup.name = savedUserGroup.name;         
     };
     var deleteUserGroupCallback = function() {
         $scope.userGroups.splice($scope.userGroups.indexOf($scope.selectedUserGroup), 1);
@@ -44,6 +44,7 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ro
     // Params:
     // - $scope.params.preselection : ID of the userGroup to select in the list
     $scope.load = function() {
+        $rootScope.isLoading= true;
         $scope.selectedUserGroup = false;
         $http.get('/api/usergroups').then(function (response) {
             $scope.userGroups = response.data;
@@ -53,6 +54,7 @@ app.controller('AdministrationUsergrouplistCardController', function($scope, $ro
             // Check preselection
             utils.handlePreselection($scope, $scope.userGroups, $scope.selectUserGroup);
             if (!$scope.params.preselection) utils.setLocation('/usergroups');
+            $rootScope.isLoading= false;
         });
     }
 

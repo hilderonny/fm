@@ -243,6 +243,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
      * Lädt die Verknüpfungen des aktuellen Objekts vom Server und füllt die Liste
      */
     $scope.loadRelations = function() {
+        $rootScope.isLoading = true;
         var entityType = $scope.relationsEntity.type;
         var entityId = $scope.relationsEntity.id;
         $http.get('/api/relations/' + entityType + '/' + entityId).then(function(response) {
@@ -270,8 +271,12 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
             });
             $scope.relations = {};
             // Verknüpfungsdetails abhängig von deren Typ laden
+            var promisesToWaitFor = [];
             Object.keys(sortedRelations).forEach(function(typeName) {
-                $scope.relationLoaders[typeName](sortedRelations[typeName]);
+                promisesToWaitFor.push($scope.relationLoaders[typeName](sortedRelations[typeName]));
+            });
+            Promise.all(promisesToWaitFor).then(function() {
+                $rootScope.isLoading = false;
             });
         });
     };
@@ -322,6 +327,7 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
                 .ok(translations.TRK_YES)
                 .cancel(translations.TRK_NO);
             $mdDialog.show(confirm).then(function() {
+                $rootScope.isLoading = true;
                 $http.delete('/api/relations/' + relationId).then(function(response) {
                     $mdToast.show($mdToast.simple().textContent(translations.TRK_RELATIONS_DELETED).hideDelay(1000).position('bottom right'));
                     utils.removeCardsToTheRightOf($element);
@@ -345,4 +351,5 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
      * um nach einer Neuanlage die Verknüpfungsliste neu zu laden
      */
     $scope.$parent.$parent.onRelationListChanged = $scope.loadRelations;
+   
 });

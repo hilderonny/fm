@@ -38,24 +38,29 @@ app.controller('AdministrationClientListCardController', function($scope, $rootS
             closeCallback: closeClientCardCallback
         }, 'PERMISSION_ADMINISTRATION_CLIENT');
     }
-
+    
     // Loads the clients list from the server
     // Params:
     // - $scope.params.preselection : ID of the client to select in the list
-    $scope.load = function() {
+    $scope.load = function() {    
+        $rootScope.isLoading = true;
         $scope.selectedClient = false;
         $http.get('/api/clients').then(function (response) {
-            $scope.clients = response.data;
+            $scope.clients = response.data;           
             // Check the permissions for the details page for handling button visibility
             $scope.canWriteClients = $rootScope.canWrite('PERMISSION_ADMINISTRATION_CLIENT');
             // Check preselection
             utils.handlePreselection($scope, $scope.clients, $scope.selectClient);
             if (!$scope.params.preselection) utils.setLocation('/clients');
+            $rootScope.isLoading= false; 
         });
-    }
-
+        
+    }    
+   
     $scope.load();
+    
 });
+
 
 app.directUrlMappings.clients = {
     mainMenu: 'TRK_MENU_PORTAL',

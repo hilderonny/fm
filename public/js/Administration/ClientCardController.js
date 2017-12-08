@@ -15,11 +15,14 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
             $http.post('/api/clientmodules', clientModuleToSave).then(function(response) {
                 clientModuleToUpdate._id = response.data._id;
                 clientModuleToUpdate.active = response.data.active;
+                $rootScope.isLoading = false;
             });
         } else {
             $http.delete('/api/clientmodules/' + clientModuleToSave._id).then(function() {
                 delete clientModuleToUpdate._id;
                 clientModuleToUpdate.active = false;
+                $rootScope.isLoading = false;
+
             });
         }
     };
@@ -28,6 +31,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
         if (!$scope.canWriteClients) return;
         var tempClientModule = JSON.parse(JSON.stringify(clientModule));
         tempClientModule.active = !tempClientModule.active;
+        $rootScope.isLoading = true;
         $scope.saveClientModule(tempClientModule, clientModule);
     };
 
@@ -70,6 +74,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
 
     // Click on Create-button to create a new client
     $scope.createClient = function() {
+        $rootScope.isLoading = true;
         var clientToSend = { 
             name: $scope.client.name,
             comment:$scope.client.comment 
@@ -85,16 +90,19 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
                 $scope.params.createClientCallback(createdClient);
             }
             return $scope.getClientModules();
+            $rootScope.isLoading = false;
         }).then(function() {
             return $translate(['TRK_CLIENTS_CLIENT_CREATED']);
         }).then(function(translations) {
             $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENT_CREATED).hideDelay(1000).position('bottom right'));
             utils.setLocation('/clients/' + createdClient._id);
-        });
+        }); 
+        
     };
 
     // Click on Save-button to save an existing client
     $scope.saveClient = function() {
+        $rootScope.isLoading = true;
         var clientToSend = { 
             name: $scope.client.name,
             comment:$scope.client.comment
@@ -107,6 +115,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
             $translate(['TRK_CLIENTS_CHANGESSAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CHANGESSAVED).hideDelay(1000).position('bottom right'));
             });
+            $rootScope.isLoading = false;
         });
     };
 
@@ -119,6 +128,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
+                    $rootScope.isLoading = true;
                     $http.delete('/api/clients/' + $scope.client._id).then(function(response) {
                         if ($scope.params.deleteClientCallback) {
                             $scope.params.deleteClientCallback();
@@ -126,6 +136,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_CLIENTS_CLIENT_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading = false;
                     });
                 });
             });
@@ -149,6 +160,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
     // - $scope.params.deleteClientCallback : Callback function when an existing client was deleted. No parameters
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
+        $rootScope.isLoading = true;
         // Switch between creation of a new client and loading of an existing client
         if ($scope.params.clientId) {
             // Existing client
@@ -162,11 +174,13 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
             }).then(function() {
                 utils.loadDynamicAttributes($scope, 'clients', $scope.params.clientId);
                 utils.setLocation('/clients/' + $scope.params.clientId);
+                $rootScope.isLoading= false;
             });
         } else {
             // New client
             $scope.isNewClient = true;
             $scope.client = { name : "", comment:'', clientModules: [] };
+            $rootScope.isLoading= false;
         }
         $scope.canWriteClients = $rootScope.canWrite('PERMISSION_ADMINISTRATION_CLIENT');
     };

@@ -56,6 +56,7 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
     };
 
     $scope.load = function(){
+        $rootScope.isLoading=true;
         $scope.modelName = $scope.params.modelName;
         $scope.title =  $scope.params.title;
         $scope.icon = $scope.params.icon;
@@ -63,7 +64,7 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
             $scope.attributes = attributesFromDataBank.data;
             $scope.attributes.forEach(function(attr) {
                 attr.icon = $scope.icons[attr.type];
-            });
+            });$rootScope.isLoading=false;
         });
         // Check the permissions for the details page for handling button visibility
         $scope.canWriteDynamicAttributes = $rootScope.canWrite('PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');

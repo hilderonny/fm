@@ -44,6 +44,7 @@ app.controller('CRMPersonListCardController', function($scope, $rootScope, $http
     }
 
     $scope.load = function(){
+        $rootScope.isLoading = true;
         $scope.selectedPerson = false; 
         $http.get('/api/persons').then(function(response){
             $scope.persons = response.data;   
@@ -52,6 +53,7 @@ app.controller('CRMPersonListCardController', function($scope, $rootScope, $http
             // Check preselection
             utils.handlePreselection($scope, $scope.persons, $scope.selectPerson);
             if (!$scope.params.preselection) utils.setLocation('/persons');
+            $rootScope.isLoading= false;
         });
     };
 

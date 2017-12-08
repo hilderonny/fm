@@ -43,7 +43,8 @@ app.controller('CRMBPListCardController', function($scope, $rootScope, $http, $m
     }
 
     $scope.load = function() {
-        $scope.selectedPartner = false;
+        $rootScope.isLoading= true;
+        $rootScope.selectedPartner = false;
         $http.get('/api/businesspartners').then(function (response) {
             $scope.partners = response.data;
             // Check the permissions for the details page for handling button visibility
@@ -51,6 +52,7 @@ app.controller('CRMBPListCardController', function($scope, $rootScope, $http, $m
             // Check preselection
             utils.handlePreselection($scope, $scope.partners, $scope.selectPartner);
             if (!$scope.params.preselection) utils.setLocation('/businesspartners');
+            $rootScope.isLoading=false;
         });
     };
 

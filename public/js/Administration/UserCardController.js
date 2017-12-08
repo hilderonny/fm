@@ -6,6 +6,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
 
     // Click on Create-button to create a new user
     $scope.createUser = function() {
+        $rootScope.isLoading = true;
         var userToSend = { 
             name: $scope.user.name, 
             pass: $scope.user.pass, 
@@ -31,11 +32,13 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_CREATED).hideDelay(1000).position('bottom right'));
             });
             utils.setLocation('/users/' + createdUser._id);
+            $rootScope.isLoading = false;
         });
     }
 
     // Click on Save-button to save an existing user
     $scope.saveUser = function() {
+        $rootScope.isLoading = true;
         var userToSend = { 
             name: $scope.user.name, 
             pass: $scope.user.pass, 
@@ -51,12 +54,14 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
             }
             $translate(['TRK_USERS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+                $rootScope.isLoading = false;
             });
         }, function errorCallback(response) {
             // Username is in use by another one
             if (response.status === 409) {
                 $scope.usersForm.un.$setValidity('nameInUse', false);
             }
+            
         });
     }
 
@@ -69,6 +74,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
+                    $rootScope.isLoading = true;
                     $http.delete('/api/users/' + $scope.user._id).then(function(response) {
                         if ($scope.params.deleteUserCallback) {
                             $scope.params.deleteUserCallback();
@@ -76,6 +82,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading = false;
                     });
                 });
             });
@@ -99,6 +106,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
     // - $scope.params.deleteUserCallback : Callback function when an existing user was deleted. No parameters
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
+        $rootScope.isLoading= true;
         // Switch between creation of a new user and loading of an existing user
         if ($scope.params.userId) {
             // Existing user
@@ -120,6 +128,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
                     }
                     utils.loadDynamicAttributes($scope, 'users', $scope.params.userId);
                     utils.setLocation('/users/' + $scope.params.userId);
+                    $rootScope.isLoading= false;
                 });
             });
         } else {
@@ -129,6 +138,7 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
                 $scope.userGroups = response.data;
                 $scope.isNewUser = true;
                 $scope.user = { name : "", pass : "", userGroup : $scope.userGroups[0] };
+                $rootScope.isLoading= false;
             });
         }
         // Check the permissions for the details page for handling button visibility

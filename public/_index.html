@@ -126,7 +126,11 @@
                 <div translate="TRK_LOGIN_LOGGED_IN_AS" translate-value-username="{{username}}"></div>
             </md-sidenav>
 
-            <md-content flex layout="row" id="cardcanvas" ng-show="currentMenuItem || isShowingDoc"></md-content>
+            <md-content flex layout="row" id="cardcanvas" ng-show="currentMenuItem || isShowingDoc">
+                <div class="progress-panel" ng-if=" $root.isLoading">
+                    <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                </div> 
+            </md-content>
 
             <md-content flex layout="row" id="dashboard" ng-show="!currentMenuItem && !isShowingDoc">
                 <div>
@@ -139,9 +143,11 @@
                         
                     </ng-repeat>
                 </div>
-            </md-content>
-
+            </md-content>        
         </div>
+
+        
+
 
     </body>
 </html>

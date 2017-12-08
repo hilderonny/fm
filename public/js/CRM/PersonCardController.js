@@ -1,6 +1,7 @@
 app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
 
     $scope.createPerson = function(){
+        $rootScope.isLoading = true;
         var sendperson={
             firstname: $scope.person.firstname,
             lastname:  $scope.person.lastname,
@@ -20,10 +21,12 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_PERSONS_PERSON_CREATED).hideDelay(1000).position('bottom right'));
             });           
             utils.setLocation('/persons/' + createdPerson._id);
+            $rootScope.isLoading = false;
         });
     };
 
     $scope.savePerson= function(){
+        $rootScope.isLoading =true;
         var sendperson={
             firstname: $scope.person.firstname,
             lastname:  $scope.person.lastname,
@@ -37,6 +40,7 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
             }
             $translate(['TRK_PERSONS_CHANGES_SAVED']).then(function(translations){
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_PERSONS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+                $rootScope.isLoading = false;
             });
         });        
     };
@@ -50,6 +54,7 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
                 .ok(translations.TRK_YES)
                 .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function(){
+                    $rootScope.isLoading = true;
                     $http.delete('/api/persons/'+ $scope.person._id).then(function(response){
                         if ($scope.params.deletePersonCallback) {
                             $scope.params.deletePersonCallback();
@@ -57,6 +62,7 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_PERSONS_PERSON_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading = false;
                     });
                 });
             });
@@ -117,6 +123,7 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
     }; 
 
     $scope.load = function(){
+        $rootScope.isLoading=true;
         if($scope.params.personId) {
             $http.get('/api/persons/' + $scope.params.personId).then(function(personResponse){
                 var completePerson=personResponse.data;
@@ -129,12 +136,14 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
                     $scope.communications = communicationResponse.data;
                     utils.loadDynamicAttributes($scope, 'persons', $scope.params.personId);
                     utils.setLocation('/persons/' + $scope.params.personId);
+                    $rootScope.isLoading=false;
                 }); 
             });
         } else {
             $scope.isNewPerson = true;
             $scope.person = { firstname: '', lastname: '', description: '' };
             $scope.communications = [];
+            $rootScope.isLoading=false;
         }   
         // Check the permissions for the details page for handling button visibility
         $scope.canWritePersons = $rootScope.canWrite('PERMISSION_CRM_PERSONS');

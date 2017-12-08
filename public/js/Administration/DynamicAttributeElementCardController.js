@@ -10,6 +10,7 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
     };
 
     $scope.createAttributeElement = function(){
+        $rootScope.isLoading=true;
         //Required properties are dynamicAttributeId and text_en
         var optionToSend = { 
             dynamicAttributeId: $scope.params.dynamicAttributeId
@@ -29,11 +30,12 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
             }
             $translate(['TRK_DYNAMICATTRIBUTES_ATTRIBUTEELEMENT_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_ATTRIBUTEELEMENT_CREATED).hideDelay(1000).position('bottom right'));
-            });
+            });$rootScope.isLoading=false;
         });
     };
 
     $scope.saveAttributeElement = function(){
+        $rootScope.isLoading=true;
         var elementToSend = { };
         Object.keys($scope.attributeelement).forEach(function(key) {
             if (key.indexOf('text_') === 0) {
@@ -48,7 +50,7 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
             }
             $translate(['TRK_DYNAMICATTRIBUTES_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
-            });
+            });$rootScope.isLoading=false;
         });
     };
 
@@ -60,6 +62,7 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
                     .ok(translations.TRK_YES)
                     .cancel(translations.TRK_NO);
                 $mdDialog.show(confirm).then(function() {
+                    $rootScope.isLoading=true;
                     $http.delete('/api/dynamicattributes/option/' + $scope.params.dynamicAttributeElementId).then(function(response) {
                         if ($scope.params.deleteDynamicAttributeElementCallback) {
                             $scope.params.deleteDynamicAttributeElementCallback();
@@ -67,6 +70,7 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
                         utils.removeCardsToTheRightOf($element);
                         utils.removeCard($element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_ATTRIBUTEELEMENT_DELETED).hideDelay(1000).position('bottom right'));
+                        $rootScope.isLoading=false;
                     });
                 });
             });
@@ -76,6 +80,7 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
     $scope.languages = $rootScope.languages;
 
     $scope.load = function() {
+        $rootScope.isLoading=true;
         //Switch between creation of a new attribute option (element) and loading of an existing one
         if($scope.params.dynamicAttributeElementId){
             //Existing attribute option/element
@@ -83,12 +88,14 @@ app.controller('AdministrationAttributeElementCardController', function($scope, 
             $http.get('/api/dynamicattributes/option/' + $scope.params.dynamicAttributeElementId).then(function(attributeOptionFromDataBank){
                 $scope.attributeelement = attributeOptionFromDataBank.data;
                 $scope.elementText = $scope.attributeelement.text_en; 
+                $rootScope.isLoading=false;
             });
         } else {
             $scope.isNewElement = true;
             $scope.attributeelement = { };
             $scope.languages.forEach(function(language) {
                 $scope.attributeelement['text_' + language] = '';
+                $rootScope.isLoading=false;
             });
         }
         // Check the permissions for the details page for handling button visibility

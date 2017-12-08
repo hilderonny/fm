@@ -1,4 +1,4 @@
-app.controller('AdministrationDynamicAttributesModelListCardController', function($scope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
+app.controller('AdministrationDynamicAttributesModelListCardController', function($scope, $rootScope, $http, $mdDialog, $element, $mdToast, $translate, utils) {
     // User clicks on close button
     $scope.closeCard = function() {
         if ($scope.params.closeCallback) {

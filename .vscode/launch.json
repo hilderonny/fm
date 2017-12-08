@@ -20,6 +20,9 @@
             },
             "console": "internalConsole",
             "sourceMaps": true,
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
             "outDir": null
         },
         {

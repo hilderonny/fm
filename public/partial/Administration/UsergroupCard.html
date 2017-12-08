@@ -1,5 +1,5 @@
 <md-card ng-cloak ng-controller="AdministrationUsergroupCardController" style="background-image:url('/css/icons/office/User Group Man Man.svg');" class="list-details-details">
-
+   
     <md-toolbar class="md-toolbar-tools md-accent">
         <ng-include ng-if="!isNewUserGroup" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
         <div flex></div>
@@ -71,6 +71,5 @@
             </md-tab-body>
         </md-tab>
         <ng-include ng-if="!isNewUserGroup" src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
-    </md-tabs>
-
+    </md-tabs>   
 </md-card>
