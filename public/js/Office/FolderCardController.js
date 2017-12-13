@@ -135,6 +135,9 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
                 $scope.isNewFolder = false;
                 $scope.folder = completeFolder;
                 $scope.folderName = completeFolder.name; // Prevent updating the label when changing the name input value
+                $scope.breadcrumbs = completeFolder.path.map(function(pathElement){
+                    return pathElement.name;
+                }).join('/');
                 $scope.relationsEntity = { type:'folders', id:completeFolder._id };
             }).then(function() {
                 utils.loadDynamicAttributes($scope, 'folders', $scope.params.folderId);

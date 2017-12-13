@@ -442,6 +442,11 @@ md-toolbar md-input-container input {
   width: 256px;
 }
 
+.breadcrumbs {
+    font-size : 12px;
+    color: rgba(0,0,0,0.54);
+}
+
 .disabled, .grayedout {
     opacity: 0.2;
 }

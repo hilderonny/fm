@@ -74,12 +74,36 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
                 startWith: '$parentFolderId',
                 connectFromField: 'parentFolderId',
                 connectToField: '_id',
-                as: 'path'
+                as: 'path',
+                depthField : 'depth'
             } },
             { $match: { // Find only relevant elements
                 _id: { $in: ids },
                 clientId: clientId
-            } }
+            } },
+            {
+                $unwind: "$path"
+            },
+            {
+                $sort: {
+                    "path.depth":-1
+                }
+            },
+            {
+                $group:{
+                    _id: "$_id",
+                    path : {$push: "$path"},
+                    doc:{"$first": "$$ROOT"}
+                }
+            },
+            {
+                $project: {
+                    "name": "$doc.name",                    
+                    "parentFolderId": "$doc.parentFolderId",
+                    "clientId": "$doc.clientId",
+                    "path": "$path"
+                }
+            }
         ]).then(function(documents) {
             // Pfade müssen sortiert werden, da graphLookup ein Problem beim Cachen hat und die Reihenfolge manchmal durcheinander haut
             documents.forEach(function(document) {
@@ -115,7 +139,44 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
 
 // Get a specific document 
 router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validateId, validateSameClientId('documents'), (req, res) => {
-    req.db.get('documents').findOne(req.params.id).then((document) => {
+    req.db.get('documents').aggregate([
+        { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
+            from: 'folders',
+            startWith: '$parentFolderId',
+            connectFromField: 'parentFolderId',
+            connectToField: '_id',
+            as: 'path',
+            depthField : 'depth'
+        } },
+        { $match: { // Find only relevant elements
+            _id: monk.id(req.params.id)
+        } },
+        { $limit: 1 },
+        {
+            $unwind: "$path"
+        },
+        {
+            $sort: {
+                "path.depth":-1
+            }
+        },
+        {
+            $group:{
+                _id: "$_id",
+                path : {$push: "$path"},
+                doc:{"$first": "$$ROOT"}
+            }
+        },
+        {
+            $project: {
+                "name": "$doc.name",                    
+                "parentFolderId": "$doc.parentFolderId",
+                "path": "$path"
+            }
+        }
+    ]).then((matchingDocuments) => {
+        // We can assume that we have exactly one element in the array
+        var document = matchingDocuments[0];
         // Database element is available here in every case, because validateSameClientId already checked for existence
         // When request parameter "action=download" is given, return the document file.
         if (req.query.action && req.query.action === 'download') {

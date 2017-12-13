@@ -273,6 +273,29 @@ describe('API documents', function(){
                 }).catch(done);
             }); 
         });
+
+        it('Contains the full path in correct order', function() {
+            // We use document 1_0_0_0_0, so we have the path
+            // 1_0 » 1_0_0 » 1_0_0_0  (or sth like test » d3 » d3.1)
+            var documentId;
+            // First login
+            return db.get(co.collections.documents.name).findOne({name: '1_0_0_0_0'}).then(function(documentFromDatabase){
+                documentId = documentFromDatabase._id;
+                return th.doLoginAndGetToken('1_0_0', 'test');
+            }).then(function(token){
+                // Then fetch the document from the API
+                return th.get(`/api/documents/${documentId}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var doc = response.body;
+                // Finally analyze the returned path (order, names)
+                assert.ok(doc.path, 'Property path does not exist');
+                assert.strictEqual(doc.path.length, 3);
+                assert.strictEqual(doc.path[0].name, '1_0');
+                assert.strictEqual(doc.path[1].name, '1_0_0');
+                assert.strictEqual(doc.path[2].name, '1_0_0_0');
+                return Promise.resolve();
+            });
+        });
         
     });
 

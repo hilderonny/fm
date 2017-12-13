@@ -67,12 +67,35 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
                 startWith: '$parentFolderId',
                 connectFromField: 'parentFolderId',
                 connectToField: '_id',
-                as: 'path'
+                as: 'path',
+                depthField: 'depth'
             } },
             { $match: { // Find only relevant elements
                 _id: { $in: ids },
                 clientId: clientId
-            } }
+            } },
+            {
+                $unwind: "$path"
+            },
+            {
+                $sort: {
+                    "path.depth":-1
+                }
+            },
+            {
+                $group:{
+                    _id: "$_id",
+                    path : {$push: "$path"},
+                    doc:{"$first": "$$ROOT"}
+                }
+            },
+            {
+                $project: {
+                    "name": "$doc.name",                    
+                    "parentFolderId": "$doc.parentFolderId",
+                    "path": "$path"
+                }
+            }
         ]).then(function(folders) {
             res.send(folders);
         });
@@ -83,8 +106,45 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
 router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), validateId, validateSameClientId('folders'), (req, res) => {
     var id = monk.id(req.params.id);
     var folder;
-    req.db.get(co.collections.folders.name).findOne(id).then((f) => {
-        folder = f;
+    req.db.get(co.collections.folders.name).aggregate([
+        { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
+            from: 'folders',
+            startWith: '$parentFolderId',
+            connectFromField: 'parentFolderId',
+            connectToField: '_id',
+            as: 'path',
+            depthField : 'depth'
+        } },
+        { $match: { // Find only relevant elements
+            _id: id,
+        } },
+        {
+            $unwind: "$path"
+        },
+        {
+            $sort: {
+                "path.depth":-1
+            }
+        },
+        {
+            $group:{
+                _id: "$_id",
+                path : {$push: "$path"},
+                doc:{"$first": "$$ROOT"}
+            }
+        },
+        {
+            $project: {
+                "name": "$doc.name",                    
+                "parentFolderId": "$doc.parentFolderId",
+                "clientId": "$doc.clientId",
+                "path": "$path"
+            }
+        }
+    ]).then((matchingFolders) => {
+       // folder = f;
+       // assuming that we have exactly one element in the array
+       folder = matchingFolders[0];
         folder.elements = [];
         // Database element is available here in every case, because validateSameClientId already checked for existence
         return req.db.get(co.collections.folders.name).find({ parentFolderId: id }, { sort : { name : 1 } });

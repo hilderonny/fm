@@ -248,6 +248,26 @@ describe('API fmobjects', function() {
             });
         });
 
+        it('Contains the full path in correct order', function() {
+            // We use fmobject 1_0_0, so we have the path
+            // 1_0  (or sth like test)
+            var fmobjId;
+            // First login
+            return db.get(co.collections.fmobjects.name).findOne({name: '1_0_0'}).then(function(fmobjectFromDatabase){
+                fmobjId = fmobjectFromDatabase._id;
+                return th.doLoginAndGetToken('1_0_0', 'test');
+            }).then(function(token){
+                // Then fetch the fnobject from the API
+                return th.get(`/api/fmobjects/${fmobjId}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var fmobject = response.body;
+                // Finally analyze the returned path (order, names)
+                assert.ok(fmobject.path, 'Property path does not exist');
+                assert.strictEqual(fmobject.path.length, 1);
+                assert.strictEqual(fmobject.path[0].name, '1_0');
+                return Promise.resolve();
+            });
+        });
     });
 
     describe('POST/', function() {

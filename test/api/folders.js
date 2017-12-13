@@ -253,6 +253,27 @@ describe('API folders', function() {
                 return Promise.resolve();
             });
         });
+        it('Contains the full path in correct order', function() {
+            // We use folder 1_0_0_0_0, so we have the path
+            // 1_0 » 1_0_0 » (or sth like test » d3 )
+            var folderId;
+            // First login
+            return db.get(co.collections.folders.name).findOne({name: '1_0_0_0'}).then(function(folderFromDatabase){
+                folderId = folderFromDatabase._id;
+                return th.doLoginAndGetToken('1_0_0', 'test');
+            }).then(function(token){
+                // Then fetch the folder from the API
+                return th.get(`/api/folders/${folderId}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var folder = response.body;
+                // Finally analyze the returned path (order, names)
+                assert.ok(folder.path, 'Property path does not exist');
+                assert.strictEqual(folder.path.length, 2);
+                assert.strictEqual(folder.path[0].name, '1_0');
+                assert.strictEqual(folder.path[1].name, '1_0_0');
+                return Promise.resolve();
+            });
+        });
 
     });
 

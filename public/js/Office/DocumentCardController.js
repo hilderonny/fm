@@ -93,7 +93,10 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             $scope.is3Dmodel =  document.extension === '.dae' || document.extension === '.obj';
             $scope.isPreviewable = [
                 'application/vnd.ms-pki.stl'
-            ].indexOf(document.type) >= 0;
+            ].indexOf(document.type) >= 0;          
+            $scope.breadcrumbs = document.path.map(function(pathElement){
+                return pathElement.name;
+            }).join('/');
             // Information über das Dokument für Verknüpfungen-Tab bereit stellen
             $scope.relationsEntity = { type:'documents', id:document._id };
             // Berechtigungen ermitteln
