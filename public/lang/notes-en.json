@@ -1,0 +1,20 @@
+{
+    "TRK_MENU_OFFICE" : "Office",
+    "TRK_MENU_OFFICE_NOTES" : "Notes",
+    "TRK_NO" : "No",
+    "TRK_NOTE_CREATE" : "Create",
+    "TRK_NOTE_DELETE": "Delete",
+    "TRK_NOTE_SAVE":"Save",
+    "TRK_NOTES_NOTE":"Note",
+    "TRK_NOTES_CHANGES_SAVED": "Changes saved",  
+    "TRK_NOTES_CONTENTS": "Content",
+    "TRK_NOTES_CREATE_NEW_NOTE":"Create new note",
+    "TRK_NOTES_NEW_NOTE": "New Note",
+    "TRK_NOTES_NOTES": "Notes",
+    "TRK_NOTES_NOTE_CREATED": "Note was successfully created",
+    "TRK_NOTES_NOTE_DELETED" : "Note deleted",
+    "TRK_NOTES_REALLY_DELETE_NOTE" : "Are you sure you want to delete the current note?", 
+    "TRK_NOTES_SELECT_NOTE" : "Select note", 
+    "TRK_MODULE_notes_NAME" : "Notes",  
+    "TRK_YES" : "Yes"
+}

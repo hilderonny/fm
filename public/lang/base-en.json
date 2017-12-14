@@ -53,6 +53,7 @@
     "TRK_PERMISSION_LICENSESERVER_PORTAL" : "License server - Portals",
     "TRK_PERMISSION_OFFICE_ACTIVITY" : "Office - Activities",
     "TRK_PERMISSION_OFFICE_DOCUMENT" : "Office - Documents",
+    "TRK_PERMISSION_OFFICE_NOTE" : "Office - Notes",
     "TRK_PERMISSION_SETTINGS_CLIENT" : "Settings - Client level",
     "TRK_PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" : "Settings - Dynamic attributes",
     "TRK_PERMISSION_SETTINGS_PORTAL" : "Settings - Portal level",

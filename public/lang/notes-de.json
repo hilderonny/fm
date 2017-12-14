@@ -1,0 +1,24 @@
+{
+    "TRK_MENU_OFFICE" : "Büro",
+    "TRK_MENU_OFFICE_NOTES" : "Notizen",    
+    "TRK_NO" : "Nein",
+    "TRK_NOTE_CREATE" : "Erstellen",
+    "TRK_NOTE_DELETE": "Löschen",
+    "TRK_NOTE_SAVE":"Speichern",
+    "TRK_NOTES_NOTE":"Notiz",
+    "TRK_NOTES_CHANGES_SAVED": "Änderungen gespeichert",  
+    "TRK_NOTES_CONTENTS": "Notizinhalt",
+    "TRK_NOTES_CREATE_NEW_NOTE":"Neue Notiz erstellen",
+    "TRK_NOTES_NEW_NOTE": "Neue Notiz",
+    "TRK_NOTES_NOTES": "Notizen",
+    "TRK_NOTES_NOTE_CREATED": "Notiz erstellt",
+    "TRK_NOTES_NOTE_DELETED" : "Notiz gelöscht",
+    "TRK_NOTES_REALLY_DELETE_NOTE" : "Soll die Notiz wirklich gelöscht werden? ",   
+    "TRK_NOTES_SELECT_NOTE" : "Notiz auswählen", 
+    "TRK_MODULE_notes_NAME" : "Notizen",
+    "TRK_YES" : "Ja"
+   
+
+
+
+}

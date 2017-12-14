@@ -53,6 +53,7 @@
     "TRK_PERMISSION_LICENSESERVER_PORTAL" : "Lizenzserver - Portale",
     "TRK_PERMISSION_OFFICE_ACTIVITY" : "Büro - Termine",
     "TRK_PERMISSION_OFFICE_DOCUMENT" : "Büro - Dokumente",
+    "TRK_PERMISSION_OFFICE_NOTE" : "Büro - Notizen",
     "TRK_PERMISSION_SETTINGS_CLIENT" : "Einstellungen - Mandantenebene",
     "TRK_PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" : "Einstellungen - dynamische Attribute",
     "TRK_PERMISSION_SETTINGS_PORTAL" : "Einstellungen - Portalebene",

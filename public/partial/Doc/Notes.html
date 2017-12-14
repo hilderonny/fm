@@ -1,0 +1,43 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller= "DocCardController">
+    
+    <md-toolbar class = "md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu Notizen</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-content>
+        
+        <p>
+            Im Notizenmodul können Benutzer ihre Gedenken aufschreiben und ihre Notizen entwurfen. Hier kann der Benutzer 
+            eine neue Notiz erstellen, oder eine existierende Notiz bearbeiten oder löschen. Die Beziehungen zu den 
+            Notizen werden dabei über <a href="/#/doc/Concepts#relations">Verknüpfungen</a> gepflegt.            
+        </p>
+
+        <ul>
+            <li><a href="/#/doc/Notes#list">Notizliste</a></li>
+            <li><a href="/#/doc/Notes#edit">Notiz bearbeiten</a></li>
+        </ul>
+
+        <h2><a name="list"/>Notizliste</h2>
+        <img src="/css/images/Notes_list.png"/>        
+        <p>
+            Die Notizliste wird als erste Karte angezeigt, sobald man im Menü auf <b>Notizen</b> klickt. Sie führt 
+            alle Notizen eines Benutzer auf. Dabei werden die ersten 50 Wörter eines Noteninhalts angezeigt.
+        </p>
+
+        <p>
+            Ein Klick auf einer Notiz öffnet dessen Detailkarte. Klickt man auf den 
+            <img src="/css/images/Notes_add_button.png"/> -Button in der Toolbar, wird eine Karte zum Anlegen eine
+            neue Notiz eingeblendet.
+        </p>
+
+        <h2><a name="edit"/>Notiz bearbeiten</h2>
+        <img src="/css/images/Notes_editnote.png"/>
+
+        <p>
+            Hier kann der Notizinhalt bearbeiten werden. 
+        </p>         
+
+    </md-card-contetn>
+</md-card>

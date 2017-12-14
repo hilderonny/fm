@@ -119,6 +119,32 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
                 $rootScope.isLoading = false;
             });
         } },
+        { icon: 'Notes', translationKey: 'NOTES_NOTE', requiredReadPermission: 'PERMISSION_OFFICE_NOTE', dialogFunction: function() {
+            $http.get('/api/notes').then(function(response) {
+                var listItems = response.data.map(function(note) {
+                    return {
+                        icon:'material/Notes', 
+                        firstLine:note.content.length > 50 ? note.content.substring(0, 50) + '. . .' : note.content,
+                        type:'notes',
+                        id:note._id
+                    };
+                });
+                $scope.showListDialog('NOTES_SELECT_NOTE', listItems);
+            });
+        } },
+        { icon: 'Notes', translationKey: 'NOTES_NOTE', requiredReadPermission: 'PERMISSION_OFFICE_NOTE', dialogFunction: function() {
+            $http.get('/api/notes').then(function(response) {
+                var listItems = response.data.map(function(note) {
+                    return {
+                        icon:'material/Notes', 
+                        firstLine:note.content.length > 50 ? note.content.substring(0, 50) + '. . .' : note.content,
+                        type:'notes',
+                        id:note._id
+                    };
+                });
+                $scope.showListDialog('NOTES_SELECT_NOTE', listItems);
+            });
+        } },
         { icon: 'Server', translationKey: 'PORTALS_PORTAL', requiredReadPermission: 'PERMISSION_LICENSESERVER_PORTAL', dialogFunction: function() {
             $rootScope.isLoading = true;
             $http.get('/api/portals').then(function(response) {

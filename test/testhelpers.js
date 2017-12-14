@@ -221,6 +221,20 @@ th.preparePersonCommunications = () => {
     });
     return th.bulkInsert(co.collections.communications.name, communications);
 };
+/**
+ * Creates 2 notes for each existing user and return 
+ * a promise.
+ * The names of the notes have following schema: [UserName]_[IndexOfNotes].
+ */
+th.prepareNotes = () =>{
+    var notes = [] ;
+    th.dbObjects.users.forEach((user)=>{
+        notes.push({ clientId: user.clientId, content: 'content'});
+        notes.push({ clientId: user.clientId, content: 'content'});
+    });
+    return th.bulkInsert(co.collections.notes.name, notes);
+};
+
 
 /**
  * Deletes the canRead flag of a permission of the usergroup of the user with the given name.
@@ -666,6 +680,18 @@ th.createRelationsToPerson = (entityType, entity) => {
         var relations = [
             { type1: entityType, id1: entity._id, type2: co.collections.persons.name, id2: person._id, clientId: person.clientId },
             { type1: co.collections.persons.name, id1: person._id, type2: entityType, id2: entity._id, clientId: person.clientId }
+        ];
+        return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
+    }).then(function() {
+        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
+    });
+};
+
+th.createRelationsToNote = (entityType, entity) => {
+    return db.get(co.collections.notes.name).findOne({name:th.defaults.note}).then(function(note) {
+        var relations = [
+            { type1: entityType, id1: entity._id, type2: co.collections.notes.name, id2: note._id, clientId: note.clientId },
+            { type1: co.collections.notes.name, id1: note._id, type2: entityType, id2: entity._id, clientId: note.clientId }
         ];
         return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
     }).then(function() {
