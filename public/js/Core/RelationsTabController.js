@@ -148,6 +148,28 @@ app.controller('CoreRelationsTabController', function($scope, $rootScope, $http,
                 return Promise.resolve(relations);
             });
         },
+        notes: function(relationList) {
+            var targetIds = {};
+            relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });
+            return $http.get('/api/notes/forIds?ids=' + Object.keys(targetIds).join(',')).then(function(response) {
+                var notes = response.data;
+                if (!notes || notes.length < 1) return resolve(false);
+                var relations = {
+                    title: 'NOTES_NOTES',
+                    items: notes.map(function(note) {
+                        return {
+                            icon:'material/Collaborator Male', 
+                            firstLine:note.content.length > 50 ? note.content.substring(0, 50) + '. . .' : note.content,
+                            id:note._id,
+                            relationId:targetIds[note._id].relationId,
+                            targetUrl:'/notes/' + note._id
+                        };
+                    })
+                }
+                $scope.relations.notes = relations;
+                return Promise.resolve(relations);
+            });
+        },
         persons: function(relationList) {
             var targetIds = {};
             relationList.forEach(function(relation) { targetIds[relation.targetId] = relation; });

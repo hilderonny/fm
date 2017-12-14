@@ -93,7 +93,8 @@ describe('API menu', function() {
                     title: 'TRK_MENU_OFFICE',
                     items: [
                         { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                        { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                        { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'},
+                        { mainCard: 'Office/NoteListCard', icon: 'Notes', title: 'TRK_MENU_OFFICE_NOTES'}                        
                     ]
                 },
                 {
@@ -134,7 +135,8 @@ describe('API menu', function() {
                 title: 'TRK_MENU_OFFICE',
                 items: [
                     { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                    { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'}
+                    { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'},
+                    { mainCard: 'Office/NoteListCard', icon: 'Notes', title: 'TRK_MENU_OFFICE_NOTES'}
                 ]
             },
             {
@@ -160,6 +162,7 @@ describe('API menu', function() {
         await th.removeClientModule('0', co.modules.clients);
         await th.removeClientModule('0', co.modules.businesspartners);
         await th.removeAllPermissions('0_0_0', co.permissions.OFFICE_DOCUMENT);
+        await th.removeAllPermissions('0_0_0', co.permissions.OFFICE_NOTE);
         await th.removeAllPermissions('0_0_0', co.permissions.ADMINISTRATION_SETTINGS);
         var token = await th.doLoginAndGetToken('0_0_0', 'test');
         var menuStructureFromApi = (await th.get(`/api/menu?token=${token}`).expect(200)).body.menu;

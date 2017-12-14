@@ -102,6 +102,7 @@ function getHardToFindTranslationKeysForModule(moduleName) {
         case 'documents' : return [ 'TRK_DOCUMENTS_DOCUMENT', 'TRK_DOCUMENTS_DOCUMENTS', 'TRK_DOCUMENTS_DOCUMENTS', 'TRK_DOCUMENTS_SELECT_FOLDER_OR_DOCUMENT', 'TRK_FOLDERS_FOLDER', 'TRK_FOLDERS_FOLDERS', 'TRK_MODEL_documents', 'TRK_MODEL_folders' ];
         case 'fmobjects' : return [ 'TRK_FMOBJECTS_FM_OBJECT', 'TRK_FMOBJECTS_FM_OBJECTS', 'TRK_FMOBJECTS_SELECT_FM_OBJECT', 'TRK_MODEL_fmobjects' ];
         case 'licenseserver' : return [ 'TRK_PORTALS_PORTAL', 'TRK_PORTALS_PORTALS', 'TRK_PORTALS_SELECT_PORTAL' ];
+        case 'notes' : return [ 'TRK_NOTES_NOTE', 'TRK_NOTES_SELECT_NOTE' ];
         case 'portalbase' : return [ 'TRK_MODEL_portals' ];
         default: return [];
     }

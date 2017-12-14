@@ -392,6 +392,34 @@
             "utils": [ "app-packager" ]
         },
 
+        "notes": {
+            "api" : [ "notes" ],
+            "public" : [
+                "css/icons/material/Notes.svg",                
+                "css/images/Notes_add_button.png",
+                "css/images/Notes_editnote.png",
+                "css/images/Notes_list.png",
+                "css/icons/office/Notes.svg",
+                "partial/Office/NoteCard.html",
+                "partial/Office/NoteListCard.html",
+                "partial/Doc/Notes.html"
+            ],
+            "include" : [
+                "public/js/Office/NoteCardController.js",
+                "public/js/Office/NoteListCardController.js"
+            ],
+            "languages" : [ "en", "de" ],
+            "menu": [
+                {
+                    "title": "TRK_MENU_OFFICE",
+                    "items": [
+                        { "mainCard": "Office/NoteListCard", "icon": "Notes", "title": "TRK_MENU_OFFICE_NOTES", "permission" : "PERMISSION_OFFICE_NOTE", "docCard" : "Notes" }
+                    ]
+                }
+
+            ]
+        },
+
         "portalbase" : {
             "api" : [ "portalmanagement" ],
             "public" : [

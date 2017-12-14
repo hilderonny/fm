@@ -65,6 +65,10 @@ module.exports.apis = {
      */
     menu: 'menu',
     /**
+     * API für Notizen
+     */
+    notes: 'notes',
+    /**
      * API für Adressen von Geschäftspartnern
      */
     partneraddresses: 'partneraddresses',
@@ -172,6 +176,11 @@ module.exports.collections = {
      */
     folders:{name:'folders', icon:'Folder', canHaveAttributes:true},
     markers:{name:'markers', canHaveAttributes:false},
+     
+    /**
+     * Notizen
+     */
+    notes:{name:'notes', icon:'Notes', canHaveAttributes:true},
     /**
      * Adressen von Geschäftspartnern
      */
@@ -244,6 +253,10 @@ module.exports.modules = {
      */
     licenseserver: 'licenseserver',
     /**
+     * Modul für Notizen
+     */
+    notes: 'notes',
+    /**
      * Modul zur Verwaltung des eigenen Portals. Stellt Einstellungsseiten für Lizenzschlüssel und Updates bereit
      */
     portalbase: 'portalbase',
@@ -294,6 +307,10 @@ module.exports.permissions = {
      * Permission to show and edit documents and folders
      */
     OFFICE_DOCUMENT: 'PERMISSION_OFFICE_DOCUMENT',
+    /**
+     * Permission to show and edit notes
+     */
+    OFFICE_NOTE: 'PERMISSION_OFFICE_NOTE',
     /**
      * Permission to show and change the settings of the own client (Logo, name)
      */
