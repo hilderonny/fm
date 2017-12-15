@@ -20,6 +20,7 @@
     <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" ng-hide="isNewFolder"><span ng-bind="folderName"></span></span>
+            <span class = "breadcrumbs" ng-hide="isNewFolder" ng-bind="breadcrumbs"></span>
             <span class="md-headline" ng-if="isNewFolder" translate>TRK_FOLDERS_NEW_FOLDER</span>
         </md-card-title-text>
     </md-card-title>
