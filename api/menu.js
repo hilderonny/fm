@@ -32,7 +32,7 @@ var extractMenu = (moduleNames) => {
     }
     moduleNames.forEach((moduleName) => {
         var appModule = moduleConfig.modules[moduleName];
-        if (!appModule.menu) return;
+        if (!appModule || !appModule.menu) return;
         appModule.menu.forEach((menu) => {
             if (!fullMenuObject[menu.title]) {
                 fullMenuObject[menu.title] = JSON.parse(JSON.stringify(menu)); // Make copy instead of reference

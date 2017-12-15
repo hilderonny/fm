@@ -191,10 +191,14 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             $http.get('/api/fmobjects/' + $scope.params.fmObjectId)
             .then(function(response) {
                 var completeFmObject = response.data;
+                if (!completeFmObject || completeFmObject <1) return Promise.resolve(false);
                 $scope.isNewFmObject = false;
                 $scope.fmObject = completeFmObject;
                 $scope.fmObjectName = completeFmObject.name; // Prevent updating the label when changing the input value 
-                $scope.relationsEntity = { type:'fmobjects', id:completeFmObject._id };
+                $scope.breadcrumbs = completeFmObject.path.map(function(pathElement){
+                    return pathElement.name;
+                }).join(' » ');
+                $scope.relationsEntity = { type:'fmobjects', id:completeFmObject._id };                
                 utils.loadDynamicAttributes($scope, 'fmobjects', $scope.params.fmObjectId);
                 utils.setLocation('/fmobjects/' + $scope.params.fmObjectId);
                 $rootScope.isLoading = false;

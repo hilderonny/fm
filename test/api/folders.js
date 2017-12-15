@@ -107,7 +107,6 @@ describe('API folders', function() {
                 var testObjects = ['testFolder1', 'testFolder2', 'testFolder3'].map(function(name) {
                     return {
                         name: name,
-                        type: 'text/plain',
                         clientId: clientId,
                         parentFolderId: null
                     }
@@ -250,6 +249,27 @@ describe('API folders', function() {
                 assert.strictEqual(folderFromApi.elements[1].type, 'f');
                 assert.strictEqual(folderFromApi.elements[2].type, 'd');
                 assert.strictEqual(folderFromApi.elements[3].type, 'd');
+                return Promise.resolve();
+            });
+        });
+        it('Contains the full path in correct order', function() {
+            // We use folder 1_0_0_0_0, so we have the path
+            // 1_0 » 1_0_0 » (or sth like test » d3 )
+            var folderId;
+            // First login
+            return db.get(co.collections.folders.name).findOne({name: '1_0_0_0'}).then(function(folderFromDatabase){
+                folderId = folderFromDatabase._id;
+                return th.doLoginAndGetToken('1_0_0', 'test');
+            }).then(function(token){
+                // Then fetch the folder from the API
+                return th.get(`/api/folders/${folderId}?token=${token}`).expect(200);
+            }).then(function(response) {
+                var folder = response.body;
+                // Finally analyze the returned path (order, names)
+                assert.ok(folder.path, 'Property path does not exist');
+                assert.strictEqual(folder.path.length, 2);
+                assert.strictEqual(folder.path[0].name, '1_0');
+                assert.strictEqual(folder.path[1].name, '1_0_0');
                 return Promise.resolve();
             });
         });
