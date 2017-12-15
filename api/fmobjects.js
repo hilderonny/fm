@@ -81,34 +81,36 @@ router.get('/forIds', auth(false, false, 'fmobjects'), (req, res) => {
                 as: 'path',
                 depthField: 'depth'
             } },
+            { $project: { 
+                "name": 1,                    
+                "parentId": 1,
+                "clientId": 1,
+                "type": 1,
+                "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
+            },
             { $match: { // Find only relevant elements
                 _id: { $in: ids },
                 clientId: clientId
             } },
-            {
-                $unwind: "$path"
-            },
-            {
-                $sort: {
-                    "path.depth":-1
-                }
-            },
+            { $unwind: "$path" },
+            { $sort: { "path.depth": -1 } },
             {
                 $group:{
                     _id: "$_id",
-                    path : {$push: "$path"},
+                    path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
                     fmobj:{"$first": "$$ROOT"}
                 }
             },
             {
                 $project: {
                     "name": "$fmobj.name",                    
-                    "parentFolderId": "$fmobj.parentFolderId",
+                    "parentId": "$fmobj.parentId",
                     "clientId": "$fmobj.clientId",
                     "type":"$fmobj.type",
-                    "path": "$path"
+                    "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
                 }
-            }
+            },
+            { $sort: { "_id": 1 } }
         ]).then(function(fmobjects) {
             res.send(fmobjects);
         });
@@ -127,33 +129,33 @@ router.get('/:id', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), validateId
             as: 'path',
             depthField:'depth'
         } },
+        { $project: { 
+            "name": 1,                    
+            "parentId": 1,
+            "clientId": 1,
+            "type": 1,
+            "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
+        },
         { $match: { // Find only relevant elements
             _id: monk.id(req.params.id)
-            }},
-        { 
-            $limit: 1 
-        },
-        {
-            $unwind: "$path"
-        },
-        {
-            $sort: {
-                "path.depth":-1
-            }
-        },
+        } },
+        { $limit: 1 },
+        { $unwind: "$path" },
+        { $sort: { "path.depth": -1 } },
         {
             $group:{
                 _id: "$_id",
-                path : {$push: "$path"},
+                path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
                 fmobj:{"$first": "$$ROOT"}
             }
         },
         {
             $project: {
                 "name": "$fmobj.name",                    
-                "parentFolderId": "$fmobj.parentFolderId",
+                "parentId": "$fmobj.parentId",
                 "clientId": "$fmobj.clientId",
-                "path": "$path"
+                "type": "$fmobj.type",
+                "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
             }
         }
     ]).then(function(fmobject){

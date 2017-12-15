@@ -77,22 +77,23 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
                 as: 'path',
                 depthField : 'depth'
             } },
+            { $project: { 
+                "name": 1,                    
+                "parentFolderId": 1,
+                "clientId": 1,
+                "type": 1,
+                "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
+            },
             { $match: { // Find only relevant elements
                 _id: { $in: ids },
                 clientId: clientId
             } },
-            {
-                $unwind: "$path"
-            },
-            {
-                $sort: {
-                    "path.depth":-1
-                }
-            },
+            { $unwind: "$path" },
+            { $sort: { "path.depth": -1 } },
             {
                 $group:{
                     _id: "$_id",
-                    path : {$push: "$path"},
+                    path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
                     doc:{"$first": "$$ROOT"}
                 }
             },
@@ -101,37 +102,12 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
                     "name": "$doc.name",                    
                     "parentFolderId": "$doc.parentFolderId",
                     "clientId": "$doc.clientId",
-                    "path": "$path"
+                    "type": "$doc.type",
+                    "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
                 }
-            }
+            },
+            { $sort: { "_id": 1 } }
         ]).then(function(documents) {
-            // Pfade müssen sortiert werden, da graphLookup ein Problem beim Cachen hat und die Reihenfolge manchmal durcheinander haut
-            documents.forEach(function(document) {
-                if (document.path.length < 2) return; // Wenn nur ein Element oder keines drin ist, brauchen wir auch nicht zu sortieren
-                var oldPath = document.path;
-                var newPath = [ ];
-                var rootFolder;
-                var folderDict = {};
-                // Dictionary zum Nachschlagen bauen
-                oldPath.forEach(function(folder) {
-                    folderDict[folder._id] = folder;
-                    if (!folder.parentFolderId) rootFolder = folder;
-                });
-                // Jetzt verkettete Liste bauen
-                oldPath.forEach(function(folder) {
-                    if (!folder.parentFolderId) return;
-                    folderDict[folder.parentFolderId].child = folder;
-                });
-                // Und nun auflösen
-                var currentFolder = rootFolder;
-                do {
-                    newPath.push(currentFolder);
-                    var child = currentFolder.child;
-                    delete currentFolder.child;
-                    currentFolder = child;
-                } while(currentFolder);
-                document.path = newPath;
-            });
             res.send(documents);
         });
     });
@@ -148,22 +124,23 @@ router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validat
             as: 'path',
             depthField : 'depth'
         } },
+        { $project: { 
+            "name": 1,                    
+            "parentFolderId": 1,
+            "clientId": 1,
+            "type": 1,
+            "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
+        },
         { $match: { // Find only relevant elements
             _id: monk.id(req.params.id)
         } },
         { $limit: 1 },
-        {
-            $unwind: "$path"
-        },
-        {
-            $sort: {
-                "path.depth":-1
-            }
-        },
+        { $unwind: "$path" },
+        { $sort: { "path.depth": -1 } },
         {
             $group:{
                 _id: "$_id",
-                path : {$push: "$path"},
+                path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
                 doc:{"$first": "$$ROOT"}
             }
         },
@@ -171,7 +148,9 @@ router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validat
             $project: {
                 "name": "$doc.name",                    
                 "parentFolderId": "$doc.parentFolderId",
-                "path": "$path"
+                "clientId": "$doc.clientId",
+                "type": "$doc.type",
+                "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
             }
         }
     ]).then((matchingDocuments) => {

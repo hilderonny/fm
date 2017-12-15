@@ -234,6 +234,7 @@ describe('API fmobjects', function() {
                             return;
                         }
                         var fmobjectFromApi = res.body;
+                        delete fmobjectFromApi.path; // Path is not handled here but in the next test, so ignore it here
                         var keyCountFromApi = Object.keys(fmobjectFromApi).length;
                         var keyCountFromDatabase = keys.length;
                         assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of fmobject ${fmobjectFromApi._id} differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);

@@ -107,7 +107,6 @@ describe('API folders', function() {
                 var testObjects = ['testFolder1', 'testFolder2', 'testFolder3'].map(function(name) {
                     return {
                         name: name,
-                        type: 'text/plain',
                         clientId: clientId,
                         parentFolderId: null
                     }
