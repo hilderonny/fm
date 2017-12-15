@@ -96,7 +96,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             ].indexOf(document.type) >= 0;          
             $scope.breadcrumbs = document.path.map(function(pathElement){
                 return pathElement.name;
-            }).join('/');
+            }).join(' » ');
             // Information über das Dokument für Verknüpfungen-Tab bereit stellen
             $scope.relationsEntity = { type:'documents', id:document._id };
             // Berechtigungen ermitteln
