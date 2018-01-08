@@ -81,47 +81,64 @@
                                 </md-option>
                             </md-select>
                         </md-input-container>
+                                
+                        <md-input-container flex ng-if="fmObject.type === 'FMOBJECTS_TYPE_LEVEL'">
+                            <label translate>TRK_FMOBJECTS_BGF</label>
+                            <input ng-model="fmObject.bgf" type="number" />
+                        </md-input-container>
+                                
+                        <md-input-container flex ng-if="['FMOBJECTS_TYPE_LEVEL', 'FMOBJECTS_TYPE_ROOM'].includes(fmObject.type)">
+                            <label translate>TRK_FMOBJECTS_NRF</label>
+                            <input ng-model="fmObject.nrf" type="number" />
+                        </md-input-container>
+                                
+                        <md-input-container flex ng-if="fmObject.type === 'FMOBJECTS_TYPE_ROOM'">
+                            <label translate>TRK_FMOBJECTS_NUF</label>
+                            <input ng-model="fmObject.nuf" type="number" />
+                        </md-input-container>
+                                
+                        <md-input-container flex ng-if="fmObject.type === 'FMOBJECTS_TYPE_ROOM'">
+                            <label translate>TRK_FMOBJECTS_TF</label>
+                            <input ng-model="fmObject.tf" type="number" />
+                        </md-input-container>
+                                
+                        <md-input-container flex ng-if="fmObject.type === 'FMOBJECTS_TYPE_ROOM'">
+                            <label translate>TRK_FMOBJECTS_VF</label>
+                            <input ng-model="fmObject.vf" type="number" />
+                        </md-input-container>
+                                
+                        <md-input-container flex ng-if="fmObject.type === 'FMOBJECTS_TYPE_AREA'">
+                            <label translate>TRK_FMOBJECTS_F</label>
+                            <input ng-model="fmObject.f" type="number" />
+                        </md-input-container>
 
-                        <md-divider ng-if="fmObject.type !== 'FMOBJECTS_TYPE_PROJECT'">
-                            <label translate>TRK_FMOBJECTS_SIZE</label>
-                            <md-card-content layout = "row" >  
-                                <md-input-container flex>
-                                    <label translate>TRK_FMOBJECTS_LENGTH</label>
-                                    <input ng-model="fmObject.size[0]" type="number" pattern = "[0-9]+([.][0-9]+)?">
-                                </md-input-container>
+                        <md-input-container flex ng-if="fmObject.type === 'FMOBJECTS_TYPE_AREA'">
+                            <label translate>TRK_FMOBJECTS_CATEGORY</label>
+                            <md-select ng-model="fmObject.category" ng-change="changeCategory()">
+                                <md-option ng-value="category" ng-repeat="(category, areatypes) in categories">
+                                    <span translate="TRK_{{category}}"></span>
+                                </md-option>
+                            </md-select>
+                        </md-input-container>
 
-                                <md-input-container  flex>
-                                    <label translate>TRK_FMOBJECTS_WIDTH</label>
-                                    <input ng-model="fmObject.size[1]" type="number" pattern = "[0-9]+([.][0-9]+)?">
-                                </md-input-container>
+                        <md-input-container flex ng-if="fmObject.type === 'FMOBJECTS_TYPE_AREA'">
+                            <label translate>TRK_FMOBJECTS_AREATYPE</label>
+                            <md-select ng-model="fmObject.areatype">
+                                <md-option ng-value="areatype" ng-repeat="areatype in categories[fmObject.category]">
+                                    <span>{{areatype}}</span>
+                                </md-option>
+                            </md-select>
+                        </md-input-container>
 
-                                <md-input-container flex>
-                                    <label translate>TRK_FMOBJECTS_HEIGHT</label>
-                                    <input ng-model="fmObject.size[2]" type="number" pattern = "[0-9]+([.][0-9]+)?">
-                                </md-input-container>
-                            </md-card-content>  
-                        </md-divider>  
+                        <md-input-container flex ng-if="fmObject.type === 'FMOBJECTS_TYPE_AREA'">
+                            <label translate>TRK_FMOBJECTS_USAGESTATE</label>
+                            <md-select ng-model="fmObject.usagestate">
+                                <md-option ng-value="usagestate" ng-repeat="usagestate in usagestates">
+                                    <span>{{usagestate}}</span>
+                                </md-option>
+                            </md-select>
+                        </md-input-container>
 
-                        <md-divider  ng-if="fmObject.type !== 'FMOBJECTS_TYPE_PROJECT'">  
-                            <label translate>TRK_FMOBJECTS_POSITION</label>
-                            <md-card-content  layout = "row" >
-                                <md-input-container flex>
-                                    <label translate>TRK_FMOBJECTS_X</label>
-                                    <input ng-model="fmObject.pos[0]" type="number" pattern = "[0-9]+([.][0-9]+)?">
-                                </md-input-container>
-
-                                <md-input-container flex>
-                                    <label translate>TRK_FMOBJECTS_Y</label>
-                                    <input ng-model="fmObject.pos[1]" type="number" pattern = "[0-9]+([.][0-9]+)?">
-                                </md-input-container>
-
-                                <md-input-container flex>
-                                    <label translate>TRK_FMOBJECTS_Z</label>
-                                    <input ng-model="fmObject.pos[2]" type="number" pattern = "[0-9]+([.][0-9]+)?">
-                                </md-input-container>
-                            </md-card-content>  
-                        </md-divider>
-                        
                         <ng-include flex ng-if="!isNewFmObject" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
 
                         <md-card-actions layout="row" layout-align="end center">

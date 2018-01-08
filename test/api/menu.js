@@ -72,61 +72,58 @@ describe('API menu', function() {
         });
     });
 
-    it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', function() {
-        return th.removeAllPermissions('_0_0', co.permissions.BIM_FMOBJECT).then(function() {
-            return th.removeAllPermissions('_0_0', co.permissions.ADMINISTRATION_SETTINGS);
-        }).then(function() {
-            return th.doLoginAndGetToken('_0_0', 'test');
-        }).then((token) => {
-            return th.get(`/api/menu?token=${token}`).expect(200);
-        }).then((res) => {
-            var menuStructureFromApi = res.body.menu;
-            var userMenu = [
-                {
-                    title: 'TRK_MENU_ADMINISTRATION',
-                    items: [
-                        { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
-                        { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
-                    ]
-                },
-                {
-                    title: 'TRK_MENU_OFFICE',
-                    items: [
-                        { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                        { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'},
-                        { mainCard: 'Office/NoteListCard', icon: 'Notes', title: 'TRK_MENU_OFFICE_NOTES'}                        
-                    ]
-                },
-                {
-                    title: 'TRK_MENU_CRM',
-                    items: [
-                        { mainCard: 'CRM/BPListCard', icon: 'Business', title: 'TRK_MENU_CRM_BUSINESSPARTNERS'},
-                        { mainCard: 'CRM/PersonListCard', icon: 'Collaborator Male', title: 'TRK_MENU_CRM_PERSONS'}
-                    ]
-                },
-                {
-                    title: 'TRK_MENU_PORTAL',
-                    items: [
-                        { mainCard: 'Administration/ClientListCard', icon: 'Briefcase', title: 'TRK_MENU_PORTAL_CLIENTS'}
-                    ]
-                },
-                {
-                    title: 'TRK_MENU_LICENSESERVER',
-                    items: [
-                        { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
-                    ]
-                }
-            ];
-            compareMenuStructures(menuStructureFromApi, userMenu);
-            return Promise.resolve();
-        });
+    it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', async () => {
+        await th.removeAllPermissions('_0_0', co.permissions.BIM_AREAS);
+        await th.removeAllPermissions('_0_0', co.permissions.BIM_FMOBJECT);
+        await th.removeAllPermissions('_0_0', co.permissions.ADMINISTRATION_SETTINGS);
+        var token = await th.doLoginAndGetToken('_0_0', 'test');
+        var res = await th.get(`/api/menu?token=${token}`).expect(200);
+        var menuStructureFromApi = res.body.menu;
+        var userMenu = [
+            {
+                title: 'TRK_MENU_ADMINISTRATION',
+                items: [
+                    { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
+                    { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
+                ]
+            },
+            {
+                title: 'TRK_MENU_OFFICE',
+                items: [
+                    { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
+                    { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'},
+                    { mainCard: 'Office/NoteListCard', icon: 'Notes', title: 'TRK_MENU_OFFICE_NOTES'}                        
+                ]
+            },
+            {
+                title: 'TRK_MENU_CRM',
+                items: [
+                    { mainCard: 'CRM/BPListCard', icon: 'Business', title: 'TRK_MENU_CRM_BUSINESSPARTNERS'},
+                    { mainCard: 'CRM/PersonListCard', icon: 'Collaborator Male', title: 'TRK_MENU_CRM_PERSONS'}
+                ]
+            },
+            {
+                title: 'TRK_MENU_PORTAL',
+                items: [
+                    { mainCard: 'Administration/ClientListCard', icon: 'Briefcase', title: 'TRK_MENU_PORTAL_CLIENTS'}
+                ]
+            },
+            {
+                title: 'TRK_MENU_LICENSESERVER',
+                items: [
+                    { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
+                ]
+            }
+        ];
+        compareMenuStructures(menuStructureFromApi, userMenu);
     });
 
     it('responds to GET/ with client admin user logged in with all menu items available to the users client', async function() {
-        await th.removeClientModule('0', 'fmobjects');
-        await th.removeClientModule('0', 'clients');
-        await th.removeClientModule('0', 'businesspartners');
-        await th.removeClientModule('0', 'ronnyseins');
+        await th.removeClientModule('0', co.modules.areas);
+        await th.removeClientModule('0', co.modules.fmobjects);
+        await th.removeClientModule('0', co.modules.clients);
+        await th.removeClientModule('0', co.modules.businesspartners);
+        await th.removeClientModule('0', co.modules.ronnyseins);
         var token = await th.doLoginAndGetToken('0_0_ADMIN0', 'test');
         var menuStructureFromApi = (await th.get(`/api/menu?token=${token}`).expect(200)).body.menu;
         // Module "ronnyseins" must not be in here, because it is never available to any client.
@@ -158,6 +155,7 @@ describe('API menu', function() {
     });
 
     it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', async function() {
+        await th.removeClientModule('0', co.modules.areas);
         await th.removeClientModule('0', co.modules.fmobjects);
         await th.removeClientModule('0', co.modules.clients);
         await th.removeClientModule('0', co.modules.businesspartners);

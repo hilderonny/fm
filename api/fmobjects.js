@@ -34,8 +34,15 @@ router.get('/', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), (req, res) =>
                 _id: fmObject._id,
                 name: fmObject.name,
                 type: fmObject.type,
-                size: fmObject.size,
-                pos: fmObject.pos,
+                category: fmObject.category,
+                areatype: fmObject.areatype,
+                f: fmObject.f,
+                bgf: fmObject.bgf,
+                usagestate: fmObject.usagestate,
+                nrf: fmObject.nrf,
+                nuf: fmObject.nuf,
+                tf: fmObject.tf,
+                vf: fmObject.vf,
                 children: []
             };
         }
@@ -134,7 +141,16 @@ router.get('/:id', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), validateId
             "parentId": 1,
             "clientId": 1,
             "type": 1,
-            "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
+            "category": 1,
+            "areatype": 1,
+            "f": 1,
+            "bgf": 1,
+            "usagestate": 1,
+            "nrf": 1,
+            "nuf": 1,
+            "tf": 1,
+            "vf": 1,
+        "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
         },
         { $match: { // Find only relevant elements
             _id: monk.id(req.params.id)
@@ -155,6 +171,15 @@ router.get('/:id', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), validateId
                 "parentId": "$fmobj.parentId",
                 "clientId": "$fmobj.clientId",
                 "type": "$fmobj.type",
+                "category": "$fmobj.category",
+                "areatype": "$fmobj.areatype",
+                "f": "$fmobj.f",
+                "bgf": "$fmobj.bgf",
+                "usagestate": "$fmobj.usagestate",
+                "nrf": "$fmobj.nrf",
+                "nuf": "$fmobj.nuf",
+                "tf": "$fmobj.tf",
+                "vf": "$fmobj.vf",
                 "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
             }
         }
