@@ -1,0 +1,49 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu Flächen</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-content>
+
+        <p>
+            Im Flächenmodul werden Flächendaten über die FM-Objekthierarchie hinweg aufsummiert und ausgewertet. Eine korrekte Berechnung
+            setzt voraus, dass eine FM Hierarchie in der Form Gebäude - Etage - Raum - Fläche vorhanden ist und dass die Flächeninformationen
+            korrekt gepflegt wurden.
+        </p>
+        <p>
+            Bei Flächen stellt die Netto-Raum-Fläche (NRF) die Grundfläche selbst dar. Dieser Wert wird auch als Nutzfläche, Technikfläche oder
+            Verkehrsfläche angenommen, je nachdem, welcher Kategorie die Fläche angehört.
+        </p>
+        <p>
+            Bei Räumen und allen darüberliegenden Hierarchien setzen sich die Kennzahlen aus der Summe der entsprechenden Kennzahlen der
+            Kindelemente zusammen. Die Netto-Raum-Fläche eines Raumes ist demnach die Summe der Netto-Raum-Flächen aller im Raum enthaltenen
+            Flächen. Hat ein Raum mal kein Kindelement, so wird der Wert angenommen, der direkt am Raum geflegt ist. Gleiches gilt für
+            übergeordnete Hierarchieebenen.
+        </p>
+        <p>
+            Ab der Ebene der Etagen aufwärts gibt es weiterhin die Kennzahlen Brutto-Geschossfläche sowie Konstruktionsgrundfläche wobei
+            letztere eine Differenz aus Brutto-Geschossfläche und Netto-Raum-Fläche ist.
+        </p>
+
+        <h2>Desktop-Anzeige</h2>
+        <img src="/css/images/Areas_desktop.png"/>
+        <p>
+            Auf Dektop-Geräten mit großem Bildschirm wird die gesamte Hierarchie und die zugehörigen Kennzahlen tabellarisch angezeigt,
+            um den vorhandenen Platz optimal auszunutzen.
+        </p>
+        <p>
+            Ein Klick auf ein Hierarchieelement öffnet die Detailkarte des entsprechenden Elementes.
+        </p>
+
+        <h2>Mobile Anzeige</h2>
+        <img src="/css/images/Areas_mobile.png"/>
+        <p>
+            Auf Mobilgeräten wird stets nur eine Hierarchieebene mit dessen Kennzahlen angezeigt. Darunter wird eine Liste mit Kindelementen
+            angezeigt, welche beim Darauf-Klicken das jeweilige Kindelement mit dessen Kennzahlen anzeigt.
+        </p>
+                        
+    </md-card-content>
+</md-card>

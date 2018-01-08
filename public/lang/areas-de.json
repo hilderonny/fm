@@ -1,0 +1,14 @@
+{
+    "TRK_AREAS_AREAS": "Flächen",
+    "TRK_AREAS_BGF": "BGF (m²)",
+    "TRK_AREAS_CHILD_ELEMENTS": "Kindelemente",
+    "TRK_AREAS_KGF": "KGF (m²)",
+    "TRK_AREAS_NRF": "NRF (m²)",
+    "TRK_AREAS_NUF": "NUF (m²)",
+    "TRK_AREAS_TF": "TF (m²)",
+    "TRK_AREAS_VF": "VF (m²)",
+    "TRK_FMOBJECTS_FM_OBJECT" : "FM Objekt",
+    "TRK_MENU_BIM" : "FM",
+    "TRK_MENU_BIM_AREAS": "Flächen",
+    "TRK_MODULE_areas_NAME" : "Flächen"
+}

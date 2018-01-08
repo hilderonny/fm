@@ -1,0 +1,97 @@
+<md-card ng-cloak ng-controller="BIMAreasCardController" style="background-image:url('/css/icons/office/surface.svg');" class="list-details-details">
+    
+    <md-toolbar class="md-toolbar-tools md-accent" ng-if="currentFmObject">
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+    
+    <md-card-title flex="none">
+        <md-card-title-text>
+            <span class="md-headline" ng-if="!currentFmObject" translate>TRK_AREAS_AREAS</span>
+            <span class="md-headline" ng-if="currentFmObject">{{currentFmObject.element.name}}</span>
+            <span class="breadcrumbs" ng-if="currentFmObject" ng-bind="breadcrumbs" ></span>
+        </md-card-title-text>
+    </md-card-title>
+
+    <md-card-content>
+        <table class="areas largedevice">
+            <thead>
+                <tr>
+                    <th translate="TRK_FMOBJECTS_FM_OBJECT"></th>
+                    <th translate="TRK_AREAS_BGF"></th>
+                    <th translate="TRK_AREAS_NRF"></th>
+                    <th translate="TRK_AREAS_KGF"></th>
+                    <th translate="TRK_AREAS_NUF"></th>
+                    <th translate="TRK_AREAS_TF"></th>
+                    <th translate="TRK_AREAS_VF"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="fmObject in fmObjects" ng-class="{active:selectedFmObject===fmObject}">
+                    <td ng-click="showFmObjectDetails(fmObject)">
+                        <div>
+                            <div class="inset" ng-repeat="inset in fmObject.inset"></div>
+                            <img ng-src="/css/icons/{{fmObject.icon}}.svg" />
+                            <span ng-bind="fmObject.name"></span>
+                        </div>
+                    </td>
+                    <td ng-bind="fmObject.bgf | number"></td>
+                    <td ng-bind="fmObject.nrf | number"></td>
+                    <td ng-bind="fmObject.kgf | number"></td>
+                    <td ng-bind="fmObject.nuf | number"></td>
+                    <td ng-bind="fmObject.tf | number"></td>
+                    <td ng-bind="fmObject.vf | number"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="areavalues smalldevice" ng-if="currentFmObject">
+            <tbody>
+                <tr ng-if="currentFmObject.element.bgf !== undefined">
+                    <th translate="TRK_AREAS_BGF"></th>
+                    <td ng-bind="currentFmObject.element.bgf | number"></td>
+                </tr>
+                <tr ng-if="currentFmObject.element.nrf !== undefined">
+                    <th translate="TRK_AREAS_NRF"></th>
+                    <td ng-bind="currentFmObject.element.nrf | number"></td>
+                </tr>
+                <tr ng-if="currentFmObject.element.kgf !== undefined">
+                    <th translate="TRK_AREAS_KGF"></th>
+                    <td ng-bind="currentFmObject.element.kgf | number"></td>
+                </tr>
+                <tr ng-if="currentFmObject.element.nuf !== undefined">
+                    <th translate="TRK_AREAS_NUF"></th>
+                    <td ng-bind="currentFmObject.element.nuf | number"></td>
+                </tr>
+                <tr ng-if="currentFmObject.element.tf !== undefined">
+                    <th translate="TRK_AREAS_TF"></th>
+                    <td ng-bind="currentFmObject.element.tf | number"></td>
+                </tr>
+                <tr ng-if="currentFmObject.element.vf !== undefined">
+                    <th translate="TRK_AREAS_VF"></th>
+                    <td ng-bind="currentFmObject.element.vf | number"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="areas areachildren smalldevice" ng-if="childFmObjects.length > 0">
+            <tbody>
+                <tr>
+                    <th translate="TRK_AREAS_CHILD_ELEMENTS"></th>
+                </tr>
+                <tr ng-repeat="fmObject in childFmObjects">
+                    <td ng-click="openChildElement(fmObject)">
+                        <div>
+                            <img ng-src="/css/icons/{{fmObject.element.icon}}.svg" />
+                            <span ng-bind="fmObject.element.name"></span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    
+    </md-card-content>
+    
+    <resize-handle></resize-handle>
+    
+</md-card>
