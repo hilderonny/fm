@@ -568,19 +568,6 @@ table.largedevice, table.smalldevice {
     z-index:1;
 }
 
-.login-dialog::after {
-    content: "BETA";
-    display: block;
-    color: white;
-    text-align: center;
-    position: absolute;
-    top: 24px;
-    right: 10px;
-    font-weight: bold;
-    transform: rotate(45deg);
-    z-index: 2;
-}
-
 .login-dialog > .version {
     position: fixed;
     left: 0;
