@@ -557,17 +557,6 @@ table.largedevice, table.smalldevice {
     position: relative;
 }
 
-.login-dialog::before {
-    content: "";
-    display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    border-top: 100px solid red;
-    border-left: 100px solid transparent;
-    z-index:1;
-}
-
 .login-dialog > .version {
     position: fixed;
     left: 0;
