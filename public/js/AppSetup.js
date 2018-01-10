@@ -104,6 +104,17 @@ app.directive('focusMe', function($timeout) {
   };
 });
 
+//seting the dateapicker input text field attribute to readonly 
+// See: https://stackoverflow.com/questions/46152691/md-datepicker-input-field-should-be-readonly-no-manual-date-entry-allowed
+app.directive('readOnly', function(){
+  return{
+    restrict: 'A',
+    link: function(scope, element){
+      element.find("input")[0].setAttribute("readonly","true");
+    }
+  }  
+})
+
 /**
  * Resize-handle für Karten. Wird bei Listen eingesetzt.
  * <md-card>

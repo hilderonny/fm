@@ -678,6 +678,8 @@ table.largedevice, table.smalldevice {
     display:none;
 }
 
+
+
 @media (max-width: 959px) and (min-width: 0) and (orientation: portrait) {
     
     .searchresults {
