@@ -242,7 +242,7 @@ md-list.hierarchy > md-list-item > div > md-icon {
     padding-right:4px;
 }
 
-md-list.hierarchy > md-list-item > div > img {
+md-list.hierarchy > md-list-item > div > img, table.areas > tbody > tr > td:first-of-type > div > img {
     margin:auto 4px auto 0;
     height:24px;
     opacity: 0.6;
@@ -351,6 +351,62 @@ md-toolbar md-input-container {
 
 md-toolbar md-input-container input {
     color:white !important;
+}
+
+table.areas {
+    min-width: 100%;
+}
+
+table.areavalues {
+    margin: 0 auto 20px auto;
+}
+
+table.areavalues th, table.areavalues td {
+    text-align: right;
+}
+
+table.areas, table.areas th, table.areas td {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-collapse: collapse;
+}
+
+table.areas > tbody > tr.active {
+    background-color: lightgray;
+}
+
+table.areas > tbody > tr:hover {
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+table.areas > tbody > tr > td {
+    padding: 0 4px;
+    text-align: right;
+}
+
+table.areas > tbody > tr > td:first-of-type {
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+}
+
+table.areas > tbody > tr > td:first-of-type > div {
+    display: flex;
+}
+
+table.areas > tbody > tr > td:first-of-type > div > .inset {
+    display: inline-block;
+}
+
+table.areas > tbody > tr > td:first-of-type > div > span {
+    margin: 4px;
+}
+
+table.areachildren > tbody > tr > td {
+    padding: 4px;
+}
+
+table.largedevice, table.smalldevice {
+    display: table;
 }
 
 .nowrap {
@@ -618,9 +674,11 @@ md-toolbar md-input-container input {
     display:initial;
 }
 
-.smalldevice {
+.smalldevice, table.smalldevice {
     display:none;
 }
+
+
 
 @media (max-width: 959px) and (min-width: 0) and (orientation: portrait) {
     
@@ -707,11 +765,15 @@ md-toolbar md-input-container input {
     }
 
     .largedevice {
-        display:none;
+        display:none !important;
     }
     
     .smalldevice {
         display:initial;
+    }
+
+    table.smalldevice {
+        display: table;
     }
 
     .searchresults {

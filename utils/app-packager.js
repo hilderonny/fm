@@ -71,7 +71,7 @@ module.exports.pack = (moduleNameList, version) => {
         var moduleName = moduleNameList[i];
         var requestedModule = moduleConfig.modules[moduleName];
         // Add api files
-        requestedModule.api.forEach((apiFileName) => {
+        if (requestedModule.api) requestedModule.api.forEach((apiFileName) => {
             var fullPath = `api/${apiFileName}.js`;
             zip.file(fullPath, fs.readFileSync('./' + fullPath));
         });

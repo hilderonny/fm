@@ -103,7 +103,7 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
     // - $scope.params.closeCallback : Callback function when the card gets closed via button. No parameters
     $scope.load = function() {
         $scope.canWriteActivities = $rootScope.canWrite('PERMISSION_OFFICE_ACTIVITY');
-        $rootScope.isLoading= true;
+        $rootScope.isLoading= true;       
         // Switch between creation of a new activity and loading of an existing activity
         if ($scope.params.activityId) {
             // Existing activity

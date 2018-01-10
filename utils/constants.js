@@ -225,6 +225,10 @@ module.exports.modules = {
      */
     activities: 'activities',
     /**
+     * Flächen
+     */
+    areas: 'areas',
+    /**
      * Grundmodul, welches in allen Installationen vorhanden ist
      */
     base: 'base',
@@ -282,6 +286,7 @@ module.exports.permissions = {
      */
     ADMINISTRATION_USER: 'PERMISSION_ADMINISTRATION_USER',
     ADMINISTRATION_USERGROUP: 'PERMISSION_ADMINISTRATION_USERGROUP',
+    BIM_AREAS: 'PERMISSION_BIM_AREAS',
     /**
      * Permission to show and edit FM objects
      */

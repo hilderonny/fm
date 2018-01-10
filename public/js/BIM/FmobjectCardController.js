@@ -9,6 +9,27 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
         'FMOBJECTS_TYPE_AREA',
         'FMOBJECTS_TYPE_INVENTORY'
     ];
+
+    $scope.categories = {
+        FMOBJECTS_CATEGORY_NUF: [
+            'Wohnen und Aufenthalt', 
+            'Büroarbeit', 
+            'Produktion, Hand- und Maschinenarbeit, Experimente', 
+            'Lagern, Verteilen und Verkaufen', 
+            'Bildung, Unterricht und Kultur', 
+            'Heilen und Pflegen',
+            'Sonstige Nutzung'
+        ],
+        FMOBJECTS_CATEGORY_TF: [ 'Technische Anlagen' ],
+        FMOBJECTS_CATEGORY_VF: [ 'Verkehrserschließung und -sicherung' ]
+    };
+
+    $scope.usagestates = [
+        "Ungenutzt",
+        "Eigengenutzt",
+        "Vermietet",
+        "Reserviert"
+    ]
     
     // Click on new FM object button opens detail dialog with new FM object data
     $scope.newFmObject = function() {
@@ -27,8 +48,15 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             name: $scope.fmObject.name, 
             type: $scope.fmObject.type, 
             parentId: $scope.fmObject.parentId,
-            size: $scope.fmObject.size,
-            pos: $scope.fmObject.pos,
+            category: $scope.fmObject.category,
+            areatype: $scope.fmObject.areatype,
+            f: $scope.fmObject.f,
+            bgf: $scope.fmObject.bgf,
+            usagestate: $scope.fmObject.usagestate,
+            nrf: $scope.fmObject.nrf,
+            nuf: $scope.fmObject.nuf,
+            tf: $scope.fmObject.tf,
+            vf: $scope.fmObject.vf,
             previewImageId: $scope.fmObject.previewImageId
         };
         $http.post('/api/fmobjects', fmObjectToSend).then(function(response) {
@@ -53,8 +81,15 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
         var fmObjectToSend = { 
             name: $scope.fmObject.name, 
             type: $scope.fmObject.type, 
-            size: $scope.fmObject.size, 
-            pos: $scope.fmObject.pos,
+            category: $scope.fmObject.category,
+            areatype: $scope.fmObject.areatype,
+            f: $scope.fmObject.f,
+            bgf: $scope.fmObject.bgf,
+            usagestate: $scope.fmObject.usagestate,
+            nrf: $scope.fmObject.nrf,
+            nuf: $scope.fmObject.nuf,
+            tf: $scope.fmObject.tf,
+            vf: $scope.fmObject.vf,
             previewImageId: $scope.fmObject.previewImageId
         };
         utils.saveEntity($scope, 'fmobjects', $scope.params.fmObjectId, '/api/fmobjects/', fmObjectToSend).then(function(savedFmObject) {
@@ -174,6 +209,10 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
         window.open('/api/documents/' + $scope.fmObject.previewImageId + '?action=download&token=' + $scope.token);
     };
 
+    $scope.changeCategory = function() {
+        $scope.fmObject.areatype = $scope.categories[$scope.fmObject.category][0]
+    };
+
 
     // Loads the FM object details or prepares the empty dialog for a new FM object
     // Params:
@@ -206,7 +245,13 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
         } else {
             // New FM object
             $scope.isNewFmObject = true;
-            $scope.fmObject = { name: '', type: $scope.types[0] };
+            $scope.fmObject = { 
+                name: '', 
+                type: $scope.types[0], 
+                category: Object.keys($scope.categories)[0], 
+                areatype:$scope.categories[Object.keys($scope.categories)[0]][0],
+                usagestate: $scope.usagestates[0]
+             };
             if ($scope.params.parentFmObjectId) {
                 $scope.fmObject.parentId = $scope.params.parentFmObjectId;
             }

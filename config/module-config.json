@@ -192,6 +192,36 @@
             ]
         },
         
+        "areas": {
+            "public" : [
+                "css/icons/fm/FMOBJECTS_TYPE_AREA.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg",
+                "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg",
+                "css/icons/material/surface.svg",
+                "css/icons/office/surface.svg",
+                "css/images/Areas_desktop.png",
+                "css/images/Areas_mobile.png",
+                "partial/Doc/Areas.html",
+                "partial/BIM/AreasCard.html"
+            ],
+            "include" : [
+                "public/js/BIM/AreasCardController.js"
+            ],
+            "languages" : [ "en", "de" ],
+            "menu": [
+                {
+                    "title": "TRK_MENU_BIM",
+                    "items": [
+                        { "mainCard": "BIM/AreasCard", "icon": "surface", "title": "TRK_MENU_BIM_AREAS", "permission" : "PERMISSION_BIM_AREAS", "docCard" : "Areas" }
+                    ]
+                }
+            ]
+        },
+
         "businesspartners" : {
             "api":[ "businesspartners", "partneraddresses", "persons", "communications"],
             "public": [
