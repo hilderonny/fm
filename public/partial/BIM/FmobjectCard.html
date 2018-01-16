@@ -59,7 +59,7 @@
             <md-tab-body>
                 <md-card-content layout="column">
 
-                    <form name="fmObjectForm" layout="column">
+                    <form name="fmObjectForm">
 
                         <md-input-container flex>
                             <img ng-if="fmObject.previewImageId" ng-src="/api/documents/{{fmObject.previewImageId}}?action=download&token={{token}}" ng-click="openImage()"/>
