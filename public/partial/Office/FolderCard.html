@@ -39,6 +39,15 @@
                     <md-button class="md-raised md-accent" ng-if="!isNewFolder && canWriteDocuments" ng-click="saveFolder()"><span translate>TRK_FOLDERS_SAVE</span></md-button>
                     <md-button class="md-raised md-warn" ng-if="!isNewFolder && canWriteDocuments" ng-click="deleteFolder()"><span translate>TRK_FOLDERS_DELETE</span></md-button>
                 </md-card-actions>
+
+                <!-- https://jsbin.com/hiqasek/edit?html,js,output -->
+                <div id="output" style="min-height: 200px; white-space: pre; border: 1px solid black;"
+                                     ondragenter="document.getElementById('output').textContent = ''; event.stopPropagation(); event.preventDefault();"
+                                     ondragover="event.stopPropagation(); event.preventDefault();"
+                                     ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);" flex>
+                    <label translate>TRK_FOLDERS_DRAG_AND_DROP_AREA</label>
+                </div>
+                
             </form>
 
         </md-card-content>
@@ -54,14 +63,6 @@
                         <p ng-bind="element.name"></p>
                         <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
                     </md-list-item>
-                
-                     <!-- https://jsbin.com/hiqasek/edit?html,js,output -->
-                    <div id="output" style="min-height: 200px; white-space: pre; border: 1px solid black;"
-                                     ondragenter="document.getElementById('output').textContent = ''; event.stopPropagation(); event.preventDefault();"
-                                     ondragover="event.stopPropagation(); event.preventDefault();"
-                                     ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);" flex>
-                    <label translate>TRK_FOLDERS_DRAG_AND_DROP_AREA</label>
-                </div>
             </md-card-content>
             </md-tab-body>
         </md-tab>
