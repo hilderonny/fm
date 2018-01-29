@@ -204,6 +204,10 @@ md-tab-content > div {
     flex-direction: column;
 }
 
+md-card-content > form {
+  display: block;
+}
+
 md-list.lines-beetween-items md-list-item {
     border-bottom:1px solid #e0e0e0;
 }
@@ -352,6 +356,7 @@ md-toolbar md-input-container {
 md-toolbar md-input-container input {
     color:white !important;
 }
+
 
 table.areas {
     min-width: 100%;
@@ -683,7 +688,7 @@ table.largedevice, table.smalldevice {
     md-card.doc md-card-content > img {
         float:initial !important;
     }
-    
+ 
     md-list.activities-3 h3 {
         margin:0;
         flex: 1;
@@ -702,7 +707,7 @@ table.largedevice, table.smalldevice {
     resize-handle {
         display: none;
     }
-    
+
     .nowrap {
         white-space: initial;
         overflow: initial;
