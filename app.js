@@ -60,6 +60,20 @@ var prepareIncludes = (fs) => {
     }
 };
 
+    var timerId; 
+    var portalUpdatesHelper = require('./utils/portalUpdatesHelper');
+    module.exports.manageAutoUpdate = function(autoUpdateMode){
+        if(autoUpdateMode){
+            var updateInterval = 30000;
+            timerId = setInterval(portalUpdatesHelper.triggerUpdate, updateInterval);
+            console.log('Auto-update on');
+            console.log(timerId);
+        }else{
+           clearInterval(timerId);
+            console.log('Auto-update off');
+        }
+    };
+
 // Server initialization
 var init = () => {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
@@ -163,6 +177,11 @@ var init = () => {
     var url =`${localConfig.licenseserverurl}/api/update/heartbeat`;
     var key = localConfig.licensekey;
     request.post({url: url, form:  {"licenseKey":  key, "version": localVersion}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
+    //start the initial auto-update mode on server start 
+    if(localConfig.autoUpdateMode){
+        var initalUpdateInterval = 30000//localConfig.updateTimerInterval;
+        timerId = setInterval(portalUpdatesHelper.triggerUpdate, initalUpdateInterval);
+    }
 };
 
 // Install required dependencies
