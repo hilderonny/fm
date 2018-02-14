@@ -14,5 +14,6 @@
     "serviceName": "Avorium FM",
     "serviceDescription": "Facility management portal",
     "licenseserverurl": "https://fm.avorium.de",
-    "licensekey": "6fi1f2o3co71ovq4h8sc70tmrousl8v50i7o677r9ri4ua7lph0ldeq91jcr1gla0cd5map8en66t0hskjs5t5ri3cjuo0l04ntsuc4drbt0isj5qikjqejiqc01at2mqpg0tjcc6snidak9gf5dv4vfn0fo52ei9kptlgppullikgi40cvm7tj5hojbm3dr675h425njmbse"
+    "licensekey": "6fi1f2o3co71ovq4h8sc70tmrousl8v50i7o677r9ri4ua7lph0ldeq91jcr1gla0cd5map8en66t0hskjs5t5ri3cjuo0l04ntsuc4drbt0isj5qikjqejiqc01at2mqpg0tjcc6snidak9gf5dv4vfn0fo52ei9kptlgppullikgi40cvm7tj5hojbm3dr675h425njmbse",
+    "updateTimerInterval": 12
 }

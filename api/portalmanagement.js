@@ -46,7 +46,8 @@ router.get('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'r', co.modules.por
     var portalSettings = { // Extract only relevant data from localConfig
         licenseserverurl : localConfig.licenseserverurl,
         licensekey : localConfig.licensekey,
-        autoUpdateMode : localConfig.autoUpdateMode
+        autoUpdateMode : localConfig.autoUpdateMode,
+        updateTimerInterval: localConfig.updateTimerInterval
     };
     return res.send(portalSettings);
 });
@@ -102,6 +103,14 @@ router.put('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.por
         // make sure that portalSettings.autoUpdateMode exists; it can have only FALSE or TRUE as valid value
         localConfig.autoUpdateMode = portalSettings.autoUpdateMode;
         appJs.manageAutoUpdate(portalSettings.autoUpdateMode);//toggle automatic updates 
+        if(portalSettings.autoUpdateMode ==false && localConfig.updateTimerInterval){
+            delete localConfig.updateTimerInterval;
+        }else{
+            localConfig.updateTimerInterval = portalSettings.updateTimerInterval; //set intial default value
+        }
+    }else if(portalSettings.updateTimerInterval){
+        localConfig.updateTimerInterval = portalSettings.updateTimerInterval;
+        appJs.changeTimeInterval(portalSettings.updateTimerInterval);
     }
     fs.writeFileSync('./config/localconfig.json', JSON.stringify(localConfig, null, 4));
     return res.send(portalSettings);

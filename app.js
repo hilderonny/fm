@@ -62,15 +62,24 @@ var prepareIncludes = (fs) => {
 
     var timerId; 
     var portalUpdatesHelper = require('./utils/portalUpdatesHelper');
+    var fs = require('fs');
     module.exports.manageAutoUpdate = function(autoUpdateMode){
         if(autoUpdateMode){
-            var updateInterval = 30000;
+            var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
+            var updateInterval = lc.updateTimerInterval;
             timerId = setInterval(portalUpdatesHelper.triggerUpdate, updateInterval);
-            console.log('Auto-update on');
-            console.log(timerId);
         }else{
            clearInterval(timerId);
-            console.log('Auto-update off');
+        }
+    };
+
+    module.exports.changeTimeInterval = function(newTimerInterval){
+        //make changes only if an  auto-update is curremtly turned on 
+        var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
+        if(lc.autoUpdateMode){
+            clearInterval(timerId); //stop timer with old update interval
+            var newTimerIntervalMS = newTimerInterval*3600000;
+            timerId = setInterval(portalUpdatesHelper.triggerUpdate, newTimerIntervalMS); //start new update timer
         }
     };
 
@@ -179,7 +188,8 @@ var init = () => {
     request.post({url: url, form:  {"licenseKey":  key, "version": localVersion}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
     //start the initial auto-update mode on server start 
     if(localConfig.autoUpdateMode){
-        var initalUpdateInterval = 30000//localConfig.updateTimerInterval;
+        var initalUpdateInterval;
+        initalUpdateInterval = localConfig.updateTimerInterval * 3600000; //convert hours to milliseconds
         timerId = setInterval(portalUpdatesHelper.triggerUpdate, initalUpdateInterval);
     }
 };
