@@ -47,6 +47,31 @@ var Db = {
     },
 
     createDefaultClientTables: async(clientname) => {
+        // TODO: Diese Standardtabellen irgendwie in die module-config auslagern. So wie vorgegebene dynamische Attribute sollen auch
+        // Standardtabellen durch Module erzeugt werden. Im Falle von Aktivitäten auch mit Vorgabewerten:
+        /*
+        "clientdatatypes": [
+            { 
+                "name": "activities",
+                "label": "Termin",
+                "icon": "...",
+                "plurallabel": "Termine",
+                "nameistitle": false
+                "fields": [
+                    {
+                        "name": "createdbyusername",
+                        "label": "Ersteller",
+                        "type": "reference",
+                        "reference": "users",
+                        "required": false
+                    }
+                ],
+                "values": [
+                    { "name": "id1", "label": "Erster vordefinierter Termin", ...}
+                ]
+            }
+        ]
+        */
         // activities
         await Db.createDatatype(clientname, "activitytypes", "Terminart", "Terminarten", false, null);
         await Db.createDatatypeField(clientname, "activitytypes", "label", "Bezeichnung", constants.fieldtypes.text, true, false, false, null);
