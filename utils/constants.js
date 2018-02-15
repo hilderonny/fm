@@ -216,6 +216,14 @@ module.exports.collections = {
     users:{name:'users', icon:'User', canHaveAttributes: true}
 };
 
+module.exports.fieldtypes = {
+    boolean: "boolean",
+    datetime: "datetime",
+    decimal: "decimal",
+    reference: "reference",
+    text: "text"
+};
+
 /**
  * Liste von Modulen, wie sie in der module-config verwendet wird.
  */

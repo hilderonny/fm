@@ -61,21 +61,25 @@ var prepareIncludes = (fs) => {
 };
 
 // Server initialization
-var init = () => {
+var init = async() => {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
     var db = require('./middlewares/db');
     var nocache = require('./middlewares/nocache');
-    db.init().then(() => {
-        var dah = require('./utils/dynamicAttributesHelper');
-        // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
-        var promises = [];
-        Object.keys(moduleConfig.modules).forEach((moduleName) => {
-            dah.activateDynamicAttributesForClient(null, moduleName);
-        });
+    await db.init();
+    var dah = require('./utils/dynamicAttributesHelper');
+    // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
+    var promises = [];
+    Object.keys(moduleConfig.modules).forEach((moduleName) => {
+        dah.activateDynamicAttributesForClient(null, moduleName);
     });
+    // Initialize and migrate PostgreSQL database
+    if (localConfig.migratedatabase) {
+        await require("./utils/db").Db.init(true);
+        await require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
+    }
     // Includes minifizieren
     var fs = require('fs');
-    prepareIncludes(fs);
+//    prepareIncludes(fs);
     // Anwendung initialisieren und Handler-Reihenfolge festlegen
     var express = require('express');
     var app = express();

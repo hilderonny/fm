@@ -32,12 +32,14 @@
     "monk": "^4.0.0",
     "morgan": "^1.7.0",
     "multer": "^1.2.0",
+    "pg": "^7.4.1",
     "request": "^2.79.0",
     "send": "^0.15.4",
     "socket.io": "^1.7.2",
     "stl-obj-viewer": "^0.0.1",
     "uglify-js": "^2.8.29",
-    "unzip": "^0.1.11"
+    "unzip": "^0.1.11",
+    "uuid": "^3.2.1"
   },
   "devDependencies": {
     "cross-env": "^3.1.3",
