@@ -123,7 +123,7 @@
                     ]
                 }
             ],
-            "utils": [ "apiHelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper" ],
+            "utils": [ "apiHelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "migrationhelper" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
@@ -188,8 +188,28 @@
                         { "mainCard": "Office/CalendarCard", "icon": "Planner", "title": "TRK_MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY", "docCard" : "Activities" }
                     ]
                 }
-
+            ],
+            "clientdatatypes": [
+                { "name": "activitytypes", "label": "Terminart", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "values": [
+                    { "name": "ACTIVITIES_TYPE_NONE", "label": "" },
+                    { "name": "ACTIVITIES_TYPE_CALL_ON_CUSTOMERS", "label": "Kundenbesuch" },
+                    { "name": "ACTIVITIES_TYPE_MAINTENANCE", "label": "Wartung" },
+                    { "name": "ACTIVITIES_TYPE_WARRANTY", "label": "Gewährleistung" }
+                ] }, 
+                { "name": "activities", "label": "Termin", "plurallabel": "Termine", "titlefield": "label", "icon": "/css/icons/material/Planner.svg", "fields": [
+                    { "name": "date", "label": "Datum", "type": "datetime" },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "task", "label": "Aufgabe", "type": "text" },
+                    { "name": "isdone", "label": "Erledigt", "type": "boolean" },
+                    { "name": "typename", "label": "Typ", "type": "reference", "reference": "activitytypes" },
+                    { "name": "comment", "label": "Kommentar", "type": "text" },
+                    { "name": "createdbyusername", "label": "Ersteller", "type": "reference", "reference": "users" },
+                    { "name": "isforallusers", "label": "Sichtbar für alle Benutzer", "type": "boolean" }
+                ] }
             ]
+    
         },
         
         "areas": {
