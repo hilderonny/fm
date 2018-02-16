@@ -42,9 +42,6 @@ async function migrateclients() {
 
 async function migrateclientsettings() {
     console.log("Migrating clientsettings ...");
-    await Db.createDatatype(Db.PortalDatabaseName, "clientsettings", "Mandanteneinstellung", "Mandanteneinstellungen", false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "clientsettings", "logourl", "Logo URL", constants.fieldtypes.text, false, false, false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "clientsettings", "clientname", "Mandant", constants.fieldtypes.reference, true, false, false, "clients");
     var clientsettings = await mongodb.get(constants.collections.clientsettings.name).find();
     for (var i = 0; i < clientsettings.length; i++) {
         var clientsetting = clientsettings[i];
@@ -82,9 +79,6 @@ async function migratepersons() {} // Tabellen NICHT anlegen, wurde bereits von 
 
 async function migrateportalmodules() {
     console.log("Migrating portalmodules ...");
-    await Db.createDatatype(Db.PortalDatabaseName, "portalmodules", "Portalmodul", "Portalmodule", false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portalmodules", "portalname", "Portal", constants.fieldtypes.reference, false, false, false, "portals");
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portalmodules", "modulename", "Modul", constants.fieldtypes.text, true, false, false, null);
     var portalmodules = await mongodb.get(constants.collections.portalmodules.name).find();
     for (var i = 0; i < portalmodules.length; i++) {
         var portalmodule = portalmodules[i];
@@ -98,14 +92,6 @@ async function migrateportalmodules() {
 
 async function migrateportals() {
     console.log("Migrating portals ...");
-    await Db.createDatatype(Db.PortalDatabaseName, "portals", "Portal", "Portale", false, "/css/icons/material/Server.svg");
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portals", "label", "Bezeichnung", constants.fieldtypes.text, true, false, false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portals", "isactive", "Aktiv", constants.fieldtypes.boolean, false, false, false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portals", "url", "URL", constants.fieldtypes.text, false, false, false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portals", "comment", "Kommentar", constants.fieldtypes.text, false, false, false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portals", "licensekey", "Lizenzschlüssel", constants.fieldtypes.text, false, false, false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portals", "version", "Version", constants.fieldtypes.text, false, false, false, null);
-    await Db.createDatatypeField(Db.PortalDatabaseName, "portals", "lastnotification", "Letzte Meldung", constants.fieldtypes.datetime, false, false, false, null);
     var portals = await mongodb.get(constants.collections.portals.name).find();
     for (var i = 0; i < portals.length; i++) {
         var portal = portals[i];
@@ -130,6 +116,7 @@ async function migrateusers() {}
 
 module.exports.copydatabasefrommongodbtopostgresql = async() => {
     console.log(`Migrating database from ${localconfig.dbName} to ${localconfig.dbhost}/${localconfig.dbprefix} ...`);
+    await Db.createDefaultPortalTables();
     // License server stuff
     await migrateportals();
     await migrateportalmodules();

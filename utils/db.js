@@ -64,6 +64,25 @@ var Db = {
         }
     },
 
+    createDefaultPortalTables: async() => {
+        var modulenames = Object.keys(moduleconfig.modules);
+        for (var i = 0; i < modulenames.length; i++) {
+            var portaldatatypes = moduleconfig.modules[modulenames[i]].portaldatatypes;
+            if (!portaldatatypes) continue;
+            for (var j = 0; j < portaldatatypes.length; j++) {
+                var portaldatatype = portaldatatypes[j];
+                await Db.createDatatype(Db.PortalDatabaseName, portaldatatype.name, portaldatatype.label, portaldatatype.plurallabel, portaldatatype.titlefield === "name", portaldatatype.icon);
+                if (portaldatatype.fields) for (var k = 0; k < portaldatatype.fields.length; k++) {
+                    var field = portaldatatype.fields[k];
+                    await Db.createDatatypeField(Db.PortalDatabaseName, portaldatatype.name, field.name, field.label, field.type, portaldatatype.titlefield === field.name, field.isrequired, false, field.reference);
+                }
+                if (portaldatatype.values) for (var k = 0; k < portaldatatype.values.length; k++) {
+                    await Db.insertDynamicObject(Db.PortalDatabaseName, portaldatatype.name, portaldatatype.values[k]);
+                }
+            }
+        }
+    },
+
     createDefaultTables: async(databaseName) => {
         await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT);");
         await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, istitle BOOLEAN, isrequired BOOLEAN, reference TEXT, PRIMARY KEY (name, datatypename));");
@@ -216,8 +235,7 @@ var Db = {
         if ((await Db.queryDirect("postgres", `SELECT 1 FROM pg_database WHERE datname = '${portalDatabaseName}';`)).rowCount === 0) {
             await Db.queryDirect("postgres", `CREATE DATABASE ${portalDatabaseName};`);
             await Db.createDefaultTables(Db.PortalDatabaseName); // Create tables users, usergroups and permissions
-            await Db.createDatatype(Db.PortalDatabaseName, "clients", "Mandant", "Mandanten", false);
-            await Db.createDatatypeField(Db.PortalDatabaseName, "clients", "label", "Bezeichnung", constants.fieldtypes.text, true, false, false, null);
+            await Db.createDefaultPortalTables();
             await Db.queryDirect(portalDatabaseName, "CREATE TABLE allusers (name TEXT NOT NULL PRIMARY KEY, password TEXT, clientname TEXT NOT NULL);");
         }
         // When portal admin locked out, recreate it

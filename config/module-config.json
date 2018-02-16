@@ -166,6 +166,18 @@
                     { "name": "name2", "type": "text" }
                 ] }
 
+            ],
+            "portaldatatypes": [
+
+                { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                ] },
+
+                { "name": "clientsettings", "label": "Mandanteneinstellung", "plurallabel": "Mandanteneinstellungen", "fields": [
+                    { "name": "logourl", "label": "Logo URL", "type": "text" },
+                    { "name": "clientname", "label": "Mandant", "type": "reference", "reference": "clients" }
+                ] }
+                
             ]
         },
 
@@ -611,7 +623,25 @@
                     ]
                 }
             ],
-            "utils": [ "app-packager" ]
+            "utils": [ "app-packager" ],
+            "portaldatatypes": [
+
+                { "name": "portals", "label": "Portal", "plurallabel": "Portale", "titlefield": "label", "icon": "/css/icons/material/Server.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "isactive", "label": "Aktiv", "type": "boolean" },
+                    { "name": "url", "label": "URL", "type": "text" },
+                    { "name": "comment", "label": "Kommentar", "type": "text" },
+                    { "name": "licensekey", "label": "Lizenzschlüssel", "type": "text" },
+                    { "name": "version", "label": "Version", "type": "text" },
+                    { "name": "lastnotification", "label": "Letzte Meldung", "type": "datetime" }
+                ] },
+
+                { "name": "portalmodules", "label": "Portalmodul", "plurallabel": "Portalmodule", "fields": [
+                    { "name": "portalname", "type": "reference", "reference": "portals" },
+                    { "name": "modulename", "label": "Modul", "type": "text" }
+                ] }
+                
+            ]
         },
 
         "notes": {
