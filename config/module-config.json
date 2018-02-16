@@ -164,18 +164,30 @@
                     { "name": "name1", "type": "text" },
                     { "name": "datatype2name", "type": "text" },
                     { "name": "name2", "type": "text" }
+                ] },
+
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg" },
+
+                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                    { "name": "password", "label": "Passwort", "type": "text" },
+                    { "name": "isadmin", "label": "Administrator", "type": "boolean" },
+                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
                 ] }
 
             ],
             "portaldatatypes": [
 
-                { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
-                    { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ] },
-
                 { "name": "clientsettings", "label": "Mandanteneinstellung", "plurallabel": "Mandanteneinstellungen", "fields": [
                     { "name": "logourl", "label": "Logo URL", "type": "text" },
                     { "name": "clientname", "label": "Mandant", "type": "reference", "reference": "clients" }
+                ] },
+
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg" },
+
+                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                    { "name": "password", "label": "Passwort", "type": "text" },
+                    { "name": "isadmin", "label": "Administrator", "type": "boolean" },
+                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
                 ] }
                 
             ]
@@ -438,6 +450,18 @@
                         { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "TRK_MENU_PORTAL_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT", "docCard" : "Clients" }
                     ]
                 }
+            ],
+            "portaldatatypes": [
+
+                { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                ] },
+
+                { "name": "clientmodules", "label": "Mandantenmodul", "plurallabel": "Mandantenmodule", "fields": [
+                    { "name": "clientname", "label": "Mandant", "type": "reference", "reference": "clients" },
+                    { "name": "modulename", "label": "Modul", "type": "text" }
+                ] }
+                
             ]
         },
 

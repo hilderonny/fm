@@ -86,11 +86,6 @@ var Db = {
     createDefaultTables: async(databaseName) => {
         await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT);");
         await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, istitle BOOLEAN, isrequired BOOLEAN, reference TEXT, PRIMARY KEY (name, datatypename));");
-        await Db.createDatatype(databaseName, "usergroups", "Benutzergruppe", "Benutzergruppen", true, "/css/icons/material/user-account.svg");
-        await Db.createDatatype(databaseName, "users", "Benutzer", "Benutzer", true, "/css/icons/material/user-account.svg");
-        await Db.createDatatypeField(databaseName, "users", "password", "Passwort", constants.fieldtypes.text, false, false, false, null);
-        await Db.createDatatypeField(databaseName, "users", "usergroupname", "Benutzergruppe", constants.fieldtypes.reference, false, true, false, "usergroups");
-        await Db.createDatatypeField(databaseName, "users", "isadmin", "Administrator", constants.fieldtypes.boolean, false, false, false, null);
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, datatypename TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, datatypename));");
     },
 
