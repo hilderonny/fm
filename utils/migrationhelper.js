@@ -15,7 +15,7 @@ async function migrateactivities() {
             label: activity.name,
             task: activity.task,
             isdone: activity.isDone,
-            typename: activity.type,
+            activitytypename: activity.type,
             comment: activity.comment,
             createdbyusername: activity.createdByUserId.toString(),
             isforallusers: activity.isForAllUsers
@@ -28,14 +28,15 @@ async function migratebusinesspartners() {} // Tabellen NICHT anlegen, wurde ber
 async function migrateclientmodules() {}
 
 async function migrateclients() {
-    console.log("Migrating clients ...");
+    console.log("Preparing clients ...");
     var clients = await mongodb.get(constants.collections.clients.name).find();
     for (var i = 0; i < clients.length; i++) {
         var client = clients[i];
-        console.log(`Migrating client "${client.name}" ...`);
+        console.log(`Preparing client "${client.name}" ...`);
         await Db.createClient(client._id.toString(), client.name);
     }
     // Create separate client for former portal
+    console.log("Preparing former portal ...");
     await Db.createClient("formerportal", "ehemals Portal");
 }
 
@@ -154,4 +155,5 @@ module.exports.copydatabasefrommongodbtopostgresql = async() => {
     await migratemarkers();
     await migratenotes();
     await migraterelations();
+    console.log("Migration done.");
 }

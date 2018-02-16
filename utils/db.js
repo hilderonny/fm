@@ -3,12 +3,7 @@ var localconfig = require('../config/localconfig.json');
 var bcryptjs = require("bcryptjs");
 var constants = require("./constants");
 var fs = require("fs");
-// var Pool = require("pg").Pool;
-// var LocalConfig = require("./localconfig").LocalConfig;
-// var compareSync = require("bcryptjs").compareSync;
-// var fieldtypes = require("./constants").fieldtypes;
-// var types = require('pg').types;
-// var hashSync = require('bcryptjs').hashSync;
+var moduleconfig = require('../config/module-config.json');
 
 var Db = {
 
@@ -47,60 +42,26 @@ var Db = {
     },
 
     createDefaultClientTables: async(clientname) => {
-        // TODO: Diese Standardtabellen irgendwie in die module-config auslagern. So wie vorgegebene dynamische Attribute sollen auch
-        // Standardtabellen durch Module erzeugt werden. Im Falle von Aktivitäten auch mit Vorgabewerten:
-        /*
-        "clientdatatypes": [
-            { 
-                "name": "activities",
-                "label": "Termin",
-                "icon": "...",
-                "plurallabel": "Termine",
-                "nameistitle": false
-                "fields": [
-                    {
-                        "name": "createdbyusername",
-                        "label": "Ersteller",
-                        "type": "reference",
-                        "reference": "users",
-                        "required": false
-                    }
-                ],
-                "values": [
-                    { "name": "id1", "label": "Erster vordefinierter Termin", ...}
-                ]
+        var modulenames = Object.keys(moduleconfig.modules);
+        for (var i = 0; i < modulenames.length; i++) {
+            await Db.createDefaultClientTablesForModule(clientname, modulenames[i]);
+        }
+    },
+
+    createDefaultClientTablesForModule: async(clientname, modulename) => {
+        var clientdatatypes = moduleconfig.modules[modulename].clientdatatypes;
+        if (!clientdatatypes) return;
+        for (var i = 0; i < clientdatatypes.length; i++) {
+            var clientdatatype = clientdatatypes[i];
+            await Db.createDatatype(clientname, clientdatatype.name, clientdatatype.label, clientdatatype.plurallabel, clientdatatype.titlefield === "name", clientdatatype.icon);
+            if (clientdatatype.fields) for (var j = 0; j < clientdatatype.fields.length; j++) {
+                var field = clientdatatype.fields[j];
+                await Db.createDatatypeField(clientname, clientdatatype.name, field.name, field.label, field.type, clientdatatype.titlefield === field.name, field.isrequired, false, field.reference);
             }
-        ]
-        */
-        // activities
-        await Db.createDatatype(clientname, "activitytypes", "Terminart", "Terminarten", false, null);
-        await Db.createDatatypeField(clientname, "activitytypes", "label", "Bezeichnung", constants.fieldtypes.text, true, false, false, null);
-        await Db.insertDynamicObject(clientname, "activitytypes", { name: "ACTIVITIES_TYPE_NONE", label: "" });
-        await Db.insertDynamicObject(clientname, "activitytypes", { name: "ACTIVITIES_TYPE_CALL_ON_CUSTOMERS", label: "Kundenbesuch" });
-        await Db.insertDynamicObject(clientname, "activitytypes", { name: "ACTIVITIES_TYPE_MAINTENANCE", label: "Wartung" });
-        await Db.insertDynamicObject(clientname, "activitytypes", { name: "ACTIVITIES_TYPE_WARRANTY", label: "Gewährleistung" });
-        await Db.createDatatype(clientname, "activities", "Termin", "Termine", false, "/css/icons/material/Planner.svg");
-        await Db.createDatatypeField(clientname, "activities", "date", "Datum", constants.fieldtypes.datetime, false, false, false, null);
-        await Db.createDatatypeField(clientname, "activities", "label", "Bezeichnung", constants.fieldtypes.text, true, false, false, null);
-        await Db.createDatatypeField(clientname, "activities", "task", "Aufgabe", constants.fieldtypes.text, false, false, false, null);
-        await Db.createDatatypeField(clientname, "activities", "isdone", "Erledigt", constants.fieldtypes.boolean, false, false, false, null);
-        await Db.createDatatypeField(clientname, "activities", "typename", "Typ", constants.fieldtypes.reference, false, false, false, "activitytypes");
-        await Db.createDatatypeField(clientname, "activities", "comment", "Kommentar", constants.fieldtypes.text, false, false, false, null);
-        await Db.createDatatypeField(clientname, "activities", "createdbyusername", "Ersteller", constants.fieldtypes.reference, false, false, false, "users");
-        await Db.createDatatypeField(clientname, "activities", "isforallusers", "Sichtbar für alle Benutzer", constants.fieldtypes.boolean, false, false, false, null);
-        // businesspartners
-        // persons
-        // partneraddresses
-        // communications
-        // dynamicattributes
-        // dynamicattributeoptions
-        // dynamicattributevalues
-        // fmobjects
-        // folders
-        // documents
-        // markers
-        // notes
-        // relations
+            if (clientdatatype.values) for (var j = 0; j < clientdatatype.values.length; j++) {
+                await Db.insertDynamicObject(clientname, clientdatatype.name, clientdatatype.values[j]);
+            }
+        }
     },
 
     createDefaultTables: async(databaseName) => {
@@ -115,13 +76,20 @@ var Db = {
     },
 
     createDatatype: async(databaseNameWithoutPrefix, datatypename, label, plurallabel, nameistitle, icon) => {
-        await Db.query(databaseNameWithoutPrefix, "INSERT INTO datatypes (name, label, plurallabel, icon) VALUES ('" + datatypename + "', '" + label + "', '" + plurallabel + "', '" + icon + "');");
+        if ((await Db.query(databaseNameWithoutPrefix, `SELECT 1 FROM datatypes WHERE name = '${datatypename}';`)).rowCount > 0) return; // Already existing
+        var labeltoinsert = label ? "'" + label + "'" : "null";
+        var plurallabeltoinsert = plurallabel ? "'" + plurallabel + "'" : "null";
+        var icontoinsert = icon ? "'" + icon + "'" : "null";
+        await Db.query(databaseNameWithoutPrefix, "INSERT INTO datatypes (name, label, plurallabel, icon) VALUES ('" + datatypename + "', " + labeltoinsert + ", " + plurallabeltoinsert + ", " + icontoinsert + ");");
         await Db.query(databaseNameWithoutPrefix, `CREATE TABLE ${datatypename} (name TEXT PRIMARY KEY);`);
         await Db.createDatatypeField(databaseNameWithoutPrefix, datatypename, "name", "Name", constants.fieldtypes.text, nameistitle, true, true, null);
     },
 
     createDatatypeField: async(databaseNameWithoutPrefix, datatypename, fieldname, label, fieldtype, istitle, isrequired, doNotAddColumn, reference) => {
-        await Db.query(databaseNameWithoutPrefix, "INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference) VALUES ('" + fieldname + "', '" + label + "', '" + datatypename + "', '" + fieldtype + "', " + istitle + ", " + isrequired + ", '" + reference + "')");
+        if ((await Db.query(databaseNameWithoutPrefix, `SELECT 1 FROM datatypefields WHERE datatypename = '${datatypename}' AND name = '${fieldname}';`)).rowCount > 0) return; // Already existing
+        var labeltoinsert = label ? "'" + label + "'" : "null";
+        var referencetoinsert = reference ? "'" + reference + "'" : "null";
+        await Db.query(databaseNameWithoutPrefix, "INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference) VALUES ('" + fieldname + "', " + labeltoinsert + ", '" + datatypename + "', '" + fieldtype + "', " + !!istitle + ", " + !!isrequired + ", " + referencetoinsert + ")");
         var columntype;
         switch(fieldtype) {
             case constants.fieldtypes.boolean: columntype = "BOOLEAN"; break;

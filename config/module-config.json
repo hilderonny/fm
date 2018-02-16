@@ -129,6 +129,43 @@
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
                 { "mainCard": "Administration/ClientSettingsCard", "title": "TRK_SETTINGSET_CLIENT", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Briefcase", "permission": "PERMISSION_SETTINGS_CLIENT"},
                 { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "View Details", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
+            ],
+            "clientdatatypes": [
+
+                { "name": "dynamicattributetypes", "label": "Attributart", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "values": [
+                    { "name": "text", "label": "Textfeld" },
+                    { "name": "boolean", "label": "Boolescher Wert" },
+                    { "name": "picklist", "label": "Auswahlliste" }
+                ] }, 
+
+                { "name": "dynamicattributes", "label": "Dynamisches Attribut", "plurallabel": "Dynamische Attribute", "titlefield": "label", "fields": [
+                    { "name": "modelname", "type": "text" },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "dynamicattributetypename", "label": "Typ", "type": "reference", "reference": "dynamicattributetypes" },
+                    { "name": "identifier", "type": "text" }
+                ] },
+
+                { "name": "dynamicattributeoptions", "label": "Listenelement", "plurallabel": "Listenelemente", "titlefield": "label", "fields": [
+                    { "name": "dynamicattributename", "type": "reference", "reference": "dynamicattributes" },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "value", "label": "Wert", "type": "text" }
+                ] },
+
+                { "name": "dynamicattributevalues", "fields": [
+                    { "name": "entityname", "type": "text" },
+                    { "name": "dynamicattributename", "type": "reference", "reference": "dynamicattributes" },
+                    { "name": "value", "type": "text" }
+                ] }, 
+
+                { "name": "relations", "label": "Verknüpfung", "plurallabel": "Verknüpfungen", "fields": [
+                    { "name": "datatype1name", "type": "text" },
+                    { "name": "name1", "type": "text" },
+                    { "name": "datatype2name", "type": "text" },
+                    { "name": "name2", "type": "text" }
+                ] }
+
             ]
         },
 
@@ -190,6 +227,7 @@
                 }
             ],
             "clientdatatypes": [
+
                 { "name": "activitytypes", "label": "Terminart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
                 ], "values": [
@@ -198,16 +236,18 @@
                     { "name": "ACTIVITIES_TYPE_MAINTENANCE", "label": "Wartung" },
                     { "name": "ACTIVITIES_TYPE_WARRANTY", "label": "Gewährleistung" }
                 ] }, 
+
                 { "name": "activities", "label": "Termin", "plurallabel": "Termine", "titlefield": "label", "icon": "/css/icons/material/Planner.svg", "fields": [
                     { "name": "date", "label": "Datum", "type": "datetime" },
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "task", "label": "Aufgabe", "type": "text" },
                     { "name": "isdone", "label": "Erledigt", "type": "boolean" },
-                    { "name": "typename", "label": "Typ", "type": "reference", "reference": "activitytypes" },
+                    { "name": "activitytypename", "label": "Typ", "type": "reference", "reference": "activitytypes" },
                     { "name": "comment", "label": "Kommentar", "type": "text" },
                     { "name": "createdbyusername", "label": "Ersteller", "type": "reference", "reference": "users" },
                     { "name": "isforallusers", "label": "Sichtbar für alle Benutzer", "type": "boolean" }
                 ] }
+
             ]
     
         },
@@ -292,6 +332,66 @@
                         { "mainCard": "CRM/PersonListCard", "icon": "Collaborator Male", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons" }
                     ]
                 }
+            ],
+
+            "clientdatatypes": [
+
+                { "name": "businesspartners", "label": "Geschäftspartner", "plurallabel": "Geschäftspartner", "titlefield": "label", "icon": "/css/icons/material/Business.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "industry", "label": "Geschäftsbereich", "type": "text" },
+                    { "name": "rolle", "label": "Art der Beziehung", "type": "text" },
+                    { "name": "isjuristic", "label": "Juristische Person", "type": "boolean" }
+                ] },
+
+                { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "lastname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
+                    { "name": "firstname", "label": "Vorname", "type": "text" },
+                    { "name": "lastname", "label": "Nachname", "type": "text" },
+                    { "name": "description", "label": "Beschreibung", "type": "text" }
+                ] },
+
+                { "name": "partneraddresstypes", "label": "Adressart", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" },
+                    { "name": "icon", "type": "text" }
+                ], "values": [
+                    { "name": "Primaryaddress", "label": "Primäradresse", "icon": "/css/icons/material/Rating.svg" },
+                    { "name": "Postaddress", "label": "Postadresse", "icon": "/css/icons/material/Post Office.svg" },
+                    { "name": "Delivaryaddress", "label": "Lieferadresse", "icon": "/css/icons/material/Truck.svg" },
+                    { "name": "Billaddress", "label": "Rechnungsadresse", "icon": "/css/icons/material/Purchase Order.svg" }
+                ] }, 
+
+                { "name": "partneraddresses", "label": "Adresse", "plurallabel": "Adressen", "titlefield": "addressee", "icon": "/css/icons/material/Address Book.svg", "fields": [
+                    { "name": "addressee", "label": "Adressat", "type": "text" },
+                    { "name": "businesspartnername", "label": "Geschäftspartner", "type": "reference", "reference": "businesspartners" },
+                    { "name": "street", "label": "Straße und Hausnummer", "type": "text" },
+                    { "name": "postcode", "label": "Postleitzahl", "type": "text" },
+                    { "name": "city", "label": "Ort", "type": "text" },
+                    { "name": "partneraddresstypename", "label": "Art der Adresse", "type": "reference", "reference": "partneraddresstypes" }
+                ] },
+
+                { "name": "communicationmediums", "label": "Kommunikationsmedium", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "values": [
+                    { "name": "email", "label": "E-Mail" },
+                    { "name": "phone", "label": "Telefon" }
+                ] }, 
+
+                { "name": "communicationtypes", "label": "Kommunikationsart", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" },
+                    { "name": "communicationmediumname", "label": "Medium", "type": "reference", "reference": "communicationmediums" }
+                ], "values": [
+                    { "name": "emailwork", "label": "Arbeit", "communicationmediumname": "email" },
+                    { "name": "emailother", "label": "Andere", "communicationmediumname": "email" },
+                    { "name": "phonework", "label": "Arbeit", "communicationmediumname": "phone" },
+                    { "name": "phonemobile", "label": "Mobil", "communicationmediumname": "phone" },
+                    { "name": "phoneother", "label": "Andere", "communicationmediumname": "phone" }
+                ] }, 
+
+                { "name": "communications", "label": "Kommunikationsweg", "plurallabel": "Kommunikationswege", "titlefield": "contact", "icon": "/css/icons/material/Phone.svg", "fields": [
+                    { "name": "contact", "label": "Kontakt", "type": "text" },
+                    { "name": "personname", "label": "Person", "type": "reference", "reference": "persons" },
+                    { "name": "communicationtypename", "label": "Typ", "type": "reference", "reference": "communicationtypes" }
+                ] }
+                
             ]
         },
 
@@ -367,6 +467,21 @@
                         { "mainCard": "Office/DocumentListCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents" }
                     ]
                 }
+            ],
+            "clientdatatypes": [
+
+                { "name": "folders", "label": "Verzeichnis", "plurallabel": "Verzeichnisse", "titlefield": "label", "icon": "/css/icons/material/Folder.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "parentfoldername", "type": "reference", "reference": "folders" }
+                ] },
+
+                { "name": "documents", "label": "Dokument", "plurallabel": "Dokumente", "titlefield": "label", "icon": "/css/icons/material/Document.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "parentfoldername", "type": "reference", "reference": "folders" },
+                    { "name": "type", "type": "text" },
+                    { "name": "isshared", "label": "Öffentlich zugänglich", "type": "boolean" }
+                ] }
+
             ]
         },
 
@@ -406,6 +521,63 @@
                         { "mainCard": "BIM/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects" }
                     ]
                 }
+            ],
+            "clientdatatypes": [
+
+                { "name": "fmobjecttypes", "label": "FM Objekttyp", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "values": [
+                    { "name": "FMOBJECTS_TYPE_PROJECT", "label": "Projekt" },
+                    { "name": "FMOBJECTS_TYPE_PROPERTY", "label": "Liegenschaft" },
+                    { "name": "FMOBJECTS_TYPE_BUILDING", "label": "Gebäude" },
+                    { "name": "FMOBJECTS_TYPE_LEVEL", "label": "Etage" },
+                    { "name": "FMOBJECTS_TYPE_ROOM", "label": "Raum" },
+                    { "name": "FMOBJECTS_TYPE_AREA", "label": "Fläche" },
+                    { "name": "FMOBJECTS_TYPE_INVENTORY", "label": "Inventar" }
+                ] }, 
+
+                { "name": "areatypes", "label": "Flächenart", "titlefield": "name", "values": [
+                    { "name": "Nutzungsfläche" },
+                    { "name": "Technikfläche" },
+                    { "name": "Verkehrsfläche" }
+                ] }, 
+
+                { "name": "areacategories", "label": "Kategorie", "titlefield": "name", "fields": [
+                    { "name": "areatypename", "type": "reference", "reference": "areatypes" }
+                ], "values": [
+                    { "name": "Wohnen und Aufenthalt", "areatypename": "Nutzungsfläche" },
+                    { "name": "Büroarbeit", "areatypename": "Nutzungsfläche" },
+                    { "name": "Produktion, Hand- und Maschinenarbeit, Experimente", "areatypename": "Nutzungsfläche" },
+                    { "name": "Lagern, Verteilen und Verkaufen", "areatypename": "Nutzungsfläche" },
+                    { "name": "Bildung, Unterricht und Kultur", "areatypename": "Nutzungsfläche" },
+                    { "name": "Heilen und Pflegen", "areatypename": "Nutzungsfläche" },
+                    { "name": "Sonstige Nutzung", "areatypename": "Nutzungsfläche" },
+                    { "name": "Technische Anlagen", "areatypename": "Technikfläche" },
+                    { "name": "Verkehrserschließung und -sicherung", "areatypename": "Verkehrsfläche" }
+                ] }, 
+
+                { "name": "areausagestates", "label": "Nutzungsstatus", "titlefield": "name", "values": [
+                    { "name": "Ungenutzt" },
+                    { "name": "Eigengenutzt" },
+                    { "name": "Vermietet" },
+                    { "name": "Reserviert" }
+                ] }, 
+
+                { "name": "fmobjects", "label": "FM Objekt", "plurallabel": "FM Objekte", "titlefield": "label", "icon": "/css/icons/material/Cottage.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "fmobjecttypename", "label": "Typ", "type": "reference", "reference": "fmobjecttypes" },
+                    { "name": "parentfmobjectname", "type": "reference", "reference": "fmobjects" },
+                    { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents" },
+                    { "name": "areacategoryname", "label": "Kategorie", "type": "reference", "reference": "areacategories" },
+                    { "name": "f", "label": "Fläche (m²)", "type": "decimal" },
+                    { "name": "bgf", "label": "Brutto-Geschoss-Fläche (BGF)", "type": "decimal" },
+                    { "name": "areausagestatename", "label": "Nutzungsstatus", "type": "reference", "reference": "areausagestates" },
+                    { "name": "nrf", "label": "Netto-Raum-Fläche (NRF)", "type": "decimal" },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "decimal" },
+                    { "name": "tf", "label": "Technikfläche (TF)", "type": "decimal" },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "decimal" }
+                ] }
+
             ]
         },
 
@@ -466,6 +638,12 @@
                         { "mainCard": "Office/NoteListCard", "icon": "Notes", "title": "TRK_MENU_OFFICE_NOTES", "permission" : "PERMISSION_OFFICE_NOTE", "docCard" : "Notes" }
                     ]
                 }
+            ],
+            "clientdatatypes": [
+
+                { "name": "notes", "label": "Notiz", "plurallabel": "Notizen", "titlefield": "content", "icon": "/css/icons/material/Notes.svg", "fields": [
+                    { "name": "content", "label": "Inhalt", "type": "text" }
+                ] }
 
             ]
         },
@@ -516,6 +694,15 @@
                         { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "World Map", "title": "TRK_MENU_LAB_GOOGLEMAPS" }
                     ]
                 }
+            ],
+            "clientdatatypes": [
+
+                { "name": "markers", "label": "Markierung", "plurallabel": "Markierungen", "titlefield": "label", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "lat", "label": "Breitengrad (LAT)", "type": "text" },
+                    { "name": "lon", "label": "Längengrad (LON)", "type": "text" }
+                ] }
+
             ]
         }
         
