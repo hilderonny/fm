@@ -75,7 +75,7 @@ var init = () => {
     });
     // Initialize and migrate PostgreSQL database
     if (localConfig.migratedatabase) {
-        require("./utils/db").Db.init(true).then(() => {
+        require("./utils/db").Db.init(localConfig.recreatedatabase).then(() => {
             return require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
         });
     }

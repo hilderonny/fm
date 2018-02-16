@@ -10,12 +10,20 @@ async function migrateforclients(collectionname, migratorfunc) {
         var originalelement = originalelements[i];
         var clientname = originalelement.clientId ? originalelement.clientId.toString() : "formerportal";
         var mappedelement = migratorfunc(originalelement);
-        if (mappedelement) await Db.insertDynamicObject(clientname, collectionname, mappedelement);
+        if (mappedelement) {
+            try {
+                await Db.insertDynamicObject(clientname, collectionname, mappedelement);
+            } catch(err) {
+                await Db.query(clientname, `DELETE FROM ${collectionname} WHERE name='${mappedelement.name}';`);
+                await Db.insertDynamicObject(clientname, collectionname, mappedelement);
+            }
+        }
     }
 }
 
 async function migrateforportal(collectionname, migratorfunc) {
     console.log(`Migrating ${collectionname} ...`);
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM ${collectionname};`);
     var originalelements = await mongodb.get(collectionname).find();
     for (var i = 0; i < originalelements.length; i++) {
         var originalelement = originalelements[i];
@@ -327,31 +335,31 @@ async function migrateusers() {
 
 module.exports.copydatabasefrommongodbtopostgresql = async() => {
     console.log(`Migrating database from ${localconfig.dbName} to ${localconfig.dbhost}/${localconfig.dbprefix} ...`);
-    await Db.createDefaultPortalTables();
-    // License server stuff
-    await migrateportals();
-    await migrateportalmodules();
-    // Portal stuff
-    await migrateclients();
-    await migrateclientsettings();
-    await migrateclientmodules();
-    // Client stuff
-    await migrateusergroups();
-    await migrateusers();
-    await migratepermissions();
-    await migrateactivities();
-    await migratebusinesspartners();
-    await migratepersons();
-    await migratepartneraddresses();
-    await migratecommunications();
-    await migratedynamicattributes();
-    await migratedynamicattributeoptions();
-    await migratedynamicattributevalues();
-    await migratefmobjects();
-    await migratefolders();
-    await migratedocuments();
-    await migratemarkers();
+    // await Db.createDefaultPortalTables();
+    // // License server stuff
+    // await migrateportals();
+    // await migrateportalmodules();
+    // // Portal stuff
+    // await migrateclients();
+    // await migrateclientsettings();
+    // await migrateclientmodules();
+    // // Client stuff
+    // await migrateusergroups();
+    // await migrateusers();
+    // await migratepermissions();
+    // await migrateactivities();
+    // await migratebusinesspartners();
+    // await migratepersons();
+    // await migratepartneraddresses();
+    // await migratecommunications();
+    // await migratedynamicattributes();
+    // await migratedynamicattributeoptions();
+    // await migratedynamicattributevalues();
+    // await migratefmobjects();
+    // await migratefolders();
+    // await migratedocuments();
+    // await migratemarkers();
     await migratenotes();
-    await migraterelations();
+    // await migraterelations();
     console.log("Migration done.");
 }

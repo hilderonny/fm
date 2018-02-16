@@ -161,6 +161,10 @@ var Db = {
     //     return result;
     // },
 
+    getDynamicObjects: async(clientname, datatypename) => {
+        return (await Db.query(clientname, `SELECT * FROM ${datatypename};`)).rows;
+    },
+
     // getDynamicObjectsForList: async(clientname, username, datatypename) => {
     //     // Get icon
     //     var datatype = (await Db.query(clientname, `SELECT label, plurallabel, icon FROM datatypes WHERE name = '${datatypename}';`)).rows[0];
