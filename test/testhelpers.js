@@ -180,6 +180,7 @@ th.prepareUserGroups = async() => {
  */
 th.prepareUsers = async() => {
     await th.cleanTable("users", true, true);
+    await th.cleanTable("allusers", true, false);
     var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
     var users = [];
     th.dbObjects.usergroups.forEach((userGroup) => {
@@ -192,8 +193,8 @@ th.prepareUsers = async() => {
         var name = user._id.toString();
         var usergroupname = user.userGroupId.toString();
         var isadmin = !!user.isAdmin;
-        await Db.insertDynamicObject(user.clientId ? user.clientId.toString() : Db.PortalDatabaseName, "users", { name: name, label: user.name, password: user.pass, usergroupname: usergroupname, isadmin: isadmin });
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${name}', '${user.pass}', '${user.clientId ? user.clientId.toString() : null}');`);
+        await Db.query(user.clientId ? user.clientId.toString() : Db.PortalDatabaseName, `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('${user.name}', '${hashedPassword}', '${usergroupname}',${isadmin});`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${user.name}', '${hashedPassword}', '${user.clientId ? user.clientId.toString() : null}');`);
     }
 };
 

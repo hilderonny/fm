@@ -16,14 +16,14 @@ module.exports = function(permissionKey, readWrite, moduleName) {
     return (req, res, next) => {
         var user = req.user;
         // Check whether credentials are given
-        if (!user || !user._id || !require('./validateId').validateId(user._id)) {
+        if (!user || !user.name) {
             return res.sendStatus(403);
         }
         // Check whether token time is older than server start
         if(localConfig.startTime > user.tokenTime) {
             return res.sendStatus(205); // Force the client to reload the entire page
         }
-        module.exports.canAccess(user._id, permissionKey, readWrite, moduleName, req.db).then(function(userInDatabase) {
+        module.exports.canAccess(user.name, permissionKey, readWrite, moduleName, req.db).then(function(userInDatabase) {
             if (!userInDatabase) { // User not found
                 return res.sendStatus(403);
             }
@@ -39,9 +39,9 @@ module.exports = function(permissionKey, readWrite, moduleName) {
  * Das Promise liefert im resolve als Parameter den Benutzer aus der Datenbank und true oder false.
  * Direkter Aufruf: require('auth').canAccess(...);
  */
-module.exports.canAccess = async(userId, permissionKey, readWrite, moduleName) => {
+module.exports.canAccess = async(username, permissionKey, readWrite, moduleName) => {
     // Check user against database
-    var userresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${userId}';`);
+    var userresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${username}';`);
     var userInAllUsers = userresult.rowCount > 0 ? userresult.rows[0] : undefined;
     if (!userInAllUsers) return false;
     var userInDatabase = await Db.getDynamicObject(userInAllUsers.clientname ? userInAllUsers.clientname : Db.PortalDatabaseName, "users", userInAllUsers.name);
