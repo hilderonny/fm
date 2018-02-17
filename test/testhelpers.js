@@ -144,6 +144,15 @@ th.prepareClientSettings = () => {
  * Removes the access to a module from the given client
  */
 th.removeClientModule = (clientName, module) => {
+    /*
+
+TODO:
+Die bisherigen prepare-Funktionen sollen nicht mehr die alten DBs verwenden, die fliegen ja eh raus.
+Clients sollen nach Namen, nicht nach IDs gefunden werden. Nur so kann removeClientModule vernünftig funktionieren.
+
+
+*/
+
     return new Promise((resolve, reject) => {
         return db.get('clients').findOne({ name: clientName }).then((client) => {
             return db.get('clientmodules').remove({ clientId: client._id, module: module }).then(resolve);
