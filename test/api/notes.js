@@ -7,20 +7,24 @@ var db = require('../../middlewares/db');
 var bcryptjs = require('bcryptjs');
 var co = require('../../utils/constants');
 
-describe.only('API notes', function(){
-    // Clear and prepare database with clients, user groups and users
-    beforeEach(()=>{
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions)
-            .then(th.prepareNotes)
-            .then(th.prepareRelations);
+describe.only('API notes', () => {
+
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
     });
 
-    describe('GET/', function(){
+    // Clear and prepare database with clients, user groups and users
+    beforeEach(async () => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareNotes();
+        await th.prepareRelations();
+    });
+
+    describe.only('GET/', function(){
 
       th.apiTests.get.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE); 
 
@@ -35,8 +39,9 @@ describe.only('API notes', function(){
       it('responds with list of all notes of the client of the logged in user containing all details', async function(){
         var user = await th.defaults.getUser();
         var token = await th.defaults.login(user.name);
-        var clientNotes = await db.get(co.collections.notes.name).find({clientId : user.clientId, isForAllUsers: true});
+        var clientNotes = await db.get(co.collections.notes.name).find({clientId : user.clientId});
         var notesFromRequest = (await th.get(`/api/${co.apis.notes}?token=${token}`).expect(200)).body; 
+        assert.strictEqual(notesFromRequest.length, clientNotes.length);
         clientNotes.forEach((note) => {
             noteFromRequest = notesFromRequest.find((a) => a._id === note._id.toString());
             assert.ok(noteFromRequest);

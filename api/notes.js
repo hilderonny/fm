@@ -39,11 +39,8 @@ router.get('/forIds', auth(false, false, co.modules.notes), (req, res) => {
 // Get all notes of the current client 
 router.get('/', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), async (req, res) =>{
     var clientId = req.user.clientId;
-    var oldnotes = await req.db.get(co.collections.notes.name).find({clientId: clientId});
-    console.log(oldnotes);
-    var newnotes = await Db.getDynamicObjects(clientId.toString(), "notes");
-    console.log(newnotes);
-    res.send(newnotes.map((n) => { return { _id: n.name, content: n.content } }));
+    var notes = await Db.getDynamicObjects(clientId.toString(), "notes");
+    res.send(notes.map((n) => { return { _id: n.name, clientId: clientId.toString(), content: n.content } }));
 });
 /**
  * Get single note with given id

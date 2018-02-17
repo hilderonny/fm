@@ -15,26 +15,24 @@ var documentsHelper = require('../utils/documentsHelper');
 var moduleConfig = require('../config/module-config.json');
 var co = require('../utils/constants');
 var monk = require('monk');
+var Db = require("../utils/db").Db;
 
 var th = module.exports;
 
 th.dbObjects = {};
 
-th.bulkInsert = (collectionName, docs) => {
+th.bulkInsert = async(collectionName, docs) => {
     if (!th.dbObjects[collectionName]) {
         th.dbObjects[collectionName] = [];
     }
     th.dbObjects[collectionName] = th.dbObjects[collectionName].concat(docs);
-    return db.get(collectionName).bulkWrite(docs.map((doc) => { return {insertOne:{document:doc}} })).then((res) => {
-        var docsToReturn = [];
-        for (var i = 0; i < res.insertedCount; i++) {
-            docs[i]._id = res.insertedIds[i];
-            docsToReturn.push(docs[i]);
-        }
-        return new Promise((resolve, reject) => {
-            resolve(docsToReturn);
-        });
-    });
+    var res = await db.get(collectionName).bulkWrite(docs.map((doc) => { return {insertOne:{document:doc}} }));
+    var docsToReturn = [];
+    for (var i = 0; i < res.insertedCount; i++) {
+        docs[i]._id = res.insertedIds[i];
+        docsToReturn.push(docs[i]);
+    }
+    return docsToReturn;
 };
 
 // Generate license key with hat, https://github.com/substack/node-hat
@@ -46,10 +44,20 @@ var generateLicenseKey = () => {
  * Removes all documents from the database and creates an admin user. Used before all tests.
  * The returned promise has no parameter.
  */
-th.cleanDatabase = () => {
+th.cleanDatabase = async () => {
     th.dbObjects = {};
     var promises = Object.keys(co.collections).map((key) => db.get(co.collections[key].name).drop());
-    return Promise.all(promises); // Wait for all drop Promises to complete
+    await Promise.all(promises); // Wait for all drop Promises to complete
+    await Db.init(true);
+};
+
+th.cleanTable = async(tablename, inportal, inclients) => {
+    await db.get(tablename).drop();
+    if (inclients && th.dbObjects.clients) for (var i = 0; i < th.dbObjects.clients.length; i++) {
+        await Db.query(th.dbObjects.clients[i]._id.toString(), `DELETE FROM ${tablename};`);
+    }
+    if (inportal) await Db.query(Db.PortalDatabaseName, `DELETE FROM ${tablename};`);
+    delete th.dbObjects[tablename];
 };
 
 /**
@@ -91,24 +99,34 @@ th.del = superTest(server).del;
 /**
  * Creates 3 clients and returns a promise without parameters.
  */
-th.prepareClients = () => {
-    return th.bulkInsert('clients', [
+th.prepareClients = async() => {
+    await th.cleanTable("clients", true, false);
+    await th.bulkInsert('clients', [
         { name: '0' },
         { name: '1' }
     ]);
+    for (var i = 0; i < th.dbObjects.clients.length; i++) {
+        var client = th.dbObjects.clients[i];
+        await Db.createClient(client._id.toString(), client.name);
+    }
 };
 
 /**
  * Creates 3 client module assignments for each existing client and returns a promise without parameters.
  */
-th.prepareClientModules = () => {
+th.prepareClientModules = async() => {
+    await th.cleanTable("clientmodules", true, false);
     var clientModules = [];
     th.dbObjects.clients.forEach((client) => {
         Object.keys(co.modules).forEach((key) => {
             clientModules.push({ clientId: client._id, module: co.modules[key] });
         });
     });
-    return th.bulkInsert('clientmodules', clientModules);
+    await th.bulkInsert('clientmodules', clientModules);
+    for (var i = 0; i < th.dbObjects.clientmodules.length; i++) {
+        var clientmodule = th.dbObjects.clientmodules[i];
+        await Db.insertDynamicObject(Db.PortalDatabaseName, "clientmodules", { name: clientmodule._id.toString(), clientname: clientmodule.clientId.toString(), modulename: clientmodule.module });
+    }
 };
 
 /**
@@ -138,7 +156,8 @@ th.removeClientModule = (clientName, module) => {
  * a promise.
  * The names of the user groups have following schema: [IndexOfClient]_[IndexOfUserGroup].
  */
-th.prepareUserGroups = () => {
+th.prepareUserGroups = async() => {
+    await th.cleanTable("usergroups", true, true);
     var userGroups = [];
     th.dbObjects.clients.forEach((client) => {
         userGroups.push({ name: client.name + '_0', clientId: client._id });
@@ -146,7 +165,11 @@ th.prepareUserGroups = () => {
     });
     // Add user groups for portal
     userGroups.push({ name: '_0', clientId: null });
-    return th.bulkInsert('usergroups', userGroups);
+    await th.bulkInsert('usergroups', userGroups);
+    for (var i = 0; i < th.dbObjects.usergroups.length; i++) {
+        var usergroup = th.dbObjects.usergroups[i];
+        await Db.insertDynamicObject(usergroup.clientId ? usergroup.clientId.toString() : Db.PortalDatabaseName, "usergroups", { name: usergroup._id.toString(), label: usergroup.name });
+    }
 };
 
 /**
@@ -155,28 +178,41 @@ th.prepareUserGroups = () => {
  * The passwords of the users have following schema: [IndexOfClient]_[IndexOfUserGroup]_[IndexOfUser].
  * The password of each user is "test"
  */
-th.prepareUsers = () => {
+th.prepareUsers = async() => {
+    await th.cleanTable("users", true, true);
     var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
     var users = [];
     th.dbObjects.usergroups.forEach((userGroup) => {
         users.push({ name: userGroup.name + '_0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id });
         users.push({ name: userGroup.name + '_ADMIN0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id, isAdmin: true }); // Administrator
     });
-    return th.bulkInsert('users', users);
+    await th.bulkInsert('users', users);
+    for (var i = 0; i < th.dbObjects.users.length; i++) {
+        var user = th.dbObjects.users[i];
+        await Db.insertDynamicObject(user.clientId ? user.clientId.toString() : Db.PortalDatabaseName, "users", { name: user._id.toString(), label: user.name, password: user.pass, usergroupname: user.userGroupId.toString(), isadmin: !!user.isAdmin });
+    }
 };
 
 /**
  * Creates default permissions with read / write for each user group for each permission key.
  * Can be deleted selectively within tests
  */
-th.preparePermissions = () => {
+th.preparePermissions = async() => {
+    await th.cleanTable("permissions", true, true);
     var permissions = [];
     th.dbObjects.usergroups.forEach((userGroup) => {
         Object.keys(co.permissions).forEach((permissionKey) => {
             permissions.push({ key: co.permissions[permissionKey], userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
         });
     });
-    return th.bulkInsert('permissions', permissions);
+    await th.bulkInsert('permissions', permissions);
+    for (var i = 0; i < th.dbObjects.permissions.length; i++) {
+        var permission = th.dbObjects.permissions[i];
+        if (permission.canRead || permission.canWrite) {
+            var dbname = permission.clientId ? permission.clientId.toString() : Db.PortalDatabaseName;
+            await Db.query(dbname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${permission.userGroupId.toString()}', '${permission.key}', ${!!permission.canWrite})`);
+        }
+    }
 };
 
 /**
@@ -226,13 +262,18 @@ th.preparePersonCommunications = () => {
  * a promise.
  * The names of the notes have following schema: [UserName]_[IndexOfNotes].
  */
-th.prepareNotes = () =>{
+th.prepareNotes = async() => {
+    await th.cleanTable("notes", false, true);
     var notes = [] ;
     th.dbObjects.users.forEach((user)=>{
         notes.push({ clientId: user.clientId, content: 'content'});
         notes.push({ clientId: user.clientId, content: 'content'});
     });
-    return th.bulkInsert(co.collections.notes.name, notes);
+    await th.bulkInsert(co.collections.notes.name, notes);
+    for (var i = 0; i < th.dbObjects.notes.length; i++) {
+        var note = th.dbObjects.notes[i];
+        if (note.clientId) await Db.insertDynamicObject(note.clientId.toString(), "notes", { name: note._id.toString(), content: note.content });
+    }
 };
 
 
