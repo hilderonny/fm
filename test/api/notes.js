@@ -6,6 +6,7 @@ var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var bcryptjs = require('bcryptjs');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
 describe.only('API notes', () => {
 
@@ -24,7 +25,7 @@ describe.only('API notes', () => {
         await th.prepareRelations();
     });
 
-    describe('GET/', function(){
+    describe.only('GET/', function(){
 
       th.apiTests.get.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE); 
 
@@ -39,7 +40,8 @@ describe.only('API notes', () => {
       it('responds with list of all notes of the client of the logged in user containing all details', async function(){
         var user = await th.defaults.getUser();
         var token = await th.defaults.login(user.name);
-        var clientNotes = await db.get(co.collections.notes.name).find({clientId : user.clientId});
+        var clientId = user.clientId;
+        var clientNotes = (await Db.getDynamicObjects(clientId.toString(), "notes")).map((n) => { return { _id: n.name, clientId: clientId, content: n.content } });
         var notesFromRequest = (await th.get(`/api/${co.apis.notes}?token=${token}`).expect(200)).body; 
         assert.strictEqual(notesFromRequest.length, clientNotes.length);
         clientNotes.forEach((note) => {
@@ -67,7 +69,7 @@ describe.only('API notes', () => {
         });        
     });
 
-    describe.only('GET/forIds', function(){
+    describe('GET/forIds', function(){
 
         function createTestNotes() {
             return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {

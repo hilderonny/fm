@@ -189,7 +189,11 @@ th.prepareUsers = async() => {
     await th.bulkInsert('users', users);
     for (var i = 0; i < th.dbObjects.users.length; i++) {
         var user = th.dbObjects.users[i];
-        await Db.insertDynamicObject(user.clientId ? user.clientId.toString() : Db.PortalDatabaseName, "users", { name: user._id.toString(), label: user.name, password: user.pass, usergroupname: user.userGroupId.toString(), isadmin: !!user.isAdmin });
+        var name = user._id.toString();
+        var usergroupname = user.userGroupId.toString();
+        var isadmin = !!user.isAdmin;
+        await Db.insertDynamicObject(user.clientId ? user.clientId.toString() : Db.PortalDatabaseName, "users", { name: name, label: user.name, password: user.pass, usergroupname: usergroupname, isadmin: isadmin });
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${name}', '${user.pass}', '${user.clientId ? user.clientId.toString() : null}');`);
     }
 };
 
@@ -280,12 +284,10 @@ th.prepareNotes = async() => {
 /**
  * Deletes the canRead flag of a permission of the usergroup of the user with the given name.
  */
-th.removeReadPermission = (userName, permissionKey) => {
-    return new Promise((resolve, reject) => {
-        return db.get('users').findOne({ name: userName }).then((user) => {
-            return db.get('permissions').findOneAndUpdate({ key: permissionKey, userGroupId: user.userGroupId }, { $set: { canRead: false} }).then(resolve);
-        });
-    });
+th.removeReadPermission = async(clientName, userGroupName, permissionKey) => {
+    var client = th.dbObjects.clients.find((c) => c.name === clientName);
+    var usergroup = th.dbObjects.usergroups.find((u) => u.name === userGroupName);
+    await Db.query(client._id.toString(), `DELETE FROM permissions WHERE usergroupname='${usergroup._id.toString()}' AND key='${permissionKey}';`);
 };
 
 /**
@@ -818,13 +820,11 @@ th.apiTests = {
             it('responds without authentication with 403', function() {
                 return th.get(`/api/${api}`).expect(403);
             });
-            it('responds without read permission with 403', function() {
+            it('responds without read permission with 403', async() => {
                 // Remove the corresponding permission
-                return th.removeReadPermission(th.defaults.user, permission).then(function() {
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`/api/${api}?token=${token}`).expect(403);
-                });
+                await th.removeReadPermission(th.defaults.client, th.defaults.userGroup, permission);
+                var token = await th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                await th.get(`/api/${api}?token=${token}`).expect(403);
             });
             function checkForUser(user) {
                 return function() {
