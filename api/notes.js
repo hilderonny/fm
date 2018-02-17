@@ -14,6 +14,7 @@ var monk = require('monk');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
+var Db = require("../utils/db").Db;
 
 router.get('/forIds', auth(false, false, co.modules.notes), (req, res) => {
     // Zuerst Berechtigung prüfen
@@ -36,11 +37,13 @@ router.get('/forIds', auth(false, false, co.modules.notes), (req, res) => {
     });
 });
 // Get all notes of the current client 
-router.get('/', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes) , (req, res) =>{
+router.get('/', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), async (req, res) =>{
     var clientId = req.user.clientId;
-     req.db.get(co.collections.notes.name).find({clientId: clientId}).then((note)=> {
-        return res.send(note);
-    });
+    var oldnotes = await req.db.get(co.collections.notes.name).find({clientId: clientId});
+    console.log(oldnotes);
+    var newnotes = await Db.getDynamicObjects(clientId.toString(), "notes");
+    console.log(newnotes);
+    res.send(newnotes.map((n) => { return { _id: n.name, content: n.content } }));
 });
 /**
  * Get single note with given id

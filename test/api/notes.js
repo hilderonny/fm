@@ -7,7 +7,7 @@ var db = require('../../middlewares/db');
 var bcryptjs = require('bcryptjs');
 var co = require('../../utils/constants');
 
-describe('API notes', function(){
+describe.only('API notes', function(){
     // Clear and prepare database with clients, user groups and users
     beforeEach(()=>{
         return th.cleanDatabase()
