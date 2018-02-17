@@ -161,8 +161,18 @@ var Db = {
     //     return result;
     // },
 
+    getDynamicObject: async(clientname, datatypename, name) => {
+        var result = await Db.query(clientname, `SELECT * FROM ${datatypename} WHERE name='${name}';`);
+        return result.rowCount > 0 ? result.rows[0] : undefined;
+    },
+
     getDynamicObjects: async(clientname, datatypename) => {
         return (await Db.query(clientname, `SELECT * FROM ${datatypename};`)).rows;
+    },
+
+    getDynamicObjectsForNames: async(clientname, datatypename, names) => {
+        var namestofind = names.map((n) => `'${n}'`).join(",");
+        return (await Db.query(clientname, `SELECT * FROM ${datatypename} WHERE name IN (${namestofind});`)).rows;
     },
 
     // getDynamicObjectsForList: async(clientname, username, datatypename) => {

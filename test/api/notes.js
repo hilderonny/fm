@@ -24,7 +24,7 @@ describe.only('API notes', () => {
         await th.prepareRelations();
     });
 
-    describe.only('GET/', function(){
+    describe('GET/', function(){
 
       th.apiTests.get.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE); 
 
@@ -67,7 +67,7 @@ describe.only('API notes', () => {
         });        
     });
 
-    describe('GET/forIds', function(){
+    describe.only('GET/forIds', function(){
 
         function createTestNotes() {
             return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {

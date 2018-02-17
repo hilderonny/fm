@@ -16,25 +16,18 @@ var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
 var Db = require("../utils/db").Db;
 
-router.get('/forIds', auth(false, false, co.modules.notes), (req, res) => {
+router.get('/forIds', auth(false, false, co.modules.notes), async (req, res) => {
     // Zuerst Berechtigung prüfen
-    auth.canAccess(req.user._id, co.permissions.OFFICE_NOTE, 'r', co.modules.notes, req.db).then(function(accessAllowed) {
-        if (!accessAllowed) {
-            return res.send([]);
-        }
-        if (!req.query.ids) {
-            return res.send([]);
-        }
-        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
-        var clientId = req.user.clientId; // Nur die Notiz des Mandanten des Benutzers raus holen.
-        var userId = req.user._id;
-        req.db.get(co.collections.notes.name).find({
-            _id: { $in: ids },
-            clientId: clientId,
-        }).then((notes) => {
-            res.send(notes);
-        });
-    });
+    var accessAllowed = await auth.canAccess(req.user._id, co.permissions.OFFICE_NOTE, 'r', co.modules.notes, req.db);
+    if (!accessAllowed) {
+        return res.send([]);
+    }
+    if (!req.query.ids) {
+        return res.send([]);
+    }
+    var clientId = req.user.clientId; // Nur die Notiz des Mandanten des Benutzers raus holen.
+    var notes = await Db.getDynamicObjectsForNames(clientId.toString(), "notes", req.query.ids.split(',').filter(validateId.validateId));
+    res.send(notes.map((n) => { return { _id: n.name, clientId: clientId.toString(), content: n.content } }));
 });
 // Get all notes of the current client 
 router.get('/', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), async (req, res) =>{
@@ -45,10 +38,10 @@ router.get('/', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), async (
 /**
  * Get single note with given id
  */
-router.get('/:id', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), validateId,validateSameClientId(co.collections.notes.name), (req, res) => {
-    req.db.get(co.collections.notes.name).findOne(req.params.id, req.query.fields).then((note) => {
-        res.send(note);
-    });
+router.get('/:id', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), validateId,validateSameClientId(co.collections.notes.name), async(req, res) => {
+    var clientId = req.user.clientId;
+    var note = await Db.getDynamicObject(clientId.toString(), "notes", req.params.id);
+    res.send({ _id: note.name, clientId: clientId.toString(), content: note.content });
 });
 // Create a Note
 router.post('/', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), function(req, res) {
