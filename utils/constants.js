@@ -287,59 +287,59 @@ module.exports.permissions = {
     /**
      * Permission to show and edit clients
      */
-    ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
-    ADMINISTRATION_SETTINGS: 'PERMISSION_ADMINISTRATION_SETTINGS',
+    ADMINISTRATION_CLIENT: 'ADMINISTRATION_CLIENT',
+    ADMINISTRATION_SETTINGS: 'ADMINISTRATION_SETTINGS',
     /**
      * Permission to show and edit users
      */
-    ADMINISTRATION_USER: 'PERMISSION_ADMINISTRATION_USER',
-    ADMINISTRATION_USERGROUP: 'PERMISSION_ADMINISTRATION_USERGROUP',
-    BIM_AREAS: 'PERMISSION_BIM_AREAS',
+    ADMINISTRATION_USER: 'ADMINISTRATION_USER',
+    ADMINISTRATION_USERGROUP: 'ADMINISTRATION_USERGROUP',
+    BIM_AREAS: 'BIM_AREAS',
     /**
      * Permission to show and edit FM objects
      */
-    BIM_FMOBJECT: 'PERMISSION_BIM_FMOBJECT',
+    BIM_FMOBJECT: 'BIM_FMOBJECT',
     /**
      * Dynamische Verknüpfungen erstellen und ansehen
      */
-    CORE_RELATIONS: 'PERMISSION_CORE_RELATIONS',
+    CORE_RELATIONS: 'CORE_RELATIONS',
     /**
      * Geschäftspartner bearbeiten
      */
-    CRM_BUSINESSPARTNERS: 'PERMISSION_CRM_BUSINESSPARTNERS',
+    CRM_BUSINESSPARTNERS: 'CRM_BUSINESSPARTNERS',
     /**
      * Personen bearbeiten
      */
-    CRM_PERSONS: 'PERMISSION_CRM_PERSONS',
+    CRM_PERSONS: 'CRM_PERSONS',
     /**
      * Permission to show and edit portals on the license server
      */
-    LICENSESERVER_PORTAL: 'PERMISSION_LICENSESERVER_PORTAL',
-    OFFICE_ACTIVITY: 'PERMISSION_OFFICE_ACTIVITY',
+    LICENSESERVER_PORTAL: 'LICENSESERVER_PORTAL',
+    OFFICE_ACTIVITY: 'OFFICE_ACTIVITY',
     /**
      * Permission to show and edit documents and folders
      */
-    OFFICE_DOCUMENT: 'PERMISSION_OFFICE_DOCUMENT',
+    OFFICE_DOCUMENT: 'OFFICE_DOCUMENT',
     /**
      * Permission to show and edit notes
      */
-    OFFICE_NOTE: 'PERMISSION_OFFICE_NOTE',
+    OFFICE_NOTE: 'OFFICE_NOTE',
     /**
      * Permission to show and change the settings of the own client (Logo, name)
      */
-    SETTINGS_CLIENT: 'PERMISSION_SETTINGS_CLIENT',
+    SETTINGS_CLIENT: 'SETTINGS_CLIENT',
     /**
      * Permission to view and edit dynamic attribute definitions and picklist options
      */
-    SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
+    SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
     /**
      * Permission to show and change the settings of the portal (license key, etc.)
      */
-    SETTINGS_PORTAL: 'PERMISSION_SETTINGS_PORTAL',
+    SETTINGS_PORTAL: 'SETTINGS_PORTAL',
     /**
      * Permission to show and change the settings of the own account
      */
-    SETTINGS_USER: 'PERMISSION_SETTINGS_USER'
+    SETTINGS_USER: 'SETTINGS_USER'
 };
 
 /**

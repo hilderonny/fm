@@ -29,20 +29,17 @@ router.get('/forIds', auth(false, false, co.modules.notes), async (req, res) => 
     var notes = await Db.getDynamicObjectsForNames(clientId.toString(), "notes", req.query.ids.split(',').filter(validateId.validateId));
     res.send(notes.map((n) => { return { _id: n.name, clientId: clientId.toString(), content: n.content } }));
 });
-// Get all notes of the current client 
+
 router.get('/', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), async (req, res) =>{
     var notes = await Db.getDynamicObjects(req.user.clientname, "notes");
     res.send(notes.map((n) => { return { _id: n.name, clientId: req.user.clientname, content: n.content } }));
 });
-/**
- * Get single note with given id
- */
-router.get('/:id', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), validateId,validateSameClientId(co.collections.notes.name), async(req, res) => {
-    var clientId = req.user.clientId;
-    var note = await Db.getDynamicObject(clientId.toString(), "notes", req.params.id);
-    res.send({ _id: note.name, clientId: clientId.toString(), content: note.content });
+
+router.get('/:id', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), validateSameClientId(co.collections.notes.name), async(req, res) => {
+    var note = await Db.getDynamicObject(req.user.clientname, "notes", req.params.id);
+    res.send({ _id: note.name, clientId: req.user.clientname, content: note.content });
 });
-// Create a Note
+
 router.post('/', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), function(req, res) {
    var note = req.body;
     if (!note || Object.keys(note).length < 1) {
@@ -56,9 +53,6 @@ router.post('/', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), functi
 
 });
 
-/**
-* Updating note details
-*/
 router.put('/:id' , auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), validateId, validateSameClientId(co.collections.notes.name), function(req,res){
    var note = req.body;
    if(!note || Object.keys(note).length < 1) {
@@ -74,10 +68,6 @@ router.put('/:id' , auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), val
    });
 });
 
-/**
- * Delete note
- */
-
 router.delete('/:id', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes),validateId, validateSameClientId(co.collections.notes.name),function(req,res){
     var noteId = monk.id(req.params.id);  
     req.db.remove(co.collections.notes.name, req.params.id).then((result) => {
@@ -88,6 +78,5 @@ router.delete('/:id', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes),va
         res.sendStatus(204);       
     });
 });
-
 
 module.exports = router;

@@ -65,6 +65,8 @@ var Db = {
     },
 
     createDefaultPortalTables: async() => {
+        await Db.query(Db.PortalDatabaseName, "CREATE TABLE allusers (name TEXT NOT NULL PRIMARY KEY, password TEXT, clientname TEXT NOT NULL);");
+        await Db.query(Db.PortalDatabaseName, "CREATE TABLE clientmodules (clientname TEXT NOT NULL, modulename TEXT NOT NULL, PRIMARY KEY(clientname, modulename));");
         var modulenames = Object.keys(moduleconfig.modules);
         for (var i = 0; i < modulenames.length; i++) {
             var portaldatatypes = moduleconfig.modules[modulenames[i]].portaldatatypes;
@@ -245,7 +247,6 @@ var Db = {
             await Db.queryDirect("postgres", `CREATE DATABASE ${portalDatabaseName};`);
             await Db.createDefaultTables(Db.PortalDatabaseName); // Create tables users, usergroups and permissions
             await Db.createDefaultPortalTables();
-            await Db.queryDirect(portalDatabaseName, "CREATE TABLE allusers (name TEXT NOT NULL PRIMARY KEY, password TEXT, clientname TEXT NOT NULL);");
         }
         // When portal admin locked out, recreate it
         if (localconfig.recreatePortalAdmin) {
@@ -312,7 +313,7 @@ var Db = {
         var client = await pool.connect();
         var result = undefined;
         try {
-            console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
+            // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
             result = await client.query(query);
         } finally {
             client.release();

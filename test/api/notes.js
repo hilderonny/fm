@@ -25,51 +25,46 @@ describe.only('API notes', () => {
         await th.prepareRelations();
     });
 
-    describe.only('GET/', function(){
+    function compareNote(actualNote, expectedNote) {
+        assert.ok(typeof(actualNote._id) !== "undefined");
+        assert.ok(typeof(actualNote.clientId) !== "undefined");
+        assert.ok(typeof(actualNote.content) !== "undefined");
+        assert.strictEqual(actualNote._id, expectedNote._id);
+        assert.strictEqual(actualNote.clientId, expectedNote.clientId);
+        assert.strictEqual(actualNote.content, expectedNote.content);
+    }
 
-      th.apiTests.get.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE); 
+    function compareNotes(actualNotes, expectedNotes) {
+        assert.strictEqual(actualNotes.length, expectedNotes.length);
+        for (var i = 0; i < actualNotes.length; i++) compareNote(actualNotes[i], expectedNotes[i]);
+    }
 
-      function compareNotes(noteFromApi, noteFromDatabase) {
-        Object.keys(noteFromDatabase).forEach((key)=>{
-            var valueFromDatabase = noteFromDatabase[key].toString();
-            var valueFromApi = noteFromApi[key].toString();
-            assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of note ${noteFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-        });                                    
-      }
-      
-      it('responds with list of all notes of the client of the logged in user containing all details', async function(){
-        var user = await th.defaults.getUser();
-        var token = await th.defaults.login(user.name);
-        var clientId = user.clientId;
-        var clientNotes = (await Db.getDynamicObjects(clientId.toString(), "notes")).map((n) => { return { _id: n.name, clientId: clientId, content: n.content } });
-        var notesFromRequest = (await th.get(`/api/${co.apis.notes}?token=${token}`).expect(200)).body; 
-        assert.strictEqual(notesFromRequest.length, clientNotes.length);
-        clientNotes.forEach((note) => {
-            noteFromRequest = notesFromRequest.find((a) => a._id === note._id.toString());
-            assert.ok(noteFromRequest);
-            compareNotes(noteFromRequest, note);
-        });  
-      });
-    });//end Get 
+    describe('GET/', function(){
+
+        th.apiTests.get.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE); 
+        
+        it('responds with list of all notes of the client of the logged in user containing all details', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var notesFromDatabase = (await Db.getDynamicObjects("client0", "notes")).map((n) => { return { _id: n.name, clientId: "client0", content: n.content } });
+            var notesFromRequest = (await th.get(`/api/${co.apis.notes}?token=${token}`).expect(200)).body;
+            compareNotes(notesFromRequest, notesFromDatabase);
+        });
+    });
     
     describe('GET/:id', function() {
         
         th.apiTests.getId.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, co.collections.notes.name);
         th.apiTests.getId.clientDependentNegative(co.apis.notes, co.collections.notes.name);
 
-        it('responds with existing id with all details of the note',  async function() {           
-            var user = await th.defaults.getUser();
-            var token = await th.defaults.login(user.name);
-            var noteFromDatabase = await db.get(co.collections.notes.name).findOne({clientId: user.clientId});
-            var noteFromApi = (await th.get(`/api/${co.apis.notes}/${noteFromDatabase._id}?token=${token}`).expect(200)).body;
-            assert.strictEqual(noteFromApi._id, noteFromDatabase._id.toString());
-            assert.strictEqual(noteFromApi.content, noteFromDatabase.content);
-            assert.strictEqual(noteFromApi.clientId, noteFromDatabase.clientId.toString());
-            return Promise.resolve();           
+        it('responds with existing id with all details of the note', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var noteFromDatabase = (await Db.getDynamicObject("client0", "notes", "client0_note0"));
+            var noteFromApi = (await th.get(`/api/${co.apis.notes}/client0_note0?token=${token}`).expect(200)).body;
+            compareNote(noteFromApi, { _id: noteFromDatabase.name, clientId: "client0", content: noteFromDatabase.content });
         });        
     });
 
-    describe('GET/forIds', function(){
+    describe.only('GET/forIds', function(){
 
         function createTestNotes() {
             return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {

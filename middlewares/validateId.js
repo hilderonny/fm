@@ -1,3 +1,5 @@
+// OBSOLETE
+
 /**
  * Middleware for routers which checks the ID given as parameter for validity.
  * An ID for MongoDB must be either a 12 or 24 character string.
@@ -16,5 +18,5 @@ module.exports = (req, res, next) => {
  * Can be called with require('validateId').validateId(id);
  */
 module.exports.validateId = (id) => {
-    return id && typeof id === 'string' && (id.length === 12 || id.length === 24);
+    return !!id;
 };

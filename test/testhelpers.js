@@ -40,40 +40,17 @@ var generateLicenseKey = () => {
     return hat(1024, 32);
 };
 
-/**
- * Removes all documents from the database and creates an admin user. Used before all tests.
- * The returned promise has no parameter.
- */
 th.cleanDatabase = async () => {
-    th.dbObjects = {};
-    var promises = Object.keys(co.collections).map((key) => db.get(co.collections[key].name).drop());
-    await Promise.all(promises); // Wait for all drop Promises to complete
     await Db.init(true);
 };
 
 th.cleanTable = async(tablename, inportal, inclients) => {
-    await db.get(tablename).drop();
-    if (inclients && th.dbObjects.clients) for (var i = 0; i < th.dbObjects.clients.length; i++) {
-        await Db.query(th.dbObjects.clients[i]._id.toString(), `DELETE FROM ${tablename};`);
-    }
+    if (inclients) await Db.query("client0", `DELETE FROM ${tablename};`);
     if (inportal) await Db.query(Db.PortalDatabaseName, `DELETE FROM ${tablename};`);
-    delete th.dbObjects[tablename];
 };
 
-/**
- * Performs a login with the given credentials and returns a promise with the token as result
- */
-th.doLoginAndGetToken = (username, password) => {
-    if (!username) throw new Error('Please provide an username');
-    if (username.split("_").length != 3) throw new Error(`The username must be of form <client>_<usergroup>_<user> or _<usergroup>_<user>. You provided "${username}"`);
-    return new Promise((resolve, reject) => {
-        superTest(server)
-            .post('/api/login')
-            .send({ 'username' : username, 'password' : password })
-            .end((err, res) => {
-                resolve(res.body.token);
-            });
-    });
+th.doLoginAndGetToken = async(username, password) => {
+    return (await th.post("/api/login").send({ username: username, password: password })).body.token;
 };
 
 /**
@@ -96,36 +73,18 @@ th.put = superTest(server).put;
  */
 th.del = superTest(server).del;
 
-/**
- * Creates 3 clients and returns a promise without parameters.
- */
 th.prepareClients = async() => {
     await th.cleanTable("clients", true, false);
-    await th.bulkInsert('clients', [
-        { name: '0' },
-        { name: '1' }
-    ]);
-    for (var i = 0; i < th.dbObjects.clients.length; i++) {
-        var client = th.dbObjects.clients[i];
-        await Db.createClient(client._id.toString(), client.name);
-    }
+    await Db.createClient("client0", "client0");
+    await Db.createClient("client1", "client1");
 };
 
-/**
- * Creates 3 client module assignments for each existing client and returns a promise without parameters.
- */
 th.prepareClientModules = async() => {
     await th.cleanTable("clientmodules", true, false);
-    var clientModules = [];
-    th.dbObjects.clients.forEach((client) => {
-        Object.keys(co.modules).forEach((key) => {
-            clientModules.push({ clientId: client._id, module: co.modules[key] });
-        });
-    });
-    await th.bulkInsert('clientmodules', clientModules);
-    for (var i = 0; i < th.dbObjects.clientmodules.length; i++) {
-        var clientmodule = th.dbObjects.clientmodules[i];
-        await Db.insertDynamicObject(Db.PortalDatabaseName, "clientmodules", { name: clientmodule._id.toString(), clientname: clientmodule.clientId.toString(), modulename: clientmodule.module });
+    var modulenames = Object.keys(co.modules);
+    for (var i = 0; i < modulenames.length; i++) {
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', '${modulenames[i]}');`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client1', '${modulenames[i]}');`);
     }
 };
 
@@ -143,68 +102,28 @@ th.prepareClientSettings = () => {
 /**
  * Removes the access to a module from the given client
  */
-th.removeClientModule = (clientName, module) => {
-    /*
-
-TODO:
-Die bisherigen prepare-Funktionen sollen nicht mehr die alten DBs verwenden, die fliegen ja eh raus.
-Clients sollen nach Namen, nicht nach IDs gefunden werden. Nur so kann removeClientModule vernünftig funktionieren.
-
-
-*/
-
-    return new Promise((resolve, reject) => {
-        return db.get('clients').findOne({ name: clientName }).then((client) => {
-            return db.get('clientmodules').remove({ clientId: client._id, module: module }).then(resolve);
-        });
-    });
+th.removeClientModule = async(clientname, modulename) => {
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE clientname='${clientname}' AND modulename='${modulename}';`);
 };
 
-/**
- * Creates 3 user groups for each existing client plus for the portal (without client) and returns
- * a promise.
- * The names of the user groups have following schema: [IndexOfClient]_[IndexOfUserGroup].
- */
 th.prepareUserGroups = async() => {
     await th.cleanTable("usergroups", true, true);
-    var userGroups = [];
-    th.dbObjects.clients.forEach((client) => {
-        userGroups.push({ name: client.name + '_0', clientId: client._id });
-        userGroups.push({ name: client.name + '_1', clientId: client._id });
-    });
-    // Add user groups for portal
-    userGroups.push({ name: '_0', clientId: null });
-    await th.bulkInsert('usergroups', userGroups);
-    for (var i = 0; i < th.dbObjects.usergroups.length; i++) {
-        var usergroup = th.dbObjects.usergroups[i];
-        await Db.insertDynamicObject(usergroup.clientId ? usergroup.clientId.toString() : Db.PortalDatabaseName, "usergroups", { name: usergroup._id.toString(), label: usergroup.name });
-    }
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "usergroups", { name: "portal_usergroup0" });
+    await Db.insertDynamicObject("client0", "usergroups", { name: "client0_usergroup0" });
 };
 
-/**
- * Creates 3 users for each existing user group and returns a promise.
- * The names of the users have following schema: [IndexOfClient]_[IndexOfUserGroup]_[IndexOfUser].
- * The passwords of the users have following schema: [IndexOfClient]_[IndexOfUserGroup]_[IndexOfUser].
- * The password of each user is "test"
- */
 th.prepareUsers = async() => {
     await th.cleanTable("users", true, true);
     await th.cleanTable("allusers", true, false);
     var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
-    var users = [];
-    th.dbObjects.usergroups.forEach((userGroup) => {
-        users.push({ name: userGroup.name + '_0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id });
-        users.push({ name: userGroup.name + '_ADMIN0', pass: hashedPassword, clientId: userGroup.clientId, userGroupId: userGroup._id, isAdmin: true }); // Administrator
-    });
-    await th.bulkInsert('users', users);
-    for (var i = 0; i < th.dbObjects.users.length; i++) {
-        var user = th.dbObjects.users[i];
-        var name = user._id.toString();
-        var usergroupname = user.userGroupId.toString();
-        var isadmin = !!user.isAdmin;
-        await Db.query(user.clientId ? user.clientId.toString() : Db.PortalDatabaseName, `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('${user.name}', '${hashedPassword}', '${usergroupname}',${isadmin});`);
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${user.name}', '${hashedPassword}', '${user.clientId ? user.clientId.toString() : null}');`);
-    }
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('${Db.PortalDatabaseName}_usergroup0_user0', '${hashedPassword}', '${Db.PortalDatabaseName}_usergroup0',false);`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('${Db.PortalDatabaseName}_usergroup0_user1', '${hashedPassword}', '${Db.PortalDatabaseName}_usergroup0',true);`);
+    await Db.query("client0", `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('client0_usergroup0_user0', '${hashedPassword}', 'client0_usergroup0',false);`);
+    await Db.query("client0", `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('client0_usergroup0_user1', '${hashedPassword}', 'client0_usergroup0',true);`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${Db.PortalDatabaseName}_usergroup0_user0', '${hashedPassword}', '${Db.PortalDatabaseName}');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${Db.PortalDatabaseName}_usergroup0_user1', '${hashedPassword}', '${Db.PortalDatabaseName}');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('client0_usergroup0_user0', '${hashedPassword}', 'client0');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('client0_usergroup0_user1', '${hashedPassword}', 'client0');`);
 };
 
 /**
@@ -213,19 +132,10 @@ th.prepareUsers = async() => {
  */
 th.preparePermissions = async() => {
     await th.cleanTable("permissions", true, true);
-    var permissions = [];
-    th.dbObjects.usergroups.forEach((userGroup) => {
-        Object.keys(co.permissions).forEach((permissionKey) => {
-            permissions.push({ key: co.permissions[permissionKey], userGroupId: userGroup._id, clientId: userGroup.clientId, canRead: true, canWrite: true });
-        });
-    });
-    await th.bulkInsert('permissions', permissions);
-    for (var i = 0; i < th.dbObjects.permissions.length; i++) {
-        var permission = th.dbObjects.permissions[i];
-        if (permission.canRead || permission.canWrite) {
-            var dbname = permission.clientId ? permission.clientId.toString() : Db.PortalDatabaseName;
-            await Db.query(dbname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${permission.userGroupId.toString()}', '${permission.key}', ${!!permission.canWrite})`);
-        }
+    var permissionkeys = Object.keys(co.permissions);
+    for (var i = 0; i < permissionkeys.length; i++) {
+        await Db.query("client0", `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('client0_usergroup0', '${permissionkeys[i]}', true);`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${Db.PortalDatabaseName}_usergroup0', '${permissionkeys[i]}', true);`);
     }
 };
 
@@ -271,33 +181,15 @@ th.preparePersonCommunications = () => {
     });
     return th.bulkInsert(co.collections.communications.name, communications);
 };
-/**
- * Creates 2 notes for each existing user and return 
- * a promise.
- * The names of the notes have following schema: [UserName]_[IndexOfNotes].
- */
+
 th.prepareNotes = async() => {
     await th.cleanTable("notes", false, true);
-    var notes = [] ;
-    th.dbObjects.users.forEach((user)=>{
-        notes.push({ clientId: user.clientId, content: 'content'});
-        notes.push({ clientId: user.clientId, content: 'content'});
-    });
-    await th.bulkInsert(co.collections.notes.name, notes);
-    for (var i = 0; i < th.dbObjects.notes.length; i++) {
-        var note = th.dbObjects.notes[i];
-        if (note.clientId) await Db.insertDynamicObject(note.clientId.toString(), "notes", { name: note._id.toString(), content: note.content });
-    }
+    await Db.insertDynamicObject("client0", "notes", { name: "client0_note0", content: "content0" });
+    await Db.insertDynamicObject("client0", "notes", { name: "client0_note1", content: "content1" });
 };
 
-
-/**
- * Deletes the canRead flag of a permission of the usergroup of the user with the given name.
- */
-th.removeReadPermission = async(clientName, userGroupName, permissionKey) => {
-    var client = th.dbObjects.clients.find((c) => c.name === clientName);
-    var usergroup = th.dbObjects.usergroups.find((u) => u.name === userGroupName);
-    await Db.query(client._id.toString(), `DELETE FROM permissions WHERE usergroupname='${usergroup._id.toString()}' AND key='${permissionKey}';`);
+th.removeReadPermission = async(clientname, usergroupname, permissionkey) => {
+    await Db.query(clientname, `DELETE FROM permissions WHERE usergroupname='${usergroupname}' AND key='${permissionkey}';`);
 };
 
 /**
@@ -552,14 +444,14 @@ th.prepareDocuments = () => {
  * Create a relations
  */
 th.prepareRelations = function() {
-    var relations = [];
-    var keys = Object.keys(th.dbObjects);
-    keys.forEach(function(key1) {
-        keys.forEach(function(key2) {
-            relations.push({ type1: key1, id1: th.dbObjects[key1][0]._id, type2: key2, id2: th.dbObjects[key2][0]._id });
-        });
-    });
-    return th.bulkInsert(co.collections.relations.name, relations);
+    // var relations = [];
+    // var keys = Object.keys(th.dbObjects);
+    // keys.forEach(function(key1) {
+    //     keys.forEach(function(key2) {
+    //         relations.push({ type1: key1, id1: th.dbObjects[key1][0]._id, type2: key2, id2: th.dbObjects[key2][0]._id });
+    //     });
+    // });
+    // return th.bulkInsert(co.collections.relations.name, relations);
 };
 
 /**
@@ -778,7 +670,6 @@ th.getModuleForApi = function(api) {
 
 th.defaults = {
     activity: '1_0_0_0',
-    adminUser: '1_0_ADMIN0',
     businessPartner: '1_0',
     /**
      * Standardmandant '1'
@@ -803,7 +694,7 @@ th.defaults = {
     /**
      * Anmeldung mit STandardbenutzer durchführen
      */
-    login: function(userName) { return th.doLoginAndGetToken(userName || th.defaults.user, th.defaults.password); },
+    login: function(username) { return th.doLoginAndGetToken(username, "test"); },
     otherClient: '0',
     /**
      * Benutzer eines anderen Mandanten
@@ -826,28 +717,26 @@ th.defaults = {
 
 th.apiTests = {
     get: {
-        defaultNegative: function(api, permission) {
-            it('responds without authentication with 403', function() {
+        defaultNegative: function(api, permissionkey) {
+            it('responds without authentication with 403', async() => {
                 return th.get(`/api/${api}`).expect(403);
             });
             it('responds without read permission with 403', async() => {
                 // Remove the corresponding permission
-                await th.removeReadPermission(th.defaults.client, th.defaults.userGroup, permission);
-                var token = await th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
+                await th.removeReadPermission("client0", "client0_usergroup0", permissionkey);
+                var token = await th.defaults.login("client0_usergroup0_user0");
                 await th.get(`/api/${api}?token=${token}`).expect(403);
             });
             function checkForUser(user) {
-                return function() {
+                return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
-                        return th.doLoginAndGetToken(user, th.defaults.password);
-                    }).then(function(token) {
-                        return th.get(`/api/${api}?token=${token}`).expect(403);
-                    });
+                    await th.removeClientModule("client0", moduleName);
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    return th.get(`/api/${api}?token=${token}`).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
         }
     },
     getForIds: {
@@ -1006,66 +895,44 @@ th.apiTests = {
         }
     },
     getId: {
-        defaultNegative: function(api, permission, collection) {
-            var testObject = {};
-            it('responds without authentication with 403', function() {
-                return db.get(collection).insert(testObject).then(function(insertedObject) {
-                    return th.get(`/api/${api}/${insertedObject._id.toString()}`).expect(403);
-                });
+        defaultNegative: function(api, permission, datatypename) {
+            var testObject = { name: "testobject" };
+            it('responds without authentication with 403', async() => {
+                await Db.insertDynamicObject("client0", datatypename, testObject);
+                await th.get(`/api/${api}/${testObject.name}`).expect(403);
             });
-            it('responds without read permission with 403', function() {
+            it('responds without read permission with 403', async() => {
                 var insertedId;
-                return th.removeReadPermission(th.defaults.user, permission).then(function() {
-                    return db.get(collection).insert(testObject);
-                }).then(function(insertedObject) {
-                    insertedId = insertedObject._id.toString();
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`/api/${api}/${insertedId}?token=${token}`).expect(403);
-                });
+                await th.removeReadPermission("client0", "client0_usergroup0", permission);
+                await Db.insertDynamicObject("client0", datatypename, testObject);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(403);
             });
             function checkForUser(user) {
-                return function() {
-                    var insertedId;
+                return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
-                        return db.get(collection).insert(testObject);
-                    }).then(function(insertedObject) {
-                        insertedId = insertedObject._id.toString();
-                        return th.doLoginAndGetToken(user, th.defaults.password);
-                    }).then(function(token) {
-                        return th.get(`/api/${api}/${insertedId}?token=${token}`).expect(403);
-                    });
+                    await th.removeClientModule("client0", moduleName);
+                    await Db.insertDynamicObject("client0", datatypename, testObject);
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-            it('responds with invalid id with 400', function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    return th.get(`/api/${api}/invalidId?token=${token}`).expect(400);
-                });
-            });
-            it('responds with not existing id with 403', function() {
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            it('responds with not existing id with 404', async() => {
                 // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
                 // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    return th.get(`/api/${api}/999999999999999999999999?token=${token}`).expect(403);
-                });
+                await Db.insertDynamicObject("client0", datatypename, testObject);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.get(`/api/${api}/999999999999999999999999?token=${token}`).expect(404);
             });
         },
-        clientDependentNegative: function(api, collection) {
-            it('responds with 403 when the object with the given ID does not belong to the client of the logged in user', function() {
-                var insertedId;
-                // Get other client
-                return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient}).then(function(client) {
-                    // Create an object for the other client
-                    return db.get(collection).insert({clientId:client._id});
-                }).then(function(insertedObject) {
-                    insertedId = insertedObject._id.toString();
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`/api/${api}/${insertedId}?token=${token}`).expect(403);
-                });
+        clientDependentNegative: function(api, datatypename) {
+            var testObject = { name: "testobject" };
+            it('responds with 404 when the object with the given ID does not belong to the client of the logged in user', async() => {
+                await Db.insertDynamicObject("client1", datatypename, testObject);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(404); // From validateSameClientId()
             });
         }
     },
