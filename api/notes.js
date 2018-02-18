@@ -18,16 +18,15 @@ var Db = require("../utils/db").Db;
 
 router.get('/forIds', auth(false, false, co.modules.notes), async (req, res) => {
     // Zuerst Berechtigung prüfen
-    var accessAllowed = await auth.canAccess(req.user._id, co.permissions.OFFICE_NOTE, 'r', co.modules.notes, req.db);
+    var accessAllowed = await auth.canAccess(req.user.name, co.permissions.OFFICE_NOTE, 'r', co.modules.notes);
     if (!accessAllowed) {
         return res.send([]);
     }
     if (!req.query.ids) {
         return res.send([]);
     }
-    var clientId = req.user.clientId; // Nur die Notiz des Mandanten des Benutzers raus holen.
-    var notes = await Db.getDynamicObjectsForNames(clientId.toString(), "notes", req.query.ids.split(',').filter(validateId.validateId));
-    res.send(notes.map((n) => { return { _id: n.name, clientId: clientId.toString(), content: n.content } }));
+    var notes = await Db.getDynamicObjectsForNames(req.user.clientname, "notes", req.query.ids.split(','));
+    res.send(notes.map((n) => { return { _id: n.name, clientId: req.user.clientname, content: n.content } }));
 });
 
 router.get('/', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), async (req, res) =>{

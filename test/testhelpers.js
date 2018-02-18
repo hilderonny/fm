@@ -740,157 +740,77 @@ th.apiTests = {
         }
     },
     getForIds: {
-        defaultNegative: function(api, permission, collection, createTestObjects) {
-            it('responds without authentication with 403', function() {
-                return createTestObjects().then(function(testObjects) {
-                    return th.bulkInsert(collection, testObjects);
-                }).then(function(insertedTestObjects) {
-                    var testObjectIds = insertedTestObjects.map((to) => to._id.toString());
-                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}`).expect(403);
-                });
+        defaultNegative: function(api, permissionkey, collection, createTestObjects) {
+            it('responds without authentication with 403', async() => {
+                var testobjectids = (await createTestObjects("client0")).map(n => n._id);
+                await th.get(`/api/${api}/forIds?ids=${testobjectids.join(',')}`).expect(403);
             });
             function checkForUser(user) {
-                return function() {
+                return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    var testObjectIds;
-                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
-                        return createTestObjects();
-                    }).then(function(testObjects) {
-                        return th.bulkInsert(collection, testObjects);
-                    }).then(function(insertedTestObjects) {
-                        testObjectIds = insertedTestObjects.map((to) => to._id.toString());
-                        return th.doLoginAndGetToken(user, th.defaults.password);
-                    }).then(function(token) {
-                        return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(403);
-                    });
+                    await th.removeClientModule("client0", moduleName);
+                    var testobjectids = (await createTestObjects("client0")).map(n => n._id);
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.get(`/api/${api}/forIds?ids=${testobjectids.join(',')}&token=${token}`).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-            it('responds with empty list when user has no read permission', function() {
-                var testObjectIds;
-                return th.removeReadPermission(th.defaults.user, permission).then(function() {
-                    return createTestObjects();
-                }).then(function(testObjects) {
-                    return th.bulkInsert(collection, testObjects);
-                }).then(function(insertedTestObjects) {
-                    testObjectIds = insertedTestObjects.map((to) => to._id.toString());
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(200);
-                }).then(function(response) {
-                    assert.equal(response.body.length, 0);
-                    return Promise.resolve();
-                });
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            it('responds with empty list when user has no read permission', async() => {
+                await th.removeReadPermission("client0", "client0_usergroup0", permissionkey);
+                var testobjectids = (await createTestObjects("client0")).map(n => n._id);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var elements = (await th.get(`/api/${api}/forIds?ids=${testobjectids.join(',')}&token=${token}`).expect(200)).body;
+                assert.equal(elements.length, 0);
             });
-            it('responds with empty list when query parameter "ids" does not exist', function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    return th.get(`/api/${api}/forIds?token=${token}`).expect(200);
-                }).then(function(response) {
-                    assert.equal(response.body.length, 0);
-                    return Promise.resolve();
-                });
+            it('responds with empty list when query parameter "ids" does not exist', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var elements = (await th.get(`/api/${api}/forIds?token=${token}`).expect(200)).body;
+                assert.equal(elements.length, 0);
             });
-            it('returns only elements of correct ids when parameter "ids" contains faulty IDs', function() {
-                var testObjectIds, insertedTestObjects;
-                return createTestObjects().then(function(testObjects) {
-                    return th.bulkInsert(collection, testObjects);
-                }).then(function(objects) {
-                    insertedTestObjects = objects;
-                    testObjectIds = objects.map((to) => to._id.toString());
-                    testObjectIds.push('invalidId');
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(200);
-                }).then(function(response) {
-                    var objects = response.body;
-                    var idCount = insertedTestObjects.length;
-                    assert.equal(objects.length, idCount);
-                    for (var i = 0; i < idCount; i++) {
-                        assert.strictEqual(objects[i].name, insertedTestObjects[i].name);
-                    }
-                    return Promise.resolve();
-                });
-            });
-            it('returns only elements of correct ids when parameter "ids" contains IDs where no entities exist for', function() {
-                var testObjectIds, insertedTestObjects;
-                return createTestObjects().then(function(testObjects) {
-                    return th.bulkInsert(collection, testObjects);
-                }).then(function(objects) {
-                    insertedTestObjects = objects;
-                    testObjectIds = objects.map((to) => to._id.toString());
-                    testObjectIds.push('999999999999999999999999');
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(200);
-                }).then(function(response) {
-                    var objects = response.body;
-                    var idCount = insertedTestObjects.length;
-                    assert.equal(objects.length, idCount);
-                    for (var i = 0; i < idCount; i++) {
-                        assert.strictEqual(objects[i]._id, insertedTestObjects[i]._id.toString());
-                    }
-                    return Promise.resolve();
-                });
+            it('returns only elements of correct ids when parameter "ids" contains invalid IDs', async() => {
+                var testobjectids = (await createTestObjects("client0")).map(n => n._id);
+                var expectedcount = testobjectids.length;
+                testobjectids.push('invalidId');
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var elements = (await th.get(`/api/${api}/forIds?ids=${testobjectids.join(',')}&token=${token}`).expect(200)).body;
+                assert.equal(elements.length, expectedcount);
+                for (var i = 0; i < expectedcount; i++) {
+                    assert.strictEqual(testobjectids[i], elements[i]._id);
+                }
             });
         },
         clientDependentNegative: function(api, collection, createTestObjects) {
-            it('returns only elements of the client of the logged in user when "ids" contains IDs of entities of another client', function() {
-                var testObjectIds, insertedTestObjects, testObjects;
-                return createTestObjects().then(function(objects) {
-                    testObjects = objects;
-                    return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient});
-                }).then(function(otherClient) {
-                    testObjects.push({
-                        clientId:otherClient._id
-                    });
-                    return th.bulkInsert(collection, testObjects);
-                }).then(function(objects) {
-                    insertedTestObjects = objects;
-                    testObjectIds = objects.map((to) => to._id.toString());
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`/api/${api}/forIds?ids=${testObjectIds.join(',')}&token=${token}`).expect(200);
-                }).then(function(response) {
-                    var objects = response.body;
-                    var idCount = insertedTestObjects.length - 1; // The last one was from the foreign client
-                    assert.equal(objects.length, idCount);
-                    for (var i = 0; i < idCount; i++) {
-                        assert.strictEqual(objects[i]._id, insertedTestObjects[i]._id.toString());
-                    }
-                    return Promise.resolve();
-                });
+            it('returns only elements of the client of the logged in user when "ids" contains IDs of entities of another client', async() => {
+                var testobjectidsclient0 = (await createTestObjects("client0")).map(n => n._id);
+                var testobjectidsclient1 = (await createTestObjects("client1")).map(n => n._id);
+                var allids = testobjectidsclient0.concat(testobjectidsclient1);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var elements = (await th.get(`/api/${api}/forIds?ids=${allids.join(',')}&token=${token}`).expect(200)).body;
+                assert.equal(elements.length, testobjectidsclient0.length);
+                for (var i = 0; i < testobjectidsclient0.length; i++) {
+                    assert.strictEqual(testobjectidsclient0[i], elements[i]._id);
+                }
             });
         },
         defaultPositive: function(api, collection, createTestObjects) {
-            it('returns a list of elements with all details for the given IDs', function() {
-                var testElementIds, insertedElements;
-                return createTestObjects().then(function(objects) {
-                    return th.bulkInsert(collection, objects);
-                }).then(function(objects) {
-                    insertedElements = objects;
-                    testElementIds = objects.map((to) => to._id.toString());
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`/api/${api}/forIds?ids=${testElementIds.join(',')}&token=${token}`).expect(200);
-                }).then(function(response) {
-                    var elementsFromApi = response.body;
-                    var idCount = insertedElements.length;
-                    assert.equal(elementsFromApi.length, idCount);
-                    for (var i = 0; i < idCount; i++) {
-                        var elementFromApi = elementsFromApi[i];
-                        var elementFromDatabase = insertedElements[i];
-                        Object.keys(elementFromDatabase).forEach(function(key) { // Prüfung beginnend mit Datenbank, bei Dokumenten wird der Pfad mit drangehängt
-                            assert.ok(elementFromApi[key] || elementFromApi[key] === null, 'Key "' + key + '" does not match'); // parentFolderId oder clientId können null ein
-                            if (elementFromApi[key] === null) {
-                                assert.ok(elementFromDatabase[key] === null);
-                            } else {
-                                assert.strictEqual(elementFromApi[key].toString(), elementFromDatabase[key].toString());
-                            }
-                        });
-                    }
-                    return Promise.resolve();
-                });
+            it('returns a list of elements with all details for the given IDs', async() => {
+                var testobjects = await createTestObjects("client0");
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var elementsFromApi = (await th.get(`/api/${api}/forIds?ids=${testobjects.map(n => n._id).join(',')}&token=${token}`).expect(200)).body;
+                assert.equal(elementsFromApi.length, testobjects.length);
+                for (var i = 0; i < testobjects.length; i++) {
+                    var elementFromApi = elementsFromApi[i];
+                    var elementFromDatabase = testobjects[i];
+                    Object.keys(elementFromDatabase).forEach(function(key) {
+                        assert.ok(elementFromApi[key] || elementFromApi[key] === null, `Key ${key} not returned by API.`); // Einige Werte können null sein
+                        if (elementFromApi[key] === null) {
+                            assert.ok(elementFromDatabase[key] === null);
+                        } else {
+                            assert.strictEqual(elementFromApi[key], elementFromDatabase[key]);
+                        }
+                    });
+                }
             });
         }
     },

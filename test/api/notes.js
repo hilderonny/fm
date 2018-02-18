@@ -66,44 +66,19 @@ describe.only('API notes', () => {
 
     describe.only('GET/forIds', function(){
 
-        function createTestNotes() {
-            return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
-                var clientId = user.clientId;
-                var testObjects = ['testNoteContent1', 'testNoteContent2'].map(function(content) {
-                    return {
-                        content: content,
-                        clientId: clientId
-                    }
-                });
-                return Promise.resolve(testObjects);
-            });
+        async function createTestNotes(clientname) {
+            var testNotes = [
+                { name: clientname + "_testnote0", content: "content0" },
+                { name: clientname + "_testnote1", content: "content1" }
+            ];
+            await Db.insertDynamicObject(clientname, "notes", testNotes[0]);
+            await Db.insertDynamicObject(clientname, "notes", testNotes[1]);
+            return testNotes.map((n) => { return { _id: n.name, clientId: clientname, content: n.content } });
         }  
         
         th.apiTests.getForIds.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, co.collections.notes.name, createTestNotes);
         th.apiTests.getForIds.clientDependentNegative(co.apis.notes,  co.collections.notes.name, createTestNotes);
-
-        it('returns a list of notes with all details for the given IDs', function() {
-            var testNotesIds, insertedNotes;
-            return createTestNotes().then(function(objects) {
-                return th.bulkInsert(co.collections.notes.name, objects);
-            }).then(function(objects) {
-                insertedNotes = objects;
-                testNotesIds = objects.map((to) => to._id.toString());
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.notes}/forIds?ids=${testNotesIds.join(',')}&token=${token}`).expect(200);
-            }).then(function(response) {
-                var notes = response.body;
-                var idCount = insertedNotes.length;
-                assert.equal(notes.length, idCount);
-                for (var i = 0; i < idCount; i++) {
-                    assert.strictEqual(notes[i]._id, insertedNotes[i]._id.toString());
-                    assert.strictEqual(notes[i].content, insertedNotes[i].content);                    
-                    assert.strictEqual(notes[i].clientId, insertedNotes[i].clientId.toString());
-                }
-                return Promise.resolve();
-            });
-        });   
+        th.apiTests.getForIds.defaultPositive(co.apis.notes,  co.collections.notes.name, createTestNotes);
     
     });
     
