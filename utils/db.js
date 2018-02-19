@@ -321,28 +321,29 @@ var Db = {
         return result;
     },
 
-    // updateDynamicObject: async(clientname, datatype, elementname, element) => {
-    //     var fields = await Db.getDataTypeFields(clientname, datatype);
-    //     var fieldMap = {};
-    //     fields.forEach((f) => { fieldMap[f.name] = f; });
-    //     var keys = Object.keys(element);
-    //     var values = keys.map((k) => {
-    //         var value = element[k];
-    //         var field = fieldMap[k];
-    //         if (!field) throw new Error(`Unknown field '${k}'`);
-    //         var result;
-    //         switch (field.fieldtype) {
-    //             case fieldtypes.boolean: result = value; break;
-    //             case fieldtypes.datetime: result = value; break;
-    //             case fieldtypes.decimal: result = value; break;
-    //             case fieldtypes.text:  result = `'${value}'`; break;
-    //             default: throw new Error(`Unknown field type '${field.fieldtype}'`);
-    //         }
-    //         return `${k}=${result}`;
-    //     });
-    //     var statement = `UPDATE ${datatype} SET ${values.join(',')} WHERE name='${elementname}';`;
-    //     return Db.query(clientname, statement);
-    // }
+    updateDynamicObject: async(clientname, datatypename, elementname, element) => {
+        var fields = await Db.getDataTypeFields(clientname, datatypename);
+        var fieldMap = {};
+        fields.forEach((f) => { fieldMap[f.name] = f; });
+        var keys = Object.keys(element);
+        var values = keys.map((k) => {
+            var value = element[k];
+            var field = fieldMap[k];
+            if (!field) throw new Error(`Unknown field '${k}'`);
+            var result;
+            switch (field.fieldtype) {
+                case constants.fieldtypes.boolean: result = value === undefined ? "null" : value; break;
+                case constants.fieldtypes.datetime: result = value === undefined ? "null" : value; break;
+                case constants.fieldtypes.decimal: result = value === undefined ? "null" : value; break;
+                case constants.fieldtypes.reference: result = value === undefined ? "null" : `'${value}'`; break;
+                case constants.fieldtypes.text: result = value === undefined ? "null" : `'${value}'`; break;
+                default: throw new Error(`Unknown field type '${field.fieldtype}'`);
+            }
+            return `${k}=${result}`;
+        });
+        var statement = `UPDATE ${datatypename} SET ${values.join(',')} WHERE name='${elementname}';`;
+        return Db.query(clientname, statement);
+    }
     
 }
 

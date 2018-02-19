@@ -82,7 +82,7 @@ describe.only('API notes', () => {
     
     });
     
-    describe.only('POST/', function() {
+    describe('POST/', function() {
 
         function createPostTestNote() {
             var testObject = {
@@ -96,34 +96,24 @@ describe.only('API notes', () => {
 
     });
 
-    describe('PUT/:id' , function(){
+    describe.only('PUT/:id' , function(){
 
-        async function createPutTestNote() {
-            var user = await th.defaults.getUser();
-            return db.get(co.collections.notes.name).findOne({clientId: user.clientId}).then(function(note) {
-                var testObject = {
-                    _id: note._id.toString(),
-                    content: 'New content'                    
-                };
-                return Promise.resolve(testObject);
-            });
+        async function createPutTestNote(clientname) {
+            var testnote = { name: clientname + "_testnote0", content: "content0" };
+            await Db.insertDynamicObject(clientname, "notes", testnote);
+            return { _id: testnote.name, clientId: clientname, content: testnote.content };
         }
 
         th.apiTests.put.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, createPutTestNote);
         th.apiTests.put.clientDependentNegative(co.apis.notes, createPutTestNote);
 
-        it('responds with a correct note with the updated notes and its new properties', async function() {
-
-            var updatedNote = {
-                content: 'New content'
-            };
-
-            var user = await th.defaults.getUser();
-            var token = await th.defaults.login(user.name);
-            var noteFromDatabase = await db.get(co.collections.notes.name).findOne({clientId: user.clientId});
-            var noteFromApi = (await th.put(`/api/${co.apis.notes}/${noteFromDatabase._id.toString()}?token=${token}`).send(updatedNote).expect(200)).body;
-            assert.strictEqual(updatedNote.content, noteFromApi.content);           
-            return Promise.resolve();           
+        it('responds with a correct note with the updated notes and its new properties', async() => {
+            var originalnote = await createPutTestNote("client0");
+            var noteupdate = { content: 'New content' };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/${co.apis.notes}/${originalnote._id}?token=${token}`).send(noteupdate).expect(200);
+            var noteFromDatabase = await Db.getDynamicObject("client0", "notes", originalnote._id);
+            assert.strictEqual(noteFromDatabase.content, noteupdate.content);
         });
     });
     

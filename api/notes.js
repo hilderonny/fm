@@ -50,19 +50,14 @@ router.post('/', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), async(
     res.send({ _id: note.name, clientId: req.user.clientname, content: note.content });
 });
 
-router.put('/:id' , auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), validateId, validateSameClientId(co.collections.notes.name), function(req,res){
+router.put('/:id' , auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), validateSameClientId(co.collections.notes.name), async(req,res) => {
    var note = req.body;
    if(!note || Object.keys(note).length < 1) {
        return res.sendStatus(400);
    }
-   delete note._id;
-   delete note.clientId;
-   if (Object.keys(note).length < 1) {
-       return res.sendStatus(400);
-   }
-   req.db.update(co.collections.notes.name, req.params.id, { $set: note }).then((updatedNote) => {
-       res.send(updatedNote);
-   });
+   var notetoinsert = { content: note.content };
+   await Db.updateDynamicObject(req.user.clientname, "notes", req.params.id, notetoinsert);
+   res.send(note);
 });
 
 router.delete('/:id', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes),validateId, validateSameClientId(co.collections.notes.name),function(req,res){

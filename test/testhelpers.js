@@ -910,135 +910,60 @@ th.apiTests = {
     },
     put: {
         defaultNegative: function(api, permission, createTestObject) {
-            it('responds without authentication with 403', function() {
-                return createTestObject().then(function(testObject) {
-                    return th.put(`/api/${api}/${testObject._id}`).send(testObject).expect(403);
-                });
+            it('responds without authentication with 403', async() => {
+                var testObject = await createTestObject("client0");
+                await th.put(`/api/${api}/${testObject._id}`).send(testObject).expect(403);
             });
-            it('responds without write permission with 403', function() {
-                var loginToken;
-                return th.removeWritePermission(th.defaults.user, permission).then(function() {
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    loginToken = token;
-                    return createTestObject();
-                }).then(function(testObject) {
-                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(403);
-                });
+            if (permission) it('responds without write permission with 403', async() => {
+                var testObject = await createTestObject("client0");
+                await th.removeWritePermission("client0", "client0_usergroup0", permission);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(403);
             });
             function checkForUser(user) {
-                return function() {
-                    var loginToken;
+                return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
-                        return th.doLoginAndGetToken(user, th.defaults.password);
-                    }).then(function(token) {
-                        loginToken = token;
-                        return createTestObject();
-                    }).then(function(testObject) {
-                        return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(403);
-                    });
+                    await th.removeClientModule("client0", moduleName);
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    var testObject = await createTestObject("client0");
+                    await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-            it('responds with 400 when not sending an object to insert', function() {
-                var loginToken;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return createTestObject();
-                }).then(function(testObject) {
-                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).expect(400);
-                });
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            it('responds with 400 when not sending an object to update', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var testObject = await createTestObject("client0");
+                await th.put(`/api/${api}/${testObject._id}?token=${token}`).expect(400);
             });
-            it('responds with 400 when the object to insert only contains an _id', function() {
-                var loginToken;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return createTestObject();
-                }).then(function(testObject) {
-                    Object.keys(testObject).forEach(function(key) {
-                        if (key === '_id') return;
-                        delete testObject[key];
-                    });
-                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(400);
-                });
+            it('responds with 404 when the _id is invalid', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var testObject = await createTestObject("client0");
+                await th.put(`/api/${api}/invalidId?token=${token}`).send(testObject).expect(404);
             });
-            it('responds with 400 when the _id is invalid', function() {
-                var loginToken;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return createTestObject();
-                }).then(function(testObject) {
-                    return th.put(`/api/${api}/invalidId?token=${loginToken}`).send(testObject).expect(400);
-                });
-            });
-            it('responds with 403 when no object for the the _id exists', function() {
-                var loginToken;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return createTestObject();
-                }).then(function(testObject) {
-                    return th.put(`/api/${api}/999999999999999999999999?token=${loginToken}`).send(testObject).expect(403);
-                });
-            });
-            it('responds with the original _id when it was changed (_id cannot be changed)', function() {
-                var loginToken;
-                var originalId;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return createTestObject();
-                }).then(function(testObject) {
-                    originalId = testObject._id.toString();
-                    testObject._id = monk.id();
-                    return th.put(`/api/${api}/${originalId}?token=${loginToken}`).send(testObject).expect(200);
-                }).then(function(response) {
-                    assert.strictEqual(response.body._id, originalId);
-                    return Promise.resolve();
-                });
+            it('does not update the _id when it was sent', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var testObject = await createTestObject("client0");
+                var originalId = testObject._id;
+                testObject._id = "newId";
+                await th.put(`/api/${api}/${originalId}?token=${token}`).send(testObject).expect(200);
+                await th.get(`/api/${api}/newId?token=${token}`).expect(404);
             });
         },
         clientDependentNegative: function(api, createTestObject) {
-            it('responds with 403 when the object to update does not belong to client of the logged in user', function() {
-                var loginToken;
-                // Login as user from client 0
-                return th.doLoginAndGetToken(th.defaults.otherUser, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    // Make sure, that the object belongs to client 1!
-                    return createTestObject();
-                }).then(function(testObject) {
-                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(403);
-                });
+            it('responds with 404 when the object to update does not belong to client of the logged in user', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var testObject = await createTestObject("client1");
+                await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(404);
             });
-            it('responds with the original clientId when it was changed (clientId cannot be changed)', function() {
-                var loginToken;
-                var otherClientId;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return db.get(co.collections.clients.name).findOne({name:th.defaults.otherClient});
-                }).then(function(client) {
-                    otherClientId = client._id.toString();
-                    return createTestObject();
-                }).then(function(testObject) {
-                    testObject.clientId = otherClientId;
-                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(200);
-                }).then(function(response) {
-                    assert.notEqual(response.body.clientId, otherClientId);
-                    return Promise.resolve();
-                });
-            });
-            it('responds with 400 when the object to insert only contains a clientId', function() {
-                var loginToken;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return createTestObject();
-                }).then(function(testObject) {
-                    Object.keys(testObject).forEach(function(key) {
-                        if (key === 'clientId') return;
-                        delete testObject[key];
-                    });
-                    return th.put(`/api/${api}/${testObject._id}?token=${loginToken}`).send(testObject).expect(400);
-                });
+            it('does not update the clientId when it was sent', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var testObject = await createTestObject("client0");
+                var originalClientId = testObject.clientId;
+                testObject.clientId = "newClientId";
+                await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(200);
+                var elementFromApi = (await th.get(`/api/${api}/${testObject._id}?token=${token}`).expect(200)).body;
+                assert.strictEqual(elementFromApi.clientId, originalClientId);
             });
         }
     },
