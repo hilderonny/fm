@@ -45,7 +45,10 @@ th.cleanDatabase = async () => {
 };
 
 th.cleanTable = async(tablename, inportal, inclients) => {
-    if (inclients) await Db.query("client0", `DELETE FROM ${tablename};`);
+    if (inclients) {
+        await Db.query("client0", `DELETE FROM ${tablename};`);
+        await Db.query("client1", `DELETE FROM ${tablename};`);
+    }
     if (inportal) await Db.query(Db.PortalDatabaseName, `DELETE FROM ${tablename};`);
 };
 
@@ -436,18 +439,8 @@ th.prepareDocuments = () => {
     return th.bulkInsert(co.collections.documents.name, documents);
 };
 
-/**
- * Create a relations
- */
-th.prepareRelations = function() {
-    // var relations = [];
-    // var keys = Object.keys(th.dbObjects);
-    // keys.forEach(function(key1) {
-    //     keys.forEach(function(key2) {
-    //         relations.push({ type1: key1, id1: th.dbObjects[key1][0]._id, type2: key2, id2: th.dbObjects[key2][0]._id });
-    //     });
-    // });
-    // return th.bulkInsert(co.collections.relations.name, relations);
+th.prepareRelations = async() => {
+    await th.cleanTable("relations", false, true);
 };
 
 /**
@@ -470,21 +463,15 @@ th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseOb
     });
 };
 
-/**
- * Creates 3 dynamic  attributes (one for each currently existing type)
- */
-th.prepareDynamicAttributes = function(collectionName) {
-    var dynamicAttributes = [];
-    var modelName = collectionName ? collectionName : co.collections.users.name;
-    th.dbObjects.clients.forEach(function(client) {
-        dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: client._id, type: 'text' });
-        dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: client._id, type: 'boolean' });
-        dynamicAttributes.push({ modelName: modelName, name_en: 'picklistattribute', clientId: client._id, type: 'picklist' });
-    });
-    dynamicAttributes.push({ modelName: modelName, name_en: 'textattribute', clientId: null, type: 'text' });
-    dynamicAttributes.push({ modelName: modelName, name_en: 'booleanattribute', clientId: null, type: 'boolean' });
-    dynamicAttributes.push({ modelName: modelName, name_en: 'picklistattribute', clientId: null, type: 'picklist' });
-    return th.bulkInsert(co.collections.dynamicattributes.name, dynamicAttributes);
+th.prepareDynamicAttributes = async(clientname, datatypename, entityname) => {
+    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da0", modelname: datatypename, label: "textattribute", dynamicattributetypename: "text" });
+    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da1", modelname: datatypename, label: "booleanattribute", dynamicattributetypename: "boolean" });
+    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da2", modelname: datatypename, label: "picklistattribute", dynamicattributetypename: "picklist" });
+    await Db.insertDynamicObject(clientname, "dynamicattributeoptions", { name: "da2o0", dynamicattributename: "da2", label: "Weiblich", value: "w" });
+    await Db.insertDynamicObject(clientname, "dynamicattributeoptions", { name: "da2o1", dynamicattributename: "da2", label: "Männlich", value: "m" });
+    await Db.insertDynamicObject(clientname, "dynamicattributevalues", { name: "da0v", entityname: entityname, dynamicattributename: "da0", value: "Text" });
+    await Db.insertDynamicObject(clientname, "dynamicattributevalues", { name: "da1v", entityname: entityname, dynamicattributename: "da1", value: true });
+    await Db.insertDynamicObject(clientname, "dynamicattributevalues", { name: "da2v", entityname: entityname, dynamicattributename: "da2", value: "m" });
 };
 
 /**
@@ -534,41 +521,41 @@ th.preparePredefinedDynamicAttibutesForClient = async function(clientName) {
  *      attribute.name_en: 'gender'
  */
 th.prepareDynamicAttributeOptions = function() {
-    var dynamicAttributeOptions = [];
-    th.dbObjects.dynamicattributes.forEach(function(attribute){
-        if (attribute.type === 'picklist') {
-            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'female', clientId: attribute.clientId});
-            dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clientId: attribute.clientId});
-        }
-    });
-    return th.bulkInsert(co.collections.dynamicattributeoptions.name, dynamicAttributeOptions);
+    // var dynamicAttributeOptions = [];
+    // th.dbObjects.dynamicattributes.forEach(function(attribute){
+    //     if (attribute.type === 'picklist') {
+    //         dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'female', clientId: attribute.clientId});
+    //         dynamicAttributeOptions.push({dynamicAttributeId: attribute._id, text_en: 'male', clientId: attribute.clientId});
+    //     }
+    // });
+    // return th.bulkInsert(co.collections.dynamicattributeoptions.name, dynamicAttributeOptions);
 };
 
 /**
  * Creates dummy example values
  */
 th.prepareDynamicAttributeValues = function(collectionName) {
-    var dynamicAttributeValues = [];
-    var modelName = collectionName ? collectionName : co.collections.users.name;
-    th.dbObjects.dynamicattributes.forEach(function(attribute) {
-        th.dbObjects[modelName].forEach(function(entity) {
-            if (modelName !== co.collections.clients.name) { // Sonderbehandlung bei Mandanten
-                if (attribute.clientId === null && entity.clientId !== null) return;
-                if (attribute.clientId !== null && entity.clientId === null) return;
-                if ('' + attribute.clientId !== '' + entity.clientId) return;
-            }
-            var value;
-            if (attribute.type === 'text') {
-                value = 'text';
-            } else if (attribute.type === 'boolean') {
-                value = true;
-            } else if (attribute.type === 'picklist') {
-                value = th.dbObjects.dynamicattributeoptions.find((o) => o.dynamicAttributeId.toString() === attribute._id.toString())._id;
-            }
-            dynamicAttributeValues.push({dynamicAttributeId: attribute._id, entityId: entity._id, clientId: attribute.clientId, value: value });
-        });
-    });
-    return th.bulkInsert(co.collections.dynamicattributevalues.name, dynamicAttributeValues);
+    // var dynamicAttributeValues = [];
+    // var modelName = collectionName ? collectionName : co.collections.users.name;
+    // th.dbObjects.dynamicattributes.forEach(function(attribute) {
+    //     th.dbObjects[modelName].forEach(function(entity) {
+    //         if (modelName !== co.collections.clients.name) { // Sonderbehandlung bei Mandanten
+    //             if (attribute.clientId === null && entity.clientId !== null) return;
+    //             if (attribute.clientId !== null && entity.clientId === null) return;
+    //             if ('' + attribute.clientId !== '' + entity.clientId) return;
+    //         }
+    //         var value;
+    //         if (attribute.type === 'text') {
+    //             value = 'text';
+    //         } else if (attribute.type === 'boolean') {
+    //             value = true;
+    //         } else if (attribute.type === 'picklist') {
+    //             value = th.dbObjects.dynamicattributeoptions.find((o) => o.dynamicAttributeId.toString() === attribute._id.toString())._id;
+    //         }
+    //         dynamicAttributeValues.push({dynamicAttributeId: attribute._id, entityId: entity._id, clientId: attribute.clientId, value: value });
+    //     });
+    // });
+    // return th.bulkInsert(co.collections.dynamicattributevalues.name, dynamicAttributeValues);
 };
 
 th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoDatabase) => {
@@ -628,16 +615,9 @@ th.createRelationsToPerson = (entityType, entity) => {
     });
 };
 
-th.createRelationsToNote = (entityType, entity) => {
-    return db.get(co.collections.notes.name).findOne({name:th.defaults.note}).then(function(note) {
-        var relations = [
-            { type1: entityType, id1: entity._id, type2: co.collections.notes.name, id2: note._id, clientId: note.clientId },
-            { type1: co.collections.notes.name, id1: note._id, type2: entityType, id2: entity._id, clientId: note.clientId }
-        ];
-        return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
-    }).then(function() {
-        return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
-    });
+th.createRelationsToNote = async (clientname, datatypename, entityname) => {
+    await Db.insertDynamicObject(clientname, "relations", { name: "relation0", datatype1name: datatypename, name1: entityname, datatype2name: "notes", name2: "client0_note0" });
+    await Db.insertDynamicObject(clientname, "relations", { name: "relation1", datatype1name: "notes", name1: "client0_note0", datatype2name: datatypename, name2: entityname });
 };
 
 th.createRelationsToUser = (entityType, entity) => {
@@ -969,127 +949,69 @@ th.apiTests = {
     },
     delete: {
         defaultNegative: function(api, permission, getId) {
-            it('responds without authentication with 403', function() {
-                return getId().then(function(id) {
-                    return th.del(`/api/${api}/${id.toString()}`).expect(403);
-                });
+            it('responds without authentication with 403', async() => {
+                var id = await getId("client0");
+                await th.del(`/api/${api}/${id}`).expect(403);
             });
-            if (permission) it('responds without write permission with 403', function() {
-                var loginToken;
-                return th.removeWritePermission(th.defaults.user, permission).then(function() {
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    loginToken = token;
-                    return getId();
-                }).then(function(id) {
-                    return th.del(`/api/${api}/${id.toString()}?token=${loginToken}`).expect(403);
-                });
+            if (permission) it('responds without write permission with 403', async() => {
+                var id = await getId("client0");
+                await th.removeWritePermission("client0", "client0_usergroup0", permission);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.del(`/api/${api}/${id}?token=${token}`).expect(403);
             });
             function checkForUser(user) {
-                return function() {
-                    var loginToken;
+                return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
-                        return th.doLoginAndGetToken(user, th.defaults.password);
-                    }).then(function(token) {
-                        loginToken = token;
-                        return getId();
-                    }).then(function(id) {
-                        return th.del(`/api/${api}/${id.toString()}?token=${loginToken}`).expect(403);
-                    });
+                    await th.removeClientModule("client0", moduleName);
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    var id = await getId("client0");
+                    await th.del(`/api/${api}/${id}?token=${token}`).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-            it('responds with 400 when the _id is invalid', function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    return th.del(`/api/${api}/invalidId?token=${token}`).expect(400);
-                });
-            });
-            it('responds with 403 when no object for the the _id exists', function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    return th.del(`/api/${api}/999999999999999999999999?token=${token}`).expect(403);
-                });
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            it('responds with 404 when the _id is invalid', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var id = await getId("client0");
+                await th.del(`/api/${api}/invalidId?token=${token}`).expect(404);
             });
         },
         clientDependentNegative: function(api, getId) {
-            it('responds with 403 when the object to delete does not belong to client of the logged in user', function() {
-                var loginToken;
-                // Login as user from client 0
-                return th.doLoginAndGetToken(th.defaults.otherUser, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    // Make sure, that the object belongs to client 1!
-                    return getId();
-                }).then(function(id) {
-                    return th.del(`/api/${api}/${id.toString()}?token=${loginToken}`).expect(403);
-                });
+            it('responds with 404 when the object to delete does not belong to client of the logged in user', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var id = await getId("client1");
+                await th.del(`/api/${api}/${id}?token=${token}`).expect(404);
             });
         },
-        defaultPositive: function(api, collection, getId, skipRelations, skipDynamicAttributes) {
-            it('deletes the object and return 204', function() {
-                var loginToken, objectId;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return getId();
-                }).then(function(id) {
-                    objectId = id;
-                    return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
-                }).then(function() {
-                    return db.get(collection).findOne(objectId);
-                }).then(function(objectInDatabase) {
-                    assert.ok(!objectInDatabase);
-                    return Promise.resolve();
-                });
+        defaultPositive: function(api, datatypename, getId, skipRelations, skipDynamicAttributes) {
+            it('deletes the object and return 204', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var id = await getId("client0");
+                await th.del(`/api/${api}/${id}?token=${token}`).expect(204);
+                var elementFromDatabase = await Db.getDynamicObject("client0", datatypename, id);
+                assert.ok(!elementFromDatabase);
             });
-            if (!skipRelations) it('All relations, where the element is the source (type1, id1), are also deleted', function() {
-                var loginToken, objectId;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return getId();
-                }).then(function(id) {
-                    objectId = id;
-                    return db.get(co.collections.relations.name).find({type1:collection,id1:objectId});
-                }).then(function(relationsBefore) {
-                    assert.notEqual(relationsBefore.length, 0, 'There are no relations set up to test. Have a look into the testHelpers.prepare... functions.');
-                    return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
-                }).then(function() {
-                    return db.get(co.collections.relations.name).find({type1:collection,id1:objectId});
-                }).then(function(relationsAfter) {
-                    assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
-                    return Promise.resolve();
-                });
+            if (!skipRelations) it('All relations, where the element is the source (type1, id1), are also deleted', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var id = await getId("client0");
+                await th.del(`/api/${api}/${id}?token=${token}`).expect(204);
+                var relations = await Db.getDynamicObjects("client0", "relations", { datatype1name: datatypename, name1: id });
+                assert.strictEqual(relations.length, 0);
             });
-            if (!skipRelations) it('All relations, where the element is the target (type2, id2), are also deleted', function() {
-                var loginToken, objectId;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    loginToken = token;
-                    return getId();
-                }).then(function(id) {
-                    objectId = id;
-                    return db.get(co.collections.relations.name).find({type2:collection,id2:objectId});
-                }).then(function(relationsBefore) {
-                    assert.notEqual(relationsBefore.length, 0, 'There are no relations set up to test. Have a look into the testHelpers.prepare... functions.');
-                    return th.del(`/api/${api}/${objectId.toString()}?token=${loginToken}`).expect(204);
-                }).then(function() {
-                    return db.get(co.collections.relations.name).find({type2:collection,id2:objectId});
-                }).then(function(relationsAfter) {
-                    assert.strictEqual(relationsAfter.length, 0, 'There are still relations left');
-                    return Promise.resolve();
-                });
+            if (!skipRelations) it('All relations, where the element is the target (type2, id2), are also deleted', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var id = await getId("client0");
+                await th.del(`/api/${api}/${id}?token=${token}`).expect(204);
+                var relations = await Db.getDynamicObjects("client0", "relations", { datatype2name: datatypename, name2: id });
+                assert.strictEqual(relations.length, 0);
             });
-            if (!skipDynamicAttributes) it('Deletes all dynamic attribute values for the entity', async function() {
-                var objectId = await getId();
-                // DA's vorbereiten
-                var entity = await db.get(collection).findOne(objectId);
-                assert.ok(entity, 'Entity was not inserted into database');
-                th.dbObjects[collection].push(entity); // Ist in der Regel nicht drin, wird aber von den folgenden Hilfsfunktionen verwendet
-                await th.prepareDynamicAttributes(collection);
-                await th.prepareDynamicAttributeOptions();
-                await th.prepareDynamicAttributeValues(collection);
-                var token = await th.defaults.login();
-                await th.del(`/api/${api}/${objectId.toString()}?token=${token}`).expect(204);
-                var dynamicAttributeValuesAfter = await db.get(co.collections.dynamicattributevalues.name).find({entityId:objectId});
-                assert.strictEqual(dynamicAttributeValuesAfter.length, 0, 'There are still dynamic attribute values left');
+            if (!skipDynamicAttributes) it('Deletes all dynamic attribute values for the entity', async() => {
+                var id = await getId("client0");
+                await th.prepareDynamicAttributes("client0", datatypename);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.del(`/api/${api}/${id}?token=${token}`).expect(204);
+                var dynamicAttributeValuesAfter = await Db.getDynamicObjects("client0", "dynamicattributevalues", { entityname: id });
+                assert.strictEqual(dynamicAttributeValuesAfter.length, 0);
             });
         }
     }

@@ -5,6 +5,8 @@ var constants = require("./constants");
 var fs = require("fs");
 var moduleconfig = require('../config/module-config.json');
 
+var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
+
 var Db = {
 
     PortalDatabaseName: "portal",
@@ -18,7 +20,7 @@ var Db = {
         pg.types.setTypeParser(20, (val) => { return parseInt(val); }); // bigint / int8
         pg.types.setTypeParser(1700, (val) => { return parseFloat(val); }); // numeric
         if (dropDatabase) {
-            var portalDatabases = await Db.queryDirect("postgres", `SELECT datname FROM pg_database WHERE datname like '${localconfig.dbprefix}_%';`);
+            var portalDatabases = await Db.queryDirect("postgres", `SELECT datname FROM pg_database WHERE datname like '${dbprefix}_%';`);
             for (var i = 0; i < portalDatabases.rowCount; i++) {
                 await Db.queryDirect("postgres", `DROP DATABASE ${portalDatabases.rows[i].datname};`);
             }
@@ -33,7 +35,7 @@ var Db = {
     // },
     
     createClient: async(clientName, label) => {
-        var clientDatabaseName = `${localconfig.dbprefix}_${clientName}`;
+        var clientDatabaseName = `${dbprefix}_${clientName}`;
         await Db.queryDirect("postgres", `CREATE DATABASE ${clientDatabaseName};`);
         await Db.query(Db.PortalDatabaseName, `INSERT INTO clients (name, label) VALUES ('${clientName}', '${label}');`);
         // Prepare client's database
@@ -122,10 +124,18 @@ var Db = {
     //     await Db.query(clientName, `INSERT INTO permissions (usergroup, datatype, canwrite) VALUES ('${userGroupName}', '${datatype}', ${canwrite}) ON CONFLICT (usergroup, datatype) DO UPDATE SET canwrite = ${canwrite};`);
     // },
 
-    // deleteDynamicObject: async(clientname, datatype, elementname) => {
-    //     var statement = `DELETE FROM ${datatype} WHERE name='${elementname}';`;
-    //     return Db.query(clientname, statement);
-    // },
+    deleteDynamicObject: async(clientname, datatypename, elementname) => {
+        return Db.query(clientname, `DELETE FROM ${datatypename} WHERE name='${elementname}';`);
+    },
+
+    deleteDynamicObjects: async(clientname, datatypename, filter) => {
+        var filterlist = [];
+        Object.keys(filter).forEach((k) => {
+            var value = filter[k];
+            filterlist.push(`${k}=${typeof(value) === 'string' ? "'" + value + "'" : value}`);
+        });
+        return Db.query(clientname, `DELETE FROM ${datatypename} WHERE ${filterlist.join(" AND ")};`);
+    },
 
     // deletePermission: async(userGroupName, clientName, datatype) => {
     //     await Db.query(clientName, `DELETE FROM permissions WHERE usergroup = '${userGroupName}' AND datatype = '${datatype}';`);
@@ -168,8 +178,17 @@ var Db = {
         return result.rowCount > 0 ? result.rows[0] : undefined;
     },
 
-    getDynamicObjects: async(clientname, datatypename) => {
-        return (await Db.query(clientname, `SELECT * FROM ${datatypename};`)).rows;
+    getDynamicObjects: async(clientname, datatypename, filter) => {
+        var filterstring = "";
+        if (filter) {
+            var filterlist = [];
+            Object.keys(filter).forEach((k) => {
+                var value = filter[k];
+                filterlist.push(`${k}=${typeof(value) === 'string' ? "'" + value + "'" : value}`);
+            });
+            filterstring = " WHERE " + filterlist.join(" AND ");
+        }
+        return (await Db.query(clientname, `SELECT * FROM ${datatypename}${filterstring};`)).rows;
     },
 
     getDynamicObjectsForNames: async(clientname, datatypename, names) => {
@@ -241,7 +260,7 @@ var Db = {
     },
 
     initPortalDatabase: async() => {
-        var portalDatabaseName = `${localconfig.dbprefix}_${Db.PortalDatabaseName}`;
+        var portalDatabaseName = `${dbprefix}_${Db.PortalDatabaseName}`;
         // Create portal database with tables clients and allusers when it does not exist
         if ((await Db.queryDirect("postgres", `SELECT 1 FROM pg_database WHERE datname = '${portalDatabaseName}';`)).rowCount === 0) {
             await Db.queryDirect("postgres", `CREATE DATABASE ${portalDatabaseName};`);
@@ -305,7 +324,7 @@ var Db = {
     // },
         
     query: async(databaseNameWithoutPrefix, query) => {
-        return Db.queryDirect(`${localconfig.dbprefix}_${databaseNameWithoutPrefix}`, query);
+        return Db.queryDirect(`${dbprefix}_${databaseNameWithoutPrefix}`, query);
     },
 
     queryDirect: async(databasename, query) => {

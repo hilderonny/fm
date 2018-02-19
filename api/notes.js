@@ -8,7 +8,6 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var monk = require('monk');
 var co = require('../utils/constants');
@@ -60,15 +59,13 @@ router.put('/:id' , auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), val
    res.send(note);
 });
 
-router.delete('/:id', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes),validateId, validateSameClientId(co.collections.notes.name),function(req,res){
-    var noteId = monk.id(req.params.id);  
-    req.db.remove(co.collections.notes.name, req.params.id).then((result) => {
-        return rh.deleteAllRelationsForEntity(co.collections.notes.name, noteId);
-    }).then(() => {
-        return dah.deleteAllDynamicAttributeValuesForEntity(noteId);
-    }).then(() => {
-        res.sendStatus(204);       
-    });
+router.delete('/:id', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), validateSameClientId(co.collections.notes.name), async(req,res) => {
+    var id = req.params.id;
+    var clientname = req.user.clientname;
+    await Db.deleteDynamicObject(clientname, "notes", id);
+    await rh.deleteAllRelationsForEntity(clientname, co.collections.notes.name, id);
+    await dah.deleteAllDynamicAttributeValuesForEntity(clientname, id);
+    res.sendStatus(204);       
 });
 
 module.exports = router;

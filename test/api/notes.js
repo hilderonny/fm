@@ -8,7 +8,7 @@ var bcryptjs = require('bcryptjs');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 
-describe.only('API notes', () => {
+describe('API notes', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -96,7 +96,7 @@ describe.only('API notes', () => {
 
     });
 
-    describe.only('PUT/:id' , function(){
+    describe('PUT/:id' , function(){
 
         async function createPutTestNote(clientname) {
             var testnote = { name: clientname + "_testnote0", content: "content0" };
@@ -118,16 +118,11 @@ describe.only('API notes', () => {
     });
     
     describe('DELETE/:id', function(){
-        async function getDeleteNoteId() {
-            var user = await th.defaults.getUser();
-            return db.get(co.collections.notes.name).findOne({clientId: user.clientId}).then(function(note) {
-                delete note._id;
-                return db.get(co.collections.notes.name).insert(note);
-            }).then(function(insertedNote) {
-                return th.createRelationsToNote(co.collections.notes.name, insertedNote);
-            }).then(function(insertedNote) {
-                return Promise.resolve(insertedNote._id);
-            });
+        async function getDeleteNoteId(clientname) {
+            var testnote = { name: clientname + "_testnote0", content: "content0" };
+            await Db.insertDynamicObject(clientname, "notes", testnote);
+            await th.createRelationsToNote(clientname, co.collections.notes.name, testnote.name);
+            return testnote.name;
         }
 
         th.apiTests.delete.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, getDeleteNoteId);

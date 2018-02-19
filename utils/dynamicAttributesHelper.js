@@ -1,14 +1,10 @@
 var db = require('../middlewares/db');
 var co = require('../utils/constants');
 var moduleConfig = require('../config/module-config.json');
+var Db = require("../utils/db").Db;
 
-/**
- * Löscht alle DA-Werte für eine Entität
- * Usage: require('../utils/dynamicAttributesHelper').deleteAllDynamicAttributeValuesForEntity(...);
- * @returns Promise
- */
-module.exports.deleteAllDynamicAttributeValuesForEntity = (id) => {
-    return db.get(co.collections.dynamicattributevalues.name).remove({entityId: id});
+module.exports.deleteAllDynamicAttributeValuesForEntity = async(clientname, id) => {
+    await Db.deleteDynamicObjects(clientname, "dynamicattributevalues", { entityname: id });
 };
 
 /**
