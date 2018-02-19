@@ -444,59 +444,6 @@ th.createRelation = (entityType1, nameType1, entityType2, nameType2, insertIntoD
     // });
 };
 
-th.createRelationsToActivity = (entityType, entity) => {
-    // return db.get(co.collections.activities.name).findOne({name:th.defaults.activity}).then(function(activity) {
-    //     var relations = [
-    //         { type1: entityType, id1: entity._id, type2: co.collections.activities.name, id2: activity._id, clientId: activity.clientId },
-    //         { type1: co.collections.activities.name, id1: activity._id, type2: entityType, id2: entity._id, clientId: activity.clientId }
-    //     ];
-    //     return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
-    // }).then(function() {
-    //     return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
-    // });
-};
-
-th.createRelationsToBusinessPartner = (entityType, entity) => {
-    // return db.get(co.collections.businesspartners.name).findOne({name:th.defaults.businessPartner}).then(function(businessPartner) {
-    //     var relations = [
-    //         { type1: entityType, id1: entity._id, type2: co.collections.businesspartners.name, id2: businessPartner._id, clientId: businessPartner.clientId },
-    //         { type1: co.collections.businesspartners.name, id1: businessPartner._id, type2: entityType, id2: entity._id, clientId: businessPartner.clientId }
-    //     ];
-    //     return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
-    // }).then(function() {
-    //     return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
-    // });
-};
-
-th.createRelationsToPerson = (entityType, entity) => {
-    // return db.get(co.collections.persons.name).findOne({lastname:th.defaults.person}).then(function(person) {
-    //     var relations = [
-    //         { type1: entityType, id1: entity._id, type2: co.collections.persons.name, id2: person._id, clientId: person.clientId },
-    //         { type1: co.collections.persons.name, id1: person._id, type2: entityType, id2: entity._id, clientId: person.clientId }
-    //     ];
-    //     return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
-    // }).then(function() {
-    //     return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
-    // });
-};
-
-th.createRelationsToNote = async (clientname, datatypename, entityname) => {
-    await Db.insertDynamicObject(clientname, "relations", { name: "relation0", datatype1name: datatypename, name1: entityname, datatype2name: "notes", name2: "client0_note0" });
-    await Db.insertDynamicObject(clientname, "relations", { name: "relation1", datatype1name: "notes", name1: "client0_note0", datatype2name: datatypename, name2: entityname });
-};
-
-th.createRelationsToUser = (entityType, entity) => {
-    // return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
-    //     var relations = [
-    //         { type1: entityType, id1: entity._id, type2: co.collections.users.name, id2: user._id, clientId: user.clientId },
-    //         { type1: co.collections.users.name, id1: user._id, type2: entityType, id2: entity._id, clientId: user.clientId }
-    //     ];
-    //     return db.get(co.collections.relations.name).bulkWrite(relations.map((relation) => { return {insertOne:{document:relation}} }));
-    // }).then(function() {
-    //     return Promise.resolve(entity); // In den nächsten then-Block weiter reichen
-    // });
-};
-
 th.getModuleForApi = function(api) {
     // Use only the first parts until the slash
     api = api.split('/')[0];

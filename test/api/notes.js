@@ -125,7 +125,6 @@ describe('API notes', () => {
         async function getDeleteNoteId(clientname) {
             var testnote = { name: clientname + "_testnote0", content: "content0" };
             await Db.insertDynamicObject(clientname, "notes", testnote);
-            await th.createRelationsToNote(clientname, co.collections.notes.name, testnote.name);
             return testnote.name;
         }
 
