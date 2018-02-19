@@ -27,8 +27,6 @@ describe('API search', function() {
         await th.prepareClientSettings();
         await th.prepareDocumentFiles();
         await th.prepareDynamicAttributes();
-        await th.prepareDynamicAttributeOptions();
-        await th.prepareDynamicAttributeValues();
         await th.prepareFmObjects();
         await th.prepareMarkers();
         await th.preparePartnerAddresses();

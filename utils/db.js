@@ -15,7 +15,11 @@ var Db = {
     isInitialized: false,
 
     init: async(dropDatabase) => {
-        if (Db.isInitialized) return;
+        if (!dropDatabase && Db.isInitialized) return;
+        Object.keys(Db.pools).forEach((k) => {
+            Db.pools[k].end();
+            delete Db.pools[k];
+        });
         // Define type parsing, (SELECT typname, oid FROM pg_type order by typname)
         pg.types.setTypeParser(20, (val) => { return parseInt(val); }); // bigint / int8
         pg.types.setTypeParser(1700, (val) => { return parseFloat(val); }); // numeric
