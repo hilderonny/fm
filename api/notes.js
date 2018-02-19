@@ -15,6 +15,7 @@ var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
 var Db = require("../utils/db").Db;
+var uuidv4 = require("uuid").v4;
 
 router.get('/forIds', auth(false, false, co.modules.notes), async (req, res) => {
     // Zuerst Berechtigung prüfen
@@ -39,17 +40,14 @@ router.get('/:id', auth(co.permissions.OFFICE_NOTE, 'r', co.modules.notes), vali
     res.send({ _id: note.name, clientId: req.user.clientname, content: note.content });
 });
 
-router.post('/', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), function(req, res) {
+router.post('/', auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), async(req, res) => {
    var note = req.body;
     if (!note || Object.keys(note).length < 1) {
         return res.sendStatus(400);
     }
-    delete note._id; // Ids are generated automatically
-    note.clientId = req.user.clientId;
-    req.db.insert(co.collections.notes.name, note).then((insertedNote) => {
-       return res.send(insertedNote);
-    });
-
+    note.name = uuidv4();
+    await Db.insertDynamicObject(req.user.clientname, "notes", note);
+    res.send({ _id: note.name, clientId: req.user.clientname, content: note.content });
 });
 
 router.put('/:id' , auth(co.permissions.OFFICE_NOTE, 'w', co.modules.notes), validateId, validateSameClientId(co.collections.notes.name), function(req,res){

@@ -90,18 +90,9 @@ describe.only('API notes', () => {
             };
             return testObject;
         }
-        th.apiTests.post.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, createPostTestNote);
 
-        it('responds with correct data with inserted note containing an _id field', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            var newNote = createPostTestNote();
-            var noteFromApi = (await th.post(`/api/${co.apis.notes}?token=${token}`).send(newNote).expect(200)).body;
-            var keyCountFromApi = Object.keys(noteFromApi).length - 2; // _id and clientId is returned additionally
-            var keys = Object.keys(newNote);
-            var keyCountFromDatabase = keys.length; 
-            assert.strictEqual(keyCountFromApi, keyCountFromDatabase);
-            assert.strictEqual(newNote.content, noteFromApi.content);
-        });
+        th.apiTests.post.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, createPostTestNote);
+        th.apiTests.post.defaultPositive(co.apis.notes, co.collections.notes.name, createPostTestNote);
 
     });
 

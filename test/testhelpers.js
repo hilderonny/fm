@@ -870,54 +870,40 @@ th.apiTests = {
                 await th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
             });
             function checkForUser(user) {
-                return function() {
-                    var loginToken;
+                return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    return th.removeClientModule(th.defaults.client, moduleName).then(function() {
-                        return th.doLoginAndGetToken(user, th.defaults.password);
-                    }).then(function(token) {
-                        loginToken = token;
-                        return createTestObject();
-                    }).then(function(testObject) {
-                        return th.post(`/api/${api}?token=${loginToken}`).send(testObject).expect(403);
-                    });
+                    await th.removeClientModule("client0", moduleName);
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    var testObject = createTestObject();
+                    await th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
+            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
+            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
             // Bei portalmanagement muss nix geschickt werden.
-            if(!ignoreSendObjectTest) it('responds with 400 when not sending an object to insert', function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                    return th.post(`/api/${api}?token=${token}`).expect(400);
-                });
+            if(!ignoreSendObjectTest) it('responds with 400 when not sending an object to insert', async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.post(`/api/${api}?token=${token}`).expect(400);
             });
         },
         /**
          * Standardpositiv-Tests zum Prüfen, ob ein gesendetes Objekt auch
          * korrekt in der Datenbank ankommt und ob die Rückgabedaten stimmen.
          */
-        defaultPositive: function(api, collection, createTestObject) {
-            it('responds with the created element containing an _id field', function() {
-                var testObject;
-                return createTestObject().then(function(obj) {
-                    testObject = obj;
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    return th.post(`/api/${api}?token=${token}`).send(testObject).expect(200);
-                }).then(function(response) {
-                    var objectFromApi = response.body;
-                    assert.ok(objectFromApi._id);
-                    Object.keys(testObject).forEach(function(key) {
-                        assert.ok(objectFromApi[key]);
-                        assert.strictEqual(objectFromApi[key].toString(), testObject[key].toString());
-                    });
-                    return db.get(collection).findOne(objectFromApi._id);
-                }).then(function(objectFromDatabase) {
-                    Object.keys(testObject).forEach(function(key) {
-                        assert.ok(objectFromDatabase[key]);
-                        assert.strictEqual(objectFromDatabase[key].toString(), testObject[key].toString());
-                    });
-                    return Promise.resolve();
+        defaultPositive: function(api, datatypename, createTestObject) {
+            it('responds with the created element containing an _id field', async() => {
+                var testObject = createTestObject();
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var objectFromApi = (await th.post(`/api/${api}?token=${token}`).send(testObject).expect(200)).body;
+                assert.ok(objectFromApi._id);
+                Object.keys(testObject).forEach(function(key) {
+                    assert.ok(objectFromApi[key]);
+                    assert.strictEqual(objectFromApi[key].toString(), testObject[key].toString());
+                });
+                var objectFromDatabase = await Db.getDynamicObject("client0", datatypename, objectFromApi._id);
+                Object.keys(testObject).forEach(function(key) {
+                    assert.ok(objectFromDatabase[key]);
+                    assert.strictEqual(objectFromDatabase[key].toString(), testObject[key].toString());
                 });
             });
         }
