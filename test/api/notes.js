@@ -64,7 +64,7 @@ describe.only('API notes', () => {
         });        
     });
 
-    describe.only('GET/forIds', function(){
+    describe('GET/forIds', function(){
 
         async function createTestNotes(clientname) {
             var testNotes = [
@@ -82,33 +82,25 @@ describe.only('API notes', () => {
     
     });
     
-    describe('POST/', function() {
+    describe.only('POST/', function() {
 
         function createPostTestNote() {
             var testObject = {
                 content: 'content'                
             };
-            return Promise.resolve(testObject);
+            return testObject;
         }
         th.apiTests.post.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, createPostTestNote);
 
-        it('responds with correct data with inserted note containing an _id field', function() {
-            var newNote, loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestNote();
-            }).then(function(note) {
-                newNote = note;
-                return th.post(`/api/${co.apis.notes}?token=${loginToken}`).send(newNote).expect(200);
-            }).then(function(response) {
-                var noteFromApi = response.body;
-                var keyCountFromApi = Object.keys(noteFromApi).length - 2; // _id and clientId is returned additionally
-                var keys = Object.keys(newNote);
-                var keyCountFromDatabase = keys.length; 
-                assert.strictEqual(keyCountFromApi, keyCountFromDatabase);
-                assert.strictEqual(newNote.content, noteFromApi.content);
-                return Promise.resolve();
-            });
+        it('responds with correct data with inserted note containing an _id field', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var newNote = createPostTestNote();
+            var noteFromApi = (await th.post(`/api/${co.apis.notes}?token=${token}`).send(newNote).expect(200)).body;
+            var keyCountFromApi = Object.keys(noteFromApi).length - 2; // _id and clientId is returned additionally
+            var keys = Object.keys(newNote);
+            var keyCountFromDatabase = keys.length; 
+            assert.strictEqual(keyCountFromApi, keyCountFromDatabase);
+            assert.strictEqual(newNote.content, noteFromApi.content);
         });
 
     });

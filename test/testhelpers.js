@@ -195,12 +195,8 @@ th.removeReadPermission = async(clientname, usergroupname, permissionkey) => {
 /**
  * Deletes the canWrite flag of a permission of the udsergroup of the user with the given name.
  */
-th.removeWritePermission = (userName, permissionKey) => {
-    return new Promise((resolve, reject) => {
-        return db.get('users').findOne({ name: userName }).then((user) => {
-            return db.get('permissions').findOneAndUpdate({ key: permissionKey, userGroupId: user.userGroupId }, { $set: { canWrite: false} }).then(resolve);
-        });
-    });
+th.removeWritePermission = async(clientname, usergroupname, permissionkey) => {
+    await Db.query(clientname, `UPDATE permissions SET canwrite=false WHERE usergroupname='${usergroupname}' AND key='${permissionkey}';`);
 };
 
 /**
@@ -822,7 +818,6 @@ th.apiTests = {
                 await th.get(`/api/${api}/${testObject.name}`).expect(403);
             });
             it('responds without read permission with 403', async() => {
-                var insertedId;
                 await th.removeReadPermission("client0", "client0_usergroup0", permission);
                 await Db.insertDynamicObject("client0", datatypename, testObject);
                 var token = await th.defaults.login("client0_usergroup0_user0");
@@ -864,21 +859,15 @@ th.apiTests = {
          * Standard-Negativtests, die das Verhalten von falschen Aufrufen prüfen
          */
         defaultNegative: function(api, permission, createTestObject, ignoreSendObjectTest) {
-            it('responds without authentication with 403', function() {
-                return createTestObject().then(function(testObject) {
-                    return th.post(`/api/${api}`).send(testObject).expect(403);
-                });
+            it('responds without authentication with 403', async() => {
+                var testObject = createTestObject();
+                await th.post(`/api/${api}`).send(testObject).expect(403);
             });
-            if (permission) it('responds without write permission with 403', function() {
-                var loginToken;
-                return th.removeWritePermission(th.defaults.user, permission).then(function() {
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-                }).then(function(token) {
-                    loginToken = token;
-                    return createTestObject();
-                }).then(function(testObject) {
-                    return th.post(`/api/${api}?token=${loginToken}`).send(testObject).expect(403);
-                });
+            if (permission) it('responds without write permission with 403', async() => {
+                var testObject = createTestObject();
+                await th.removeWritePermission("client0", "client0_usergroup0", permission);
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
             });
             function checkForUser(user) {
                 return function() {
