@@ -128,8 +128,17 @@ var Db = {
     //     await Db.query(clientName, `INSERT INTO permissions (usergroup, datatype, canwrite) VALUES ('${userGroupName}', '${datatype}', ${canwrite}) ON CONFLICT (usergroup, datatype) DO UPDATE SET canwrite = ${canwrite};`);
     // },
 
-    deleteDynamicObject: async(clientname, datatypename, elementname) => {
-        return Db.query(clientname, `DELETE FROM ${datatypename} WHERE name='${elementname}';`);
+    deleteDynamicObject: async(clientname, datatypename, elementname, filter) => {
+        var filterstring = "";
+        if (filter) {
+            var filterlist = [];
+            Object.keys(filter).forEach((k) => {
+                var value = filter[k];
+                filterlist.push(`${k}=${typeof(value) === 'string' ? "'" + value + "'" : value}`);
+            });
+            filterstring = " AND " + filterlist.join(" AND ");
+        }
+        return Db.query(clientname, `DELETE FROM ${datatypename} WHERE name='${elementname}'${filterstring};`);
     },
 
     deleteDynamicObjects: async(clientname, datatypename, filter) => {
@@ -195,9 +204,18 @@ var Db = {
         return (await Db.query(clientname, `SELECT * FROM ${datatypename}${filterstring};`)).rows;
     },
 
-    getDynamicObjectsForNames: async(clientname, datatypename, names) => {
+    getDynamicObjectsForNames: async(clientname, datatypename, names, filter) => {
         var namestofind = names.map((n) => `'${n}'`).join(",");
-        return (await Db.query(clientname, `SELECT * FROM ${datatypename} WHERE name IN (${namestofind});`)).rows;
+        var filterstring = "";
+        if (filter) {
+            var filterlist = [];
+            Object.keys(filter).forEach((k) => {
+                var value = filter[k];
+                filterlist.push(`${k}=${typeof(value) === 'string' ? "'" + value + "'" : value}`);
+            });
+            filterstring = " AND " + filterlist.join(" AND ");
+        }
+        return (await Db.query(clientname, `SELECT * FROM ${datatypename} WHERE name IN (${namestofind})${filterstring};`)).rows;
     },
 
     // getDynamicObjectsForList: async(clientname, username, datatypename) => {
@@ -303,11 +321,11 @@ var Db = {
             if (!field) throw new Error(`Unknown field '${k}'`);
             var result;
             switch (field.fieldtype) {
-                case constants.fieldtypes.boolean: result = value === undefined ? "null" : value; break;
-                case constants.fieldtypes.datetime: result = value === undefined ? "null" : value; break;
-                case constants.fieldtypes.decimal: result = value === undefined ? "null" : value; break;
-                case constants.fieldtypes.reference: result = value === undefined ? "null" : `'${value}'`; break;
-                case constants.fieldtypes.text: result = value === undefined ? "null" : `'${value}'`; break;
+                case constants.fieldtypes.boolean: result = (value === undefined || value === null) ? "null" : value; break;
+                case constants.fieldtypes.datetime: result = (value === undefined || value === null) ? "null" : value; break;
+                case constants.fieldtypes.decimal: result = (value === undefined || value === null) ? "null" : value; break;
+                case constants.fieldtypes.reference: result = (value === undefined || value === null) ? "null" : `'${value}'`; break;
+                case constants.fieldtypes.text: result = (value === undefined || value === null) ? "null" : `'${value}'`; break;
                 default: throw new Error(`Unknown field type '${field.fieldtype}'`);
             }
             return result;
@@ -344,7 +362,7 @@ var Db = {
         return result;
     },
 
-    updateDynamicObject: async(clientname, datatypename, elementname, element) => {
+    updateDynamicObject: async(clientname, datatypename, elementname, element, filter) => {
         var fields = await Db.getDataTypeFields(clientname, datatypename);
         var fieldMap = {};
         fields.forEach((f) => { fieldMap[f.name] = f; });
@@ -355,16 +373,25 @@ var Db = {
             if (!field) throw new Error(`Unknown field '${k}'`);
             var result;
             switch (field.fieldtype) {
-                case constants.fieldtypes.boolean: result = value === undefined ? "null" : value; break;
-                case constants.fieldtypes.datetime: result = value === undefined ? "null" : value; break;
-                case constants.fieldtypes.decimal: result = value === undefined ? "null" : value; break;
-                case constants.fieldtypes.reference: result = value === undefined ? "null" : `'${value}'`; break;
-                case constants.fieldtypes.text: result = value === undefined ? "null" : `'${value}'`; break;
+                case constants.fieldtypes.boolean: result = (value === undefined || value === null) ? "null" : value; break;
+                case constants.fieldtypes.datetime: result = (value === undefined || value === null) ? "null" : value; break;
+                case constants.fieldtypes.decimal: result = (value === undefined || value === null) ? "null" : value; break;
+                case constants.fieldtypes.reference: result = (value === undefined || value === null) ? "null" : `'${value}'`; break;
+                case constants.fieldtypes.text: result = (value === undefined || value === null) ? "null" : `'${value}'`; break;
                 default: throw new Error(`Unknown field type '${field.fieldtype}'`);
             }
             return `${k}=${result}`;
         });
-        var statement = `UPDATE ${datatypename} SET ${values.join(',')} WHERE name='${elementname}';`;
+        var filterstring = "";
+        if (filter) {
+            var filterlist = [];
+            Object.keys(filter).forEach((k) => {
+                var value = filter[k];
+                filterlist.push(`${k}=${typeof(value) === 'string' ? "'" + value + "'" : value}`);
+            });
+            filterstring = " AND " + filterlist.join(" AND ");
+        }
+        var statement = `UPDATE ${datatypename} SET ${values.join(',')} WHERE name='${elementname}'${filterstring};`;
         return Db.query(clientname, statement);
     }
     

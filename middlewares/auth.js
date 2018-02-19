@@ -13,7 +13,7 @@ var Db = require("../utils/db").Db;
  */
 module.exports = function(permissionKey, readWrite, moduleName) {
     // http://stackoverflow.com/a/12737295
-    return (req, res, next) => {
+    return async(req, res, next) => {
         var user = req.user;
         // Check whether credentials are given
         if (!user || !user.name) {
@@ -23,13 +23,12 @@ module.exports = function(permissionKey, readWrite, moduleName) {
         if(localConfig.startTime > user.tokenTime) {
             return res.sendStatus(205); // Force the client to reload the entire page
         }
-        module.exports.canAccess(user.name, permissionKey, readWrite, moduleName, req.db).then(function(userInDatabase) {
-            if (!userInDatabase) { // User not found
-                return res.sendStatus(403);
-            }
-            req.user = userInDatabase;
-            next();
-        });
+        var userInDatabase = await module.exports.canAccess(user.name, permissionKey, readWrite, moduleName);
+        if (!userInDatabase) { // User not found
+            return res.sendStatus(403);
+        }
+        req.user = userInDatabase;
+        next();
     };
 };
 

@@ -39,6 +39,10 @@ describe('API notes', () => {
         for (var i = 0; i < actualNotes.length; i++) compareNote(actualNotes[i], expectedNotes[i]);
     }
 
+    function mapNotes(notes, clientname) {
+        return notes.map((n) => { return { _id: n.name, clientId: clientname, content: n.content } });
+    }
+
     describe('GET/', function(){
 
         th.apiTests.get.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE); 
@@ -58,9 +62,9 @@ describe('API notes', () => {
 
         it('responds with existing id with all details of the note', async () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var noteFromDatabase = (await Db.getDynamicObject("client0", "notes", "client0_note0"));
+            var noteFromDatabase = [(await Db.getDynamicObject("client0", "notes", "client0_note0"))].map((n) => { return { _id: n.name, clientId: "client0", content: n.content } })[0];
             var noteFromApi = (await th.get(`/api/${co.apis.notes}/client0_note0?token=${token}`).expect(200)).body;
-            compareNote(noteFromApi, { _id: noteFromDatabase.name, clientId: "client0", content: noteFromDatabase.content });
+            compareNote(noteFromApi, noteFromDatabase);
         });        
     });
 
@@ -69,7 +73,7 @@ describe('API notes', () => {
         async function createTestNotes(clientname) {
             var testNotes = [
                 { name: clientname + "_testnote0", content: "content0" },
-                { name: clientname + "_testnote1", content: "content1" }
+                { name: clientname + "_testnote1", content: null }
             ];
             await Db.insertDynamicObject(clientname, "notes", testNotes[0]);
             await Db.insertDynamicObject(clientname, "notes", testNotes[1]);
@@ -81,7 +85,7 @@ describe('API notes', () => {
         th.apiTests.getForIds.defaultPositive(co.apis.notes,  co.collections.notes.name, createTestNotes);
     
     });
-    
+        
     describe('POST/', function() {
 
         function createPostTestNote() {
@@ -92,7 +96,7 @@ describe('API notes', () => {
         }
 
         th.apiTests.post.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, createPostTestNote);
-        th.apiTests.post.defaultPositive(co.apis.notes, co.collections.notes.name, createPostTestNote);
+        th.apiTests.post.defaultPositive(co.apis.notes, co.collections.notes.name, createPostTestNote, mapNotes);
 
     });
 
@@ -107,7 +111,7 @@ describe('API notes', () => {
         th.apiTests.put.defaultNegative(co.apis.notes, co.permissions.OFFICE_NOTE, createPutTestNote);
         th.apiTests.put.clientDependentNegative(co.apis.notes, createPutTestNote);
 
-        it('responds with a correct note with the updated notes and its new properties', async() => {
+        it('responds with a correct note with the updated note and its new properties', async() => {
             var originalnote = await createPutTestNote("client0");
             var noteupdate = { content: 'New content' };
             var token = await th.defaults.login("client0_usergroup0_user0");

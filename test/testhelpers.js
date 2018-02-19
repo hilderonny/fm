@@ -229,37 +229,14 @@ th.preparePortalModules = () => {
     // return th.bulkInsert('portalmodules', portalModules);
 };
 
-th.prepareActivities = () => {
-    // var activities = [];
-    // var now = new Date();
-    // th.dbObjects.users.forEach((user) => {
-    //     now.setHours(now.getHours() - 24);
-    //     activities.push({
-    //         date: now.toISOString(),
-    //         clientId: user.clientId,
-    //         createdByUserId: user._id,
-    //         name: user.name + '_0',
-    //         type: 'Gewährleistung'
-    //     });
-    //     now.setHours(now.getHours() + 25);
-    //     activities.push({
-    //         date: now.toISOString(),
-    //         clientId: user.clientId,
-    //         createdByUserId: user._id,
-    //         isForAllUsers: true, // Für alle benutzer des Mandanten zugänglich
-    //         name: user.name + '_1',
-    //         type: 'Kundenbesuch'
-    //     });
-    //     now.setYear(now.getYear() + 1901);
-    //     activities.push({
-    //         date: now.toISOString(),
-    //         clientId: user.clientId,
-    //         createdByUserId: user._id,
-    //         name: user.name + '_2',
-    //         type: 'Wartung'
-    //     });
-    // });
-    // return th.bulkInsert('activities', activities);
+th.prepareActivities = async() => {
+    await th.cleanTable("activities", false, true);
+    var nowTicks = (new Date()).getTime();
+    await Db.insertDynamicObject("client0", "activities", { name: "client0_activity0", date: nowTicks - 172800000, label: "client0_activity0", task: null, isdone: true, activitytypename: "ACTIVITIES_TYPE_NONE", comment: "comment", createdbyusername: "client0_usergroup0_user0", isforallusers: false });
+    await Db.insertDynamicObject("client0", "activities", { name: "client0_activity1", date: nowTicks - 86400000, label: "client0_activity1", task: null, isdone: false, activitytypename: "ACTIVITIES_TYPE_WARRANTY", comment: "comment", createdbyusername: "client0_usergroup0_user0", isforallusers: false });
+    await Db.insertDynamicObject("client0", "activities", { name: "client0_activity2", date: nowTicks + 86400000, label: "client0_activity2", task: null, isdone: false, activitytypename: "ACTIVITIES_TYPE_CALL_ON_CUSTOMERS", comment: "comment", createdbyusername: "client0_usergroup0_user1", isforallusers: true }); // Für alle Benutzer des Mandanten zugänglich aber von anderem Benutzer
+    await Db.insertDynamicObject("client0", "activities", { name: "client0_activity3", date: nowTicks - 172800000, label: "client0_activity3", task: null, isdone: false, activitytypename: "ACTIVITIES_TYPE_MAINTENANCE", comment: "comment", createdbyusername: "client0_usergroup0_user0", isforallusers: false });
+    await Db.insertDynamicObject("client0", "activities", { name: "client0_activity4", date: nowTicks + 6400000, label: "client0_activity4", task: null, isdone: false, activitytypename: "ACTIVITIES_TYPE_CALL_ON_CUSTOMERS", comment: "comment", createdbyusername: "client0_usergroup0_user1", isforallusers: false }); // Anderer Benutzer aber nicht öffentlich
 };
 
 th.prepareMarkers = () => {
@@ -667,7 +644,7 @@ th.apiTests = {
                     var elementFromApi = elementsFromApi[i];
                     var elementFromDatabase = testobjects[i];
                     Object.keys(elementFromDatabase).forEach(function(key) {
-                        assert.ok(elementFromApi[key] || elementFromApi[key] === null, `Key ${key} not returned by API.`); // Einige Werte können null sein
+                        assert.ok(typeof(elementFromApi[key]) !== "undefined" || elementFromApi[key] === null, `Key ${key} not returned by API.`); // Einige Werte können null sein
                         if (elementFromApi[key] === null) {
                             assert.ok(elementFromDatabase[key] === null);
                         } else {
@@ -758,20 +735,20 @@ th.apiTests = {
          * Standardpositiv-Tests zum Prüfen, ob ein gesendetes Objekt auch
          * korrekt in der Datenbank ankommt und ob die Rückgabedaten stimmen.
          */
-        defaultPositive: function(api, datatypename, createTestObject) {
+        defaultPositive: function(api, datatypename, createTestObject, mapFunction) {
             it('responds with the created element containing an _id field', async() => {
                 var testObject = createTestObject();
                 var token = await th.defaults.login("client0_usergroup0_user0");
                 var objectFromApi = (await th.post(`/api/${api}?token=${token}`).send(testObject).expect(200)).body;
                 assert.ok(objectFromApi._id);
                 Object.keys(testObject).forEach(function(key) {
-                    assert.ok(objectFromApi[key]);
-                    assert.strictEqual(objectFromApi[key].toString(), testObject[key].toString());
+                    assert.ok(typeof(objectFromApi[key]) !== "undefined", `Key ${key} is missing`);
+                    assert.strictEqual(objectFromApi[key], testObject[key], `Key ${key} differs`);
                 });
-                var objectFromDatabase = await Db.getDynamicObject("client0", datatypename, objectFromApi._id);
+                var objectFromDatabase = mapFunction([await Db.getDynamicObject("client0", datatypename, objectFromApi._id)], "client0")[0];
                 Object.keys(testObject).forEach(function(key) {
-                    assert.ok(objectFromDatabase[key]);
-                    assert.strictEqual(objectFromDatabase[key].toString(), testObject[key].toString());
+                    assert.ok(typeof(objectFromDatabase[key]) !== "undefined", `Key ${key} is missing`);
+                    assert.strictEqual(objectFromDatabase[key], testObject[key], `Key ${key} differs`);
                 });
             });
         }
