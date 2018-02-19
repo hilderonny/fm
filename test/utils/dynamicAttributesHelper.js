@@ -37,18 +37,19 @@ describe('UTILS dynamicAttributesHelper', function() {
         };
     }
 
-    beforeEach(async function() {
+    before(async() => {
         await th.cleanDatabase();
         await th.prepareClients();
+    });
+
+    beforeEach(async() => {
         await th.prepareClientModules();
         await th.prepareUserGroups();
         await th.prepareUsers();
+        await th.preparePermissions();
         await th.prepareDynamicAttributes();
-        await th.prepareDynamicAttributeOptions();
-        await th.prepareDynamicAttributeValues();
         await th.preparePredefinedDynamicAttibutesForClient(th.defaults.client);
         prepareModuleConfigForDynamicAttributes();
-        return Promise.resolve();
     });
 
     afterEach(() => {

@@ -11,10 +11,12 @@ var monk = require('monk');
 
 describe('API dynamicattributes', function() {
 
-    // Clear and prepare database with clients, user groups and users
-    beforeEach(async function() {
+    before(async() => {
         await th.cleanDatabase();
         await th.prepareClients();
+    });
+
+    beforeEach(async() => {
         await th.prepareClientModules();
         await th.prepareUserGroups();
         await th.prepareUsers();
@@ -22,10 +24,8 @@ describe('API dynamicattributes', function() {
         await th.prepareFolders();
         await th.prepareDocuments();
         await th.prepareDynamicAttributes();
-        await th.prepareDynamicAttributeOptions();
-        await th.prepareDynamicAttributeValues();
         await th.preparePredefinedDynamicAttibutesForClient(th.defaults.client);
-        return Promise.resolve();
+        await th.prepareRelations();
     });
 
     describe('GET/:id', function() {

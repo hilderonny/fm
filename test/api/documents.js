@@ -21,20 +21,22 @@ var createFileForUpload = (fileName, content) => {
 
 describe('API documents', function(){
 
-    // Clear and prepare database with clients, user groups, users... 
-    beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions)
-            .then(th.prepareActivities)
-            .then(th.prepareFmObjects)
-            .then(th.prepareFolders)
-            .then(th.prepareDocuments)
-            .then(th.prepareDocumentFiles)
-            .then(th.prepareRelations);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareActivities();
+        await th.prepareFmObjects();
+        await th.prepareFolders();
+        await th.prepareDocuments();
+        await th.prepareDocumentFiles();
+        await th.prepareRelations();
     });
 
     // Delete temporary documents

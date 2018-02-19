@@ -9,10 +9,12 @@ var monk = require('monk');
 
 describe('API search', function() {
 
-    // Clear and prepare database with clients, user groups and users
-    beforeEach(async function() {
+    before(async() => {
         await th.cleanDatabase();
         await th.prepareClients();
+    });
+
+    beforeEach(async() => {
         await th.prepareClientModules();
         await th.prepareUserGroups();
         await th.prepareUsers();
@@ -34,7 +36,6 @@ describe('API search', function() {
         await th.preparePortals();
         await th.preparePortalModules();
         await th.prepareRelations();
-        return Promise.resolve();
     });
 
     describe('GET/', function() {

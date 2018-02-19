@@ -38,16 +38,17 @@ describe('API clientmodules', function() {
         };
     }
 
-    // Clear and prepare database with clients, user groups and users
-    beforeEach(async function() {
+    before(async() => {
         await th.cleanDatabase();
         await th.prepareClients();
+    });
+
+    beforeEach(async() => {
         await th.prepareClientModules();
         await th.prepareUserGroups();
         await th.prepareUsers();
         await th.preparePermissions();
         prepareModuleConfigForDynamicAttributes();
-        return Promise.resolve();
     });
 
     afterEach(() => {

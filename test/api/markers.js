@@ -10,16 +10,20 @@ var db = require('../../middlewares/db');
 describe('API markers', function() {
 
     var server = require('../../app');
-    
-    beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)         
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareMarkers);
+
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
     });
+
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareMarkers();
+    });
+
     describe('GET/', function() {
 
         // Positive tests

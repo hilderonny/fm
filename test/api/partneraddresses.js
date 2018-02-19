@@ -9,17 +9,19 @@ var co = require('../../utils/constants');
 
 describe('API partneraddresses', function() {
 
-    // Clear and prepare database with clients, user groups and users
-    beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions)
-            .then(th.prepareBusinessPartners)
-            .then(th.preparePartnerAddresses)
-            .then(th.prepareRelations);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareBusinessPartners();
+        await th.preparePartnerAddresses();
+        await th.prepareRelations();
     });
 
     describe('GET/forBusinessPartner/:id', function() {

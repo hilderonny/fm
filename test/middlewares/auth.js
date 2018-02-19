@@ -3,21 +3,24 @@
  */
 var assert = require('assert');
 var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 
 describe('MIDDLEWARE auth', function() {
 
     var server = require('../../app');
     
-    beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareActivities);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareActivities();
     });
 
     it('reponds with 403 when req.user is not set', function() {

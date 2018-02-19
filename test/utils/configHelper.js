@@ -13,13 +13,16 @@ var moduleConfig = require('../../config/module-config.json');
 
 describe('UTILS configHelper', function() {
         
-    beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
     });
 
     afterEach(() => {

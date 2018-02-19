@@ -9,15 +9,18 @@ var co = require('../../utils/constants');
 
 describe('API activities', function() {
 
-    beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions)
-            .then(th.prepareActivities)
-            .then(th.prepareRelations);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareActivities();
+        await th.prepareRelations();
     });
 
     describe('GET/', function() {

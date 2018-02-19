@@ -3,15 +3,18 @@
  */
 var assert = require('assert');
 var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
+var th = require('../testhelpers');
 
 describe('MIDDLEWARE extracttoken', function() {
 
-    beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
+        await th.prepareUserGroups();
+        await th.prepareUsers();
     });
 
     it('does not fill req.user when there is no token set', function() {
