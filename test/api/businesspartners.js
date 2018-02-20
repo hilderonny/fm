@@ -6,6 +6,7 @@ var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var bcryptjs =  require('bcryptjs');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
 describe('API businesspartners', function() {
 
@@ -24,80 +25,61 @@ describe('API businesspartners', function() {
         await th.prepareRelations();
     });
 
+    function compareBusinessPartner(actual, expected) {
+        assert.ok(typeof(actual._id) !== "undefined");
+        assert.ok(typeof(actual.clientId) !== "undefined");
+        assert.ok(typeof(actual.name) !== "undefined");
+        assert.ok(typeof(actual.industry) !== "undefined");
+        assert.ok(typeof(actual.rolle) !== "undefined");
+        assert.ok(typeof(actual.isJuristic) !== "undefined");
+        assert.strictEqual(actual._id, expected._id);
+        assert.strictEqual(actual.clientId, expected.clientId);
+        assert.strictEqual(actual.name, expected.name);
+        assert.strictEqual(actual.industry, expected.industry);
+        assert.strictEqual(actual.rolle, expected.rolle);
+        assert.strictEqual(actual.isJuristic, expected.isJuristic);
+    }
+
+    function compareBusinessPartners(actual, expected) {
+        assert.strictEqual(actual.length, expected.length);
+        actual.sort((a, b) => { return a._id.localeCompare(b._id); });
+        expected.sort((a, b) => { return a._id.localeCompare(b._id); });
+        for (var i = 0; i < actual.length; i++) compareBusinessPartner(actual[i], expected[i]);
+    }
+
+    function mapBusinessPartners(elements, clientname) {
+        return elements.map((e) => { return { _id: e.name, clientId: clientname, name: e.label, industry: e.industry, rolle: e.rolle, isJuristic: e.isjuristic } });
+    }
+
     describe('GET/', function() {
 
-        th.apiTests.get.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS);
+        th.apiTests.get.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS); 
 
-        it('responds with list of all business partners of the client of the logged in user containing all details', function() {
-            var businessPartners;
-            // We use client 1
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                return th.get(`/api/${co.apis.businesspartners}?token=${token}`).expect(200);
-            }).then(function(response){
-                businessPartners = response.body;
-                assert.strictEqual(businessPartners.length, 2);
-                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
-            }).then((currentUser) => {
-                var currentUserClientId = currentUser.clientId.toString();
-                businessPartners.forEach((businessPartner) => {
-                    ['name', 'clientId', 'industry', 'rolle', 'isJuristic'].forEach((propertyName) => {
-                        assert.ok(typeof(businessPartner[propertyName]) !== 'undefined');
-                    });
-                    // Check clientId for correctness
-                    assert.strictEqual(businessPartner.clientId, currentUserClientId);
-                });
-                return Promise.resolve();
-            });
+        it('responds with list of all business partners of the client of the logged in user containing all details', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var elementsFromDatabase = mapBusinessPartners(await Db.getDynamicObjects("client0", "businesspartners"), "client0");
+            var elementsFromRequest = (await th.get(`/api/${co.apis.businesspartners}?token=${token}`).expect(200)).body;
+            compareBusinessPartners(elementsFromRequest, elementsFromDatabase);
         });
 
     });
 
     describe('GET/forIds', function() {
 
-        function createTestBusinessPartners() {
-            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
-                var clientId = client._id;
-                var testObjects = ['testBusinessPartner1', 'testBusinessPartner2', 'testBusinessPartner3'].map(function(name) {
-                    return {
-                        name: name,
-                        industry: 'Geschäftsbereich',
-                        isJuristic: true,
-                        rolle: 'Lieferent',
-                        clientId: clientId
-                    }
-                });
-                return Promise.resolve(testObjects);
-            });
-        }
-
+        async function createTestBusinessPartners(clientname) {
+            var testElements = [
+                { name: clientname + "_testbusinesspartner0", label: "bp0", industry: "industry0", rolle: "rolle0", isjuristic: false },
+                { name: clientname + "_testbusinesspartner1", label: "bp1", industry: "industry1", rolle: "rolle1", isjuristic: true }
+            ];
+            await Db.insertDynamicObject(clientname, "businesspartners", testElements[0]);
+            await Db.insertDynamicObject(clientname, "businesspartners", testElements[1]);
+            return mapBusinessPartners(testElements, clientname);
+        }  
+        
         th.apiTests.getForIds.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS, co.collections.businesspartners.name, createTestBusinessPartners);
         th.apiTests.getForIds.clientDependentNegative(co.apis.businesspartners, co.collections.businesspartners.name, createTestBusinessPartners);
+        th.apiTests.getForIds.defaultPositive(co.apis.businesspartners, co.collections.businesspartners.name, createTestBusinessPartners);
 
-        it('returns a list of business partners with all details for the given IDs', function() {
-            var testBusinessPartnerIds, insertedBusinessPartners;
-            return createTestBusinessPartners().then(function(objects) {
-                return th.bulkInsert(co.collections.businesspartners.name, objects);
-            }).then(function(objects) {
-                insertedBusinessPartners = objects;
-                testBusinessPartnerIds = objects.map((to) => to._id.toString());
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.businesspartners}/forIds?ids=${testBusinessPartnerIds.join(',')}&token=${token}`).expect(200);
-            }).then(function(response) {
-                var businessPartners = response.body;
-                var idCount = insertedBusinessPartners.length;
-                assert.equal(businessPartners.length, idCount);
-                for (var i = 0; i < idCount; i++) {
-                    assert.strictEqual(businessPartners[i]._id, insertedBusinessPartners[i]._id.toString());
-                    assert.strictEqual(businessPartners[i].name, insertedBusinessPartners[i].name);
-                    assert.strictEqual(businessPartners[i].industry, insertedBusinessPartners[i].industry);
-                    assert.strictEqual(businessPartners[i].rolle, insertedBusinessPartners[i].rolle);
-                    assert.strictEqual(businessPartners[i].isJuristic, insertedBusinessPartners[i].isJuristic);
-                    assert.strictEqual(businessPartners[i].clientId, insertedBusinessPartners[i].clientId.toString());
-                }
-                return Promise.resolve();
-            });
-        });
     });
 
     describe('GET/:id', function() {
@@ -105,22 +87,12 @@ describe('API businesspartners', function() {
         th.apiTests.getId.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS, co.collections.businesspartners.name);
         th.apiTests.getId.clientDependentNegative(co.apis.businesspartners, co.collections.businesspartners.name);
 
-        it('responds with existing id with all details of the business partner', function() {
-            var businessPartnerFromDatabase;
-            return db.get(co.collections.businesspartners.name).findOne({name: '1_0'}).then(function(businessPartner) {
-                businessPartnerFromDatabase = businessPartner;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.businesspartners}/${businessPartnerFromDatabase._id}?token=${token}`).expect(200);
-            }).then(function(response) {
-                var businessPartnerFromRequest = response.body;
-                assert.strictEqual(businessPartnerFromRequest.name, businessPartnerFromDatabase.name);
-                assert.strictEqual(businessPartnerFromRequest.industry, businessPartnerFromDatabase.industry);
-                assert.strictEqual(businessPartnerFromRequest.rolle, businessPartnerFromDatabase.rolle);
-                assert.strictEqual(businessPartnerFromRequest.isJuristic, businessPartnerFromDatabase.isJuristic);
-                assert.strictEqual(businessPartnerFromRequest.clientId, businessPartnerFromDatabase.clientId.toString());
-                return Promise.resolve();
-            });
+        it('responds with existing id with all details of the business partner', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var elementId = "client0_businesspartner0";
+            var elementFromDatabase = mapBusinessPartners([await Db.getDynamicObject("client0", "businesspartners", elementId)], "client0")[0];
+            var elementFromApi = (await th.get(`/api/${co.apis.businesspartners}/${elementId}?token=${token}`).expect(200)).body;
+            compareBusinessPartner(elementFromApi, elementFromDatabase);
         });
         
     });
@@ -128,115 +100,54 @@ describe('API businesspartners', function() {
     describe('POST/', function() {
 
         function createPostTestBusinessPartner() {
-            var testObject = {
-                name: 'newBusinessPartner',
-                industry: 'Geschäftsbereich',
-                isJuristic: true,
-                rolle: 'Lieferent'
-            };
-            return Promise.resolve(testObject);
+            return { name: "bp0", industry: "industry0", rolle: "rolle0", isJuristic: false };
         }
 
         th.apiTests.post.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS, createPostTestBusinessPartner);
-        
-        it('responds with correct data with inserted business partner containing an _id field', function() {
-            var newBusinessPartner, loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestBusinessPartner();
-            }).then(function(businessPartner) {
-                newBusinessPartner = businessPartner;
-                return th.post(`/api/${co.apis.businesspartners}?token=${loginToken}`).send(newBusinessPartner).expect(200);
-            }).then(function(response) {
-                var businessPartnerFromApi = response.body;
-                var keyCountFromApi = Object.keys(businessPartnerFromApi).length - 2; // _id and clientId is returned additionally
-                var keys = Object.keys(newBusinessPartner);
-                var keyCountFromDatabase = keys.length; 
-                assert.strictEqual(keyCountFromApi, keyCountFromDatabase);
-                assert.strictEqual(newBusinessPartner.name, businessPartnerFromApi.name);
-                assert.strictEqual(newBusinessPartner.industry, businessPartnerFromApi.industry);
-                assert.strictEqual(newBusinessPartner.rolle, businessPartnerFromApi.rolle);
-                assert.strictEqual(newBusinessPartner.isJuristic, businessPartnerFromApi.isJuristic);
-                return Promise.resolve();
-            });
-        });
+        th.apiTests.post.defaultPositive(co.apis.businesspartners, co.collections.businesspartners.name, createPostTestBusinessPartner, mapBusinessPartners);
 
     });
 
     describe('PUT/:id', function() {
 
-        function createPutTestBusinessPartner() {
-            return db.get(co.collections.businesspartners.name).findOne({name:th.defaults.businessPartner}).then(function(businessPartner) {
-                var testObject = {
-                    _id: businessPartner._id.toString(),
-                    name: 'newBusinessPartner',
-                    industry: 'newIndustry',
-                    isJuristic: true,
-                    rolle: 'newRole'
-                };
-                return Promise.resolve(testObject);
-            });
+        async function createPutTestBusinessPartner(clientname) {
+            var testelement = { name: clientname + "_testbusinesspartner0", label: "bp0", industry: "industry0", rolle: "rolle0", isjuristic: false };
+            await Db.insertDynamicObject(clientname, "businesspartners", testelement);
+            return mapBusinessPartners([testelement], clientname)[0];
         }
 
         th.apiTests.put.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS, createPutTestBusinessPartner);
         th.apiTests.put.clientDependentNegative(co.apis.businesspartners, createPutTestBusinessPartner);
 
-        it('responds with a correct business partner with the updated business partner and its new properties', function() {
-            var updatedBusinessPartner = {
-                name: 'newBusinessPartnerName',
-                industry: 'newBusinessPartnerIndustry',
-                isJuristic: false,
-                rolle: 'newBusinessPartnerRole'
-            };
-            var businessPartnerFromDatabase;
-            return db.get(co.collections.businesspartners.name).findOne({name: th.defaults.businessPartner}).then(function(user) {
-                businessPartner = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.businesspartners}/${businessPartner._id.toString()}?token=${token}`).send(updatedBusinessPartner).expect(200);
-            }).then(function(response) {
-                var businessPartnerFromApi = response.body;
-                assert.strictEqual(updatedBusinessPartner.name, businessPartnerFromApi.name);
-                assert.strictEqual(updatedBusinessPartner.industry, businessPartnerFromApi.industry);
-                assert.strictEqual(updatedBusinessPartner.rolle, businessPartnerFromApi.rolle);
-                assert.strictEqual(updatedBusinessPartner.isJuristic, businessPartnerFromApi.isJuristic);
-                return Promise.resolve();
-            });
+        it('responds with a correct businesspartner with the updated businesspartner and its new properties', async() => {
+            var originalelement = await createPutTestBusinessPartner("client0");
+            var elementupdate = { industry: "newindustry" };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/${co.apis.businesspartners}/${originalelement._id}?token=${token}`).send(elementupdate).expect(200);
+            var elementFromDatabase = await Db.getDynamicObject("client0", "businesspartners", originalelement._id);
+            assert.strictEqual(elementFromDatabase.industry, elementupdate.industry);
         });
-        
+         
     });
 
     describe('DELETE/:id', function() {
 
-        function getDeleteBusinessPartnerId() {
-            return db.get(co.collections.businesspartners.name).findOne({name:th.defaults.businessPartner}).then(function(businessPartner) {
-                delete businessPartner._id;
-                businessPartner.name = 'newBusinessPartnerToDelete';
-                return db.get(co.collections.businesspartners.name).insert(businessPartner);
-            }).then(function(insertedBusinessPartner) {
-                return th.createRelationsToBusinessPartner(co.collections.businesspartners.name, insertedBusinessPartner);
-            }).then(function(insertedBusinessPartner) {
-                return Promise.resolve(insertedBusinessPartner._id);
-            });
+        async function getDeleteBusinessPartnerId(clientname) {
+            var testelement = { name: clientname + "_testbusinesspartner0", label: "bp0", industry: "industry0", rolle: "rolle0", isjuristic: false };
+            await Db.insertDynamicObject(clientname, "businesspartners", testelement);
+            return testelement.name;
         }
 
         th.apiTests.delete.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS, getDeleteBusinessPartnerId);
         th.apiTests.delete.clientDependentNegative(co.apis.businesspartners, getDeleteBusinessPartnerId);
         th.apiTests.delete.defaultPositive(co.apis.businesspartners, co.collections.businesspartners.name, getDeleteBusinessPartnerId);
 
-        it('also deletes all addresses of the business partner', function() {
-            var businessPartnerId;
-            return db.get(co.collections.businesspartners.name).findOne({name:th.defaults.businessPartner}).then(function(bp) {
-                businessPartnerId = bp._id;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then((token) => {
-                return th.del(`/api/${co.apis.businesspartners}/${businessPartnerId.toString()}?token=${token}`).expect(204);
-            }).then(() => {
-                return db.get(co.collections.partneraddresses.name).find({partnerId:businessPartnerId});
-            }).then((addresses) => {
-                assert.equal(addresses.length, 0);
-                return Promise.resolve();
-            });
+        it('also deletes all addresses of the business partner', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var id = await getDeleteBusinessPartnerId("client0");
+            await th.del(`/api/${co.apis.businesspartners}/${id}?token=${token}`).expect(204);
+            var addresses = await Db.getDynamicObjects("client0", "partneraddresses", { businesspartnername: id });
+            assert.strictEqual(addresses.length, 0);
         });
         
     });

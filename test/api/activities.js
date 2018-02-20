@@ -163,8 +163,8 @@ describe('API activities', () => {
             var activityupdate = { type: 'ACTIVITIES_TYPE_CALL_ON_CUSTOMERS' };
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/${co.apis.activities}/${originalactivity._id}?token=${token}`).send(activityupdate).expect(200);
-            var noteFromDatabase = await Db.getDynamicObject("client0", "activities", originalactivity._id);
-            assert.strictEqual(noteFromDatabase.activitytypename, activityupdate.type);
+            var elementFromDatabase = await Db.getDynamicObject("client0", "activities", originalactivity._id);
+            assert.strictEqual(elementFromDatabase.activitytypename, activityupdate.type);
         });
 
     });
