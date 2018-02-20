@@ -147,9 +147,106 @@ app.controller('ronnyseinsBlocklyCardController', function($scope, $http, $mdDia
            this.setHelpUrl("");
             }
           };
+
+
+
+
+
         
+
+
+          Blockly.JavaScript['api'] = function(block) {
+            var text_apiname = block.getFieldValue('APINAME');
+            var statements_name = Blockly.JavaScript.statementToCode(block, 'NAME');
+            // TODO: Assemble JavaScript into code variable.
+            var code = 'Hier kommt der generierte Kot raus.\n';
+            return code;
+          };
+          
+          Blockly.JavaScript['api_get'] = function(block) {
+            var value_middlewares = Blockly.JavaScript.valueToCode(block, 'MIDDLEWARES', Blockly.JavaScript.ORDER_ATOMIC);
+            var statements_statements = Blockly.JavaScript.statementToCode(block, 'STATEMENTS');
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...;\n';
+            return code;
+          };
+          
+          Blockly.JavaScript['auth'] = function(block) {
+            var dropdown_permission = block.getFieldValue('PERMISSION');
+            var dropdown_readwrite = block.getFieldValue('READWRITE');
+            var dropdown_module = block.getFieldValue('MODULE');
+            var value_auth = Blockly.JavaScript.valueToCode(block, 'AUTH', Blockly.JavaScript.ORDER_ATOMIC);
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...';
+            // TODO: Change ORDER_NONE to the correct strength.
+            return [code, Blockly.JavaScript.ORDER_NONE];
+          };
+          
+          Blockly.JavaScript['get_db'] = function(block) {
+            var dropdown_database = block.getFieldValue('DATABASE');
+            var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...;\n';
+            return code;
+          };
+          
+          Blockly.JavaScript['send_response'] = function(block) {
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...;\n';
+            return code;
+          };
+          
+          Blockly.JavaScript['query_filter'] = function(block) {
+            var dropdown_combination = block.getFieldValue('COMBINATION');
+            var statements_parts = Blockly.JavaScript.statementToCode(block, 'PARTS');
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...';
+            // TODO: Change ORDER_NONE to the correct strength.
+            return [code, Blockly.JavaScript.ORDER_NONE];
+          };
+          
+          Blockly.JavaScript['filter_part_boolean'] = function(block) {
+            var text_field = block.getFieldValue('FIELD');
+            var checkbox_checked = block.getFieldValue('CHECKED') == 'TRUE';
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...;\n';
+            return code;
+          };
+          
+          Blockly.JavaScript['filter_part_text'] = function(block) {
+            var text_field = block.getFieldValue('FIELD');
+            var text_value = block.getFieldValue('VALUE');
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...;\n';
+            return code;
+          };
+          
+          Blockly.JavaScript['filter_part_var'] = function(block) {
+            var text_field = block.getFieldValue('FIELD');
+            var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...;\n';
+            return code;
+          };
+          
+          Blockly.JavaScript['var_req_user_id'] = function(block) {
+            // TODO: Assemble JavaScript into code variable.
+            var code = '...';
+            // TODO: Change ORDER_NONE to the correct strength.
+            return [code, Blockly.JavaScript.ORDER_NONE];
+          };
+
+
+
+
           var workspace = Blockly.inject('blocklydiv', {toolbox: document.getElementById('blocklytoolbox')});
-        var workspaceBlocks = document.getElementById("blocklylibrary"); 
+
+        function myUpdateFunction(event) {
+            var code = Blockly.JavaScript.workspaceToCode(workspace);
+            document.getElementById('blocklycode').value = code;
+          }
+          workspace.addChangeListener(myUpdateFunction);
+
         Blockly.svgResize(workspace);
     }
 
