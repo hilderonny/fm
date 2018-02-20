@@ -1,11 +1,99 @@
 <md-card id="blocklydiv" class="fullwidth" ng-controller="ronnyseinsBlocklyCardController">
     <xml id="blocklytoolbox" style="display: none">
-        <block type="controls_if"></block>
-        <block type="controls_repeat_ext"></block>
-        <block type="logic_compare"></block>
-        <block type="math_number"></block>
-        <block type="math_arithmetic"></block>
-        <block type="text"></block>
-        <block type="text_print"></block>
-    </xml>
+            <category name="Demo">
+                    <block type="api">
+                      <field name="APINAME">activities</field>
+                      <statement name="NAME">
+                        <block type="api_get">
+                          <value name="MIDDLEWARES">
+                            <block type="auth">
+                              <field name="PERMISSION">ACTIVITIES</field>
+                              <field name="READWRITE">R</field>
+                              <field name="MODULE">ACTIVITIES</field>
+                            </block>
+                          </value>
+                          <statement name="STATEMENTS">
+                            <block type="get_db">
+                              <field name="DATABASE">ACTIVITIES</field>
+                              <value name="NAME">
+                                <block type="query_filter">
+                                  <field name="COMBINATION">AND</field>
+                                  <statement name="PARTS">
+                                    <block type="filter_part_var">
+                                      <field name="FIELD">createdByUserId</field>
+                                      <value name="NAME">
+                                        <block type="var_req_user_id"></block>
+                                      </value>
+                                      <next>
+                                        <block type="filter_part_boolean">
+                                          <field name="FIELD">isForAllUsers</field>
+                                          <field name="CHECKED">TRUE</field>
+                                        </block>
+                                      </next>
+                                    </block>
+                                  </statement>
+                                </block>
+                              </value>
+                              <next>
+                                <block type="send_response"></block>
+                              </next>
+                            </block>
+                          </statement>
+                        </block>
+                      </statement>
+                    </block>
+                    <block type="api">
+                      <field name="APINAME">documents</field>
+                      <statement name="NAME">
+                        <block type="api_get">
+                          <value name="MIDDLEWARES">
+                            <block type="auth">
+                              <field name="PERMISSION">DOCUMENTS</field>
+                              <field name="READWRITE">R</field>
+                              <field name="MODULE">DOCUMENTS</field>
+                            </block>
+                          </value>
+                          <statement name="STATEMENTS">
+                            <block type="get_db">
+                              <field name="DATABASE">DOCUMENTS</field>
+                              <next>
+                                <block type="send_response"></block>
+                              </next>
+                            </block>
+                          </statement>
+                        </block>
+                      </statement>
+                    </block>
+                  </category>
+                  <category name="API">
+                    <block type="api">
+                      <field name="APINAME">activities</field>
+                    </block>
+                    <block type="api_get"></block>
+                    <block type="auth">
+                      <field name="PERMISSION">ACTIVITIES</field>
+                      <field name="READWRITE">R</field>
+                      <field name="MODULE">ACTIVITIES</field>
+                    </block>
+                    <block type="get_db">
+                      <field name="DATABASE">ACTIVITIES</field>
+                    </block>
+                    <block type="send_response"></block>
+                    <block type="query_filter">
+                      <field name="COMBINATION">AND</field>
+                    </block>
+                    <block type="filter_part_boolean">
+                      <field name="FIELD"></field>
+                      <field name="CHECKED">TRUE</field>
+                    </block>
+                    <block type="filter_part_text">
+                      <field name="FIELD"></field>
+                      <field name="VALUE"></field>
+                    </block>
+                    <block type="filter_part_var">
+                      <field name="FIELD"></field>
+                    </block>
+                    <block type="var_req_user_id"></block>
+                  </category>
+                    </xml>
 </md-card>
