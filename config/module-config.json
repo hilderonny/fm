@@ -730,22 +730,29 @@
                 "css/icons/office/World Map.svg",
                 "partial/ronnyseins/3DCard.html",
                 "partial/ronnyseins/AugmentedRealityCard.html",
-                "partial/ronnyseins/GoogleMapsCard.html"
+                "partial/ronnyseins/GoogleMapsCard.html",
+                "partial/ronnyseins/BlocklyCard.html"
             ],
             "include" : [
                 "public/js/lib/babylon.js",
                 "public/js/lib/aframe-v0.7.0.min.js",
                 "public/js/lib/aframe-look-at-billboard-component.min.js",
+                "public/js/lib/blockly_compressed.js",
+                "public/js/lib/blocks_compressed.js",
+                "public/js/lib/msg/js/de.js",
                 "public/js/ronnyseins/3DCardController.js",
                 "public/js/ronnyseins/AugmentedRealityCardController.js",
-                "public/js/ronnyseins/GoogleMapsCardController.js"
+                "public/js/ronnyseins/GoogleMapsCardController.js",
+                "public/js/ronnyseins/BlocklyCardController.js"
             ],
+            "languages" : [ "de" ],
             "menu" : [
                 {
                     "title": "TRK_MENU_LAB",
                     "items": [
                         { "mainCard": "ronnyseins/AugmentedRealityCard", "icon": "Virtual Reality", "title": "TRK_MENU_LAB_AUGMENTEDREALITY" },
-                        { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "World Map", "title": "TRK_MENU_LAB_GOOGLEMAPS" }
+                        { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "World Map", "title": "TRK_MENU_LAB_GOOGLEMAPS" },
+                        { "mainCard": "ronnyseins/BlocklyCard", "icon": "icons8-blockly-green", "title": "TRK_MENU_LAB_BLOCKLY" }
                     ]
                 }
             ],
