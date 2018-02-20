@@ -3,8 +3,6 @@
  */
 var assert = require('assert');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
-var bcryptjs =  require('bcryptjs');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 
@@ -26,18 +24,10 @@ describe('API businesspartners', function() {
     });
 
     function compareBusinessPartner(actual, expected) {
-        assert.ok(typeof(actual._id) !== "undefined");
-        assert.ok(typeof(actual.clientId) !== "undefined");
-        assert.ok(typeof(actual.name) !== "undefined");
-        assert.ok(typeof(actual.industry) !== "undefined");
-        assert.ok(typeof(actual.rolle) !== "undefined");
-        assert.ok(typeof(actual.isJuristic) !== "undefined");
-        assert.strictEqual(actual._id, expected._id);
-        assert.strictEqual(actual.clientId, expected.clientId);
-        assert.strictEqual(actual.name, expected.name);
-        assert.strictEqual(actual.industry, expected.industry);
-        assert.strictEqual(actual.rolle, expected.rolle);
-        assert.strictEqual(actual.isJuristic, expected.isJuristic);
+        ["_id", "clientId", "name", "industry", "rolle", "isJuristic"].forEach((f) => {
+            assert.ok(typeof(actual[f]) !== "undefined");
+            assert.strictEqual(actual[f], expected[f]);
+        });
     }
 
     function compareBusinessPartners(actual, expected) {
@@ -144,7 +134,7 @@ describe('API businesspartners', function() {
 
         it('also deletes all addresses of the business partner', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var id = await getDeleteBusinessPartnerId("client0");
+            var id = "client0_businesspartner0";
             await th.del(`/api/${co.apis.businesspartners}/${id}?token=${token}`).expect(204);
             var addresses = await Db.getDynamicObjects("client0", "partneraddresses", { businesspartnername: id });
             assert.strictEqual(addresses.length, 0);

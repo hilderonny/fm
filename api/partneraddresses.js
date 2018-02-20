@@ -14,70 +14,64 @@
 
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
 var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
+var Db = require("../utils/db").Db;
+var uuidv4 = require("uuid").v4;
 
-router.get('/forBusinessPartner/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.businesspartners.name), function(req, res) {
-    req.db.get(co.collections.businesspartners.name).findOne(req.params.id).then((businessPartner) => {
-        //we can be sure that businessPartner exists because validateSameClientId() has already checked this
-        return req.db.get(co.collections.partneraddresses.name).find({partnerId: businessPartner._id});
-    }).then((addresses) => {
-        res.send(addresses);
-    });
+function mapPartnerAddresses(elements, clientname) {
+    return elements.map((e) => { return { _id: e.name, clientId: clientname, addressee: e.addressee, partnerId: e.businesspartnername, street: e.street, postcode: e.postcode, city: e.city, type: e.partneraddresstypename } });
+}
+
+function mapPartnerAddressReverse(element) {
+    return [element].map((e) => { return { name: e._id, addressee: e.addressee, businesspartnername: e.partnerId, street: e.street, postcode: e.postcode, city: e.city, partneraddresstypename: e.type } })[0];
+}
+
+router.get('/forBusinessPartner/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateSameClientId(co.collections.businesspartners.name), async(req, res) => {
+    var addresses = await Db.getDynamicObjects(req.user.clientname, "partneraddresses", { businesspartnername : req.params.id});
+    res.send(mapPartnerAddresses(addresses, req.user.clientname));
 });
 
-router.get('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.partneraddresses.name),(req, res) => {
-    req.db.get(co.collections.partneraddresses.name).findOne(req.params.id).then((address) => {
-        res.send(address);
-    });
+router.get('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'r', co.modules.businesspartners), validateSameClientId(co.collections.partneraddresses.name), async(req, res) => {
+    res.send(mapPartnerAddresses([await Db.getDynamicObject(req.user.clientname, "partneraddresses", req.params.id)], req.user.clientname)[0]);
 });
 
-router.post('/', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), function(req, res) {
+router.post('/', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), async(req, res) => {
     var address = req.body;
-    if (!address || Object.keys(address).length < 1 || !address.partnerId || !validateId.validateId(address.partnerId)) {
+    if (!address || Object.keys(address).length < 1 || !address.partnerId || !(await Db.getDynamicObject(req.user.clientname, "businesspartners", address.partnerId))) {
         return res.sendStatus(400);
     }
-    address.partnerId = monk.id(address.partnerId); // Make it a real id
-    req.db.get(co.collections.businesspartners.name).findOne({_id:address.partnerId,clientId:req.user.clientId}).then((businessPartner) => {
-        if (!businessPartner) {
-            return Promise.reject();
-        }
-        delete address._id; // Ids are generated automatically
-        address.clientId = req.user.clientId; // Make it a real id
-        return req.db.insert(co.collections.partneraddresses.name, address);
-    }).then((insertedAddress) => {
-        res.send(insertedAddress);
-    }, () => {
-        res.sendStatus(400);
-    });
+    address = mapPartnerAddressReverse(address);
+    address.name = uuidv4();
+    await Db.insertDynamicObject(req.user.clientname, "partneraddresses", address);
+    res.send(mapPartnerAddresses([address], req.user.clientname)[0]);
 });
 
-router.put('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), validateId, validateSameClientId(co.collections.partneraddresses.name), function(req, res) {
+router.put('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), validateSameClientId(co.collections.partneraddresses.name), async(req, res) => {
     var address = req.body;
-    if (!address || Object.keys(address).length < 1) {
+    if(!address || Object.keys(address).length < 1) {
         return res.sendStatus(400);
     }
-    delete address._id;
-    delete address.clientId;
-    delete address.partnerId; // Reassignment of addresses to other business partners is currently not supported
-    if (Object.keys(address).length < 1) {
-        return res.sendStatus(400);
-    }
-    req.db.update(co.collections.partneraddresses.name, req.params.id, { $set: address }).then((updatedAddress) => {
-        res.send(updatedAddress);
-    });
+    var elementtoupdate = {};
+    if (typeof(address.addressee) !== "undefined") elementtoupdate.addressee = address.addressee;
+    // partnerId is not changeable
+    if (typeof(address.street) !== "undefined") elementtoupdate.street = address.street;
+    if (typeof(address.postcode) !== "undefined") elementtoupdate.postcode = address.postcode;
+    if (typeof(address.city) !== "undefined") elementtoupdate.city = address.city;
+    if (typeof(address.type) !== "undefined") elementtoupdate.partneraddresstypename = address.type;
+    await Db.updateDynamicObject(req.user.clientname, "partneraddresses", req.params.id, elementtoupdate);
+    res.send(elementtoupdate);
 });
 
-router.delete('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), validateId, validateSameClientId(co.collections.partneraddresses.name), function(req, res) {
-    var id = monk.id(req.params.id);  
-    req.db.remove(co.collections.partneraddresses.name, id).then((result) => {
-        return dah.deleteAllDynamicAttributeValuesForEntity(id);
-    }).then(() => {
-        res.sendStatus(204);
-    });
+router.delete('/:id', auth(co.permissions.CRM_BUSINESSPARTNERS, 'w', co.modules.businesspartners), validateSameClientId(co.collections.partneraddresses.name), async(req, res) => {
+    var id = req.params.id;
+    var clientname = req.user.clientname;
+    await Db.deleteDynamicObject(clientname, "partneraddresses", id);
+    await rh.deleteAllRelationsForEntity(clientname, co.collections.partneraddresses.name, id);
+    await dah.deleteAllDynamicAttributeValuesForEntity(clientname, id);
+    res.sendStatus(204);
 });
 
 module.exports = router;

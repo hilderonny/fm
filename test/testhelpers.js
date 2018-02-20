@@ -149,18 +149,15 @@ th.preparePermissions = async() => {
  */
 th.prepareBusinessPartners = async() => {
     await th.cleanTable("businesspartners", false, true);
-    var nowTicks = (new Date()).getTime();
     await Db.insertDynamicObject("client0", "businesspartners", { name: "client0_businesspartner0", label: "bp0", industry: "industry0", rolle: "rolle0", isjuristic: false });
     await Db.insertDynamicObject("client0", "businesspartners", { name: "client0_businesspartner1", label: "bp1", industry: "industry1", rolle: "rolle1", isjuristic: true });
+    await Db.insertDynamicObject("client1", "businesspartners", { name: "client1_businesspartner0", label: "bp2", industry: "industry2", rolle: "rolle2", isjuristic: true });
 };
 
 th.preparePartnerAddresses = async() => {
-    // var partnerAddresses = [];
-    // th.dbObjects.businesspartners.forEach((businessPartner) => {
-    //     partnerAddresses.push({ addressee: businessPartner.name + '_0', partnerId: businessPartner._id, clientId: businessPartner.clientId, street: 'Street', postcode: '12345', city: 'City', type: 'Primaryaddress' });
-    //     partnerAddresses.push({ addressee: businessPartner.name + '_1', partnerId: businessPartner._id, clientId: businessPartner.clientId, street: 'Another street', postcode: '34567', city: 'Another city', type: 'Postaddress' });
-    // });
-    // return th.bulkInsert(co.collections.partneraddresses.name, partnerAddresses);
+    await th.cleanTable("partneraddresses", false, true);
+    await Db.insertDynamicObject("client0", "partneraddresses", { name: "client0_partneraddress0", addressee: "addressee0", businesspartnername: "client0_businesspartner0", street: "street0", postcode: "postcode0", city: "city0", partneraddresstypename: "Primaryaddress" });
+    await Db.insertDynamicObject("client0", "partneraddresses", { name: "client0_partneraddress1", addressee: "addressee1", businesspartnername: "client0_businesspartner1", street: "street1", postcode: "postcode1", city: "city1", partneraddresstypename: "Postaddress" });
 };
 
 th.preparePersons = async() => {
