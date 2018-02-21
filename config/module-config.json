@@ -124,7 +124,7 @@
                     ]
                 }
             ],
-            "utils": [ "apiHelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper" ],
+            "utils": [ "apiHelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "localConfigHelper" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},

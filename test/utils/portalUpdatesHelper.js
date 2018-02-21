@@ -74,33 +74,7 @@ describe('UTILS portalUpdatesHelper', function() {
         return Promise.resolve();
     }
 
-    it('Do not trigger updates when autoUpdateMode is set to FALSE and instantUpdate is set to FALSE', async function(){
-        //set auroUpdateMode to FALSE
-        lc.autoUpdateMode = false;
-        lc.updateExtractPath = './temp/';
-        saveConfigs();   
-        var updateWasDone = await portalUpdatesHelper.triggerUpdate(false);
-        assert.ok(!updateWasDone);
-        return checkNoExtractedFiles('./temp/', [co.modules.base]);
-    });
 
-    it('Trigger Updates when autoUpdateMode is set to TRUE and instantUpdate is set to FALSE', async function(){
-        lc.autoUpdateMode = true;
-        lc.updateExtractPath = './temp/';
-        saveConfigs();
-        var updateWasDone = await portalUpdatesHelper.triggerUpdate(false);
-        assert.ok(updateWasDone);
-        return checkExtractedFiles('./temp/', [co.modules.base]);
-    });
-
-    it('Trigger Updates when autoUpdateMode is set to FALSE and instantUpdate is set to TRUE', async function(){
-        lc.autoUpdateMode = false;
-        lc.updateExtractPath = './temp/';
-        saveConfigs();
-        var updateWasDone = await portalUpdatesHelper.triggerUpdate(true);
-        assert.ok(updateWasDone);
-        return checkExtractedFiles('./temp/', [co.modules.base]);
-    });
 
     it('Does not perform an update when licenseserver URL is wrong', async function(){
         lc.updateExtractPath = './temp/';
