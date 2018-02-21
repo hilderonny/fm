@@ -348,7 +348,7 @@ th.defaults = {
     /**
      * Standardportal 'p1' aus Datenbank auslesen und per Promise zurück geben
      */
-    getPortal: function() { return db.get(co.collections.portals.name).findOne({name:th.defaults.portal}); },
+    getPortal: () => { return db.get(co.collections.portals.name).findOne({name:th.defaults.portal}); },
     /**
      * Standardbenutzer '1_0_0' aus Datenbank auslesen und per Promise zurück geben
      */
@@ -356,7 +356,7 @@ th.defaults = {
     /**
      * Standardbenutzergruppe '1_0' aus Datenbank auslesen und per Promise zurück geben
      */
-    getUserGroup: function() { return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}); },
+    getUserGroup: () => { return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}); },
     /**
      * Anmeldung mit STandardbenutzer durchführen
      */
@@ -385,7 +385,7 @@ th.createApiTests = (config, onlythis) => {
 
     var describefunction = onlythis ? describe.only : describe;
 
-    describefunction("API " + config.apiname, function() {
+    describefunction("API " + config.apiname, () => {
 
         before(async() => {
             await th.cleanDatabase();
@@ -437,7 +437,40 @@ th.createApiTests = (config, onlythis) => {
             
         });
 
-        describe('GET/:id', function() {
+        if (config.cangetall) describe('GET/', () => {
+
+            th.apiTests.get.defaultNegative(config.apiname, config.permission); 
+    
+            it(`responds with list of all ${config.apiname} of the client of the logged in user containing all details`, async () => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var elementsFromDatabase = mapFields(await Db.getDynamicObjects("client0", config.apiname), "client0");
+                var elementsFromRequest = (await th.get(`/api/${config.apiname}?token=${token}`).expect(200)).body;
+                compareElements(elementsFromRequest, elementsFromDatabase);
+            });
+    
+        });
+
+        if (config.cangetforids) describe('GET/forIds', function() {
+
+            async function createTestElements(clientname) {
+                var testelements = [];
+                for (var i = 0; i < 2; i++) {
+                    var testelement = JSON.parse(JSON.stringify(config.testelement));
+                    testelement.name.replace("client0", clientname);
+                    testelement.name += i;
+                    testelements.push(testelement);
+                    await Db.insertDynamicObject(clientname, config.apiname, testelement);
+                }
+                return mapFields(testelements, clientname);
+            } 
+            
+            th.apiTests.getForIds.defaultNegative(config.apiname, config.permission, config.apiname, createTestElements);
+            th.apiTests.getForIds.clientDependentNegative(config.apiname, config.apiname, createTestElements);
+            th.apiTests.getForIds.defaultPositive(config.apiname, config.apiname, createTestElements);
+    
+        });
+        
+        describe('GET/:id', () => {
 
             th.apiTests.getId.defaultNegative(config.apiname, config.permission, config.apiname);
             th.apiTests.getId.clientDependentNegative(config.apiname, config.apiname);
@@ -452,7 +485,7 @@ th.createApiTests = (config, onlythis) => {
            
         });
 
-        describe('POST/', function() {
+        describe('POST/', () => {
 
             function createPostTestElement() {
                 var testelement = config.mapfields(JSON.parse(JSON.stringify(config.testelement)), "client0");
@@ -491,7 +524,7 @@ th.createApiTests = (config, onlythis) => {
     
         });
 
-        describe('PUT/:id', function() {
+        describe('PUT/:id', () => {
 
             async function createPutTestElement(clientname) {
                 var testelement = JSON.parse(JSON.stringify(config.testelement));
@@ -530,7 +563,7 @@ th.createApiTests = (config, onlythis) => {
             
         });
 
-        describe('DELETE/:id', function() {
+        describe('DELETE/:id', () => {
 
             async function getDeleteElementId(clientname) {
                 return config.elementname.replace("client0", clientname);
@@ -539,7 +572,17 @@ th.createApiTests = (config, onlythis) => {
             th.apiTests.delete.defaultNegative(config.apiname, config.permission, getDeleteElementId);
             th.apiTests.delete.clientDependentNegative(config.apiname, getDeleteElementId);
             th.apiTests.delete.defaultPositive(config.apiname, config.apiname, getDeleteElementId);
-            
+
+            if (config.children) it(`also deletes all ${config.children.datatypename} of the business partner`, async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var id = config.elementname;
+                await th.del(`/api/${co.apis.businesspartners}/${id}?token=${token}`).expect(204);
+                var filter = [];
+                filter[config.children.parentfield] = id;
+                var children = await Db.getDynamicObjects("client0", config.children.datatypename, filter);
+                assert.strictEqual(children.length, 0);
+            });
+                
         });
                 
 
