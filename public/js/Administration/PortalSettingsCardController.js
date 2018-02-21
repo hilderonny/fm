@@ -45,7 +45,9 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
             $scope.settings.updateTimerInterval = defaultIntervalValue; //set an intial default value
             settingsToSend.updateTimerInterval = defaultIntervalValue;
         }
-        $http.put('/api/portalmanagement/', settingsToSend).then(function(response) {
+        $http.put('/api/portalmanagement/', settingsToSend).then(function(){
+            $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
+        }).then(function(response) {
             $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });

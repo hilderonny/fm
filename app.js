@@ -67,9 +67,15 @@ var prepareIncludes = (fs) => {
         if(autoUpdateMode){
             var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
             var updateInterval = lc.updateTimerInterval;
-            timerId = setInterval(portalUpdatesHelper.triggerUpdate, updateInterval);
+            if(updateInterval > 0){
+                console.log(updateInterval);
+                timerId = setInterval(portalUpdatesHelper.triggerUpdate, updateInterval);
+            }else{
+                console.log('invalid time interval');
+            }            
         }else{
            clearInterval(timerId);
+           console.log(timerId);
         }
     };
 

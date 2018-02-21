@@ -16,7 +16,8 @@
                 "--nolazy"
             ],
             "env": {
-                "NODE_ENV": "development"
+                "NODE_ENV": "development",
+                "NODE_TLS_REJECT_UNAUTHORIZED": "0"
             },
             "console": "internalConsole",
             "sourceMaps": true,

@@ -1,5 +1,5 @@
 {
-    "autoUpdateMode": true,
+    "autoUpdateMode": false,
     "dbName": "db",
     "documentspath": "documents/",
     "tokensecret": "schnullibulli",
@@ -13,7 +13,6 @@
     "updateExtractPath": "./temp/",
     "serviceName": "Avorium FM",
     "serviceDescription": "Facility management portal",
-    "licenseserverurl": "https://fm.avorium.de",
-    "licensekey": "6fi1f2o3co71ovq4h8sc70tmrousl8v50i7o677r9ri4ua7lph0ldeq91jcr1gla0cd5map8en66t0hskjs5t5ri3cjuo0l04ntsuc4drbt0isj5qikjqejiqc01at2mqpg0tjcc6snidak9gf5dv4vfn0fo52ei9kptlgppullikgi40cvm7tj5hojbm3dr675h425njmbse",
-    "updateTimerInterval": 12
+    "licenseserverurl": "https://localhost",
+    "licensekey": "8otcmndcs1gma54idig96jqiemkkhgk5q9kn81r4l8lscaul8olrurd4cphn0oicj3bvcqbolbsboqo9l22m8mkdo68mgne4ib1vbj7jln1qhj3agg0l30eb194q7rc0p25qus912cg0872m8o9kglh1c3rotvv572cjr0csvjo4m7r1287joamgvf0m6adb27nfq2b0p8244"
 }
