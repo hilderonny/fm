@@ -45,7 +45,8 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
             $scope.settings.updateTimerInterval = defaultIntervalValue; //set an intial default value
             settingsToSend.updateTimerInterval = defaultIntervalValue;
         }
-        $http.put('/api/portalmanagement/', settingsToSend).then(function(){
+        console.log(settingsToSend);
+        $http.put('/api/portalmanagement/', settingsToSend).then(function(res){
             $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
         }).then(function(response) {
             $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
@@ -57,7 +58,9 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
     $scope.saveTimeInterval = function(){
         var timerIntervalInMS =  $scope.settings.updateTimerInterval; //save time interval in hours
         var settingsToSend = {updateTimerInterval: timerIntervalInMS};
-        $http.put('/api/portalmanagement/', settingsToSend).then(function(response) {
+        $http.put('/api/portalmanagement/', settingsToSend).then(function(){
+            $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
+        }).then(function(response) {
             $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
             });

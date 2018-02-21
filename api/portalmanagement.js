@@ -86,6 +86,7 @@ router.post('/manageAutoUpdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w
     if(portalSettings.autoUpdateMode){
           appJs.manageAutoUpdate(portalSettings.autoUpdateMode);//toggle automatic updates
     }else if(portalSettings.updateTimerInterval){
+        var timeInMS = portalSettings.updateTimerInterval * 3600000 //convert hours to milliseconds
          appJs.changeTimeInterval(portalSettings.updateTimerInterval);
     }
 });

@@ -64,18 +64,26 @@ var prepareIncludes = (fs) => {
     var portalUpdatesHelper = require('./utils/portalUpdatesHelper');
     var fs = require('fs');
     module.exports.manageAutoUpdate = function(autoUpdateMode){
-        if(autoUpdateMode){
+       // console.log(autoUpdateMode);
+        if(autoUpdateMode == true){
             var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
-            var updateInterval = lc.updateTimerInterval;
-            if(updateInterval > 0){
-                console.log(updateInterval);
+            var updateInterval = lc.updateTimerInterval * 3600000; //convert hours to milliseconds
+            if(updateInterval > 10000){
+                //console.log(updateInterval);
+                if(timerId != null){
+                    clearInterval(timerId); //cancel old timer befor setting a new one
+                }
                 timerId = setInterval(portalUpdatesHelper.triggerUpdate, updateInterval);
+                console.log('SET: ',timerId);
+                return;                
             }else{
-                console.log('invalid time interval');
+                console.log('invalid time interval', updateInterval);
+                return;
             }            
-        }else{
+        }else{ //autoUpdateMode == false
            clearInterval(timerId);
-           console.log(timerId);
+           console.log('CLEAR: ',timerId);
+           return;
         }
     };
 
@@ -83,9 +91,13 @@ var prepareIncludes = (fs) => {
         //make changes only if an  auto-update is curremtly turned on 
         var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
         if(lc.autoUpdateMode){
+            console.log('CLEAR on reset: ',timerId);
             clearInterval(timerId); //stop timer with old update interval
             var newTimerIntervalMS = newTimerInterval*3600000;
+            console.log('newTimerInterval: ', newTimerInterval);
+            console.log('BEFORE setNEW: ',timerId);
             timerId = setInterval(portalUpdatesHelper.triggerUpdate, newTimerIntervalMS); //start new update timer
+            console.log('SETNEW: ',timerId);
         }
     };
 
@@ -197,6 +209,7 @@ var init = () => {
         var initalUpdateInterval;
         initalUpdateInterval = localConfig.updateTimerInterval * 3600000; //convert hours to milliseconds
         timerId = setInterval(portalUpdatesHelper.triggerUpdate, initalUpdateInterval);
+        console.log('Intial SET: ', timerId);
     }
 };
 
