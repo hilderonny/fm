@@ -48,7 +48,7 @@ describe('UTILS dynamicAttributesHelper', function() {
         await th.prepareUsers();
         await th.preparePermissions();
         await th.prepareDynamicAttributes();
-        await th.preparePredefinedDynamicAttibutesForClient(th.defaults.client);
+        await th.preparePredefinedDynamicAttibutesForClient("client0");
         prepareModuleConfigForDynamicAttributes();
     });
 

@@ -302,32 +302,6 @@ describe('API relations', function() {
             });
         });  
 
-        it('responds with 200 and creates a relation between two entities of same types for a portal', function() {
-            var preparedRelation;
-            return th.createRelation(co.collections.activities.name, th.defaults.portalActivity, co.collections.activities.name, '_0_0_1').then(function(relation) {
-                preparedRelation = relation;
-                return th.doLoginAndGetToken(th.defaults.portalUser, th.defaults.password);
-            }).then(function(token) {
-                var newRelation = {
-                    type1: preparedRelation.type1,
-                    type2: preparedRelation.type2,
-                    id1: preparedRelation.id1.toString(),
-                    id2: preparedRelation.id2.toString()
-                };
-                return th.post(`/api/${co.apis.relations}?token=${token}`).send(newRelation).expect(200);
-            }).then(function(response) {
-                var relationFromApi = response.body; 
-                db.get(co.collections.relations.name).findOne(relationFromApi._id).then(function(relationAfterCreation){
-                    assert.ok(relationAfterCreation, 'New Relation wasn not created');
-                    assert.strictEqual(relationAfterCreation.type1, relationFromApi.type2,`type1 (${relationFromApi.type2} from API, differs from type2 ${relationAfterCreation.type1} in database)` );
-                    assert.strictEqual(relationAfterCreation.id1.toString(), relationFromApi.id1.toString(),`Id1 (${relationFromApi.id1} from API, differs from id1 ${relationAfterCreation.id1} in database)`  );
-                    assert.strictEqual(relationAfterCreation.id2.toString(), relationFromApi.id2.toString(),`Id2 (${relationFromApi.id2} from API, differs from id2 ${relationAfterCreation.id2} in database)`  );
-                    assert.strictEqual(relationAfterCreation.type2, relationFromApi.type1,`type2 (${relationFromApi.type1} from API, differs from type2 ${relationAfterCreation.type2} in database)` );                    
-                });                
-                return Promise.resolve();
-            });
-        }); 
-
         it('responds with 200 and creates a relation between the same entities (id1=id2 and type1=type2)', function() {
             var preparedRelation;
             return th.createRelation(co.collections.activities.name, th.defaults.activity, co.collections.activities.name, th.defaults.activity).then(function(relation) {

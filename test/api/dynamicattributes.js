@@ -24,7 +24,7 @@ describe('API dynamicattributes', function() {
         await th.prepareFolders();
         await th.prepareDocuments();
         await th.prepareDynamicAttributes();
-        await th.preparePredefinedDynamicAttibutesForClient(th.defaults.client);
+        await th.preparePredefinedDynamicAttibutesForClient("client0");
         await th.prepareRelations();
     });
 

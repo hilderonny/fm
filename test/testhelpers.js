@@ -21,20 +21,6 @@ var th = module.exports;
 
 th.dbObjects = {};
 
-th.bulkInsert = async(collectionName, docs) => {
-    // if (!th.dbObjects[collectionName]) {
-    //     th.dbObjects[collectionName] = [];
-    // }
-    // th.dbObjects[collectionName] = th.dbObjects[collectionName].concat(docs);
-    // var res = await db.get(collectionName).bulkWrite(docs.map((doc) => { return {insertOne:{document:doc}} }));
-    // var docsToReturn = [];
-    // for (var i = 0; i < res.insertedCount; i++) {
-    //     docs[i]._id = res.insertedIds[i];
-    //     docsToReturn.push(docs[i]);
-    // }
-    // return docsToReturn;
-};
-
 // Generate license key with hat, https://github.com/substack/node-hat
 var generateLicenseKey = () => {
     return hat(1024, 32);
@@ -91,20 +77,12 @@ th.prepareClientModules = async() => {
     }
 };
 
-/**
- * Mandanteneinstellungen vorbereiten
- */
 th.prepareClientSettings = () => {
-    // var clientSettings = [];
-    // th.dbObjects.clients.forEach((client) => {
-    //     clientSettings.push({ clientId: client._id, logourl: 'http://' + client.name });
-    // });
-    // return th.bulkInsert('clientsettings', clientSettings);
+    await th.cleanTable("clientsettings", true, false);
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "clientsettings", { name: "clientsetting0", logourl: "logourl0", clientname: "client0" });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "clientsettings", { name: "clientsetting1", logourl: "logourl1", clientname: "client1" });
 };
 
-/**
- * Removes the access to a module from the given client
- */
 th.removeClientModule = async(clientname, modulename) => {
     await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE clientname='${clientname}' AND modulename='${modulename}';`);
 };
@@ -142,11 +120,6 @@ th.preparePermissions = async() => {
     }
 };
 
-/**
- * Creates 3 business partners for each existing client plus for the portal (without client) and returns
- * a promise.
- * The names of the business partners have following schema: [IndexOfClient]_[IndexOfBusinessPartner].
- */
 th.prepareBusinessPartners = async() => {
     await th.cleanTable("businesspartners", false, true);
     await Db.insertDynamicObject("client0", "businesspartners", { name: "client0_businesspartner0", label: "bp0", industry: "industry0", rolle: "rolle0", isjuristic: false });
@@ -187,34 +160,20 @@ th.removeWritePermission = async(clientname, usergroupname, permissionkey) => {
     await Db.query(clientname, `UPDATE permissions SET canwrite=false WHERE usergroupname='${usergroupname}' AND key='${permissionkey}';`);
 };
 
-th.removeAllPermissions = async(userName, permissionKey) => {
-    // return new Promise((resolve, reject) => {
-    //     return db.get('users').findOne({ name: userName }).then((user) => {
-    //         return db.get('permissions').findOneAndUpdate({ key: permissionKey, userGroupId: user.userGroupId }, { $set: { canRead: false, canWrite: false} }).then(resolve);
-    //     });
-    // });
-};
-
 th.preparePortals = async() => {
-    // return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
-    //     var portals = [
-    //         {name: 'p1', isActive: true, licenseKey: 'LicenseKey1', clientId: client._id},
-    //         {name: 'p2', isActive: false, licenseKey: 'LicenseKey2', clientId: null} 
-    //     ];
-    //     return th.bulkInsert('portals', portals);
-    // });
+    await th.cleanTable("portals", true, false);
+    var nowTicks = (new Date()).getTime();
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal0", label: "label", isactive: true, url: "url", comment: "comment", licensekey: "licensekey", version: "1.0", lastnotification:nowTicks - 1000000 });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal1", label: "label", isactive: false, url: "url", comment: "comment", licensekey: "licensekey", version: "1.0", lastnotification:nowTicks - 2000000 });
 };
 
 th.preparePortalModules = async() => {
-    // var portalModules = [];
-    // th.dbObjects.portals.forEach((portal) => {
-    //     portalModules.push({portalId: portal._id, module: co.modules.base});
-    //     portalModules.push({portalId: portal._id, module: co.modules.clients});
-    //     portalModules.push({portalId: portal._id, module: co.modules.documents});
-    //     portalModules.push({portalId: portal._id, module: co.modules.fmobjects});
-    //     portalModules.push({portalId: portal._id, module: co.modules.portalbase});
-    // });
-    // return th.bulkInsert('portalmodules', portalModules);
+    await th.cleanTable("portalmodules", true, false);
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule0", portalname: "portal0", modulename: co.modules.base });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule1", portalname: "portal0", modulename: co.modules.clients });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule2", portalname: "portal0", modulename: co.modules.documents });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule3", portalname: "portal0", modulename: co.modules.fmobjects });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule4", portalname: "portal0", modulename: co.modules.portalbase });
 };
 
 th.prepareActivities = async() => {
@@ -228,63 +187,25 @@ th.prepareActivities = async() => {
 };
 
 th.prepareMarkers = async() => {
-    // var markers = [];
-    // th.dbObjects.users.forEach((user)=>{
-    //     markers.push({
-    //         clientId: user.clientId,
-    //         name: user.name + '_0',
-    //         lat: 'lat',
-    //         lng: 'lng'
-    //     });
-    //     markers.push({
-    //         clientId: user.clientId,
-    //         name: user.name +  '_1',
-    //         lat: 'lat',
-    //         lng: 'lng'        
-    //     });
-    // });
-    // return th.bulkInsert('markers', markers);
+    await th.cleanTable("markers", false, true);
+    await Db.insertDynamicObject("client0", "markers", { name: "client0_marker0", label: "label", lat: "lat", lon: "lon" });
+    await Db.insertDynamicObject("client0", "markers", { name: "client0_marker1", label: "label", lat: "lat", lon: "lon" });
 };
 
 th.prepareFmObjects = async() => {
-    // var fmObjects = [];
-    // th.dbObjects.clients.forEach((client) => {
-    //     fmObjects.push({ name: client.name + '_0', clientId: client._id, type: 'Projekt' });
-    //     fmObjects.push({ name: client.name + '_1', clientId: client._id, type: 'Gebäude' });
-    // });
-    // return th.bulkInsert('fmobjects', fmObjects).then((insertedRootFmObjects) => {
-    //     var level1FmObjects = [];
-    //     insertedRootFmObjects.forEach((rootFmObject) => {
-    //         level1FmObjects.push({ name: rootFmObject.name + '_0', clientId: rootFmObject.clientId, type: 'Etage', parentId: rootFmObject._id });
-    //         level1FmObjects.push({ name: rootFmObject.name + '_1', clientId: rootFmObject.clientId, type: 'Raum', parentId: rootFmObject._id });
-    //     });
-    //     return th.bulkInsert('fmobjects', level1FmObjects);
-    // });
+    await th.cleanTable("fmobjects", false, true);
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject0", parentfmobjectname: null, label: "label0", fmobjecttypename: "FMOBJECTS_TYPE_PROJECT", previewimagedocumentname: null, areacategoryname: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject1", parentfmobjectname: null, label: "label1", fmobjecttypename: "FMOBJECTS_TYPE_PROPERTY", previewimagedocumentname: null, areacategoryname: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject00", parentfmobjectname: "client0_fmobject0", label: "label2", fmobjecttypename: "FMOBJECTS_TYPE_BUILDING", previewimagedocumentname: null, areacategoryname: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject01", parentfmobjectname: "client0_fmobject0", label: "label2", fmobjecttypename: "FMOBJECTS_TYPE_LEVEL", previewimagedocumentname: null, areacategoryname: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
 };
 
 th.prepareFolders = async() => {
-    // var rootFolders = [];
-    // th.dbObjects.clients.forEach((client) => {
-    //     rootFolders.push({ name: client.name + '_0', clientId: client._id });
-    //     rootFolders.push({ name: client.name + '_1', clientId: client._id });
-    // });
-    // // Add folder to portal
-    // rootFolders.push({ name: 'portalfolder', clientId: null });
-    // return th.bulkInsert('folders', rootFolders).then((insertedRootFolders) => {
-    //     var level1Folders = [];
-    //     insertedRootFolders.forEach((insertedRootFolder) => {
-    //         level1Folders.push({ name: insertedRootFolder.name + '_0', clientId: insertedRootFolder.clientId, parentFolderId: insertedRootFolder._id });
-    //         level1Folders.push({ name: insertedRootFolder.name + '_1', clientId: insertedRootFolder.clientId, parentFolderId: insertedRootFolder._id });
-    //     });
-    //     return th.bulkInsert('folders', level1Folders).then((insertedLevel1Folders) => {
-    //         var level2Folders = [];
-    //         insertedLevel1Folders.forEach((insertedLevel1Folder) => {
-    //             level2Folders.push({ name: insertedLevel1Folder.name + '_0', clientId: insertedLevel1Folder.clientId, parentFolderId: insertedLevel1Folder._id });
-    //             level2Folders.push({ name: insertedLevel1Folder.name + '_1', clientId: insertedLevel1Folder.clientId, parentFolderId: insertedLevel1Folder._id });
-    //         });
-    //         return th.bulkInsert('folders', level2Folders);
-    //     });
-    // });
+    await th.cleanTable("folders", false, true);
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder0", parentfoldername: null, label: "label0" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder1", parentfoldername: null, label: "label1" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder00", parentfoldername: "client0_folder0", label: "label2" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder01", parentfoldername: "client0_folder0", label: "label3" });
 };
 
 th.createPath = (pathToCreate) => {
@@ -299,68 +220,58 @@ th.createPath = (pathToCreate) => {
     }
 }
 
-th.prepareDocumentFiles = async() => {
-    // return new Promise((resolve, reject) => {
-    //     th.dbObjects.documents.forEach((document) => {
-    //         var filePath = documentsHelper.getDocumentPath(document._id);
-    //         th.createPath(path.dirname(filePath));
-    //         fs.writeFileSync(filePath, document._id.toString());
-    //     });
-    //     resolve();
-    // });
+th.prepareDocumentFiles = () => {
+    var ids = [ "client0_document0", "client0_document1", "client0_document2" ];
+    for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        var filePath = documentsHelper.getDocumentPath(id);
+        th.createPath(path.dirname(filePath));
+        fs.writeFileSync(filePath, id);
+    }
 };
 
-th.removeDocumentFiles = async() => {
-    // return new Promise((resolve, reject) => {
-    //     db.get('documents').find().then((documents) => {
-    //         documents.forEach((document) => {
-    //             var id = document._id.toString();
-    //             var filePath = documentsHelper.getDocumentPath(document._id);
-    //             if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    //         });
-    //         var documentsBasePath = path.join(
-    //             __dirname, 
-    //             '/../',
-    //             localConfig.documentspath
-    //         );
-    //         db.get('clients').find().then((clients) => {
-    //             clients.forEach((client) => {
-    //                 var clientPath = path.join(documentsBasePath, client._id.toString());
-    //                 if (fs.existsSync(clientPath)) fs.rmdirSync(clientPath);
-    //             });
-    //             resolve();
-    //         });
-    //     });
-    // });
+th.removeDocumentFiles = () => {
+    var ids = [ "client0_document0", "client0_document1", "client0_document2" ];
+    for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        var filePath = documentsHelper.getDocumentPath(id);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
 };
 
 th.prepareDocuments = async() => {
-    // var documents = [];
-    // th.dbObjects.folders.forEach((folder) => {
-    //     documents.push({ name: folder.name + '_0', clientId: folder.clientId, parentFolderId: folder._id });
-    //     documents.push({ name: folder.name + '_1', clientId: folder.clientId, parentFolderId: folder._id });
-    // });
-    // // Documents in root folder
-    // th.dbObjects.clients.forEach((client) => {
-    //     documents.push({ name: client.name + '_0', clientId: client._id });
-    //     documents.push({ name: client.name + '_1', clientId: client._id });
-    // });
-    // return th.bulkInsert(co.collections.documents.name, documents);
+    await th.cleanTable("documents", false, true);
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document0", parentfoldername: null, label: "label", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document1", parentfoldername: "client0_folder0", label: "label", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document2", parentfoldername: "client0_folder00", label: "label", type: "type", isshared: true });
 };
 
 th.prepareRelations = async() => {
+    var map = {
+        activities:"client0_activity0",
+        businesspartners:"client0_businesspartner0",
+        clientsettings:"clientsetting0",
+        clients:"client0",
+        communications:"client0_communication0",
+        documents:"client0_document0",
+        fmobjects:"client0_fmobject0",
+        folders:"client0_folder0",
+        markers:"client0_marker0",
+        notes:"client0_note0",
+        partneraddresses:"client0_partneraddress0",
+        persons:"client0_person0",
+        portalmodules:"portalmodule0",
+        portals:"portal0",
+        usergroups:"client0_usergroup0",
+        users:"client0_usergroup0_user0"
+    }
     await th.cleanTable("relations", false, true);
-};
-
-th.compareApiAndDatabaseObjects = (name, keysFromDatabase, apiObject, databaseObject) => {
-    // var keyCountFromApi = Object.keys(apiObject).length;
-    // var keyCountFromDatabase = keysFromDatabase.length;
-    // assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of ${name} ${apiObject._id} differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-    // keysFromDatabase.forEach((key) => {
-    //     var valueFromDatabase = databaseObject[key].toString(); // Compare on a string basis because the API returns strings only
-    //     var valueFromApi = apiObject[key].toString();
-    //     assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of ${name} ${apiObject._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-    // });
+    var keys = map.keys;
+    for (var i = 0; i < keys.length; i++) {
+        var datatypename = keys[i];
+        var name = map[datatypename];
+        await th.createRelation(datatypename, name, datatypename, name);
+    }
 };
 
 th.prepareDynamicAttributes = async(clientname, datatypename, entityname) => {
@@ -374,62 +285,41 @@ th.prepareDynamicAttributes = async(clientname, datatypename, entityname) => {
     await Db.insertDynamicObject(clientname, "dynamicattributevalues", { name: "da2v", entityname: entityname, dynamicattributename: "da2", value: "m" });
 };
 
-th.preparePredefinedDynamicAttibutesForClient = async (clientName) => {
-    // var clientId = (await th.defaults.getClient())._id;
-    // var dynamicAttributes = [
-    //     // Vordefinierte
-    //     { modelName: co.collections.users.name, name_en: 'Gewicht', clientId: clientId, type: co.dynamicAttributeTypes.text, identifier: 'gewicht' },
-    //     { modelName: co.collections.users.name, name_en: 'Geschlecht', clientId: clientId, type: co.dynamicAttributeTypes.picklist, identifier: 'geschlecht' },
-    //     // Manuelle
-    //     { modelName: co.collections.users.name, name_en: 'Größe', clientId: clientId, type: co.dynamicAttributeTypes.text },
-    //     { modelName: co.collections.users.name, name_en: 'Haarfarbe', clientId: clientId, type: co.dynamicAttributeTypes.picklist }
-    // ];
-    // var daRes = await db.get(co.collections.dynamicattributes.name).bulkWrite(dynamicAttributes.map((e) => { return {insertOne:{document:e}} }));
-    // for (var i = 0; i < daRes.insertedCount; i++) {
-    //     dynamicAttributes[i]._id = daRes.insertedIds[i];
-    // }
-    // var dynamicAttributeOptions = [
-    //     { dynamicAttributeId: dynamicAttributes[1]._id, text_en: 'männlich', clientId: clientId, value: 'männlich' },
-    //     { dynamicAttributeId: dynamicAttributes[1]._id, text_en: 'weiblich', clientId: clientId, value: 'weiblich' },
-    //     { dynamicAttributeId: dynamicAttributes[3]._id, text_en: 'braun', clientId: clientId },
-    //     { dynamicAttributeId: dynamicAttributes[3]._id, text_en: 'blond', clientId: clientId }
-    // ];
-    // dynamicAttributes[1].options = [ dynamicAttributeOptions[0], dynamicAttributeOptions[1] ];
-    // dynamicAttributes[3].options = [ dynamicAttributeOptions[2], dynamicAttributeOptions[3] ];
-    // var daoRes = await db.get(co.collections.dynamicattributeoptions.name).bulkWrite(dynamicAttributeOptions.map((e) => { return {insertOne:{document:e}} }));
-    // for (var i = 0; i < daoRes.insertedCount; i++) {
-    //     dynamicAttributeOptions[i]._id = daoRes.insertedIds[i];
-    // }
-    // var user = await th.defaults.getUser();
-    // var dynamicAttributeValues = [
-    //     { dynamicAttributeId: dynamicAttributes[0]._id, entityId: user._id, clientId: clientId, value: '60' },
-    //     { dynamicAttributeId: dynamicAttributes[1]._id, entityId: user._id, clientId: clientId, value: dynamicAttributeOptions[1]._id },
-    //     { dynamicAttributeId: dynamicAttributes[2]._id, entityId: user._id, clientId: clientId, value: '170' },
-    //     { dynamicAttributeId: dynamicAttributes[3]._id, entityId: user._id, clientId: clientId, value: dynamicAttributeOptions[2]._id }
-    // ]
-    // await db.get(co.collections.dynamicattributevalues.name).bulkWrite(dynamicAttributeValues.map((e) => { return {insertOne:{document:e}} }));
-    // return Promise.resolve(dynamicAttributes);
+th.preparePredefinedDynamicAttibutesForClient = async (clientname) => {
+    var clientId = (await th.defaults.getClient())._id;
+    var dynamicAttributes = [
+        // Vordefinierte
+        { name: clientname + "_da0", modelname: co.collections.users.name, label: 'Gewicht', dynamicattributetypename: co.dynamicAttributeTypes.text, identifier: 'gewicht' },
+        { name: clientname + "_da1", modelname: co.collections.users.name, label: 'Geschlecht', dynamicattributetypename: co.dynamicAttributeTypes.picklist, identifier: 'geschlecht' },
+        // Manuelle
+        { name: clientname + "_da2", modelname: co.collections.users.name, label: 'Größe', dynamicattributetypename: co.dynamicAttributeTypes.text },
+        { name: clientname + "_da3", modelname: co.collections.users.name, label: 'Haarfarbe', dynamicattributetypename: co.dynamicAttributeTypes.picklist }
+    ];
+    for (var i = 0; i < dynamicAttributes.length; i++) {
+        await Db.insertDynamicObject(clientname, "dynamicattributes", dynamicAttributes[i]);
+    }
+    var dynamicAttributeOptions = [
+        { name: clientname + "_dao0", dynamicattributename: clientname + "_da1", label: 'männlich', value: 'm' },
+        { name: clientname + "_dao1", dynamicattributename: clientname + "_da1", label: 'weiblich', value: 'w' },
+        { name: clientname + "_dao2", dynamicattributename: clientname + "_da3", label: 'braun' },
+        { name: clientname + "_dao3", dynamicattributename: clientname + "_da3", label: 'blond' }
+    ];
+    for (var i = 0; i < dynamicAttributeOptions.length; i++) {
+        await Db.insertDynamicObject(clientname, "dynamicattributeoptions", dynamicAttributeOptions[i]);
+    }
+    var dynamicAttributeValues = [
+        { name: clientname + "_dav0", dynamicattributename: clientname + "_da0", entityname: "client0_usergroup0_user0", value: '60' },
+        { name: clientname + "_dav1", dynamicattributename: clientname + "_da1", entityname: "client0_usergroup0_user0", value: clientname + "_dao1" },
+        { name: clientname + "_dav2", dynamicattributename: clientname + "_da2", entityname: "client0_usergroup0_user0", value: '170' },
+        { name: clientname + "_dav3", dynamicattributename: clientname + "_da3", entityname: "client0_usergroup0_user0", value: clientname + "_dao2" }
+    ]
+    for (var i = 0; i < dynamicAttributeValues.length; i++) {
+        await Db.insertDynamicObject(clientname, "dynamicattributevalues", dynamicAttributeValues[i]);
+    }
 };
 
-th.createRelation = async(entityType1, nameType1, entityType2, nameType2, insertIntoDatabase) => {
-    // var entity1;
-    // return db.get(entityType1).findOne({ name: nameType1 }).then((entity) => {
-    //     entity1 = entity;
-    //     return db.get(entityType2).findOne({ name: nameType2 });
-    // }).then((entity2) => {
-    //     var relation = {
-    //         type1: entityType1,
-    //         type2: entityType2,
-    //         id1: entity1._id,
-    //         id2: entity2._id,
-    //         clientId: entity1.clientId
-    //     };
-    //     if (insertIntoDatabase) {
-    //         return db.get(co.collections.relations.name).insert(relation);
-    //     } else {
-    //         return Promise.resolve(relation);
-    //     }
-    // });
+th.createRelation = async(datatype1name, name1, datatype2name, name2) => {
+    await Db.insertDynamicObject("client0", "relations", { name: `client0_${datatype1name}_${name2}_${datatype2name}_${name2}`, datatype1name: datatype1name, name1: name1, datatype2name: datatype2name, name2: name2 });
 };
 
 th.getModuleForApi = (api) => {

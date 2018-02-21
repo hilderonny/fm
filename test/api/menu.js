@@ -8,6 +8,7 @@ var moduleConfig = require('../../config/module-config.json'); // http://stackov
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
 describe('API menu', function() {
 
@@ -74,9 +75,9 @@ describe('API menu', function() {
     });
 
     it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', async () => {
-        await th.removeAllPermissions('_0_0', co.permissions.BIM_AREAS);
-        await th.removeAllPermissions('_0_0', co.permissions.BIM_FMOBJECT);
-        await th.removeAllPermissions('_0_0', co.permissions.ADMINISTRATION_SETTINGS);
+        await th.removeReadPermission(Db.PortalDatabaseName, '_0_0', co.permissions.BIM_AREAS);
+        await th.removeReadPermission(Db.PortalDatabaseName, '_0_0', co.permissions.BIM_FMOBJECT);
+        await th.removeReadPermission(Db.PortalDatabaseName, '_0_0', co.permissions.ADMINISTRATION_SETTINGS);
         var token = await th.doLoginAndGetToken('_0_0', 'test');
         var res = await th.get(`/api/menu?token=${token}`).expect(200);
         var menuStructureFromApi = res.body.menu;
@@ -160,9 +161,9 @@ describe('API menu', function() {
         await th.removeClientModule('0', co.modules.fmobjects);
         await th.removeClientModule('0', co.modules.clients);
         await th.removeClientModule('0', co.modules.businesspartners);
-        await th.removeAllPermissions('0_0_0', co.permissions.OFFICE_DOCUMENT);
-        await th.removeAllPermissions('0_0_0', co.permissions.OFFICE_NOTE);
-        await th.removeAllPermissions('0_0_0', co.permissions.ADMINISTRATION_SETTINGS);
+        await th.removeReadPermission("0", '0_0_0', co.permissions.OFFICE_DOCUMENT);
+        await th.removeReadPermission("0", '0_0_0', co.permissions.OFFICE_NOTE);
+        await th.removeReadPermission("0", '0_0_0', co.permissions.ADMINISTRATION_SETTINGS);
         var token = await th.doLoginAndGetToken('0_0_0', 'test');
         var menuStructureFromApi = (await th.get(`/api/menu?token=${token}`).expect(200)).body.menu;
         var userMenu = [
