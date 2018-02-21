@@ -573,10 +573,10 @@ th.createApiTests = (config, onlythis) => {
             th.apiTests.delete.clientDependentNegative(config.apiname, getDeleteElementId);
             th.apiTests.delete.defaultPositive(config.apiname, config.apiname, getDeleteElementId);
 
-            if (config.children) it(`also deletes all ${config.children.datatypename} of the business partner`, async() => {
+            if (config.children) it(`also deletes all children of the element`, async() => {
                 var token = await th.defaults.login("client0_usergroup0_user0");
                 var id = config.elementname;
-                await th.del(`/api/${co.apis.businesspartners}/${id}?token=${token}`).expect(204);
+                await th.del(`/api/${config.apiname}/${id}?token=${token}`).expect(204);
                 var filter = [];
                 filter[config.children.parentfield] = id;
                 var children = await Db.getDynamicObjects("client0", config.children.datatypename, filter);

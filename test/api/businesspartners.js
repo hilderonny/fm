@@ -32,4 +32,4 @@ th.createApiTests({
         datatypename: "partneraddresses",
         parentfield: "businesspartnername"
     }
-}, true);
+});
