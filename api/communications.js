@@ -11,87 +11,75 @@
 
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
 var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
+var Db = require("../utils/db").Db;
+var uuidv4 = require("uuid").v4;
 
-/**
- List all communications for a given person
- **/
-router.get('/forPerson/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.persons.name), (req, res) => {
-    req.db.get(co.collections.persons.name).findOne(req.params.id).then((person) => {
-        //we can be sure that entity exsists because validateSameClientID() has already checked this
-        return req.db.get(co.collections.communications.name).find({personId:person._id});
-    }).then((allPersoncommunications) => {
-        res.send(allPersoncommunications);
-    });
+function mapCommunications(elements, clientname) {
+    var mediums = {
+        emailwork: "email",
+        emailother: "email",
+        phonework: "phone",
+        phonemobile: "phone",
+        phoneother: "phone"
+    };
+    var types = {
+        emailwork: "work",
+        emailother: "other",
+        phonework: "work",
+        phonemobile: "mobile",
+        phoneother: "other"
+    };
+    return elements.map((e) => { return { _id: e.name, clientId: clientname, contact: e.contact, personId: e.personname, medium: mediums[e.communicationtypename], type: types[e.communicationtypename] } });
+}
+
+function mapCommunicationReverse(element) {
+    return [element].map((e) => { return { name: e._id, contact: e.contact, personname: e.personId, communicationtypename: e.medium + e.type } })[0];
+}
+
+router.get('/forPerson/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateSameClientId(co.collections.persons.name), async(req, res) => {
+    var elements = await Db.getDynamicObjects(req.user.clientname, "communications", { personname : req.params.id});
+    res.send(mapCommunications(elements, req.user.clientname));
 });
 
-/**
- * Get single person communication with given id
- */
-router.get('/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.communications.name), (req, res) => {
-    req.db.get(co.collections.communications.name).findOne(req.params.id).then((communication) => {
-        res.send(communication);
-    });
+router.get('/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateSameClientId(co.collections.communications.name), async(req, res) => {
+    res.send(mapCommunications([await Db.getDynamicObject(req.user.clientname, "communications", req.params.id)], req.user.clientname)[0]);
 });
 
-/**
- * Create a new communication and assign it to a person
- */
-router.post('/', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), function(req, res) {
-    var comm=req.body;
-    if(!comm || Object.keys(comm).lenght<1 || !comm.personId || !validateId.validateId(comm.personId)){
+router.post('/', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), async(req, res) => {
+    var element = req.body;
+    if (!element || Object.keys(element).length < 1 || !element.personId || !(await Db.getDynamicObject(req.user.clientname, "persons", element.personId))) {
         return res.sendStatus(400);
     }
-    comm.personId = monk.id(comm.personId); // Make it a real id
-    // Assigning the Address with a specific patrner 
-    req.db.get(co.collections.persons.name).findOne({_id:comm.personId,clientId:req.user.clientId}).then((person)=>
-    { 
-        if (!person) {
-            return Promise.reject();
-        }
-        delete comm._id; // generating address id automatically 
-        comm.clientId = req.user.clientId; // Make it a real id
-        return req.db.insert(co.collections.communications.name, comm);
-    }).then((insertedComm)=> {
-        res.send(insertedComm);
-    }, () => {
-        res.sendStatus(400);
-    });
+    element = mapCommunicationReverse(element);
+    element.name = uuidv4();
+    await Db.insertDynamicObject(req.user.clientname, "communications", element);
+    res.send(mapCommunications([element], req.user.clientname)[0]);
 });
 
-/**
-Updating person communication.
- **/
-router.put('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), validateId, validateSameClientId(co.collections.communications.name), function(req, res){
-    var communication = req.body;
-    if(!communication || Object.keys(communication).length < 1 ){
+router.put('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), validateSameClientId(co.collections.communications.name), async(req, res) => {
+    var element = req.body;
+    if(!element || Object.keys(element).length < 1) {
         return res.sendStatus(400);
     }
-    delete communication._id;
-    delete communication.personId;
-    delete communication.clientId;
-    if (Object.keys(communication).length < 1) {
-        return res.sendStatus(400);
-    }
-    req.db.update(co.collections.communications.name, req.params.id, { $set: communication }).then((updatedComm) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-        res.send(updatedComm);
-    });
+    var elementtoupdate = {};
+    if (typeof(element.contact) !== "undefined") elementtoupdate.contact = element.contact;
+    // personId is not changeable
+    if (typeof(element.medium) !== "undefined" && typeof(element.type) !== "undefined") elementtoupdate.communicationtypename = element.medium + element.type;
+    await Db.updateDynamicObject(req.user.clientname, "communications", req.params.id, elementtoupdate);
+    res.send(elementtoupdate);
 });
 
-/**
- * Delete persons communication
- */
-router.delete('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), validateId, validateSameClientId(co.collections.communications.name), function(req, res) {
-    var id = monk.id(req.params.id);
-    req.db.remove(co.collections.communications.name, req.params.id).then((result) => {
-        return dah.deleteAllDynamicAttributeValuesForEntity(id);
-    }).then(() => {
-        res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
-    });
+router.delete('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), validateSameClientId(co.collections.communications.name), async(req, res) => {
+    var id = req.params.id;
+    var clientname = req.user.clientname;
+    await Db.deleteDynamicObject(clientname, "communications", id);
+    await rh.deleteAllRelationsForEntity(clientname, co.collections.communications.name, id);
+    await dah.deleteAllDynamicAttributeValuesForEntity(clientname, id);
+    res.sendStatus(204);
 });
 
 module.exports = router;

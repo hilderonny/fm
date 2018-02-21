@@ -123,9 +123,7 @@ describe('API businesspartners', function() {
     describe('DELETE/:id', function() {
 
         async function getDeleteBusinessPartnerId(clientname) {
-            var testelement = { name: clientname + "_testbusinesspartner0", label: "bp0", industry: "industry0", rolle: "rolle0", isjuristic: false };
-            await Db.insertDynamicObject(clientname, "businesspartners", testelement);
-            return testelement.name;
+            return clientname + "_businesspartner0";
         }
 
         th.apiTests.delete.defaultNegative(co.apis.businesspartners, co.permissions.CRM_BUSINESSPARTNERS, getDeleteBusinessPartnerId);

@@ -161,22 +161,16 @@ th.preparePartnerAddresses = async() => {
 };
 
 th.preparePersons = async() => {
-    // var persons = [];
-    // th.dbObjects.clients.forEach((client) => {
-    //     persons.push({ firstname: 'First 0', lastname: client.name + '_0', description: 'Description 0', clientId: client._id });
-    //     persons.push({ firstname: 'First 1', lastname: client.name + '_1', description: 'Description 1', clientId: client._id });
-    // });
-    // persons.push({ firstname: 'First 2', lastname: '_0', description: 'Description 2', clientId: null });
-    // return th.bulkInsert(co.collections.persons.name, persons);
+    await th.cleanTable("persons", false, true);
+    await Db.insertDynamicObject("client0", "persons", { name: "client0_person0", firstname: "fn0", lastname: "ln0", description: "d0" });
+    await Db.insertDynamicObject("client0", "persons", { name: "client0_person1", firstname: "fn1", lastname: "ln1", description: "d1" });
+    await Db.insertDynamicObject("client1", "persons", { name: "client1_person0", firstname: "fn2", lastname: "ln2", description: "d2" });
 };
 
-th.preparePersonCommunications = async() => {
-    // var communications = [];
-    // th.dbObjects.persons.forEach((person) => {
-    //     communications.push({ contact: person.lastname + '_0', personId: person._id, clientId: person.clientId, medium: 'email', type: 'work' });
-    //     communications.push({ contact: person.lastname + '_1', personId: person._id, clientId: person.clientId, medium: 'phone', type: 'other' });
-    // });
-    // return th.bulkInsert(co.collections.communications.name, communications);
+th.prepareCommunications = async() => {
+    await th.cleanTable("communications", false, true);
+    await Db.insertDynamicObject("client0", "communications", { name: "client0_communication0", contact: "c0", personname: "client0_person0", communicationtypename: "emailwork" });
+    await Db.insertDynamicObject("client0", "communications", { name: "client0_communication1", contact: "c1", personname: "client0_person1", communicationtypename: "phonemobile" });
 };
 
 th.prepareNotes = async() => {

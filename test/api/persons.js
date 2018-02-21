@@ -3,9 +3,8 @@
  */
 var assert = require('assert');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
-var bcryptjs =  require('bcryptjs');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
 describe('API persons', function() {
 
@@ -19,83 +18,58 @@ describe('API persons', function() {
         await th.prepareUserGroups();
         await th.prepareUsers();
         await th.preparePermissions();
-        await th.prepareBusinessPartners();
-        await th.preparePartnerAddresses();
+        await th.preparePersons();
+        await th.prepareCommunications();
         await th.prepareRelations();
     });
+
+    function comparePerson(actual, expected) {
+        ["_id", "clientId", "firstname", "lastname", "description"].forEach((f) => {
+            assert.ok(typeof(actual[f]) !== "undefined");
+            assert.strictEqual(actual[f], expected[f]);
+        });
+    }
+
+    function comparePersons(actual, expected) {
+        assert.strictEqual(actual.length, expected.length);
+        actual.sort((a, b) => { return a._id.localeCompare(b._id); });
+        expected.sort((a, b) => { return a._id.localeCompare(b._id); });
+        for (var i = 0; i < actual.length; i++) comparePerson(actual[i], expected[i]);
+    }
+
+    function mapPersons(elements, clientname) {
+        return elements.map((e) => { return { _id: e.name, clientId: clientname, firstname: e.firstname, lastname: e.lastname, description: e.description } });
+    }
 
     describe('GET/', function() {
 
         th.apiTests.get.defaultNegative(co.apis.persons, co.permissions.CRM_PERSONS);
 
-        it('responds with list of all persons of the client of the logged in user containing all details', function() {
-            var persons;
-            // We use client 1
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                return th.get(`/api/${co.apis.persons}?token=${token}`).expect(200);
-            }).then(function(response){
-                persons = response.body;
-                assert.strictEqual(persons.length, 2);
-                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
-            }).then((currentUser) => {
-                var currentUserClientId = currentUser.clientId.toString();
-                persons.forEach((person) => {
-                    ['firstname', 'clientId', 'lastname', 'description'].forEach((propertyName) => {
-                        assert.ok(typeof(person[propertyName]) !== 'undefined');
-                    });
-                    // Check clientId for correctness
-                    assert.strictEqual(person.clientId, currentUserClientId);
-                });
-                return Promise.resolve();
-            });
+        it('responds with list of all persons of the client of the logged in user containing all details', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var elementsFromDatabase = mapPersons(await Db.getDynamicObjects("client0", "persons"), "client0");
+            var elementsFromRequest = (await th.get(`/api/${co.apis.persons}?token=${token}`).expect(200)).body;
+            comparePersons(elementsFromRequest, elementsFromDatabase);
         });
 
     });
 
     describe('GET/forIds', function() {
 
-        function createTestPersons() {
-            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
-                var clientId = client._id;
-                var testObjects = ['testPerson1', 'testPerson2', 'testPerson3'].map(function(name) {
-                    return {
-                        firstname: 'First',
-                        lastname: name,
-                        description: 'Beschreibung',
-                        clientId: clientId
-                    }
-                });
-                return Promise.resolve(testObjects);
-            });
+        async function createTestPersons(clientname) {
+            var testElements = [
+                { name: clientname + "_testperson0", firstname: "fn0", lastname: "ln0", description: "d0" },
+                { name: clientname + "_testperson1", firstname: "fn0", lastname: "ln0", description: "d0" }
+            ];
+            await Db.insertDynamicObject(clientname, "persons", testElements[0]);
+            await Db.insertDynamicObject(clientname, "persons", testElements[1]);
+            return mapPersons(testElements, clientname);
         }
 
         th.apiTests.getForIds.defaultNegative(co.apis.persons, co.permissions.CRM_PERSONS, co.collections.persons.name, createTestPersons);
         th.apiTests.getForIds.clientDependentNegative(co.apis.persons, co.collections.persons.name, createTestPersons);
+        th.apiTests.getForIds.defaultPositive(co.apis.persons, co.collections.persons.name, createTestPersons);
 
-        it('returns a list of persons with all details for the given IDs', function() {
-            var testPersonIds, insertedPersons;
-            return createTestPersons().then(function(objects) {
-                return th.bulkInsert(co.collections.persons.name, objects);
-            }).then(function(objects) {
-                insertedPersons = objects;
-                testPersonIds = objects.map((to) => to._id.toString());
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.persons}/forIds?ids=${testPersonIds.join(',')}&token=${token}`).expect(200);
-            }).then(function(response) {
-                var persons = response.body;
-                var idCount = insertedPersons.length;
-                assert.equal(persons.length, idCount);
-                for (var i = 0; i < idCount; i++) {
-                    assert.strictEqual(persons[i]._id, insertedPersons[i]._id.toString());
-                    assert.strictEqual(persons[i].firstname, insertedPersons[i].firstname);
-                    assert.strictEqual(persons[i].lastname, insertedPersons[i].lastname);
-                    assert.strictEqual(persons[i].description, insertedPersons[i].description);
-                    assert.strictEqual(persons[i].clientId, insertedPersons[i].clientId.toString());
-                }
-                return Promise.resolve();
-            });
-        });
     });
 
     describe('GET/:id', function() {
@@ -103,22 +77,12 @@ describe('API persons', function() {
         th.apiTests.getId.defaultNegative(co.apis.persons, co.permissions.CRM_PERSONS, co.collections.persons.name);
         th.apiTests.getId.clientDependentNegative(co.apis.persons, co.collections.persons.name);
 
-        it('responds with existing id with all details of the person', function() {
-            var personFromDatabase;
-            return db.get(co.collections.persons.name).findOne({lastname: '1_0'}).then(function(person) {
-                personFromDatabase = person;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.persons}/${personFromDatabase._id}?token=${token}`).expect(200);
-            }).then(function(response) {
-                var personFromApi = response.body;
-                assert.strictEqual(personFromApi.name, personFromDatabase.name);
-                assert.strictEqual(personFromApi.firstname, personFromDatabase.firstname);
-                assert.strictEqual(personFromApi.lastname, personFromDatabase.lastname);
-                assert.strictEqual(personFromApi.description, personFromDatabase.description);
-                assert.strictEqual(personFromApi.clientId, personFromDatabase.clientId.toString());
-                return Promise.resolve();
-            });
+        it('responds with existing id with all details of the person', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var elementId = "client0_person0";
+            var elementFromDatabase = mapPersons([await Db.getDynamicObject("client0", "persons", elementId)], "client0")[0];
+            var elementFromApi = (await th.get(`/api/${co.apis.persons}/${elementId}?token=${token}`).expect(200)).body;
+            comparePerson(elementFromApi, elementFromDatabase);
         });
         
     });
@@ -126,110 +90,52 @@ describe('API persons', function() {
     describe('POST/', function() {
 
         function createPostTestPerson() {
-            var testObject = {
-                firstname: 'New First',
-                lastname: 'New Last',
-                description: 'Beschreibung'
-            };
-            return Promise.resolve(testObject);
+            return { firstname: "fn", lastname: "ln", description: "d" };
         }
 
         th.apiTests.post.defaultNegative(co.apis.persons, co.permissions.CRM_PERSONS, createPostTestPerson);
-        
-        it('responds with correct data with inserted person containing an _id field', function() {
-            var newPerson, loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestPerson();
-            }).then(function(person) {
-                newPerson = person;
-                return th.post(`/api/${co.apis.persons}?token=${loginToken}`).send(newPerson).expect(200);
-            }).then(function(response) {
-                var personFromApi = response.body;
-                var keyCountFromApi = Object.keys(personFromApi).length - 2; // _id and clientId is returned additionally
-                var keys = Object.keys(newPerson);
-                var keyCountFromDatabase = keys.length; 
-                assert.strictEqual(keyCountFromApi, keyCountFromDatabase);
-                assert.strictEqual(newPerson.firstname, personFromApi.firstname);
-                assert.strictEqual(newPerson.lastname, personFromApi.lastname);
-                assert.strictEqual(newPerson.description, personFromApi.description);
-                return Promise.resolve();
-            });
-        });
+        th.apiTests.post.defaultPositive(co.apis.persons, co.collections.persons.name, createPostTestPerson, mapPersons);
 
     });
 
     describe('PUT/:id', function() {
 
-        function createPutTestPerson() {
-            return db.get(co.collections.persons.name).findOne({lastname:th.defaults.person}).then(function(person) {
-                var testObject = {
-                    _id: person._id.toString(),
-                    firstname: 'New First',
-                    lastname: 'New Last',
-                    description: 'Beschreibung'
-                };
-                return Promise.resolve(testObject);
-            });
+        async function createPutTestPerson(clientname) {
+            var testelement = { name: clientname + "_testperson0", firstname: "fn", lastname: "ln", description: "d" };
+            await Db.insertDynamicObject(clientname, "persons", testelement);
+            return mapPersons([testelement], clientname)[0];
         }
 
         th.apiTests.put.defaultNegative(co.apis.persons, co.permissions.CRM_PERSONS, createPutTestPerson);
         th.apiTests.put.clientDependentNegative(co.apis.persons, createPutTestPerson);
 
-        it('responds with a correct person with the updated person and its new properties', function() {
-            var updatedPerson = {
-                firstname: 'Updated First',
-                lastname: 'Updated Last',
-                description: 'Updated Beschreibung'
-            };
-            var personFromDatabase;
-            return db.get(co.collections.persons.name).findOne({lastname: th.defaults.person}).then(function(user) {
-                person = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.persons}/${person._id.toString()}?token=${token}`).send(updatedPerson).expect(200);
-            }).then(function(response) {
-                var personFromApi = response.body;
-                assert.strictEqual(updatedPerson.firstname, personFromApi.firstname);
-                assert.strictEqual(updatedPerson.lastname, personFromApi.lastname);
-                assert.strictEqual(updatedPerson.description, personFromApi.description);
-                return Promise.resolve();
-            });
+        it('responds with a correct person with the updated person and its new properties', async() => {
+            var originalelement = await createPutTestPerson("client0");
+            var elementupdate = { firstname: "newfirstname" };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/${co.apis.persons}/${originalelement._id}?token=${token}`).send(elementupdate).expect(200);
+            var elementFromDatabase = await Db.getDynamicObject("client0", "persons", originalelement._id);
+            assert.strictEqual(elementFromDatabase.firstname, elementupdate.firstname);
         });
         
     });
 
     describe('DELETE/:id', function() {
 
-        function getDeletePersonId() {
-            return db.get(co.collections.persons.name).findOne({lastname:th.defaults.person}).then(function(person) {
-                delete person._id;
-                person.lastname = 'person to delete';
-                return db.get(co.collections.persons.name).insert(person);
-            }).then(function(insertedPerson) {
-                return th.createRelationsToPerson(co.collections.persons.name, insertedPerson);
-            }).then(function(insertedPerson) {
-                return Promise.resolve(insertedPerson._id);
-            });
+        async function getDeletePersonId(clientname) {
+            return clientname + "_person0";
         }
 
         th.apiTests.delete.defaultNegative(co.apis.persons, co.permissions.CRM_PERSONS, getDeletePersonId);
         th.apiTests.delete.clientDependentNegative(co.apis.persons, getDeletePersonId);
         th.apiTests.delete.defaultPositive(co.apis.persons, co.collections.persons.name, getDeletePersonId);
 
-        it('also deletes all communications of the person', function() {
-            var personId;
-            return db.get(co.collections.persons.name).findOne({lastname:th.defaults.person}).then(function(bp) {
-                personId = bp._id;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then((token) => {
-                return th.del(`/api/${co.apis.persons}/${personId.toString()}?token=${token}`).expect(204);
-            }).then(() => {
-                return db.get(co.collections.communications.name).find({personId:personId});
-            }).then((communications) => {
-                assert.equal(communications.length, 0);
-                return Promise.resolve();
-            });
+        it('also deletes all communications of the person', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var id = "client0_person0";
+            await th.del(`/api/${co.apis.persons}/${id}?token=${token}`).expect(204);
+            var communications = await Db.getDynamicObjects("client0", "communications", { personname: id });
+            assert.strictEqual(communications.length, 0);
         });
         
     });

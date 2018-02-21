@@ -7,104 +7,88 @@
  */
 var router = require('express').Router(); //Express Router to handle all of our API routes
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
-var async = require('async');
-var bcryptjs = require('bcryptjs');
 var co = require('../utils/constants');
+var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
+var Db = require("../utils/db").Db;
+var uuidv4 = require("uuid").v4;
 
-router.get('/forIds', auth(false, false, co.modules.businesspartners), (req, res) => {
+function mapPersons(elements, clientname) {
+    return elements.map((e) => { return { _id: e.name, clientId: clientname, firstname: e.firstname, lastname: e.lastname, description: e.description } });
+}
+
+function mapPersonReverse(element) {
+    return [element].map((e) => { return { name: e._id, firstname: e.firstname, lastname: e.lastname, description: e.description } })[0];
+}
+
+router.get('/forIds', auth(false, false, co.modules.businesspartners), async(req, res) => {
     // Zuerst Berechtigung prüfen
-    auth.canAccess(req.user._id, co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners, req.db).then(function(accessAllowed) {
-        if (!accessAllowed) {
-            return res.send([]);
-        }
-        if (!req.query.ids) {
-            return res.send([]);
-        }
-        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
-        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
-        var userId = req.user._id;
-        req.db.get(co.collections.persons.name).find({
-            _id: { $in: ids },
-            clientId: clientId,
-        }).then((persons) => {
-            res.send(persons);
-        });
-    });
+    var accessAllowed = await auth.canAccess(req.user.name, co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners);
+    if (!accessAllowed) {
+        return res.send([]);
+    }
+    if (!req.query.ids) {
+        return res.send([]);
+    }
+    res.send(mapPersons(await Db.getDynamicObjectsForNames(req.user.clientname, "persons", req.query.ids.split(',')), req.user.clientname));
 });
 
 /**
  * List of  all persons
  */
-router.get('/', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners) , (req, res) =>{
-    var clientId = req.user.clientId;
-     req.db.get(co.collections.persons.name).find({clientId: clientId}).then((persons)=> {
-        return res.send(persons);
-    })  ;
+router.get('/', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), async(req, res) =>{
+    res.send(mapPersons(await Db.getDynamicObjects(req.user.clientname, "persons"), req.user.clientname));
 });
-
 
 /**
  * Get single person with given id
 */
-router.get('/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateId, validateSameClientId(co.collections.persons.name),(req, res) => {
-    req.db.get(co.collections.persons.name).findOne(req.params.id, req.query.fields).then((person) => {
-        res.send(person);
-    });
-}); 
-
+router.get('/:id', auth(co.permissions.CRM_PERSONS, 'r', co.modules.businesspartners), validateSameClientId(co.collections.persons.name), async(req, res) => {
+    res.send(mapPersons([await Db.getDynamicObject(req.user.clientname, "persons", req.params.id)], req.user.clientname)[0]);
+});
 
 /**
- * creating business person details
+ * creating person details
  */
-router.post('/', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), function(req, res){
-    var person = req.body;
-    if (!person || Object.keys(person).length < 1) {
+router.post('/', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), async(req, res) => {
+    var element = req.body;
+    if (!element || Object.keys(element).length < 1) {
         return res.sendStatus(400);
     }
-    delete person._id;
-    person.clientId = req.user.clientId;
-    req.db.insert(co.collections.persons.name, person).then((insertedPerson) => {
-        return res.send(insertedPerson);
-    });
+    element = mapPersonReverse(element);
+    element.name = uuidv4();
+    await Db.insertDynamicObject(req.user.clientname, "persons", element);
+    res.send(mapPersons([element], req.user.clientname)[0]);
 });
 
 /**
  * Updating person details
  */
-router.put('/:id' , auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners),validateId,validateSameClientId(co.collections.persons.name),function(req,res){
-    var person = req.body;
-    if(!person || Object.keys(person).length < 1) {
+router.put('/:id' , auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), validateSameClientId(co.collections.persons.name), async(req,res) => {
+    var element = req.body;
+    if(!element || Object.keys(element).length < 1) {
         return res.sendStatus(400);
     }
-    delete person._id;
-    delete person.clientId;
-    if (Object.keys(person).length < 1) {
-        return res.sendStatus(400);
-    }
-    req.db.update(co.collections.persons.name, req.params.id, { $set: person }).then((updatedPerson) => {
-        res.send(updatedPerson);
-    });
+    var elementtoupdate = {};
+    if (typeof(element.firstname) !== "undefined") elementtoupdate.firstname = element.firstname;
+    if (typeof(element.lastname) !== "undefined") elementtoupdate.lastname = element.lastname;
+    if (typeof(element.description) !== "undefined") elementtoupdate.description = element.description;
+    await Db.updateDynamicObject(req.user.clientname, "persons", req.params.id, elementtoupdate);
+    res.send(elementtoupdate);
 });
 
 /**
  * Delete person
  */
-
-router.delete('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners),validateId,validateSameClientId(co.collections.persons.name), function(req,res){
-    var personId= monk.id(req.params.id);
-    req.db.remove(co.collections.relations.name, { $or: [ {id1:personId}, {id2:personId} ] }).then(function() {
-        return req.db.remove(co.collections.communications.name, {personId:personId});
-    }).then(function() {
-        return req.db.remove(co.collections.persons.name, personId)
-    }).then(() => {
-        return dah.deleteAllDynamicAttributeValuesForEntity(personId);
-    }).then(function() {
-        res.sendStatus(204);
-    });
+router.delete('/:id', auth(co.permissions.CRM_PERSONS, 'w', co.modules.businesspartners), validateSameClientId(co.collections.persons.name), async(req,res) => {
+    var id = req.params.id;
+    var clientname = req.user.clientname;
+    await Db.deleteDynamicObject(clientname, "persons", id);
+    await Db.deleteDynamicObjects(clientname, "communications", { personname: id });
+    await rh.deleteAllRelationsForEntity(clientname, co.collections.persons.name, id);
+    await dah.deleteAllDynamicAttributeValuesForEntity(clientname, id);
+    res.sendStatus(204);
 });
 
 module.exports = router;
