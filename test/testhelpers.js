@@ -77,7 +77,7 @@ th.prepareClientModules = async() => {
     }
 };
 
-th.prepareClientSettings = () => {
+th.prepareClientSettings = async() => {
     await th.cleanTable("clientsettings", true, false);
     await Db.insertDynamicObject(Db.PortalDatabaseName, "clientsettings", { name: "clientsetting0", logourl: "logourl0", clientname: "client0" });
     await Db.insertDynamicObject(Db.PortalDatabaseName, "clientsettings", { name: "clientsetting1", logourl: "logourl1", clientname: "client1" });
@@ -266,7 +266,7 @@ th.prepareRelations = async() => {
         users:"client0_usergroup0_user0"
     }
     await th.cleanTable("relations", false, true);
-    var keys = map.keys;
+    var keys = Object.keys(map);
     for (var i = 0; i < keys.length; i++) {
         var datatypename = keys[i];
         var name = map[datatypename];
@@ -379,6 +379,172 @@ th.defaults = {
     portalAdminUser: '_0_ADMIN0',
     user: '1_0_0',
     userGroup: '1_0'
+};
+
+th.createApiTests = (config, onlythis) => {
+
+    var describefunction = onlythis ? describe.only : describe;
+
+    describefunction("API " + config.apiname, function() {
+
+        before(async() => {
+            await th.cleanDatabase();
+            await th.prepareClients();
+        });
+    
+        beforeEach(async() => {
+            await th.prepareClientModules();
+            await th.prepareUserGroups();
+            await th.prepareUsers();
+            await th.preparePermissions();
+            for (var i = 0; i < config.beforeeach.length; i++) await config.beforeeach[i]();
+            await th.prepareRelations();
+        });
+
+        function compareElement(actual, expected) {
+            config.comparefields.forEach((f) => {
+                assert.ok(typeof(actual[f]) !== "undefined");
+                assert.strictEqual(actual[f], expected[f]);
+            });
+        }
+    
+        function compareElements(actual, expected) {
+            assert.strictEqual(actual.length, expected.length);
+            actual.sort((a, b) => { return a._id.localeCompare(b._id); });
+            expected.sort((a, b) => { return a._id.localeCompare(b._id); });
+            for (var i = 0; i < actual.length; i++) compareElement(actual[i], expected[i]);
+        }
+    
+        function mapFields(elements, clientname) {
+            return elements.map((e) => { return config.mapfields(e, clientname); });
+        }
+
+        if (config.forparent) describe(`GET/${config.forparent.apisuffix}/:id`, () => {
+    
+            var api = `${config.apiname}/${config.forparent.apisuffix}`;
+            th.apiTests.getId.defaultNegative(api, config.permission, config.forparent.datatypename);
+            th.apiTests.getId.clientDependentNegative(api, config.forparent.datatypename);
+            
+            it(`returns all ${config.apiname} for the given ${config.forparent.datatypename}`, async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var elementname = config.forparent.elementname;
+                var filter = {};
+                filter[config.forparent.parentfield] = elementname;
+                var elementsFromDatabase = mapFields(await Db.getDynamicObjects("client0", config.apiname, filter), "client0");
+                var elementsFromApi = (await th.get(`/api/${api}/${elementname}?token=${token}`).expect(200)).body;
+                compareElements(elementsFromApi, elementsFromDatabase);
+            });
+            
+        });
+
+        describe('GET/:id', function() {
+
+            th.apiTests.getId.defaultNegative(config.apiname, config.permission, config.apiname);
+            th.apiTests.getId.clientDependentNegative(config.apiname, config.apiname);
+             
+            it(`returns the ${config.apiname.replace(/s+$/, "")} with all details for the given id`, async() => {
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                var elementname = config.elementname;
+                var elementFromDatabase = mapFields([await Db.getDynamicObject("client0", config.apiname, elementname)], "client0")[0];
+                var elementFromApi = (await th.get(`/api/${config.apiname}/${elementname}?token=${token}`).expect(200)).body;
+                compareElement(elementFromApi, elementFromDatabase);
+            });
+           
+        });
+
+        describe('POST/', function() {
+
+            function createPostTestElement() {
+                var testelement = config.mapfields(JSON.parse(JSON.stringify(config.testelement)), "client0");
+                delete testelement._id;
+                delete testelement.clientId;
+                return testelement;
+            }
+    
+            th.apiTests.post.defaultNegative(config.apiname, config.permission, createPostTestElement);
+            th.apiTests.post.defaultPositive(config.apiname, config.apiname, createPostTestElement, mapFields);
+                    
+            if (config.forparent) {
+
+                it(`responds without giving a ${config.forparent.clientparentfield} with 400`, async() => {
+                    var elementToSend = createPostTestElement();
+                    delete elementToSend[config.forparent.clientparentfield];
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.post(`/api/${config.apiname}?token=${token}`).send(elementToSend).expect(400);
+                });
+                        
+                it(`responds with not existing ${config.forparent.clientparentfield} with 400`, async() => {
+                    var elementToSend = createPostTestElement();
+                    elementToSend[config.forparent.clientparentfield] = '999999999999999999999999';
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.post(`/api/${config.apiname}?token=${token}`).send(elementToSend).expect(400);
+                });
+                
+                it('responds with 400 when the parent of the element does not belong to the same client as the logged in user', async() => {
+                    var elementToSend = createPostTestElement();
+                    elementToSend[config.forparent.clientparentfield] = elementToSend[config.forparent.clientparentfield].replace("client0", "client1");
+                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.post(`/api/${config.apiname}?token=${token}`).send(elementToSend).expect(400);
+                });
+
+            }
+    
+        });
+
+        describe('PUT/:id', function() {
+
+            async function createPutTestElement(clientname) {
+                var testelement = JSON.parse(JSON.stringify(config.testelement));
+                testelement.name.replace("client0", clientname);
+                await Db.insertDynamicObject(clientname, config.apiname, testelement);
+                return config.mapfields(testelement, clientname);
+            }
+    
+            th.apiTests.put.defaultNegative(config.apiname, config.permission, createPutTestElement);
+            th.apiTests.put.clientDependentNegative(config.apiname, createPutTestElement);
+    
+            it(`updates the ${config.apiname.replace(/s+$/, "")} and returns the updated entity`, async() => {
+                var originalelement = await createPutTestElement("client0");
+                var elementupdate = config.updateset;
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.put(`/api/${config.apiname}/${originalelement._id}?token=${token}`).send(elementupdate).expect(200);
+                var elementFromDatabase = await Db.getDynamicObject("client0", config.apiname, originalelement._id);
+                Object.keys(elementupdate).forEach((k) => {
+                    assert.strictEqual(elementFromDatabase[k], elementupdate[k]);
+                });
+            });
+    
+            if (config.forparent) it(`does not change the parent when a new ${config.forparent.clientparentfield} is given`, async() => {
+                var originalelement = await createPutTestElement("client0");
+                var elementupdate = config.updateset;
+                elementupdate[config.forparent.clientparentfield] = config.forparent.elementname.replace(/0+$/, "1");
+                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.put(`/api/${config.apiname}/${originalelement._id}?token=${token}`).send(elementupdate).expect(200);
+                var elementFromDatabase = await Db.getDynamicObject("client0", config.apiname, originalelement._id);
+                assert.strictEqual(elementFromDatabase[config.forparent.parentfield], originalelement[config.forparent.clientparentfield]);
+                delete elementupdate[config.forparent.clientparentfield];
+                Object.keys(elementupdate).forEach((k) => {
+                    assert.strictEqual(elementFromDatabase[k], elementupdate[k]);
+                });
+            });
+            
+        });
+
+        describe('DELETE/:id', function() {
+
+            async function getDeleteElementId(clientname) {
+                return config.elementname.replace("client0", clientname);
+            }
+    
+            th.apiTests.delete.defaultNegative(config.apiname, config.permission, getDeleteElementId);
+            th.apiTests.delete.clientDependentNegative(config.apiname, getDeleteElementId);
+            th.apiTests.delete.defaultPositive(config.apiname, config.apiname, getDeleteElementId);
+            
+        });
+                
+
+    });
+
 };
 
 th.apiTests = {
