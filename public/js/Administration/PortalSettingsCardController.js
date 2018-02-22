@@ -45,7 +45,6 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
             $scope.settings.updateTimerInterval = defaultIntervalValue; //set an intial default value
             settingsToSend.updateTimerInterval = defaultIntervalValue;
         }
-        console.log(settingsToSend);
         $http.put('/api/portalmanagement/', settingsToSend).then(function(res){
            return $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
         }).then(function(response) {
