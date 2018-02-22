@@ -72,7 +72,6 @@ var prepareIncludes = (fs) => {
                     clearInterval(timerId); //cancel old timer befor setting a new one
                 }
                 timerId = setInterval(portalUpdatesHelper.triggerUpdate, updateInterval);
-                console.log('SET: ',timerId);
                 return;                
             }else{
                 return;

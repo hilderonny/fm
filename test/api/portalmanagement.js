@@ -71,12 +71,18 @@ describe('API portalmanagement', function() {
 
         th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS);
 
-        it('responds with portalsettings (autoUpdateMode, licenseserverurl and licensekey only) from localconfig', function() {
+        it.only('responds with portalsettings (autoUpdateMode, [updateTimerInterval], licenseserverurl and licensekey only) from localconfig', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                 return th.get(`/api/${co.apis.portalmanagement}?token=${token}`).expect(200);
             }).then(function(response) {
                 var result = response.body;
-                assert.strictEqual(Object.keys(result).length, 3);
+                if(result.updateTimerInterval){
+                   assert.strictEqual(Object.keys(result).length, 4); //updateTimerInterval is also expected when autoUpdateMode == True
+                   assert.strictEqual(result.updateTimerInterval, lc.updateTimerInterval);
+                }else{
+                    assert.strictEqual(Object.keys(result).length, 3);
+                }
+                assert.strictEqual(result.autoUpdateMode, lc.autoUpdateMode);
                 assert.ok(result.licensekey);
                 assert.strictEqual(result.licensekey, lc.licensekey);
                 assert.ok(result.licenseserverurl);
