@@ -83,12 +83,13 @@ router.put('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.por
  */
 router.post('/manageAutoUpdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.portalbase), (req, res) => {
     var portalSettings = req.body;
-    if(portalSettings.autoUpdateMode){
+    if(portalSettings.autoUpdateMode == false || portalSettings.autoUpdateMode == true ){
           appJs.manageAutoUpdate(portalSettings.autoUpdateMode);//toggle automatic updates
     }else if(portalSettings.updateTimerInterval){
         var timeInMS = portalSettings.updateTimerInterval * 3600000 //convert hours to milliseconds
          appJs.changeTimeInterval(portalSettings.updateTimerInterval);
     }
+    res.sendStatus(200);
 });
 
 module.exports = router;
