@@ -27,7 +27,7 @@ var ah = {
             var elements = [];
             if (Array.isArray(config.getforids)) {
                 for (var i = 0; i < config.getforids.length; i++) {
-                    var filter = config.getforids[i](req);
+                    var filter = await config.getforids[i](req);
                     (await Db.getDynamicObjectsForNames(req.user.clientname, config.apiname, req.query.ids.split(','), filter)).forEach((e) => {
                         elements.push(e);
                     });
@@ -49,7 +49,7 @@ var ah = {
             var elements = [];
             if (Array.isArray(config.getall)) {
                 for (var i = 0; i < config.getall.length; i++) {
-                    var filter = config.getall[i](req);
+                    var filter = await config.getall[i](req);
                     (await Db.getDynamicObjects(req.user.clientname, config.apiname, filter)).forEach((e) => {
                         elements.push(e);
                     });
@@ -62,7 +62,7 @@ var ah = {
         
         if (config.getid) router.get('/:id', auth(config.permission, 'r', config.modulename), validateSameClientId(config.apiname), async(req, res) => {
             var element = await Db.getDynamicObject(req.user.clientname, config.apiname, req.params.id);
-            if (config.getid !== true && !config.getid(element, req, res)) return; // Callback can handle errors and returns false in this case
+            if (config.getid !== true && !(await config.getid(element, req, res))) return; // Callback can handle errors and returns false in this case
             res.send(config.mapfields(element, req.user));
         });
 
@@ -78,7 +78,7 @@ var ah = {
                 }
             }
             element.name = uuidv4();
-            if (config.post !== true && !config.post(element, req, res)) return; // Callback can handle errors and returns false in this case
+            if (config.post !== true && !(await config.post(element, req, res))) return; // Callback can handle errors and returns false in this case
             await Db.insertDynamicObject(req.user.clientname, config.apiname, element);
             res.send(config.mapfields(element, req.user));
         });
@@ -97,7 +97,7 @@ var ah = {
             Object.keys(elementtoupdate).forEach((k) => {
                 if (elementtoupdate[k] === undefined) delete elementtoupdate[k]; // Not sent fields should not be updated
             });
-            var filter = (config.put !== true) ? config.put(req) : undefined;
+            var filter = (config.put !== true) ? await config.put(req) : undefined;
             var result = await Db.updateDynamicObject(req.user.clientname, config.apiname, req.params.id, elementtoupdate, filter);
             if (result.rowCount < 1) return res.sendStatus(403); // Error in update, maybe filters do not match like in activities?
             res.send(elementtoupdate);
@@ -107,7 +107,7 @@ var ah = {
             var id = req.params.id;
             var clientname = req.user.clientname;
 
-            var filter = (config.delete !== true) ? config.delete(req) : undefined;
+            var filter = (config.delete !== true) ? await config.delete(req) : undefined;
             var result = await Db.deleteDynamicObject(clientname, config.apiname, id, filter);
             if (result.rowCount < 1) return res.sendStatus(403); // Error in deletion, maybe filters do not match like in activities?
             if (config.children) for (var i = 0; i < config.children.length; i++) {

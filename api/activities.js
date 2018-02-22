@@ -32,24 +32,24 @@ module.exports = ah.createApi({
         isforallusers: e.isForAllUsers
     }},
     getforids: [
-        (req) => { return { createdbyusername: req.user.name, isforallusers: false } },
-        (req) => { return { isforallusers: true } }
+        async(req) => { return { createdbyusername: req.user.name, isforallusers: false } },
+        async(req) => { return { isforallusers: true } }
     ],
     getall: [
-        (req) => { return { createdbyusername: req.user.name, isforallusers: false } },
-        (req) => { return { isforallusers: true } }
+        async(req) => { return { createdbyusername: req.user.name, isforallusers: false } },
+        async(req) => { return { isforallusers: true } }
     ],
-    getid: (activity, req, res) => {
+    getid: async(activity, req, res) => {
         if (!activity.isforallusers && !req.user.name === activity.createdbyusername) {
             res.sendStatus(403);
             return false;
         }
         return true;
     },
-    post: (activity, req, res) => {
+    post: async(activity, req, res) => {
         activity.createdbyusername = req.user.name;
         return true;
     },
-    put: (req) => { return { createdbyusername: req.user.name } },
-    delete: (req) => { return { createdbyusername: req.user.name } },
+    put: async(req) => { return { createdbyusername: req.user.name } },
+    delete: async(req) => { return { createdbyusername: req.user.name } },
 });
