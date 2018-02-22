@@ -23,9 +23,9 @@ module.exports = ah.createApi({
     apiname: "communications",
     modulename: "businesspartners",
     permission: co.permissions.CRM_PERSONS,
-    mapfields: (e, clientname) => { return {
+    mapfields: (e, user) => { return {
         _id: e.name, 
-        clientId: clientname, 
+        clientId: user.clientname, 
         contact: e.contact, 
         personId: e.personname, 
         medium: mediums[e.communicationtypename], 

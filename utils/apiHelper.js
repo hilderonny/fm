@@ -11,8 +11,8 @@ var ah = {
 
         var router = require('express').Router();
 
-        function mapFields(elements, clientname) {
-            return elements.map((e) => { return config.mapfields(e, clientname); });
+        function mapFields(elements, user) {
+            return elements.map((e) => { return config.mapfields(e, user); });
         }
 
         if (config.getforids) router.get('/forIds', auth(false, false, config.modulename), async(req, res) => {
@@ -24,22 +24,46 @@ var ah = {
             if (!req.query.ids) {
                 return res.send([]);
             }
-            res.send(mapFields(await Db.getDynamicObjectsForNames(req.user.clientname, config.apiname, req.query.ids.split(',')), req.user.clientname));
+            var elements = [];
+            if (Array.isArray(config.getforids)) {
+                for (var i = 0; i < config.getforids.length; i++) {
+                    var filter = config.getforids[i](req);
+                    (await Db.getDynamicObjectsForNames(req.user.clientname, config.apiname, req.query.ids.split(','), filter)).forEach((e) => {
+                        elements.push(e);
+                    });
+                }
+            } else {
+                elements = await Db.getDynamicObjectsForNames(req.user.clientname, config.apiname, req.query.ids.split(','));
+            }
+            res.send(mapFields(elements, req.user));
         });
         
         if (config.parent) router.get(`/${config.parent.apisuffix}/:id`, auth(config.permission, 'r', config.modulename), validateSameClientId(config.parent.datatypename), async(req, res) => {
             var filter = [];
             filter[config.parent.parentfield] = req.params.id;
             var elements = await Db.getDynamicObjects(req.user.clientname, config.apiname, filter);
-            res.send(mapFields(elements, req.user.clientname));
+            res.send(mapFields(elements, req.user));
         });
 
         if (config.getall) router.get('/', auth(config.permission, 'r', config.modulename), async(req, res) =>{
-            res.send(mapFields(await Db.getDynamicObjects(req.user.clientname, config.apiname), req.user.clientname));
+            var elements = [];
+            if (Array.isArray(config.getall)) {
+                for (var i = 0; i < config.getall.length; i++) {
+                    var filter = config.getall[i](req);
+                    (await Db.getDynamicObjects(req.user.clientname, config.apiname, filter)).forEach((e) => {
+                        elements.push(e);
+                    });
+                }
+            } else {
+                elements = await Db.getDynamicObjects(req.user.clientname, config.apiname);
+            }
+            res.send(mapFields(elements, req.user));
         });
         
         if (config.getid) router.get('/:id', auth(config.permission, 'r', config.modulename), validateSameClientId(config.apiname), async(req, res) => {
-            res.send(config.mapfields(await Db.getDynamicObject(req.user.clientname, config.apiname, req.params.id), req.user.clientname));
+            var element = await Db.getDynamicObject(req.user.clientname, config.apiname, req.params.id);
+            if (config.getid !== true && !config.getid(element, req, res)) return; // Callback can handle errors and returns false in this case
+            res.send(config.mapfields(element, req.user));
         });
 
         if (config.post) router.post('/', auth(config.permission, 'w', config.modulename), async(req, res) => {
@@ -54,8 +78,9 @@ var ah = {
                 }
             }
             element.name = uuidv4();
+            if (config.post !== true && !config.post(element, req, res)) return; // Callback can handle errors and returns false in this case
             await Db.insertDynamicObject(req.user.clientname, config.apiname, element);
-            res.send(config.mapfields(element, req.user.clientname));
+            res.send(config.mapfields(element, req.user));
         });
 
         if (config.put) router.put('/:id' , auth(config.permission, 'w', config.modulename), validateSameClientId(config.apiname), async(req,res) => {
@@ -72,19 +97,24 @@ var ah = {
             Object.keys(elementtoupdate).forEach((k) => {
                 if (elementtoupdate[k] === undefined) delete elementtoupdate[k]; // Not sent fields should not be updated
             });
-            await Db.updateDynamicObject(req.user.clientname, config.apiname, req.params.id, elementtoupdate);
+            var filter = (config.put !== true) ? config.put(req) : undefined;
+            var result = await Db.updateDynamicObject(req.user.clientname, config.apiname, req.params.id, elementtoupdate, filter);
+            if (result.rowCount < 1) return res.sendStatus(403); // Error in update, maybe filters do not match like in activities?
             res.send(elementtoupdate);
         });
         
         if (config.delete) router.delete('/:id', auth(config.permission, 'w', config.modulename), validateSameClientId(config.apiname), async(req,res) => {
             var id = req.params.id;
             var clientname = req.user.clientname;
-            await Db.deleteDynamicObject(clientname, config.apiname, id);
+
+            var filter = (config.delete !== true) ? config.delete(req) : undefined;
+            var result = await Db.deleteDynamicObject(clientname, config.apiname, id, filter);
+            if (result.rowCount < 1) return res.sendStatus(403); // Error in deletion, maybe filters do not match like in activities?
             if (config.children) for (var i = 0; i < config.children.length; i++) {
                 var child = config.children[i];
-                var filter = {};
-                filter[child.parentfield] = id;
-                await Db.deleteDynamicObjects(clientname, child.datatypename, filter);
+                var childfilter = {};
+                childfilter[child.parentfield] = id;
+                await Db.deleteDynamicObjects(clientname, child.datatypename, childfilter);
             }
             await rh.deleteAllRelationsForEntity(clientname, config.apiname, id);
             await dah.deleteAllDynamicAttributeValuesForEntity(clientname, id);
