@@ -358,7 +358,7 @@ th.defaults = {
      */
     getUserGroup: () => { return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}); },
     /**
-     * Anmeldung mit STandardbenutzer durchführen
+     * Anmeldung mit Standardbenutzer durchführen
      */
     login: function(username) { return th.doLoginAndGetToken(username, "test"); },
     otherClient: '0',
@@ -397,7 +397,7 @@ th.createApiTests = (config, onlythis) => {
             await th.prepareUserGroups();
             await th.prepareUsers();
             await th.preparePermissions();
-            for (var i = 0; i < config.beforeeach.length; i++) await config.beforeeach[i]();
+            if (config.beforeeach) for (var i = 0; i < config.beforeeach.length; i++) await config.beforeeach[i]();
             await th.prepareRelations();
         });
 
@@ -862,7 +862,7 @@ th.apiTests = {
                 return async() => {
                     var moduleName = th.getModuleForApi(api);
                     await th.removeClientModule("client0", moduleName);
-                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    var token = await th.defaults.login(user);
                     var id = await getId("client0");
                     await th.del(`/api/${api}/${id}?token=${token}`).expect(403);
                 }

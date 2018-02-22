@@ -166,7 +166,9 @@
                     { "name": "name2", "type": "text" }
                 ] },
 
-                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg"},
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                ] },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "password", "label": "Passwort", "type": "text" },
@@ -182,7 +184,9 @@
                     { "name": "clientname", "label": "Mandant", "type": "reference", "reference": "clients" }
                 ] },
 
-                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg"},
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                ] },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "password", "label": "Passwort", "type": "text" },

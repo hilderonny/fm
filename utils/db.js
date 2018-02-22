@@ -123,6 +123,24 @@ var Db = {
         }
         if (!doNotAddColumn) await Db.query(databaseNameWithoutPrefix, `ALTER TABLE ${datatypename} ADD COLUMN ${fieldname} ${columntype};`);
     },
+    
+    deleteClient: async(clientname) => {
+        var clientExists = (await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${clientname}';`)).rowCount > 0;
+        if (!clientExists) return false;
+        var clientDatabaseName = `${dbprefix}_${clientname}`;
+        await new Promise((resolve, reject) => {
+            Db.getPool(clientDatabaseName).end(async() => {
+                resolve();
+            });
+        });
+        delete Db.pools[clientDatabaseName];
+        await Db.queryDirect("postgres", `DROP DATABASE IF EXISTS ${clientDatabaseName};`);
+        await Db.query(Db.PortalDatabaseName, `DELETE FROM clients WHERE name = '${clientname}';`);
+        await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE clientname = '${clientname}';`);
+        await Db.query(Db.PortalDatabaseName, `DELETE FROM clientsettings WHERE clientname = '${clientname}';`);
+        // TODO: Also delete documents of client
+        return true;
+    },
 
     // createPermission: async(userGroupName, clientName, datatype, canwrite) => {
     //     await Db.query(clientName, `INSERT INTO permissions (usergroup, datatype, canwrite) VALUES ('${userGroupName}', '${datatype}', ${canwrite}) ON CONFLICT (usergroup, datatype) DO UPDATE SET canwrite = ${canwrite};`);
