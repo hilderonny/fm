@@ -2,20 +2,6 @@ var readFileSync = require("fs").readFileSync;
 var writeFileSync = require("fs").writeFileSync;
 var LocalConfig = {
     load: () => {
-        /*if (!LocalConfig.isLoaded) {
-            // Load from file
-            var fromJson = JSON.parse(readFileSync("./config/localconfig.json", "utf8"));
-            Object.keys(fromJson).forEach(k => {
-                LocalConfig[k] = fromJson[k];
-            });
-            // Overwrite from environment variables
-            Object.keys(LocalConfig).forEach(k => {
-                if (process.env[k]) LocalConfig[k] = process.env[k];
-            });
-            // Append version from package.json
-            var packageJson = JSON.parse(readFileSync("./package.json"));
-            LocalConfig.version = packageJson.version;
-        }*/
         var localConfig = JSON.parse(readFileSync('./config/localconfig.json').toString());
         return localConfig;
     },

@@ -47,7 +47,7 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
         }
         console.log(settingsToSend);
         $http.put('/api/portalmanagement/', settingsToSend).then(function(res){
-            $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
+           return $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
         }).then(function(response) {
             $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
@@ -59,7 +59,7 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
         var timerIntervalInMS =  $scope.settings.updateTimerInterval; //save time interval in hours
         var settingsToSend = {updateTimerInterval: timerIntervalInMS};
         $http.put('/api/portalmanagement/', settingsToSend).then(function(){
-            $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
+          return  $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
         }).then(function(response) {
             $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
