@@ -143,6 +143,7 @@
                 { "name": "dynamicattributes", "label": "Dynamisches Attribut", "plurallabel": "Dynamische Attribute", "titlefield": "label", "fields": [
                     { "name": "modelname", "type": "text" },
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "isinactive", "label": "Inaktiv", "type": "boolean" },
                     { "name": "dynamicattributetypename", "label": "Typ", "type": "reference", "reference": "dynamicattributetypes" },
                     { "name": "identifier", "type": "text" }
                 ] },
