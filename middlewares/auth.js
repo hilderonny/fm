@@ -46,7 +46,7 @@ module.exports.canAccess = async(username, permissionKey, readWrite, moduleName)
     var userInDatabase = await Db.getDynamicObject(userInAllUsers.clientname ? userInAllUsers.clientname : Db.PortalDatabaseName, "users", userInAllUsers.name);
     userInDatabase.clientname = userInAllUsers.clientname; // Relevant for APIs
     // Check whether module is available for the client of the user, ignore portal users
-    if (userInAllUsers.clientname && moduleName) {
+    if (userInAllUsers.clientname && userInAllUsers.clientname !== Db.PortalDatabaseName && moduleName) {
         var clientmoduleresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${userInAllUsers.clientname}' AND modulename='${moduleName}';`);
         if (clientmoduleresult.rowCount < 1) return false;
         var userHasAccess = await checkUser(userInAllUsers.clientname, userInDatabase, permissionKey, readWrite);

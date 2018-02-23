@@ -185,6 +185,41 @@
                     { "name": "clientname", "label": "Mandant", "type": "reference", "reference": "clients" }
                 ] },
 
+                { "name": "dynamicattributetypes", "label": "Attributart", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "values": [
+                    { "name": "text", "label": "Textfeld" },
+                    { "name": "boolean", "label": "Boolescher Wert" },
+                    { "name": "picklist", "label": "Auswahlliste" }
+                ] }, 
+
+                { "name": "dynamicattributes", "label": "Dynamisches Attribut", "plurallabel": "Dynamische Attribute", "titlefield": "label", "fields": [
+                    { "name": "modelname", "type": "text" },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "isinactive", "label": "Inaktiv", "type": "boolean" },
+                    { "name": "dynamicattributetypename", "label": "Typ", "type": "reference", "reference": "dynamicattributetypes" },
+                    { "name": "identifier", "type": "text" }
+                ] },
+
+                { "name": "dynamicattributeoptions", "label": "Listenelement", "plurallabel": "Listenelemente", "titlefield": "label", "fields": [
+                    { "name": "dynamicattributename", "type": "reference", "reference": "dynamicattributes" },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "value", "label": "Wert", "type": "text" }
+                ] },
+
+                { "name": "dynamicattributevalues", "fields": [
+                    { "name": "entityname", "type": "text" },
+                    { "name": "dynamicattributename", "type": "reference", "reference": "dynamicattributes" },
+                    { "name": "value", "type": "text" }
+                ] }, 
+
+                { "name": "relations", "label": "Verknüpfung", "plurallabel": "Verknüpfungen", "fields": [
+                    { "name": "datatype1name", "type": "text" },
+                    { "name": "name1", "type": "text" },
+                    { "name": "datatype2name", "type": "text" },
+                    { "name": "name2", "type": "text" }
+                ] },
+
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ] },

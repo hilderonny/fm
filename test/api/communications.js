@@ -49,4 +49,8 @@ th.createApiTests({
         communicationtypename: "emailwork"
     },
     updateset: { contact: "Ronny" },
+    client: "client0",
+    usergroup: "client0_usergroup0",
+    user: "client0_usergroup0_user0",
+    adminuser: "client0_usergroup0_user1",
 });

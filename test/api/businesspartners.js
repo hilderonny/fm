@@ -34,4 +34,8 @@ th.createApiTests({
     },
     cangetid: true,
     canput: true,
+    client: "client0",
+    usergroup: "client0_usergroup0",
+    user: "client0_usergroup0_user0",
+    adminuser: "client0_usergroup0_user1",
 });

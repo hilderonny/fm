@@ -163,17 +163,17 @@ th.removeWritePermission = async(clientname, usergroupname, permissionkey) => {
 th.preparePortals = async() => {
     await th.cleanTable("portals", true, false);
     var nowTicks = (new Date()).getTime();
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal0", label: "label", isactive: true, url: "url", comment: "comment", licensekey: "licensekey", version: "1.0", lastnotification:nowTicks - 1000000 });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal1", label: "label", isactive: false, url: "url", comment: "comment", licensekey: "licensekey", version: "1.0", lastnotification:nowTicks - 2000000 });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal_portal0", label: "label", isactive: true, url: "url", comment: "comment", licensekey: "licensekey", version: "1.0", lastnotification:nowTicks - 1000000 });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal_portal1", label: "label", isactive: false, url: "url", comment: "comment", licensekey: "licensekey", version: "1.0", lastnotification:nowTicks - 2000000 });
 };
 
 th.preparePortalModules = async() => {
     await th.cleanTable("portalmodules", true, false);
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule0", portalname: "portal0", modulename: co.modules.base });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule1", portalname: "portal0", modulename: co.modules.clients });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule2", portalname: "portal0", modulename: co.modules.documents });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule3", portalname: "portal0", modulename: co.modules.fmobjects });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portalmodule4", portalname: "portal0", modulename: co.modules.portalbase });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule0", portalname: "portal0", modulename: co.modules.base });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule1", portalname: "portal0", modulename: co.modules.clients });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule2", portalname: "portal0", modulename: co.modules.documents });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule3", portalname: "portal0", modulename: co.modules.fmobjects });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule4", portalname: "portal0", modulename: co.modules.portalbase });
 };
 
 th.prepareActivities = async() => {
@@ -335,50 +335,7 @@ th.getModuleForApi = (api) => {
 };
 
 th.defaults = {
-    activity: '1_0_0_0',
-    businessPartner: '1_0',
-    /**
-     * Standardmandant '1'
-     */
-    client: '1',
-    /**
-     * Standardmandant '1' aus Datenbank auslesen und per Promise zurück geben
-     */
-    getClient: function(clientName) { return db.get(co.collections.clients.name).findOne({name:clientName || th.defaults.client}); },
-    /**
-     * Standardportal 'p1' aus Datenbank auslesen und per Promise zurück geben
-     */
-    getPortal: () => { return db.get(co.collections.portals.name).findOne({name:th.defaults.portal}); },
-    /**
-     * Standardbenutzer '1_0_0' aus Datenbank auslesen und per Promise zurück geben
-     */
-    getUser: function(userName) { return db.get(co.collections.users.name).findOne({name:userName || th.defaults.user}); },
-    /**
-     * Standardbenutzergruppe '1_0' aus Datenbank auslesen und per Promise zurück geben
-     */
-    getUserGroup: () => { return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}); },
-    /**
-     * Anmeldung mit Standardbenutzer durchführen
-     */
     login: function(username) { return th.doLoginAndGetToken(username, "test"); },
-    otherClient: '0',
-    /**
-     * Benutzer eines anderen Mandanten
-     */
-    otherUser: '0_0_0',
-    partnerAddress: '1_0_0',
-    password: 'test',
-    person: '1_0',
-    personCommunication: '1_0_0',
-    /**
-     * Standardportal 'p1'
-     */
-    portal: 'p1',
-    portalActivity: '_0_0_0',
-    portalUser: '_0_0',
-    portalAdminUser: '_0_ADMIN0',
-    user: '1_0_0',
-    userGroup: '1_0'
 };
 
 th.createApiTests = (config, onlythis) => {
@@ -422,15 +379,15 @@ th.createApiTests = (config, onlythis) => {
         if (config.forparent) describe(`GET/${config.forparent.apisuffix}/:id`, () => {
     
             var api = `${config.apiname}/${config.forparent.apisuffix}`;
-            th.apiTests.getId.defaultNegative(api, config.permission, config.forparent.datatypename);
-            th.apiTests.getId.clientDependentNegative(api, config.forparent.datatypename);
+            th.apiTests.getId.defaultNegative(api, config.permission, config.forparent.datatypename, config.client, config.usergroup, config.user, config.adminuser);
+            if (config.client !== Db.PortalDatabaseName) th.apiTests.getId.clientDependentNegative(api, config.forparent.datatypename, config.client, config.usergroup, config.user);
             
             it(`returns all ${config.apiname} for the given ${config.forparent.datatypename}`, async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(config.user);
                 var elementname = config.forparent.elementname;
                 var filter = {};
                 filter[config.forparent.parentfield] = elementname;
-                var elementsFromDatabase = mapFields(await Db.getDynamicObjects("client0", config.apiname, filter), "client0");
+                var elementsFromDatabase = mapFields(await Db.getDynamicObjects(config.client ? config.client : "client0", config.apiname, filter), config.client ? config.client : "client0");
                 var elementsFromApi = (await th.get(`/api/${api}/${elementname}?token=${token}`).expect(200)).body;
                 compareElements(elementsFromApi, elementsFromDatabase);
             });
@@ -439,11 +396,11 @@ th.createApiTests = (config, onlythis) => {
 
         if (config.cangetall) describe('GET/', () => {
 
-            th.apiTests.get.defaultNegative(config.apiname, config.permission); 
+            th.apiTests.get.defaultNegative(config.apiname, config.permission, config.client, config.usergroup, config.user, config.adminuser); 
     
             it(`responds with list of all ${config.apiname} of the client of the logged in user containing all details`, async () => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var elementsFromDatabase = mapFields(await Db.getDynamicObjects("client0", config.apiname), "client0");
+                var token = await th.defaults.login(config.user);
+                var elementsFromDatabase = mapFields(await Db.getDynamicObjects(config.client ? config.client : "client0", config.apiname), config.client ? config.client : "client0");
                 var elementsFromRequest = (await th.get(`/api/${config.apiname}?token=${token}`).expect(200)).body;
                 compareElements(elementsFromRequest, elementsFromDatabase);
             });
@@ -456,7 +413,7 @@ th.createApiTests = (config, onlythis) => {
                 var testelements = [];
                 for (var i = 0; i < 2; i++) {
                     var testelement = JSON.parse(JSON.stringify(config.testelement));
-                    testelement.name.replace("client0", clientname);
+                    testelement.name.replace(config.client ? config.client : "client0", clientname);
                     testelement.name += i;
                     testelements.push(testelement);
                     await Db.insertDynamicObject(clientname, config.apiname, testelement);
@@ -464,21 +421,21 @@ th.createApiTests = (config, onlythis) => {
                 return mapFields(testelements, clientname);
             } 
             
-            th.apiTests.getForIds.defaultNegative(config.apiname, config.permission, config.apiname, createTestElements);
-            th.apiTests.getForIds.clientDependentNegative(config.apiname, config.apiname, createTestElements);
-            th.apiTests.getForIds.defaultPositive(config.apiname, config.apiname, createTestElements);
+            th.apiTests.getForIds.defaultNegative(config.apiname, config.permission, config.apiname, createTestElements, config.client, config.usergroup, config.user, config.adminuser);
+            if (config.client !== Db.PortalDatabaseName) th.apiTests.getForIds.clientDependentNegative(config.apiname, config.apiname, createTestElements, config.client, config.usergroup, config.user);
+            th.apiTests.getForIds.defaultPositive(config.apiname, config.apiname, createTestElements, config.client, config.usergroup, config.user);
     
         });
         
         if (config.cangetid) describe('GET/:id', () => {
 
-            th.apiTests.getId.defaultNegative(config.apiname, config.permission, config.apiname);
-            th.apiTests.getId.clientDependentNegative(config.apiname, config.apiname);
+            th.apiTests.getId.defaultNegative(config.apiname, config.permission, config.apiname, config.client, config.usergroup, config.user, config.adminuser);
+            if (config.client !== Db.PortalDatabaseName) th.apiTests.getId.clientDependentNegative(config.apiname, config.apiname, config.client, config.usergroup, config.user);
              
             it(`returns the ${config.apiname.replace(/s+$/, "")} with all details for the given id`, async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(config.user);
                 var elementname = config.elementname;
-                var elementFromDatabase = mapFields([await Db.getDynamicObject("client0", config.apiname, elementname)], "client0")[0];
+                var elementFromDatabase = mapFields([await Db.getDynamicObject(config.client ? config.client : "client0", config.apiname, elementname)], config.client ? config.client : "client0")[0];
                 var elementFromApi = (await th.get(`/api/${config.apiname}/${elementname}?token=${token}`).expect(200)).body;
                 compareElement(elementFromApi, elementFromDatabase);
             });
@@ -488,35 +445,35 @@ th.createApiTests = (config, onlythis) => {
         describe('POST/', () => {
 
             function createPostTestElement() {
-                var testelement = config.mapfields(JSON.parse(JSON.stringify(config.testelement)), "client0");
+                var testelement = config.mapfields(JSON.parse(JSON.stringify(config.testelement)), config.client ? config.client : "client0");
                 delete testelement._id;
                 delete testelement.clientId;
                 return testelement;
             }
     
-            th.apiTests.post.defaultNegative(config.apiname, config.permission, createPostTestElement);
-            th.apiTests.post.defaultPositive(config.apiname, config.apiname, createPostTestElement, mapFields);
+            th.apiTests.post.defaultNegative(config.apiname, config.permission, createPostTestElement, false, config.client, config.usergroup, config.user, config.adminuser);
+            th.apiTests.post.defaultPositive(config.apiname, config.apiname, createPostTestElement, mapFields, config.client, config.usergroup, config.user);
                     
             if (config.forparent) {
 
                 it(`responds without giving a ${config.forparent.clientparentfield} with 400`, async() => {
                     var elementToSend = createPostTestElement();
                     delete elementToSend[config.forparent.clientparentfield];
-                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    var token = await th.defaults.login(config.user);
                     await th.post(`/api/${config.apiname}?token=${token}`).send(elementToSend).expect(400);
                 });
                         
                 it(`responds with not existing ${config.forparent.clientparentfield} with 400`, async() => {
                     var elementToSend = createPostTestElement();
                     elementToSend[config.forparent.clientparentfield] = '999999999999999999999999';
-                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    var token = await th.defaults.login(config.user);
                     await th.post(`/api/${config.apiname}?token=${token}`).send(elementToSend).expect(400);
                 });
                 
                 it('responds with 400 when the parent of the element does not belong to the same client as the logged in user', async() => {
                     var elementToSend = createPostTestElement();
-                    elementToSend[config.forparent.clientparentfield] = elementToSend[config.forparent.clientparentfield].replace("client0", "client1");
-                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    elementToSend[config.forparent.clientparentfield] = elementToSend[config.forparent.clientparentfield].replace(config.client ? config.client : "client0", "client1");
+                    var token = await th.defaults.login(config.user);
                     await th.post(`/api/${config.apiname}?token=${token}`).send(elementToSend).expect(400);
                 });
 
@@ -528,32 +485,32 @@ th.createApiTests = (config, onlythis) => {
 
             async function createPutTestElement(clientname) {
                 var testelement = JSON.parse(JSON.stringify(config.testelement));
-                testelement.name.replace("client0", clientname);
+                testelement.name.replace(config.client ? config.client : "client0", clientname);
                 await Db.insertDynamicObject(clientname, config.apiname, testelement);
                 return config.mapfields(testelement, clientname);
             }
     
-            th.apiTests.put.defaultNegative(config.apiname, config.permission, createPutTestElement);
-            th.apiTests.put.clientDependentNegative(config.apiname, createPutTestElement);
+            th.apiTests.put.defaultNegative(config.apiname, config.permission, createPutTestElement, config.client, config.usergroup, config.user, config.adminuser);
+            if (config.client !== Db.PortalDatabaseName) th.apiTests.put.clientDependentNegative(config.apiname, createPutTestElement, config.client, config.usergroup, config.user);
     
             it(`updates the ${config.apiname.replace(/s+$/, "")} and returns the updated entity`, async() => {
-                var originalelement = await createPutTestElement("client0");
+                var originalelement = await createPutTestElement(config.client ? config.client : "client0");
                 var elementupdate = config.updateset;
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(config.user);
                 await th.put(`/api/${config.apiname}/${originalelement._id}?token=${token}`).send(elementupdate).expect(200);
-                var elementFromDatabase = await Db.getDynamicObject("client0", config.apiname, originalelement._id);
+                var elementFromDatabase = await Db.getDynamicObject(config.client ? config.client : "client0", config.apiname, originalelement._id);
                 Object.keys(elementupdate).forEach((k) => {
                     assert.strictEqual(elementFromDatabase[k], elementupdate[k]);
                 });
             });
     
             if (config.forparent) it(`does not change the parent when a new ${config.forparent.clientparentfield} is given`, async() => {
-                var originalelement = await createPutTestElement("client0");
+                var originalelement = await createPutTestElement(config.client ? config.client : "client0");
                 var elementupdate = config.updateset;
                 elementupdate[config.forparent.clientparentfield] = config.forparent.elementname.replace(/0+$/, "1");
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(config.user);
                 await th.put(`/api/${config.apiname}/${originalelement._id}?token=${token}`).send(elementupdate).expect(200);
-                var elementFromDatabase = await Db.getDynamicObject("client0", config.apiname, originalelement._id);
+                var elementFromDatabase = await Db.getDynamicObject(config.client ? config.client : "client0", config.apiname, originalelement._id);
                 assert.strictEqual(elementFromDatabase[config.forparent.parentfield], originalelement[config.forparent.clientparentfield]);
                 delete elementupdate[config.forparent.clientparentfield];
                 Object.keys(elementupdate).forEach((k) => {
@@ -566,25 +523,26 @@ th.createApiTests = (config, onlythis) => {
         describe('DELETE/:id', () => {
 
             async function getDeleteElementId(clientname) {
-                return config.elementname.replace("client0", clientname);
+                return config.elementname.replace(config.client ? config.client : "client0", clientname);
             }
     
-            th.apiTests.delete.defaultNegative(config.apiname, config.permission, getDeleteElementId);
-            th.apiTests.delete.clientDependentNegative(config.apiname, getDeleteElementId);
-            th.apiTests.delete.defaultPositive(config.apiname, config.apiname, getDeleteElementId);
+            th.apiTests.delete.defaultNegative(config.apiname, config.permission, getDeleteElementId, config.client, config.usergroup, config.user, config.adminuser);
+            if (config.client !== Db.PortalDatabaseName) th.apiTests.delete.clientDependentNegative(config.apiname, getDeleteElementId, config.client, config.usergroup, config.user);
+            th.apiTests.delete.defaultPositive(config.apiname, config.apiname, getDeleteElementId, false, false, config.client, config.usergroup, config.user);
 
             if (config.children) it(`also deletes all children of the element`, async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(config.user);
                 var id = config.elementname;
                 await th.del(`/api/${config.apiname}/${id}?token=${token}`).expect(204);
                 var filter = [];
                 filter[config.children.parentfield] = id;
-                var children = await Db.getDynamicObjects("client0", config.children.datatypename, filter);
+                var children = await Db.getDynamicObjects(config.client ? config.client : "client0", config.children.datatypename, filter);
                 assert.strictEqual(children.length, 0);
             });
                 
         });
-                
+        
+        if (config.additionaltests) config.additionaltests();
 
     });
 
@@ -592,62 +550,62 @@ th.createApiTests = (config, onlythis) => {
 
 th.apiTests = {
     get: {
-        defaultNegative: function(api, permissionkey) {
+        defaultNegative: function(api, permissionkey, client, usergroup, user, adminuser) {
             it('responds without authentication with 403', async() => {
                 return th.get(`/api/${api}`).expect(403);
             });
             if (permissionkey) it('responds without read permission with 403', async() => {
                 // Remove the corresponding permission
-                await th.removeReadPermission("client0", "client0_usergroup0", permissionkey);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.removeReadPermission(client ? client : "client0", usergroup ? usergroup : "client0_usergroup0", permissionkey);
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.get(`/api/${api}?token=${token}`).expect(403);
             });
             function checkForUser(user) {
                 return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    await th.removeClientModule("client0", moduleName);
-                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.removeClientModule(client ? client : "client0", moduleName);
+                    var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                     return th.get(`/api/${api}?token=${token}`).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
         }
     },
     getForIds: {
-        defaultNegative: function(api, permissionkey, collection, createTestObjects) {
+        defaultNegative: function(api, permissionkey, collection, createTestObjects, client, usergroup, user, adminuser) {
             it('responds without authentication with 403', async() => {
-                var testobjectids = (await createTestObjects("client0")).map(n => n._id);
+                var testobjectids = (await createTestObjects(client ? client : "client0")).map(n => n._id);
                 await th.get(`/api/${api}/forIds?ids=${testobjectids.join(',')}`).expect(403);
             });
             function checkForUser(user) {
                 return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    await th.removeClientModule("client0", moduleName);
-                    var testobjectids = (await createTestObjects("client0")).map(n => n._id);
-                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.removeClientModule(client ? client : "client0", moduleName);
+                    var testobjectids = (await createTestObjects(client ? client : "client0")).map(n => n._id);
+                    var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                     await th.get(`/api/${api}/forIds?ids=${testobjectids.join(',')}&token=${token}`).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
             if (permissionkey) it('responds with empty list when user has no read permission', async() => {
-                await th.removeReadPermission("client0", "client0_usergroup0", permissionkey);
-                var testobjectids = (await createTestObjects("client0")).map(n => n._id);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.removeReadPermission(client ? client : "client0", usergroup ? usergroup : "client0_usergroup0", permissionkey);
+                var testobjectids = (await createTestObjects(client ? client : "client0")).map(n => n._id);
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var elements = (await th.get(`/api/${api}/forIds?ids=${testobjectids.join(',')}&token=${token}`).expect(200)).body;
                 assert.equal(elements.length, 0);
             });
             it('responds with empty list when query parameter "ids" does not exist', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var elements = (await th.get(`/api/${api}/forIds?token=${token}`).expect(200)).body;
                 assert.equal(elements.length, 0);
             });
             it('returns only elements of correct ids when parameter "ids" contains invalid IDs', async() => {
-                var testobjectids = (await createTestObjects("client0")).map(n => n._id);
+                var testobjectids = (await createTestObjects(client ? client : "client0")).map(n => n._id);
                 var expectedcount = testobjectids.length;
                 testobjectids.push('invalidId');
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var elements = (await th.get(`/api/${api}/forIds?ids=${testobjectids.join(',')}&token=${token}`).expect(200)).body;
                 assert.equal(elements.length, expectedcount);
                 for (var i = 0; i < expectedcount; i++) {
@@ -655,12 +613,12 @@ th.apiTests = {
                 }
             });
         },
-        clientDependentNegative: function(api, collection, createTestObjects) {
+        clientDependentNegative: function(api, collection, createTestObjects, client, usergroup, user) {
             it('returns only elements of the client of the logged in user when "ids" contains IDs of entities of another client', async() => {
-                var testobjectidsclient0 = (await createTestObjects("client0")).map(n => n._id);
+                var testobjectidsclient0 = (await createTestObjects(client ? client : "client0")).map(n => n._id);
                 var testobjectidsclient1 = (await createTestObjects("client1")).map(n => n._id);
                 var allids = testobjectidsclient0.concat(testobjectidsclient1);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var elements = (await th.get(`/api/${api}/forIds?ids=${allids.join(',')}&token=${token}`).expect(200)).body;
                 assert.equal(elements.length, testobjectidsclient0.length);
                 for (var i = 0; i < testobjectidsclient0.length; i++) {
@@ -668,10 +626,10 @@ th.apiTests = {
                 }
             });
         },
-        defaultPositive: function(api, collection, createTestObjects) {
+        defaultPositive: function(api, collection, createTestObjects, client, usergroup, user) {
             it('returns a list of elements with all details for the given IDs', async() => {
-                var testobjects = await createTestObjects("client0");
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var testobjects = await createTestObjects(client ? client : "client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var elementsFromApi = (await th.get(`/api/${api}/forIds?ids=${testobjects.map(n => n._id).join(',')}&token=${token}`).expect(200)).body;
                 assert.equal(elementsFromApi.length, testobjects.length);
                 for (var i = 0; i < testobjects.length; i++) {
@@ -690,42 +648,42 @@ th.apiTests = {
         }
     },
     getId: {
-        defaultNegative: function(api, permission, datatypename) {
+        defaultNegative: function(api, permission, datatypename, client, usergroup, user, adminuser) {
             var testObject = { name: "testobject" };
             it('responds without authentication with 403', async() => {
-                await Db.insertDynamicObject("client0", datatypename, testObject);
+                await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
                 await th.get(`/api/${api}/${testObject.name}`).expect(403);
             });
             if (permission) it('responds without read permission with 403', async() => {
-                await th.removeReadPermission("client0", "client0_usergroup0", permission);
-                await Db.insertDynamicObject("client0", datatypename, testObject);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.removeReadPermission(client ? client : "client0", usergroup ? usergroup : "client0_usergroup0", permission);
+                await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(403);
             });
             function checkForUser(user) {
                 return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    await th.removeClientModule("client0", moduleName);
-                    await Db.insertDynamicObject("client0", datatypename, testObject);
-                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.removeClientModule(client ? client : "client0", moduleName);
+                    await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
+                    var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                     await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
             it('responds with not existing id with 404', async() => {
                 // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
                 // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-                await Db.insertDynamicObject("client0", datatypename, testObject);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.get(`/api/${api}/999999999999999999999999?token=${token}`).expect(404);
             });
         },
-        clientDependentNegative: function(api, datatypename) {
+        clientDependentNegative: function(api, datatypename, client, usergroup, user) {
             var testObject = { name: "testobject" };
             it('responds with 404 when the object with the given ID does not belong to the client of the logged in user', async() => {
                 await Db.insertDynamicObject("client1", datatypename, testObject);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(404); // From validateSameClientId()
             });
         }
@@ -737,31 +695,31 @@ th.apiTests = {
         /**
          * Standard-Negativtests, die das Verhalten von falschen Aufrufen prüfen
          */
-        defaultNegative: function(api, permission, createTestObject, ignoreSendObjectTest) {
+        defaultNegative: function(api, permission, createTestObject, ignoreSendObjectTest, client, usergroup, user, adminuser) {
             it('responds without authentication with 403', async() => {
                 var testObject = createTestObject();
                 await th.post(`/api/${api}`).send(testObject).expect(403);
             });
             if (permission) it('responds without write permission with 403', async() => {
                 var testObject = createTestObject();
-                await th.removeWritePermission("client0", "client0_usergroup0", permission);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                await th.removeWritePermission(client ? client : "client0", usergroup ? usergroup : "client0_usergroup0", permission);
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
             });
             function checkForUser(user) {
                 return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    await th.removeClientModule("client0", moduleName);
-                    var token = await th.defaults.login("client0_usergroup0_user0");
+                    await th.removeClientModule(client ? client : "client0", moduleName);
+                    var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                     var testObject = createTestObject();
                     await th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
             // Bei portalmanagement muss nix geschickt werden.
             if(!ignoreSendObjectTest) it('responds with 400 when not sending an object to insert', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.post(`/api/${api}?token=${token}`).expect(400);
             });
         },
@@ -769,17 +727,17 @@ th.apiTests = {
          * Standardpositiv-Tests zum Prüfen, ob ein gesendetes Objekt auch
          * korrekt in der Datenbank ankommt und ob die Rückgabedaten stimmen.
          */
-        defaultPositive: function(api, datatypename, createTestObject, mapFunction) {
+        defaultPositive: function(api, datatypename, createTestObject, mapFunction, client, usergroup, user) {
             it('responds with the created element containing an _id field', async() => {
                 var testObject = createTestObject();
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var objectFromApi = (await th.post(`/api/${api}?token=${token}`).send(testObject).expect(200)).body;
                 assert.ok(objectFromApi._id);
                 Object.keys(testObject).forEach(function(key) {
                     assert.ok(typeof(objectFromApi[key]) !== "undefined", `Key ${key} is missing`);
                     assert.strictEqual(objectFromApi[key], testObject[key], `Key ${key} differs`);
                 });
-                var objectFromDatabase = mapFunction([await Db.getDynamicObject("client0", datatypename, objectFromApi._id)], "client0")[0];
+                var objectFromDatabase = mapFunction([await Db.getDynamicObject(client ? client : "client0", datatypename, objectFromApi._id)], client ? client : "client0")[0];
                 Object.keys(testObject).forEach(function(key) {
                     assert.ok(typeof(objectFromDatabase[key]) !== "undefined", `Key ${key} is missing`);
                     assert.strictEqual(objectFromDatabase[key], testObject[key], `Key ${key} differs`);
@@ -788,56 +746,56 @@ th.apiTests = {
         }
     },
     put: {
-        defaultNegative: function(api, permission, createTestObject) {
+        defaultNegative: function(api, permission, createTestObject, client, usergroup, user, adminuser) {
             it('responds without authentication with 403', async() => {
-                var testObject = await createTestObject("client0");
+                var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/${testObject._id}`).send(testObject).expect(403);
             });
             if (permission) it('responds without write permission with 403', async() => {
-                var testObject = await createTestObject("client0");
-                await th.removeWritePermission("client0", "client0_usergroup0", permission);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var testObject = await createTestObject(client ? client : "client0");
+                await th.removeWritePermission(client ? client : "client0", usergroup ? usergroup : "client0_usergroup0", permission);
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(403);
             });
             function checkForUser(user) {
                 return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    await th.removeClientModule("client0", moduleName);
-                    var token = await th.defaults.login("client0_usergroup0_user0");
-                    var testObject = await createTestObject("client0");
+                    await th.removeClientModule(client ? client : "client0", moduleName);
+                    var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                    var testObject = await createTestObject(client ? client : "client0");
                     await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
             it('responds with 400 when not sending an object to update', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var testObject = await createTestObject("client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/${testObject._id}?token=${token}`).expect(400);
             });
             it('responds with 404 when the _id is invalid', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var testObject = await createTestObject("client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/invalidId?token=${token}`).send(testObject).expect(404);
             });
             it('does not update the _id when it was sent', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var testObject = await createTestObject("client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                var testObject = await createTestObject(client ? client : "client0");
                 var originalId = testObject._id;
                 testObject._id = "newId";
                 await th.put(`/api/${api}/${originalId}?token=${token}`).send(testObject).expect(200);
                 await th.get(`/api/${api}/newId?token=${token}`).expect(404);
             });
         },
-        clientDependentNegative: function(api, createTestObject) {
+        clientDependentNegative: function(api, createTestObject, client, usergroup, user) {
             it('responds with 404 when the object to update does not belong to client of the logged in user', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject("client1");
                 await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(404);
             });
             it('does not update the clientId when it was sent', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var testObject = await createTestObject("client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                var testObject = await createTestObject(client ? client : "client0");
                 var originalClientId = testObject.clientId;
                 testObject.clientId = "newClientId";
                 await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(200);
@@ -847,69 +805,69 @@ th.apiTests = {
         }
     },
     delete: {
-        defaultNegative: function(api, permission, getId) {
+        defaultNegative: function(api, permission, getId, client, usergroup, user, adminuser) {
             it('responds without authentication with 403', async() => {
-                var id = await getId("client0");
+                var id = await getId(client ? client : "client0");
                 await th.del(`/api/${api}/${id}`).expect(403);
             });
             if (permission) it('responds without write permission with 403', async() => {
-                var id = await getId("client0");
-                await th.removeWritePermission("client0", "client0_usergroup0", permission);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var id = await getId(client ? client : "client0");
+                await th.removeWritePermission(client ? client : "client0", usergroup ? usergroup : "client0_usergroup0", permission);
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.del(`/api/${api}/${id}?token=${token}`).expect(403);
             });
             function checkForUser(user) {
                 return async() => {
                     var moduleName = th.getModuleForApi(api);
-                    await th.removeClientModule("client0", moduleName);
+                    await th.removeClientModule(client ? client : "client0", moduleName);
                     var token = await th.defaults.login(user);
-                    var id = await getId("client0");
+                    var id = await getId(client ? client : "client0");
                     await th.del(`/api/${api}/${id}?token=${token}`).expect(403);
                 }
             }
-            it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
-            it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
+            if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
             it('responds with 404 when the _id is invalid', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var id = await getId("client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                var id = await getId(client ? client : "client0");
                 await th.del(`/api/${api}/invalidId?token=${token}`).expect(404);
             });
         },
-        clientDependentNegative: function(api, getId) {
+        clientDependentNegative: function(api, getId, client, usergroup, user) {
             it('responds with 404 when the object to delete does not belong to client of the logged in user', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var id = await getId("client1");
                 await th.del(`/api/${api}/${id}?token=${token}`).expect(404);
             });
         },
-        defaultPositive: function(api, datatypename, getId, skipRelations, skipDynamicAttributes) {
+        defaultPositive: function(api, datatypename, getId, skipRelations, skipDynamicAttributes, client, usergroup, user) {
             it('deletes the object and return 204', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var id = await getId("client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                var id = await getId(client ? client : "client0");
                 await th.del(`/api/${api}/${id}?token=${token}`).expect(204);
-                var elementFromDatabase = await Db.getDynamicObject("client0", datatypename, id);
+                var elementFromDatabase = await Db.getDynamicObject(client ? client : "client0", datatypename, id);
                 assert.ok(!elementFromDatabase);
             });
             if (!skipRelations) it('All relations, where the element is the source (type1, id1), are also deleted', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var id = await getId("client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                var id = await getId(client ? client : "client0");
                 await th.del(`/api/${api}/${id}?token=${token}`).expect(204);
-                var relations = await Db.getDynamicObjects("client0", "relations", { datatype1name: datatypename, name1: id });
+                var relations = await Db.getDynamicObjects(client ? client : "client0", "relations", { datatype1name: datatypename, name1: id });
                 assert.strictEqual(relations.length, 0);
             });
             if (!skipRelations) it('All relations, where the element is the target (type2, id2), are also deleted', async() => {
-                var token = await th.defaults.login("client0_usergroup0_user0");
-                var id = await getId("client0");
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+                var id = await getId(client ? client : "client0");
                 await th.del(`/api/${api}/${id}?token=${token}`).expect(204);
-                var relations = await Db.getDynamicObjects("client0", "relations", { datatype2name: datatypename, name2: id });
+                var relations = await Db.getDynamicObjects(client ? client : "client0", "relations", { datatype2name: datatypename, name2: id });
                 assert.strictEqual(relations.length, 0);
             });
             if (!skipDynamicAttributes) it('Deletes all dynamic attribute values for the entity', async() => {
-                var id = await getId("client0");
-                await th.prepareDynamicAttributes("client0", datatypename);
-                var token = await th.defaults.login("client0_usergroup0_user0");
+                var id = await getId(client ? client : "client0");
+                await th.prepareDynamicAttributes(client ? client : "client0", datatypename);
+                var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.del(`/api/${api}/${id}?token=${token}`).expect(204);
-                var dynamicAttributeValuesAfter = await Db.getDynamicObjects("client0", "dynamicattributevalues", { entityname: id });
+                var dynamicAttributeValuesAfter = await Db.getDynamicObjects(client ? client : "client0", "dynamicattributevalues", { entityname: id });
                 assert.strictEqual(dynamicAttributeValuesAfter.length, 0);
             });
         }
