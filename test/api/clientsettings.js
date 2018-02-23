@@ -2,12 +2,11 @@
  * UNIT Tests for api/clientsettings
  */
 var assert = require('assert');
-var async = require('async');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
-describe('API clientsettings', function() {
+describe('API clientsettings', () => {
     
     before(async() => {
         await th.cleanDatabase();
@@ -22,68 +21,49 @@ describe('API clientsettings', function() {
         await th.prepareClientSettings();
     });
 
-    describe('GET/', function() {
+    describe('GET/', () => {
 
         th.apiTests.get.defaultNegative(co.apis.clientsettings, co.permissions.SETTINGS_CLIENT);
 
-        it('returns client settings of currently logged in user', async function() {
-            var loggedInUser = await th.defaults.getUser();
-            var settingsFromDatabase = await db.get(co.collections.clientsettings.name).findOne({clientId: loggedInUser.clientId });
-            var token = await th.defaults.login();
+        it('returns client settings of currently logged in user', async () => {
+            var settingsFromDatabase = await Db.getDynamicObject(Db.PortalDatabaseName, "clientsettings", { clientname: "client0" });
+            var token = await th.defaults.login("client0_usergroup0_user0");
             var settingsFromApi = (await th.get(`/api/${co.apis.clientsettings}?token=${token}`).expect(200)).body;
-            ['_id', 'clientId', 'logourl'].forEach((key) => {
-                assert.strictEqual(settingsFromApi[key].toString(), settingsFromDatabase[key].toString());
-            });
+            assert.strictEqual(settingsFromApi._id, settingsFromDatabase.name);
+            assert.strictEqual(settingsFromApi.clientId, "client0");
+            assert.strictEqual(settingsFromApi.logourl, settingsFromDatabase.logourl);
         });
 
-        it('returns an empty setting set when client of logged in user has no settings in database', async function() {
-            var loggedInUser = await th.defaults.getUser();
-            // Eventuell vorhandene Einstellungen löschen
-            await db.get(co.collections.clientsettings.name).remove({clientId: loggedInUser.clientId });
-            var token = await th.defaults.login();
+        it('returns an empty setting set when client of logged in user has no settings in database', async () => {
+            await Db.deleteDynamicObjects(Db.PortalDatabaseName, "clientsettings", { clientname: "client0" });
+            var token = await th.defaults.login("client0_usergroup0_user0");
             var settingsFromApi = (await th.get(`/api/${co.apis.clientsettings}?token=${token}`).expect(200)).body;
-            assert.strictEqual(settingsFromApi.logourl, 'css/logo_avorium_komplett.svg');
+            assert.strictEqual(settingsFromApi._id, null);
+            assert.strictEqual(settingsFromApi.clientId, "client0");
+            assert.strictEqual(settingsFromApi.logourl, "css/logo_avorium_komplett.svg");
         });
 
     });
 
-    describe('POST/', function() {
+    describe('POST/', () => {
 
-        function createPostTestClientSettings() {
-            return Promise.resolve({
-                logourl: 'http://logourl.com'
-            });
+        async function createPostTestClientSettings() {
+            return { logourl: 'http://logourl.com' };
         }
 
         th.apiTests.post.defaultNegative(co.apis.clientsettings, co.permissions.SETTINGS_CLIENT, createPostTestClientSettings);
 
-        it('returns the created settings containing an _id and the clientId of the logged in user', async () => {
+        it('returns the created settings containing an _id and the clientId of the logged in user', async() => {
             var settings = await createPostTestClientSettings();
-            var token = await th.defaults.login();
+            var token = await th.defaults.login("client0_usergroup0_user0");
             var apiResult = (await th.post(`/api/${co.apis.clientsettings}?token=${token}`).send(settings).expect(200)).body;
             assert.ok(apiResult._id);
-            assert.ok(apiResult.clientId);
+            assert.strictEqual(apiResult.clientId, "client0");
             assert.strictEqual(apiResult.logourl, settings.logourl);
+            var settingsFromDatabase = await Db.getDynamicObject(Db.PortalDatabaseName, "clientsettings", { clientname: "client0" });
+            assert.strictEqual(settingsFromDatabase.logourl, settings.logourl);
         });
 
-    });
-
-    describe('PUT/', function() {
-
-        it('responds with 404', async () => {
-            var token = await th.defaults.login();
-            await th.put(`/api/${co.apis.clientsettings}?token=${token}`).send({}).expect(404);
-        });
-
-    });
-
-    describe('DELETE/', function() {
-
-        it('responds with 404', async () => {
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.clientsettings}?token=${token}`).expect(404);
-        });
-    
     });
 
 });

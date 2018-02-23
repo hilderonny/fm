@@ -204,9 +204,14 @@ var Db = {
     //     return result;
     // },
 
-    getDynamicObject: async(clientname, datatypename, name) => {
-        var result = await Db.query(clientname, `SELECT * FROM ${datatypename} WHERE name='${name}';`);
-        return result.rowCount > 0 ? result.rows[0] : undefined;
+    getDynamicObject: async(clientname, datatypename, filterorname) => {
+        if ((typeof filterorname) === "string") {
+            var result = await Db.query(clientname, `SELECT * FROM ${datatypename} WHERE name='${filterorname}';`);
+            return result.rowCount > 0 ? result.rows[0] : undefined;
+        } else {
+            var result = await Db.getDynamicObjects(clientname, datatypename, filterorname);
+            return result.length > 0 ? result[0] : undefined;
+        }
     },
 
     getDynamicObjects: async(clientname, datatypename, filter) => {
