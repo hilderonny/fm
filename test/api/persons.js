@@ -28,6 +28,7 @@ th.createApiTests({
     cangetforids: true,
     cangetid: true,
     canput: true,
+    candelete: true,
     children: {
         datatypename: "communications",
         parentfield: "personname"

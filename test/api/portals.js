@@ -39,6 +39,7 @@ th.createApiTests({
     },
     cangetid: true,
     canput: true,
+    candelete: true,
     client: "portal",
     usergroup: "portal_usergroup0",
     user: "portal_usergroup0_user0",

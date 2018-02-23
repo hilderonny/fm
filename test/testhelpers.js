@@ -498,7 +498,7 @@ th.createApiTests = (config, onlythis) => {
                 var elementupdate = config.updateset;
                 var token = await th.defaults.login(config.user);
                 await th.put(`/api/${config.apiname}/${originalelement._id}?token=${token}`).send(elementupdate).expect(200);
-                var elementFromDatabase = await Db.getDynamicObject(config.client ? config.client : "client0", config.apiname, originalelement._id);
+                var elementFromDatabase = config.mapfields(await Db.getDynamicObject(config.client ? config.client : "client0", config.apiname, originalelement._id));
                 Object.keys(elementupdate).forEach((k) => {
                     assert.strictEqual(elementFromDatabase[k], elementupdate[k]);
                 });
@@ -510,8 +510,8 @@ th.createApiTests = (config, onlythis) => {
                 elementupdate[config.forparent.clientparentfield] = config.forparent.elementname.replace(/0+$/, "1");
                 var token = await th.defaults.login(config.user);
                 await th.put(`/api/${config.apiname}/${originalelement._id}?token=${token}`).send(elementupdate).expect(200);
-                var elementFromDatabase = await Db.getDynamicObject(config.client ? config.client : "client0", config.apiname, originalelement._id);
-                assert.strictEqual(elementFromDatabase[config.forparent.parentfield], originalelement[config.forparent.clientparentfield]);
+                var elementFromDatabase = config.mapfields(await Db.getDynamicObject(config.client ? config.client : "client0", config.apiname, originalelement._id));
+                assert.strictEqual(elementFromDatabase[config.forparent.clientparentfield], originalelement[config.forparent.clientparentfield]);
                 delete elementupdate[config.forparent.clientparentfield];
                 Object.keys(elementupdate).forEach((k) => {
                     assert.strictEqual(elementFromDatabase[k], elementupdate[k]);
@@ -520,7 +520,7 @@ th.createApiTests = (config, onlythis) => {
             
         });
 
-        describe('DELETE/:id', () => {
+        if (config.candelete) describe('DELETE/:id', () => {
 
             async function getDeleteElementId(clientname) {
                 return config.elementname.replace(config.client ? config.client : "client0", clientname);

@@ -22,6 +22,7 @@ th.createApiTests({
     },
     updateset: { lat: "newlat" },
     cangetall: true,
+    candelete: true,
     client: "client0",
     usergroup: "client0_usergroup0",
     user: "client0_usergroup0_user0",

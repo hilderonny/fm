@@ -28,6 +28,7 @@ th.createApiTests({
         portalname: "portal_portal0", 
         modulename: "ronnyseins"
     },
+    candelete: true,
     client: "portal",
     usergroup: "portal_usergroup0",
     user: "portal_usergroup0_user0",

@@ -10,6 +10,7 @@ th.createApiTests({
     comparefields: ["_id", "clientId", "addressee", "partnerId", "street", "postcode", "city", "type"],
     cangetid: true,
     canput: true,
+    candelete: true,
     mapfields: (e, clientname) => { return {
         _id: e.name, 
         clientId: clientname, 

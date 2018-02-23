@@ -24,6 +24,7 @@ th.createApiTests({
     beforeeach: [ th.preparePersons, th.prepareCommunications ],
     cangetid: true,
     canput: true,
+    candelete: true,
     comparefields: ["_id", "clientId", "contact", "personId", "medium", "type"],
     mapfields: (e, clientname) => { return {
         _id: e.name, 
