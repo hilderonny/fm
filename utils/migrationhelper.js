@@ -121,7 +121,7 @@ async function migratedynamicattributeoptions() {
         return {
             name: orig._id.toString(),
             dynamicattributename: orig.dynamicAttributeId.toString(),
-            label: orig.text_de,
+            label: orig.text_de ? orig.text_de : orig.text_en,
             value: orig.value
         };
     });
@@ -132,7 +132,7 @@ async function migratedynamicattributes() {
         return {
             name: orig._id.toString(),
             modelname: orig.modelName,
-            label: orig.name_de,
+            label: orig.name_de ? orig.name_de : orig.name_en,
             dynamicattributetypename: orig.type,
             identifier: orig.identifier
         };
