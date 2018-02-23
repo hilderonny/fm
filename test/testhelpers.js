@@ -470,7 +470,7 @@ th.createApiTests = (config, onlythis) => {
     
         });
         
-        describe('GET/:id', () => {
+        if (config.cangetid) describe('GET/:id', () => {
 
             th.apiTests.getId.defaultNegative(config.apiname, config.permission, config.apiname);
             th.apiTests.getId.clientDependentNegative(config.apiname, config.apiname);
@@ -524,7 +524,7 @@ th.createApiTests = (config, onlythis) => {
     
         });
 
-        describe('PUT/:id', () => {
+        if (config.canput) describe('PUT/:id', () => {
 
             async function createPutTestElement(clientname) {
                 var testelement = JSON.parse(JSON.stringify(config.testelement));
@@ -596,7 +596,7 @@ th.apiTests = {
             it('responds without authentication with 403', async() => {
                 return th.get(`/api/${api}`).expect(403);
             });
-            it('responds without read permission with 403', async() => {
+            if (permissionkey) it('responds without read permission with 403', async() => {
                 // Remove the corresponding permission
                 await th.removeReadPermission("client0", "client0_usergroup0", permissionkey);
                 var token = await th.defaults.login("client0_usergroup0_user0");
@@ -631,7 +631,7 @@ th.apiTests = {
             }
             it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser("client0_usergroup0_user0"));
             it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser("client0_usergroup0_user1"));
-            it('responds with empty list when user has no read permission', async() => {
+            if (permissionkey) it('responds with empty list when user has no read permission', async() => {
                 await th.removeReadPermission("client0", "client0_usergroup0", permissionkey);
                 var testobjectids = (await createTestObjects("client0")).map(n => n._id);
                 var token = await th.defaults.login("client0_usergroup0_user0");
@@ -696,7 +696,7 @@ th.apiTests = {
                 await Db.insertDynamicObject("client0", datatypename, testObject);
                 await th.get(`/api/${api}/${testObject.name}`).expect(403);
             });
-            it('responds without read permission with 403', async() => {
+            if (permission) it('responds without read permission with 403', async() => {
                 await th.removeReadPermission("client0", "client0_usergroup0", permission);
                 await Db.insertDynamicObject("client0", datatypename, testObject);
                 var token = await th.defaults.login("client0_usergroup0_user0");

@@ -21,5 +21,7 @@ th.createApiTests({
     },
     updateset: { content: "Ronny" },
     cangetall: true,
-    cangetforids: true
+    cangetforids: true,
+    cangetid: true,
+    canput: true,
 });

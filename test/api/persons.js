@@ -26,6 +26,8 @@ th.createApiTests({
     updateset: { firstname: "Ronny" },
     cangetall: true,
     cangetforids: true,
+    cangetid: true,
+    canput: true,
     children: {
         datatypename: "communications",
         parentfield: "personname"

@@ -22,6 +22,8 @@ var types = {
 th.createApiTests({
     apiname: "communications",
     beforeeach: [ th.preparePersons, th.prepareCommunications ],
+    cangetid: true,
+    canput: true,
     comparefields: ["_id", "clientId", "contact", "personId", "medium", "type"],
     mapfields: (e, clientname) => { return {
         _id: e.name, 

@@ -31,5 +31,7 @@ th.createApiTests({
     children: {
         datatypename: "partneraddresses",
         parentfield: "businesspartnername"
-    }
+    },
+    cangetid: true,
+    canput: true,
 });
