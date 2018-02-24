@@ -283,6 +283,7 @@ qrcode.process = function(ctx){
     var detector = new Detector(image);
 
     var qRCodeMatrix = detector.detect();
+    if (qrcode.matrixcallback) qrcode.matrixcallback(qRCodeMatrix);
     
     if(qrcode.debug)
     {

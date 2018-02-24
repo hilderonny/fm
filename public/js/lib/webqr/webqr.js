@@ -18,7 +18,9 @@ function captureToCanvas() {
         context2d.drawImage(preview, 0, 0);
         qrcode.decode();
     }
-    catch(e){ }
+    catch(e){
+        console.log(e);
+    }
     setTimeout(captureToCanvas, 500);
 }
 
@@ -34,6 +36,14 @@ function setwebcam()
     });
 }
 
+function matrixcallback(qRCodeMatrix) {
+    context2d.fillStyle = "rgba(255,255,255,1)";
+    qRCodeMatrix.points.forEach(function(p) {
+        context2d.fillRect(p.x, p.y, 3, 3 );
+    });
+    console.log(qRCodeMatrix);
+}
+
 function onqrresult(content) {
     console.log(content);
     document.getElementById("result").innerHTML = content;
@@ -42,6 +52,7 @@ function onqrresult(content) {
 window.addEventListener("load", function() {
     preview = document.getElementById("preview");
     initCanvas(800, 600);
+    qrcode.matrixcallback = matrixcallback;
     qrcode.callback = onqrresult;
     setwebcam();
 });
