@@ -3,7 +3,6 @@
  */
 var assert = require('assert');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 var localconfig = require('../../config/localconfig.json');
@@ -55,7 +54,7 @@ describe('API clients', async() => {
 
         it('responds with list of all clients containing all details', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var elementsFromDatabase = ((await Db.query(Db.PortalDatabaseName, "SELECT * FROM clients")).rows).map(mapFields);
+            var elementsFromDatabase = (await Db.query(Db.PortalDatabaseName, "SELECT * FROM clients")).rows.map(mapFields);
             var elementsFromRequest = (await th.get(`/api/clients?token=${token}`).expect(200)).body;
             compareElements(elementsFromRequest, elementsFromDatabase);
         });

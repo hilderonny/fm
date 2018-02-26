@@ -152,7 +152,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
                 $scope.isNewUserGroup = false;
                 $scope.userGroupName = $scope.userGroup.name; // Prevent updating the label when changing the name input value
                 $scope.relationsEntity = { type:'usergroups', id:$scope.userGroup._id };
-                return $http.get('/api/users/?userGroupId=' + $scope.params.userGroupId + '#ignore403');
+                return $http.get('/api/users/forUserGroup/' + $scope.params.userGroupId + '?ignore403');
             }).then(function(usersResponse) {
                 $scope.userGroup.users = usersResponse.data;
                 return $scope.getPermissions();

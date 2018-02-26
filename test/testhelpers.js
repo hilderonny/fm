@@ -91,16 +91,18 @@ th.prepareUserGroups = async() => {
     await th.cleanTable("usergroups", true, true);
     await Db.insertDynamicObject(Db.PortalDatabaseName, "usergroups", { name: "portal_usergroup0" });
     await Db.insertDynamicObject("client0", "usergroups", { name: "client0_usergroup0" });
+    await Db.insertDynamicObject("client0", "usergroups", { name: "client0_usergroup1" });
+    await Db.insertDynamicObject("client1", "usergroups", { name: "client1_usergroup0" });
 };
 
 th.prepareUsers = async() => {
     await th.cleanTable("users", true, true);
     await th.cleanTable("allusers", true, false);
     var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('${Db.PortalDatabaseName}_usergroup0_user0', '${hashedPassword}', '${Db.PortalDatabaseName}_usergroup0',false);`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('${Db.PortalDatabaseName}_usergroup0_user1', '${hashedPassword}', '${Db.PortalDatabaseName}_usergroup0',true);`);
-    await Db.query("client0", `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('client0_usergroup0_user0', '${hashedPassword}', 'client0_usergroup0',false);`);
-    await Db.query("client0", `INSERT INTO users (name, password, usergroupname, isadmin) VALUES ('client0_usergroup0_user1', '${hashedPassword}', 'client0_usergroup0',true);`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO users (name, label, password, usergroupname, isadmin) VALUES ('${Db.PortalDatabaseName}_usergroup0_user0', 'userlabel', '${hashedPassword}', '${Db.PortalDatabaseName}_usergroup0',false);`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO users (name, label, password, usergroupname, isadmin) VALUES ('${Db.PortalDatabaseName}_usergroup0_user1', 'userlabel', '${hashedPassword}', '${Db.PortalDatabaseName}_usergroup0',true);`);
+    await Db.query("client0", `INSERT INTO users (name, label, password, usergroupname, isadmin) VALUES ('client0_usergroup0_user0', 'userlabel', '${hashedPassword}', 'client0_usergroup0',false);`);
+    await Db.query("client0", `INSERT INTO users (name, label, password, usergroupname, isadmin) VALUES ('client0_usergroup0_user1', 'userlabel', '${hashedPassword}', 'client0_usergroup0',true);`);
     await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${Db.PortalDatabaseName}_usergroup0_user0', '${hashedPassword}', '${Db.PortalDatabaseName}');`);
     await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${Db.PortalDatabaseName}_usergroup0_user1', '${hashedPassword}', '${Db.PortalDatabaseName}');`);
     await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('client0_usergroup0_user0', '${hashedPassword}', 'client0');`);
@@ -729,7 +731,7 @@ th.apiTests = {
          */
         defaultPositive: function(api, datatypename, createTestObject, mapFunction, client, usergroup, user) {
             it('responds with the created element containing an _id field', async() => {
-                var testObject = createTestObject();
+                var testObject = await createTestObject();
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var objectFromApi = (await th.post(`/api/${api}?token=${token}`).send(testObject).expect(200)).body;
                 assert.ok(objectFromApi._id);

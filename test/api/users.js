@@ -1,15 +1,13 @@
 /**
  * UNIT Tests for api/users
- * @example npm run-script testlocal
- * @see http://softwareengineering.stackexchange.com/a/223376 for running async tasks in parallel
  */
 var assert = require('assert');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
+var Db = require("../../utils/db").Db;
 var bcryptjs =  require('bcryptjs');
 var co = require('../../utils/constants');
 
-describe('API users', function() {
+describe('API users', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -24,476 +22,234 @@ describe('API users', function() {
         await th.prepareRelations();
     });
 
-    describe('GET/', function() {
+    function compareElement(actual, expected) {
+        ["_id", "name", "userGroupId", "isAdmin"].forEach((f) => {
+            assert.ok(typeof(actual[f]) !== "undefined");
+            assert.strictEqual(actual[f], expected[f]);
+        });
+    }
+
+    function compareElements(actual, expected) {
+        assert.strictEqual(actual.length, expected.length);
+        actual.sort((a, b) => { return a._id.localeCompare(b._id); });
+        expected.sort((a, b) => { return a._id.localeCompare(b._id); });
+        for (var i = 0; i < actual.length; i++) compareElement(actual[i], expected[i]);
+    }
+
+    function mapFields(e) {
+        return {
+            _id: e.name,
+            clientId: "client0",
+            name: e.label,
+            userGroupId: e.usergroupname,
+            isAdmin: e.isadmin
+        }
+    }
+
+    describe('GET/', () => {
 
         th.apiTests.get.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER);
 
-        it('responds with list of all users of the client of the logged in user containing all details', function() {
-            var users;
-            // We use client 1
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                return th.get(`/api/${co.apis.users}?token=${token}`).expect(200);
-            }).then(function(response){
-                users = response.body;
-                // Check whether all users of the current client and all of their details are contained in the response
-                assert.strictEqual(users.length, 4, `Number of users differ (actual ${users.length}, expected 4)`); // 2 user groups with 2 users each;
-                // Get client of current user
-                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
-            }).then((currentUser) => {
-                var currentUserClientId = currentUser.clientId.toString();
-                users.forEach((user) => {
-                    // Check properties for existence
-                    ['name', 'clientId', 'userGroupId'].forEach((propertyName) => {
-                        assert.ok(user[propertyName], `Property "${propertyName}" is missing`);
-                    });
-                    // Check clientId for correctness
-                    assert.strictEqual(user.clientId, currentUserClientId, `ClientId of user in list (${user.clientId}) does not match the clientId of the logged in user (${currentUserClientId})`);
-                });
-                return Promise.resolve();
-            });
+        it('responds with list of all users of the client of the logged in user containing all details', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var elementsFromDatabase = (await Db.getDynamicObjects("client0", "users")).map((e) => { return mapFields(e); });
+            var elementsFromRequest = (await th.get(`/api/users?token=${token}`).expect(200)).body;
+            compareElements(elementsFromRequest, elementsFromDatabase);
         });
 
-        it('contains information about the usergroup when parameter "joinUserGroup" is given', function() {
-            var users;
-            // We use client 1
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                return th.get(`/api/${co.apis.users}?token=${token}&joinUserGroup=true`).expect(200);
-            }).then(function(response){
-                users = response.body;
-                // Check whether all users of the current client and all of their details are contained in the response
-                assert.strictEqual(users.length, 4, `Number of users differ (actual ${users.length}, expected 4)`); // 2 user groups with 2 users each;
-                // Get client of current user
-                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
-            }).then((currentUser) => {
-                var currentUserClientId = currentUser.clientId.toString();
-                users.forEach((user) => {
-                    // Check properties for existence
-                    ['name', 'clientId', 'userGroupId'].forEach((propertyName) => {
-                        assert.ok(user[propertyName], `Property "${propertyName}" is missing`);
-                    });
-                    // Check clientId for correctness
-                    assert.strictEqual(user.clientId, currentUserClientId, `ClientId of user in list (${user.clientId}) does not match the clientId of the logged in user (${currentUserClientId})`);
-                    // Check usergroup
-                    assert.ok(user.userGroup);
-                    assert.strictEqual(user.userGroup._id, user.userGroupId);
-                });
-                return Promise.resolve();
+        it('contains information about the usergroup when parameter "joinUserGroup" is given', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var usergroup = await Db.getDynamicObject("client0", "usergroups", "client0_usergroup0");
+            var usersFromRequest = (await th.get(`/api/users?token=${token}&joinUserGroup=true`).expect(200)).body;
+            usersFromRequest.forEach((userFromRequest) => {
+                assert.ok(userFromRequest.userGroup);
+                assert.strictEqual(userFromRequest.userGroup._id, usergroup.name);
+                assert.strictEqual(userFromRequest.userGroup.name, usergroup.label);
             });
         });
 
     });
 
-    describe('GET/forIds', function() {
+    describe('GET/forIds', () => {
 
-        function createTestUsers() {
-            return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}).then(function(userGroup) {
-                var userGroupId = userGroup._id;
-                var clientId = userGroup.clientId;
-                var testObjects = ['testUser1', 'testUser2', 'testUser3'].map(function(name) {
-                    return {
-                        name: name,
-                        pass: 'test',
-                        userGroupId: userGroupId,
-                        clientId: clientId
-                    }
-                });
-                return Promise.resolve(testObjects);
-            });
+        async function createTestUsers(client) {
+            var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
+            var testobjects = [
+                { name: client + "_usergroup0_testuser0", password: hashedPassword, label: "label0", usergroupname: client + "_usergroup0", isadmin: false },
+                { name: client + "_usergroup0_testuser1", password: hashedPassword, label: "label1", usergroupname: client + "_usergroup0", isadmin: true }
+            ];
+            for (var i = 0; i < testobjects.length; i++) {
+                await Db.insertDynamicObject(client, "users", testobjects[i]);
+            }
+            return testobjects.map(mapFields);
         }
 
         th.apiTests.getForIds.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users.name, createTestUsers);
         th.apiTests.getForIds.clientDependentNegative(co.apis.users, co.collections.users.name, createTestUsers);
+        th.apiTests.getForIds.defaultPositive(co.apis.users, co.collections.users.name, createTestUsers);
 
-        it('returns a list of users with all details except password for the given IDs', function() {
-            var testUserIds, insertedUsers;
-            return createTestUsers().then(function(objects) {
-                return th.bulkInsert(co.collections.users.name, objects);
-            }).then(function(objects) {
-                insertedUsers = objects;
-                testUserIds = objects.map((to) => to._id.toString());
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.users}/forIds?ids=${testUserIds.join(',')}&token=${token}`).expect(200);
-            }).then(function(response) {
-                var users = response.body;
-                var idCount = insertedUsers.length;
-                assert.equal(users.length, idCount);
-                for (var i = 0; i < idCount; i++) {
-                    assert.strictEqual(users[i]._id, insertedUsers[i]._id.toString());
-                    assert.strictEqual(users[i].name, insertedUsers[i].name);
-                    assert.strictEqual(users[i].userGroupId, insertedUsers[i].userGroupId.toString());
-                    assert.strictEqual(users[i].clientId, insertedUsers[i].clientId.toString());
-                    assert.ok(!users[i].pass);
-                }
-                return Promise.resolve();
-            });
-        });
     });
 
-    describe('GET/?userGroupId', function() {
-
-        it('responds with invalid userGroupId with 400', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                return th.get(`/api/${co.apis.users}/?token=${token}&userGroupId=invalidId`).expect(400);
-            });
-        });
-
-        it('responds with list of all users of the given usergroup containing all details', function() {
-            var currentUserGroupId, users;
-            return db.get(co.collections.usergroups.name).findOne({name: th.defaults.userGroup}).then(function(userGroup) {
-                currentUserGroupId = userGroup._id.toString();
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.users}?token=${token}&userGroupId=${currentUserGroupId}`).expect(200);
-            }).then(function(response) {
-                users = response.body;
-                // Check whether all users of the current usergroup and all of their details are contained in the response
-                assert.strictEqual(users.length, 2, `Number of users differ (actual ${users.length}, expected 2)`);
-                // Get client of current user
-                return db.get('users').findOne({name: th.defaults.user});
-            }).then(function(currentUser) {
-                var currentUserClientId = currentUser.clientId.toString();
-                users.forEach((user) => {
-                    // Check properties for existence
-                    ['name', 'clientId', 'userGroupId'].forEach((propertyName) => {
-                        assert.ok(user[propertyName], `Property "${propertyName}" is missing`);
-                    });
-                    // Check clientId for correctness
-                    assert.strictEqual(user.clientId, currentUserClientId, `ClientId of user in list (${user.clientId}) does not match the clientId of the logged in user (${currentUserClientId})`);
-                    assert.strictEqual(user.userGroupId, currentUserGroupId, `UserGroupId of user in list (${user.userGroupId}) does not match the userGroupId of the logged in user (${currentUserGroupId})`);
-                });
-                return Promise.resolve();
-            });
+    describe('GET/forUserGroup', () => {
+    
+        var api = "users/forUserGroup";
+        th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USER, "usergroups");
+        th.apiTests.getId.clientDependentNegative(api, "usergroups");
+        
+        it(`returns all users for the given usergroup`, async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var filter = { usergroupname: "client0_usergroup0" };
+            var elementsFromDatabase = (await Db.getDynamicObjects("client0", "users", filter)).map((e) => { return mapFields(e); });
+            var elementsFromApi = (await th.get(`/api/${api}/client0_usergroup0?token=${token}`).expect(200)).body;
+            compareElements(elementsFromApi, elementsFromDatabase);
         });
         
     });
 
-    describe('GET/:id', function() {
+    describe('GET/:id', () => {
 
         th.apiTests.getId.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, co.collections.users.name);
         th.apiTests.getId.clientDependentNegative(co.apis.users, co.collections.users.name);
 
-        it('responds with existing user id with all details of the user', function() {
-            var userFromDatabase;
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.users}/${userFromDatabase._id}?token=${token}`).expect(200);
-            }).then(function(response) {
-                var userFromRequest = response.body;
-                assert.strictEqual(userFromRequest.name, userFromDatabase.name, `Name of user in database does not match name of user from API ("${userFromDatabase.name}" vs. "${userFromRequest.name}")`);
-                assert.strictEqual(userFromRequest.userGroupId, userFromDatabase.userGroupId.toString(), `userGroupId of user in database does not match the one from API ("${userFromDatabase.userGroupId}" vs. "${userFromRequest.userGroupId}")`);
-                assert.strictEqual(userFromRequest.clientId, userFromDatabase.clientId.toString(), `clientId of user in database does not match the one from API ("${userFromDatabase.clientId}" vs. "${userFromRequest.clientId}")`);
-                assert.strictEqual(userFromRequest.isAdmin, userFromDatabase.isAdmin, `isAdmin property of user in database does not match the one from API ("${userFromDatabase.isAdmin}" vs. "${userFromRequest.isAdmin}")`);
-                return Promise.resolve();
-            });
-        });
-        
-        it('responds with existing user id and specific fields with details of user containing only the given fields', function() {
-            var userFromDatabase;
-            var keys = ['_id', 'name']; 
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/users/${userFromDatabase._id}?token=${token}&fields=${keys.join('+')}`).expect(200);
-            }).then(function(response) {
-                var userFromApi = response.body;
-                var keyCountFromApi = Object.keys(userFromApi).length;
-                var keyCountFromDatabase = keys.length;
-                assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of user ${userFromApi._id} differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                assert.strictEqual(userFromApi._id, userFromDatabase._id.toString(), `User id from Api: ${userFromApi._id} differs user id in DB: ${userFromDatabase._id.toString()} `); //compare ID values
-                assert.strictEqual(userFromApi.name, userFromDatabase.name.toString(), `User id from Api: ${userFromApi.name} differs user id in DB: ${userFromDatabase.name.toString()} `);                   
-                return Promise.resolve();
-            });
+        it('responds with existing user id with all details of the user', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var elementFromDatabase = mapFields(await Db.getDynamicObject("client0", "users", "client0_usergroup0_user0"));
+            var elementFromApi = (await th.get(`/api/users/client0_usergroup0_user0?token=${token}`).expect(200)).body;
+            compareElement(elementFromApi, elementFromDatabase);
         });
         
     });
 
-    describe('POST/', function() {
+    describe('POST/', () => {
 
-        function createPostTestUser() {
-            return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup}).then(function(userGroup) {
-                var testObject = {
-                    name: 'newUser',
-                    pass: 'newPassword',
-                    userGroupId: userGroup._id.toString()
-                };
-                return Promise.resolve(testObject);
-            });
+        async function createPostTestUser() {
+            return { _id: "client0_testuser", pass: "newPassword", name: "client0_testuser", userGroupId: "client0_usergroup0", isAdmin: false }
         }
 
         th.apiTests.post.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, createPostTestUser);
 
-        it('responds without giving an username with 400', function() {
-            var loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestUser();
-            }).then(function(user) {
-                delete user.name;
-                return th.post(`/api/${co.apis.users}?token=${loginToken}`).send(user).expect(400);
-            });
+        it('responds with the created user containing an _id field', async() => {
+            var elementToSend = await createPostTestUser();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var userFromApi = (await th.post(`/api/users?token=${token}`).send(elementToSend).expect(200)).body;
+            assert.ok(typeof(userFromApi._id) !== "undefined");
+            assert.ok(typeof(userFromApi.name) !== "undefined");
+            assert.ok(typeof(userFromApi.clientId) !== "undefined");
+            assert.ok(typeof(userFromApi.userGroupId) !== "undefined");
+            assert.ok(typeof(userFromApi.isAdmin) !== "undefined");
+            assert.strictEqual(userFromApi._id, elementToSend.name); // id must be name with users
+            assert.strictEqual(userFromApi.clientId, "client0");
+            assert.strictEqual(userFromApi.name, elementToSend.name);
+            assert.strictEqual(userFromApi.userGroupId, elementToSend.userGroupId);
+            assert.strictEqual(userFromApi.isAdmin, elementToSend.isAdmin);
+            var userFromDatabase = await Db.getDynamicObject("client0", "users", elementToSend.name);
+            assert.strictEqual(userFromDatabase.name, elementToSend.name);
+            assert.strictEqual(userFromDatabase.label, elementToSend.name);
+            assert.strictEqual(userFromDatabase.usergroupname, elementToSend.userGroupId);
+            assert.strictEqual(userFromDatabase.isadmin, elementToSend.isAdmin);
         });
 
-        it('responds without giving an user password with 400', function() {
-            var loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestUser();
-            }).then(function(user) {
-                delete user.pass;
-                return th.post(`/api/${co.apis.users}?token=${loginToken}`).send(user).expect(400);
-            });
+        it('responds without giving an user password with 400', async() => {
+            var elementToSend = createPostTestUser();
+            delete elementToSend.pass;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.post(`/api/users?token=${token}`).send(elementToSend).expect(400);
         });
         
-        it('responds without giving an userGroupId with 400', function() {
-            var loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestUser();
-            }).then(function(user) {
-                delete user.userGroupId;
-                return th.post(`/api/${co.apis.users}?token=${loginToken}`).send(user).expect(400);
-            });
+        it('responds without giving an userGroupId with 400', async() => {
+            var elementToSend = createPostTestUser();
+            delete elementToSend.userGroupId;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.post(`/api/users?token=${token}`).send(elementToSend).expect(400);
         });
-
-        it('responds with already used username with 409', function() {
-            var loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestUser();
-            }).then(function(user) {
-                user.name = th.defaults.user;
-                return th.post(`/api/${co.apis.users}?token=${loginToken}`).send(user).expect(409);
-            });
-        }); 
     
-        it('responds with not existing userGroup with 400', function() {
-            var loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestUser();
-            }).then(function(user) {
-                user.userGroupId = '999999999999999999999999';
-                return th.post(`/api/${co.apis.users}?token=${loginToken}`).send(user).expect(400);
-            });
+        it('responds with not existing userGroup with 400', async() => {
+            var elementToSend = createPostTestUser();
+            elementToSend.userGroupId = "client1_usergroupnotexisting";
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.post(`/api/users?token=${token}`).send(elementToSend).expect(400);
         });
-        
-        it('responds with correct user data with inserted user containing an _id field', function() {
-            var newUser, loginToken;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then((token) => {
-                loginToken = token;
-                return createPostTestUser();
-            }).then(function(user) {
-                newUser = user;
-                return th.post(`/api/${co.apis.users}?token=${loginToken}`).send(newUser).expect(200);
-            }).then(function(response) {
-                var userFromApi = response.body;
-                var keyCountFromApi = Object.keys(userFromApi).length - 2; // _id and clientId is returned additionally
-                var keys = Object.keys(newUser);
-                var keyCountFromDatabase =  keys.length; 
-                assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of new user differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                assert.strictEqual( newUser.name, userFromApi.name, 'Names do not match');
-                assert.ok(bcryptjs.compareSync(newUser.pass, userFromApi.pass), 'Passwords do not match');
-                assert.strictEqual( newUser.userGroupId, userFromApi.userGroupId, 'userGroupIds do not match');
-                return Promise.resolve();
-            });
+                
+        it('responds with 400 when the parent of the element does not belong to the same client as the logged in user', async() => {
+            var elementToSend = createPostTestUser();
+            elementToSend.userGroupId = "client1_usergroup0";
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.post(`/api/users?token=${token}`).send(elementToSend).expect(400);
         });
 
     });
 
-    describe('POST/newpassword', function() {
+    describe('POST/newpassword', () => {
+
+        function createPostPassword() {
+            return { pass: "newPassword" }
+        }
 
         var api = `${co.apis.users}/newpassword`;
 
-        th.apiTests.post.defaultNegative(api, co.permissions.SETTINGS_USER, function() {
-            return Promise.resolve({pass:'newPassword'});
+        th.apiTests.post.defaultNegative(api, co.permissions.SETTINGS_USER, createPostPassword);
+
+        it('responds with 200 with giving an empty password and updates the password in the database (empty passwords are okay)', async() => {
+            var elementToSend = createPostPassword();
+            elementToSend.pass = "";
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.post(`/api/${api}?token=${token}`).send(elementToSend).expect(200);
+            var userFromDatabase = await Db.getDynamicObject("client0", "users", "client0_usergroup0_user0");
+            assert.ok(bcryptjs.compareSync(elementToSend.pass, userFromDatabase.password));
         });
 
-        it('responds with 200 with giving an empty password and updates the password in the database (empty passwords are okay)', function() {
-            var objectToSend = {
-                pass: ''
-            };
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.post(`/api/${api}?token=${token}`).send(objectToSend).expect(200);
-            }).then(function() {
-                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
-            }).then(function(userAfterPasswordChange) {
-                assert.ok(bcryptjs.compareSync(objectToSend.pass, userAfterPasswordChange.pass));
-                return Promise.resolve();
-            });
-        });
-
-        it('responds with 200 with giving a correct new password and updates the password in the database', function() {
-            var objectToSend = {
-                pass: 'newPassword'
-            };
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.post(`/api/${api}?token=${token}`).send(objectToSend).expect(200);
-            }).then(function() {
-                return db.get(co.collections.users.name).findOne({name: th.defaults.user});
-            }).then(function(userAfterPasswordChange) {
-                assert.ok(bcryptjs.compareSync(objectToSend.pass, userAfterPasswordChange.pass));
-                return Promise.resolve();
-            });
+        it('responds with 200 with giving a correct new password and updates the password in the database', async() => {
+            var elementToSend = createPostPassword();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.post(`/api/${api}?token=${token}`).send(elementToSend).expect(200);
+            var userFromDatabase = await Db.getDynamicObject("client0", "users", "client0_usergroup0_user0");
+            assert.ok(bcryptjs.compareSync(elementToSend.pass, userFromDatabase.password));
         });
 
     });
 
-    describe('PUT/:id', function() {
+    describe('PUT/:id', () => {
 
-        function createPutTestUser() {
-            return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
-                var testObject = {
-                    _id: user._id.toString(), // Needed in testHelpers to construct the URL with ID
-                    name: 'newUserName',
-                    pass: 'newPassword',
-                    userGroupId: user.userGroupId.toString()
-                };
-                return Promise.resolve(testObject);
-            });
+        async function createPutTestUser(client) {
+            var testelement = { name: client + "_usergroup0_testuser", label: 'Bezeichnung', password: 'test', usergroupname: client + "_usergroup0", isadmin: false };
+            await Db.insertDynamicObject(client, "users", testelement);
+            return mapFields(testelement);
         }
 
         th.apiTests.put.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, createPutTestUser);
         th.apiTests.put.clientDependentNegative(co.apis.users, createPutTestUser);
         
-        it('responds with an user containing a new password with an updated user with the new password', function() {
-            var updatedUser = {
-                pass: 'newpass'
-            };
-            var userFromDatabase;
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.users}/${userFromDatabase._id.toString()}?token=${token}`).send(updatedUser).expect(200);
-            }).then(function(response) {
-                var userFromApi = response.body;       
-                var keyCountFromApi = Object.keys(userFromApi).length;
-                var keys = Object.keys(userFromDatabase);
-                var keyCountFromDatabase = keys.length;
-                assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of updated user differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                assert.strictEqual(userFromApi._id.toString(), userFromDatabase._id.toString(), `_id of updated user differs (${userFromApi._id} from API, ${userFromDatabase._id} in database)`);
-                assert.strictEqual(userFromApi.name, userFromDatabase.name, `name of updated user differs (${userFromApi.name} from API, ${userFromDatabase.name} in database)`);
-                assert.strictEqual(userFromApi.userGroupId.toString(), userFromDatabase.userGroupId.toString(), `userGroupId of updated user differs (${userFromApi.userGroupId} from API, ${userFromDatabase.userGroupId} in database)`);
-                assert.strictEqual(userFromApi.clientId.toString(), userFromDatabase.clientId.toString(), `clientId of updated user differs (${userFromApi.clientId} from API, ${userFromDatabase.clientId} in database)`);
-                assert.strictEqual(userFromApi.isAdmin, userFromDatabase.isAdmin, `isAdmin of updated user differs (${userFromApi.isAdmin} from API, ${userFromDatabase.isAdmin} in database)`);
-                assert.notEqual(userFromApi._id.pass, userFromDatabase.pass, `Password seems to be still the old one`);
-                assert.ok(bcryptjs.compareSync(updatedUser.pass, userFromApi.pass), `Password of updated user does not match the on in the database`);
-                return Promise.resolve();
-            });
-        });
-        
-        it('responds without a new password with an updated user with the old password', function() {
-            var updatedUser = {
-                name: 'newName'
-            };
-            var userFromDatabase;
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.users}/${userFromDatabase._id.toString()}?token=${token}`).send(updatedUser).expect(200);
-            }).then(function(response) {
-                var userFromApi = response.body;
-                assert.strictEqual(updatedUser.name, userFromApi.name, 'User name differs');
-                assert.strictEqual(userFromDatabase.pass, userFromApi.pass, 'User pass differs'); 
-                return Promise.resolve();
-            });
+        it('responds with an user containing a new password with an updated user which has the new password', async() => {
+            var updateset = { pass: "newpassword" };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/users/client0_usergroup0_user0?token=${token}`).send(updateset).expect(200);
+            var userFromDatabase = await Db.getDynamicObject("client0", "users", "client0_usergroup0_user0");
+            assert.ok(bcryptjs.compareSync(updateset.pass, userFromDatabase.password));
         });
 
-        it('responds with an invalid userGroupId with 400', function() {
-            var updatedUser = {
-                userGroupId: 'invalidId'
-            };
-            var userFromDatabase;
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.users}/${userFromDatabase._id.toString()}?token=${token}`).send(updatedUser).expect(400);
-            });
+        it('responds with an invalid userGroupId with 400', async() => {
+            var updateset = { userGroupId: "client0_invalidusergroup" };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/users/client0_usergroup0_user0?token=${token}`).send(updateset).expect(400);
         });
 
-        it('responds with a new userGroupId which does not exist with 400', function() {
-            var updatedUser = {
-                userGroupId: '999999999999999999999999'
-            };
-            var userFromDatabase;
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.users}/${userFromDatabase._id.toString()}?token=${token}`).send(updatedUser).expect(400);
-            });
-        });
-        
-        it('responds with already used username with 409', function() {
-            var updatedUser = {
-                name: th.defaults.user
-            };
-            var userFromDatabase;
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.users}/${userFromDatabase._id.toString()}?token=${token}`).send(updatedUser).expect(409);
-            });
-        });
-
-        it('responds with a correct user with the updated user and its new properties', function() {
-            var updatedUser = {
-                name: 'newName',
-                pass: 'newPass'
-            };
-            var userFromDatabase;
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.users}/${userFromDatabase._id.toString()}?token=${token}`).send(updatedUser).expect(200);
-            }).then(function(response) {
-                var userFromApi = response.body;
-                assert.strictEqual(updatedUser.name, userFromApi.name);
-                assert.ok(bcryptjs.compareSync(updatedUser.pass,  userFromApi.pass)); 
-                return Promise.resolve();
-            });
-        });
-        
-        it('responds with a new userGroup with an updated user with the new userGroupId', function() {
-            var updatedUser = {};
-            var userFromDatabase;
-            return db.get(co.collections.users.name).findOne({name: '1_1_0'}).then(function(user) {
-                userFromDatabase = user;
-                return db.get(co.collections.usergroups.name).findOne({name:'1_1'});
-            }).then(function(userGroup) {
-                updatedUser.userGroupId = userGroup._id.toString();
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.put(`/api/${co.apis.users}/${userFromDatabase._id.toString()}?token=${token}`).send(updatedUser).expect(200);
-            }).then(function(response) {
-                var userFromApi = response.body;
-                assert.strictEqual(updatedUser.userGroupId.toString(), userFromApi.userGroupId);
-                return Promise.resolve();
-            });
+        it('responds with a correct user with the updated user and its new properties', async() => {
+            var updateset = { name: "newlabel", isAdmin: true, userGroupId: "client0_usergroup1" };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/users/client0_usergroup0_user1?token=${token}`).send(updateset).expect(200);
+            var userFromDatabase = await Db.getDynamicObject("client0", "users", "client0_usergroup0_user1");
+            assert.notStrictEqual(userFromDatabase.name, updateset.name);
+            assert.strictEqual(userFromDatabase.label, updateset.name);
+            assert.strictEqual(userFromDatabase.usergroupname, updateset.userGroupId);
+            assert.strictEqual(userFromDatabase.isadmin, updateset.isAdmin);
         });
         
     });
 
-    describe('DELETE/:id', function() {
+    describe('DELETE/:id', () => {
 
-        function getDeleteUserId() {
-            return db.get(co.collections.users.name).findOne({name:th.defaults.user}).then(function(user) {
-                delete user._id;
-                user.name = 'newUserToDelete';
-                return db.get(co.collections.users.name).insert(user);
-            }).then(function(insertedUser) {
-                return th.createRelationsToUser(co.collections.users.name, insertedUser);
-            }).then(function(insertedUser) {
-                return Promise.resolve(insertedUser._id);
-            });
+        async function getDeleteUserId(client) {
+            return client + "_usergroup0_user1";
         }
 
         th.apiTests.delete.defaultNegative(co.apis.users, co.permissions.ADMINISTRATION_USER, getDeleteUserId);

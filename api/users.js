@@ -12,230 +12,126 @@
 var bcryptjs = require('bcryptjs');
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
-var apiHelper = require('../utils/apiHelper');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
+var Db = require("../utils/db").Db;
 
-// Get all users of the current client, maybe filtered by userGroupId
-// TODO: Testfälle anpassen
+function mapFields(e, user) {
+    // Psswort niemals mappen
+    var user = {
+        _id: e.name,
+        clientId: user.clientname,
+        name: e.label,
+        userGroupId: e.usergroupname,
+        isAdmin: e.isadmin
+    }
+    if (e.usergroup) user.userGroup = e.usergroup;
+    return user;
+}
+
+router.get(`/forUserGroup/:id`, auth(co.permissions.ADMINISTRATION_USER, 'r', co.modules.base), validateSameClientId(co.collections.usergroups.name), async(req, res) => {
+    var elements = await Db.getDynamicObjects(req.user.clientname, "users", { usergroupname: req.params.id});
+    res.send(elements.map((e) => { return mapFields(e, req.user); }));
+});
+
 /**
  * Gibt eine Liste von Benutzern des Mandanten des angemeldeten Benutzers zurück.
- * Wenn als Query-Parameter "userGroupId=IRGENDEINEID" angegeben ist, werden nur die Benutzer
- * zurück gegeben, die der geforderten Benutzergruppe angehören.
  * Wenn als Query-Parameter "joinUserGroup=true" angegeben ist, werden in der Property "userGroup"
  * auch noch die Daten der Benutzergruppe der Benutzer zurück gegeben.
  */
-router.get('/', auth(co.permissions.ADMINISTRATION_USER, 'r', 'base'), (req, res) => {
-    var clientId = req.user.clientId; // clientId === null means that the user is a portal user
-    // Aggregate-Pipeline: https://www.mongodb.com/blog/post/joins-and-other-aggregation-enhancements-coming-in-mongodb-3-2-part-1-of-3-introduction
-    var aggregateSteps = [
-        { $match: { clientId: clientId } } // Nur Benutzer des Mandanten des angemeldeten Benutzers
-    ];
-    if (req.query.userGroupId) { // Nur Benutzer einer bestimmten Benutzergruppe
-        if (!validateId.validateId(req.query.userGroupId)) {
-            return res.sendStatus(400);
-        }
-        aggregateSteps.push({ $match: { userGroupId: monk.id(req.query.userGroupId) } });
-    }
+router.get('/', auth(co.permissions.ADMINISTRATION_USER, 'r', 'base'), async(req, res) => {
+    var users = await Db.getDynamicObjects(req.user.clientname, "users");
     if (req.query.joinUserGroup) { // Daten der Benutzergruppe einbinden
-        aggregateSteps.push({ $lookup: { 
-            from: 'usergroups',
-            localField: 'userGroupId',
-            foreignField: '_id',
-            as: 'userGroup'
-        } });
-    }
-    aggregateSteps.push({ $project: { pass: false } }); // Passwort niemals mit zurück geben // TODO: Test einbauen, ob Passwörter zurück kommen
-    req.db.get(co.collections.users.name).aggregate(aggregateSteps).then((users) => {
-        if (req.query.joinUserGroup) { // Benutzergruppen ggf. von Feld zu Einzelwert wandeln
-            users.forEach(function(user) {
-                user.userGroup = user.userGroup[0];
-            });
-        }
-        res.send(users);
-    });
-});
-
-/**
- * Liefert eine Liste von Terminen für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
- * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
- * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
- * einfach eine leere Liste zurück gegeben.
- * Zu jedem Benutzer wird in der Eigenschaft userGroup die Information über die zugehörige Benutzergruppe
- * zurück gegeben. Passwörter werden nicht rausgegeben.
- * @example
- * $http.get('/api/users/forIds?ids=ID1,ID2,ID3')...
- */
-router.get('/forIds', auth(false, false, 'base'), (req, res) => {
-    // Zuerst Berechtigung prüfen
-    auth.canAccess(req.user._id, 'PERMISSION_ADMINISTRATION_USER', 'r', 'base', req.db).then(function(accessAllowed) {
-        if (!accessAllowed) {
-            return res.send([]);
-        }
-        if (!req.query.ids) {
-            return res.send([]);
-        }
-        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
-        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
-        var aggregateSteps = [
-            { $match: { // Nur Benutzer des Mandanten des angemeldeten Benutzers
-                clientId: clientId, 
-                _id: { $in: ids } 
-            } },
-            { $lookup: { 
-                from: 'usergroups',
-                localField: 'userGroupId',
-                foreignField: '_id',
-                as: 'userGroup'
-            } }
-        ];
-        aggregateSteps.push({ $project: { pass: false } }); // Passwort niemals mit zurück geben // TODO: Test einbauen, ob Passwörter zurück kommen
-        req.db.get(co.collections.users.name).aggregate(aggregateSteps).then((users) => {
-            res.send(users);
+        var usergroups = await Db.getDynamicObjects(req.user.clientname, "usergroups");
+        users.forEach((user) => {
+            var usergroup = usergroups.find((ug) => ug.name === user.usergroupname);
+            user.usergroup = { _id: usergroup.name, name: usergroup.label };
         });
-    });
+    }
+    res.send(users.map((e) => { return mapFields(e, req.user); }));
 });
 
-// Get a specific user
-apiHelper.createDefaultGetIdRoute(router, co.collections.users.name, 'PERMISSION_ADMINISTRATION_USER', 'base');
+router.get('/forIds', auth(false, false, co.modules.base), async(req, res) => {
+    // Zuerst Berechtigung prüfen
+    var accessAllowed = await auth.canAccess(req.user.name, co.permissions.ADMINISTRATION_USER, 'r', co.modules.base);
+    if (!accessAllowed) {
+        return res.send([]);
+    }
+    if (!req.query.ids) {
+        return res.send([]);
+    }
+    var users = await Db.getDynamicObjectsForNames(req.user.clientname, "users", req.query.ids.split(','));
+    var usergroups = await Db.getDynamicObjects(req.user.clientname, "usergroups");
+    users.forEach((user) => {
+        var usergroup = usergroups.find((ug) => ug.name === user.usergroupname);
+        user.usergroup = { _id: usergroup.name, name: usergroup.label };
+    });
+    res.send(users.map((e) => { return mapFields(e, req.user); }));
+});
+
+router.get('/:id', auth(co.permissions.ADMINISTRATION_USER, "r", co.modules.base), async(req, res) => {
+    var user = await Db.getDynamicObject(req.user.clientname, "users", req.params.id);
+    if (!user) return res.sendStatus(404);
+    res.send(mapFields(user, req.user));
+});
+
+router.post('/newpassword', auth(co.permissions.SETTINGS_USER, "w", co.modules.base), async(req, res) => {
+    if (typeof(req.body.pass) === 'undefined') return res.sendStatus(400);
+    await Db.updateDynamicObject(req.user.clientname, "users", req.user.name, { password: bcryptjs.hashSync(req.body.pass) });
+    res.sendStatus(200);
+});
 
 // Create an user
-router.post('/', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), function(req, res) {
+router.post('/', auth(co.permissions.ADMINISTRATION_USER, "w", co.modules.base), async(req, res) => {
     var user = req.body;
-    if (!user || Object.keys(user).length < 1 || !user.name || !user.pass || !user.userGroupId || !validateId.validateId(user.userGroupId)) {
+    if (!user || Object.keys(user).length < 1 || !user.name || !user.pass || !user.userGroupId) {
         return res.sendStatus(400);
     }
-    user.pass = bcryptjs.hashSync(user.pass);
-    user.userGroupId = monk.id(user.userGroupId);
     // Check whether username is in use
-    var users = req.db.get(co.collections.users.name);
-    users.count({ name: user.name}).then((count) => {
-        if (count > 0) {
-            return res.sendStatus(409); // Conflict
-        }
-        // Check whether userGroup exists
-        req.db.get('usergroups').findOne(user.userGroupId).then((userGroup) => {
-            if (!userGroup) {
-                res.sendStatus(400);
-            } else {
-                delete user._id; // Ids are generated automatically
-                user.clientId = req.user.clientId; // Assing the new user to the same client as the logged in user, because users can create only users for their own clients
-                req.db.insert(co.collections.users.name, user).then((insertedUser) => {
-                    res.send(insertedUser);
-                });
-            }
-        });
-    });
+    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM allusers WHERE name = '${user.name}';`)).rowCount > 0) return res.sendStatus(409); // Conflict
+    // Check whether userGroup exists
+    if (!(await Db.getDynamicObject(req.user.clientname, "usergroups", user.userGroupId))) return res.sendStatus(400);
+    var usertoinsert = {
+        name: user.name,
+        label: user.name,
+        password: bcryptjs.hashSync(user.pass),
+        usergroupname: user.userGroupId,
+        isadmin: user.isAdmin
+    };
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${usertoinsert.name}', '${usertoinsert.password}', '${req.user.clientname}');`);
+    await Db.query(req.user.clientname, `INSERT INTO users (name, label, password, usergroupname, isadmin) VALUES('${usertoinsert.name}', '${usertoinsert.name}', '${usertoinsert.password}', '${usertoinsert.usergroupname}', ${usertoinsert.isadmin});`);
+    return res.send(mapFields(usertoinsert, req.user));
 });
-
-//TODO check if other verifications are needed
-router.post('/newpassword', auth('PERMISSION_SETTINGS_USER', 'w', 'base'), (req, res) => {
-    if (typeof(req.body.pass) === 'undefined') {
-        res.sendStatus(400);
-    } else {
-        var encryptedNewPassword = bcryptjs.hashSync(req.body.pass);
-        req.db.update(co.collections.users.name, req.user._id, { $set: {pass:encryptedNewPassword} }).then(() => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-            res.sendStatus(200);
-        });
-    }
-});
-
-var getUserFromDatabase = (req, res, userId, userFromRequest) => {
-    return new Promise((resolve, reject) => {
-        req.db.get(co.collections.users.name).findOne(req.params.id).then((userFromDatabase) => {
-            resolve(userFromDatabase);
-        });
-    });
-};
-
-var checkUserNameInUse = (req, res, userFromRequest, userFromDatabase) => {
-    return new Promise((resolve, reject) => {
-        if (userFromRequest.name && userFromRequest.name !== userFromDatabase.name) {
-            // Name was changed, so check whether another user has this name already
-            req.db.get(co.collections.users.name).count({ name: userFromRequest.name}).then((count) => {
-                if (count > 0) {
-                    res.sendStatus(409); // Conflict
-                    reject();
-                } else {
-                    resolve();
-                }
-            });
-        } else {
-            resolve(); // Name was not changed
-        }
-    });
-};
-
-var checkUserGroupId = (req, res, userFromRequest) => {
-    return new Promise((resolve, reject) => {
-        if (userFromRequest.userGroupId) {
-            userFromRequest.userGroupId = monk.id(userFromRequest.userGroupId);
-            // Check whether userGroup exists
-            req.db.get('usergroups').findOne(userFromRequest.userGroupId).then((userGroupFromDatabase) => {
-                if (!userGroupFromDatabase) {
-                    res.sendStatus(400);
-                    reject();
-                } else {
-                    resolve();
-                }
-            });
-        } else {
-            resolve();
-        }
-    });
-};
-
-var updateUser = (req, res, userFromRequest) => {
-    return new Promise((resolve, reject) => {
-        req.db.update(co.collections.users.name, req.params.id, { $set: userFromRequest }).then((updatedUser) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-            res.send(updatedUser);
-            resolve();
-        });
-    });
-};
 
 // Update an user
-router.put('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', 'base'), validateId, validateSameClientId(co.collections.users.name), function(req, res) {
+router.put('/:id', auth(co.permissions.ADMINISTRATION_USER, "w", co.modules.base), validateSameClientId(co.collections.users.name), async(req, res) => {
     var user = req.body;
-    if (!user || Object.keys(user).length < 1) {
-        return res.sendStatus(400);
+    if (!user || Object.keys(user).length < 1) return res.sendStatus(400);
+    // Check whether userGroup exists
+    var usertoupdate = {};
+    if (user.pass && user.pass.length > 0) usertoupdate.password = bcryptjs.hashSync(user.pass);
+    if (user.userGroupId) {
+        if (!(await Db.getDynamicObject(req.user.clientname, "usergroups", user.userGroupId))) return res.sendStatus(400);
+        usertoupdate.usergroupname = user.userGroupId;
     }
-    delete user._id; // When user object also contains the _id field
-    delete user.clientId; // Prevent assignment of the user to another client
-    // For the case that only the _id had to be updated, return an error and do not handle any further
-    if (Object.keys(user).length < 1) {
-        return res.sendStatus(400);
-    }
-    if (user.pass && user.pass.length > 0) {
-        user.pass = bcryptjs.hashSync(user.pass);
-    } else {
-        delete user.pass;
-    }
-    if (user.userGroupId && !validateId.validateId(user.userGroupId)) {
-        return res.sendStatus(400);
-    }
-    getUserFromDatabase(req, res, req.params.id, user)
-        .then((userFromDatabase) => checkUserNameInUse(req, res, user, userFromDatabase))
-        .then(() => checkUserGroupId(req, res, user))
-        .then(() => updateUser(req, res, user))
-        .catch(() => {}); // Errors are handled in the functions itselves
+    if (typeof(user.isAdmin) !== "undefined") usertoupdate.isadmin = user.isAdmin;
+    if (user.name) usertoupdate.label = user.name;
+    if (Object.keys(usertoupdate).length < 1) return res.sendStatus(400);
+    await Db.updateDynamicObject(req.user.clientname, "users", req.params.id, usertoupdate);
+    return res.send(mapFields(usertoupdate, req.user));
 });
 
 // Delete an user
-router.delete('/:id', auth('PERMISSION_ADMINISTRATION_USER', 'w', co.modules.base), validateId, validateSameClientId(co.collections.users.name), function(req, res) {
-    var id = monk.id(req.params.id);
-    req.db.remove(co.collections.users.name, req.params.id).then((result) => {
-        // Database element is available here in every case, because validateSameClientId already checked for existence
-        rh.deleteAllRelationsForEntity(co.collections.users.name, id).then(function() {
-            return dah.deleteAllDynamicAttributeValuesForEntity(id);
-        }).then(() => {
-            res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
-        });
-    });
+router.delete('/:id', auth(co.permissions.ADMINISTRATION_USER, "w", co.modules.base), validateSameClientId(co.collections.users.name), async(req, res) => {
+    var id = req.params.id;
+    var clientname = req.user.clientname;
+    var result = await Db.deleteDynamicObject(clientname, "users", id);
+    if (result.rowCount < 1) return res.sendStatus(403); // Error in deletion, maybe filters do not match like in activities?
+    await rh.deleteAllRelationsForEntity(clientname, "users", id);
+    await dah.deleteAllDynamicAttributeValuesForEntity(clientname, id);
+    res.sendStatus(204);
 });
 
 module.exports = router;

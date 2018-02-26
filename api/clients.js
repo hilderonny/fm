@@ -64,7 +64,7 @@ router.post('/newadmin', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modu
 
 router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), async(req, res) => {
     var element = req.body;
-    if (!element || Object.keys(element).length < 1) {
+    if (!element || Object.keys(element).length < 1 || !element.name) {
         return res.sendStatus(400);
     }
     await Db.query(Db.PortalDatabaseName, `INSERT INTO clients (name, label) VALUES ('${element.name}','${element.name}');`);

@@ -172,6 +172,7 @@
                 ] },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
@@ -225,6 +226,7 @@
                 ] },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
