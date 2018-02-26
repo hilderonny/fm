@@ -15,11 +15,12 @@ var fs = require('fs');
  * Used in documents API, extractdocuments API and unit tests.
  * The ID must be given as Monk ID or as string
  */
-module.exports.getDocumentPath = function(documentId) {
+module.exports.getDocumentPath = function(clientname, documentId) {
     return path.join(
         __dirname, // relative to utils folder
         '..', // go up to app.js folder
         localConfig.documentspath ? localConfig.documentspath : 'documents', // subfolder from localconfig
+        clientname, // Subfolder for clients
         documentId.toString() // document id as file name
     );
 };

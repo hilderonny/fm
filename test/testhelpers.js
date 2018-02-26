@@ -204,10 +204,11 @@ th.prepareFmObjects = async() => {
 
 th.prepareFolders = async() => {
     await th.cleanTable("folders", false, true);
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder0", parentfoldername: null, label: "label0" });
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder1", parentfoldername: null, label: "label1" });
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder00", parentfoldername: "client0_folder0", label: "label2" });
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder01", parentfoldername: "client0_folder0", label: "label3" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder0", parentfoldername: null, label: "folder0" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder1", parentfoldername: null, label: "folder1" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder00", parentfoldername: "client0_folder0", label: "folder00" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder01", parentfoldername: "client0_folder0", label: "folder01" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder000", parentfoldername: "client0_folder00", label: "folder000" });
 };
 
 th.createPath = (pathToCreate) => {
@@ -226,7 +227,7 @@ th.prepareDocumentFiles = () => {
     var ids = [ "client0_document0", "client0_document1", "client0_document2" ];
     for (var i = 0; i < ids.length; i++) {
         var id = ids[i];
-        var filePath = documentsHelper.getDocumentPath(id);
+        var filePath = documentsHelper.getDocumentPath("client0", id);
         th.createPath(path.dirname(filePath));
         fs.writeFileSync(filePath, id);
     }
@@ -236,16 +237,17 @@ th.removeDocumentFiles = () => {
     var ids = [ "client0_document0", "client0_document1", "client0_document2" ];
     for (var i = 0; i < ids.length; i++) {
         var id = ids[i];
-        var filePath = documentsHelper.getDocumentPath(id);
+        var filePath = documentsHelper.getDocumentPath("client0", id);
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 };
 
 th.prepareDocuments = async() => {
     await th.cleanTable("documents", false, true);
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document0", parentfoldername: null, label: "label", type: "type", isshared: false });
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document1", parentfoldername: "client0_folder0", label: "label", type: "type", isshared: false });
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document2", parentfoldername: "client0_folder00", label: "label", type: "type", isshared: true });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document0", parentfoldername: null, label: "document0", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document00", parentfoldername: "client0_folder0", label: "document00", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document01", parentfoldername: "client0_folder0", label: "document01", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document000", parentfoldername: "client0_folder00", label: "document000", type: "type", isshared: true });
 };
 
 th.prepareRelations = async() => {

@@ -3,7 +3,7 @@ var localconfig = require("../config/localconfig.json");
 var Db = require("../utils/db").Db;
 var constants  = require("./constants");
 
-async function migrateforclients(collectionname, migratorfunc) {
+async function migrateforclients(collectionname, migratorfunc, singleelementhandler) {
     console.log(`Migrating ${collectionname} ...`);
     var originalelements = await mongodb.get(collectionname).find();
     for (var i = 0; i < originalelements.length; i++) {
@@ -18,6 +18,7 @@ async function migrateforclients(collectionname, migratorfunc) {
                 await Db.insertDynamicObject(clientname, collectionname, mappedelement);
             }
         }
+        if (singleelementhandler) singleelementhandler(originalelement, mappedelement); // For documents
     }
 }
 
@@ -113,6 +114,8 @@ async function migratedocuments() {
             type: orig.type,
             isshared: !!orig.isShared
         };
+    }, (original, mapped) => {
+        // TODO: Move files
     });
 }
 

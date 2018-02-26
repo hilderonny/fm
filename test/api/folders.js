@@ -7,9 +7,10 @@ var documentsHelper = require('../../utils/documentsHelper');
 var th = require('../testhelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
 // xdescribe and xit are used for test stubs which should not run now and are to be implemented later
-describe('API folders', function() {
+describe.only('API folders', function() {
     
     before(async() => {
         await th.cleanDatabase();
@@ -33,7 +34,30 @@ describe('API folders', function() {
         return th.removeDocumentFiles()
     });
 
-    describe('GET/allFoldersAndDocuments', function() {
+    function compareElement(actual, expected) {
+        ["_id", "clientId", "name", "parentFolderId"].forEach((f) => {
+            assert.ok(typeof(actual[f]) !== "undefined");
+            assert.strictEqual(actual[f], expected[f]);
+        });
+    }
+
+    function compareElements(actual, expected) {
+        assert.strictEqual(actual.length, expected.length);
+        actual.sort((a, b) => { return a._id.localeCompare(b._id); });
+        expected.sort((a, b) => { return a._id.localeCompare(b._id); });
+        for (var i = 0; i < actual.length; i++) compareElement(actual[i], expected[i]);
+    }
+
+    function mapFields(e) {
+        return {
+            _id: e.name,
+            clientId: "client0",
+            name: e.label,
+            parentFolderId: e.parentfoldername
+        }
+    }
+
+    xdescribe('GET/allFoldersAndDocuments', function() {
 
         var api = `${co.apis.folders}/allFoldersAndDocuments`;
 
@@ -101,7 +125,7 @@ describe('API folders', function() {
 
     });
 
-    describe('GET/forIds', function() {
+    xdescribe('GET/forIds', function() {
 
         function createTestFolders() {
             return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
@@ -159,121 +183,54 @@ describe('API folders', function() {
 
     });
 
-    describe('GET/:id', function() {
+    describe.only('GET/:id', () => {
 
-        // Negative tests
+        th.apiTests.getId.defaultNegative(co.apis.folders, co.permissions.OFFICE_DOCUMENT, co.collections.folders.name);
+        th.apiTests.getId.clientDependentNegative(co.apis.folders, co.collections.folders.name);
 
-        it('responds without authentication with 403', function() {
-            return db.get('folders').findOne({name: '0_0'}).then((folderFromDatabase) => {
-                return th.get(`/api/folders/${folderFromDatabase._id}`).expect(403);
-            });
+        it('responds with existing folder id with all details of the folder', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var elementFromDatabase = mapFields(await Db.getDynamicObject("client0", "folders", "client0_folder00"));
+            var elementFromApi = (await th.get(`/api/folders/client0_folder00?token=${token}`).expect(200)).body;
+            compareElement(elementFromApi, elementFromDatabase);
         });
 
-        it('responds without read permission with 403', function() {
-            // Remove the corresponding permission
-            return th.removeReadPermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return db.get('folders').findOne({name: '1_0'}).then((folderFromDatabase) =>{
-                        var folderId = folderFromDatabase._id.toString(); 
-                        return th.get(`/api/folders/${folderId}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with invalid id with 400', function() {
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return th.get(`/api/folders/InvalidId?token=${token}`).expect(400);
-            });
-        });
-
-        it('responds with not existing folder id with 403', function() {
-            // Here the validateSameClientId comes into the game and returns a 403 because the requested folder is
-            // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                return th.get(`/api/folders/999999999999999999999999?token=${token}`).expect(403);
-            });
-        });
-    
-        it('responds with an id of an existing folder which does not belong to the same client as the logged in user with 403', function() {
-            //folder.clientId != user.clientId
-            //logg-in as user for client 1, but ask for folder of client 2 
-            return db.get('folders').findOne({name: '0_0'}).then((folderOfUser2) => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) =>{
-                    var folderId = folderOfUser2._id.toString();
-                    return th.get(`/api/folders/${folderId}?token=${token}`).expect(403);
-                });
-            });        
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('folders').findOne({name: '1_0'}).then((folderOfUser) => {
-                return th.removeClientModule('1', 'documents').then(function() {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        var folderId = folderOfUser._id.toString();
-                        return th.get(`/api/folders/${folderId}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('folders').findOne({name: '1_0'}).then((folderOfUser) => {
-                return th.removeClientModule('1', 'documents').then(function() {
-                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                        var folderId = folderOfUser._id.toString();
-                        return th.get(`/api/folders/${folderId}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        // Positive tests
-
-        it('responds with existing folder id with all details of the folder and its subfolders and documents', function() {
+        it('folder contains information about direct child elements', async() => {
+            /**
+             * +- client0_folder0
+             *      +- client0_folder00
+             *          +- client0_document000
+             *      +- client0_folder01
+             *      +- client0_document00
+             *      +- client0_document01
+             * +- client0_folder1
+             * +- client0_document0
+             */
             //Note: delivered subfolders are from one lever below the current folder
             //The actual complete folder structure can be deeper 
-            var folderFromDatabase;
-            return db.get(co.collections.folders.name).findOne({name: '1_0_0'}).then((f)=>{ 
-                folderFromDatabase = f;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then((token)=>{
-                return th.get(`/api/folders/${folderFromDatabase._id.toString()}?token=${token}`).expect(200);
-            }).then((res) => {
-                var folderFromApi = res.body;
-                assert.strictEqual(folderFromApi._id, folderFromDatabase._id.toString());
-                assert.strictEqual(folderFromApi.clientId, folderFromDatabase.clientId.toString());
-                assert.strictEqual(folderFromApi.parentFolderId, folderFromDatabase.parentFolderId.toString());
-                assert.strictEqual(folderFromApi.name, folderFromDatabase.name);
-                assert.ok(folderFromApi.elements);
-                assert.strictEqual(folderFromApi.elements.length, 4);
-                assert.strictEqual(folderFromApi.elements[0].type, 'f');
-                assert.strictEqual(folderFromApi.elements[1].type, 'f');
-                assert.strictEqual(folderFromApi.elements[2].type, 'd');
-                assert.strictEqual(folderFromApi.elements[3].type, 'd');
-                return Promise.resolve();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var folderFromApi = (await th.get(`/api/folders/client0_folder0?token=${token}`).expect(200)).body;
+            assert.ok(folderFromApi.elements);
+            assert.strictEqual(folderFromApi.elements.length, 4);
+            assert.strictEqual(folderFromApi.elements[0]._id, "client0_folder00");
+            assert.strictEqual(folderFromApi.elements[1]._id, "client0_folder01");
+            assert.strictEqual(folderFromApi.elements[2]._id, "client0_document00");
+            assert.strictEqual(folderFromApi.elements[3]._id, "client0_document01");
+            folderFromApi.elements.forEach((e) => {
+                assert.ok(typeof(e._id) !== "undefined");
+                assert.ok(typeof(e.name) !== "undefined");
+                assert.ok(typeof(e.type) !== "undefined");
             });
         });
-        it('Contains the full path in correct order', function() {
-            // We use folder 1_0_0_0_0, so we have the path
-            // 1_0 » 1_0_0 » (or sth like test » d3 )
-            var folderId;
-            // First login
-            return db.get(co.collections.folders.name).findOne({name: '1_0_0_0'}).then(function(folderFromDatabase){
-                folderId = folderFromDatabase._id;
-                return th.doLoginAndGetToken('1_0_0', 'test');
-            }).then(function(token){
-                // Then fetch the folder from the API
-                return th.get(`/api/folders/${folderId}?token=${token}`).expect(200);
-            }).then(function(response) {
-                var folder = response.body;
-                // Finally analyze the returned path (order, names)
-                assert.ok(folder.path, 'Property path does not exist');
-                assert.strictEqual(folder.path.length, 2);
-                assert.strictEqual(folder.path[0].name, '1_0');
-                assert.strictEqual(folder.path[1].name, '1_0_0');
-                return Promise.resolve();
-            });
+
+        it('Contains the full path in correct order', async() => {
+            // For client0_folder000: client0_folder0 » client0_folder00
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var folderFromApi = (await th.get(`/api/folders/client0_folder000?token=${token}`).expect(200)).body;
+            assert.ok(folderFromApi.path);
+            assert.strictEqual(folderFromApi.path.length, 2);
+            assert.strictEqual(folderFromApi.path[0].name, 'folder0');
+            assert.strictEqual(folderFromApi.path[1].name, 'folder00');
         });
 
     });

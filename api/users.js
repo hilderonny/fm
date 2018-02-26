@@ -19,7 +19,7 @@ var dah = require('../utils/dynamicAttributesHelper');
 var Db = require("../utils/db").Db;
 
 function mapFields(e, user) {
-    // Psswort niemals mappen
+    // Passwort niemals mappen
     var user = {
         _id: e.name,
         clientId: user.clientname,

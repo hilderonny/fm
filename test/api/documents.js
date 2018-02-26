@@ -6,8 +6,8 @@ var documentsHelper = require('../../utils/documentsHelper');
 var fs = require('fs');
 var path = require('path');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
 /**
  * Creates a temporary file with the given file name and content and returns
@@ -44,21 +44,21 @@ describe('API documents', function(){
         return th.removeDocumentFiles();
     });
 
+    function mapFields(e, user) {
+        return {
+            _id: e.name,
+            clientId: user.clientname,
+            name: e.label,
+            parentFolderId: e.parentfoldername,
+            type: e.type,
+            isShared: e.isshared
+        }
+    }
+    
     describe('GET/forIds', function() {
 
-        function createTestDocuments() {
-            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
-                var clientId = client._id;
-                var testObjects = ['testDocument1', 'testDocument2', 'testDocument3'].map(function(name) {
-                    return {
-                        name: name,
-                        type: 'text/plain',
-                        clientId: clientId,
-                        parentFolderId: null
-                    }
-                });
-                return Promise.resolve(testObjects);
-            });
+        async function createTestDocuments() {
+            return ['testDocument1', 'testDocument2', 'testDocument3'].map((name) => { _id: name });
         }
 
         th.apiTests.getForIds.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, co.collections.documents.name, createTestDocuments);
