@@ -116,10 +116,16 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
         });
     });
 });
+
 // var parentcheck = folder.name ? `='${folder.parentfoldername}'` : " IS NULL";
 // var query = `(SELECT name AS _id, label AS name, 'f' AS type FROM folders WHERE parentfoldername${parentcheck} ORDER BY label) UNION ALL (SELECT name AS _id, label AS name, 'd' AS type FROM documents WHERE parentfoldername${parentcheck} ORDER BY label);`;
 
-// Get a specific folder and its contained folders and documents
+/**
+ * Get a specific folder and its contained folders and documents
+ * elements: _id, name, type ("f" / d") of contained folders and documents
+ * path: [{ name: label }, ...] inbetween folder names from root level to folder
+ */
+// 
 router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), validateSameClientId(co.collections.folders.name), async(req, res) => {
     var clientname = req.user.clientname;
     var folder = await Db.getDynamicObject(clientname, co.collections.folders.name, req.params.id);
@@ -132,66 +138,6 @@ router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.document
     var pathresult = await Db.query(clientname, pathquery);
     if (pathresult.rowCount > 0) folder.path = pathresult.rows[0].path.split('»').map((p) => { return { name: p}});
     res.send(mapFields(folder, req.user));
-    // var id = monk.id(req.params.id);
-    // var folder;
-    // req.db.get(co.collections.folders.name).aggregate([
-    //     { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
-    //         from: 'folders',
-    //         startWith: '$parentFolderId',
-    //         connectFromField: 'parentFolderId',
-    //         connectToField: '_id',
-    //         as: 'path',
-    //         depthField: 'depth'
-    //     } },
-    //     { $project: { 
-    //         "name": 1,                    
-    //         "parentFolderId": 1,
-    //         "clientId": 1,
-    //         "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
-    //     },
-    //     { $match: { // Find only relevant elements
-    //         _id: monk.id(req.params.id)
-    //     } },
-    //     { $limit: 1 },
-    //     { $unwind: "$path" },
-    //     { $sort: { "path.depth": -1 } },
-    //     {
-    //         $group:{
-    //             _id: "$_id",
-    //             path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
-    //             doc:{"$first": "$$ROOT"}
-    //         }
-    //     },
-    //     {
-    //         $project: {
-    //             "name": "$doc.name",                    
-    //             "parentFolderId": "$doc.parentFolderId",
-    //             "clientId": "$doc.clientId",
-    //             "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
-    //         }
-    //     }
-    // ]).then((matchingFolders) => {
-    //     // folder = f;
-    //     // assuming that we have exactly one element in the array
-    //     folder = matchingFolders[0];
-    //     folder.elements = [];
-    //     // Database element is available here in every case, because validateSameClientId already checked for existence
-    //     return req.db.get(co.collections.folders.name).find({ parentFolderId: id }, { sort : { name : 1 } });
-    // }).then((subfolders) => {
-    //     folder.elements = folder.elements.concat(subfolders.map((subFolder) => { return {
-    //         _id: subFolder._id,
-    //         type: 'f',
-    //         name: subFolder.name
-    //     }}));
-    //     return req.db.get(co.collections.documents.name).find({ parentFolderId: id }, { sort : { name : 1 } });
-    // }).then((documents) => {
-    //     folder.elements = folder.elements.concat(documents.map((document) => { return {
-    //         _id: document._id,
-    //         type: 'd',
-    //         name: document.name
-    //     }}));
-    //     res.send(folder);
-    // });
 });
 
 // Create a folder
