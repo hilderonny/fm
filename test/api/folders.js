@@ -125,65 +125,37 @@ describe.only('API folders', function() {
 
     });
 
-    xdescribe('GET/forIds', function() {
+    describe.only('GET/forIds', function() {
 
-        function createTestFolders() {
-            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
-                var clientId = client._id;
-                var testObjects = ['testFolder1', 'testFolder2', 'testFolder3'].map(function(name) {
-                    return {
-                        name: name,
-                        clientId: clientId,
-                        parentFolderId: null
-                    }
-                });
-                return Promise.resolve(testObjects);
-            });
+        async function createTestFolders(client) {
+            return [
+                { _id: client + "_folder0" }
+            ];
         }
 
         th.apiTests.getForIds.defaultNegative(co.apis.folders, co.permissions.OFFICE_DOCUMENT, co.collections.folders.name, createTestFolders);
         th.apiTests.getForIds.clientDependentNegative(co.apis.folders, co.collections.folders.name, createTestFolders);
         th.apiTests.getForIds.defaultPositive(co.apis.folders, co.collections.folders.name, createTestFolders);
 
-        function checkPath(folder, folders) {
-            assert.ok(folder.path);
-            var parentFolders = [];
-            var parentFolderId = folder.parentFolderId;
-            while (parentFolderId) {
-                var parentFolder = folders[parentFolderId];
-                // Reihenfolge von API ist umgekehrt, daher vorn dran hängen
-                parentFolders.unshift(parentFolder);
-                parentFolderId = parentFolder.parentFolderId;
-            }
-            assert.strictEqual(folder.path.length, parentFolders.length);
-            for (var i = 0; i < parentFolders.length; i++) {
-                assert.strictEqual(folder.path[i]._id.toString(), parentFolders[i]._id.toString());
-                assert.strictEqual(folder.path[i].name, parentFolders[i].name);
-            }
-        }
-
-        it('returns the full path for each folder', function() {
-            var foldersInDatabase = th.dbObjects[co.collections.folders.name];
-            var ids = foldersInDatabase.map(function(doc) { return doc._id.toString() });
-            return db.get(co.collections.folders.name).find().then(function(folders) {
-                folders.forEach(function(folder) {
-                    foldersInDatabase[folder._id] = folder;
-                });
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then((token) => {
-                return th.get(`/api/${co.apis.folders}/forIds?ids=${ids.join(',')}&token=${token}`).expect(200);
-            }).then(function(response) {
-                var foldersFromApi = response.body;
-                foldersFromApi.forEach(function(folderFromApi) {
-                    checkPath(folderFromApi, foldersInDatabase);
-                });
-                return Promise.resolve();
-            });
+        it('returns the full path for each folder', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var foldersFromApi = (await th.get(`/api/folders/forIds?ids=client0_folder0,client0_folder00,client0_folder000&token=${token}`).expect(200)).body;
+            assert.strictEqual(foldersFromApi.length, 3);
+            var sortedFolders = foldersFromApi.sort((a, b) => a._id.localeCompare(b._id));
+            assert.strictEqual(sortedFolders[0]._id, "client0_folder0");
+            assert.strictEqual(sortedFolders[0].path.length, 0);
+            assert.strictEqual(sortedFolders[1]._id, "client0_folder00");
+            assert.strictEqual(sortedFolders[1].path.length, 1);
+            assert.strictEqual(sortedFolders[1].path[0].name, "folder0");
+            assert.strictEqual(sortedFolders[2]._id, "client0_folder000");
+            assert.strictEqual(sortedFolders[2].path.length, 2);
+            assert.strictEqual(sortedFolders[2].path[0].name, "folder0");
+            assert.strictEqual(sortedFolders[2].path[1].name, "folder00");
         });
 
     });
 
-    describe.only('GET/:id', () => {
+    describe('GET/:id', () => {
 
         th.apiTests.getId.defaultNegative(co.apis.folders, co.permissions.OFFICE_DOCUMENT, co.collections.folders.name);
         th.apiTests.getId.clientDependentNegative(co.apis.folders, co.collections.folders.name);

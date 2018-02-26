@@ -22,16 +22,42 @@ var dah = require('../utils/dynamicAttributesHelper');
 var Db = require("../utils/db").Db;
 
 function mapFields(e) {
-    var folder = {
+    return {
         _id: e.name,
         clientId: "client0",
         name: e.label,
-        parentFolderId: e.parentfoldername
-    }
-    if (e.children) folder.elements = e.children;
-    if (e.path) folder.path = e.path;
-    return folder;
+        parentFolderId: e.parentfoldername,
+        elements: e.elements,
+        path: e.path
+    };
 }
+
+var folderquery = `
+DROP TABLE IF EXISTS folderpathtype;
+CREATE TEMP TABLE folderpathtype (name text);
+DROP TABLE IF EXISTS folderchildtype;
+CREATE TEMP TABLE folderchildtype (_id text, name text, type text);
+WITH RECURSIVE get_path(name, parentfoldername, depth) AS (
+    (SELECT name, parentfoldername, 0 FROM folders)
+    UNION
+    (SELECT get_path.name, folders.parentfoldername, get_path.depth + 1 FROM folders JOIN get_path on get_path.parentfoldername = folders.name)
+)
+SELECT folders.*, COALESCE(pd.path, '[]') as path, COALESCE(cd.children, '[]') as elements FROM folders
+LEFT JOIN (
+    SELECT name, COALESCE(json_agg(row_to_json(row(label)::folderpathtype)) FILTER (WHERE parentfoldername IS NOT NULL), '[]') AS path
+    FROM (SELECT get_path.name, get_path.parentfoldername, folders.label FROM get_path JOIN folders ON get_path.parentfoldername = folders.name ORDER BY depth DESC) a
+    GROUP BY name
+) pd ON pd.name = folders.name
+LEFT JOIN (
+    SELECT parentfoldername, json_agg(row_to_json(row(name, label, type)::folderchildtype)) AS children FROM (
+        (SELECT name, label, parentfoldername, 'f' AS type FROM folders ORDER BY label)
+        UNION ALL
+        (SELECT name, label, parentfoldername, 'd' AS type FROM documents ORDER BY label)
+    ) a
+    GROUP BY parentfoldername
+) cd ON cd.parentfoldername = folders.name 
+`;
+
 
 /**
  * Gibt alle Verzeichnisse und Dokumente zurück. Wird für den Dialog
@@ -60,61 +86,21 @@ router.get('/allFoldersAndDocuments', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'd
  * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
  * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
  * einfach eine leere Liste zurück gegeben.
- * @example
- * $http.get('/api/folders/forIds?ids=ID1,ID2,ID3')...
+ * Used for relations dialog. The path.name is used for the second line there
  */
-router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
+router.get('/forIds', auth(false, false, co.modules.documents), async(req, res) => {
     // Zuerst Berechtigung prüfen
-    auth.canAccess(req.user._id, 'PERMISSION_OFFICE_DOCUMENT', 'r', 'documents', req.db).then(function(accessAllowed) {
-        if (!accessAllowed) {
-            return res.send([]);
-        }
-        if (!req.query.ids) {
-            return res.send([]);
-        }
-        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
-        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
-        req.db.get('folders').aggregate([
-            { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
-                from: 'folders',
-                startWith: '$parentFolderId',
-                connectFromField: 'parentFolderId',
-                connectToField: '_id',
-                as: 'path',
-                depthField: 'depth'
-            } },
-            { $project: { 
-                "name": 1,                    
-                "parentFolderId": 1,
-                "clientId": 1,
-                "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
-            },
-            { $match: { // Find only relevant elements
-                _id: { $in: ids },
-                clientId: clientId
-            } },
-            { $unwind: "$path" },
-            { $sort: { "path.depth": -1 } },
-            {
-                $group:{
-                    _id: "$_id",
-                    path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
-                    doc:{"$first": "$$ROOT"}
-                }
-            },
-            {
-                $project: {
-                    "name": "$doc.name",                    
-                    "parentFolderId": "$doc.parentFolderId",
-                    "clientId": "$doc.clientId",
-                    "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
-                }
-            },
-            { $sort: { "_id": 1 } }
-        ]).then(function(folders) {
-            res.send(folders);
-        });
-    });
+    var accessAllowed = await auth.canAccess(req.user.name, co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents);
+    if (!accessAllowed) {
+        return res.send([]);
+    }
+    if (!req.query.ids) {
+        return res.send([]);
+    }
+    var namestofind = req.query.ids.split(",").map((n) => `'${n}'`).join(",");
+    var query = `${folderquery} WHERE folders.name IN (${namestofind})`;
+    var result = (await Db.query(req.user.clientname, query))[4]; // 0 = DROP, 1 = CREATE, 2 = DROP, 3 = CREATE, 4 = SELECT
+    res.send(result.rowCount > 0 ? result.rows.map(mapFields) : []);
 });
 
 // var parentcheck = folder.name ? `='${folder.parentfoldername}'` : " IS NULL";
@@ -125,19 +111,11 @@ router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
  * elements: _id, name, type ("f" / d") of contained folders and documents
  * path: [{ name: label }, ...] inbetween folder names from root level to folder
  */
-// 
 router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), validateSameClientId(co.collections.folders.name), async(req, res) => {
-    var clientname = req.user.clientname;
-    var folder = await Db.getDynamicObject(clientname, co.collections.folders.name, req.params.id);
-    if (!folder) return res.sendStatus(404);
-    // Direct children
-    var childrenquery = `(SELECT name AS _id, label AS name, 'f' AS type FROM folders WHERE parentfoldername = '${folder.name}' ORDER BY label) UNION ALL (SELECT name AS _id, label AS name, 'd' AS type FROM documents WHERE parentfoldername = '${folder.name}' ORDER BY label);`;
-    folder.children = (await Db.query(clientname, childrenquery)).rows;
-    // Parents
-    var pathquery = `WITH RECURSIVE get_path(name, path, parentfoldername, depth) AS ( (SELECT name, '', parentfoldername, 0 FROM folders) UNION (SELECT get_path.name, folders.label || (CASE WHEN get_path.depth > 0 THEN '»' ELSE '' END) || get_path.path, folders.parentfoldername, get_path.depth + 1 FROM folders JOIN get_path on get_path.parentfoldername = folders.name) ) SELECT path FROM get_path WHERE name = '${folder.name}' ORDER BY depth DESC`;
-    var pathresult = await Db.query(clientname, pathquery);
-    if (pathresult.rowCount > 0) folder.path = pathresult.rows[0].path.split('»').map((p) => { return { name: p}});
-    res.send(mapFields(folder, req.user));
+    var query = `${folderquery} WHERE folders.name = '${req.params.id}'`;
+    var result = (await Db.query(req.user.clientname, query))[4]; // 0 = DROP, 1 = CREATE, 2 = DROP, 3 = CREATE, 4 = SELECT
+    if (result.rowCount < 1) return res.sendStatus(404);
+    res.send(mapFields(result.rows[0], req.user));
 });
 
 // Create a folder
