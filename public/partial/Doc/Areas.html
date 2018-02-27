@@ -28,6 +28,20 @@
             letztere eine Differenz aus Brutto-Geschossfläche und Netto-Raum-Fläche ist.
         </p>
 
+        <h2>Berechnungslogik</h2>
+        <p>
+            Zum Einen kann man die FM-Struktur bis zur Raumebene modellieren. Man lässt dabei die einzelnen Flächen außer Acht und gibt 
+            die Maße direkt am Raum ein. Dann werden diese Daten über die Hierarchie hinweg nach oben zur Berechnung verwendet.
+        </p>
+        <p>
+            Modelliert man nun aber an einen Raum spezifische Flächen, so muss man die Kennzahlen an diesen Flächen hinterlegen. Eben 
+            diese Werte haben dann vor den Werten, die direkt am Raum gepflegt sind, Vorrang in der Berechnung.
+        </p>
+        <p>        
+            In der Detailansicht eines Raumes sieht man immer die Werte, die man direkt eingegeben hat. Diese werden dort auch nicht 
+            automatisch aktualisiert. Nur in der Flächenauswertung werden die berechneten Werte der Flächen angezeigt.
+        </p>
+
         <h2>Desktop-Anzeige</h2>
         <img src="/css/images/Areas_desktop.png"/>
         <p>
