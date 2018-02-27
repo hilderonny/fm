@@ -60,6 +60,38 @@ var prepareIncludes = (fs) => {
     }
 };
 
+    var timerId; 
+    var portalUpdatesHelper = require('./utils/portalUpdatesHelper');
+    var fs = require('fs');
+    module.exports.manageAutoUpdate = function(autoUpdateMode){
+        if(autoUpdateMode == true){
+            var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
+            var updateInterval = lc.updateTimerInterval * 3600000; //convert hours to milliseconds
+            if(updateInterval > 10000){ //check if the time interval is at least 1 second long
+                if(timerId != null){
+                    clearInterval(timerId); //cancel old timer befor setting a new one
+                }
+                timerId = setInterval(portalUpdatesHelper.triggerUpdate, updateInterval);
+                return;                
+            }else{
+                return;
+            }            
+        }else{ //autoUpdateMode == false
+           clearInterval(timerId);
+           return;
+        }
+    };
+
+    module.exports.changeTimeInterval = function(newTimerInterval){
+        //make changes only if an  auto-update is curremtly turned on 
+        var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
+        if(lc.autoUpdateMode){
+            clearInterval(timerId); //stop timer with old update interval
+            var newTimerIntervalMS = newTimerInterval*3600000; //convert hours to milliseconds
+            timerId = setInterval(portalUpdatesHelper.triggerUpdate, newTimerIntervalMS); //start new update timer
+        }
+    };
+
 // Server initialization
 var init = () => {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
@@ -169,6 +201,12 @@ var init = () => {
     var url =`${localConfig.licenseserverurl}/api/update/heartbeat`;
     var key = localConfig.licensekey;
     request.post({url: url, form:  {"licenseKey":  key, "version": localVersion}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
+    //start the initial auto-update mode on server start 
+    if(localConfig.autoUpdateMode){
+        var initalUpdateInterval;
+        initalUpdateInterval = localConfig.updateTimerInterval * 3600000; //convert hours to milliseconds
+        timerId = setInterval(portalUpdatesHelper.triggerUpdate, initalUpdateInterval);
+    }
 };
 
 // Install required dependencies
