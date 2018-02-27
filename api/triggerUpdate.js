@@ -7,7 +7,7 @@ var fs = require('fs');
 var multer  = require('multer')
 var upload = multer({ dest: 'uploads/' })
 var path = require('path');
-var unzip = require('unzip');
+var unzip = require('unzip2');
 var child_process = require('child_process');
 var lc = require('../config/localconfig.json');
 

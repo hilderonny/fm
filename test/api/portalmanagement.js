@@ -74,12 +74,18 @@ describe('API portalmanagement', function() {
 
         th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS);
 
-        it('responds with portalsettings (licenseserverurl and licensekey only) from localconfig', function() {
+        it('responds with portalsettings (autoUpdateMode, [updateTimerInterval], licenseserverurl and licensekey only) from localconfig', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                 return th.get(`/api/${co.apis.portalmanagement}?token=${token}`).expect(200);
             }).then(function(response) {
                 var result = response.body;
-                assert.strictEqual(Object.keys(result).length, 2);
+                if(result.updateTimerInterval){
+                   assert.strictEqual(Object.keys(result).length, 4); //updateTimerInterval is also expected when autoUpdateMode == True
+                   assert.strictEqual(result.updateTimerInterval, lc.updateTimerInterval);
+                }else{
+                    assert.strictEqual(Object.keys(result).length, 3);
+                }
+                assert.strictEqual(result.autoUpdateMode, lc.autoUpdateMode);
                 assert.ok(result.licensekey);
                 assert.strictEqual(result.licensekey, lc.licensekey);
                 assert.ok(result.licenseserverurl);
@@ -301,7 +307,7 @@ describe('API portalmanagement', function() {
             });
         });
 
-        it('responds with 200 and does not update the localconfig file when other properties than licenseserverurl and licensekey are sent', function() {
+        it('responds with 200 and does not update the localconfig file when other properties than licenseserverurl and licensekey, or autoUpdateMode are sent', function() {
             var loginToken, settings;
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                 loginToken = token;
@@ -320,6 +326,40 @@ describe('API portalmanagement', function() {
                 assert.ok(!updatedLocalConfig.newproperty);
             });
         });
+
+        it('responds with 200 but does not update the localconfig file when invalid (e.g. null) value for autoUpdateMode is sent', function() {
+            var loginToken, settings;
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                loginToken = token;
+                settings = {
+                    autoUpdateMode: null,
+                    documentspath: 'newdocpath/',
+                    tokensecret: 'newtokensecret',
+                    newproperty: 'newproperty'
+                };
+                return th.put(`/api/${api}?token=${loginToken}`).send(settings).expect(200);
+            }).then(function() {
+                var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
+                assert.strictEqual(updatedLocalConfig.documentspath, lc.documentspath);
+                assert.notStrictEqual(updatedLocalConfig.documentspath, settings.documentspath);
+                assert.strictEqual(updatedLocalConfig.tokensecret, lc.tokensecret);
+                assert.notStrictEqual(updatedLocalConfig.tokensecret, settings.tokensecret);
+                assert.ok(!updatedLocalConfig.newproperty);
+            });
+        });
+
+        it('responds with 200 and updates the autoUpdateMode property in the localconfig.json file with the new sent data', function() {
+            var loginToken;
+            var settings = {autoUpdateMode: false}; //autoUpdateMode should have either TRUE or FALSE as value 
+            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
+                loginToken = token;
+            }).then(function() {
+                return th.put(`/api/${api}?token=${loginToken}`).send(settings).expect(200);
+            }).then(function() {
+                var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
+                assert.strictEqual(updatedLocalConfig.autoUpdateMode, settings.autoUpdateMode);
+            });
+        })
 
     });
 

@@ -10,8 +10,11 @@ var auth = require('../middlewares/auth');
 var validateId = require('../middlewares/validateId');
 var fs = require('fs');
 var request = require('request');
-var unzip = require('unzip');
+var unzip = require('unzip2');
 var co = require('../utils/constants');
+var portalUpdatesHelper = require('../utils/portalUpdatesHelper');
+var localConfigHelper = require('../utils/localConfigHelper');
+var appJs = require('../app.js');
 
 /**
  * Asks the license server for available updates. Returns a JSON with local and remote update info:
@@ -43,8 +46,12 @@ router.get('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'r', co.modules.por
     var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
     var portalSettings = { // Extract only relevant data from localConfig
         licenseserverurl : localConfig.licenseserverurl,
-        licensekey : localConfig.licensekey
+        licensekey : localConfig.licensekey,
+        autoUpdateMode : localConfig.autoUpdateMode
     };
+    if(localConfig.updateTimerInterval){ //no updateTimerInterval value when autoUpdateMode == False
+        portalSettings.updateTimerInterval = localConfig.updateTimerInterval;
+    }
     return res.send(portalSettings);
 });
 
@@ -52,24 +59,12 @@ router.get('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'r', co.modules.por
  * Starts updating the server from the license server
  */
 router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.portalbase), (req, res) => {
-    var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
-    var updateExtractPath = localConfig.updateExtractPath ? localConfig.updateExtractPath : './temp/';
-    var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
-    var updateRequest = request(url);
-    updateRequest.on('error', function () {
-        updateRequest.abort();
-        return res.sendStatus(400);
-    });
-    updateRequest.on('response', function (response) {
-        if (response.statusCode !== 200) {
-            updateRequest.abort();
-            return res.sendStatus(400);
-        }
-    });
-    var unzipStream = updateRequest.pipe(unzip.Extract({ path: updateExtractPath }));
-    unzipStream.on('close', function() {
-        return res.sendStatus(200); // Erst antworten, wenn alles ausgepackt ist
-    });
+    portalUpdatesHelper.triggerUpdate(true).then((wasUpdated) => {
+        res.sendStatus(200);
+    }, () => {
+        // error
+        res.sendStatus(400);
+    })
 });
 
 /**
@@ -80,12 +75,23 @@ router.put('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.por
     if (!portalSettings || Object.keys(portalSettings).length < 1) {
         return res.sendStatus(400);
     }
-    // Load localconfig and update only relevant information
-    var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());
-    localConfig.licenseserverurl = portalSettings.licenseserverurl;
-    localConfig.licensekey = portalSettings.licensekey;
-    fs.writeFileSync('./config/localconfig.json', JSON.stringify(localConfig, null, 4));
+    localConfigHelper.LocalConfig.updateContent(portalSettings);
     return res.send(portalSettings);
+});
+
+
+/**
+ * Call functions for global controll over Auto-Update behaviour
+ */
+router.post('/manageAutoUpdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.portalbase), (req, res) => {
+    var portalSettings = req.body;
+    if(portalSettings.autoUpdateMode == false || portalSettings.autoUpdateMode == true ){
+          appJs.manageAutoUpdate(portalSettings.autoUpdateMode);//toggle automatic updates
+    }else if(portalSettings.updateTimerInterval){
+        var timeInMS = portalSettings.updateTimerInterval * 3600000 //convert hours to milliseconds
+         appJs.changeTimeInterval(portalSettings.updateTimerInterval);
+    }
+    res.sendStatus(200);
 });
 
 module.exports = router;
