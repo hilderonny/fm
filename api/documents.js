@@ -112,54 +112,22 @@ router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.document
 });
 
 // Create a document via file upload
-router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), upload.single('file'), function(req, res) { // https://github.com/expressjs/multer
+router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), upload.single('file'), async(req, res) => { // https://github.com/expressjs/multer
     var file = req.file;
-    if (!file) {
-        return res.sendStatus(400);
-    }
-    var user = req.user;
-    var clientId = user && user.clientId ? user.clientId.toString() : null;
-    var parentFolderId = req.body.parentFolderId;
-    if (!parentFolderId) {
-        parentFolderId = null; // Assign to root folder, when no parent folder ID is given
-    }
-    if (parentFolderId !== null && !validateId.validateId(parentFolderId)) {
-        return res.sendStatus(400); // ID has wrong length
-    }
-    // Create document in database and assign user, client and parentFolderId
-    var document = { 
-        name: file.originalname,
-        extension: file.originalname.substring(file.originalname.lastIndexOf('.')),
+    if (!file) return res.sendStatus(400);
+    var clientname = req.user.clientname;
+    var parentFolderId = req.body.parentFolderId ? req.body.parentFolderId : null;
+    if (parentFolderId && !(await Db.getDynamicObject(clientname, co.collections.folders.name, parentFolderId))) return res.sendStatus(400);
+    var document = {
+        name: uuidv4(),
+        label: file.originalname,
         type: file.mimetype, 
-        clientId: clientId !== null ? monk.id(clientId) : null,
-        isExtractable: file.mimetype === 'application/x-zip-compressed' || file.mimetype === 'application/zip',
-        parentFolderId: parentFolderId !== null ? monk.id(parentFolderId) : null
+        parentfoldername: parentFolderId,
+        isshared: false
     };
-    if (document.parentFolderId) { 
-        // Need to check whether the parent folder which this document is to be assigned to exists
-        req.db.get(co.collections.folders.name).findOne(document.parentFolderId).then((parentFolder) => {
-            if (!parentFolder) {
-                return res.sendStatus(400);
-            }
-            req.db.insert(co.collections.documents.name, document).then((insertedDocument) => {
-                dh.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
-                res.send({
-                    _id: insertedDocument._id,
-                    type: 'd',
-                    name: insertedDocument.name
-                });
-            });
-        });
-    } else {
-        req.db.insert(co.collections.documents.name, document).then((insertedDocument) => {
-            dh.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
-            res.send({
-                _id: insertedDocument._id,
-                type: 'd',
-                name: insertedDocument.name
-            });
-        });
-    }
+    await Db.insertDynamicObject(clientname, co.collections.documents.name, document);
+    dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', file.path));
+    res.send({ _id: document.name, type: "d", name: document.label });
 });
 
 // Update meta data of a document

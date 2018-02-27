@@ -13,13 +13,15 @@ var Db = require("../../utils/db").Db;
  * Creates a temporary file with the given file name and content and returns
  * its absolute path.
  */
-var createFileForUpload = (fileName, content) => {
+var createFileForUpload = () => {
+    var fileName = 'testDocumentPost.txt';
+    var content = 'Gaga Bubu';
     var filePath = path.join(__dirname, fileName);
     fs.writeFileSync(filePath, content);
     return filePath;
 }
 
-describe.only('API documents', () =>{
+describe('API documents', () =>{
 
     before(async() => {
         await th.cleanDatabase();
@@ -41,7 +43,9 @@ describe.only('API documents', () =>{
 
     // Delete temporary documents
     afterEach(() => {
-        return th.removeDocumentFiles();
+        th.removeDocumentFiles();
+        var filepath = path.join(__dirname, "testDocumentPost.txt");
+        if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
     });
 
     function compareElement(actual, expected) {
@@ -144,215 +148,58 @@ describe.only('API documents', () =>{
         
     });
 
-    // TODO: Noch umstellen!
-    describe.only('POST/', () => {
+    describe('POST/', () => {
 
-        // Negative tests
+        async function createPostTestObject() {
+            return { name: "client0_testdocument" }
+        }
 
-        it('responds with correct document with invalid parentFolderId with 400', () => {
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                //https://visionmedia.github.io/superagent/#multipart-requests
-                return th.post(`/api/documents?token=${token}`).field('parentFolderId', 'invalidid').attach('file', filePath).expect(400);
-            });
+        function deleteDocumentsFolder() {
+            var clientfolder = dh.getDocumentPath("client0", "");
+            if (fs.existsSync(clientfolder)) {
+                fs.readdirSync(clientfolder).forEach((filename) => fs.unlinkSync(path.join(clientfolder, filename)));
+                fs.rmdirSync(clientfolder);
+            }
+        }
+
+        th.apiTests.post.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, createPostTestObject);
+
+        it('responds with correct document with invalid parentFolderId with 400', async() => {
+            var filePath = createFileForUpload();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            // https://visionmedia.github.io/superagent/#multipart-requests
+            await th.post(`/api/documents?token=${token}`).field('parentFolderId', 'invalidid').attach('file', filePath).expect(400);
         });
 
-        it('responds with correct document with a not existing parentFolderId with 400', () => {
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                //https://visionmedia.github.io/superagent/#multipart-requests
-                return th.post(`/api/documents?token=${token}`).field('parentFolderId', '999999999999999999999999').attach('file', filePath).expect(400);
-            });
+        it('responds without file with 400', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.post(`/api/documents?token=${token}`).field('parentFolderId', 'client0_folder0').expect(400);
         });
 
-        it('responds without file with 400', () => {
-            return db.get('folders').findOne({name: '1_1_1'}).then((folderOfClient1) => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    //https://visionmedia.github.io/superagent/#multipart-requests
-                    return th.post(`/api/documents?token=${token}`).field('parentFolderId', folderOfClient1._id.toString()).expect(400)
-                });
-            });
+        it('responds with correct document for a client which has no documents the correct status and creates document path for client', async() => {
+            deleteDocumentsFolder();
+            var filePath = createFileForUpload();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var createddocument = (await th.post(`/api/documents?token=${token}`).field('parentFolderId', 'client0_folder0').attach('file', filePath).expect(200)).body;
+            assert.ok(createddocument);
+            assert.ok(createddocument._id);
+            assert.strictEqual(createddocument.type, "d");
+            assert.strictEqual(createddocument.name, "testDocumentPost.txt");
+            var documentFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, createddocument._id);
+            assert.ok(documentFromDatabase);
+            assert.strictEqual(documentFromDatabase.label, "testDocumentPost.txt");
+            assert.strictEqual(documentFromDatabase.parentfoldername, "client0_folder0");
+            assert.strictEqual(documentFromDatabase.type, "text/plain");
+            assert.ok(fs.existsSync(dh.getDocumentPath("client0", documentFromDatabase.name)));
         });
 
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', () => {
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            return th.removeClientModule('1', 'documents').then(() =>{
-                return th.doLoginAndGetToken('1_1_0', 'test').then(function(token){
-                    return th.post(`/api/documents?token=${token}`).attach('file', filePath).expect(403);
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', () => {
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            return th.removeClientModule('1', 'documents').then(() =>{
-                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                    return th.post(`/api/documents?token=${token}`).attach('file', filePath).expect(403);
-                });
-            });
-        });
-
-        it('responds without authentication with 403', () => {
-            var newDocument = {name: 'new_document_name'};
-            // TODO: Attach real document, because you would get a 400 otherwise
-            return th.post(`/api/documents`).send(newDocument).expect(403);       
-        });
-
-        it('responds without write permission with 403', () => {
-            // Remove the corresponding permission
-            return th.removeWritePermission('1_0_0', 'PERMISSION_OFFICE_DOCUMENT').then(() => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    var newDocuments = {name: 'newName'};
-                    // TODO: Attach real document, because you would get a 400 otherwise
-                    return th.post('/api/documents?token=' + token).send(newDocuments).expect(403);
-                });
-            });
-        });
-
-        // Positive tests
-
-        it('responds with correct document for a client which has no documents the correct status and creates document path for client', (done) => {
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            // First create a client
-            db.insert('clients', { name: 'testclient' }).then((client) => {
-                // Now create a client module assignment so that the client can use the documents module
-                db.insert('clientmodules', { clientId: client._id, module: 'documents' }).then((clientModule) => {
-                    // Next we need a usergroup for the client
-                    db.insert('usergroups', { name: client.name + '_0', clientId: client._id }).then((userGroup) => {
-                        // And we need an user for authentication
-                        db.insert('users', { name: userGroup.name + '_0', pass: '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S', clientId: userGroup.clientId, userGroupId: userGroup._id, isAdmin: true }).then((user) => {
-                            // Now login the new user
-                            th.doLoginAndGetToken(user.name, 'test').then((token) => {
-                                //https://visionmedia.github.io/superagent/#multipart-requests
-                                th.post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
-                                    fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
-                                    if(err) return done(err);
-                                    var id = res.body._id;
-                                    assert.ok(id, '_id not returned.');
-                                    db.get('documents').findOne(id).then((document) => {
-                                        assert.ok(document, 'Document not found in database.');
-                                        assert.notStrictEqual(document.clientId, null, 'clientId is null.');
-                                        var uploadedFilePath = dh.getDocumentPath(document._id);
-                                        assert.ok(fs.existsSync(uploadedFilePath), `Uploaded file not found in ${uploadedFilePath}, so the path also does not exist.`);
-                                        done();
-                                    }).catch(done);
-                                });
-                            }).catch(done);
-                        });
-                    });
-                });
-            });
-        });
-
-        it('responds with correct document for the portal (no clientId) with inserted document and the file is located in the correct path', (done) => {
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            th.doLoginAndGetToken('_0_0', 'test').then((token) => { // This username is from a portal user
-                //https://visionmedia.github.io/superagent/#multipart-requests
-                th.post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
-                    fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
-                    if(err) return done(err);
-                    var id = res.body._id;
-                    assert.ok(id, '_id not returned.');
-                    db.get('documents').findOne(id).then((document) => {
-                        assert.ok(document, 'Document not found in database.');
-                        assert.strictEqual(document.clientId, null, 'cientId is not null.');
-                        var uploadedFilePath = dh.getDocumentPath(document._id);
-                        assert.ok(fs.existsSync(uploadedFilePath), `Uploaded file not found in ${uploadedFilePath}.`);
-                        done();
-                    }).catch(done);
-                });
-            }).catch(done);
-        });
-
-        it('responds with correct document with no parentFolderId with the inserted document and null as parentFolderId', (done) => {
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                //https://visionmedia.github.io/superagent/#multipart-requests
-                th.post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
-                    fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
-                    if(err) return done(err);
-                    var id = res.body._id;
-                    assert.ok(id, '_id not returned.');
-                    db.get('documents').findOne(id).then((document) => {
-                        assert.ok(document, 'Document not found in database.');
-                        assert.strictEqual(document.parentFolderId, null, 'Parent folder ID is not null.');
-                        done();
-                    }).catch(done);
-                });
-            }).catch(done);
-        });
-
-        it('responds with given file with uploaded document containing valid _id field', function(done){
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            db.get('folders').findOne({name: '1_1_1'}).then((folderOfClient1) => {
-                th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    var parentFolderId = folderOfClient1._id.toString();
-                    //https://visionmedia.github.io/superagent/#multipart-requests
-                    th.post(`/api/documents?token=${token}`).field('parentFolderId', parentFolderId).attach('file', filePath).end((err, res) => {
-                        fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
-                        if(err) return done(err);
-                        var id = res.body._id;
-                        assert.ok(id, '_id not returned.');
-                        db.get('documents').findOne(id).then((document) => {
-                            assert.ok(document, 'Document not found in database.');
-                            assert.strictEqual(document.name, fileName, `Filename ${document.name} not as expected.`);
-                            assert.strictEqual(document.parentFolderId.toString(), parentFolderId, 'Parent folder IDs do not match.');
-                            var uploadedFilePath = dh.getDocumentPath(document._id);
-                            assert.ok(fs.existsSync(uploadedFilePath), `Uploaded file not found in ${uploadedFilePath}.`);
-                            var uploadedFileContent = fs.readFileSync(uploadedFilePath).toString();
-                            assert.strictEqual(uploadedFileContent, fileContent, 'File content differs.');
-                            done();
-                        }).catch(done);
-                    });
-                }).catch(done);
-            });
-        });
-
-        it('responds with correct document for the portal (no clientId) with inserted document and the file is located in the correct path', (done) => {
-            // Prepare file for upload
-            var fileName = 'testDocumentPost.txt';
-            var fileContent = 'Gaga Bubu';
-            var filePath = createFileForUpload(fileName, fileContent);
-            th.doLoginAndGetToken('_0_0', 'test').then((token) => { // This username is from a portal user
-                //https://visionmedia.github.io/superagent/#multipart-requests
-                th.post(`/api/documents?token=${token}`).attach('file', filePath).end((err, res) => {
-                    fs.unlinkSync(filePath); // Immediately delete temporary file, we do not need it anymore
-                    if(err) return done(err);
-                    var id = res.body._id;
-                    assert.ok(id, '_id not returned.');
-                    db.get('documents').findOne(id).then((document) => {
-                        assert.ok(document, 'Document not found in database.');
-                        assert.strictEqual(document.clientId, null, 'cientId is not null.');
-                        var uploadedFilePath = dh.getDocumentPath(document._id);
-                        assert.ok(fs.existsSync(uploadedFilePath), `Uploaded file not found in ${uploadedFilePath}.`);
-                        done();
-                    }).catch(done);
-                });
-            }).catch(done);
+        it('responds with correct document with no parentFolderId with the inserted document and null as parentFolderId', async() => {
+            deleteDocumentsFolder();
+            var filePath = createFileForUpload();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var createddocument = (await th.post(`/api/documents?token=${token}`).attach('file', filePath).expect(200)).body;
+            var documentFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, createddocument._id);
+            assert.strictEqual(documentFromDatabase.parentfoldername, null);
         });
         
     });

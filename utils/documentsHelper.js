@@ -48,10 +48,10 @@ var dh = {
     /**
      * Moves a file into the documents folder and renames it to the given id.
      */
-    moveToDocumentsDirectory: function(documentId, originalFilePath) {
+    moveToDocumentsDirectory: function(clientname, documentname, originalFilePath) {
         // Create path ehen it does not exist
-        var documentPath = module.exports.getDocumentPath(documentId);
-        module.exports.createPath(path.dirname(documentPath));
+        var documentPath = dh.getDocumentPath(clientname, documentname);
+        dh.createPath(path.dirname(documentPath));
         fs.renameSync(originalFilePath, documentPath);
     },
 
