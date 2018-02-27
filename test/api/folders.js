@@ -35,19 +35,11 @@ describe('API folders', () => {
         return th.removeDocumentFiles();
     });
 
-
     function compareElement(actual, expected) {
         ["_id", "clientId", "name", "parentFolderId"].forEach((f) => {
             assert.ok(typeof(actual[f]) !== "undefined");
             assert.strictEqual(actual[f], expected[f]);
         });
-    }
-
-    function compareElements(actual, expected) {
-        assert.strictEqual(actual.length, expected.length);
-        actual.sort((a, b) => { return a._id.localeCompare(b._id); });
-        expected.sort((a, b) => { return a._id.localeCompare(b._id); });
-        for (var i = 0; i < actual.length; i++) compareElement(actual[i], expected[i]);
     }
 
     function mapFields(e) {
@@ -118,7 +110,7 @@ describe('API folders', () => {
 
     describe('GET/forIds', () => {
 
-        async function createTestFolders(client) {
+        async function createTestFolders(clientname) {
             return [ { _id: client + "_folder0" } ];
         }
 
@@ -303,7 +295,7 @@ describe('API folders', () => {
             assert.strictEqual(documentsOnSameLevel.length, 2);
         });
 
-        it('responds with a correct id with 204 and deletes all contained folders, documents and their files', async() => {
+        it('responds with a correct id with 204 and deletes all contained folders and documents', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.del(`/api/folders/client0_folder0?token=${token}`).expect(204);
             var folders = await Db.getDynamicObjects("client0", co.collections.folders.name);

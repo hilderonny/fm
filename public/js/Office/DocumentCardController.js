@@ -95,7 +95,7 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
             var document = response.data;
             $scope.document = document;
             $scope.documentName = document.name;
-            $scope.documentUrl = window.location.origin + '/api/documents/share/' + $scope.params.documentId;
+            $scope.documentUrl = window.location.origin + '/api/documents/share/' + $scope.document.clientId + '/' + $scope.params.documentId;
             $scope.is3Dmodel =  document.extension === '.dae' || document.extension === '.obj';
             $scope.isPreviewable = [
                 'application/vnd.ms-pki.stl'
