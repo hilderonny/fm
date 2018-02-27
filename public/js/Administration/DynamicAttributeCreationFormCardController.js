@@ -96,6 +96,20 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         });
     };
 
+    $scope.toogleVisibility = function(){
+        if($scope.attributeVisibility == true){
+             var updatedVisibility = false;
+        }else {
+            var updatedVisibility = true;
+        }
+        var attributeToSend = {isVisible: updatedVisibility};
+        $http.put('/api/dynamicattributes/' + $scope.params.dynamicAttributeId, attributeToSend).then(function(response){
+            $translate(['TRK_DYNAMICATTRIBUTES_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_DYNAMICATTRIBUTES_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            })
+           $scope.attributeVisibility = updatedVisibility;
+        });        
+    };
     $scope.newAttributeElement = function(){
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/DynamicAttributeElementCard', {
@@ -140,6 +154,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
                 $scope.dynamicattribute = completeAttribute;
                 $scope.attributeName = completeAttribute.name_en; 
                 $scope.attributeType = completeAttribute.type;
+                $scope.attributeVisibility = completeAttribute.isVisible;
                 if ($scope.attributeType === 'picklist') {
                     $http.get('/api/dynamicattributes/options/' + $scope.params.dynamicAttributeId).then(function(attributeOptionsFromDataBank){
                         $scope.elements = attributeOptionsFromDataBank.data;
