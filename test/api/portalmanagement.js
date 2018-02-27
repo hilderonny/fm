@@ -71,7 +71,7 @@ describe('API portalmanagement', function() {
 
         th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS);
 
-        it.only('responds with portalsettings (autoUpdateMode, [updateTimerInterval], licenseserverurl and licensekey only) from localconfig', function() {
+        it('responds with portalsettings (autoUpdateMode, [updateTimerInterval], licenseserverurl and licensekey only) from localconfig', function() {
             return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
                 return th.get(`/api/${co.apis.portalmanagement}?token=${token}`).expect(200);
             }).then(function(response) {
