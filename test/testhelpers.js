@@ -235,12 +235,8 @@ th.prepareDocumentFiles = () => {
 };
 
 th.removeDocumentFiles = () => {
-    var ids = [ "client0_document0", "client0_document1", "client0_document2" ];
-    for (var i = 0; i < ids.length; i++) {
-        var id = ids[i];
-        var filePath = documentsHelper.getDocumentPath("client0", id);
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    }
+    var filePath = documentsHelper.getDocumentPath("client0", "");
+    fs.readdirSync(filePath).forEach((f) => fs.unlinkSync(path.join(filePath, f)) );
 };
 
 th.prepareDocuments = async() => {

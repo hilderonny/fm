@@ -111,7 +111,7 @@ describe('API folders', () => {
     describe('GET/forIds', () => {
 
         async function createTestFolders(clientname) {
-            return [ { _id: client + "_folder0" } ];
+            return [ { _id: clientname + "_folder0" } ];
         }
 
         th.apiTests.getForIds.defaultNegative(co.apis.folders, co.permissions.OFFICE_DOCUMENT, co.collections.folders.name, createTestFolders);
