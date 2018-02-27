@@ -209,6 +209,7 @@ th.prepareFolders = async() => {
     await Db.insertDynamicObject("client0", "folders", { name: "client0_folder00", parentfoldername: "client0_folder0", label: "folder00" });
     await Db.insertDynamicObject("client0", "folders", { name: "client0_folder01", parentfoldername: "client0_folder0", label: "folder01" });
     await Db.insertDynamicObject("client0", "folders", { name: "client0_folder000", parentfoldername: "client0_folder00", label: "folder000" });
+    await Db.insertDynamicObject("client1", "folders", { name: "client1_folder0", parentfoldername: null, label: "folder0" });
 };
 
 th.createPath = (pathToCreate) => {
@@ -224,7 +225,7 @@ th.createPath = (pathToCreate) => {
 }
 
 th.prepareDocumentFiles = () => {
-    var ids = [ "client0_document0", "client0_document1", "client0_document2" ];
+    var ids = [ "client0_document0", "client0_document00", "client0_document01", "client0_document000" ];
     for (var i = 0; i < ids.length; i++) {
         var id = ids[i];
         var filePath = documentsHelper.getDocumentPath("client0", id);
@@ -244,9 +245,9 @@ th.removeDocumentFiles = () => {
 
 th.prepareDocuments = async() => {
     await th.cleanTable("documents", false, true);
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document0", parentfoldername: null, label: "document0", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document0", parentfoldername: null, label: "document0", type: "image/gif", isshared: false });
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document00", parentfoldername: "client0_folder0", label: "document00", type: "type", isshared: false });
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document01", parentfoldername: "client0_folder0", label: "document01", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document01", parentfoldername: "client0_folder0", label: "document01", type: "image/png", isshared: false });
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document000", parentfoldername: "client0_folder00", label: "document000", type: "type", isshared: true });
 };
 
