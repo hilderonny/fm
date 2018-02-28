@@ -96,7 +96,7 @@ app.controller('AdministrationAttributeCreationCardController', function($scope,
         });
     };
 
-    $scope.toogleVisibility = function(){
+    $scope.toggleVisibility = function(){
         if($scope.attributeVisibility == true){
              var updatedVisibility = false;
         }else {

@@ -127,7 +127,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 var visibleDynamicAttributes = [];
                 //return only the visible dynamic attributes
                 for(i = 0; i < allDynamicAttributes.length; i++){
-                    if(allDynamicAttributes[i].type.isVisible == true){
+                    if(allDynamicAttributes[i].type.isVisible != false){
                         visibleDynamicAttributes.push(allDynamicAttributes[i]);
                     }
                 };

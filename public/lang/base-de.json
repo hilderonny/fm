@@ -1,6 +1,6 @@
 {   
     "TRK_CANCEL" : "Abbrechen",
-    "TRK_DYNAMICATTRIBUTES_ACTIVATE": "Unsichtbar machen",
+    "TRK_DYNAMICATTRIBUTES_ACTIVATE": "Sichtbar machen",
     "TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTE": "Neues Attribut erstellen",
     "TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTEELEMENT": "Neues Listenelement erstellen",
     "TRK_DYNAMICATTRIBUTES_ATTRIBUTE": "Attribut",
@@ -12,7 +12,7 @@
     "TRK_DYNAMICATTRIBUTES_CHANGES_SAVED": "Änderungen gespeichert",
     "TRK_DYNAMICATTRIBUTES_CREATE": "Erstellen",
     "TRK_DYNAMICATTRIBUTES_DELETE": "Löschen",
-    "TRK_DYNAMICATTRIBUTES_DEACTIVATE": "Sichtbar machen",
+    "TRK_DYNAMICATTRIBUTES_DEACTIVATE": "Unsichtbar machen",
     "TRK_DYNAMICATTRIBUTES_ELEMENTS": "Listenelemente",
     "TRK_DYNAMICATTRIBUTES_NAME_de": "Bezeichnung DE",
     "TRK_DYNAMICATTRIBUTES_NAME_en": "Bezeichnung EN",
