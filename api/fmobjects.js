@@ -45,19 +45,20 @@ function mapFields(fmobject, clientname) {
 
 // Get all FM objects and their recursive children of the current client as hierarchy. Only _id, name and type are returned
 router.get('/', auth(co.permissions.BIM_FMOBJECT, 'r', co.modules.fmobjects), async(req, res) => {
-    var fmobjectquery = `
-    DROP TABLE IF EXISTS fmobjectchildtype;
-    CREATE TEMP TABLE fmobjectchildtype (_id text, name text, type text);
-    SELECT fmobjects.name AS _id, fmobjects.label AS name, fmobjects.fmobjecttypename as type, COALESCE(cd.children, '[]') as children FROM fmobjects
-    LEFT JOIN (
-        SELECT parentfmobjectname, json_agg(row_to_json(row(name, label, fmobjecttypename)::fmobjectchildtype)) AS children
-        FROM (SELECT name, label, parentfmobjectname, fmobjecttypename FROM fmobjects ORDER BY label) a
-        GROUP BY parentfmobjectname
-    ) cd ON cd.parentfmobjectname = fmobjects.name 
-    WHERE fmobjects.parentfmobjectname IS NULL
-    `;
-    var result = (await Db.query(req.user.clientname, fmobjectquery))[2]; // 0 = DROP, 1 = CREATE, 2 = SELECT
-    res.send(result.rowCount > 0 ? result.rows : []);
+    var allfmobjects = (await Db.query(req.user.clientname, `SELECT name AS _id, label AS name, fmobjecttypename AS type, parentfmobjectname AS "parentId", ARRAY[]::text[] as children FROM fmobjects ORDER BY label;`)).rows;
+    var fmmap = {};
+    allfmobjects.forEach((fmo) => {
+        fmmap[fmo._id] = fmo;
+    });
+    var toplevelobjects = [];
+    allfmobjects.forEach((fmo) => {
+        if (!fmo.parentId) {
+            toplevelobjects.push(fmo);
+            return;
+        }
+        fmmap[fmo.parentId].children.push(fmo);
+    });
+    res.send(toplevelobjects);
 });
 
 /**

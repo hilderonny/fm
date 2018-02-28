@@ -8,7 +8,7 @@ var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 
-describe.only('API fmobjects', () => {
+describe('API fmobjects', () => {
     
     before(async() => {
         await th.cleanDatabase();
@@ -63,7 +63,7 @@ describe.only('API fmobjects', () => {
 
         th.apiTests.get.defaultNegative(co.apis.fmobjects, co.permissions.BIM_FMOBJECT);
 
-        it.only('returns a hierarchy of FM objects which are ordered by their names', async() => {
+        it('returns a hierarchy of FM objects which are ordered by their names', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var fmObjectsFromApi = (await th.get(`/api/${co.apis.fmobjects}?token=${token}`).expect(200)).body;
             assert.strictEqual(fmObjectsFromApi.length, 2);
