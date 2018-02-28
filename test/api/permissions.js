@@ -8,7 +8,7 @@ var co = require('../../utils/constants');
 var ch = require('../../utils/configHelper');
 var Db = require("../../utils/db").Db;
 
-describe.only('API permissions', () => {
+describe('API permissions', () => {
 
     before(async() => {
         await th.cleanDatabase();
