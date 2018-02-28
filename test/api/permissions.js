@@ -1,15 +1,14 @@
 /**
  * UNIT Tests for api/permissions
  */
-
 var assert = require('assert');
-var superTest = require('supertest');
 var th = require('../testHelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var ch = require('../../utils/configHelper');
+var Db = require("../../utils/db").Db;
 
-describe('API permissions', function(){
+describe.only('API permissions', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -23,154 +22,50 @@ describe('API permissions', function(){
         await th.preparePermissions();
     });
 
-    var validPermisionKey = 'PERMISSION_BIM_FMOBJECT';
+    describe('GET/forLoggedInUser', () => {
 
-    function getUserGroup() {
-        return db.get(co.collections.usergroups.name).findOne({name:th.defaults.userGroup});
-    }
+        var api = `${co.apis.permissions}/forLoggedInUser`;
 
-    function testGetId(subApi) {
+        th.apiTests.get.defaultNegative(api, undefined);
 
-        var api = `/api/${co.apis.permissions}/${subApi}`;
-        var permission = co.permissions.ADMINISTRATION_USERGROUP;
-
-        it('responds without authentication with 403', function() {
-            return getUserGroup().then(function(userGroup) {
-                return th.get(`${api}/${userGroup._id.toString()}`).expect(403);
+        it('returns all permissions available to the client when the user is admin', async() => {
+            await th.cleanTable("permissions", true, true);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            var permissionsFromApi = (await th.get(`/api/${api}?token=${token}`).expect(200)).body;
+            var expectedPermissions = Object.keys(co.permissions).map((k) => co.permissions[k]);
+            assert.strictEqual(permissionsFromApi.length, expectedPermissions.length);
+            permissionsFromApi.forEach(function(permission) {
+                assert.ok(expectedPermissions.indexOf(permission.key) >= 0);
+                assert.ok(permission.canRead);
+                assert.ok(permission.canWrite);
             });
         });
-        it('responds without read permission with 403', function() {
-            var userGroup;
-            return th.removeReadPermission(th.defaults.user, permission).then(function() {
-                return getUserGroup();
-            }).then(function(ug) {
-                userGroup = ug;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`${api}/${userGroup._id.toString()}?token=${token}`).expect(403);
-            });
-        });
-        function checkForUser(user) {
-            return function() {
-                var userGroup;
-                return th.removeClientModule(th.defaults.client, 'base').then(function() {
-                    return getUserGroup();
-                }).then(function(ug) {
-                    userGroup = ug;
-                    return th.doLoginAndGetToken(user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`${api}/${userGroup._id.toString()}?token=${token}`).expect(403);
-                });
+
+        it('returns only permissions available to the logged in user (depending on usergroup and client modules', async() => {
+            await th.cleanTable("permissions", true, true);
+            var expectedPermissions = [
+                { permission: co.permissions.BIM_FMOBJECT, canwrite: true },
+                { permission: co.permissions.OFFICE_NOTE, canwrite: false },
+            ]
+            for (var i = 0; i < expectedPermissions.length; i++) {
+                var expectedPermission = expectedPermissions[i];
+                await Db.query("client0", `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('client0_usergroup0', '${expectedPermission.permission}', ${expectedPermission.canwrite});`);
             }
-        }
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-        it('responds with invalid id with 400', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.get(`${api}/invalidId?token=${token}`).expect(400);
-            });
-        });
-        it('responds with not existing id with 403', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.get(`${api}/999999999999999999999999?token=${token}`).expect(403);
-            });
-        });
-        it('responds with 403 when the user group with the given ID does not belong to the client of the logged in user', function() {
-            var userGroup;
-            // Get other client
-            return getUserGroup().then(function(ug) {
-                userGroup = ug;
-                return th.doLoginAndGetToken(th.defaults.otherUser, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`${api}/${userGroup._id.toString()}?token=${token}`).expect(403);
-            });
-        });
-
-    }
-
-    describe('GET/forLoggedInUser', function() {
-
-        var api = `/api/${co.apis.permissions}/forLoggedInUser`;
-
-        it('responds without authentication with 403', function() {
-            return th.get(api).expect(403);
-        });
-        function checkForUser(user) {
-            return function() {
-                return th.removeClientModule(th.defaults.client, 'base').then(function() {
-                    return th.doLoginAndGetToken(user, th.defaults.password);
-                }).then(function(token) {
-                    return th.get(`${api}?token=${token}`).expect(403);
-                });
-            }
-        }
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-
-        it('returns all permissions available to the client when the user is admin', function() {
-            var userGroup;
-            return getUserGroup().then(function(ug) {
-                userGroup = ug;
-                // Erst mal alle vorbereiteten Berechtigungen löschen
-                return db.get(co.collections.permissions.name).remove({userGroupId: userGroup._id});
-            }).then(function() {
-                // Jetzt alle Berechtigungen außer FMOBJECTS, ACTIVITES und SETTINGS_PORTAL (hat Mandant aber kein Zugriff drauf) hinzufügen
-                var permissionKeys = Object.keys(co.permissions).filter((k) => [co.permissions.BIM_FMOBJECT, co.permissions.OFFICE_ACTIVITY, co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0);
-                var permissionsToCreate = permissionKeys.map((key) => { return {
-                    key: co.permissions[key],
-                    userGroupId: userGroup._id,
-                    clientId : userGroup.clientId,
-                    canRead: true,
-                    canWrite: true
-                }});
-                return db.get(co.collections.permissions.name).bulkWrite(permissionsToCreate.map((p) => { return {insertOne:{document:p}} }));
-            }).then(function(createdPermissions) {
-                return th.doLoginAndGetToken(th.defaults.adminUser, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`${api}?token=${token}`).expect(200);
-            }).then(function(response) {
-                var permissionsFromApi = response.body.map((p) => p.key);
-                // Die ausgenommen Berechtigungen stehen dem Mandanten nicht zur Verfügung
-                var expectedPermissions = Object.keys(co.permissions).map((k) => co.permissions[k]);
-                assert.strictEqual(permissionsFromApi.length, expectedPermissions.length);
-                permissionsFromApi.forEach(function(permission) {
-                    assert.ok(expectedPermissions.indexOf(permission) >= 0);
-                });
-            });
-        });
-
-        it('returns only permissions available to the logged in user (depending on usergroup and client modules', function() {
-            var userGroup;
-            return getUserGroup().then(function(ug) {
-                userGroup = ug;
-                // Erst mal alle vorbereiteten Berechtigungen löschen
-                return db.get(co.collections.permissions.name).remove({userGroupId: userGroup._id});
-            }).then(function() {
-                // Jetzt alle Berechtigungen außer FMOBJECTS, ACTIVITES und SETTINGS_PORTAL (hat Mandant aber kein Zugriff drauf) hinzufügen
-                var permissionKeys = Object.keys(co.permissions).filter((k) => [co.permissions.BIM_FMOBJECT, co.permissions.OFFICE_ACTIVITY, co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0);
-                var permissionsToCreate = permissionKeys.map((key) => { return {
-                    key: co.permissions[key],
-                    userGroupId: userGroup._id,
-                    clientId : userGroup.clientId,
-                    canRead: true,
-                    canWrite: true
-                }});
-                return db.get(co.collections.permissions.name).bulkWrite(permissionsToCreate.map((p) => { return {insertOne:{document:p}} }));
-            }).then(function(createdPermissions) {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`${api}?token=${token}`).expect(200);
-            }).then(function(response) {
-                var permissionsFromApi = response.body.map((p) => p.key);
-                var expectedPermissions = Object.keys(co.permissions).filter((k) => [co.permissions.BIM_FMOBJECT, co.permissions.OFFICE_ACTIVITY, co.permissions.SETTINGS_PORTAL].indexOf(co.permissions[k]) < 0).map((k) => co.permissions[k]);
-                assert.strictEqual(permissionsFromApi.length, expectedPermissions.length);
-                permissionsFromApi.forEach(function(permission) {
-                    assert.ok(expectedPermissions.indexOf(permission) >= 0);
-                });
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var permissionsFromApi = (await th.get(`/api/${api}?token=${token}`).expect(200)).body;
+            assert.strictEqual(permissionsFromApi.length, expectedPermissions.length);
+            permissionsFromApi.forEach(function(permission) {
+                var expectedPermission = expectedPermissions.find((p) => p.permission === permission.key);
+                assert.ok(expectedPermission);
+                assert.ok(typeof(permission.canRead) !== "undefined");
+                assert.ok(typeof(permission.canWrite) !== "undefined");
+                assert.strictEqual(permission.canWrite, expectedPermission.canwrite);
             });
         });
 
     });
+
+    // TODO: Hier weiter
 
     describe('GET/forUserGroup/:id', function() {
 

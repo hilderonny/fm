@@ -12,38 +12,39 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
 var apiHelper = require('../utils/apiHelper');
 var co = require('../utils/constants');
 var configHelper = require('../utils/configHelper');
+var Db = require("../utils/db").Db;
 
 /**
  * Liefert alle Berechtigungen für den angemeldeten Benutzer. Wird für Verweise verwendet, um
  * Verweismenü zu filtern.
  */
-router.get('/forLoggedInUser', auth(false, false, co.modules.base), (req, res) => {
-    configHelper.getAvailablePermissionKeysForClient(req.user.clientId, req.db).then(function(permissionKeysForClient) {
-        // Bei Administratoren werden alle Permissions einfach zurück gegeben
-        if (req.user.isAdmin) {
-            var adminPermissions = permissionKeysForClient.map(function(permissionKey) {
-                return { key:permissionKey, canRead:true, canWrite:true, clientId:req.user.clientId, userGroupId: req.user.userGroupId };
-            });
-            res.send(adminPermissions);
-        } else {
-            // Obtain the permissions for the user group
-            req.db.get(co.collections.permissions.name).find({
-                userGroupId: req.user.userGroupId,
-                key: { $in: permissionKeysForClient }
-            }).then((permissionsOfUserGroup) => {
-                res.send(permissionsOfUserGroup);
-            });
-        }
-    });
+router.get('/forLoggedInUser', auth(false, false, co.modules.base), async(req, res) => {
+    var clientname = req.user.clientname;
+    var permissionKeysForClient = await configHelper.getAvailablePermissionKeysForClient(clientname);
+    // Bei Administratoren werden alle Permissions einfach zurück gegeben
+    if (req.user.isadmin) {
+        var adminPermissions = permissionKeysForClient.map((permissionKey) => {
+            return { key:permissionKey, canRead:true, canWrite:true, clientId:clientname, userGroupId: req.user.usergroupname };
+        });
+        res.send(adminPermissions);
+    } else {
+        var permissions = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${req.user.usergroupname}' AND key IN (${permissionKeysForClient.map((k) => `'${k}'`).join(',')});`)).rows;
+        var mappedPermissions = permissions.map((p) => { return {
+            key: p.key,
+            canRead: true,
+            canWrite: p.canwrite,
+            clientId:clientname,
+            userGroupId: req.user.usergroupname
+        }});
+        res.send(mappedPermissions);
+    }
 });
 
-router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r', co.modules.base), validateId, validateSameClientId(co.collections.usergroups.name), function(req, res) {
+router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r', co.modules.base), validateSameClientId(co.collections.usergroups.name), function(req, res) {
     var userGroup, permissionKeysForClient;
     req.db.get(co.collections.usergroups.name).findOne(req.params.id).then(function(ug) {
         userGroup = ug;
@@ -101,7 +102,7 @@ router.post('/', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.b
 });
 
 // Update a permission
-router.put('/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.base), validateId, validateSameClientId(co.collections.permissions.name), function(req, res) {
+router.put('/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.base), validateSameClientId(co.collections.permissions.name), function(req, res) {
     var permission = req.body;
     configHelper.getAvailablePermissionKeysForClient(req.user.clientId, req.db).then(function(permissionKeyForUser) {
         if (!permission || Object.keys(permission).length < 1 || (permission.key && permissionKeyForUser.indexOf(permission.key) < 0)) {
@@ -118,7 +119,7 @@ router.put('/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules
 });
 
 // Delete a permission
-router.delete('/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.base), validateId, validateSameClientId(co.collections.permissions.name), function(req, res) {
+router.delete('/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.base), validateSameClientId(co.collections.permissions.name), function(req, res) {
     req.db.remove(co.collections.permissions.name, req.params.id).then((result) => {
         // Database element is available here in every case, because validateSameClientId already checked for existence
         res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5

@@ -6,7 +6,6 @@ var fs = require('fs');
 var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
-var uuidv4 = require("uuid").v4;
 
 describe('API fmobjects', () => {
     
