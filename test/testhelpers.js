@@ -196,10 +196,12 @@ th.prepareMarkers = async() => {
 
 th.prepareFmObjects = async() => {
     await th.cleanTable("fmobjects", false, true);
-    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject0", parentfmobjectname: null, label: "label0", fmobjecttypename: "FMOBJECTS_TYPE_PROJECT", previewimagedocumentname: null, areacategoryname: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
-    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject1", parentfmobjectname: null, label: "label1", fmobjecttypename: "FMOBJECTS_TYPE_PROPERTY", previewimagedocumentname: null, areacategoryname: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
-    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject00", parentfmobjectname: "client0_fmobject0", label: "label2", fmobjecttypename: "FMOBJECTS_TYPE_BUILDING", previewimagedocumentname: null, areacategoryname: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
-    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject01", parentfmobjectname: "client0_fmobject0", label: "label2", fmobjecttypename: "FMOBJECTS_TYPE_LEVEL", previewimagedocumentname: null, areacategoryname: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject0", parentfmobjectname: null, label: "label0", fmobjecttypename: "FMOBJECTS_TYPE_PROJECT", previewimagedocumentname: null, areatypename: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject1", parentfmobjectname: null, label: "label1", fmobjecttypename: "FMOBJECTS_TYPE_PROPERTY", previewimagedocumentname: null, areatypename: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject00", parentfmobjectname: "client0_fmobject0", label: "label00", fmobjecttypename: "FMOBJECTS_TYPE_BUILDING", previewimagedocumentname: "client0_document01", areatypename: "Büroarbeit", f: 10, bgf: 50, areausagestatename: "Eigengenutzt", nrf: 30, nuf: 5, tf: 3, vf: 2 });
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject000", parentfmobjectname: "client0_fmobject00", label: "label000", fmobjecttypename: "FMOBJECTS_TYPE_AREA", previewimagedocumentname: null, areatypename: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
+    await Db.insertDynamicObject("client0", "fmobjects", { name: "client0_fmobject01", parentfmobjectname: "client0_fmobject0", label: "label01", fmobjecttypename: "FMOBJECTS_TYPE_LEVEL", previewimagedocumentname: null, areatypename: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
+    await Db.insertDynamicObject("client1", "fmobjects", { name: "client1_fmobject0", parentfmobjectname: null, label: "label0", fmobjecttypename: "FMOBJECTS_TYPE_PROJECT", previewimagedocumentname: null, areatypename: null, f: 0, bgf: 0, areausagestatename: null, nrf: 0, nuf: 0, tf: 0, vf: 0 });
 };
 
 th.prepareFolders = async() => {

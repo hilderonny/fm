@@ -33,8 +33,6 @@ describe('API documents', () =>{
         await th.prepareUserGroups();
         await th.prepareUsers();
         await th.preparePermissions();
-        await th.prepareActivities();
-        await th.prepareFmObjects();
         await th.prepareFolders();
         await th.prepareDocuments();
         await th.prepareDocumentFiles();
@@ -207,7 +205,7 @@ describe('API documents', () =>{
     describe('PUT/:id', () => {
 
         async function createPutTestObject(client) {
-            return { _id: client + "_document0", clientId: "client0", name: "document0" }
+            return { _id: client + "_document0", clientId: client, name: "document0" }
         }
 
         th.apiTests.put.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, createPutTestObject);
@@ -275,6 +273,13 @@ describe('API documents', () =>{
             await th.del(`/api/documents/client0_document00?token=${token}`).expect(204);
             var filePath = dh.getDocumentPath("client0", 'client0_document00');
             assert.ok(!fs.existsSync(filePath));
+        });
+
+        it('Sets the previewImageId of all FM objects to null where it was the id of the deleted document previously', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/documents/client0_document01?token=${token}`).expect(204);
+            var fmobjects = await Db.getDynamicObjects("client0", co.collections.fmobjects.name, { previewimagedocumentname: "client0_document01" });
+            assert.strictEqual(fmobjects.length, 0);
         });
 
     });

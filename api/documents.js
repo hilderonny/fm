@@ -11,9 +11,7 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
 var multer  = require('multer')
 var upload = multer({ dest: 'uploads/' })
 var fs = require('fs');

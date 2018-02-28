@@ -610,24 +610,24 @@
                     { "name": "FMOBJECTS_TYPE_INVENTORY", "label": "Inventar" }
                 ] }, 
 
-                { "name": "areatypes", "label": "Flächenart", "titlefield": "name", "values": [
+                { "name": "areacategories", "label": "Kategorie", "titlefield": "name", "values": [
                     { "name": "Nutzungsfläche" },
                     { "name": "Technikfläche" },
                     { "name": "Verkehrsfläche" }
                 ] }, 
 
-                { "name": "areacategories", "label": "Kategorie", "titlefield": "name", "fields": [
-                    { "name": "areatypename", "type": "reference", "reference": "areatypes" }
+                { "name": "areatypes", "label": "Flächenart", "titlefield": "name", "fields": [
+                    { "name": "areacategoryname", "type": "reference", "reference": "areacategories" }
                 ], "values": [
-                    { "name": "Wohnen und Aufenthalt", "areatypename": "Nutzungsfläche" },
-                    { "name": "Büroarbeit", "areatypename": "Nutzungsfläche" },
-                    { "name": "Produktion, Hand- und Maschinenarbeit, Experimente", "areatypename": "Nutzungsfläche" },
-                    { "name": "Lagern, Verteilen und Verkaufen", "areatypename": "Nutzungsfläche" },
-                    { "name": "Bildung, Unterricht und Kultur", "areatypename": "Nutzungsfläche" },
-                    { "name": "Heilen und Pflegen", "areatypename": "Nutzungsfläche" },
-                    { "name": "Sonstige Nutzung", "areatypename": "Nutzungsfläche" },
-                    { "name": "Technische Anlagen", "areatypename": "Technikfläche" },
-                    { "name": "Verkehrserschließung und -sicherung", "areatypename": "Verkehrsfläche" }
+                    { "name": "Wohnen und Aufenthalt", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Büroarbeit", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Produktion, Hand- und Maschinenarbeit, Experimente", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Lagern, Verteilen und Verkaufen", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Bildung, Unterricht und Kultur", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Heilen und Pflegen", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Sonstige Nutzung", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Technische Anlagen", "areacategoryname": "Technikfläche" },
+                    { "name": "Verkehrserschließung und -sicherung", "areacategoryname": "Verkehrsfläche" }
                 ] }, 
 
                 { "name": "areausagestates", "label": "Nutzungsstatus", "titlefield": "name", "values": [
@@ -642,7 +642,7 @@
                     { "name": "fmobjecttypename", "label": "Typ", "type": "reference", "reference": "fmobjecttypes" },
                     { "name": "parentfmobjectname", "type": "reference", "reference": "fmobjects" },
                     { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents" },
-                    { "name": "areacategoryname", "label": "Kategorie", "type": "reference", "reference": "areacategories" },
+                    { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
                     { "name": "f", "label": "Fläche (m²)", "type": "decimal" },
                     { "name": "bgf", "label": "Brutto-Geschoss-Fläche (BGF)", "type": "decimal" },
                     { "name": "areausagestatename", "label": "Nutzungsstatus", "type": "reference", "reference": "areausagestates" },

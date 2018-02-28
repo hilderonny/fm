@@ -22,8 +22,6 @@ describe('API folders', () => {
         await th.prepareUserGroups();
         await th.prepareUsers();
         await th.preparePermissions();
-        await th.prepareActivities();
-        await th.prepareFmObjects();
         await th.prepareFolders();
         await th.prepareDocuments();
         await th.prepareDocumentFiles();
