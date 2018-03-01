@@ -278,6 +278,14 @@ module.exports.modules = {
     ronnyseins: 'ronnyseins'
 }
 
+module.exports.portalmodules = [
+    module.exports.modules.base, 
+    module.exports.modules.clients, 
+    module.exports.modules.doc,
+    module.exports.modules.portalbase,
+    module.exports.modules.licenseserver 
+]
+
 /**
  * List of all possible permissions.
  * Can be used with:
