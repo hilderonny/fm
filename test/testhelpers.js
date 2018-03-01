@@ -322,7 +322,7 @@ th.preparePredefinedDynamicAttibutesForClient = async (clientname) => {
 };
 
 th.createRelation = async(datatype1name, name1, datatype2name, name2) => {
-    await Db.insertDynamicObject("client0", "relations", { name: `client0_${datatype1name}_${name2}_${datatype2name}_${name2}`, datatype1name: datatype1name, name1: name1, datatype2name: datatype2name, name2: name2 });
+    await Db.insertDynamicObject("client0", "relations", { name: `client0_${datatype1name}_${name1}_${datatype2name}_${name2}`, datatype1name: datatype1name, name1: name1, datatype2name: datatype2name, name2: name2 });
 };
 
 th.getModuleForApi = (api) => {
@@ -651,7 +651,7 @@ th.apiTests = {
         }
     },
     getId: {
-        defaultNegative: function(api, permission, datatypename, client, usergroup, user, adminuser) {
+        defaultNegative: function(api, permission, datatypename, client, usergroup, user, adminuser, ignoreNotExistingId) {
             var testObject = { name: "testobject" };
             it('responds without authentication with 403', async() => {
                 await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
@@ -674,7 +674,7 @@ th.apiTests = {
             }
             if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
             if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
-            it('responds with not existing id with 404', async() => {
+            if (!ignoreNotExistingId) it('responds with not existing id with 404', async() => {
                 // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
                 // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
                 await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
