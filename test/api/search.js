@@ -3,11 +3,10 @@
  */
 var assert = require('assert');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
-var monk = require('monk');
+var Db = require("../../utils/db").Db;
 
-describe('API search', function() {
+describe('API search', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -26,73 +25,64 @@ describe('API search', function() {
         await th.preparePersons();
         await th.prepareClientSettings();
         await th.prepareDocumentFiles();
-        await th.prepareDynamicAttributes();
         await th.prepareFmObjects();
         await th.prepareMarkers();
         await th.preparePartnerAddresses();
-        await th.preparePersonCommunications();
+        await th.prepareCommunications();
         await th.preparePortals();
         await th.preparePortalModules();
         await th.prepareRelations();
     });
 
-    describe('GET/', function() {
+    describe('GET/', () => {
 
-        it('responds with 403 when user is not authenticated', async function() {
-            return th.get(`/api/${co.apis.search}?term=a`).expect(403);
+        it('responds without authentication with 403', async() => {
+            await th.get(`/api/${co.apis.search}?term=ient`).expect(403);
         });
 
-        it('responds with emtpy list when parameter term is not given', async function() {
-            var token = await th.defaults.login();
+        it('responds with emtpy list when parameter term is not given', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
             var results = (await th.get(`/api/${co.apis.search}?token=${token}`).expect(200)).body;
             assert.strictEqual(results.length, 0);
         });
 
-        it('responds with emtpy list when parameter term is empty', async function() {
-            var token = await th.defaults.login();
+        it('responds with emtpy list when parameter term is empty', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
             var results = (await th.get(`/api/${co.apis.search}?token=${token}&term=`).expect(200)).body;
             assert.strictEqual(results.length, 0);
         });
 
-        it('responds with emtpy list when parameter term is not found in any name of any entity', async function() {
-            var token = await th.defaults.login();
+        it('responds with emtpy list when parameter term is not found in any name of any entity', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
             var results = (await th.get(`/api/${co.apis.search}?token=${token}&term=notExistingSearchTerm`).expect(200)).body;
             assert.strictEqual(results.length, 0);
         });
 
-        it('responds with list containing entities from different collections where the name equals the term parameter', async function() {
-            var token = await th.defaults.login();
-            var results = (await th.get(`/api/${co.apis.search}?token=${token}&term=1_0_0`).expect(200)).body;
+        it('responds with list containing entities from different collections where the name equals the term parameter', async() => {
+            var searchterm = 'ient';
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var results = (await th.get(`/api/${co.apis.search}?token=${token}&term=${searchterm}`).expect(200)).body;
             assert.notEqual(results.length, 0);
             for (var i = 0; i < results.length; i++) {
                 var result = results[i];
                 assert.ok(result._id);
                 assert.ok(result.collection);
                 assert.ok(result.name);
+                assert.ok(result.name.indexOf(searchterm) >= 0);
                 var collection = co.collections[result.collection];
                 assert.ok(collection);
                 assert.strictEqual(!result.icon ? null : result.icon, !collection.icon ? null : collection.icon); // Vergleich null === undefined
-                var entityFromDatabase = await db.get(collection.name).findOne(result._id);
+                var entityFromDatabase = await Db.getDynamicObject("client0", result.collection, result._id);
                 assert.ok(entityFromDatabase);
-                assert.strictEqual(result.name, entityFromDatabase.name);
             };
         });
 
-        it('responds with list containing entities only from the client of the logged in user', async function() {
-            var token = await th.defaults.login();
-            var client = await th.defaults.getClient();
-            var results = (await th.get(`/api/${co.apis.search}?token=${token}&term=_`).expect(200)).body;
+        it('returns results from portal only datatypes when logged in user is a portal user', async() => {
+            var searchterm = 'ient';
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var results = (await th.get(`/api/${co.apis.search}?token=${token}&term=${searchterm}`).expect(200)).body;
             assert.notEqual(results.length, 0);
-            for (var i = 0; i < results.length; i++) {
-                var result = results[i];
-                assert.ok(result._id);
-                assert.ok(result.collection);
-                var collection = co.collections[result.collection];
-                assert.ok(collection);
-                var entityFromDatabase = await db.get(collection.name).findOne(result._id);
-                assert.ok(entityFromDatabase);
-                assert.strictEqual(client._id.toString(), entityFromDatabase.clientId.toString());
-            };
+            assert.ok(results.find((r) => r.collection === co.collections.clients.name)); // collection only available to portals
         });
                                                             
     });
