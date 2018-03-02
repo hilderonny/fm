@@ -24,9 +24,9 @@ var Db = {
         pg.types.setTypeParser(20, (val) => { return parseInt(val); }); // bigint / int8
         pg.types.setTypeParser(1700, (val) => { return parseFloat(val); }); // numeric
         if (dropDatabase) {
-            var portalDatabases = await Db.queryDirect("postgres", `SELECT datname FROM pg_database WHERE datname like '${dbprefix}_%';`);
+            var portalDatabases = await Db.queryDirect("postgres", `SELECT * FROM pg_database WHERE datname like '${dbprefix}_%';`);
             for (var i = 0; i < portalDatabases.rowCount; i++) {
-                await Db.queryDirect("postgres", `DROP DATABASE ${portalDatabases.rows[i].datname};`);
+                await Db.queryDirect("postgres", `DROP DATABASE IF EXISTS ${portalDatabases.rows[i].datname};`);
             }
         }
         await Db.initPortalDatabase();
@@ -376,12 +376,9 @@ var Db = {
         var pool = Db.getPool(databasename);
         var client = await pool.connect();
         var result = undefined;
-        try {
-            // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
-            result = await client.query(query);
-        } finally {
-            client.release();
-        }
+        // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
+        result = await client.query(query);
+        client.release();
         return result;
     },
 

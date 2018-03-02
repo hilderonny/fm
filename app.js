@@ -195,14 +195,16 @@ var init = () => {
     console.log(`Server started at ${localConfig.startTime}.`)
 
     //Update local 'version' and 'lastNotification' of portal 
-    var request = require('request');
-    var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-    var localVersion = packageJson.version;
-    var url =`${localConfig.licenseserverurl}/api/update/heartbeat`;
-    var key = localConfig.licensekey;
-    request.post({url: url, form:  {"licenseKey":  key, "version": localVersion}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
+    if (process.env.NODE_ENV !== 'test') { // Bei tests werden die Tabellen gelöscht. Bei denm heartbeat würde dann eine Fehlermeldung kommen
+        var request = require('request');
+        var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
+        var localVersion = packageJson.version;
+        var url =`${localConfig.licenseserverurl}/api/update/heartbeat`;
+        var key = localConfig.licensekey;
+        request.post({url: url, form:  {"licenseKey":  key, "version": localVersion}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
+    }
     //start the initial auto-update mode on server start 
-    if(localConfig.autoUpdateMode){
+    if(localConfig.autoUpdateMode && localConfig.updateTimerInterval && localConfig.updateTimerInterval > 0) {
         var initalUpdateInterval;
         initalUpdateInterval = localConfig.updateTimerInterval * 3600000; //convert hours to milliseconds
         timerId = setInterval(portalUpdatesHelper.triggerUpdate, initalUpdateInterval);

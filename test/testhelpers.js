@@ -165,17 +165,17 @@ th.removeWritePermission = async(clientname, usergroupname, permissionkey) => {
 th.preparePortals = async() => {
     await th.cleanTable("portals", true, false);
     var nowTicks = (new Date()).getTime();
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal_portal0", label: "label", isactive: true, url: "url", comment: "comment", licensekey: "licensekey", version: "1.0", lastnotification:nowTicks - 1000000 });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal_portal1", label: "label", isactive: false, url: "url", comment: "comment", licensekey: "licensekey", version: "1.0", lastnotification:nowTicks - 2000000 });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal_portal0", label: "label", isactive: true, url: "url", comment: "comment", licensekey: "licensekey0", version: "1.0", lastnotification:nowTicks - 1000000 });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portals", { name: "portal_portal1", label: "label", isactive: false, url: "url", comment: "comment", licensekey: "licensekey1", version: "1.0", lastnotification:nowTicks - 2000000 });
 };
 
 th.preparePortalModules = async() => {
     await th.cleanTable("portalmodules", true, false);
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule0", portalname: "portal0", modulename: co.modules.base });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule1", portalname: "portal0", modulename: co.modules.clients });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule2", portalname: "portal0", modulename: co.modules.documents });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule3", portalname: "portal0", modulename: co.modules.fmobjects });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule4", portalname: "portal0", modulename: co.modules.portalbase });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule0", portalname: "portal_portal0", modulename: co.modules.base });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule1", portalname: "portal_portal0", modulename: co.modules.clients });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule2", portalname: "portal_portal0", modulename: co.modules.documents });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule3", portalname: "portal_portal0", modulename: co.modules.fmobjects });
+    await Db.insertDynamicObject(Db.PortalDatabaseName, "portalmodules", { name: "portal_portalmodule4", portalname: "portal_portal0", modulename: co.modules.portalbase });
 };
 
 th.prepareActivities = async() => {
@@ -749,7 +749,7 @@ th.apiTests = {
         }
     },
     put: {
-        defaultNegative: function(api, permission, createTestObject, client, usergroup, user, adminuser) {
+        defaultNegative: function(api, permission, createTestObject, client, usergroup, user, adminuser, ignoreinvalidid) {
             it('responds without authentication with 403', async() => {
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/${testObject._id}`).send(testObject).expect(403);
@@ -776,12 +776,12 @@ th.apiTests = {
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/${testObject._id}?token=${token}`).expect(400);
             });
-            it('responds with 404 when the _id is invalid', async() => {
+            if (!ignoreinvalidid) it('responds with 404 when the _id is invalid', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/invalidId?token=${token}`).send(testObject).expect(404);
             });
-            it('does not update the _id when it was sent', async() => {
+            if (!ignoreinvalidid) it('does not update the _id when it was sent', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
                 var originalId = testObject._id;
