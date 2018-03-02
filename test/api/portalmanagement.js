@@ -9,7 +9,7 @@ var mc = require('../../config/module-config.json');
 var rimraf = require('rimraf');
 var Db = require("../../utils/db").Db;
 
-describe.only('API portalmanagement', () => {
+describe('API portalmanagement', () => {
 
     var localConfigBackup, packageJsonBackup, lc, pj, httpsPort, httpPort, extractPath = './extractTemp/';
 
