@@ -25,15 +25,14 @@
  *  value
  * }
  */
-var bcryptjs = require('bcryptjs');
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
 var apiHelper = require('../utils/apiHelper');
 var dynamicAttributesHelper = require('../utils/dynamicAttributesHelper');
 var co = require('../utils/constants');
+var Db = require("../utils/db").Db;
+var uuidv4 = require("uuid").v4;
 
 /**
  * Check whether the modelName given in the request is valid or not
@@ -48,149 +47,125 @@ function validateModelName(req, res, next) {
 /**
  * Returns all dynamic attributes defined for the model MODELNAME as list
  */
-router.get('/model/:modelName', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateModelName, (req, res) => {
-    var modelName = req.params.modelName;
-    req.db.get(co.collections.dynamicattributes.name).find({modelName: modelName, clientId: req.user.clientId}).then(function(dynamicattributes){
-        var onlyActive = dynamicattributes.filter((a) => !a.isInactive);
-        res.send(onlyActive);
-    });
+router.get('/model/:modelName', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateModelName, async(req, res) => {
+    var modelname = req.params.modelName;
+    var dynamicattributes = await Db.getDynamicObjects(req.user.clientname, co.collections.dynamicattributes.name, {modelname: modelname, isinactive: false });
+    res.send(dynamicattributes);
 });
 
 /**
  * Returns the concrete option with the given _id.
  */
-router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateId, validateSameClientId(co.collections.dynamicattributeoptions.name), (req, res) => {
-    req.db.get(co.collections.dynamicattributeoptions.name).aggregate([
-        { $lookup: { // In Typen nachgucken, damit wir auch solche Werte bekommen, für die nix in der Datenbank steht
-            from: co.collections.dynamicattributes.name,
-            localField: 'dynamicAttributeId',
-            foreignField: '_id',
-            as: 'attribute'
-        } },
-        { $unwind: {
-            path: '$attribute'
-        } },
-        { $match: {
-            _id: monk.id(req.params.id),
-            $or: [
-                { 'attribute.isInactive': {'$exists':false} },
-                { 'attribute.isInactive': false }
-            ]
-        } }
-    ]).then(function(options) {
-        if (options.length < 1) return res.sendStatus(404);
-        res.send(options[0]);
-    });
+router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributeoptions.name), async(req, res) => {
+    var query = `
+    SELECT dynamicattributeoptions.* 
+    FROM dynamicattributeoptions 
+    JOIN dynamicattributes ON dynamicattributes.name = dynamicattributeoptions.dynamicattributename 
+    WHERE dynamicattributeoptions.name='${req.params.id}' AND dynamicattributes.isinactive = false;
+    `;
+    var result = await Db.query(req.user.clientname, query);
+    if (result.rowCount < 1) return res.sendStatus(404);
+    res.send(result.rows[0]);
 });
 
 /**
  * Returns a list of options for a dynamic attribute with the given _id. The type of the dynamic attribute must be picklist.
  */
-router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateId, validateSameClientId('dynamicattributes'), (req, res) => {
-    var dynamicAttributeId =  monk.id(req.params.id);
-    req.db.get(co.collections.dynamicattributeoptions.name).aggregate([
-        { $lookup: { // In Typen nachgucken, damit wir auch solche Werte bekommen, für die nix in der Datenbank steht
-            from: co.collections.dynamicattributes.name,
-            localField: 'dynamicAttributeId',
-            foreignField: '_id',
-            as: 'attribute'
-        } },
-        { $unwind: {
-            path: '$attribute'
-        } },
-        { $match: {
-            dynamicAttributeId: monk.id(dynamicAttributeId),
-            $or: [
-                { 'attribute.isInactive': {'$exists':false} },
-                { 'attribute.isInactive': false }
-            ]
-        } }
-    ]).then(function(options) {
-        if (options.length < 1) return res.sendStatus(404);
-        res.send(options);
-    });
+router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
+    var query = `
+    SELECT dynamicattributeoptions.* 
+    FROM dynamicattributeoptions 
+    JOIN dynamicattributes ON dynamicattributes.name = dynamicattributeoptions.dynamicattributename 
+    WHERE dynamicattributes.name='${req.params.id}' AND dynamicattributes.isinactive = false;
+    `;
+    var options = (await Db.query(req.user.clientname, query)).rows;
+    res.send(options);
 });
 
 /**
  * Returns all values of the dynamic attributes of an entity of a model MODELNAME with the given _id.
  */
-router.get('/values/:modelName/:id', auth(false, false, co.modules.base), validateId, validateSameClientId(), (req, res) => {
-    var entityId = monk.id(req.params.id);
-    req.db.get(co.collections.dynamicattributes.name).aggregate([
-        { $lookup: { // In Typen nachgucken, damit wir auch solche Werte bekommen, für die nix in der Datenbank steht
-            from: co.collections.dynamicattributevalues.name,
-            localField: '_id',
-            foreignField: 'dynamicAttributeId',
-            as: 'valueInstance'
-        } },
-        { $lookup: { // Eventuelle Optionen für Picklisten suchen
-            from: co.collections.dynamicattributeoptions.name,
-            localField: '_id',
-            foreignField: 'dynamicAttributeId',
-            as: 'options'
-        } },
-        { $project: { // Erst mal Felder filtern und Werte suchen
-            _id: 0,
-            type: '$$ROOT', // Der Typ steckt im Feld type drin, anders geht das nicht mit project, siehe https://stackoverflow.com/questions/19431773/include-all-existing-fields-and-add-new-fields-to-document
-            valueInstance: { $filter: {
-                input: '$valueInstance',
-                as: 'dav',
-                cond: { $eq: [ '$$dav.entityId', entityId ] } // Nur Werte für die korrekte Entität suchen
-            } }
-        } },
-        { $unwind: { // Es sollte nur einen Wert geben, diesen extrahieren.
-            path: '$valueInstance',
-            preserveNullAndEmptyArrays: true // Falls es keinen Wert gibt, null zurück geben
-        } },
-        { $addFields: { // Den Wert direkt als Attribut zurück geben
-            value: { $ifNull: [ '$valueInstance.value', null ] },
-            options: '$type.options'
-        } },
-        { $match: { // Nur Attribute des zugehörigen Modells
-            'type.modelName': req.params.modelName,
-            'type.clientId': req.user.clientId,
-            $or: [
-                { 'type.isInactive': {'$exists':false} }, // Nur Werte von aktiven DAs
-                { 'type.isInactive': false }
-            ]
-        } },
-        { $project: { // Das temporäre Wertefeld brauchen wir nicht mehr
-            'options.clientId': 0,
-            'options.dynamicAttributeId': 0,
-            //'type.clientId': 0,
-            'type.modelName': 0,
-            'type.valueInstance': 0,
-            'type.options': 0,
-            valueInstance: 0
-        } }
-    ]).then(function(valuesForEntity) {
-        res.send(valuesForEntity);
-    });
+router.get('/values/:modelName/:id', auth(false, false, co.modules.base), validateSameClientId(), async(req, res) => {
+    // var entityId = monk.id(req.params.id);
+    // req.db.get(co.collections.dynamicattributes.name).aggregate([
+    //     { $lookup: { // In Typen nachgucken, damit wir auch solche Werte bekommen, für die nix in der Datenbank steht
+    //         from: co.collections.dynamicattributevalues.name,
+    //         localField: '_id',
+    //         foreignField: 'dynamicAttributeId',
+    //         as: 'valueInstance'
+    //     } },
+    //     { $lookup: { // Eventuelle Optionen für Picklisten suchen
+    //         from: co.collections.dynamicattributeoptions.name,
+    //         localField: '_id',
+    //         foreignField: 'dynamicAttributeId',
+    //         as: 'options'
+    //     } },
+    //     { $project: { // Erst mal Felder filtern und Werte suchen
+    //         _id: 0,
+    //         type: '$$ROOT', // Der Typ steckt im Feld type drin, anders geht das nicht mit project, siehe https://stackoverflow.com/questions/19431773/include-all-existing-fields-and-add-new-fields-to-document
+    //         valueInstance: { $filter: {
+    //             input: '$valueInstance',
+    //             as: 'dav',
+    //             cond: { $eq: [ '$$dav.entityId', entityId ] } // Nur Werte für die korrekte Entität suchen
+    //         } }
+    //     } },
+    //     { $unwind: { // Es sollte nur einen Wert geben, diesen extrahieren.
+    //         path: '$valueInstance',
+    //         preserveNullAndEmptyArrays: true // Falls es keinen Wert gibt, null zurück geben
+    //     } },
+    //     { $addFields: { // Den Wert direkt als Attribut zurück geben
+    //         value: { $ifNull: [ '$valueInstance.value', null ] },
+    //         options: '$type.options'
+    //     } },
+    //     { $match: { // Nur Attribute des zugehörigen Modells
+    //         'type.modelName': req.params.modelName,
+    //         'type.clientId': req.user.clientId,
+    //         $or: [
+    //             { 'type.isInactive': {'$exists':false} }, // Nur Werte von aktiven DAs
+    //             { 'type.isInactive': false }
+    //         ]
+    //     } },
+    //     { $project: { // Das temporäre Wertefeld brauchen wir nicht mehr
+    //         'options.clientId': 0,
+    //         'options.dynamicAttributeId': 0,
+    //         //'type.clientId': 0,
+    //         'type.modelName': 0,
+    //         'type.valueInstance': 0,
+    //         'type.options': 0,
+    //         valueInstance: 0
+    //     } }
+    // ]).then(function(valuesForEntity) {
+    //     res.send(valuesForEntity);
+    // });
 });
 
 /**
  * Returns a list of all possible data models which can have dynamic attributes
  */
 router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), (req, res) => {
-    var models = [];
-    Object.keys(co.collections).forEach((key) => {
-        var collection = co.collections[key];
-        if (collection.canHaveAttributes) models.push(collection);
-    });
+    var models = Object.keys(co.collections).map(k => co.collections[k]).filter(c => c.canHaveAttributes);
+    // var models = [];
+    // Object.keys(co.collections).forEach((key) => {
+    //     var collection = co.collections[key];
+    //     if (collection.canHaveAttributes) models.push(collection);
+    // });
     res.send(models);
 });
 
 /**
  * Returns a dynamic attribute with the given _id
  */
-router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateId, validateSameClientId(co.collections.dynamicattributes.name), (req, res) => {
-    var dynamicAttributeId = req.params.id;
-    req.db.get(co.collections.dynamicattributes.name).findOne(dynamicAttributeId).then(function(dynamicattribute){
-        if (dynamicattribute.isInactive) {
-            return res.sendStatus(404);
-        }
-        res.send(dynamicattribute);
-    });
+router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
+    var dynamicattribute = Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, req.params.id);
+    if (!dynamicattribute) return res.sendStatus(404);
+    res.send(dynamicattribute);
+    // var dynamicAttributeId = req.params.id;
+    // req.db.get(co.collections.dynamicattributes.name).findOne(dynamicAttributeId).then(function(dynamicattribute){
+    //     if (dynamicattribute.isInactive) {
+    //         return res.sendStatus(404);
+    //     }
+    //     res.send(dynamicattribute);
+    // });
 });
 
 /**
