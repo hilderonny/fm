@@ -9,7 +9,7 @@ var bcryptjs =  require('bcryptjs');
 var co = require('../../utils/constants');
 var monk = require('monk');
 
-describe('API dynamicattributes', function() {
+xdescribe('API dynamicattributes', function() {
 
     before(async() => {
         await th.cleanDatabase();

@@ -9,7 +9,7 @@ var dynamicAttributesHelper = require('../../utils/dynamicAttributesHelper');
 var monk = require('monk');
 var moduleConfig = require('../../config/module-config.json');
 
-describe('UTILS dynamicAttributesHelper', function() {
+xdescribe('UTILS dynamicAttributesHelper', function() {
     
     /**
      * Modul-config mit vorgegebenen DAs vorbereiten, wir benutzen ein eigenes Modul "DAtest"

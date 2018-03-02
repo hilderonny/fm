@@ -10,7 +10,7 @@ var co = require('../../utils/constants');
 var JSZip = require('jszip');
 var path = require('path');
 
-describe('API extractdocument', function() {
+xdescribe('API extractdocument', function() {
 
     var zipContent = {
         folders: [
