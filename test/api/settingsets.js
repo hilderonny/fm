@@ -26,7 +26,7 @@ describe('API settingsets', () => {
         delete moduleConfig.modules.testModul2;
     });
 
-    describe.only('GET/', () => {
+    describe('GET/', () => {
 
         th.apiTests.get.defaultNegative(co.apis.settingsets, undefined);
 
