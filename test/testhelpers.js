@@ -749,16 +749,16 @@ th.apiTests = {
         }
     },
     put: {
-        defaultNegative: function(api, permission, createTestObject, client, usergroup, user, adminuser, ignoreinvalidid) {
+        defaultNegative: function(api, permission, createTestObject, client, usergroup, user, adminuser, withoutid) {
             it('responds without authentication with 403', async() => {
                 var testObject = await createTestObject(client ? client : "client0");
-                await th.put(`/api/${api}/${testObject._id}`).send(testObject).expect(403);
+                await th.put(`/api/${api}${withoutid ? "" : `/${testObject._id}`}`).send(testObject).expect(403);
             });
             if (permission) it('responds without write permission with 403', async() => {
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.removeWritePermission(client ? client : "client0", usergroup ? usergroup : "client0_usergroup0", permission);
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
-                await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(403);
+                await th.put(`/api/${api}${withoutid ? "" : `/${testObject._id}`}?token=${token}`).send(testObject).expect(403);
             });
             function checkForUser(user) {
                 return async() => {
@@ -766,7 +766,7 @@ th.apiTests = {
                     await th.removeClientModule(client ? client : "client0", moduleName);
                     var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                     var testObject = await createTestObject(client ? client : "client0");
-                    await th.put(`/api/${api}/${testObject._id}?token=${token}`).send(testObject).expect(403);
+                    await th.put(`/api/${api}${withoutid ? "" : `/${testObject._id}`}?token=${token}`).send(testObject).expect(403);
                 }
             }
             if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
@@ -774,14 +774,14 @@ th.apiTests = {
             it('responds with 400 when not sending an object to update', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
-                await th.put(`/api/${api}/${testObject._id}?token=${token}`).expect(400);
+                await th.put(`/api/${api}${withoutid ? "" : `/${testObject._id}`}?token=${token}`).expect(400);
             });
-            if (!ignoreinvalidid) it('responds with 404 when the _id is invalid', async() => {
+            if (!withoutid) it('responds with 404 when the _id is invalid', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/invalidId?token=${token}`).send(testObject).expect(404);
             });
-            if (!ignoreinvalidid) it('does not update the _id when it was sent', async() => {
+            if (!withoutid) it('does not update the _id when it was sent', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
                 var originalId = testObject._id;
