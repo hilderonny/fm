@@ -118,12 +118,13 @@ module.exports.deactivateDynamicAttributesForClient = async(clientId, moduleName
 */
 module.exports.createDynamicAttributeOption = async(dao) => {
     if ((await Db.query(dao.clientId, `SELECT 1 FROM dynamicattributeoptions WHERE dynamicattributename='${dao.dynamicAttributeId}' AND value='${dao.identifier}';`)).rowCount < 1) {
-        await Db.insertDynamicObject(dao.clientId, "dynamicattributeoptions", {
+        dao = {
             name: uuidv4(),
             dynamicattributename: dao.dynamicAttributeId,
-            label: dao.text_en,
+            label: dao.text_de ? dao.text_de : dao.text_en,
             value: dao.value
-        });
+        };
+        await Db.insertDynamicObject(dao.clientId, "dynamicattributeoptions", dao);
     }
     return dao;
 };

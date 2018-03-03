@@ -289,7 +289,6 @@ th.prepareDynamicAttributes = async(clientname, datatypename, entityname) => {
 };
 
 th.preparePredefinedDynamicAttibutesForClient = async (clientname) => {
-    var clientId = "client0";
     var dynamicAttributes = [
         // Vordefinierte
         { name: clientname + "_da0", modelname: co.collections.users.name, label: 'Gewicht', dynamicattributetypename: co.dynamicAttributeTypes.text, identifier: 'gewicht' },
