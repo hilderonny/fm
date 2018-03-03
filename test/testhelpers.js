@@ -4,7 +4,6 @@
  */
 var superTest = require('supertest');
 var server = require('../app');
-var db = require('../middlewares/db');
 var bcryptjs = require('bcryptjs');
 var assert = require('assert');
 var hat = require('hat');
@@ -14,7 +13,6 @@ var localConfig = require('../config/localconfig.json'); // http://stackoverflow
 var documentsHelper = require('../utils/documentsHelper');
 var moduleConfig = require('../config/module-config.json');
 var co = require('../utils/constants');
-var monk = require('monk');
 var Db = require("../utils/db").Db;
 
 var th = module.exports;
@@ -278,9 +276,12 @@ th.prepareRelations = async() => {
 };
 
 th.prepareDynamicAttributes = async(clientname, datatypename, entityname) => {
-    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da0", modelname: datatypename, label: "textattribute", dynamicattributetypename: "text" });
-    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da1", modelname: datatypename, label: "booleanattribute", dynamicattributetypename: "boolean" });
-    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da2", modelname: datatypename, label: "picklistattribute", dynamicattributetypename: "picklist" });
+    await th.cleanTable(co.collections.dynamicattributes.name, false, true);
+    await th.cleanTable(co.collections.dynamicattributeoptions.name, false, true);
+    await th.cleanTable(co.collections.dynamicattributevalues.name, false, true);
+    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da0", modelname: datatypename, label: "textattribute", dynamicattributetypename: "text", isinactive: false });
+    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da1", modelname: datatypename, label: "booleanattribute", dynamicattributetypename: "boolean", isinactive: false });
+    await Db.insertDynamicObject(clientname, "dynamicattributes", { name: "da2", modelname: datatypename, label: "picklistattribute", dynamicattributetypename: "picklist", isinactive: false });
     await Db.insertDynamicObject(clientname, "dynamicattributeoptions", { name: "da2o0", dynamicattributename: "da2", label: "Weiblich", value: "w" });
     await Db.insertDynamicObject(clientname, "dynamicattributeoptions", { name: "da2o1", dynamicattributename: "da2", label: "Männlich", value: "m" });
     await Db.insertDynamicObject(clientname, "dynamicattributevalues", { name: "da0v", entityname: entityname, dynamicattributename: "da0", value: "Text" });
@@ -289,13 +290,16 @@ th.prepareDynamicAttributes = async(clientname, datatypename, entityname) => {
 };
 
 th.preparePredefinedDynamicAttibutesForClient = async (clientname) => {
+    await th.cleanTable(co.collections.dynamicattributes.name, false, true);
+    await th.cleanTable(co.collections.dynamicattributeoptions.name, false, true);
+    await th.cleanTable(co.collections.dynamicattributevalues.name, false, true);
     var dynamicAttributes = [
         // Vordefinierte
-        { name: clientname + "_da0", modelname: co.collections.users.name, label: 'Gewicht', dynamicattributetypename: co.dynamicAttributeTypes.text, identifier: 'gewicht' },
-        { name: clientname + "_da1", modelname: co.collections.users.name, label: 'Geschlecht', dynamicattributetypename: co.dynamicAttributeTypes.picklist, identifier: 'geschlecht' },
+        { name: clientname + "_da0", modelname: co.collections.users.name, label: 'Gewicht', dynamicattributetypename: co.dynamicAttributeTypes.text, identifier: 'gewicht', isinactive: false },
+        { name: clientname + "_da1", modelname: co.collections.users.name, label: 'Geschlecht', dynamicattributetypename: co.dynamicAttributeTypes.picklist, identifier: 'geschlecht', isinactive: false },
         // Manuelle
-        { name: clientname + "_da2", modelname: co.collections.users.name, label: 'Größe', dynamicattributetypename: co.dynamicAttributeTypes.text },
-        { name: clientname + "_da3", modelname: co.collections.users.name, label: 'Haarfarbe', dynamicattributetypename: co.dynamicAttributeTypes.picklist }
+        { name: clientname + "_da2", modelname: co.collections.users.name, label: 'Größe', dynamicattributetypename: co.dynamicAttributeTypes.text, isinactive: true },
+        { name: clientname + "_da3", modelname: co.collections.users.name, label: 'Haarfarbe', dynamicattributetypename: co.dynamicAttributeTypes.picklist, isinactive: false }
     ];
     for (var i = 0; i < dynamicAttributes.length; i++) {
         await Db.insertDynamicObject(clientname, "dynamicattributes", dynamicAttributes[i]);
@@ -314,7 +318,7 @@ th.preparePredefinedDynamicAttibutesForClient = async (clientname) => {
         { name: clientname + "_dav1", dynamicattributename: clientname + "_da1", entityname: "client0_usergroup0_user0", value: clientname + "_dao1" },
         { name: clientname + "_dav2", dynamicattributename: clientname + "_da2", entityname: "client0_usergroup0_user0", value: '170' },
         { name: clientname + "_dav3", dynamicattributename: clientname + "_da3", entityname: "client0_usergroup0_user0", value: clientname + "_dao2" }
-    ]
+    ];
     for (var i = 0; i < dynamicAttributeValues.length; i++) {
         await Db.insertDynamicObject(clientname, "dynamicattributevalues", dynamicAttributeValues[i]);
     }

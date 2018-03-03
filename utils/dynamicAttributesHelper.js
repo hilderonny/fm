@@ -116,15 +116,15 @@ module.exports.deactivateDynamicAttributesForClient = async(clientId, moduleName
  * Wenn die Option ein value hat, wird sie nur dann erstellt, wenn sie nicht bereits vorhanden ist
  * @returns Promise
 */
-module.exports.createDynamicAttributeOption = async(dao) => {
-    if ((await Db.query(dao.clientId, `SELECT 1 FROM dynamicattributeoptions WHERE dynamicattributename='${dao.dynamicAttributeId}' AND value='${dao.identifier}';`)).rowCount < 1) {
+module.exports.createDynamicAttributeOption = async(dao, clientname) => {
+    if ((await Db.query(clientname, `SELECT 1 FROM dynamicattributeoptions WHERE dynamicattributename='${dao.dynamicAttributeId}' AND value='${dao.identifier}';`)).rowCount < 1) {
         dao = {
             name: uuidv4(),
             dynamicattributename: dao.dynamicAttributeId,
             label: dao.text_de ? dao.text_de : dao.text_en,
-            value: dao.value
+            value: null // value darf per API derzeit nicht gesetzt werden, um Vorgaben nicht mehrfach zu definieren
         };
-        await Db.insertDynamicObject(dao.clientId, "dynamicattributeoptions", dao);
+        await Db.insertDynamicObject(clientname, "dynamicattributeoptions", dao);
     }
     return dao;
 };

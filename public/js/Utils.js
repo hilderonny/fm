@@ -136,8 +136,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 if (!scope.dynamicAttributes) return Promise.resolve();
                 scope.dynamicAttributes.forEach(function(da) {
                     dynamicAttributesToSend.push({
-                        daId: da.type._id,
-                        type: da.type.type, // API needs this
+                        dynamicAttributeId: da.type._id,
                         value: da.value
                     });
                 });

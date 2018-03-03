@@ -25,6 +25,8 @@ module.exports = (tableName) => {
             } else {
                 next();
             }
+        }, (error) => { // Tabelle für modelName existiert nicht
+            return res.sendStatus(404);
         });
     }
 }

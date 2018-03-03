@@ -44,62 +44,54 @@ function validateModelName(req, res, next) {
     next();
 }
 
+function mapDynamicAttributeFields(da, clientname) {
+    return {
+        _id: da.name,
+        clientId: clientname,
+        name_en: da.label,
+        name_de: da.label,
+        type: da.dynamicattributetypename,
+        identifier: da.identifier,
+        modelName: da.modelname,
+        isInactive: da.isinactive
+    }
+}
+
+function mapDynamicAttributeOptionField(dao, clientname) {
+    return {
+        _id: dao.name,
+        clientId: clientname,
+        dynamicAttributeId: dao.dynamicattributename,
+        text_en: dao.label,
+        text_de: dao.label,
+        value: dao.value
+    }    
+}
+
 /**
  * Returns all dynamic attributes defined for the model MODELNAME as list
  */
 router.get('/model/:modelName', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), async(req, res) => {
     var modelname = req.params.modelName;
-    var dynamicattributes = await Db.getDynamicObjects(req.user.clientname, co.collections.dynamicattributes.name, {modelname: modelname, isinactive: false });
-    res.send(dynamicattributes.map(da => { return {
-        _id: da.name,
-        modelName: da.modelname,
-        name_en: da.label,
-        name_de: da.label,
-        type: da.dynamicattributetypename,
-        identifier: da.identifier
-    }}));
+    var dynamicattributes = await Db.getDynamicObjects(req.user.clientname, co.collections.dynamicattributes.name, {modelname: modelname });
+    res.send(dynamicattributes.map(da => { return mapDynamicAttributeFields(da, req.user.clientname); }));
 });
 
 /**
  * Returns the concrete option with the given _id.
  */
 router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributeoptions.name), async(req, res) => {
-    var query = `
-    SELECT dynamicattributeoptions.* 
-    FROM dynamicattributeoptions 
-    JOIN dynamicattributes ON dynamicattributes.name = dynamicattributeoptions.dynamicattributename 
-    WHERE dynamicattributeoptions.name='${req.params.id}' AND dynamicattributes.isinactive = false;
-    `;
-    var result = await Db.query(req.user.clientname, query);
-    if (result.rowCount < 1) return res.sendStatus(404);
-    var option = result.rows[0];
-    res.send({
-        _id: option.name,
-        dynamicAttributeId: option.dynamicattributename,
-        text_en: option.label,
-        text_de: option.label,
-        value: option.value
-    });
+    var option = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributeoptions.name, req.params.id);
+    if (!option) return res.sendStatus(404);
+    res.send(mapDynamicAttributeOptionField(option, req.user.clientname));
 });
 
 /**
  * Returns a list of options for a dynamic attribute with the given _id. The type of the dynamic attribute must be picklist.
  */
 router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
-    var query = `
-    SELECT dynamicattributeoptions.* 
-    FROM dynamicattributeoptions 
-    JOIN dynamicattributes ON dynamicattributes.name = dynamicattributeoptions.dynamicattributename 
-    WHERE dynamicattributes.name='${req.params.id}' AND dynamicattributes.isinactive = false;
-    `;
-    var options = (await Db.query(req.user.clientname, query)).rows;
-    res.send(options.map(option => { return {
-        _id: option.name,
-        dynamicAttributeId: option.dynamicattributename,
-        text_en: option.label,
-        text_de: option.label,
-        value: option.value
-    }}));
+    var options = await Db.getDynamicObjects(req.user.clientname, co.collections.dynamicattributeoptions.name, { dynamicattributename: req.params.id });
+    res.send(options.map(option => { return mapDynamicAttributeOptionField(option, req.user.clientname); }));
 });
 
 /**
@@ -121,78 +113,42 @@ router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES
  * }
  */
 router.get('/values/:modelName/:id', auth(false, false, co.modules.base), validateSameClientId(), async(req, res) => {
+    var modelname = req.params.modelName;
     // https://dba.stackexchange.com/a/72139, https://dba.stackexchange.com/a/69658/145998
     var query = `
     SELECT
-        dav.name AS _id,
-        dav.value AS value,
-        (SELECT row_to_json(da_) FROM (SELECT da.label AS name_en, da.label AS name_de, da.dynamicattributetypename AS type) AS da_) AS type,
-        CASE WHEN dynamicattributetypename = 'picklist' THEN (SELECT json_agg(dao_) FROM (SELECT dao.name AS _id, dao.label AS text_de, dao.label AS text_en) AS dao_) ELSE NULL END AS options
-    FROM dynamicattributevalues dav
-    JOIN dynamicattributes da ON da.name = dav.dynamicattributename
-    LEFT JOIN dynamicattributeoptions dao ON dao.dynamicattributename = da.name
-    WHERE (da.isinactive IS NULL OR da.isinactive = false) AND dav.entityname = '${req.params.id}' AND da.modelname = '${req.params.modelName}'
-    ORDER BY da.label;
+        b.type::jsonb,
+        json_agg(b.options) AS options,
+        dav.value
+    FROM (
+        SELECT
+            a.*,
+            CASE WHEN a.dynamicattributetypename = 'picklist' THEN (SELECT row_to_json(dao_) FROM (SELECT dao.name AS _id, dao.label AS text_de, dao.label AS text_en) AS dao_) ELSE NULL END AS options
+        FROM (
+            SELECT
+                ${modelname}.name AS entityname,
+                da.name AS dynamicattributename,
+                da.dynamicattributetypename,
+                (SELECT row_to_json(da_) FROM (SELECT da.name AS _id, da.label AS name_en, da.label AS name_de, da.dynamicattributetypename AS type) AS da_) AS type
+            FROM dynamicattributes da, ${modelname}
+            WHERE (da.isinactive IS NULL OR da.isinactive = false)
+            AND da.modelname = '${modelname}'
+        ) a
+        LEFT JOIN dynamicattributeoptions dao ON dao.dynamicattributename = a.dynamicattributename
+    ) b
+    LEFT JOIN dynamicattributevalues dav ON dav.dynamicattributename = b.dynamicattributename AND dav.entityname = b.entityname
+    WHERE b.entityname = '${req.params.id}'
+    GROUP BY b.type::jsonb, dav.value
+    ORDER BY type::jsonb->>'name_en'
     `;
-    var values = (await Db.query(req.user.clientname, query)).body;
-    res.send(value);
-    // var entityId = monk.id(req.params.id);
-    // req.db.get(co.collections.dynamicattributes.name).aggregate([
-    //     { $lookup: { // In Typen nachgucken, damit wir auch solche Werte bekommen, für die nix in der Datenbank steht
-    //         from: co.collections.dynamicattributevalues.name,
-    //         localField: '_id',
-    //         foreignField: 'dynamicAttributeId',
-    //         as: 'valueInstance'
-    //     } },
-    //     { $lookup: { // Eventuelle Optionen für Picklisten suchen
-    //         from: co.collections.dynamicattributeoptions.name,
-    //         localField: '_id',
-    //         foreignField: 'dynamicAttributeId',
-    //         as: 'options'
-    //     } },
-    //     { $project: { // Erst mal Felder filtern und Werte suchen
-    //         _id: 0,
-    //         type: '$$ROOT', // Der Typ steckt im Feld type drin, anders geht das nicht mit project, siehe https://stackoverflow.com/questions/19431773/include-all-existing-fields-and-add-new-fields-to-document
-    //         valueInstance: { $filter: {
-    //             input: '$valueInstance',
-    //             as: 'dav',
-    //             cond: { $eq: [ '$$dav.entityId', entityId ] } // Nur Werte für die korrekte Entität suchen
-    //         } }
-    //     } },
-    //     { $unwind: { // Es sollte nur einen Wert geben, diesen extrahieren.
-    //         path: '$valueInstance',
-    //         preserveNullAndEmptyArrays: true // Falls es keinen Wert gibt, null zurück geben
-    //     } },
-    //     { $addFields: { // Den Wert direkt als Attribut zurück geben
-    //         value: { $ifNull: [ '$valueInstance.value', null ] },
-    //         options: '$type.options'
-    //     } },
-    //     { $match: { // Nur Attribute des zugehörigen Modells
-    //         'type.modelName': req.params.modelName,
-    //         'type.clientId': req.user.clientId,
-    //         $or: [
-    //             { 'type.isInactive': {'$exists':false} }, // Nur Werte von aktiven DAs
-    //             { 'type.isInactive': false }
-    //         ]
-    //     } },
-    //     { $project: { // Das temporäre Wertefeld brauchen wir nicht mehr
-    //         'options.clientId': 0,
-    //         'options.dynamicAttributeId': 0,
-    //         //'type.clientId': 0,
-    //         'type.modelName': 0,
-    //         'type.valueInstance': 0,
-    //         'type.options': 0,
-    //         valueInstance: 0
-    //     } }
-    // ]).then(function(valuesForEntity) {
-    //     res.send(valuesForEntity);
-    // });
+    var values = (await Db.query(req.user.clientname, query)).rows;
+    res.send(values); // Kein mapping, das kommt schon richtig aus der Datenbank
 });
 
 /**
  * Returns a list of all possible data models which can have dynamic attributes
  */
-router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), (req, res) => {
+router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), async(req, res) => {
     var models = Object.keys(co.collections).map(k => co.collections[k]).filter(c => c.canHaveAttributes);
     // var models = [];
     // Object.keys(co.collections).forEach((key) => {
@@ -206,16 +162,9 @@ router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r'
  * Returns a dynamic attribute with the given _id
  */
 router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
-    var dynamicattribute = Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, req.params.id);
-    if (!dynamicattribute) return res.sendStatus(404);
-    res.send(dynamicattribute);
-    // var dynamicAttributeId = req.params.id;
-    // req.db.get(co.collections.dynamicattributes.name).findOne(dynamicAttributeId).then(function(dynamicattribute){
-    //     if (dynamicattribute.isInactive) {
-    //         return res.sendStatus(404);
-    //     }
-    //     res.send(dynamicattribute);
-    // });
+    var da = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, req.params.id);
+    if (!da) return res.sendStatus(404);
+    res.send(mapDynamicAttributeFields(da, req.user.clientname));
 });
 
 /**
@@ -225,37 +174,26 @@ router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', c
 router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), async(req, res) => {
     var dynamicAttributeOption = req.body;
     if(!dynamicAttributeOption || !dynamicAttributeOption.dynamicAttributeId || !dynamicAttributeOption.text_en) return res.sendStatus(400);
-    var attribute = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, { name: dynamicAttributeOption.dynamicAttributeId, type: 'picklist' });
+    var attribute = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, { name: dynamicAttributeOption.dynamicAttributeId, dynamicattributetypename: 'picklist' });
     if (!attribute) return res.sendStatus(400);
-    var createdoption = await dynamicAttributesHelper.createDynamicAttributeOption(dynamicAttributeOption);
+    var createdoption = await dynamicAttributesHelper.createDynamicAttributeOption(dynamicAttributeOption, req.user.clientname);
     dynamicAttributeOption._id = createdoption.name;
     res.send(dynamicAttributeOption);
-    // //Options are allowed only for Attributes of type picklist
-    // dynamicAttributeOption.dynamicAttributeId = monk.id(dynamicAttributeOption.dynamicAttributeId);
-    // req.db.get(co.collections.dynamicattributes.name).findOne(dynamicAttributeOption.dynamicAttributeId).then(function(dynamicAttribute){
-    //     if (!dynamicAttribute) return Promise.reject();
-    //     if (dynamicAttribute.type != co.dynamicAttributeTypes.picklist) return Promise.reject();
-    //     delete dynamicAttributeOption.value; // Kann nicht per API gesetzt werden
-    //     dynamicAttributeOption.clientId = req.user.clientId; 
-    //     return dynamicAttributesHelper.createDynamicAttributeOption(dynamicAttributeOption);
-    // }).then(function(inserteddynamicAttributeOption) {
-    //     res.send(inserteddynamicAttributeOption); 
-    // }, function() {
-    //     res.sendStatus(400);
-    // });
 });
 
 /**
  * Creates a new set of values for dynamic attributes for an entity of type MODELNAME and with the given _id.
  */
-router.post('/values/:modelName/:id', auth(false, false, co.modules.base), validateModelName, validateSameClientId(), (req, res) => {
+router.post('/values/:modelName/:id', auth(false, false, co.modules.base), validateModelName, validateSameClientId(), async(req, res) => {
     var clientname = req.user.clientname;
     var modelName = req.params.modelName;
     var entity = await Db.getDynamicObject(clientname, modelName, req.params.id);
     if (!entity) return res.sendStatus(400);
     var dynamicAttributeValues = req.body;
+    if (!Array.isArray(dynamicAttributeValues)) return res.sendStatus(400); 
+    if (dynamicAttributeValues.find(v => !v.dynamicAttributeId)) return res.sendStatus(400);
     var dynamicattributenames = dynamicAttributeValues.map(dav => `'${dav.dynamicAttributeId}'`);
-    var dynamicattributes = (await Db.query(clientname, `SELECT * FROM dynamicattributes WHERE name IN (${dynamicattributenames.join(",")});`)).rows;
+    var dynamicattributes = dynamicattributenames.length > 0 ? (await Db.query(clientname, `SELECT * FROM dynamicattributes WHERE name IN (${dynamicattributenames.join(",")});`)).rows : [];
     if (dynamicattributes.length !== dynamicAttributeValues.length) return res.sendStatus(400); // Some attributes do not exist or multiply defined in body
     var valuestoinsert = dynamicAttributeValues.map(dav => { return {
         name: uuidv4(),
@@ -263,8 +201,10 @@ router.post('/values/:modelName/:id', auth(false, false, co.modules.base), valid
         dynamicattributename: dav.dynamicAttributeId,
         value: dav.value
     }});
-    await Db.deleteDynamicObjects(clientname, co.collections.dynamicattributevalues.name, { entityname: entity.name });
-    await Db.insertDynamicObject(clientname, co.collections.dynamicattributevalues.name, valuestoinsert);
+    for (var i = 0; i < valuestoinsert.length; i++) {
+        await Db.deleteDynamicObjects(clientname, co.collections.dynamicattributevalues.name, { entityname: entity.name, dynamicattributename: valuestoinsert[i].dynamicattributename });
+        await Db.insertDynamicObject(clientname, co.collections.dynamicattributevalues.name, valuestoinsert[i]);
+    }
     res.send(valuestoinsert.map(v => { return {
         _id: v.name,
         entityId: v.entityname,
@@ -370,7 +310,7 @@ router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
  * For this case the attribute needs to be deleted and a new one is to be created.
  * Also changing the model is not supported. Only the name_* properties can be updated.
  */
-router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async (req, res) => {
+router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
     var clientname = req.user.clientname;
     var dynamicAttribute = req.body;
     delete dynamicAttribute._id;
