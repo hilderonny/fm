@@ -171,6 +171,7 @@ router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w
     if(!dynamicAttributeOption || !dynamicAttributeOption.dynamicAttributeId || !dynamicAttributeOption.text_en) return res.sendStatus(400);
     var attribute = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, { name: dynamicAttributeOption.dynamicAttributeId, dynamicattributetypename: 'picklist' });
     if (!attribute) return res.sendStatus(400);
+    delete dynamicAttributeOption.value; // Darf per API nicht gesetzt werden
     var createdoption = await dynamicAttributesHelper.createDynamicAttributeOption(dynamicAttributeOption, req.user.clientname);
     dynamicAttributeOption._id = createdoption.name;
     res.send(dynamicAttributeOption);

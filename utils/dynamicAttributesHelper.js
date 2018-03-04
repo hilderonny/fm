@@ -79,14 +79,13 @@ module.exports.activateDynamicAttributesForClient = async(clientId, moduleName) 
                 for (var k = 0; k < attributeDefinition.options.length; k++) {
                     var optionDefinition = attributeDefinition.options[k];
                     var optionToCreate = {
-                        clientId: clientId,
                         dynamicAttributeId: createdAttribute.name,
                         value: optionDefinition.value
                     };
                     Object.keys(optionDefinition).filter((k) => k.startsWith('text_')).forEach((k) => {
                         optionToCreate[k] = optionDefinition[k];
                     });
-                    await module.exports.createDynamicAttributeOption(optionToCreate);
+                    await module.exports.createDynamicAttributeOption(optionToCreate, clientId);
                 }
             } else {
                 await module.exports.createDynamicAttribute(attributeToCreate);
@@ -122,7 +121,7 @@ module.exports.createDynamicAttributeOption = async(dao, clientname) => {
             name: uuidv4(),
             dynamicattributename: dao.dynamicAttributeId,
             label: dao.text_de ? dao.text_de : dao.text_en,
-            value: null // value darf per API derzeit nicht gesetzt werden, um Vorgaben nicht mehrfach zu definieren
+            value: dao.value
         };
         await Db.insertDynamicObject(clientname, "dynamicattributeoptions", dao);
     }
