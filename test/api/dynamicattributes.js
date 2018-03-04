@@ -509,250 +509,175 @@ describe('API dynamicattributes', () => {
 
     });
 
-    xdescribe('PUT/:id', () => {
+    describe('PUT/:id', () => {
 
-        function createPutTestDynamicAttribute() {
-            return createTestDynamicAttribute().then(function(attr) {
-                return db.get(co.collections.dynamicattributes.name).insert(attr);
-            });
+        async function createPutTestDynamicAttribute(clientname) {
+            return {
+                _id: clientname + "_da0",
+                name_en: 'newname EN',
+                name_de: 'newname DE'
+            }
         }
 
         th.apiTests.put.defaultNegative(co.apis.dynamicattributes, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createPutTestDynamicAttribute);
-        th.apiTests.put.clientDependentNegative(co.apis.dynamicattributes, createPutTestDynamicAttribute);
 
-        it('responds with a new modelName with an updated record but with old modelName', async () => {
-            var token = await th.defaults.login();
-            var attributeToSend = await createPutTestDynamicAttribute();
+        it('responds with a new modelName with an updated record but with old modelName', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var attributeToSend = await createPutTestDynamicAttribute("client0");
             attributeToSend.modelName = co.collections.usergroups.name;
-            var updatedAttribute = (await th.put(`/api/${co.apis.dynamicattributes}/${attributeToSend._id}?token=${token}`).send(attributeToSend).expect(200)).body;
-            assert.strictEqual(updatedAttribute.modelName, co.collections.users.name);
+            await th.put(`/api/${co.apis.dynamicattributes}/${attributeToSend._id}?token=${token}`).send(attributeToSend).expect(200);
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributes.name, "client0_da0");
+            assert.strictEqual(da.modelname, co.collections.users.name);
         });
 
-        it('responds with a new type with an updated record but with old type', async () => {
-            var token = await th.defaults.login();
-            var attributeToSend = await createPutTestDynamicAttribute();
+        it('responds with a new type with an updated record but with old type (type cannot be changed afterwards)', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var attributeToSend = await createPutTestDynamicAttribute("client0");
             attributeToSend.type = co.dynamicAttributeTypes.boolean;
-            var updatedAttribute = (await th.put(`/api/${co.apis.dynamicattributes}/${attributeToSend._id}?token=${token}`).send(attributeToSend).expect(200)).body;
-            assert.strictEqual(updatedAttribute.type, co.dynamicAttributeTypes.text);
+            await th.put(`/api/${co.apis.dynamicattributes}/${attributeToSend._id}?token=${token}`).send(attributeToSend).expect(200);
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributes.name, "client0_da0");
+            assert.strictEqual(da.dynamicattributetypename, co.dynamicAttributeTypes.text);
         });
 
-        it('responds with an updated dynamic attribute', async () => {
-            var token = await th.defaults.login();
-            var attributeToSend = await createPutTestDynamicAttribute();
-            attributeToSend.name_en = 'updated name en';
-            attributeToSend.name_de = 'updated name de';
-            var updatedAttribute = (await th.put(`/api/${co.apis.dynamicattributes}/${attributeToSend._id}?token=${token}`).send(attributeToSend).expect(200)).body;
-            assert.strictEqual(updatedAttribute.name_en, attributeToSend.name_en);
-            assert.strictEqual(updatedAttribute.name_de, attributeToSend.name_de);
-        });
-
-        it('Liefert 404, wenn das DA inaktiv ist', async () => {
-            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Gewicht' });
-            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
-            da.name_en = 'Masse';
-            var token = await th.defaults.login();
-            return th.put(`/api/${co.apis.dynamicattributes}/${da._id}?token=${token}`).send(da).expect(404);
+        it('responds with an updated dynamic attribute', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var attributeToSend = await createPutTestDynamicAttribute("client0");
+            await th.put(`/api/${co.apis.dynamicattributes}/${attributeToSend._id}?token=${token}`).send(attributeToSend).expect(200);
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributes.name, "client0_da0");
+            assert.strictEqual(da.label, attributeToSend.name_de);
         });
 
     });
 
-    xdescribe('PUT/option/:id', () => {
+    describe('PUT/option/:id', () => {
 
-        function createPutTestDynamicAttributeOption() {
-            return createTestDynamicAttributeOption().then(function(option) {
-                return db.get(co.collections.dynamicattributeoptions.name).insert(option);
-            });
+        async function createPutTestDynamicAttributeOption(clientname) {
+            return {
+                _id: clientname + "_dao0",
+                text_en: 'newtext EN',
+                text_de: 'newtext DE'
+            }
         }
 
         var optionApi = `${co.apis.dynamicattributes}/option`;
 
         th.apiTests.put.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createPutTestDynamicAttributeOption);
-        th.apiTests.put.clientDependentNegative(optionApi, createPutTestDynamicAttributeOption);
 
-        it('responds with a new dynamicAttributeId with an updated record but with old dynamicAttributeId', async () => {
-            var token = await th.defaults.login();
-            var optionToSend = await createPutTestDynamicAttributeOption();
-            var otherDynamicAttribute = await db.get(co.collections.dynamicattributes.name).findOne({ clientId: optionToSend.clientId, modelName: co.collections.users.name, type: co.dynamicAttributeTypes.text });
-            var originalAttributeId = optionToSend.dynamicAttributeId;
-            optionToSend.dynamicAttributeId = otherDynamicAttribute._id;
-            var updatedOption = (await th.put(`/api/${optionApi}/${optionToSend._id}?token=${token}`).send(optionToSend).expect(200)).body;
-            assert.strictEqual(updatedOption.dynamicAttributeId, originalAttributeId.toString());
+        it('responds with a new dynamicAttributeId with an updated record but with old dynamicAttributeId', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var optionToSend = await createPutTestDynamicAttributeOption("client0");
+            optionToSend.dynamicAttributeId = "client0_da2";
+            await th.put(`/api/${co.apis.dynamicattributes}/option/${optionToSend._id}?token=${token}`).send(optionToSend).expect(200);
+            var dao = await Db.getDynamicObject("client0", co.collections.dynamicattributeoptions.name, "client0_dao0");
+            assert.strictEqual(dao.dynamicattributename, "client0_da1");
         });
 
-        it('responds with an updated dynamic attribute option', async () => {
-            var token = await th.defaults.login();
-            var optionToSend = await createPutTestDynamicAttributeOption();
-            optionToSend.text_en = 'new text en';
-            optionToSend.text_de = 'new text de';
-            var updatedOption = (await th.put(`/api/${optionApi}/${optionToSend._id}?token=${token}`).send(optionToSend).expect(200)).body;
-            assert.strictEqual(updatedOption.text_en, optionToSend.text_en);
-            assert.strictEqual(updatedOption.text_de, optionToSend.text_de);
-        });
-
-        it('Liefert 404, wenn das zugehörige DA inaktiv ist', async () => {
-            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Geschlecht' });
-            var dao = await db.get(co.collections.dynamicattributeoptions.name).findOne({ text_en: 'männlich' });
-            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
-            var token = await th.defaults.login();
-            dao.text_en = 'sächlich';
-            return th.put(`/api/${co.apis.dynamicattributes}/option/${dao._id}?token=${token}`).send(dao).expect(404);
+        it('responds with an updated dynamic attribute option', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var optionToSend = await createPutTestDynamicAttributeOption("client0");
+            await th.put(`/api/${co.apis.dynamicattributes}/option/${optionToSend._id}?token=${token}`).send(optionToSend).expect(200);
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributeoptions.name, "client0_dao0");
+            assert.strictEqual(da.label, optionToSend.text_de);
         });
 
     });
 
-    xdescribe('DELETE/:id', () => {
+    describe('DELETE/:id', () => {
 
-        function createDeleteTestDynamicAttribute() {
-            return createTestDynamicAttribute().then(function(attr) {
-                return db.get(co.collections.dynamicattributes.name).insert(attr);
-            }).then(function(insertedAttribute) {
-                return Promise.resolve(insertedAttribute._id);
-            });
+        async function createDeleteTestDynamicAttributeId() {
+            return "client0_da3";
         }
 
-        th.apiTests.delete.defaultNegative(co.apis.dynamicattributes, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttribute);
-        th.apiTests.delete.clientDependentNegative(co.apis.dynamicattributes, createDeleteTestDynamicAttribute);
+        th.apiTests.delete.defaultNegative(co.apis.dynamicattributes, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttributeId);
 
-        it('responds with a correct id with 204 and deletes the dynamic attribute, all of its dynamic attribute options and all of its dynamic attribute values from the database', async () => {
-            var token = await th.defaults.login();
-            var client = await th.defaults.getClient();
-            var attribute = await th.dbObjects.dynamicattributes.find((da) => da.clientId !== null && da.clientId.toString() === client._id.toString() && da.type === co.dynamicAttributeTypes.picklist);
-            await th.del(`/api/${co.apis.dynamicattributes}/${attribute._id}?token=${token}`).expect(204);
-            var attributeAfterDeletion = await db.get(co.collections.dynamicattributes.name).findOne(attribute._id);
-            var options = await db.get(co.collections.dynamicattributeoptions.name).find({dynamicAttributeId:attribute._id});
-            var values = await db.get(co.collections.dynamicattributevalues.name).find({dynamicAttributeId:attribute._id});
-            assert.ok(!attributeAfterDeletion);
-            assert.strictEqual(options.length, 0);
-            assert.strictEqual(values.length, 0);
+        it('responds with a correct id with 204 and deletes the dynamic attribute, all of its dynamic attribute options and all of its dynamic attribute values from the database', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/${co.apis.dynamicattributes}/client0_da3?token=${token}`).expect(204);
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributes.name, "client0_da3");
+            assert.ok(!da);
+            var daos = await Db.getDynamicObjects("client0", co.collections.dynamicattributeoptions.name, { dynamicattributename: "client0_da3" });
+            assert.strictEqual(daos.length, 0);
+            var davs = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, { dynamicattributename: "client0_da3" });
+            assert.strictEqual(davs.length, 0);
         });
 
-        it('Liefert 405, wenn das DA einen identifier hat', async () => {
-            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Gewicht' });
-            var token = await th.defaults.login();
-            return th.del(`/api/${co.apis.dynamicattributes}/${da._id}?token=${token}`).expect(405);
-        });
-
-        it('Liefert 404, wenn das DA inaktiv ist', async () => {
-            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Größe' });
-            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
-            var token = await th.defaults.login();
-            return th.del(`/api/${co.apis.dynamicattributes}/${da._id}?token=${token}`).expect(404);
+        it('Liefert 405, wenn das DA einen identifier hat', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/${co.apis.dynamicattributes}/client0_da1?token=${token}`).expect(405);
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributes.name, "client0_da1");
+            assert.ok(da);
+            var daos = await Db.getDynamicObjects("client0", co.collections.dynamicattributeoptions.name, { dynamicattributename: "client0_da1" });
+            assert.notEqual(daos.length, 0);
+            var davs = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, { dynamicattributename: "client0_da1" });
+            assert.notEqual(davs.length, 0);
         });
 
     });
 
-    xdescribe('DELETE/option/:id', () => {
+    describe('DELETE/option/:id', () => {
 
-        function createDeleteTestDynamicAttributeOption() {
-            return createTestDynamicAttributeOption().then(function(option) {
-                return db.get(co.collections.dynamicattributeoptions.name).insert(option);
-            }).then(function(insertedOption) {
-                return Promise.resolve(insertedOption._id);
-            });
+        async function createDeleteTestDynamicAttributeOptionId() {
+            return "client0_dao2";
         }
 
         var optionApi = `${co.apis.dynamicattributes}/option`;
 
-        th.apiTests.delete.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttributeOption);
-        th.apiTests.delete.clientDependentNegative(optionApi, createDeleteTestDynamicAttributeOption);
+        th.apiTests.delete.defaultNegative(optionApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestDynamicAttributeOptionId);
 
-        it('responds with a correct id with 204 and deletes the dynamic attribute option and all dynamic attribute values which use it from the database', async () => {
-            var token = await th.defaults.login();
-            var client = await th.defaults.getClient();
-            var option = await th.dbObjects.dynamicattributeoptions.find((dao) => dao.clientId !== null && dao.clientId.toString() === client._id.toString());
-            await th.del(`/api/${optionApi}/${option._id}?token=${token}`).expect(204);
-            var optionAfterDeletion = await db.get(co.collections.dynamicattributeoptions.name).findOne(option._id);
-            var values = await db.get(co.collections.dynamicattributevalues.name).find({value:option._id});
-            assert.ok(!optionAfterDeletion);
-            assert.strictEqual(values.length, 0);
+        it('responds with a correct id with 204 and deletes the dynamic attribute option and all dynamic attribute values which use it from the database', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/${optionApi}/client0_dao2?token=${token}`).expect(204);
+            var dao = await Db.getDynamicObject("client0", co.collections.dynamicattributeoptions.name, "client0_dao2");
+            assert.ok(!dao);
+            var davs = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, { value: "client0_dao2" });
+            assert.strictEqual(davs.length, 0);
         });
 
-        it('Liefert 404, wenn das zugehörige DA inaktiv ist', async () => {
-            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Haarfarbe' });
-            var dao = await db.get(co.collections.dynamicattributeoptions.name).findOne({ text_en: 'braun' });
-            await db.update(co.collections.dynamicattributes.name, da._id, { $set: { isInactive: true } });
-            var token = await th.defaults.login();
-            return th.del(`/api/${co.apis.dynamicattributes}/option/${dao._id}?token=${token}`).expect(404);
-        });
-
-        it('Liefert 405, wenn die Option einen value hat', async () => {
-            var da = await db.get(co.collections.dynamicattributes.name).findOne({ name_en: 'Geschlecht' });
-            var dao = await db.get(co.collections.dynamicattributeoptions.name).findOne({ text_en: 'männlich' });
-            var token = await th.defaults.login();
-            return th.del(`/api/${co.apis.dynamicattributes}/option/${dao._id}?token=${token}`).expect(405);
+        it('Liefert 405, wenn die Option einen value hat (also vorgegeben ist)', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/${optionApi}/client0_dao1?token=${token}`).expect(405);
+            var dao = await Db.getDynamicObject("client0", co.collections.dynamicattributeoptions.name, "client0_dao1");
+            assert.ok(dao);
+            var davs = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, { value: "client0_dao1" });
+            assert.notEqual(davs.length, 0);
         });
 
     });
 
-    xdescribe('DELETE/values/:modelName/:id', () => {
+    describe('DELETE/values/:modelName/:id', () => {
 
-        it('responds without authentication with 403', async () => {
-            var user = await th.defaults.getUser();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}`).expect(403);
+        async function createDeleteTestId() {
+            return "client0_usergroup0_user0";
+        }
+
+        var api = `${co.apis.dynamicattributes}/values/users`;
+
+        th.apiTests.delete.defaultNegative(api, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestId);
+
+        it('responds without giving a model name and entity id with 404', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/${co.apis.dynamicattributes}/values/?token=${token}`).expect(404);
         });
 
-        it('responds without write permission with 403', async () => {
-            var user = await th.defaults.getUser();
-            await th.removeWritePermission(th.defaults.user, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES);
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).expect(403);
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async () => {
-            var user = await th.defaults.getUser();
-            await th.removeClientModule(th.defaults.client, co.modules.base);
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).expect(403);
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async () => {
-            var user = await th.defaults.getUser();
-            await th.removeClientModule(th.defaults.client, co.modules.base);
-            var token = await th.defaults.login(th.defaults.adminUser);
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).expect(403);
-        });
-
-        it('responds with an id of an existing entity which does not belong to the same client as the logged in user with 403', async () => {
-            var user = await th.defaults.getUser('0_0_0');
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).expect(403);
-        });
-
-        it('responds without giving a model name and entity id with 400', async () => {
-            var user = await th.defaults.getUser();
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/?token=${token}`).expect(400);
-        });
-
-        it('responds without giving an entity id but with giving a modelName with 404', async () => {
-            var user = await th.defaults.getUser();
-            var token = await th.defaults.login();
+        it('responds without giving an entity id but with giving a modelName with 404', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
             await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/?token=${token}`).expect(404);
         });
         
-        it('responds with invalid modelName with 400', async () => {
-            var user = await th.defaults.getUser();
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/invalidModelName/${user._id}?token=${token}`).expect(400);
+        it('responds with invalid modelName with 404', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/${co.apis.dynamicattributes}/values/invalidModelName/client0_usergroup0_user0?token=${token}`).expect(404);
         });
         
-        it('responds with invalid entity id with 400', async () => {
-            var user = await th.defaults.getUser();
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/invalidId?token=${token}`).expect(400);
+        it('responds with invalid entity id with 404', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/invalidId?token=${token}`).expect(404);
         });
 
-        it('responds with not existing entity id with 403', async () => {
-            var user = await th.defaults.getUser();
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/999999999999999999999999?token=${token}`).expect(403);
-        });
-
-        it('responds with correct modelName and id with 204 and deletes all dynamic attribute values for the entity from the database', async () => {
-            var user = await th.defaults.getUser();
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/${user._id}?token=${token}`).expect(204);
-            var valuesAfter = await db.get(co.collections.dynamicattributevalues.name).find({entityId:user._id});
+        it('responds with correct modelName and id with 204 and deletes all dynamic attribute values for the entity from the database', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/client0_usergroup0_user0?token=${token}`).expect(204);
+            var valuesAfter = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, { entityname: "client0_usergroup0_user0" });
             assert.strictEqual(valuesAfter.length, 0);
         });
 
