@@ -373,11 +373,11 @@ var Db = {
     },
 
     queryDirect: async(databasename, query) => {
+        // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
         var pool = Db.getPool(databasename);
         var client = await pool.connect();
         var result = undefined;
         try {
-            // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
             result = await client.query(query);
         } finally {
             client.release();
