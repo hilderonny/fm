@@ -338,31 +338,31 @@ async function migrateusers() {
 
 module.exports.copydatabasefrommongodbtopostgresql = async() => {
     console.log(`Migrating database from ${localconfig.dbName} to ${localconfig.dbhost}/${localconfig.dbprefix} ...`);
-    // await Db.createDefaultPortalTables();
-    // // License server stuff
-    // await migrateportals();
-    // await migrateportalmodules();
-    // // Portal stuff
-    // await migrateclients();
-    // await migrateclientsettings();
-    // await migrateclientmodules();
-    // // Client stuff
-    // await migrateusergroups();
-    // await migrateusers();
-    // await migratepermissions();
-    // await migrateactivities();
-    // await migratebusinesspartners();
-    // await migratepersons();
-    // await migratepartneraddresses();
-    // await migratecommunications();
-    // await migratedynamicattributes();
-    // await migratedynamicattributeoptions();
-    // await migratedynamicattributevalues();
-    // await migratefmobjects();
-    // await migratefolders();
-    // await migratedocuments();
-    // await migratemarkers();
+    await Db.createDefaultPortalTables();
+    // License server stuff
+    await migrateportals();
+    await migrateportalmodules();
+    // Portal stuff
+    await migrateclients();
+    await migrateclientsettings();
+    await migrateclientmodules();
+    // Client stuff
+    await migrateusergroups();
+    await migrateusers();
+    await migratepermissions();
+    await migrateactivities();
+    await migratebusinesspartners();
+    await migratepersons();
+    await migratepartneraddresses();
+    await migratecommunications();
+    await migratedynamicattributes();
+    await migratedynamicattributeoptions();
+    await migratedynamicattributevalues();
+    await migratefmobjects();
+    await migratefolders();
+    await migratedocuments();
+    await migratemarkers();
     await migratenotes();
-    // await migraterelations();
+    await migraterelations();
     console.log("Migration done.");
 }

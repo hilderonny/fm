@@ -111,8 +111,11 @@ var init = () => {
             return require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
         });
     }
-    // Includes minifizieren
+    localConfig.migratedatabase = false;
+    localConfig.recreatedatabase = false;
     var fs = require('fs');
+    fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
+    // Includes minifizieren
     prepareIncludes(fs);
     // Anwendung initialisieren und Handler-Reihenfolge festlegen
     var express = require('express');
