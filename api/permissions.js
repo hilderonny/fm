@@ -14,7 +14,7 @@ var uuidv4 = require("uuid").v4;
  * Liefert alle Berechtigungen für den angemeldeten Benutzer. Wird für Verweise verwendet, um
  * Verweismenü zu filtern.
  */
-router.get('/forLoggedInUser', auth(false, false, co.modules.base), async(req, res) => {
+router.get('/forLoggedInUser', auth(), async(req, res) => {
     var clientname = req.user.clientname;
     var permissionKeysForClient = await configHelper.getAvailablePermissionKeysForClient(clientname);
     // Bei Administratoren werden alle Permissions einfach zurück gegeben

@@ -78,7 +78,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             // Set the token for all requests
             $http.defaults.headers.common['x-access-token'] = response.data.token;
             $scope.isLoggedIn = true;
-            $scope.isPortal = response.data.clientId === null;
+            $scope.isPortal = response.data.clientId === "portal";
             if ($scope.isPortal) {
                 $scope.title = 'TRK_TITLE_PORTAL';
             }

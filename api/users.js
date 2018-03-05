@@ -23,7 +23,7 @@ function mapFields(e, user) {
     var user = {
         _id: e.name,
         clientId: user.clientname,
-        name: e.label,
+        name: e.name,
         userGroupId: e.usergroupname,
         isAdmin: e.isadmin
     }

@@ -105,16 +105,16 @@ var init = () => {
             dah.activateDynamicAttributesForClient(null, moduleName);
         });
     });
-    // Initialize and migrate PostgreSQL database
-    if (localConfig.migratedatabase) {
-        require("./utils/db").Db.init(localConfig.recreatedatabase).then(() => {
-            return require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
-        });
-    }
-    localConfig.migratedatabase = false;
-    localConfig.recreatedatabase = false;
     var fs = require('fs');
-    fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
+    // Initialize and migrate PostgreSQL database
+    require("./utils/db").Db.init(localConfig.recreatedatabase).then(() => {
+        if (localConfig.migratedatabase) {
+            require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
+        }
+        localConfig.migratedatabase = false;
+        localConfig.recreatedatabase = false;
+        fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
+    });
     // Includes minifizieren
     prepareIncludes(fs);
     // Anwendung initialisieren und Handler-Reihenfolge festlegen

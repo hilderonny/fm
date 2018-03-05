@@ -36,7 +36,9 @@ describe('API permissions', () => {
 
         var api = `${co.apis.permissions}/forLoggedInUser`;
 
-        th.apiTests.get.defaultNegative(api, undefined);
+        it('responds without authentication with 403', async() => {
+            return th.get(`/api/${api}`).expect(403);
+        });
 
         it('returns all permissions available to the client when the user is admin', async() => {
             await th.cleanTable("permissions", true, true);

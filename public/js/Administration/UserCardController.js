@@ -40,7 +40,6 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
     $scope.saveUser = function() {
         $rootScope.isLoading = true;
         var userToSend = { 
-            name: $scope.user.name, 
             pass: $scope.user.pass, 
             isAdmin: $scope.user.isAdmin, 
             userGroupId: $scope.user.userGroup._id 
@@ -48,7 +47,6 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
          utils.saveEntity($scope, 'users', $scope.user._id, '/api/users/', userToSend).then(function(savedUser) {
             $scope.user.pass = '';
             $scope.user.pass2 = '';
-            $scope.userName = $scope.user.name;
             if ($scope.params.saveUserCallback) {
                 $scope.params.saveUserCallback(savedUser);
             }

@@ -69,6 +69,12 @@ async function migrateclientmodules() {
         var clientmodule = migrateclientmodules[i];
         await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('${clientmodule.clientId.toString()}', '${clientmodule.module}');`);
     }
+    // Former portal
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'base');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'doc');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'clients');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'licenseserver');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'portalbase');`);
 }
 
 async function migrateclients() {
@@ -309,7 +315,8 @@ async function migraterelations() {
 async function migrateusergroups() {
     await migrateforclients(constants.collections.usergroups.name, (orig) => {
         return {
-            name: orig._id.toString()
+            name: orig._id.toString(),
+            label: orig.name
         };
     });
 }
@@ -321,13 +328,9 @@ async function migrateusers() {
     for (var i = 0; i < originalusers.length; i++) {
         var originaluser = originalusers[i];
         var clientname = originaluser.clientId ? originaluser.clientId.toString() : "formerportal";
-        var mappedalluser = {
-            name: originaluser.name,
-            password: originaluser.pass,
-            clientname: clientname
-        };
         var mappeduser = {
             name: originaluser.name,
+            label: originaluser.name,
             password: originaluser.pass,
             usergroupname: originaluser.userGroupId.toString(),
             isadmin: !!originaluser.isAdmin

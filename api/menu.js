@@ -60,7 +60,7 @@ router.get('/', auth(), async(req, res) => {
     var fullmenu = extractMenu(modulenames); // Clone it for overwriting
     if (!req.user.isadmin) {
         var permissionKeys = await configHelper.getAvailablePermissionKeysForClient(clientname);
-        var permissions = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${req.user.usergroupname}' AND key IN (${permissionKeys.map((k) => `'${k}'`).join(',')});`)).rows;
+        var permissions = permissionKeys.length > 0 ? (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${req.user.usergroupname}' AND key IN (${permissionKeys.map((k) => `'${k}'`).join(',')});`)).rows : [];
         for (var i = fullmenu.length - 1; i >= 0; i--) {
             var mainMenu = fullmenu[i];
             for (var j = mainMenu.items.length - 1; j >= 0; j--) {

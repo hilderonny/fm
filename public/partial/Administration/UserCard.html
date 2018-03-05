@@ -19,7 +19,7 @@
 
             <form name="usersForm" layout="column">
 
-                <md-input-container flex>
+                <md-input-container ng-if="isNewUser" flex>
                     <label translate>TRK_USERS_NAME</label>
                     <input ng-model="user.name" name="un" ng-required="true" ng-keydown="resetUserNameError()">
                     <div ng-messages="usersForm.un.$error">

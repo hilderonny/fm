@@ -40,7 +40,7 @@ describe('API users', () => {
         return {
             _id: e.name,
             clientId: "client0",
-            name: e.label,
+            name: e.name, // label cannot be used and is obsolete
             userGroupId: e.usergroupname,
             isAdmin: e.isadmin
         }
@@ -75,8 +75,8 @@ describe('API users', () => {
         async function createTestUsers(client) {
             var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
             var testobjects = [
-                { name: client + "_usergroup0_testuser0", password: hashedPassword, label: "label0", usergroupname: client + "_usergroup0", isadmin: false },
-                { name: client + "_usergroup0_testuser1", password: hashedPassword, label: "label1", usergroupname: client + "_usergroup0", isadmin: true }
+                { name: client + "_usergroup0_testuser0", password: hashedPassword, label: client + "_usergroup0_testuser0", usergroupname: client + "_usergroup0", isadmin: false },
+                { name: client + "_usergroup0_testuser1", password: hashedPassword, label: client + "_usergroup0_testuser1", usergroupname: client + "_usergroup0", isadmin: true }
             ];
             for (var i = 0; i < testobjects.length; i++) {
                 await Db.insertDynamicObject(client, "users", testobjects[i]);
