@@ -170,7 +170,7 @@ describe('API permissions', () => {
             assert.ok(typeof(response.canWrite) !== "undefined");
             assert.strictEqual(response.canRead, newpermission.canRead);
             assert.strictEqual(response.canWrite, newpermission.canWrite);
-            var result = await Db.query("client0", "SELECT * FROM permissions WHERE key = 'CRM_BUSINESSPARTNERS' AND usergroupname = 'client0_usergroup0';");
+            var result = await Db.query("client0", "SELECT * FROM permissions WHERE key = 'PERMISSION_CRM_BUSINESSPARTNERS' AND usergroupname = 'client0_usergroup0';");
             assert.strictEqual(result.rowCount, 1);
             assert.strictEqual(result.rows[0].canwrite, false);
         });
@@ -184,7 +184,7 @@ describe('API permissions', () => {
             assert.ok(typeof(response.canWrite) !== "undefined");
             assert.strictEqual(response.canRead, newpermission.canRead);
             assert.strictEqual(response.canWrite, newpermission.canWrite);
-            var result = await Db.query("client0", "SELECT * FROM permissions WHERE key = 'OFFICE_ACTIVITY' AND usergroupname = 'client0_usergroup0';");
+            var result = await Db.query("client0", "SELECT * FROM permissions WHERE key = 'PERMISSION_OFFICE_ACTIVITY' AND usergroupname = 'client0_usergroup0';");
             assert.strictEqual(result.rowCount, 1);
             assert.strictEqual(result.rows[0].canwrite, true);
         });

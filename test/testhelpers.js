@@ -115,8 +115,9 @@ th.preparePermissions = async() => {
     await th.cleanTable("permissions", true, true);
     var permissionkeys = Object.keys(co.permissions);
     for (var i = 0; i < permissionkeys.length; i++) {
-        await Db.query("client0", `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('client0_usergroup0', '${permissionkeys[i]}', true);`);
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${Db.PortalDatabaseName}_usergroup0', '${permissionkeys[i]}', true);`);
+        var permission = co.permissions[permissionkeys[i]];
+        await Db.query("client0", `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('client0_usergroup0', '${permission}', true);`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${Db.PortalDatabaseName}_usergroup0', '${permission}', true);`);
     }
 };
 
