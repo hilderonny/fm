@@ -322,7 +322,7 @@ var Db = {
             await Db.queryDirect(portalDatabaseName, `DELETE FROM users WHERE usergroupname = '${adminUserGroupName}';`);
             await Db.queryDirect(portalDatabaseName, `DELETE FROM usergroups WHERE name = '${adminUserGroupName}';`);
             await Db.queryDirect(portalDatabaseName, `INSERT INTO usergroups (name) VALUES('${adminUserGroupName}');`);
-            var hashedPassword = hashSync(adminUserPassword);
+            var hashedPassword = bcryptjs.hashSync(adminUserPassword);
             await Db.queryDirect(portalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${adminUserName}', '${hashedPassword}', '${Db.PortalDatabaseName}');`);
             await Db.queryDirect(portalDatabaseName, `INSERT INTO users (name, password, usergroupname, isadmin) VALUES('${adminUserName}', '${hashedPassword}', '${adminUserGroupName}', true);`);
             localconfig.recreatePortalAdmin = false;

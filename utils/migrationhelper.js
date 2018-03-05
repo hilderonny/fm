@@ -62,13 +62,13 @@ async function migratebusinesspartners() {
 }
 
 async function migrateclientmodules() {
-    await migrateforportal(constants.collections.clientmodules.name, (orig) => {
-        return {
-            name: orig._id.toString(),
-            clientname: orig.clientId.toString(),
-            modulename: orig.module
-        };
-    });
+    console.log("Migrating clientmodules ...");
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules;`);
+    var migrateclientmodules = await mongodb.get(constants.collections.clientmodules.name).find();
+    for (var i = 0; i < migrateclientmodules.length; i++) {
+        var clientmodule = migrateclientmodules[i];
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('${clientmodule.clientId.toString()}', '${clientmodule.module}');`);
+    }
 }
 
 async function migrateclients() {
@@ -77,10 +77,12 @@ async function migrateclients() {
     for (var i = 0; i < clients.length; i++) {
         var client = clients[i];
         console.log(`Preparing client "${client.name}" ...`);
+        await Db.deleteClient(client._id.toString());
         await Db.createClient(client._id.toString(), client.name);
     }
     // Create separate client for former portal
     console.log("Preparing former portal ...");
+    await Db.deleteClient("formerportal");
     await Db.createClient("formerportal", "ehemals Portal");
 }
 
@@ -161,7 +163,7 @@ async function migratefmobjects() {
             fmobjecttypename: orig.type,
             parentfmobjectname: orig.parentId ? orig.parentId.toString() : null,
             previewimagedocumentname: orig.previewImageId ? orig.previewImageId.toString() : null,
-            areacategoryname: orig.category,
+            areatypename: orig.areatype,
             f: orig.f,
             bgf: orig.nbgf,
             areausagestatename: orig.usagestate,
@@ -261,6 +263,7 @@ async function migratepersons() {
 
 async function migrateportalmodules() {
     console.log("Migrating portalmodules ...");
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM portalmodules;`);
     var portalmodules = await mongodb.get(constants.collections.portalmodules.name).find();
     for (var i = 0; i < portalmodules.length; i++) {
         var portalmodule = portalmodules[i];
@@ -274,6 +277,7 @@ async function migrateportalmodules() {
 
 async function migrateportals() {
     console.log("Migrating portals ...");
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM portals;`);
     var portals = await mongodb.get(constants.collections.portals.name).find();
     for (var i = 0; i < portals.length; i++) {
         var portal = portals[i];
@@ -312,6 +316,7 @@ async function migrateusergroups() {
 
 async function migrateusers() {
     console.log("Migrating users ...");
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM allusers;`);
     var originalusers = await mongodb.get(constants.collections.users.name).find();
     for (var i = 0; i < originalusers.length; i++) {
         var originaluser = originalusers[i];
@@ -328,7 +333,7 @@ async function migrateusers() {
             isadmin: !!originaluser.isAdmin
         };
         try { // Maybe double names due to corrupt databases
-            await Db.insertDynamicObject(Db.PortalDatabaseName, "allusers", mappedalluser);
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${originaluser.name}','${originaluser.pass}','${clientname}');`);
             await Db.insertDynamicObject(clientname, "users", mappeduser);
         } catch(err) {
             console.log(err);
@@ -338,7 +343,6 @@ async function migrateusers() {
 
 module.exports.copydatabasefrommongodbtopostgresql = async() => {
     console.log(`Migrating database from ${localconfig.dbName} to ${localconfig.dbhost}/${localconfig.dbprefix} ...`);
-    await Db.createDefaultPortalTables();
     // License server stuff
     await migrateportals();
     await migrateportalmodules();

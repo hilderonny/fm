@@ -45,7 +45,7 @@ describe('API fmobjects', () => {
             parentId: e.parentfmobjectname,
             type: e.fmobjecttypename,
             areatype: e.areatypename,
-            category: areaTypeCategories[e.areacategoryname],
+            category: areaTypeCategories[e.areatypename],
             f: e.f,
             bgf: e.bgf,
             usagestate: e.areausagestatename,
