@@ -45,13 +45,6 @@ module.exports.createDynamicAttribute = async(da) => {
 };
 
 /**
- * OBSOLET
- */
-module.exports.deactivateDynamicAttribute = (query) => {
-    // return db.updateMany(co.collections.dynamicattributes.name, query, { isInactive: true });
-};
-
-/**
  * Vorgegebene DAs erstellen bzw. bei Vorhandensein reaktivieren
  */
 module.exports.activateDynamicAttributesForClient = async(clientId, moduleName) => {
@@ -116,7 +109,7 @@ module.exports.deactivateDynamicAttributesForClient = async(clientId, moduleName
  * @returns Promise
 */
 module.exports.createDynamicAttributeOption = async(dao, clientname) => {
-    if ((await Db.query(clientname, `SELECT 1 FROM dynamicattributeoptions WHERE dynamicattributename='${dao.dynamicAttributeId}' AND value='${dao.identifier}';`)).rowCount < 1) {
+    if ((await Db.query(clientname, `SELECT 1 FROM dynamicattributeoptions WHERE dynamicattributename='${dao.dynamicAttributeId}' AND value='${dao.value}';`)).rowCount < 1) {
         dao = {
             name: uuidv4(),
             dynamicattributename: dao.dynamicAttributeId,

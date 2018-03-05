@@ -6,7 +6,6 @@ var documentsHelper = require('../../utils/documentsHelper');
 var localConfig = require('../../config/localconfig.json');
 var path = require('path');
 var fs = require('fs');
-var Db = require("../../utils/db").Db;
 
 describe('UTILS documentsHelper', () => {
     
