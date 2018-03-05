@@ -1,4 +1,3 @@
-var monk = require('monk');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
 
@@ -12,7 +11,7 @@ var Db = require("../utils/db").Db;
  * Benutzung:
  * 
  * var validateSameClientId = require('../middlewares/validateSameClientId');
- * router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r'), validateId, validateSameClientId('folders'), (req, res) => { ... }
+ * router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r'), validateSameClientId('folders'), (req, res) => { ... }
  */
 module.exports = (tableName) => {
     return (req, res, next) => {

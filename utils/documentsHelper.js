@@ -17,7 +17,6 @@ var dh = {
      * is defined relative to the app.js. When the documentspath is not set,
      * "documents/" is used by default.
      * Used in documents API, extractdocuments API and unit tests.
-     * The ID must be given as Monk ID or as string
      */
     getDocumentPath: function(clientname, documentId) {
         return path.join(

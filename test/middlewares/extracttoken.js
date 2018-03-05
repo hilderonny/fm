@@ -2,10 +2,9 @@
  * UNIT Tests for middlewares/extracttoken
  */
 var assert = require('assert');
-var superTest = require('supertest');
 var th = require('../testhelpers');
 
-describe('MIDDLEWARE extracttoken', function() {
+describe.only('MIDDLEWARE extracttoken', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -17,7 +16,7 @@ describe('MIDDLEWARE extracttoken', function() {
         await th.prepareUsers();
     });
 
-    it('does not fill req.user when there is no token set', function() {
+    it('does not fill req.user when there is no token set', () => {
         return new Promise(function(resolve, reject) {
             var req = { query: {}, headers: {} };
             require('../../middlewares/extracttoken')(req, null, function next() {
@@ -27,7 +26,7 @@ describe('MIDDLEWARE extracttoken', function() {
         });
     });
 
-    it('does not fill req.user when the given token given as query parameter is empty', function() {
+    it('does not fill req.user when the given token given as query parameter is empty', () => {
         return new Promise(function(resolve, reject) {
             var req = { query: { token: '' }, headers: {} };
             require('../../middlewares/extracttoken')(req, null, function next() {
@@ -37,7 +36,7 @@ describe('MIDDLEWARE extracttoken', function() {
         });
     });
 
-    it('does not fill req.user when the given token given as query parameter in not valid', function() {
+    it('does not fill req.user when the given token given as query parameter in not valid', () => {
         return new Promise(function(resolve, reject) {
             var req = { query: { token: 'invalidToken' }, headers: {} };
             require('../../middlewares/extracttoken')(req, null, function next() {
@@ -47,21 +46,20 @@ describe('MIDDLEWARE extracttoken', function() {
         });
     });
 
-    it('fills out req.user with at least attribute _id when the token given as query parameter is valid', function() {
-        return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+    it('fills out req.user with at least attribute _id when the token given as query parameter is valid', () => {
+        return th.defaults.login("client0_usergroup0_user0").then((token) => {
             return new Promise(function(resolve, reject) {
                 var req = { query: { token: token }, headers: {} };
                 require('../../middlewares/extracttoken')(req, null, function next() {
                     assert.ok(req.user, 'req.user was not set');
-                    assert.ok(req.user._id, 'req.user._id was not set');
-                    assert.ok(require('../../middlewares/validateId').validateId(req.user._id), 'req.user._id is no valid ID');
+                    assert.ok(req.user.name, 'req.user.name was not set');
                     resolve();
                 });
             });
         });
     });
 
-    it('does not fill req.user when the given token given as request header in not valid', function() {
+    it('does not fill req.user when the given token given as request header in not valid', () => {
         return new Promise(function(resolve, reject) {
             var req = { query: {}, headers: { 'x-access-token' : '' } };
             require('../../middlewares/extracttoken')(req, null, function next() {
@@ -71,14 +69,13 @@ describe('MIDDLEWARE extracttoken', function() {
         });
     });
 
-    it('fills out req.user with at least attribute _id when the token given as request header is valid', function() {
-        return testHelpers.doLoginAndGetToken('1_0_0', 'test').then((token) => {
+    it('fills out req.user with at least attribute _id when the token given as request header is valid', () => {
+        return th.defaults.login("client0_usergroup0_user0").then((token) => {
             return new Promise(function(resolve, reject) {
                 var req = { query: {}, headers: { 'x-access-token' : token } };
                 require('../../middlewares/extracttoken')(req, null, function next() {
                     assert.ok(req.user, 'req.user was not set');
-                    assert.ok(req.user._id, 'req.user._id was not set');
-                    assert.ok(require('../../middlewares/validateId').validateId(req.user._id), 'req.user._id is no valid ID');
+                    assert.ok(req.user.name, 'req.user.name was not set');
                     resolve();
                 });
             });

@@ -6,7 +6,6 @@ var th = require('../testHelpers');
 var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var dynamicAttributesHelper = require('../../utils/dynamicAttributesHelper');
-var monk = require('monk');
 var moduleConfig = require('../../config/module-config.json');
 
 xdescribe('UTILS dynamicAttributesHelper', function() {

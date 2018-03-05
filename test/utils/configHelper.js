@@ -3,11 +3,9 @@
  */
 var assert = require('assert');
 var configHelper = require('../../utils/configHelper');
-var monk = require('monk');
 var path = require('path');
 var fs = require('fs');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var moduleConfig = require('../../config/module-config.json');
 

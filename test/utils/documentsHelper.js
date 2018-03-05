@@ -2,16 +2,12 @@
  * UNIT Tests for utils/documentsHelper
  */
 var assert = require('assert');
-var superTest = require('supertest');
 var documentsHelper = require('../../utils/documentsHelper');
 var localConfig = require('../../config/localconfig.json');
-var monk = require('monk');
 var path = require('path');
 var fs = require('fs');
 
-describe('UTILS documentsHelper', function() {
-
-    var server = require('../../app');
+xdescribe('UTILS documentsHelper', function() {
     
     describe('getDocumentPath', function() {
 
