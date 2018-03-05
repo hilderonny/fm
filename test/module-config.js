@@ -147,6 +147,7 @@ describe('module-config.json', function() {
             'test/',
             'test.bat',
             'uploads/',
+            'utils/README.md',
             'utils/webHelper.js'
         ];
         handleDirectoriesRecursively('', errors, referencedFiles, pathsToIgnore);

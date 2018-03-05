@@ -64,7 +64,7 @@ router.get('/', auth(), async(req, res) => {
         for (var i = fullmenu.length - 1; i >= 0; i--) {
             var mainMenu = fullmenu[i];
             for (var j = mainMenu.items.length - 1; j >= 0; j--) {
-                if (!permissions.find((p) => "PERMISSION_" + p.key === mainMenu.items[j].permission)) mainMenu.items.splice(j, 1);
+                if (!permissions.find((p) => p.key === mainMenu.items[j].permission)) mainMenu.items.splice(j, 1);
             }
             if (mainMenu.items.length < 1) {
                 fullmenu.splice(i, 1);

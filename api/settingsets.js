@@ -27,7 +27,7 @@ var extractSettingSets = (isUserAdmin, userClientId, allowedPermissionKeys) => {
         var appModule = moduleConfig.modules[moduleName];
         if (!appModule.settingsets) return;
         appModule.settingsets.forEach((settingSet) => {
-            var permission = settingSet.permission.replace("PERMISSION_", "");
+            var permission = settingSet.permission;
             if (!isUserAdmin && allowedPermissionKeys.indexOf(permission) < 0) return; // Filter out setting sets the user has no access to
             // Check whether the user is a client user and tries to access portal level settings and forbid it
             if (userClientId !== Db.PortalDatabaseName && permission === co.permissions.SETTINGS_PORTAL) return;

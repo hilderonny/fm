@@ -20,7 +20,7 @@ var ch = {
             if (mod.menu) mod.menu.forEach((menu) => {
                 menu.items.forEach((item) => {
                     if (item.permission && permissionKeys.indexOf(item.permission) < 0) {
-                        permissionKeys.push(item.permission.replace("PERMISSION_", ""));
+                        permissionKeys.push(item.permission);
                     }
                 })
             });
@@ -28,7 +28,7 @@ var ch = {
             if (mod.settingsets) {
                 mod.settingsets.forEach((settingset) => {
                     if (settingset.permission && permissionKeys.indexOf(settingset.permission) < 0) {
-                        permissionKeys.push(settingset.permission.replace("PERMISSION_", ""));
+                        permissionKeys.push(settingset.permission);
                     }
                 });
             }
