@@ -4,7 +4,7 @@
 var assert = require('assert');
 var th = require('../testhelpers');
 
-describe.only('MIDDLEWARE extracttoken', () => {
+describe('MIDDLEWARE extracttoken', () => {
 
     before(async() => {
         await th.cleanDatabase();

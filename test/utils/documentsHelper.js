@@ -6,42 +6,31 @@ var documentsHelper = require('../../utils/documentsHelper');
 var localConfig = require('../../config/localconfig.json');
 var path = require('path');
 var fs = require('fs');
+var Db = require("../../utils/db").Db;
 
-xdescribe('UTILS documentsHelper', function() {
+describe('UTILS documentsHelper', () => {
     
-    describe('getDocumentPath', function() {
+    describe('getDocumentPath', () => {
 
-        it('returns full path with relative path from localConfig', function() {
+        it('returns full path with relative path from localConfig', () => {
             return new Promise(function(resolve, reject) {
                 // Define relative path in localconfig
                 localConfig.documentspath = 'temporarytestdir/documents/subdirectory';
-                var id = monk.id('123456789012345678901234');
-                var documentPath = documentsHelper.getDocumentPath(id);
-                var expectedPath = path.join(__dirname, '../../temporarytestdir/documents/subdirectory', id.toString());
+                var id = '123456789012345678901234';
+                var documentPath = documentsHelper.getDocumentPath("client0", id);
+                var expectedPath = path.join(__dirname, '../../temporarytestdir/documents/subdirectory/client0/', id);
                 assert.strictEqual(documentPath, expectedPath, 'Returned document path not as expected');
                 resolve();
             });
         });
 
-        it('returns full path with relative path to "documents" when "documentspath" not set in localConfig', function() {
+        it('returns full path with relative path to "documents" when "documentspath" not set in localConfig', () => {
             return new Promise(function(resolve, reject) {
                 // Remove relative path in localconfig
                 delete localConfig.documentspath;
-                var id = monk.id('123456789012345678901234');
-                var documentPath = documentsHelper.getDocumentPath(id);
-                var expectedPath = path.join(__dirname, '../../documents', id.toString());
-                assert.strictEqual(documentPath, expectedPath, 'Returned document path not as expected');
-                resolve();
-            });
-        });
-
-        it('returns full path when ID is given as string', function() {
-            return new Promise(function(resolve, reject) {
-                // Define relative path in localconfig
-                localConfig.documentspath = 'temporarytestdir/documents/subdirectory';
-                var id = '123456789012345678901234'; // ID as string
-                var documentPath = documentsHelper.getDocumentPath(id);
-                var expectedPath = path.join(__dirname, '../../temporarytestdir/documents/subdirectory', id);
+                var id = '123456789012345678901234';
+                var documentPath = documentsHelper.getDocumentPath("client0", id);
+                var expectedPath = path.join(__dirname, '../../documents/client0/', id);
                 assert.strictEqual(documentPath, expectedPath, 'Returned document path not as expected');
                 resolve();
             });
@@ -49,9 +38,9 @@ xdescribe('UTILS documentsHelper', function() {
 
     });
     
-    describe('createPath', function() {
+    describe('createPath', () => {
 
-        it('returns immediately when the path exists', function() {
+        it('returns immediately when the path exists', () => {
             return new Promise(function(resolve, reject) {
                 // Create path
                 var pathToCheck = path.join(__dirname, '../../temporarytestdir');
@@ -64,7 +53,7 @@ xdescribe('UTILS documentsHelper', function() {
             });
         });
 
-        it('creates the path and all intermediate folders when they do not exist', function() {
+        it('creates the path and all intermediate folders when they do not exist', () => {
             return new Promise(function(resolve, reject) {
                 var pathToCheck = path.join(__dirname, '../../temporarytestdir/subdir1/subdir2');
                 documentsHelper.createPath(pathToCheck);
@@ -79,29 +68,9 @@ xdescribe('UTILS documentsHelper', function() {
 
     });
     
-    describe('moveToDocumentsDirectory', function() {
+    describe('moveToDocumentsDirectory', () => {
 
-        it('moves an existing file to the documents directory', function() {
-            return new Promise(function(resolve, reject) {
-                delete localConfig.documentspath; // Do that to assume the path is 'documents/'
-                // Prepare file
-                var sourcepath = path.join(__dirname, 'testfile.ext');
-                var content = 'testContent';
-                fs.writeFileSync(sourcepath, content);
-                var id = monk.id('123456789012345678901234');
-                documentsHelper.moveToDocumentsDirectory(id, sourcepath);
-                var expectedPath = path.join(__dirname, '../../documents', id.toString());
-                var targetExisting = fs.existsSync(expectedPath);
-                var targetContent = fs.readFileSync(expectedPath).toString();
-                var sourceExisting = fs.existsSync(sourcepath);
-                assert.ok(targetExisting, `Target file "${expectedPath}" does not exist`);
-                assert.strictEqual(targetContent, content, `Content of target file "${targetContent}" not as expected "${content}"`);
-                assert.ok(!sourceExisting, 'Source file still exists after moving');
-                resolve();
-            });
-        });
-
-        it('moves an existing file to the documents directory when the ID is given as string', function() {
+        it('moves an existing file to the documents directory', () => {
             return new Promise(function(resolve, reject) {
                 delete localConfig.documentspath; // Do that to assume the path is 'documents/'
                 // Prepare file
@@ -109,8 +78,8 @@ xdescribe('UTILS documentsHelper', function() {
                 var content = 'testContent';
                 fs.writeFileSync(sourcepath, content);
                 var id = '123456789012345678901234';
-                documentsHelper.moveToDocumentsDirectory(id, sourcepath);
-                var expectedPath = path.join(__dirname, '../../documents', id);
+                documentsHelper.moveToDocumentsDirectory("client0", id, sourcepath);
+                var expectedPath = path.join(__dirname, '../../documents/client0', id.toString());
                 var targetExisting = fs.existsSync(expectedPath);
                 var targetContent = fs.readFileSync(expectedPath).toString();
                 var sourceExisting = fs.existsSync(sourcepath);
@@ -121,26 +90,26 @@ xdescribe('UTILS documentsHelper', function() {
             });
         });
 
-        it('throws an error when the source file path does not exist or cannot be accessed', function() {
+        it('throws an error when the source file path does not exist or cannot be accessed', () => {
             return new Promise(function(resolve, reject) {
                 var sourcepath = path.join(__dirname, 'notexistingtestfile.ext');
                 if (fs.existsSync(sourcepath)) fs.unlinkSync(sourcepath);
-                var id = monk.id('123456789012345678901234');
-                assert.throws(function errorFunction() { documentsHelper.moveToDocumentsDirectory(id, sourcepath) }, 'Expected error was not thrown');
+                var id = '123456789012345678901234';
+                assert.throws(function errorFunction() { documentsHelper.moveToDocumentsDirectory("client0", id, sourcepath) }, 'Expected error was not thrown');
                 resolve();
             });
         });
 
-        it('creates the documents target folder and its intermediate folders when they do not exist', function() {
+        it('creates the documents target folder and its intermediate folders when they do not exist', () => {
             return new Promise(function(resolve, reject) {
                 localConfig.documentspath = 'temporarytestdir/subdir1/subdir2';
                 // Prepare file
                 var sourcepath = path.join(__dirname, 'testfile.ext');
                 var content = 'testContent';
                 fs.writeFileSync(sourcepath, content);
-                var id = monk.id('123456789012345678901234');
-                documentsHelper.moveToDocumentsDirectory(id, sourcepath);
-                var expectedPath = path.join(__dirname, '../..', localConfig.documentspath, id.toString());
+                var id = '123456789012345678901234';
+                documentsHelper.moveToDocumentsDirectory("client0", id, sourcepath);
+                var expectedPath = path.join(__dirname, '../..', localConfig.documentspath, "client0", id);
                 var targetExisting = fs.existsSync(expectedPath);
                 var targetContent = fs.readFileSync(expectedPath).toString();
                 var sourceExisting = fs.existsSync(sourcepath);
@@ -149,6 +118,7 @@ xdescribe('UTILS documentsHelper', function() {
                 fs.rmdirSync(path.dirname(expectedPath));
                 fs.rmdirSync(path.dirname(path.dirname(expectedPath)));
                 fs.rmdirSync(path.dirname(path.dirname(path.dirname(expectedPath))));
+                fs.rmdirSync(path.dirname(path.dirname(path.dirname(path.dirname(expectedPath)))));
                 assert.ok(targetExisting, `Target file "${expectedPath}" does not exist`);
                 assert.strictEqual(targetContent, content, `Content of target file "${targetContent}" not as expected "${content}"`);
                 assert.ok(!sourceExisting, 'Source file still exists after moving');
