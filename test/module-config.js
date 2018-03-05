@@ -126,6 +126,7 @@ describe('module-config.json', function() {
         var pathsToIgnore = [
             '.git/',
             '.gitignore',
+            '.nyc_output/',
             '.vscode/',
             'basetest.bat',
             'config/localconfig.json',
