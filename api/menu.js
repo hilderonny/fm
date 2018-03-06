@@ -55,7 +55,7 @@ router.get('/', auth(), async(req, res) => {
     var clientSettings = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: clientname });
     var allModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
     var modulenames = clientname === Db.PortalDatabaseName
-        ? co.portalmodules.filter((m) => allModuleKeys.indexOf(m) >= 0) // Portal has only some modules allowed
+        ? allModuleKeys.filter(mk => mc.modules[mk].forportal) // Portal has only some modules allowed
         : (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${clientname}' AND modulename IN (${allModuleKeys.map((k) => `'${k}'`).join(",")});`)).rows.map((r) => r.modulename);
     var fullmenu = extractMenu(modulenames); // Clone it for overwriting
     if (!req.user.isadmin) {

@@ -2,6 +2,7 @@ var mongodb = require("../middlewares/db");
 var localconfig = require("../config/localconfig.json");
 var Db = require("../utils/db").Db;
 var constants  = require("./constants");
+var mc = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
 
 function getclientname(obj) {
     return obj.clientId ? obj.clientId.toString() : Db.PortalDatabaseName;
@@ -71,6 +72,7 @@ async function migrateclientmodules() {
     var migrateclientmodules = await mongodb.get(constants.collections.clientmodules.name).find();
     for (var i = 0; i < migrateclientmodules.length; i++) {
         var clientmodule = migrateclientmodules[i];
+        if (!mc.modules[clientmodule.module].forclients) continue;
         await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('${getclientname(clientmodule)}', '${clientmodule.module}');`);
     }
 }

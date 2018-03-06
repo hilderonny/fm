@@ -2,6 +2,8 @@
     "modules" : {
 
         "base": {
+            "forportal": true,
+            "forclients": true,
             "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
@@ -237,6 +239,8 @@
         },
 
         "doc": {
+            "forportal": true,
+            "forclients": true,
             "api" : [ "doc" ],
             "doc" : [
                 { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "Dictionary", "index": 97 },
@@ -269,6 +273,8 @@
         },
 
         "activities": {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "activities" ],
             "public" : [
                 "css/icons/material/Planner.svg",
@@ -320,6 +326,8 @@
         },
         
         "areas": {
+            "forportal": false,
+            "forclients": true,
             "public" : [
                 "css/icons/fm/FMOBJECTS_TYPE_AREA.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg",
@@ -350,6 +358,8 @@
         },
 
         "businesspartners" : {
+            "forportal": false,
+            "forclients": true,
             "api":[ "businesspartners", "partneraddresses", "persons", "communications"],
             "public": [
                 "css/icons/material/Address Book.svg",
@@ -463,6 +473,8 @@
         },
 
         "clients": {
+            "forportal": true,
+            "forclients": false,
             "api" : [ "clients", "clientmodules" ],
             "public" : [
                 "css/icons/material/Add User Male.svg",
@@ -504,6 +516,8 @@
         },
 
         "documents": {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "documents", "extractdocument", "folders" ],
             "public" : [
                 "css/icons/material/Add Folder.svg",
@@ -560,6 +574,8 @@
         },
 
         "fmobjects": {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "fmobjects" ],
             "public" : [
                 "css/icons/material/Cottage.svg",
@@ -656,6 +672,8 @@
         },
 
         "licenseserver" : {
+            "forportal": true,
+            "forclients": false,
             "api" : [ "portalmodules", "portals", "triggerUpdate", "update" ],
             "public" : [
                 "css/icons/material/Checkmark.svg",
@@ -707,6 +725,8 @@
         },
 
         "notes": {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "notes" ],
             "public" : [
                 "css/icons/material/Notes.svg",                
@@ -741,6 +761,8 @@
         },
 
         "portalbase" : {
+            "forportal": true,
+            "forclients": false,
             "api" : [ "portalmanagement" ],
             "public" : [
                 "css/icons/material/Settings.svg",
@@ -758,6 +780,8 @@
         },
 
         "ronnyseins" : {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "markers" ],
             "public" : [
                 "css/icons/userlocation.png",

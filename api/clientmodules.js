@@ -7,10 +7,11 @@ var uuidv4 = require("uuid").v4;
 var dah = require('../utils/dynamicAttributesHelper');
 var router = require('express').Router();
 var co = require('../utils/constants');
+var mc = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
 
 router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), async(req, res) => {
     if ((await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${req.params.id}';`)).rowCount < 1) return res.sendStatus(404);
-    var allModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
+    var allModuleKeys = Object.keys(co.modules).filter(mk => mc.modules[mk].forclients).map((k) => co.modules[k]);
     var clientModulesOfClient = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${req.params.id}' AND modulename IN (${allModuleKeys.map((k) => `'${k}'`).join(",")});`)).rows;
     var result = allModuleKeys.map((key) => {
         var existingClientModule = clientModulesOfClient.find((c) => c.modulename === key);
