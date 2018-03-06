@@ -15,7 +15,6 @@
     "portalName": "AVT FacilityManagement",
     "npmInstallCommand": "\"C:\\Program Files\\nodejs\\npm.cmd\" install",
     "recreatePortalAdmin": false,
-    "recreatedatabase": false,
     "migratedatabase": false,
     "updateExtractPath": "./temp/",
     "serviceName": "Avorium FM",
@@ -23,5 +22,5 @@
     "licenseserverurl": "https://localhost",
     "licensekey": "8otcmndcs1gma54idig96jqiemkkhgk5q9kn81r4l8lscaul8olrurd4cphn0oicj3bvcqbolbsboqo9l22m8mkdo68mgne4ib1vbj7jln1qhj3agg0l30eb194q7rc0p25qus912cg0872m8o9kglh1c3rotvv572cjr0csvjo4m7r1287joamgvf0m6adb27nfq2b0p8244",
     "updateTimerInterval": 0.005,
-    "startTime": 1520256850326
+    "startTime": 1520321840295
 }

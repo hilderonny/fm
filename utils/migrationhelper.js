@@ -3,12 +3,16 @@ var localconfig = require("../config/localconfig.json");
 var Db = require("../utils/db").Db;
 var constants  = require("./constants");
 
+function getclientname(obj) {
+    return obj.clientId ? obj.clientId.toString() : Db.PortalDatabaseName;
+}
+
 async function migrateforclients(collectionname, migratorfunc, singleelementhandler) {
     console.log(`Migrating ${collectionname} ...`);
     var originalelements = await mongodb.get(collectionname).find();
     for (var i = 0; i < originalelements.length; i++) {
         var originalelement = originalelements[i];
-        var clientname = originalelement.clientId ? originalelement.clientId.toString() : "formerportal";
+        var clientname = getclientname(originalelement);
         var mappedelement = migratorfunc(originalelement);
         if (mappedelement) {
             try {
@@ -67,14 +71,8 @@ async function migrateclientmodules() {
     var migrateclientmodules = await mongodb.get(constants.collections.clientmodules.name).find();
     for (var i = 0; i < migrateclientmodules.length; i++) {
         var clientmodule = migrateclientmodules[i];
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('${clientmodule.clientId.toString()}', '${clientmodule.module}');`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('${getclientname(clientmodule)}', '${clientmodule.module}');`);
     }
-    // Former portal
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'base');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'doc');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'clients');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'licenseserver');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('formerportal', 'portalbase');`);
 }
 
 async function migrateclients() {
@@ -86,10 +84,6 @@ async function migrateclients() {
         await Db.deleteClient(client._id.toString());
         await Db.createClient(client._id.toString(), client.name);
     }
-    // Create separate client for former portal
-    console.log("Preparing former portal ...");
-    await Db.deleteClient("formerportal");
-    await Db.createClient("formerportal", "ehemals Portal");
 }
 
 async function migrateclientsettings() {
@@ -97,7 +91,7 @@ async function migrateclientsettings() {
         return {
             name: orig._id.toString(),
             logourl: orig.logourl,
-            clientname: orig.clientId.toString()
+            clientname: getclientname(orig)
         };
     });
 }
@@ -323,20 +317,23 @@ async function migrateusergroups() {
 
 async function migrateusers() {
     console.log("Migrating users ...");
+    var usernames = {};
     await Db.query(Db.PortalDatabaseName, `DELETE FROM allusers;`);
     var originalusers = await mongodb.get(constants.collections.users.name).find();
     for (var i = 0; i < originalusers.length; i++) {
         var originaluser = originalusers[i];
-        var clientname = originaluser.clientId ? originaluser.clientId.toString() : "formerportal";
+        var clientname = getclientname(originaluser);
+        var username = (usernames[originaluser.name]) ? clientname + "_" + originaluser.name : originaluser.name;
+        usernames[username] = true;
         var mappeduser = {
-            name: originaluser.name,
-            label: originaluser.name,
+            name: username,
+            label: username,
             password: originaluser.pass,
             usergroupname: originaluser.userGroupId.toString(),
             isadmin: !!originaluser.isAdmin
         };
         try { // Maybe double names due to corrupt databases
-            await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${originaluser.name}','${originaluser.pass}','${clientname}');`);
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${username}','${originaluser.pass}','${clientname}');`);
             await Db.insertDynamicObject(clientname, "users", mappeduser);
         } catch(err) {
             console.log(err);

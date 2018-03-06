@@ -74,19 +74,20 @@ var Db = {
         await Db.query(Db.PortalDatabaseName, "CREATE TABLE allusers (name TEXT NOT NULL PRIMARY KEY, password TEXT, clientname TEXT NOT NULL);");
         await Db.query(Db.PortalDatabaseName, "CREATE TABLE clientmodules (clientname TEXT NOT NULL, modulename TEXT NOT NULL, PRIMARY KEY(clientname, modulename));");
         var modulenames = Object.keys(moduleconfig.modules);
-        for (var i = 0; i < modulenames.length; i++) {
-            var portaldatatypes = moduleconfig.modules[modulenames[i]].portaldatatypes;
-            if (!portaldatatypes) continue;
-            for (var j = 0; j < portaldatatypes.length; j++) {
-                var portaldatatype = portaldatatypes[j];
-                await Db.createDatatype(Db.PortalDatabaseName, portaldatatype.name, portaldatatype.label, portaldatatype.plurallabel, portaldatatype.titlefield === "name", portaldatatype.icon);
-                if (portaldatatype.fields) for (var k = 0; k < portaldatatype.fields.length; k++) {
-                    var field = portaldatatype.fields[k];
-                    await Db.createDatatypeField(Db.PortalDatabaseName, portaldatatype.name, field.name, field.label, field.type, portaldatatype.titlefield === field.name, field.isrequired, false, field.reference);
-                }
-                if (portaldatatype.values) for (var k = 0; k < portaldatatype.values.length; k++) {
-                    await Db.insertDynamicObject(Db.PortalDatabaseName, portaldatatype.name, portaldatatype.values[k]);
-                }
+        var alldatatypes = [];
+        modulenames.forEach(mn => { // Portale bekommen für die Migration alle Module freigeschaltet
+            if (moduleconfig.modules[mn].portaldatatypes) moduleconfig.modules[mn].portaldatatypes.forEach(pdt => {if(!alldatatypes.find(a => a.name === pdt.name)) alldatatypes.push(pdt)});
+            if (moduleconfig.modules[mn].clientdatatypes) moduleconfig.modules[mn].clientdatatypes.forEach(cdt => {if(!alldatatypes.find(a => a.name === cdt.name)) alldatatypes.push(cdt)});
+        })
+        for (var i = 0; i < alldatatypes.length; i++) {
+            var datatype = alldatatypes[i];
+            await Db.createDatatype(Db.PortalDatabaseName, datatype.name, datatype.label, datatype.plurallabel, datatype.titlefield === "name", datatype.icon);
+            if (datatype.fields) for (var k = 0; k < datatype.fields.length; k++) {
+                var field = datatype.fields[k];
+                await Db.createDatatypeField(Db.PortalDatabaseName, datatype.name, field.name, field.label, field.type, datatype.titlefield === field.name, field.isrequired, false, field.reference);
+            }
+            if (datatype.values) for (var k = 0; k < datatype.values.length; k++) {
+                await Db.insertDynamicObject(Db.PortalDatabaseName, datatype.name, datatype.values[k]);
             }
         }
     },

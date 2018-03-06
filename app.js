@@ -107,14 +107,17 @@ var init = () => {
     });
     var fs = require('fs');
     // Initialize and migrate PostgreSQL database
-    require("./utils/db").Db.init(localConfig.recreatedatabase).then(() => {
+    require("./utils/db").Db.init(localConfig.migratedatabase).then(() => {
         if (localConfig.migratedatabase) {
             require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
         }
         localConfig.migratedatabase = false;
-        localConfig.recreatedatabase = false;
         fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
     });
+    if(localConfig.migratedatabase) {
+        console.log("Recreating database. Please restart the app after finishing.");
+        return;
+    }
     // Includes minifizieren
     prepareIncludes(fs);
     // Anwendung initialisieren und Handler-Reihenfolge festlegen
