@@ -70,8 +70,11 @@ th.prepareClientModules = async() => {
     await th.cleanTable("clientmodules", true, false);
     var modulenames = Object.keys(co.modules);
     for (var i = 0; i < modulenames.length; i++) {
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', '${modulenames[i]}');`);
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client1', '${modulenames[i]}');`);
+        var modulename = modulenames[i];
+        var mod = moduleConfig.modules[modulename];
+        if (!mod.forclients) continue; // Ignore portal modules
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', '${modulename}');`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client1', '${modulename}');`);
     }
 };
 
