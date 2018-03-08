@@ -3,6 +3,9 @@ var localconfig = require("../config/localconfig.json");
 var Db = require("../utils/db").Db;
 var constants  = require("./constants");
 var mc = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
+var path = require("path");
+var dh = require("./documentsHelper");
+var fs = require("fs");
 
 function getclientname(obj) {
     return obj.clientId ? obj.clientId.toString() : Db.PortalDatabaseName;
@@ -119,7 +122,12 @@ async function migratedocuments() {
             isshared: !!orig.isShared
         };
     }, (original, mapped) => {
-        // TODO: Move files
+        var clientname = original.clientId ? original.clientId.toString() : Db.PortalDatabaseName;
+        var fromPath = path.join(__dirname, '..', localconfig.documentspath ? localconfig.documentspath : 'documents', mapped.name);
+        if (!fs.existsSync(fromPath)) return; // File does not exist
+        var toPath = dh.getDocumentPath(clientname, mapped.name);
+        dh.createPath(path.dirname(toPath));
+        fs.writeFileSync(toPath, fs.readFileSync(fromPath)); // copyFileSync erst ab Node 8.5.0
     });
 }
 
