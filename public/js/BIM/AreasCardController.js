@@ -47,7 +47,7 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
 
     $scope.load = function() {
         $rootScope.isLoading = true;
-        $http.get('/api/fmobjects').then(function(response) {
+        $http.get('/api/fmobjects?forareas=true').then(function(response) {
             $scope.fmObjects = [];
             var handleFmObject = function(fmObject, depth) {
                 var element = {

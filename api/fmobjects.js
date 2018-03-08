@@ -44,8 +44,10 @@ function mapFields(fmobject, clientname) {
 }
 
 // Get all FM objects and their recursive children of the current client as hierarchy. Only _id, name and type are returned
+// When parameter ?forareas=true is set, also area infos are returned
 router.get('/', auth(co.permissions.BIM_FMOBJECT, 'r', co.modules.fmobjects), async(req, res) => {
-    var allfmobjects = (await Db.query(req.user.clientname, `SELECT name AS _id, label AS name, fmobjecttypename AS type, parentfmobjectname AS "parentId", ARRAY[]::text[] as children FROM fmobjects ORDER BY label;`)).rows;
+    var additionalfields = req.query.forareas ? ", f, bgf, nrf, nuf, tf, vf" : "";
+    var allfmobjects = (await Db.query(req.user.clientname, `SELECT name AS _id, label AS name, fmobjecttypename AS type, parentfmobjectname AS "parentId", ARRAY[]::text[] as children${additionalfields} FROM fmobjects ORDER BY label;`)).rows;
     var fmmap = {};
     allfmobjects.forEach((fmo) => {
         fmmap[fmo._id] = fmo;
@@ -156,15 +158,15 @@ router.put('/:id', auth(co.permissions.BIM_FMOBJECT, 'w', co.modules.fmobjects),
     if (!fmobject) return res.sendStatus(400);
     var updateset = { };
     if (fmobject.name) updateset.label = fmobject.name;
-    if (fmobject.type) updateset.fmobjecttypename = fmobject.name;
+    if (fmobject.type) updateset.fmobjecttypename = fmobject.type;
     if (fmobject.areatype) updateset.areatypename = fmobject.areatype;
-    if (fmobject.f) updateset.f = fmobject.name;
-    if (fmobject.bgf) updateset.bgf = fmobject.name;
-    if (fmobject.usagestate) updateset.areausagestatename = fmobject.name;
-    if (fmobject.nrf) updateset.nrf = fmobject.name;
-    if (fmobject.nuf) updateset.nuf = fmobject.name;
-    if (fmobject.tf) updateset.tf = fmobject.name;
-    if (fmobject.vf) updateset.vf = fmobject.name;
+    if (fmobject.f) updateset.f = fmobject.f;
+    if (fmobject.bgf) updateset.bgf = fmobject.bgf;
+    if (fmobject.usagestate) updateset.areausagestatename = fmobject.usagestate;
+    if (fmobject.nrf) updateset.nrf = fmobject.nrf;
+    if (fmobject.nuf) updateset.nuf = fmobject.nuf;
+    if (fmobject.tf) updateset.tf = fmobject.tf;
+    if (fmobject.vf) updateset.vf = fmobject.vf;
     if (fmobject.parentId && !(await Db.getDynamicObject(clientname, co.collections.fmobjects.name, fmobject.parentId))) return res.sendStatus(400);
     if (typeof(fmobject.parentId) !== "undefined") updateset.parentfmobjectname = fmobject.parentId ? fmobject.parentId : null;
     if (fmobject.previewImageId && !(await Db.getDynamicObject(clientname, co.collections.documents.name, fmobject.previewImageId))) return res.sendStatus(400);
