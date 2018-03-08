@@ -59,10 +59,10 @@ describe('API portalmanagement', () => {
 
     describe('GET/', () => {
 
-        th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS);
+        th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS, "portal", "portal_usergroup0", "portal_usergroup0_user0");
 
         it('responds with portalsettings (autoUpdateMode, [updateTimerInterval], licenseserverurl and licensekey only) from localconfig', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             var result = (await th.get(`/api/${co.apis.portalmanagement}?token=${token}`).expect(200)).body;
             if(result.updateTimerInterval){
                 assert.strictEqual(Object.keys(result).length, 4); //updateTimerInterval is also expected when autoUpdateMode == True
@@ -83,20 +83,20 @@ describe('API portalmanagement', () => {
 
         var api = `${co.apis.portalmanagement}/checkforupdate`;
 
-        th.apiTests.get.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS);
+        th.apiTests.get.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS, "portal", "portal_usergroup0", "portal_usergroup0_user0");
 
         it('responds with 400 when license server URL is not correct', async() => {
             lc.licensekey = 'licensekey0';
             lc.licenseserverurl = 'https://invalidurl.avorium.de';
             saveConfigs();
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             await th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(400);
         });
 
         it('responds with 400 when license key is invalid', async() => {
             lc.licensekey = 'InvalidKey';
             saveConfigs();
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             await th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(400);
         });
 
@@ -105,7 +105,7 @@ describe('API portalmanagement', () => {
             lc.licensekey = 'licensekey0';
             pj.version = 'Testversion';
             saveConfigs();
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             var result = (await th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(200)).body;
             assert.strictEqual(Object.keys(result).length, 2);
             assert.ok(result.localVersion);
@@ -127,14 +127,14 @@ describe('API portalmanagement', () => {
             });
         }
 
-        th.apiTests.post.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS, () => { return {} }, true);
+        th.apiTests.post.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS, () => { return {} }, true, "portal", "portal_usergroup0", "portal_usergroup0_user0");
 
         it('responds with 400 when license server URL is not correct', async() => {
             lc.licensekey = 'licensekey0';
             lc.licenseserverurl = 'https://invalidurl.avorium.de';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
         });
 
@@ -142,7 +142,7 @@ describe('API portalmanagement', () => {
             lc.licensekey = 'invalidkey';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
         });
 
@@ -151,7 +151,7 @@ describe('API portalmanagement', () => {
             lc.licensekey = 'licensekey0';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
         });
 
@@ -159,7 +159,7 @@ describe('API portalmanagement', () => {
             lc.licensekey = 'licensekey0';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(200);
             checkExtractedFiles(lc.updateExtractPath, [co.modules.base]);
         });
@@ -168,7 +168,7 @@ describe('API portalmanagement', () => {
             lc.licensekey = 'licensekey0';
             delete lc.updateExtractPath;
             saveConfigs();
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(200);
             checkExtractedFiles('./temp/', [co.modules.base]);
         });
@@ -187,10 +187,10 @@ describe('API portalmanagement', () => {
             };
         }
 
-        th.apiTests.put.defaultNegative(api, permission, createPutSettings, undefined, undefined, undefined, undefined, true);
+        th.apiTests.put.defaultNegative(api, permission, createPutSettings, "portal", "portal_usergroup0", "portal_usergroup0_user0", undefined, true);
 
         it('responds with 200 and updates the licenseserverurl and licensekey properties in the localconfig.json file with the new sent data', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             var settings = await createPutSettings();
             await th.put(`/api/${api}?token=${token}`).send(settings).expect(200);
             var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
@@ -201,7 +201,7 @@ describe('API portalmanagement', () => {
         });
 
         it('responds with 200 and does not update the localconfig file when other properties than licenseserverurl and licensekey, or autoUpdateMode are sent', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             var settings = {
                 documentspath: 'newdocpath/',
                 tokensecret: 'newtokensecret',
@@ -217,7 +217,7 @@ describe('API portalmanagement', () => {
         });
 
         it('responds with 200 but does not update the localconfig file when invalid (e.g. null) value for autoUpdateMode is sent', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             var settings = { autoUpdateMode: null };
             await th.put(`/api/${api}?token=${token}`).send(settings).expect(200);
             var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
@@ -225,7 +225,7 @@ describe('API portalmanagement', () => {
         });
 
         it('responds with 200 and updates the autoUpdateMode property in the localconfig.json file with the new sent data', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
+            var token = await th.defaults.login("portal_usergroup0_user0");
             lc.autoUpdateMode = true;
             saveConfigs();
             var settings = { autoUpdateMode: false };

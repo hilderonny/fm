@@ -32,6 +32,25 @@ describe('API permissions', () => {
         }
     }
 
+    function getAllowedClientPermissions() {
+        return [
+            co.permissions.ADMINISTRATION_SETTINGS,
+            co.permissions.ADMINISTRATION_USER,
+            co.permissions.ADMINISTRATION_USERGROUP,
+            co.permissions.BIM_AREAS,
+            co.permissions.BIM_FMOBJECT,
+            co.permissions.CORE_RELATIONS,
+            co.permissions.CRM_BUSINESSPARTNERS,
+            co.permissions.CRM_PERSONS,
+            co.permissions.OFFICE_ACTIVITY,
+            co.permissions.OFFICE_DOCUMENT,
+            co.permissions.OFFICE_NOTE,
+            co.permissions.SETTINGS_CLIENT,
+            co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
+            co.permissions.SETTINGS_USER
+        ]
+    }
+
     describe('GET/forLoggedInUser', () => {
 
         var api = `${co.apis.permissions}/forLoggedInUser`;
@@ -44,7 +63,7 @@ describe('API permissions', () => {
             await th.cleanTable("permissions", true, true);
             var token = await th.defaults.login("client0_usergroup0_user1");
             var permissionsFromApi = (await th.get(`/api/${api}?token=${token}`).expect(200)).body;
-            var expectedPermissions = Object.keys(co.permissions).map((k) => co.permissions[k]);
+            var expectedPermissions = getAllowedClientPermissions();
             assert.strictEqual(permissionsFromApi.length, expectedPermissions.length);
             permissionsFromApi.forEach(function(permission) {
                 assert.ok(expectedPermissions.indexOf(permission.key) >= 0);
@@ -97,7 +116,7 @@ describe('API permissions', () => {
             }
             var token = await th.defaults.login("client0_usergroup0_user0");
             var permissionsFromApi = (await th.get(`/api/${api}/client0_usergroup0?token=${token}`).expect(200)).body;
-            var permissionKeys = Object.keys(co.permissions).map((k) => co.permissions[k]);
+            var permissionKeys = getAllowedClientPermissions();
             assert.strictEqual(permissionsFromApi.length, permissionKeys.length);
             permissionsFromApi.forEach(function(permission) {
                 assert.ok(typeof(permission.key) !== "undefined");
