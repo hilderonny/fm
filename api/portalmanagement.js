@@ -7,7 +7,6 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var fs = require('fs');
 var request = require('request');
 var unzip = require('unzip2');
@@ -70,7 +69,7 @@ router.post('/triggerupdate', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', 
 /**
  * Updates settings to localconfig.json and sends updated settings
  */
-router.put('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.portalbase), function(req, res) {
+router.put('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'w', co.modules.portalbase), (req, res) => {
     var portalSettings = req.body;
     if (!portalSettings || Object.keys(portalSettings).length < 1) {
         return res.sendStatus(400);

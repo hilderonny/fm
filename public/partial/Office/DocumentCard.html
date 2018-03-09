@@ -43,7 +43,7 @@
                         <ng-include flex src="'partial/Core/DynamicAttributesTab.html'"></ng-include>
 
                         <p ng-if="document.isShared">
-                            <a href="/api/documents/share/{{document._id}}" ng-bind="documentUrl" target="_blank" class="share-link"></a>
+                            <a href="{{documentUrl}}" ng-bind="documentUrl" target="_blank" class="share-link"></a>
                         </p>
 
                         <md-input-container flex ng-if="is3Dmodel">

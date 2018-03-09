@@ -13,18 +13,21 @@ var wh = require('../../utils/webHelper');
 var lc = require('../../config/localconfig.json');
 
 describe('API triggerUpdate', function() {
-    
+
     var oldProcessExit;
 
-    beforeEach(() => {
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
         oldProcessExit = process.exit;
         process.exit = (code) => { };
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions);
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
     });
 
     afterEach(() => {

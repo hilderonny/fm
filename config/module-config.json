@@ -2,8 +2,10 @@
     "modules" : {
 
         "base": {
+            "forportal": true,
+            "forclients": true,
             "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
-            "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateId", "validateSameClientId" ],
+            "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
                 "css/base.css",
@@ -144,6 +146,7 @@
                 { "name": "dynamicattributes", "label": "Dynamisches Attribut", "plurallabel": "Dynamische Attribute", "titlefield": "label", "fields": [
                     { "name": "modelname", "type": "text" },
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "isinactive", "label": "Inaktiv", "type": "boolean" },
                     { "name": "dynamicattributetypename", "label": "Typ", "type": "reference", "reference": "dynamicattributetypes" },
                     { "name": "identifier", "type": "text" }
                 ] },
@@ -167,9 +170,12 @@
                     { "name": "name2", "type": "text" }
                 ] },
 
-                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg" },
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                ] },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
@@ -183,9 +189,47 @@
                     { "name": "clientname", "label": "Mandant", "type": "reference", "reference": "clients" }
                 ] },
 
-                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg" },
+                { "name": "dynamicattributetypes", "label": "Attributart", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "values": [
+                    { "name": "text", "label": "Textfeld" },
+                    { "name": "boolean", "label": "Boolescher Wert" },
+                    { "name": "picklist", "label": "Auswahlliste" }
+                ] }, 
+
+                { "name": "dynamicattributes", "label": "Dynamisches Attribut", "plurallabel": "Dynamische Attribute", "titlefield": "label", "fields": [
+                    { "name": "modelname", "type": "text" },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "isinactive", "label": "Inaktiv", "type": "boolean" },
+                    { "name": "dynamicattributetypename", "label": "Typ", "type": "reference", "reference": "dynamicattributetypes" },
+                    { "name": "identifier", "type": "text" }
+                ] },
+
+                { "name": "dynamicattributeoptions", "label": "Listenelement", "plurallabel": "Listenelemente", "titlefield": "label", "fields": [
+                    { "name": "dynamicattributename", "type": "reference", "reference": "dynamicattributes" },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "value", "label": "Wert", "type": "text" }
+                ] },
+
+                { "name": "dynamicattributevalues", "fields": [
+                    { "name": "entityname", "type": "text" },
+                    { "name": "dynamicattributename", "type": "reference", "reference": "dynamicattributes" },
+                    { "name": "value", "type": "text" }
+                ] }, 
+
+                { "name": "relations", "label": "Verknüpfung", "plurallabel": "Verknüpfungen", "fields": [
+                    { "name": "datatype1name", "type": "text" },
+                    { "name": "name1", "type": "text" },
+                    { "name": "datatype2name", "type": "text" },
+                    { "name": "name2", "type": "text" }
+                ] },
+
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                ] },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
@@ -195,6 +239,8 @@
         },
 
         "doc": {
+            "forportal": true,
+            "forclients": true,
             "api" : [ "doc" ],
             "doc" : [
                 { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "Dictionary", "index": 97 },
@@ -227,6 +273,8 @@
         },
 
         "activities": {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "activities" ],
             "public" : [
                 "css/icons/material/Planner.svg",
@@ -278,6 +326,8 @@
         },
         
         "areas": {
+            "forportal": false,
+            "forclients": true,
             "public" : [
                 "css/icons/fm/FMOBJECTS_TYPE_AREA.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg",
@@ -308,6 +358,8 @@
         },
 
         "businesspartners" : {
+            "forportal": false,
+            "forclients": true,
             "api":[ "businesspartners", "partneraddresses", "persons", "communications"],
             "public": [
                 "css/icons/material/Address Book.svg",
@@ -421,6 +473,8 @@
         },
 
         "clients": {
+            "forportal": true,
+            "forclients": false,
             "api" : [ "clients", "clientmodules" ],
             "public" : [
                 "css/icons/material/Add User Male.svg",
@@ -456,17 +510,14 @@
 
                 { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ] },
-
-                { "name": "clientmodules", "label": "Mandantenmodul", "plurallabel": "Mandantenmodule", "fields": [
-                    { "name": "clientname", "label": "Mandant", "type": "reference", "reference": "clients" },
-                    { "name": "modulename", "label": "Modul", "type": "text" }
                 ] }
                 
             ]
         },
 
         "documents": {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "documents", "extractdocument", "folders" ],
             "public" : [
                 "css/icons/material/Add Folder.svg",
@@ -523,6 +574,8 @@
         },
 
         "fmobjects": {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "fmobjects" ],
             "public" : [
                 "css/icons/material/Cottage.svg",
@@ -573,24 +626,24 @@
                     { "name": "FMOBJECTS_TYPE_INVENTORY", "label": "Inventar" }
                 ] }, 
 
-                { "name": "areatypes", "label": "Flächenart", "titlefield": "name", "values": [
+                { "name": "areacategories", "label": "Kategorie", "titlefield": "name", "values": [
                     { "name": "Nutzungsfläche" },
                     { "name": "Technikfläche" },
                     { "name": "Verkehrsfläche" }
                 ] }, 
 
-                { "name": "areacategories", "label": "Kategorie", "titlefield": "name", "fields": [
-                    { "name": "areatypename", "type": "reference", "reference": "areatypes" }
+                { "name": "areatypes", "label": "Flächenart", "titlefield": "name", "fields": [
+                    { "name": "areacategoryname", "type": "reference", "reference": "areacategories" }
                 ], "values": [
-                    { "name": "Wohnen und Aufenthalt", "areatypename": "Nutzungsfläche" },
-                    { "name": "Büroarbeit", "areatypename": "Nutzungsfläche" },
-                    { "name": "Produktion, Hand- und Maschinenarbeit, Experimente", "areatypename": "Nutzungsfläche" },
-                    { "name": "Lagern, Verteilen und Verkaufen", "areatypename": "Nutzungsfläche" },
-                    { "name": "Bildung, Unterricht und Kultur", "areatypename": "Nutzungsfläche" },
-                    { "name": "Heilen und Pflegen", "areatypename": "Nutzungsfläche" },
-                    { "name": "Sonstige Nutzung", "areatypename": "Nutzungsfläche" },
-                    { "name": "Technische Anlagen", "areatypename": "Technikfläche" },
-                    { "name": "Verkehrserschließung und -sicherung", "areatypename": "Verkehrsfläche" }
+                    { "name": "Wohnen und Aufenthalt", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Büroarbeit", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Produktion, Hand- und Maschinenarbeit, Experimente", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Lagern, Verteilen und Verkaufen", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Bildung, Unterricht und Kultur", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Heilen und Pflegen", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Sonstige Nutzung", "areacategoryname": "Nutzungsfläche" },
+                    { "name": "Technische Anlagen", "areacategoryname": "Technikfläche" },
+                    { "name": "Verkehrserschließung und -sicherung", "areacategoryname": "Verkehrsfläche" }
                 ] }, 
 
                 { "name": "areausagestates", "label": "Nutzungsstatus", "titlefield": "name", "values": [
@@ -605,7 +658,7 @@
                     { "name": "fmobjecttypename", "label": "Typ", "type": "reference", "reference": "fmobjecttypes" },
                     { "name": "parentfmobjectname", "type": "reference", "reference": "fmobjects" },
                     { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents" },
-                    { "name": "areacategoryname", "label": "Kategorie", "type": "reference", "reference": "areacategories" },
+                    { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
                     { "name": "f", "label": "Fläche (m²)", "type": "decimal" },
                     { "name": "bgf", "label": "Brutto-Geschoss-Fläche (BGF)", "type": "decimal" },
                     { "name": "areausagestatename", "label": "Nutzungsstatus", "type": "reference", "reference": "areausagestates" },
@@ -619,6 +672,8 @@
         },
 
         "licenseserver" : {
+            "forportal": true,
+            "forclients": false,
             "api" : [ "portalmodules", "portals", "triggerUpdate", "update" ],
             "public" : [
                 "css/icons/material/Checkmark.svg",
@@ -670,6 +725,8 @@
         },
 
         "notes": {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "notes" ],
             "public" : [
                 "css/icons/material/Notes.svg",                
@@ -704,6 +761,8 @@
         },
 
         "portalbase" : {
+            "forportal": true,
+            "forclients": false,
             "api" : [ "portalmanagement" ],
             "public" : [
                 "css/icons/material/Settings.svg",
@@ -721,6 +780,8 @@
         },
 
         "ronnyseins" : {
+            "forportal": false,
+            "forclients": true,
             "api" : [ "markers" ],
             "public" : [
                 "css/icons/userlocation.png",

@@ -6,6 +6,7 @@
     "httpsPort": "Port where the HTTPS handler of the app should listen, e.g. 443. Only useful when useHTTPS=true",
     "licensekey": "License key you obtained from avorium",
     "licenseserverurl": "URL of the license server to fetch updates from, e.g. 'https://fm.avorium.de'",
+    "migratedatabase": "Set to true to copy the content of the MongoDB into the PostgreSQL database. All existing content will be overwritten, but structures must exist in the target database.",
     "npmInstallCommand": "Full commandline to do install required libraries, e.g. '\"C:\\Program Files\\nodejs\\npm.cmd\" install'",
     "portalLogo": "URL of the pPortal's logo to be shown on the login page, can be relative 'images/logo.png' or absolute URL 'http://...'",
     "portalName": "Portal's name to be shown on the loing page,e.g 'AVT FAcility Management '",

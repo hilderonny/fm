@@ -1,32 +1,30 @@
 /**
  * CRUD API for relations between objects. These are no separate objects.
  * Relations are modelled in the corresponding objects in the relations-array.
- * TODO: In separate Tabelle verschieben
- * TODO: Update-Script, welches die Relationen aus den Objekten heraus nimmt und in die neue Tabelle verschiebt
- * TODO: Löschen von Objekten soll auch Relationen löschen. Mechanismus ausdenken.
- * TODO: Tests für allen möglichen Mist bauen
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
 var co = require('../utils/constants');
 var dah = require('../utils/dynamicAttributesHelper');
+var Db = require("../utils/db").Db;
+var uuidv4 = require("uuid").v4;
 
 /**
  * Sucht alle Verknüpfungen zu einer Entität einer bestimmten ID und liefert diese als Liste
  * zurück. Dabei ist egal, ob die Entität in type1 oder type2 definiert ist.
  */
-router.get('/:entityType/:id', auth(false, false, 'base'), validateId, function(req, res) {
-    var entityType = req.params.entityType;
-    var id = monk.id(req.params.id);
-    req.db.get(co.collections.relations.name).find({$or: [
-        { $and: [ { type1: entityType, id1: id, clientId: req.user.clientId } ] },
-        { $and: [ { type2: entityType, id2: id, clientId: req.user.clientId } ] }
-    ]}).then(function(relations) {
-        res.send(relations);
-    });
+router.get('/:entityType/:id', auth(false, false, co.modules.base), async(req, res) => {
+    var id = Db.replaceQuotes(req.params.id);
+    var entitytype = Db.replaceQuotes(req.params.entityType);
+    var relations = (await Db.query(req.user.clientname, `SELECT * FROM relations WHERE (name1='${id}' AND datatype1name='${entitytype}') OR (name2='${id}' AND datatype2name='${entitytype}');`)).rows;
+    res.send(relations.map((r) => { return {
+        _id: r.name,
+        id1: r.name1,
+        type1: r.datatype1name,
+        id2: r.name2,
+        type2: r.datatype2name,
+    }}));
 });
 
 /**
@@ -37,60 +35,36 @@ router.get('/:entityType/:id', auth(false, false, 'base'), validateId, function(
  * id2: ID of the object of type type2
  * TODO: Alte Verknüpfungen aus Terminen und FM-Objekten raus nehmen 
  */  
-router.post('/', auth(false, false, 'base'), (req, res) => {
+router.post('/', auth(false, false, co.modules.base), async(req, res) => {
+    var clientname = req.user.clientname;
     var relation = req.body;
-    if (!relation || !relation.type1 || !relation.type2 || !relation.id1 || !relation.id2 || !validateId.validateId(relation.id1) || !validateId.validateId(relation.id2)) {
+    if (!relation || !relation.type1 || !relation.type2 || !relation.id1 || !relation.id2) return res.sendStatus(400);
+    try {
+        if ((await Db.query(clientname, `SELECT 1 FROM ${Db.replaceQuotes(relation.type1)} WHERE name='${Db.replaceQuotes(relation.id1)}';`)).rowCount < 1) return res.sendStatus(400);
+        if ((await Db.query(clientname, `SELECT 1 FROM ${Db.replaceQuotes(relation.type2)} WHERE name='${Db.replaceQuotes(relation.id2)}';`)).rowCount < 1) return res.sendStatus(400);
+    } catch(e) {
+        // When datatypes do not exist, maybe at other client?
         return res.sendStatus(400);
     }
-    relation.id1 = monk.id(relation.id1);
-    relation.id2 = monk.id(relation.id2);
-    var clientId = req.user.clientId;
-    // Prüfen, ob die Quell- und Zielobjekte existieren
-    req.db.get(relation.type1).findOne(relation.id1).then((object1) => {
-        if (!object1) { // Quell-Objekt existiert nicht
-            return res.sendStatus(404);
-        }
-        //        
-        if (`${object1.clientId ? object1.clientId : 'null'}` !== `${clientId}`) { // Quell-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
-            return res.sendStatus(403);
-        }
-        req.db.get(relation.type2).findOne(relation.id2).then((object2) => {
-            if (!object2) { // Ziel-Objekt existiert nicht
-                return res.sendStatus(404);
-            }
-            if (`${object2.clientId ? object2.clientId : 'null'}` !== `${clientId}`) {
-                return res.sendStatus(403); // Ziel-Objekt gehört nicht zum Mandanten des angemeldeten Benutzers
-            }
-            // Der Verknüpfung wird die ID des Mandanten des Benutzers angehängt, um beim Löschen die Zugehörigkeit zu prüfen
-            relation.clientId = clientId;
-            // Verknüpfung anlegen. Vorher gucken, ob es die nicht schon gibt
-            req.db.get('relations').find({$or: [
-                { $and: [ { type1: relation.type1, id1: relation.id1, type2: relation.type2, id2: relation.id2 } ] },
-                { $and: [ { type2: relation.type1, id2: relation.id1, type1: relation.type2, id1: relation.id2 } ] }
-            ]}).then(function(relations) {
-                if (relations.length > 0) {
-                    res.send(relations[0]);
-                } else {
-                    req.db.insert('relations', relation).then((insertedRelation) => {
-                        res.send(insertedRelation);
-                    });
-                }
-            });
-        });
-    });
+    var relationtoinsert = {
+        name: uuidv4(),
+        name1: relation.id1,
+        datatype1name: relation.type1,
+        name2: relation.id2,
+        datatype2name: relation.type2,
+    }
+    await Db.insertDynamicObject(clientname, co.collections.relations.name, relationtoinsert);
+    relation._id = relationtoinsert.name;
+    res.send(relation);
 });
 
 /**
  * Löscht eine Verknüpfung mit einer bestimmten ID
  */  
-router.delete('/:id', auth(false, false, co.modules.base), validateId, validateSameClientId(co.collections.relations.name), function(req, res) {
-    var id = monk.id(req.params.id);
-    req.db.remove(co.collections.relations.name, id).then((result) => {
-        return dah.deleteAllDynamicAttributeValuesForEntity(id);
-    }).then(() => {
-        res.sendStatus(204);
-    });
+router.delete('/:id', auth(false, false, co.modules.base), validateSameClientId(co.collections.relations.name), async(req, res) => {
+    await Db.deleteDynamicObject(req.user.clientname, co.collections.relations.name, req.params.id);
+    await dah.deleteAllDynamicAttributeValuesForEntity(req.user.clientname, req.params.id);
+    res.sendStatus(204);
 });
-
 
 module.exports = router;

@@ -3,13 +3,12 @@
  */
 var assert = require('assert');
 var th = require('../testHelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var dynamicAttributesHelper = require('../../utils/dynamicAttributesHelper');
-var monk = require('monk');
 var moduleConfig = require('../../config/module-config.json');
+var Db = require("../../utils/db").Db;
 
-describe('UTILS dynamicAttributesHelper', function() {
+describe('UTILS dynamicAttributesHelper', () => {
     
     /**
      * Modul-config mit vorgegebenen DAs vorbereiten, wir benutzen ein eigenes Modul "DAtest"
@@ -37,171 +36,137 @@ describe('UTILS dynamicAttributesHelper', function() {
         };
     }
 
-    beforeEach(async function() {
+    before(async() => {
         await th.cleanDatabase();
         await th.prepareClients();
+    });
+
+    beforeEach(async() => {
         await th.prepareClientModules();
         await th.prepareUserGroups();
         await th.prepareUsers();
-        await th.prepareDynamicAttributes();
-        await th.prepareDynamicAttributeOptions();
-        await th.prepareDynamicAttributeValues();
-        await th.preparePredefinedDynamicAttibutesForClient(th.defaults.client);
+        await th.preparePermissions();
+        await th.preparePredefinedDynamicAttibutesForClient("client0");
         prepareModuleConfigForDynamicAttributes();
-        return Promise.resolve();
     });
 
     afterEach(() => {
         delete moduleConfig.modules.DAtest;
     });
 
-    describe('createDynamicAttributeOption', function() {
+    describe('createDynamicAttributeOption', () => {
 
-        it('Erstellt eine Option, wenn kein value angegeben ist, auch wenn es schon eine mit demselben text_en gibt', async function() {
-            var da = await db.get(co.collections.dynamicattributes.name).findOne({ identifier:'geschlecht' });
-            var optionToCreate = { clientId: da.clientId, text_en: 'männlich', dynamicAttributeId: da._id };
-            var createdOption = await dynamicAttributesHelper.createDynamicAttributeOption(optionToCreate);
-            var daos = await db.get(co.collections.dynamicattributeoptions.name).find({ dynamicAttributeId:da._id, text_en: 'männlich' });
+        it('Erstellt eine Option, wenn kein value angegeben ist, auch wenn es schon eine mit demselben text_en gibt', async() => {
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributes.name, { identifier:'geschlecht' });
+            var optionToCreate = { text_en: 'männlich', dynamicAttributeId: da.name };
+            var createdOption = await dynamicAttributesHelper.createDynamicAttributeOption(optionToCreate, "client0");
+            var daos =await Db.getDynamicObjects("client0", co.collections.dynamicattributeoptions.name, { dynamicattributename: da.name, label: 'männlich' });
             assert.strictEqual(daos.length, 2);
-            var optionInDatabase = daos.find((d) => d._id.equals(createdOption._id));
+            var optionInDatabase = daos.find((d) => d.name === createdOption.name);
             assert.ok(optionInDatabase);
-            assert.ok(optionInDatabase.clientId.equals(da.clientId));
         });
 
-        it('Generiert eine neue _id, auch wenn diese vorgegeben wurde', async function() {
-            var da = await db.get(co.collections.dynamicattributes.name).findOne({ identifier:'geschlecht' });
-            var id = monk.id();
-            var optionToCreate = { _id: id, clientId: da.clientId, text_en: 'männlich', dynamicAttributeId: da._id };
-            var createdOption = await dynamicAttributesHelper.createDynamicAttributeOption(optionToCreate);
-            assert.ok(!createdOption._id.equals(id));
+        it('Erstellt eine Option, wenn sie einen value hat und noch keine mit demselben value existiert', async() => {
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributes.name, { identifier:'geschlecht' });
+            var optionToCreate = { text_en: 'sächlich', dynamicAttributeId: da.name, value: "s" };
+            var createdOption = await dynamicAttributesHelper.createDynamicAttributeOption(optionToCreate, "client0");
+            var daos = await Db.getDynamicObjects("client0", co.collections.dynamicattributeoptions.name, { dynamicattributename: da.name, label: 'sächlich' });
+            assert.strictEqual(daos.length, 1);
         });
 
-        it('Erstellt eine Option, wenn sie einen value hat und noch keine mit demselben value existiert', async function() {
-        });
-
-        it('Liefert die bestehende Option, wenn eine mit einem value erzeugt werden soll, der schon in der Datenbank ist', async function() {
-            var existingOption = await db.get(co.collections.dynamicattributeoptions.name).findOne({ value:'männlich' });
-            var optionToCreate = { clientId: existingOption.clientId, text_en: 'männlich', value: 'männlich', dynamicAttributeId: existingOption.dynamicAttributeId };
-            var createdOption = await dynamicAttributesHelper.createDynamicAttributeOption(optionToCreate);
-            var daos = await db.get(co.collections.dynamicattributeoptions.name).find({ dynamicAttributeId:createdOption.dynamicAttributeId });
-            assert.strictEqual(daos.length, 2);
-            assert.ok(createdOption._id.equals(existingOption._id));
+        it('Liefert die bestehende Option, wenn eine mit einem value erzeugt werden soll, der schon in der Datenbank ist', async() => {
+            var da = await Db.getDynamicObject("client0", co.collections.dynamicattributes.name, { identifier:'geschlecht' });
+            var optionToCreate = { text_en: 'männlich', dynamicAttributeId: da.name, value: "m" };
+            var createdOption = await dynamicAttributesHelper.createDynamicAttributeOption(optionToCreate, "client0");
+            var daos = await Db.getDynamicObjects("client0", co.collections.dynamicattributeoptions.name, { dynamicattributename: da.name, label: 'männlich' });
+            assert.strictEqual(daos.length, 1);
+            assert.strictEqual(daos[0].name, "client0_dao0");
         });
         
     });
 
-    describe('activateDynamicAttributesForClient', function() {
+    describe('activateDynamicAttributesForClient', () => {
         
-        it('Macht nichts, wenn das Modul keine vorgegebenen DAs hat', async function() {
+        it('Macht nichts, wenn das Modul keine vorgegebenen DAs hat', async() => {
             moduleConfig.modules.ModuleWithoutDAs = {};
-            var client = await th.defaults.getClient();
-            var dasBeforeCount = (await db.get(co.collections.dynamicattributes.name).find({clientId:client._id})).length;
-            await dynamicAttributesHelper.activateDynamicAttributesForClient(client._id, 'ModuleWithoutDAs');
-            var dasAfterCount = (await db.get(co.collections.dynamicattributes.name).find({clientId:client._id})).length;
+            var dasBeforeCount = (await Db.getDynamicObjects("client0", co.collections.dynamicattributes.name)).length;
+            await dynamicAttributesHelper.activateDynamicAttributesForClient("client0", 'ModuleWithoutDAs');
+            var dasAfterCount = (await Db.getDynamicObjects("client0", co.collections.dynamicattributes.name)).length;
             assert.strictEqual(dasAfterCount, dasBeforeCount);
         });
 
-        it('Erstellt bzw. aktiviert alle vorgegebenen DAs des Moduls für den gegebenen Mandanten', async function() {
-            var client = await th.defaults.getClient();
-            await dynamicAttributesHelper.activateDynamicAttributesForClient(client._id, 'DAtest');
-            var das = await db.get(co.collections.dynamicattributes.name).find({ clientId:client._id, modelName:co.collections.users.name });
-            assert.ok(das.find((a) => a.identifier === 'DAtest_user_1' && !a.isInactive));
-            assert.ok(das.find((a) => a.identifier === 'DAtest_user_2' && !a.isInactive));
+        it('Erstellt bzw. aktiviert alle vorgegebenen DAs des Moduls für den gegebenen Mandanten', async() => {
+            await dynamicAttributesHelper.activateDynamicAttributesForClient("client0", 'DAtest');
+            var das = await Db.getDynamicObjects("client0", co.collections.dynamicattributes.name, { modelname:co.collections.users.name });
+            assert.ok(das.find((a) => a.identifier === 'DAtest_user_1' && !a.isinactive));
+            assert.ok(das.find((a) => a.identifier === 'DAtest_user_2' && !a.isinactive));
         });
 
-        it('Erstellt bzw. aktiviert alle vorgegebenen DA-Optionen bei Picklisten des Moduls für den gegebenen Mandanten', async function() {
-            var client = await th.defaults.getClient();
-            await dynamicAttributesHelper.activateDynamicAttributesForClient(client._id, 'DAtest');
-            var daos = await db.get(co.collections.dynamicattributeoptions.name).find({ clientId:client._id });
+        it('Erstellt bzw. aktiviert alle vorgegebenen DA-Optionen bei Picklisten des Moduls für den gegebenen Mandanten', async() => {
+            await dynamicAttributesHelper.activateDynamicAttributesForClient("client0", 'DAtest');
+            var daos = await Db.getDynamicObjects("client0", co.collections.dynamicattributeoptions.name);
             assert.ok(daos.find((o) => o.value === 'DAtest_user_2_1'));
             assert.ok(daos.find((o) => o.value === 'DAtest_user_2_2'));
         });
         
     });
 
-    describe('createDynamicAttribute', function() {
+    describe('createDynamicAttribute', () => {
 
-        it('Generiert eine neue _id, auch wenn diese vorgegeben wurde', async function() {
-            var client = await th.defaults.getClient();
-            var id = monk.id();
-            var attributeToCreate = { _id: id, clientId: client._id, name_en: 'Furzel' };
+        it('Wenn ein Attribut mit demselben identifier für den Mandanten existiert, wird dieses einfach aktiviert', async() => {
+            var existingAttribute = await Db.insertDynamicObject("client0", co.collections.dynamicattributes.name, { name: "client0_testda0", label: 'Hampel', identifier: 'Hampel', isinactive:true });
+            var attributeToCreate = { clientId: "client0", name_en: 'Hampel', identifier: 'Hampel' };
             var createdAttribute = await dynamicAttributesHelper.createDynamicAttribute(attributeToCreate);
-            assert.ok(!createdAttribute._id.equals(id));
+            assert.ok(createdAttribute.name === existingAttribute.name);
+            assert.ok(!createdAttribute.isinactive);
         });
 
-        it('Wenn ein Attribut mit demselben identifier für den Mandanten existiert, wird dieses einfach aktiviert', async function() {
-            var client = await th.defaults.getClient();
-            var existingAttribute = await db.get(co.collections.dynamicattributes.name).insert({ clientId: client._id, name_en: 'Hampel', identifier: 'Hampel', isInactive:true });
-            var attributeToCreate = { clientId: client._id, name_en: 'Hampel', identifier: 'Hampel' };
+        it('Wenn identifier angegeben wurde und kein Attribut damit schon existiert, wird eines erzeugt', async() => {
+            var attributeToCreate = { clientId: "client0", name_en: 'Hampel', identifier: 'Hampel' };
             var createdAttribute = await dynamicAttributesHelper.createDynamicAttribute(attributeToCreate);
-            assert.ok(createdAttribute._id.equals(existingAttribute._id));
-            assert.ok(!createdAttribute.isInactive);
+            assert.ok(createdAttribute.name);
+            assert.ok(!createdAttribute.isinactive);
         });
 
-        it('Wenn identifier angegeben wurde und kein Attribut damit schon existiert, wird eines erzeugt', async function() {
-            var client = await th.defaults.getClient();
-            var attributeToCreate = { clientId: client._id, name_en: 'Hampel', identifier: 'Hampel' };
+        it('Wenn kein identifier angegeben wurde, wird das Attribut einfach erzeugt.', async() => {
+            var existingAttribute = await Db.insertDynamicObject("client0", co.collections.dynamicattributes.name, { name: "client0_testda0", label: 'Hampel', identifier: 'Hampel', isinactive:true });
+            var attributeToCreate = { clientId: "client0", name_en: 'Hampel' };
             var createdAttribute = await dynamicAttributesHelper.createDynamicAttribute(attributeToCreate);
-            assert.ok(createdAttribute._id);
-            assert.ok(!createdAttribute.isInactive);
-        });
-
-        it('Wenn kein identifier angegeben wurde, wird das Attribut einfach erzeugt.', async function() {
-            var client = await th.defaults.getClient();
-            var existingAttribute = await db.get(co.collections.dynamicattributes.name).insert({ clientId: client._id, name_en: 'Hampel', identifier: 'Hampel', isInactive:true });
-            var attributeToCreate = { clientId: client._id, name_en: 'Hampel' };
-            var createdAttribute = await dynamicAttributesHelper.createDynamicAttribute(attributeToCreate);
-            assert.ok(!createdAttribute._id.equals(existingAttribute._id));
-            assert.ok(!createdAttribute.isInactive);
+            assert.notEqual(createdAttribute.name, existingAttribute.name);
+            assert.ok(!createdAttribute.isinactive);
         });
         
     });
 
-    describe('deactivateDynamicAttribute', function() {
+    describe('deactivateDynamicAttributesForClient', () => {
 
-        it('Setzt bei allen DAs, die der Abfrage entsprechen, isInactive auf true', async function() {
-            await dynamicAttributesHelper.deactivateDynamicAttribute({name_en:'textattribute'});
-            var das = await db.get(co.collections.dynamicattributes.name).find({ name_en:'textattribute' });
-            assert.ok(das.length > 0);
-            das.forEach((a) => {
-                assert.ok(a.isInactive);
-            });
-        });
-        
-    });
-
-    describe('deactivateDynamicAttributesForClient', function() {
-
-        it('Wenn das Modul keine DA-Vorgaben hat, passiert nichts weiter', async function() {
+        it('Wenn das Modul keine DA-Vorgaben hat, passiert nichts weiter', async() => {
             moduleConfig.modules.ModuleWithoutDAs = {};
-            var client = await th.defaults.getClient();
-            var dasBeforeCount = (await db.get(co.collections.dynamicattributes.name).find({isInactive:true})).length;
-            await dynamicAttributesHelper.deactivateDynamicAttributesForClient(client._id, 'ModuleWithoutDAs');
-            var dasAfterCount = (await db.get(co.collections.dynamicattributes.name).find({isInactive:true})).length;
+            var dasBeforeCount = (await Db.getDynamicObjects("client0", co.collections.dynamicattributes.name, {isinactive:true})).length;
+            await dynamicAttributesHelper.deactivateDynamicAttributesForClient("client0", 'ModuleWithoutDAs');
+            var dasAfterCount = (await Db.getDynamicObjects("client0", co.collections.dynamicattributes.name, {isinactive:true})).length;
             assert.strictEqual(dasAfterCount, dasBeforeCount);
         });
 
-        it('Deaktiviert alle vorgegebenen DAs des Moduls für den gegebenen Mandanten', async function() {
+        it('Deaktiviert alle vorgegebenen DAs des Moduls für den gegebenen Mandanten', async() => {
             // Erst mal aktivieren
-            var client = await th.defaults.getClient();
-            await dynamicAttributesHelper.activateDynamicAttributesForClient(client._id, 'DAtest');
+            await dynamicAttributesHelper.activateDynamicAttributesForClient("client0", 'DAtest');
             // Nun wieder deaktivieren
-            await dynamicAttributesHelper.deactivateDynamicAttributesForClient(client._id, 'DAtest');
-            var das = await db.get(co.collections.dynamicattributes.name).find({ clientId:client._id, modelName:co.collections.users.name });
-            assert.ok(das.find((a) => a.identifier === 'DAtest_user_1' && a.isInactive));
-            assert.ok(das.find((a) => a.identifier === 'DAtest_user_2' && a.isInactive));
+            await dynamicAttributesHelper.deactivateDynamicAttributesForClient("client0", 'DAtest');
+            var das = await Db.getDynamicObjects("client0", co.collections.dynamicattributes.name, {modelname:co.collections.users.name});
+            assert.ok(das.find((a) => a.identifier === 'DAtest_user_1' && a.isinactive));
+            assert.ok(das.find((a) => a.identifier === 'DAtest_user_2' && a.isinactive));
         });
         
     });
 
-    describe('deleteAllDynamicAttributeValuesForEntity', function() {
+    describe('deleteAllDynamicAttributeValuesForEntity', () => {
 
-        it('Löscht alle DA-Werte für eine gegebene Entität', async function() {
-            var user = await th.defaults.getUser();
-            var valuesBefore = await db.get(co.collections.dynamicattributevalues.name).find({entityId:user._id});
+        it('Löscht alle DA-Werte für eine gegebene Entität', async() => {
+            var valuesBefore = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, {entityname:"client0_usergroup0_user0"});
             assert.ok(valuesBefore.length > 0);
-            await dynamicAttributesHelper.deleteAllDynamicAttributeValuesForEntity(user._id);
-            var valuesAfter = await db.get(co.collections.dynamicattributevalues.name).find({entityId:user._id});
+            await dynamicAttributesHelper.deleteAllDynamicAttributeValuesForEntity("client0", "client0_usergroup0_user0");
+            var valuesAfter = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, {entityname:"client0_usergroup0_user0"});
             assert.strictEqual(valuesAfter.length, 0);
         });
         

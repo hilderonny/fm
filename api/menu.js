@@ -3,8 +3,10 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var moduleConfig = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
+var mc = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
 var co = require('../utils/constants');
+var configHelper = require('../utils/configHelper');
+var Db = require("../utils/db").Db;
 
 /**
  * Extracts the menu structure from the module configuration for further processing
@@ -26,10 +28,8 @@ var co = require('../utils/constants');
  * }
  */
 var extractMenu = (moduleNames) => {
+    var moduleConfig = JSON.parse(JSON.stringify(mc));
     var fullMenuObject = {};
-    if (!moduleNames) { // When no module filters are given
-        moduleNames = Object.keys(moduleConfig.modules);
-    }
     moduleNames.forEach((moduleName) => {
         var appModule = moduleConfig.modules[moduleName];
         if (!appModule || !appModule.menu) return;
@@ -50,51 +50,32 @@ var extractMenu = (moduleNames) => {
  * When the logged in user is an admin, 
  * then the entire menu structure is returned.
  */
-router.get('/', auth(), (req, res) => {
-    var clientSettings, clientmodules, clientMenu, result = { };
-    req.db.get(co.collections.clientsettings.name).findOne({clientId:req.user.clientId}).then((cs) => {
-        clientSettings = cs;
-        result.logourl = clientSettings && clientSettings.logourl ? clientSettings.logourl : 'css/logo_avorium_komplett.svg';
-        // Check module availability for the client of the user 
-        return req.db.get(co.collections.clientmodules.name).find({ clientId: req.user.clientId });
-    }).then((cm) => {
-        clientmodules = cm;
-        // Distinguish between portal and client users
-        var clientModuleNames = req.user.clientId === null ? Object.keys(moduleConfig.modules) : clientmodules.map((clientModule) => clientModule.module);
-        // Portal users have all modules available, all others must be filtered
-        clientMenu = extractMenu(req.user.clientId ? clientModuleNames : false);
-        if (req.user.isAdmin) { // Admins will get all menu items available to their clients
-            result.menu = clientMenu;
-            res.send(result);
-            return Promise.reject();
-        }
-        // Check permissions of current user
-        return req.db.get(co.collections.permissions.name).find({ userGroupId: req.user.userGroupId });
-    }).then((permissions) => {
-        var userMenu = JSON.parse(JSON.stringify(clientMenu)); // Clone config, otherwise it would be overwritten
-        for (var i = userMenu.length - 1; i >= 0; i--) {
-            var mainMenu = userMenu[i];
+router.get('/', auth(), async(req, res) => {
+    var clientname = req.user.clientname;
+    var clientSettings = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: clientname });
+    var allModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
+    var modulenames = clientname === Db.PortalDatabaseName
+        ? allModuleKeys.filter(mk => mc.modules[mk].forportal) // Portal has only some modules allowed
+        : (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}' AND modulename IN (${allModuleKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(",")});`)).rows.map((r) => r.modulename);
+    var fullmenu = extractMenu(modulenames); // Clone it for overwriting
+    if (!req.user.isadmin) {
+        var permissionKeys = await configHelper.getAvailablePermissionKeysForClient(clientname);
+        var permissions = permissionKeys.length > 0 ? (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows : [];
+        for (var i = fullmenu.length - 1; i >= 0; i--) {
+            var mainMenu = fullmenu[i];
             for (var j = mainMenu.items.length - 1; j >= 0; j--) {
-                var item = mainMenu.items[j];
-                var hasPermission = false;
-                for (var k = 0; k < permissions.length; k++) {
-                    var permission = permissions[k];
-                    if ((permission.canRead || permission.canWrite) && permission.key === item.permission) {
-                        hasPermission = true;
-                        break;
-                    }
-                }
-                if (!hasPermission) {
-                    mainMenu.items.splice(j, 1);
-                }
+                if (!permissions.find((p) => p.key === mainMenu.items[j].permission)) mainMenu.items.splice(j, 1);
             }
             if (mainMenu.items.length < 1) {
-                userMenu.splice(i, 1);
+                fullmenu.splice(i, 1);
             }
         }
-        result.menu = userMenu;
-        res.send(result);
-    }, () => {});
+    }
+    var result = {
+        logourl: clientSettings && clientSettings.logourl ? clientSettings.logourl : 'css/logo_avorium_komplett.svg',
+        menu: fullmenu,
+    }
+    res.send(result);
 });
 
 module.exports = router;

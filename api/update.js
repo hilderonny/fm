@@ -6,6 +6,7 @@ var router = require('express').Router();
 var fs = require('fs');
 var appPackager = require('../utils/app-packager');
 var co = require('../utils/constants');
+var Db = require("../utils/db").Db;
 
 /**
  * API for checking for available updates for a specific portal. Returns the version number of the
@@ -13,17 +14,12 @@ var co = require('../utils/constants');
  * Parameters:
  * - licenseKey: License key identifying the portal
  */
-router.get('/version', (req, res) => {
-    if (!req.query.licenseKey) {
-        return res.sendStatus(400);
-    }
-    req.db.get('portals').findOne({ licenseKey: req.query.licenseKey, isActive: true}).then((portal) => {
-        if (!portal) {
-            return res.sendStatus(403); // No active portal with the given licenseKey found
-        }
-        var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-        return res.send(packageJson.version);
-    });
+router.get('/version', async(req, res) => {
+    if (!req.query.licenseKey) return res.sendStatus(400);
+    var portal = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.portals.name, { licensekey: req.query.licenseKey, isactive: true });
+    if (!portal) return res.sendStatus(403); // No active portal with the given licenseKey found
+    var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
+    return res.send(packageJson.version);
 });
 
 /**
@@ -32,26 +28,17 @@ router.get('/version', (req, res) => {
  * Parameters:
  * - licenseKey: License key of the portal to get the update package for
  */
-router.get('/download', (req, res) => {
-    if (!req.query.licenseKey) {
-        return res.sendStatus(400);
-    }
-    req.db.get('portals').findOne({ licenseKey: req.query.licenseKey, isActive: true}).then((portal) => {
-        if (!portal) {
-            return res.sendStatus(403); // No active portal with the given licenseKey found
-        }
-        req.db.get('portalmodules').find({ portalId: portal._id}).then((portalModules) => {
-            var moduleNames = portalModules.map((portalModule) => portalModule.module);
-            if (moduleNames.length < 1) {
-                return res.sendStatus(404); // At least one module must be configured
-            }
-            var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-            var version = packageJson.version;
-            appPackager.pack(moduleNames, version).then(function(buffer) {
-                res.set({'Content-disposition': `attachment; filename=${portal.name} ${version}.zip`}).send(buffer);
-            });
-        });
-    });
+router.get('/download', async(req, res) => {
+    if (!req.query.licenseKey) return res.sendStatus(400);
+    var portal = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.portals.name, { licensekey: req.query.licenseKey, isactive: true });
+    if (!portal) return res.sendStatus(403); // No active portal with the given licenseKey found
+    var portalModules = await Db.getDynamicObjects(Db.PortalDatabaseName, co.collections.portalmodules.name, { portalname: portal.name });
+    var moduleNames = portalModules.map((portalModule) => portalModule.modulename);
+    if (moduleNames.length < 1) return res.sendStatus(404); // At least one module must be configured
+    var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
+    var version = packageJson.version;
+    var buffer = await appPackager.pack(moduleNames, version);
+    res.set({'Content-disposition': `attachment; filename=${portal.name} ${version}.zip`}).send(buffer);
 });
 
 /**
@@ -59,23 +46,16 @@ router.get('/download', (req, res) => {
  * Merkt sich den Zeitpunkt der letzten Meldung.
  * Künftig wird hier auch die Lizenz geprüft und das Portal ggf. am Start gehindert.
  */
-router.post('/heartbeat', (req, res) => {
-    if (!req.body.licenseKey || !req.body.version) {
-        return res.sendStatus(400);
-    }
-    req.db.get(co.collections.portals.name).findOne({ licenseKey: req.body.licenseKey }).then((portal) => {
-        if (!portal) {
-            return res.sendStatus(403); // No active portal with the given licenseKey found
-        }
-        var updateSet = {
-            version: req.body.version,
-            lastNotification: Date.now()
-        };
-        req.db.update(co.collections.portals.name, portal._id, { $set: updateSet }).then(() => {
-            res.sendStatus(200);
-        });
-    });
-
+router.post('/heartbeat', async(req, res) => {
+    if (!req.body.licenseKey || !req.body.version) return res.sendStatus(400);
+    var portal = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.portals.name, { licensekey: req.body.licenseKey });
+    if (!portal) return res.sendStatus(403); // No active portal with the given licenseKey found
+    var updateSet = {
+        version: req.body.version,
+        lastnotification: Date.now()
+    };
+    await Db.updateDynamicObject(Db.PortalDatabaseName, co.collections.portals.name, portal.name, updateSet);
+    res.sendStatus(200);
 });
 
 module.exports = router;

@@ -1,4 +1,5 @@
 var localConfig = require('../config/localconfig.json');
+var Db = require("../utils/db").Db;
 
 /**
  * Middleware for routers which checks the user credentials and access permissions.
@@ -12,23 +13,22 @@ var localConfig = require('../config/localconfig.json');
  */
 module.exports = function(permissionKey, readWrite, moduleName) {
     // http://stackoverflow.com/a/12737295
-    return (req, res, next) => {
+    return async(req, res, next) => {
         var user = req.user;
         // Check whether credentials are given
-        if (!user || !user._id || !require('./validateId').validateId(user._id)) {
+        if (!user || !user.name) {
             return res.sendStatus(403);
         }
         // Check whether token time is older than server start
         if(localConfig.startTime > user.tokenTime) {
             return res.sendStatus(205); // Force the client to reload the entire page
         }
-        module.exports.canAccess(user._id, permissionKey, readWrite, moduleName, req.db).then(function(userInDatabase) {
-            if (!userInDatabase) { // User not found
-                return res.sendStatus(403);
-            }
-            req.user = userInDatabase;
-            next();
-        });
+        var userInDatabase = await module.exports.canAccess(user.name, permissionKey, readWrite, moduleName);
+        if (!userInDatabase) { // User not found
+            return res.sendStatus(403);
+        }
+        req.user = userInDatabase;
+        next();
     };
 };
 
@@ -38,59 +38,35 @@ module.exports = function(permissionKey, readWrite, moduleName) {
  * Das Promise liefert im resolve als Parameter den Benutzer aus der Datenbank und true oder false.
  * Direkter Aufruf: require('auth').canAccess(...);
  */
-module.exports.canAccess = function(userId, permissionKey, readWrite, moduleName, db) {
-    return new Promise(function(resolve, reject) {
-        // Check user against database
-        db.get('users').findOne(userId).then((userInDatabase) => {
-            if (!userInDatabase) { // User not found
-                return resolve(false);
-            }
-            // Check whether module is available for the client of the user, ignore portal users
-            if (userInDatabase.clientId && moduleName) {
-                db.get('clientmodules').findOne({ clientId: userInDatabase.clientId, module: moduleName }).then(function(clientmodule) {
-                    // Ignore check for portal users
-                    if (userInDatabase.clientId !== null && !clientmodule) { // Client has no access to the module
-                        return resolve(false);
-                    }
-                    return checkUser(userInDatabase, permissionKey, readWrite, db);
-                }).then(function(userHasAccess) {
-                    if (!userHasAccess) {
-                        return resolve(false);
-                    }
-                    return resolve(userInDatabase);
-                });
-            } else {
-                checkUser(userInDatabase, permissionKey, readWrite, db).then(function(userHasAccess) {
-                    if (!userHasAccess) {
-                        return resolve(false);
-                    }
-                    return resolve(userInDatabase);
-                });
-            }
-        });
-    });
+module.exports.canAccess = async(username, permissionKey, readWrite, moduleName) => {
+    // Check user against database
+    var userresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${Db.replaceQuotes(username)}';`);
+    var userInAllUsers = userresult.rowCount > 0 ? userresult.rows[0] : undefined;
+    if (!userInAllUsers) return false;
+    var userInDatabase = await Db.getDynamicObject(userInAllUsers.clientname ? userInAllUsers.clientname : Db.PortalDatabaseName, "users", userInAllUsers.name);
+    userInDatabase.clientname = userInAllUsers.clientname; // Relevant for APIs
+    // Check whether module is available for the client of the user, ignore portal users
+    if (userInAllUsers.clientname && userInAllUsers.clientname !== Db.PortalDatabaseName && moduleName) {
+        var clientmoduleresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${Db.replaceQuotes(userInAllUsers.clientname)}' AND modulename='${Db.replaceQuotes(moduleName)}';`);
+        if (clientmoduleresult.rowCount < 1) return false;
+        var userHasAccess = await checkUser(userInAllUsers.clientname, userInDatabase, permissionKey, readWrite);
+        if (!userHasAccess) return false;
+        return userInDatabase;
+    } else {
+        var userHasAccess = await checkUser(userInAllUsers.clientname, userInDatabase, permissionKey, readWrite);
+        if (!userHasAccess) return false;
+        return userInDatabase;
+    }
 };
 
-function checkUser(userInDatabase, permissionKey, readWrite, db) {
-    return new Promise(function(resolve, reject) {
-        // Check permission when not administrator
-        if (!userInDatabase.isAdmin && permissionKey && readWrite) { // in menu API no key and no readwrite is given
-            // Extract the permission for the requested permission key
-            var permissionToFind = { userGroupId: userInDatabase.userGroupId, key: permissionKey };
-            if (readWrite.indexOf('r') >= 0) {
-                permissionToFind.canRead = true;
-            }
-            if (readWrite.indexOf('w') >= 0) {
-                permissionToFind.canWrite = true;
-            }
-            db.get('permissions').findOne(permissionToFind).then((permission) => {
-                if (!permission) { // User has no permission
-                    resolve(false);
-                }
-                resolve(true);
-            });
-        } else {
-            resolve(true);
-        }
-    });
+async function checkUser(clientname, userInDatabase, permissionKey, readWrite) {
+    // Check permission when not administrator
+    if (!userInDatabase.isadmin && permissionKey && readWrite) { // in menu API no key and no readwrite is given
+        // Extract the permission for the requested permission key
+        var writecondition = readWrite.indexOf('w') >= 0 ? " AND canwrite=true" : "";
+        var permissionresult = await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname='${Db.replaceQuotes(userInDatabase.usergroupname)}' AND key='${Db.replaceQuotes(permissionKey)}'${writecondition};`);
+        return permissionresult.rowCount > 0;
+    } else {
+        return true;
+    }
 };

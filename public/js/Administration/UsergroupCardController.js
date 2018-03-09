@@ -90,29 +90,11 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
     };
 
     $scope.savePermission = function(permissionToSave, permissionToUpdate) {
-        if (permissionToSave._id) {
-            if (permissionToSave.canRead || permissionToSave.canWrite) {
-                $http.put('/api/permissions/' + permissionToSave._id, permissionToSave).then(function(response) {
-                    permissionToUpdate.canRead = response.data.canRead;
-                    permissionToUpdate.canWrite = response.data.canWrite;
-                    $rootScope.isLoading= false;
-                });
-            } else {
-                $http.delete('/api/permissions/' + permissionToSave._id).then(function() {
-                    delete permissionToUpdate._id;
-                    permissionToUpdate.canRead = false;
-                    permissionToUpdate.canWrite = false;
-                    $rootScope.isLoading= false;
-                });
-            }
-        } else {
-            $http.post('/api/permissions', permissionToSave).then(function(response) {
-                permissionToUpdate._id = response.data._id;
-                permissionToUpdate.canRead = response.data.canRead;
-                permissionToUpdate.canWrite = response.data.canWrite;
-                $rootScope.isLoading= false;
-            });
-        }
+        $http.post('/api/permissions', permissionToSave).then(function(response) {
+            permissionToUpdate.canRead = response.data.canRead;
+            permissionToUpdate.canWrite = response.data.canWrite;
+            $rootScope.isLoading= false;
+        });
     };
 
     $scope.switchRead = function(permission) { 
@@ -152,7 +134,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
                 $scope.isNewUserGroup = false;
                 $scope.userGroupName = $scope.userGroup.name; // Prevent updating the label when changing the name input value
                 $scope.relationsEntity = { type:'usergroups', id:$scope.userGroup._id };
-                return $http.get('/api/users/?userGroupId=' + $scope.params.userGroupId + '#ignore403');
+                return $http.get('/api/users/forUserGroup/' + $scope.params.userGroupId + '?ignore403');
             }).then(function(usersResponse) {
                 $scope.userGroup.users = usersResponse.data;
                 return $scope.getPermissions();

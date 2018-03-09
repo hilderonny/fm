@@ -1,62 +1,66 @@
 /**
  * CRUD API for fm object management
- * 
- * fmObject {
- *  _id
- *  name
- *  type
- *  pos
- *  size
- *  rotation
- *  path - https://docs.mongodb.com/manual/tutorial/model-tree-structures-with-materialized-paths/
- *  parentId
- *  clientId
- * }
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
+var Db = require("../utils/db").Db;
+var uuidv4 = require("uuid").v4;
+
+function mapFields(fmobject, clientname) {
+    var areaTypeCategories = {
+        "Wohnen und Aufenthalt" : "FMOBJECTS_CATEGORY_NUF",
+        "Büroarbeit" : "FMOBJECTS_CATEGORY_NUF",
+        "Produktion, Hand- und Maschinenarbeit, Experimente" : "FMOBJECTS_CATEGORY_NUF",
+        "Lagern, Verteilen und Verkaufen" : "FMOBJECTS_CATEGORY_NUF",
+        "Bildung, Unterricht und Kultur" : "FMOBJECTS_CATEGORY_NUF",
+        "Heilen und Pflegen" : "FMOBJECTS_CATEGORY_NUF",
+        "Sonstige Nutzung" : "FMOBJECTS_CATEGORY_NUF",
+        "Technische Anlagen" : "FMOBJECTS_CATEGORY_TF",
+        "Verkehrserschließung und -sicherung" : "FMOBJECTS_CATEGORY_VF",
+    }
+    var result = {
+        _id: fmobject.name,
+        name: fmobject.label,
+        parentId: fmobject.parentfmobjectname,
+        clientId: clientname,
+        type: fmobject.fmobjecttypename,
+        areatype: fmobject.areatypename,
+        category: areaTypeCategories[fmobject.areatypename],
+        f: fmobject.f,
+        bgf: fmobject.bgf,
+        usagestate: fmobject.areausagestatename,
+        previewImageId: fmobject.previewimagedocumentname,
+        nrf: fmobject.nrf,
+        nuf: fmobject.nuf,
+        tf: fmobject.tf,
+        vf: fmobject.vf,
+    };
+    if (fmobject.path) result.path = fmobject.path;
+    return result;
+}
 
 // Get all FM objects and their recursive children of the current client as hierarchy. Only _id, name and type are returned
-router.get('/', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), (req, res) => {
-    var clientId = req.user.clientId; // clientId === null means that the user is a portal user
-    var rootFmObjects = [];
-    var allFmObjects = {};
-    req.db.get('fmobjects').find({ clientId: clientId }, { sort : { path : 1, name : 1 } }).then((fmobjects) => {
-        for (var i = 0; i < fmobjects.length; i++) {
-            var fmObject = fmobjects[i];
-            allFmObjects[fmObject._id] = {
-                _id: fmObject._id,
-                name: fmObject.name,
-                type: fmObject.type,
-                category: fmObject.category,
-                areatype: fmObject.areatype,
-                f: fmObject.f,
-                bgf: fmObject.bgf,
-                usagestate: fmObject.usagestate,
-                nrf: fmObject.nrf,
-                nuf: fmObject.nuf,
-                tf: fmObject.tf,
-                vf: fmObject.vf,
-                children: []
-            };
-        }
-        for (var i = 0; i < fmobjects.length; i++) {
-            var fmObject = fmobjects[i];
-            if (fmObject.parentId && allFmObjects[fmObject.parentId]) {
-                allFmObjects[fmObject.parentId].children.push(allFmObjects[fmObject._id]);
-            } else {
-                rootFmObjects.push(allFmObjects[fmObject._id]);
-            }
-        }
-        return res.send(rootFmObjects);
+// When parameter ?forareas=true is set, also area infos are returned
+router.get('/', auth(co.permissions.BIM_FMOBJECT, 'r', co.modules.fmobjects), async(req, res) => {
+    var additionalfields = req.query.forareas ? ", f, bgf, nrf, nuf, tf, vf" : "";
+    var allfmobjects = (await Db.query(req.user.clientname, `SELECT name AS _id, label AS name, fmobjecttypename AS type, parentfmobjectname AS "parentId", ARRAY[]::text[] as children${additionalfields} FROM fmobjects ORDER BY label;`)).rows;
+    var fmmap = {};
+    allfmobjects.forEach((fmo) => {
+        fmmap[fmo._id] = fmo;
     });
-    // https://docs.mongodb.com/manual/tutorial/model-tree-structures-with-materialized-paths/
+    var toplevelobjects = [];
+    allfmobjects.forEach((fmo) => {
+        if (!fmo.parentId) {
+            toplevelobjects.push(fmo);
+            return;
+        }
+        fmmap[fmo.parentId].children.push(fmo);
+    });
+    res.send(toplevelobjects);
 });
 
 /**
@@ -67,212 +71,128 @@ router.get('/', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), (req, res) =>
  * @example
  * $http.get('/api/fmobjects/forIds?ids=ID1,ID2,ID3')...
  */
-router.get('/forIds', auth(false, false, 'fmobjects'), (req, res) => {
+router.get('/forIds', auth(false, false, co.modules.fmobjects), async(req, res) => {
+    var clientname = req.user.clientname;
     // Zuerst Berechtigung prüfen
-    auth.canAccess(req.user._id, 'PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects', req.db).then(function(accessAllowed) {
-        if (!accessAllowed) {
-            return res.send([]);
-        }
-        if (!req.query.ids) {
-            return res.send([]);
-        }
-        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
-        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
-        req.db.get('fmobjects').aggregate([
-            { $project: { path: false } }, // Property path wird im nächsten Schritt überschrieben
-            { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
-                from: 'fmobjects',
-                startWith: '$parentId',
-                connectFromField: 'parentId',
-                connectToField: '_id',
-                as: 'path',
-                depthField: 'depth'
-            } },
-            { $project: { 
-                "name": 1,                    
-                "parentId": 1,
-                "clientId": 1,
-                "type": 1,
-                "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
-            },
-            { $match: { // Find only relevant elements
-                _id: { $in: ids },
-                clientId: clientId
-            } },
-            { $unwind: "$path" },
-            { $sort: { "path.depth": -1 } },
-            {
-                $group:{
-                    _id: "$_id",
-                    path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
-                    fmobj:{"$first": "$$ROOT"}
-                }
-            },
-            {
-                $project: {
-                    "name": "$fmobj.name",                    
-                    "parentId": "$fmobj.parentId",
-                    "clientId": "$fmobj.clientId",
-                    "type":"$fmobj.type",
-                    "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
-                }
-            },
-            { $sort: { "_id": 1 } }
-        ]).then(function(fmobjects) {
-            res.send(fmobjects);
-        });
-    });
+    var accessAllowed = await auth.canAccess(req.user.name, co.permissions.BIM_FMOBJECT, 'r', co.modules.fmobjects);
+    if (!accessAllowed) {
+        return res.send([]);
+    }
+    if (!req.query.ids) {
+        return res.send([]);
+    }
+    var namestofind = req.query.ids.split(",").map((n) => `'${Db.replaceQuotes(n)}'`).join(",");
+    var fmobjectquery = `
+    DROP TABLE IF EXISTS fmobjectpathtype;
+    CREATE TEMP TABLE fmobjectpathtype (name text);
+    WITH RECURSIVE get_path(name, parentfmobjectname, depth) AS (
+        (SELECT name, parentfmobjectname, 0 FROM fmobjects)
+        UNION
+        (SELECT get_path.name, fmobjects.parentfmobjectname, get_path.depth + 1 FROM fmobjects JOIN get_path on get_path.parentfmobjectname = fmobjects.name)
+    )
+    SELECT fmobjects.name AS _id, fmobjects.label AS name, fmobjects.fmobjecttypename AS "type", fmobjects.parentfmobjectname AS "parentId", '${Db.replaceQuotes(clientname)}' AS "clientId", COALESCE(pd.path, '[]') as path FROM fmobjects
+    LEFT JOIN (
+        SELECT name, COALESCE(json_agg(row_to_json(row(label)::fmobjectpathtype)) FILTER (WHERE parentfmobjectname IS NOT NULL), '[]') AS path
+        FROM (SELECT get_path.name, get_path.parentfmobjectname, fmobjects.label FROM get_path JOIN fmobjects ON get_path.parentfmobjectname = fmobjects.name ORDER BY depth DESC) a
+        GROUP BY name
+    ) pd ON pd.name = fmobjects.name
+    WHERE fmobjects.name IN (${namestofind})
+    `;
+    var result = (await Db.query(clientname, fmobjectquery))[2]; // 0 = DROP, 1 = CREATE, 2 = SELECT
+    res.send(result.rowCount > 0 ? result.rows : []);
 });
 
 // Get a specific FM object without child information
-router.get('/:id', auth('PERMISSION_BIM_FMOBJECT', 'r', 'fmobjects'), validateId, validateSameClientId('fmobjects'), (req, res) => {
-    req.db.get('fmobjects').aggregate([
-        {$project: { path: false } }, // Property path wird im nächsten Schritt überschrieben
-        { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
-            from: 'fmobjects',
-            startWith: '$parentId',
-            connectFromField: 'parentId',
-            connectToField: '_id',
-            as: 'path',
-            depthField:'depth'
-        } },
-        { $project: { 
-            "name": 1,                    
-            "parentId": 1,
-            "clientId": 1,
-            "type": 1,
-            "category": 1,
-            "areatype": 1,
-            "f": 1,
-            "bgf": 1,
-            "usagestate": 1,
-            "nrf": 1,
-            "nuf": 1,
-            "tf": 1,
-            "vf": 1,
-        "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
-        },
-        { $match: { // Find only relevant elements
-            _id: monk.id(req.params.id)
-        } },
-        { $limit: 1 },
-        { $unwind: "$path" },
-        { $sort: { "path.depth": -1 } },
-        {
-            $group:{
-                _id: "$_id",
-                path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
-                fmobj:{"$first": "$$ROOT"}
-            }
-        },
-        {
-            $project: {
-                "name": "$fmobj.name",                    
-                "parentId": "$fmobj.parentId",
-                "clientId": "$fmobj.clientId",
-                "type": "$fmobj.type",
-                "category": "$fmobj.category",
-                "areatype": "$fmobj.areatype",
-                "f": "$fmobj.f",
-                "bgf": "$fmobj.bgf",
-                "usagestate": "$fmobj.usagestate",
-                "nrf": "$fmobj.nrf",
-                "nuf": "$fmobj.nuf",
-                "tf": "$fmobj.tf",
-                "vf": "$fmobj.vf",
-                "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
-            }
-        }
-    ]).then(function(fmobject){
-        return res.send(fmobject[0]);
-    });
+router.get('/:id', auth(co.permissions.BIM_FMOBJECT, 'r', co.modules.fmobjects), validateSameClientId(co.collections.fmobjects.name), async(req, res) => {
+    var clientname = req.user.clientname;
+    var fmobjectquery = `
+    DROP TABLE IF EXISTS fmobjectpathtype;
+    CREATE TEMP TABLE fmobjectpathtype (name text);
+    WITH RECURSIVE get_path(name, parentfmobjectname, depth) AS (
+        (SELECT name, parentfmobjectname, 0 FROM fmobjects)
+        UNION
+        (SELECT get_path.name, fmobjects.parentfmobjectname, get_path.depth + 1 FROM fmobjects JOIN get_path on get_path.parentfmobjectname = fmobjects.name)
+    )
+    SELECT fmobjects.*, COALESCE(pd.path, '[]') as path FROM fmobjects
+    LEFT JOIN (
+        SELECT name, COALESCE(json_agg(row_to_json(row(label)::fmobjectpathtype)) FILTER (WHERE parentfmobjectname IS NOT NULL), '[]') AS path
+        FROM (SELECT get_path.name, get_path.parentfmobjectname, fmobjects.label FROM get_path JOIN fmobjects ON get_path.parentfmobjectname = fmobjects.name ORDER BY depth DESC) a
+        GROUP BY name
+    ) pd ON pd.name = fmobjects.name
+    WHERE fmobjects.name = '${Db.replaceQuotes(req.params.id)}'
+    `;
+    var fmobject = (await Db.query(clientname, fmobjectquery))[2].rows[0]; // 0 = DROP, 1 = CREATE, 2 = SELECT
+    res.send(mapFields(fmobject, clientname));
 });
 
 // Create an FM object
-router.post('/', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), function(req, res) {
-    var fmObject = req.body;
-    if (!fmObject || Object.keys(fmObject).length < 1) {
+router.post('/', auth(co.permissions.BIM_FMOBJECT, 'w', co.modules.fmobjects), async(req, res) => {
+    var clientname = req.user.clientname;
+    var fmobject = req.body;
+    if (!fmobject || Object.keys(fmobject).length < 1) {
         return res.sendStatus(400);
     }
-    delete fmObject._id; // Ids are generated automatically
-    fmObject.clientId = req.user.clientId; // Assing the new FM object to the same client as the logged in user
-    if (fmObject.previewImageId) fmObject.previewImageId = monk.id(fmObject.previewImageId);
-    // Check the parentId for existence
-    var insertFmObject = function() {
-        req.db.insert(co.collections.fmobjects.name, fmObject).then((insertedFmObject) => {
-            return res.send(insertedFmObject);
-        });
-    };
-    if (fmObject.parentId) {
-        req.db.get(co.collections.fmobjects.name).findOne(fmObject.parentId).then(function(parentFmObject) {
-            if (!parentFmObject) {
-                res.sendStatus(400);
-            } else {
-                fmObject.parentId = monk.id(fmObject.parentId);
-                insertFmObject();
-            }
-        })
-    } else {
-        insertFmObject();
-    }
+    var fmobjecttoinsert = { name: uuidv4() };
+    if (fmobject.name) fmobjecttoinsert.label = fmobject.name;
+    if (fmobject.type) fmobjecttoinsert.fmobjecttypename = fmobject.name;
+    if (fmobject.areatype) fmobjecttoinsert.areatypename = fmobject.areatype;
+    if (fmobject.f) fmobjecttoinsert.f = fmobject.name;
+    if (fmobject.bgf) fmobjecttoinsert.bgf = fmobject.name;
+    if (fmobject.usagestate) fmobjecttoinsert.areausagestatename = fmobject.name;
+    if (fmobject.nrf) fmobjecttoinsert.nrf = fmobject.name;
+    if (fmobject.nuf) fmobjecttoinsert.nuf = fmobject.name;
+    if (fmobject.tf) fmobjecttoinsert.tf = fmobject.name;
+    if (fmobject.vf) fmobjecttoinsert.vf = fmobject.name;
+    if (fmobject.parentId && !(await Db.getDynamicObject(clientname, co.collections.fmobjects.name, fmobject.parentId))) return res.sendStatus(400);
+    fmobjecttoinsert.parentfmobjectname = fmobject.parentId ? fmobject.parentId : null;
+    if (fmobject.previewImageId && !(await Db.getDynamicObject(clientname, co.collections.documents.name, fmobject.previewImageId))) return res.sendStatus(400);
+    fmobjecttoinsert.previewimagedocumentname = fmobject.previewImageId ? fmobject.previewImageId : null;
+    await Db.insertDynamicObject(clientname, co.collections.fmobjects.name, fmobjecttoinsert);
+    res.send(mapFields(fmobjecttoinsert, clientname));
 });
 
 // Update an FM object
-router.put('/:id', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), validateId, validateSameClientId('fmobjects'), function(req, res) {
-    var fmObject = req.body;
-    if (!fmObject || Object.keys(fmObject).length < 1) {
-        return res.sendStatus(400);
-    }
-    delete fmObject._id; // When fmObject object also contains the _id field
-    delete fmObject.clientId; // Prevent assignment of the fmObject to another client
-    if (fmObject.previewImageId) fmObject.previewImageId = monk.id(fmObject.previewImageId);
-    // For the case that only the _id had to be updated, return an error and do not handle any further
-    if (Object.keys(fmObject).length < 1) {
-        return res.sendStatus(400);
-    }
-    // Check the parentId for existence
-    var updateFmObject = function() {
-        req.db.update(co.collections.fmobjects.name, req.params.id, { $set: fmObject }).then((updatedFmObject) => {
-            return res.send(updatedFmObject);
-        });
-    };
-    if (fmObject.parentId) {
-        fmObject.parentId = monk.id(fmObject.parentId);
-        req.db.get(co.collections.fmobjects.name).findOne(fmObject.parentId).then(function(parentFmObject) {
-            if (!parentFmObject) {
-                res.sendStatus(400);
-            } else {
-                updateFmObject();
-            }
-        })
-    } else {
-        updateFmObject();
-    }
+router.put('/:id', auth(co.permissions.BIM_FMOBJECT, 'w', co.modules.fmobjects), validateSameClientId(co.collections.fmobjects.name), async(req, res) => {
+    var clientname = req.user.clientname;
+    var fmobject = req.body;
+    if (!fmobject) return res.sendStatus(400);
+    var updateset = { };
+    if (fmobject.name) updateset.label = fmobject.name;
+    if (fmobject.type) updateset.fmobjecttypename = fmobject.type;
+    if (fmobject.areatype) updateset.areatypename = fmobject.areatype;
+    if (fmobject.f) updateset.f = fmobject.f;
+    if (fmobject.bgf) updateset.bgf = fmobject.bgf;
+    if (fmobject.usagestate) updateset.areausagestatename = fmobject.usagestate;
+    if (fmobject.nrf) updateset.nrf = fmobject.nrf;
+    if (fmobject.nuf) updateset.nuf = fmobject.nuf;
+    if (fmobject.tf) updateset.tf = fmobject.tf;
+    if (fmobject.vf) updateset.vf = fmobject.vf;
+    if (fmobject.parentId && !(await Db.getDynamicObject(clientname, co.collections.fmobjects.name, fmobject.parentId))) return res.sendStatus(400);
+    if (typeof(fmobject.parentId) !== "undefined") updateset.parentfmobjectname = fmobject.parentId ? fmobject.parentId : null;
+    if (fmobject.previewImageId && !(await Db.getDynamicObject(clientname, co.collections.documents.name, fmobject.previewImageId))) return res.sendStatus(400);
+    if (typeof(fmobject.previewImageId) !== "undefined") updateset.previewimagedocumentname = fmobject.previewImageId ? fmobject.previewImageId : null;
+    if (Object.keys(updateset).length < 1) return res.sendStatus(400);
+    var result = await Db.updateDynamicObject(clientname, co.collections.fmobjects.name, req.params.id, updateset);
+    if (result.rowCount < 1) return res.sendStatus(404);
+    return res.send(mapFields(updateset, req.user.clientname));
 });
 
 // Remove FM object and its children recursively
-var removeFmObject = (db, fmObject) => {
-    var promises = [];
-    // Delete children recursively
-    promises.push(db.get(co.collections.fmobjects.name).find({ parentId: fmObject._id }, '_id').then((subElements) => {
-        return Promise.all(subElements.map((subElement) => removeFmObject(db, subElement)));
-    }));
-    // Delete relations
-    promises.push(rh.deleteAllRelationsForEntity(co.collections.fmobjects.name, fmObject._id));
-    promises.push(dah.deleteAllDynamicAttributeValuesForEntity(fmObject._id));
+var removeFmObject = async(clientname, fmobjectname) => {
+    var subelements = await Db.getDynamicObjects(clientname, co.collections.fmobjects.name, { parentfmobjectname: fmobjectname });
+    for (var i = 0; i < subelements.length; i++) {
+        await removeFmObject(clientname, subelements[i].name);
+    }
     // Delete the FM object itself
-    promises.push(db.remove(co.collections.fmobjects.name, fmObject._id));
-    return Promise.all(promises);
+    await Db.deleteDynamicObject(clientname, co.collections.fmobjects.name, fmobjectname);
+    await rh.deleteAllRelationsForEntity(clientname, co.collections.fmobjects.name, fmobjectname);
+    await dah.deleteAllDynamicAttributeValuesForEntity(clientname, fmobjectname);
 };
 
 // Delete an FM object
-router.delete('/:id', auth('PERMISSION_BIM_FMOBJECT', 'w', 'fmobjects'), validateId, validateSameClientId('fmobjects'), function(req, res) {
-    req.db.get(co.collections.fmobjects.name).findOne(req.params.id).then((fmObject) => {
-        // Database element is available here in every case, because validateSameClientId already checked for existence
-        return removeFmObject(req.db, fmObject);
-    }).then(() => {
-        res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
-    });
+router.delete('/:id', auth(co.permissions.BIM_FMOBJECT, 'w', co.modules.fmobjects), validateSameClientId(co.collections.fmobjects.name), async(req, res) => {
+    await removeFmObject(req.user.clientname, req.params.id);
+    res.sendStatus(204);
 });
 
 module.exports = router;

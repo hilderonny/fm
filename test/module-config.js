@@ -126,6 +126,7 @@ describe('module-config.json', function() {
         var pathsToIgnore = [
             '.git/',
             '.gitignore',
+            '.nyc_output/',
             '.vscode/',
             'basetest.bat',
             'config/localconfig.json',
@@ -147,6 +148,7 @@ describe('module-config.json', function() {
             'test/',
             'test.bat',
             'uploads/',
+            'utils/README.md',
             'utils/webHelper.js'
         ];
         handleDirectoriesRecursively('', errors, referencedFiles, pathsToIgnore);

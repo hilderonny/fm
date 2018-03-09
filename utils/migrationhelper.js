@@ -2,28 +2,37 @@ var mongodb = require("../middlewares/db");
 var localconfig = require("../config/localconfig.json");
 var Db = require("../utils/db").Db;
 var constants  = require("./constants");
+var mc = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
+var path = require("path");
+var dh = require("./documentsHelper");
+var fs = require("fs");
 
-async function migrateforclients(collectionname, migratorfunc) {
+function getclientname(obj) {
+    return obj.clientId ? obj.clientId.toString() : Db.PortalDatabaseName;
+}
+
+async function migrateforclients(collectionname, migratorfunc, singleelementhandler) {
     console.log(`Migrating ${collectionname} ...`);
     var originalelements = await mongodb.get(collectionname).find();
     for (var i = 0; i < originalelements.length; i++) {
         var originalelement = originalelements[i];
-        var clientname = originalelement.clientId ? originalelement.clientId.toString() : "formerportal";
+        var clientname = getclientname(originalelement);
         var mappedelement = migratorfunc(originalelement);
         if (mappedelement) {
             try {
                 await Db.insertDynamicObject(clientname, collectionname, mappedelement);
             } catch(err) {
-                await Db.query(clientname, `DELETE FROM ${collectionname} WHERE name='${mappedelement.name}';`);
+                await Db.query(clientname, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(collectionname)} WHERE name='${Db.replaceQuotes(mappedelement.name)}';`);
                 await Db.insertDynamicObject(clientname, collectionname, mappedelement);
             }
         }
+        if (singleelementhandler) singleelementhandler(originalelement, mappedelement); // For documents
     }
 }
 
 async function migrateforportal(collectionname, migratorfunc) {
     console.log(`Migrating ${collectionname} ...`);
-    await Db.query(Db.PortalDatabaseName, `DELETE FROM ${collectionname};`);
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(collectionname)};`);
     var originalelements = await mongodb.get(collectionname).find();
     for (var i = 0; i < originalelements.length; i++) {
         var originalelement = originalelements[i];
@@ -61,13 +70,14 @@ async function migratebusinesspartners() {
 }
 
 async function migrateclientmodules() {
-    await migrateforportal(constants.collections.clientmodules.name, (orig) => {
-        return {
-            name: orig._id.toString(),
-            clientname: orig.clientId.toString(),
-            modulename: orig.module
-        };
-    });
+    console.log("Migrating clientmodules ...");
+    await Db.query(Db.PortalDatabaseName, "DELETE FROM clientmodules;");
+    var migrateclientmodules = await mongodb.get(constants.collections.clientmodules.name).find();
+    for (var i = 0; i < migrateclientmodules.length; i++) {
+        var clientmodule = migrateclientmodules[i];
+        if (!mc.modules[clientmodule.module].forclients) continue;
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('${Db.replaceQuotes(getclientname(clientmodule))}', '${Db.replaceQuotes(clientmodule.module)}');`);
+    }
 }
 
 async function migrateclients() {
@@ -76,11 +86,9 @@ async function migrateclients() {
     for (var i = 0; i < clients.length; i++) {
         var client = clients[i];
         console.log(`Preparing client "${client.name}" ...`);
+        await Db.deleteClient(client._id.toString());
         await Db.createClient(client._id.toString(), client.name);
     }
-    // Create separate client for former portal
-    console.log("Preparing former portal ...");
-    await Db.createClient("formerportal", "ehemals Portal");
 }
 
 async function migrateclientsettings() {
@@ -88,7 +96,7 @@ async function migrateclientsettings() {
         return {
             name: orig._id.toString(),
             logourl: orig.logourl,
-            clientname: orig.clientId.toString()
+            clientname: getclientname(orig)
         };
     });
 }
@@ -113,6 +121,13 @@ async function migratedocuments() {
             type: orig.type,
             isshared: !!orig.isShared
         };
+    }, (original, mapped) => {
+        var clientname = original.clientId ? original.clientId.toString() : Db.PortalDatabaseName;
+        var fromPath = path.join(__dirname, '..', localconfig.documentspath ? localconfig.documentspath : 'documents', mapped.name);
+        if (!fs.existsSync(fromPath)) return; // File does not exist
+        var toPath = dh.getDocumentPath(clientname, mapped.name);
+        dh.createPath(path.dirname(toPath));
+        fs.writeFileSync(toPath, fs.readFileSync(fromPath)); // copyFileSync erst ab Node 8.5.0
     });
 }
 
@@ -121,7 +136,7 @@ async function migratedynamicattributeoptions() {
         return {
             name: orig._id.toString(),
             dynamicattributename: orig.dynamicAttributeId.toString(),
-            label: orig.text_de,
+            label: orig.text_de ? orig.text_de : orig.text_en,
             value: orig.value
         };
     });
@@ -132,7 +147,7 @@ async function migratedynamicattributes() {
         return {
             name: orig._id.toString(),
             modelname: orig.modelName,
-            label: orig.name_de,
+            label: orig.name_de ? orig.name_de : orig.name_en,
             dynamicattributetypename: orig.type,
             identifier: orig.identifier
         };
@@ -158,7 +173,7 @@ async function migratefmobjects() {
             fmobjecttypename: orig.type,
             parentfmobjectname: orig.parentId ? orig.parentId.toString() : null,
             previewimagedocumentname: orig.previewImageId ? orig.previewImageId.toString() : null,
-            areacategoryname: orig.category,
+            areatypename: orig.areatype,
             f: orig.f,
             bgf: orig.nbgf,
             areausagestatename: orig.usagestate,
@@ -258,6 +273,7 @@ async function migratepersons() {
 
 async function migrateportalmodules() {
     console.log("Migrating portalmodules ...");
+    await Db.query(Db.PortalDatabaseName, "DELETE FROM portalmodules;");
     var portalmodules = await mongodb.get(constants.collections.portalmodules.name).find();
     for (var i = 0; i < portalmodules.length; i++) {
         var portalmodule = portalmodules[i];
@@ -271,6 +287,7 @@ async function migrateportalmodules() {
 
 async function migrateportals() {
     console.log("Migrating portals ...");
+    await Db.query(Db.PortalDatabaseName, "DELETE FROM portals;");
     var portals = await mongodb.get(constants.collections.portals.name).find();
     for (var i = 0; i < portals.length; i++) {
         var portal = portals[i];
@@ -302,30 +319,31 @@ async function migraterelations() {
 async function migrateusergroups() {
     await migrateforclients(constants.collections.usergroups.name, (orig) => {
         return {
-            name: orig._id.toString()
+            name: orig._id.toString(),
+            label: orig.name
         };
     });
 }
 
 async function migrateusers() {
     console.log("Migrating users ...");
+    var usernames = {};
+    await Db.query(Db.PortalDatabaseName, "DELETE FROM allusers;");
     var originalusers = await mongodb.get(constants.collections.users.name).find();
     for (var i = 0; i < originalusers.length; i++) {
         var originaluser = originalusers[i];
-        var clientname = originaluser.clientId ? originaluser.clientId.toString() : "formerportal";
-        var mappedalluser = {
-            name: originaluser.name,
-            password: originaluser.pass,
-            clientname: clientname
-        };
+        var clientname = getclientname(originaluser);
+        var username = (usernames[originaluser.name]) ? clientname + "_" + originaluser.name : originaluser.name;
+        usernames[username] = true;
         var mappeduser = {
-            name: originaluser.name,
+            name: username,
+            label: username,
             password: originaluser.pass,
             usergroupname: originaluser.userGroupId.toString(),
             isadmin: !!originaluser.isAdmin
         };
         try { // Maybe double names due to corrupt databases
-            await Db.insertDynamicObject(Db.PortalDatabaseName, "allusers", mappedalluser);
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${Db.replaceQuotes(username)}','${Db.replaceQuotes(originaluser.pass)}','${Db.replaceQuotes(clientname)}');`);
             await Db.insertDynamicObject(clientname, "users", mappeduser);
         } catch(err) {
             console.log(err);
@@ -335,31 +353,30 @@ async function migrateusers() {
 
 module.exports.copydatabasefrommongodbtopostgresql = async() => {
     console.log(`Migrating database from ${localconfig.dbName} to ${localconfig.dbhost}/${localconfig.dbprefix} ...`);
-    // await Db.createDefaultPortalTables();
-    // // License server stuff
-    // await migrateportals();
-    // await migrateportalmodules();
-    // // Portal stuff
-    // await migrateclients();
-    // await migrateclientsettings();
-    // await migrateclientmodules();
-    // // Client stuff
-    // await migrateusergroups();
-    // await migrateusers();
-    // await migratepermissions();
-    // await migrateactivities();
-    // await migratebusinesspartners();
-    // await migratepersons();
-    // await migratepartneraddresses();
-    // await migratecommunications();
-    // await migratedynamicattributes();
-    // await migratedynamicattributeoptions();
-    // await migratedynamicattributevalues();
-    // await migratefmobjects();
-    // await migratefolders();
-    // await migratedocuments();
-    // await migratemarkers();
+    // License server stuff
+    await migrateportals();
+    await migrateportalmodules();
+    // Portal stuff
+    await migrateclients();
+    await migrateclientsettings();
+    await migrateclientmodules();
+    // Client stuff
+    await migrateusergroups();
+    await migrateusers();
+    await migratepermissions();
+    await migrateactivities();
+    await migratebusinesspartners();
+    await migratepersons();
+    await migratepartneraddresses();
+    await migratecommunications();
+    await migratedynamicattributes();
+    await migratedynamicattributeoptions();
+    await migratedynamicattributevalues();
+    await migratefmobjects();
+    await migratefolders();
+    await migratedocuments();
+    await migratemarkers();
     await migratenotes();
-    // await migraterelations();
+    await migraterelations();
     console.log("Migration done.");
 }

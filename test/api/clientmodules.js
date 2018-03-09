@@ -4,11 +4,11 @@
 var assert = require('assert');
 var fs = require('fs');
 var th = require('../testHelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var moduleConfig = require('../../config/module-config.json');
+var Db = require("../../utils/db").Db;
 
-describe('API clientmodules', function() {
+describe('API clientmodules', () => {
 
     var server = require('../../app');
     
@@ -38,80 +38,48 @@ describe('API clientmodules', function() {
         };
     }
 
-    // Clear and prepare database with clients, user groups and users
-    beforeEach(async function() {
+    before(async() => {
         await th.cleanDatabase();
         await th.prepareClients();
+    });
+
+    beforeEach(async() => {
         await th.prepareClientModules();
         await th.prepareUserGroups();
         await th.prepareUsers();
         await th.preparePermissions();
+        await Db.query("client0", "DELETE FROM dynamicattributes WHERE identifier like 'DAtest%';");
+        await Db.query("client0", "DELETE FROM dynamicattributeoptions WHERE value like 'DAtest%';");
         prepareModuleConfigForDynamicAttributes();
-        return Promise.resolve();
     });
 
-    afterEach(() => {
+    afterEach(async() => {
         delete moduleConfig.modules.DAtest;
     });
 
-    describe('GET/forClient/:id', function() {
+    describe('GET/forClient/:id', () => {
 
-        it('responds without authentication with 403', function() {
-            return db.get('clients').findOne({name: '1'}).then((client) => {
-                return th.get('/api/clientmodules/forClient/' + client._id.toString()).expect(403);
-            });
+        it('responds without authentication with 403', async() => {
+            await th.get(`/api/clientmodules/forClient/client0`).expect(403);
         });
 
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('clients').findOne({name: '0'}).then(function(clientFromDatabase){
-                return th.removeClientModule('1', 'clients').then(function() {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        return th.get(`/api/clientmodules/forClient/${clientFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("portal", "portal_usergroup0", co.permissions.ADMINISTRATION_CLIENT);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.get(`/api/clientmodules/forClient/client0?token=${token}`).expect(403);
         });
 
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('clients').findOne({name: '0'}).then(function(clientFromDatabase){
-                return th.removeClientModule('1', 'clients').then(function() {
-                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
-                        return th.get(`/api/clientmodules/forClient/${clientFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
+        it('responds with not existing id with 404', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.get(`/api/clientmodules/forClient/999999999999999999999999?token=${token}`).expect(404);
         });
 
-        it('responds without read permission with 403', function() {
-            return db.get('clients').findOne({name: '0'}).then(function(clientFromDatabase){
-                // Remove the corresponding permission
-                return th.removeReadPermission('_0_0', 'PERMISSION_ADMINISTRATION_CLIENT').then(function(){
-                    return th.doLoginAndGetToken('_0_0', 'test').then(function(token){
-                        return th.get(`/api/clientmodules/forClient/${clientFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with incorrect query parameter clientId with 400', function() {
-            return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                return th.get(`/api/clientmodules/forClient/invalid?token=${token}`).expect(400);
-            });
-        });
-
-        it('responds with not existing clientId with 400', function() {
-            return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                return th.get(`/api/clientmodules/forClient/999999999999999999999999?token=${token}`).expect(400);
-            });
-        });
-
-        it('responds with all client modules where the states are correctly set', async function() {
-            var client = await th.defaults.getClient();
-            var token = await th.defaults.login();
-            var clientModulesFromDatabase = await db.get(co.collections.clientmodules.name).find({clientId: client._id});
-            var clientModulesFromApi = (await th.get(`/api/${co.apis.clientmodules}/forClient/${client._id}?token=${token}`).expect(200)).body;
-            var keysFromDatabase = clientModulesFromDatabase.map((p) => p.key);
-            var keysFromApi = clientModulesFromApi.map((p) => p.key);
+        it('responds with all client modules where the states are correctly set', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var clientModulesFromDatabase = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='client0';`)).rows;
+            var clientModulesFromApi = (await th.get(`/api/clientmodules/forClient/client0?token=${token}`).expect(200)).body;
+            var keysFromDatabase = clientModulesFromDatabase.map((p) => p.modulename);
+            var keysFromApi = clientModulesFromApi.map((p) => p.module);
             keysFromDatabase.forEach((key) => {
                 assert.ok(keysFromApi.indexOf(key) >= 0, `Client module ${key} not returned by API.`);
             });
@@ -120,290 +88,144 @@ describe('API clientmodules', function() {
             });
         });
 
-        it('responds with all client modules even when some of them are not defined in database', async function() {
-            var client = await th.defaults.getClient();
-            var token = await th.defaults.login();
-            var moduleToCheck = co.modules.documents;
+        it('responds with all client modules even when some of them are not defined in database', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
             // Zugriff aus Datenbank löschen
-            await db.remove(co.collections.clientmodules.name, {module:moduleToCheck});
-            var clientModulesFromApi = (await th.get(`/api/${co.apis.clientmodules}/forClient/${client._id}?token=${token}`).expect(200)).body;
-            var relevantClientModule = clientModulesFromApi.find((p) => p.module === moduleToCheck);
+            await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE modulename = 'documents';`);
+            var clientModulesFromApi = (await th.get(`/api/clientmodules/forClient/client0?token=${token}`).expect(200)).body;
+            var relevantClientModule = clientModulesFromApi.find((p) => p.module === "documents");
             assert.ok(relevantClientModule);
-            assert.strictEqual(relevantClientModule.active, false);
+            assert.ok(!relevantClientModule.active);
         });
 
     });
 
-    describe('POST/', function() {
+    describe('POST/', () => {
 
-        it('responds without authentication with 403', function() {
-            return db.get('clients').findOne({name: '1'}).then((client) => {
-                return th.post('/api/clientmodules')
-                    .send({
-                        clientId: client._id.toString(),
-                        module: 'clients'
-                    })
-                    .expect(403);
-            });
+        function createTestObject() {
+            return { clientId: "client0", module: "ronnyseins" };
+        }
+
+        it('responds without authentication with 403', async() => {
+            var testObject = createTestObject();
+            await th.post(`/api/clientmodules`).send(testObject).expect(403);
         });
 
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                return th.removeClientModule('1', 'clients').then(function() {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        var clientModule = {module: 'base', clientId: clientFromDatabase._id}
-                        return th.post(`/api/clientmodules?token=${token}`).send(clientModule).expect(403);
-                    });
-                });
-            });
+        it('responds without write permission with 403', async() => {
+            var testObject = createTestObject();
+            await th.removeWritePermission("portal", "portal_usergroup0", co.permissions.ADMINISTRATION_CLIENT);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clientmodules?token=${token}`).send(testObject).expect(403);
         });
 
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                return th.removeClientModule('1', 'clients').then(function() {
-                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
-                        var clientModule = {module: 'base', clientId: clientFromDatabase._id}
-                        return th.post(`/api/clientmodules?token=${token}`).send(clientModule).expect(403);
-                    });
-                });
-            });
+        it('responds with 400 when not sending an object to insert', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clientmodules?token=${token}`).expect(400);
         });
 
-        it('responds without write permission with 403', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                //Remove the corresponding permission
-                return th.removeWritePermission('_0_0', 'PERMISSION_ADMINISTRATION_CLIENT').then(function(){
-                    return th.doLoginAndGetToken('_0_0', 'test').then(function(token){
-                        var clientModule = {module: 'base', clientId: clientFromDatabase._id}
-                        return th.post(`/api/clientmodules?token=${token}`).send(clientModule).expect(403);
-                    });
-                });
-            });
+        it('responds with the created element containing an _id field', async() => {
+            var testObject = createTestObject();
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var objectFromApi = (await th.post(`/api/clientmodules?token=${token}`).send(testObject).expect(200)).body;
+            assert.strictEqual(objectFromApi._id, testObject.clientId + "_--_" + testObject.module);
+            assert.strictEqual(objectFromApi.clientId, testObject.clientId);
+            assert.strictEqual(objectFromApi.module, testObject.module);
+            var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${testObject.clientId}' AND modulename='${testObject.module}';`);
+            assert.ok(result.rowCount > 0);
+            var objectFromDatabase = result.rows[0];
+            assert.strictEqual(objectFromDatabase.clientname, testObject.clientId);
+            assert.strictEqual(objectFromDatabase.modulename, testObject.module);
         });
 
-        it('responds without giving a client module assignment with 400', function() {
-            return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                return th.post('/api/clientmodules?token=' + token).send().expect(400);
-            });
+        it('responds with the existing assignment when an assignment between a client and a module already exists', async() => {
+            var testObject = { clientId: "client0", module: "activities" };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var objectFromApi = (await th.post(`/api/clientmodules?token=${token}`).send(testObject).expect(200)).body;
+            assert.strictEqual(objectFromApi._id, testObject.clientId + "_--_" + testObject.module);
+            var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${testObject.clientId}' AND modulename='${testObject.module}';`);
+            assert.ok(result.rowCount > 0);
         });
 
-        it('responds without a clientId with 400', function() {
-            return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                var newClientModule = { 
-                    module: 'activities'
-                };
-                return th.post('/api/clientmodules?token=' + token).send(newClientModule).expect(400);
-            });
-        });
-
-        it('responds with an incorrect clientId with 400', function() {
-            return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                var newClientModule = { 
-                    module: 'activities',
-                    clientId: 'invalid'
-                };
-                return th.post('/api/clientmodules?token=' + token).send(newClientModule).expect(400);
-            });
-        });
-
-        it('responds with a not existing clientId with 400', function() {
-            return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                var newClientModule = { 
-                    module: 'activities',
-                    clientId: '999999999999999999999999'
-                };
-                return th.post('/api/clientmodules?token=' + token).send(newClientModule).expect(400);
-            });
-        });
-
-        it('responds with correct client module assignment data with inserted client module assignment containing an _id field', function() {
-            var moduleToTest = 'activities';
-            var newClientModule = { module: moduleToTest };
-            return th.removeClientModule(th.defaults.client, moduleToTest).then(function() {
-                return db.get(co.collections.clients.name).findOne({name:th.defaults.client});
-            }).then(function(client) {
-                newClientModule.clientId = client._id.toString();
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.post(`/api/${co.apis.clientmodules}?token=${token}`).send(newClientModule).expect(200);
-            }).then(function(response) {
-                var clientModuleFromApi = response.body;
-                assert.ok(clientModuleFromApi._id, 'Inserted client module does not contain an _id field');
-                delete clientModuleFromApi._id;
-                th.compareApiAndDatabaseObjects(co.collections.clientmodules.name, Object.keys(newClientModule), clientModuleFromApi, newClientModule);
-                return Promise.resolve();
-            });
-        });
-
-        it('responds with the existing assignment when an assignment between a client and a module already exists', function() {
-            var moduleToTest = 'activities';
-            var relevantClient, existingClientModule;
-            return db.get(co.collections.clients.name).findOne({name:th.defaults.client}).then(function(client) {
-                relevantClient = client;
-                return db.get(co.collections.clientmodules.name).findOne({clientId:client._id, module:moduleToTest});
-            }).then(function(clientModule) {
-                existingClientModule = clientModule;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                var newClientModule = { 
-                    module: moduleToTest,
-                    clientId: relevantClient._id.toString()
-                };
-                return th.post(`/api/${co.apis.clientmodules}?token=${token}`).send(newClientModule).expect(200);
-            }).then(function(response) {
-                assert.strictEqual(response.body._id, existingClientModule._id.toString());
-            });
-        });
-
-        it('Vorgegebene DAs, die noch nicht existieren, werden angelegt und sind nicht inaktiv', async function() {
-            var client = await th.defaults.getClient();
-            var token = await th.defaults.login();
-            var moduleAssignment = { module: 'DAtest', clientId: client._id.toString() };
-            await th.post(`/api/${co.apis.clientmodules}?token=${token}`).send(moduleAssignment).expect(200);
-            var das = await db.get(co.collections.dynamicattributes.name).find({identifier:{$exists:true}});
+        it('Vorgegebene DAs, die noch nicht existieren, werden angelegt und sind nicht inaktiv', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var moduleAssignment = { module: 'DAtest', clientId: "client0" };
+            await th.post(`/api/clientmodules?token=${token}`).send(moduleAssignment).expect(200);
+            var das = (await Db.query("client0", "SELECT * FROM dynamicattributes WHERE identifier IS NOT NULL;")).rows;
             assert.strictEqual(das.length, 2);
-            assert.ok(das[0].clientId.equals(client._id));
-            assert.ok(das.find((da) => da.identifier === 'DAtest_user_1' && !da.isInactive ));
-            assert.ok(das[1].clientId.equals(client._id));
-            assert.ok(das.find((da) => da.identifier === 'DAtest_user_2' && !da.isInactive ));
-            var daos = await db.get(co.collections.dynamicattributeoptions.name).find({value:{$exists:true}});
+            assert.ok(das.find((da) => da.identifier === 'DAtest_user_1' && !da.isinactive ));
+            assert.ok(das.find((da) => da.identifier === 'DAtest_user_2' && !da.isinactive ));
+            var daos = (await Db.query("client0", "SELECT * FROM dynamicattributeoptions WHERE value IS NOT NULL;")).rows;
             assert.strictEqual(daos.length, 2);
             assert.ok(daos.find((dao) => dao.value === 'DAtest_user_2_1' ));
-            assert.ok(daos[0].clientId.equals(client._id));
             assert.ok(daos.find((dao) => dao.value === 'DAtest_user_2_2' ));
-            assert.ok(daos[1].clientId.equals(client._id));
         });
 
-        it('Vorgegebene DAs, die bereits aktiv sind, bleiben aktiv', async function() {
+        it('Vorgegebene DAs, die bereits aktiv sind, bleiben aktiv', async() => {
             // DAs vorbereiten
-            var client = await th.defaults.getClient();
-            await db.get(co.collections.dynamicattributes.name).insert({ clientId: client._id, identifier:'DAtest_user_1', name_en:'DAtest_user_1', type: co.dynamicAttributeTypes.text });
+            await Db.insertDynamicObject("client0", "dynamicattributes", { name: "datest001", identifier: 'DAtest_user_1', label: 'DAtest_user_1', dynamicattributetypename: co.dynamicAttributeTypes.text });
             // Der Rest wie oben
-            var token = await th.defaults.login();
-            var moduleAssignment = { module: 'DAtest', clientId: client._id.toString() };
-            await th.post(`/api/${co.apis.clientmodules}?token=${token}`).send(moduleAssignment).expect(200);
-            var das = await db.get(co.collections.dynamicattributes.name).find({identifier:{$exists:true}});
-            assert.strictEqual(das.length, 2); // Es müssen dennoch 2 DAs vorhanden sein
-            var textAttribute = das.find((da) => da.identifier === 'DAtest_user_1' && !da.isInactive );
-            assert.ok(textAttribute);
-            assert.ok(textAttribute.clientId.equals(client._id));
-        });
-
-        it('Vorgegebene DAs, die inaktiv sind, werden aktiviert', async function() {
-            // DAs vorbereiten
-            var client = await th.defaults.getClient();
-            await db.get(co.collections.dynamicattributes.name).insert({ clientId: client._id, identifier:'DAtest_user_1', name_en:'DAtest_user_1', type: co.dynamicAttributeTypes.text, isInactive: true });
-            // Der Rest wie oben
-            var token = await th.defaults.login();
-            var moduleAssignment = { module: 'DAtest', clientId: client._id.toString() };
-            await th.post(`/api/${co.apis.clientmodules}?token=${token}`).send(moduleAssignment).expect(200);
-            var das = await db.get(co.collections.dynamicattributes.name).find({identifier:{$exists:true}});
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var moduleAssignment = { module: 'DAtest', clientId: "client0" };
+            await th.post(`/api/clientmodules?token=${token}`).send(moduleAssignment).expect(200);
+            var das = (await Db.query("client0", "SELECT * FROM dynamicattributes WHERE identifier IS NOT NULL;")).rows;
             assert.strictEqual(das.length, 2);
-            var textAttribute = das.find((da) => da.identifier === 'DAtest_user_1' && !da.isInactive ); // Nur aktive rausfiltern, da muss das vorher inaktive mit drin sein
+            var textAttribute = das.find((da) => da.identifier === 'DAtest_user_1' && !da.isinactive );
             assert.ok(textAttribute);
-            assert.ok(textAttribute.clientId.equals(client._id));
+        });
+
+        it('Vorgegebene DAs, die inaktiv sind, werden aktiviert', async() => {
+            // DAs vorbereiten
+            await Db.insertDynamicObject("client0", "dynamicattributes", { name: "datest001", identifier: 'DAtest_user_1', label: 'DAtest_user_1', dynamicattributetypename: co.dynamicAttributeTypes.text, isinactive: true });
+            // Der Rest wie oben
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var moduleAssignment = { module: 'DAtest', clientId: "client0" };
+            await th.post(`/api/clientmodules?token=${token}`).send(moduleAssignment).expect(200);
+            var das = (await Db.query("client0", "SELECT * FROM dynamicattributes WHERE identifier IS NOT NULL;")).rows;
+            assert.strictEqual(das.length, 2);
+            var textAttribute = das.find((da) => da.identifier === 'DAtest_user_1' && !da.isinactive );
+            assert.ok(textAttribute);
         });
         
     });
 
-    describe('DELETE/:id', function() {
+    describe('DELETE/:id', () => {
 
-        it('responds without authentication with 403', function() {
-            return db.get('clientmodules').findOne({module: 'activities'}).then((clientmodule) => {
-                return th.del('/api/clientmodules/' + clientmodule._id.toString()).expect(403);
-            });
+        it('responds without authentication with 403', async() => {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', 'DAtest');`);
+            await th.del(`/api/clientmodules/client0_--_DAtest`).expect(403);
         });
 
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                var clientId = clientFromDatabase._id;
-                return db.get('clientmodules').findOne({module: 'documents', clientId:  clientId}).then(function(clientModuleFromDatabase){
-                    return th.removeClientModule('1', 'clients').then(function() {
-                        return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                            var id = clientModuleFromDatabase._id;
-                            return th.del(`/api/clientmodules/${id}?token=${token}`).expect(403);
-                        });
-                    });
-                });
-            });    
+        it('responds without write permission with 403', async() => {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', 'DAtest');`);
+            await th.removeWritePermission("portal", "portal_usergroup0", co.permissions.ADMINISTRATION_CLIENT);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/clientmodules/client0_--_DAtest?token=${token}`).expect(403);
         });
 
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                var clientId = clientFromDatabase._id;
-                return db.get('clientmodules').findOne({module: 'documents', clientId:  clientId}).then(function(clientModuleFromDatabase){
-                    return th.removeClientModule('1', 'clients').then(function() {
-                        return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
-                            var id = clientModuleFromDatabase._id;
-                            return th.del(`/api/clientmodules/${id}?token=${token}`).expect(403);
-                        });
-                    });
-                });
-            });    
+        it('responds with 404 when the _id is invalid', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/clientmodules/invalidId?token=${token}`).expect(404);
         });
 
-        it('responds without write permission with 403', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                var clientId = clientFromDatabase._id;
-                return db.get('clientmodules').findOne({module: 'documents', clientId:  clientId}).then(function(clientModuleFromDatabase){
-                    //use portal user 
-                    return th.removeWritePermission('_0_0', 'PERMISSION_ADMINISTRATION_CLIENT').then(function(){
-                        return th.doLoginAndGetToken('_0_0', 'test').then(function(token){
-                            var id = clientModuleFromDatabase._id;
-                            return th.del(`/api/clientmodules/${id}?token=${token}`).expect(403);
-                        });
-                    });
-                });
-            });    
+        it('deletes the object and return 204', async() => {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', 'DAtest');`);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/clientmodules/client0_--_DAtest?token=${token}`).expect(204);
+            var result = await Db.query(Db.PortalDatabaseName, "SELECT 1 FROM clientmodules WHERE clientname='client0' and modulename='DAtest';");
+            assert.ok(result.rowCount < 1);
         });
-
-        it('responds with an invalid id with 400', function() {
-            return db.get('clientmodules').findOne({ module : 'activities' }).then((clientModuleFromDatabase) => {
-                return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                    return th.del(`/api/clientmodules/invalid?token=${token}`).send(clientModuleFromDatabase).expect(400);
-                });
-            });
-        });
-
-        it('responds with an id where no client module exists exists with 404', function() {
-            return db.get('clientmodules').findOne({ module : 'activities' }).then((clientModuleFromDatabase) => {
-                return th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                    return th.del(`/api/clientmodules/999999999999999999999999?token=${token}`).send(clientModuleFromDatabase).expect(404);
-                });
-            });
-        });
-
-        it('responds with a correct id with 204', function(done) {
-            db.get('clientmodules').findOne({ module : 'activities' }).then((clientModuleFromDatabase) => {
-                th.doLoginAndGetToken('_0_0', 'test').then((token) => {
-                    th.del(`/api/clientmodules/${clientModuleFromDatabase._id}?token=${token}`).send(clientModuleFromDatabase).expect(204).end((err, res) => {
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        db.get('clientmodules').findOne(clientModuleFromDatabase._id).then((stillExistingClientModule) => {
-                            assert.ok(!stillExistingClientModule, 'client module has not been deleted from database');
-                            done();
-                        });
-                    });
-                });
-            });
-        });
-
-        it('Vorgegebene DAs werden deaktiviert', async function() {
+        
+        it('Vorgegebene DAs werden deaktiviert', async () => {
             // DAs vorbereiten
-            var client = await th.defaults.getClient();
-            await db.get(co.collections.dynamicattributes.name).insert({ clientId: client._id, identifier:'DAtest_user_1', name_en:'DAtest_user_1', type: co.dynamicAttributeTypes.text });
-            // Modulzuordnung vorbereiten
-            var zuordnung = await db.get(co.collections.clientmodules.name).insert({ module: 'DAtest', clientId: client._id });
+            await Db.insertDynamicObject("client0", "dynamicattributes", { name: "datest001", identifier: 'DAtest_user_1', label: 'DAtest_user_1', dynamicattributetypename: co.dynamicAttributeTypes.text });
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', 'DAtest');`);
             // Deaktivieren
-            var token = await th.defaults.login();
-            await th.del(`/api/${co.apis.clientmodules}/${zuordnung._id}?token=${token}`).expect(204);
-            var das = await db.get(co.collections.dynamicattributes.name).find({identifier:{$exists:true}});
-            assert.strictEqual(das.length, 1); // Das Attribut muss dennoch vorhanden sein
-            var inactiveAttribute = das.find((da) => da.identifier === 'DAtest_user_1' && da.isInactive );
-            assert.ok(inactiveAttribute);
-            assert.ok(inactiveAttribute.clientId.equals(client._id));
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/clientmodules/client0_--_DAtest?token=${token}`).expect(204);
+            var das = (await Db.query("client0", "SELECT * FROM dynamicattributes WHERE identifier IS NOT NULL;")).rows;
+            assert.strictEqual(das.length, 1);
+            assert.strictEqual(das[0].identifier, 'DAtest_user_1');
+            assert.ok(das[0].isinactive);
         });
         
     });

@@ -1,7 +1,9 @@
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var monk = require('monk');
 var moduleConfig = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
+var Db = require("../utils/db").Db;
+var co = require('../utils/constants');
+var ch = require('../utils/configHelper');
 
 /**
  * Extracts the setting sets structure from the module configuration for further processing
@@ -25,9 +27,10 @@ var extractSettingSets = (isUserAdmin, userClientId, allowedPermissionKeys) => {
         var appModule = moduleConfig.modules[moduleName];
         if (!appModule.settingsets) return;
         appModule.settingsets.forEach((settingSet) => {
-            if (!isUserAdmin && allowedPermissionKeys.indexOf(settingSet.permission) < 0) return; // Filter out setting sets the user has no access to
+            var permission = settingSet.permission;
+            if (!isUserAdmin && allowedPermissionKeys.indexOf(permission) < 0) return; // Filter out setting sets the user has no access to
             // Check whether the user is a client user and tries to access portal level settings and forbid it
-            if (userClientId !== null && settingSet.permission === 'PERMISSION_SETTINGS_PORTAL') return;
+            if (userClientId !== Db.PortalDatabaseName && permission === co.permissions.SETTINGS_PORTAL) return;
             if (!settingSets[settingSet.type]) {
                 settingSets[settingSet.type] = {
                     type: settingSet.type,
@@ -38,7 +41,7 @@ var extractSettingSets = (isUserAdmin, userClientId, allowedPermissionKeys) => {
                 mainCard: settingSet.mainCard,
                 icon: settingSet.icon,
                 title: settingSet.title,
-                permission: settingSet.permission
+                permission: permission
             });
         });
     });
@@ -50,17 +53,12 @@ var extractSettingSets = (isUserAdmin, userClientId, allowedPermissionKeys) => {
  * Get all setting sets the currently logged in user has access to. When the user has no access
  * to any setting set, the returned list is empty.
  */
-router.get('/', auth(false, false, 'base'), (req, res) => {
-    // find permissions for the user
-    req.db.get('permissions').find({ userGroupId: req.user.userGroupId }).then((permissions) => {
-        var readPermissionKeys = [];
-        permissions.forEach((permission) => {
-            if (!permission.canRead) return;
-            readPermissionKeys.push(permission.key);
-        })
-        var settingSets = extractSettingSets(req.user.isAdmin, req.user.clientId, readPermissionKeys);
-        res.send(settingSets);
-    });    
+router.get('/', auth(false, false, co.modules.base), async(req, res) => {
+    var clientname = req.user.clientname;
+    var permissionKeysForClient = await ch.getAvailablePermissionKeysForClient(clientname);
+    var permissionKeysForUser = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeysForClient.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows.map((p) => p.key);
+    var settingSets = extractSettingSets(req.user.isadmin, clientname, permissionKeysForUser);
+    res.send(settingSets);
 });
 
 module.exports = router;

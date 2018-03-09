@@ -4,37 +4,26 @@
 var assert = require('assert');
 var fs = require('fs');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var mc = require('../../config/module-config.json');
 var rimraf = require('rimraf');
+var Db = require("../../utils/db").Db;
 
-describe('API portalmanagement', function() {
-    
-    function prepareTests() {
-        var userGroup;
-        return th.defaults.getUserGroup().then(function(ug) {
-            userGroup = ug;
-            return db.insert(co.collections.clientmodules.name, { clientId: userGroup.clientId, module: co.modules.portalbase });
-        });
-    }
+describe('API portalmanagement', () => {
 
     var localConfigBackup, packageJsonBackup, lc, pj, httpsPort, httpPort, extractPath = './extractTemp/';
 
-    function prepareConfigs() {
-        return new Promise(function(resolve, reject) {
-            localConfigBackup = fs.readFileSync('./config/localconfig.json');
-            packageJsonBackup = fs.readFileSync('./package.json');
-            lc = JSON.parse(localConfigBackup);
-            pj = JSON.parse(packageJsonBackup);
-            httpsPort = process.env.HTTPS_PORT || lc.httpsPort || 443;
-            httpPort = process.env.PORT || lc.httpPort || 80;
-            lc.licenseserverurl = 'https://localhost:' + httpsPort; // Bei tests müssen die URLs umgeschrieben werden
-            saveConfigs();
-            rimraf.sync('./temp/');
-            rimraf.sync(extractPath);
-            resolve();
-        });
+    async function prepareConfigs() {
+        localConfigBackup = fs.readFileSync('./config/localconfig.json');
+        packageJsonBackup = fs.readFileSync('./package.json');
+        lc = JSON.parse(localConfigBackup);
+        pj = JSON.parse(packageJsonBackup);
+        httpsPort = process.env.HTTPS_PORT || lc.httpsPort || 443;
+        httpPort = process.env.PORT || lc.httpPort || 80;
+        lc.licenseserverurl = 'https://localhost:' + httpsPort; // Bei tests müssen die URLs umgeschrieben werden
+        saveConfigs();
+        rimraf.sync('./temp/');
+        rimraf.sync(extractPath);
     }
 
     function saveConfigs() {
@@ -42,332 +31,209 @@ describe('API portalmanagement', function() {
         fs.writeFileSync('./package.json', JSON.stringify(pj, null, 4));
     }
 
-    function cleanupConfigs() {
-        return new Promise(function(resolve, reject) {
-            fs.writeFileSync('./config/localconfig.json', localConfigBackup);
-            fs.writeFileSync('./package.json', packageJsonBackup);
-            rimraf.sync('./temp/');
-            rimraf.sync(extractPath);
-            resolve();
-        });
+    async function cleanupConfigs() {
+        fs.writeFileSync('./config/localconfig.json', localConfigBackup);
+        fs.writeFileSync('./package.json', packageJsonBackup);
+        rimraf.sync('./temp/');
+        rimraf.sync(extractPath);
     }
 
-    beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions)
-            .then(prepareTests)
-            .then(prepareConfigs);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
     });
 
-    afterEach(() => {
-        return cleanupConfigs();
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.preparePortals();
+        await th.preparePortalModules();
+        await prepareConfigs();
     });
 
-    describe('GET/', function() {
+    afterEach(async() => {
+        await cleanupConfigs();
+    });
 
-        th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS);
+    describe('GET/', () => {
 
-        it('responds with portalsettings (autoUpdateMode, [updateTimerInterval], licenseserverurl and licensekey only) from localconfig', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.get(`/api/${co.apis.portalmanagement}?token=${token}`).expect(200);
-            }).then(function(response) {
-                var result = response.body;
-                if(result.updateTimerInterval){
-                   assert.strictEqual(Object.keys(result).length, 4); //updateTimerInterval is also expected when autoUpdateMode == True
-                   assert.strictEqual(result.updateTimerInterval, lc.updateTimerInterval);
-                }else{
-                    assert.strictEqual(Object.keys(result).length, 3);
-                }
-                assert.strictEqual(result.autoUpdateMode, lc.autoUpdateMode);
-                assert.ok(result.licensekey);
-                assert.strictEqual(result.licensekey, lc.licensekey);
-                assert.ok(result.licenseserverurl);
-                assert.strictEqual(result.licenseserverurl, lc.licenseserverurl);
-            });
+        th.apiTests.get.defaultNegative(co.apis.portalmanagement, co.permissions.ADMINISTRATION_SETTINGS, "portal", "portal_usergroup0", "portal_usergroup0_user0");
+
+        it('responds with portalsettings (autoUpdateMode, [updateTimerInterval], licenseserverurl and licensekey only) from localconfig', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var result = (await th.get(`/api/${co.apis.portalmanagement}?token=${token}`).expect(200)).body;
+            if(result.updateTimerInterval){
+                assert.strictEqual(Object.keys(result).length, 4); //updateTimerInterval is also expected when autoUpdateMode == True
+                assert.strictEqual(result.updateTimerInterval, lc.updateTimerInterval);
+            }else{
+                assert.strictEqual(Object.keys(result).length, 3);
+            }
+            assert.strictEqual(result.autoUpdateMode, lc.autoUpdateMode);
+            assert.ok(result.licensekey);
+            assert.strictEqual(result.licensekey, lc.licensekey);
+            assert.ok(result.licenseserverurl);
+            assert.strictEqual(result.licenseserverurl, lc.licenseserverurl);
         });
 
     });
 
-    describe('GET/checkforupdate', function() {
+    describe('GET/checkforupdate', () => {
 
         var api = `${co.apis.portalmanagement}/checkforupdate`;
 
-        th.apiTests.get.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS);
+        th.apiTests.get.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS, "portal", "portal_usergroup0", "portal_usergroup0_user0");
 
-        it('responds with 400 when license server URL is not correct', function() {
-            lc.licensekey = 'Testkey';
+        it('responds with 400 when license server URL is not correct', async() => {
+            lc.licensekey = 'licensekey0';
             lc.licenseserverurl = 'https://invalidurl.avorium.de';
             saveConfigs();
-            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(400);
-            });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(400);
         });
 
-        it('responds with 400 when license key is invalid', function() {
+        it('responds with 400 when license key is invalid', async() => {
             lc.licensekey = 'InvalidKey';
             saveConfigs();
-            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: 'ValidKey'}).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(400);
-            });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(400);
         });
 
-        it('responds with serverVersion from licenseserver and localVersion from package.json', function() {
+        it('responds with serverVersion from licenseserver and localVersion from package.json', async() => {
             // Lizenzschlüssel vorbereiten und Portal dafür erstellen
-            lc.licensekey = 'Testkey';
+            lc.licensekey = 'licensekey0';
             pj.version = 'Testversion';
             saveConfigs();
-            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(200);
-            }).then(function(response) {
-                var result = response.body;
-                assert.strictEqual(Object.keys(result).length, 2);
-                assert.ok(result.localVersion);
-                assert.strictEqual(result.localVersion, pj.version);
-                assert.ok(result.serverVersion);
-                assert.strictEqual(result.serverVersion, pj.version);
-            });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var result = (await th.get(`/api/${co.apis.portalmanagement}/checkforupdate?token=${token}`).expect(200)).body;
+            assert.strictEqual(Object.keys(result).length, 2);
+            assert.ok(result.localVersion);
+            assert.strictEqual(result.localVersion, pj.version);
+            assert.ok(result.serverVersion);
+            assert.strictEqual(result.serverVersion, pj.version);
         });
 
     });
 
-    describe('POST/', function() {
-
-        it('responds with 404', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.post(`/api/${co.apis.extractdocument}?token=${token}`).send({}).expect(404);
-            });
-        });
-    
-    });
-
-    describe('POST/triggerupdate', function() {
+    describe('POST/triggerupdate', () => {
 
         var api = `${co.apis.portalmanagement}/triggerupdate`;
-
-        function createPostData() {
-            return Promise.resolve({});
-        }
 
         function checkExtractedFiles(path, moduleNames) {
             th.createFileList(moduleNames).forEach(function(fileName) {
                 var fullPath = path + fileName;
                 assert.ok(fs.existsSync(fullPath), `File ${fullPath} does not exist`);
             });
-            return Promise.resolve();
         }
 
-        th.apiTests.post.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS, createPostData, true);
+        th.apiTests.post.defaultNegative(api, co.permissions.ADMINISTRATION_SETTINGS, () => { return {} }, true, "portal", "portal_usergroup0", "portal_usergroup0_user0");
 
-        it('responds with 400 when license server URL is not correct', function() {
-            lc.licensekey = 'Testkey';
+        it('responds with 400 when license server URL is not correct', async() => {
+            lc.licensekey = 'licensekey0';
             lc.licenseserverurl = 'https://invalidurl.avorium.de';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
-                return db.insert(co.collections.portalmodules.name, {portalId: insertedPortal._id, module: co.modules.base});
-            }).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
-            });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
         });
 
-        it('responds with 400 when license key is invalid', function() {
-            lc.licensekey = 'InvalidKey';
+        it('responds with 400 when license key is invalid', async() => {
+            lc.licensekey = 'invalidkey';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: 'ValidKey'}).then(function(insertedPortal) {
-                return db.insert(co.collections.portalmodules.name, {portalId: insertedPortal._id, module: co.modules.base});
-            }).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
-            });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
         });
 
-        it('responds with 400 when portal has no module configured', function() {
-            lc.licensekey = 'Testkey';
+        it('responds with 400 when portal has no module configured', async() => {
+            await th.cleanTable("portalmodules", true, false);
+            lc.licensekey = 'licensekey0';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
-            });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(400);
         });
 
-        it('downloads a package for the portal and extracts it into the updateExtractPath given in localconfig.json', function() {
-            lc.licensekey = 'Testkey';
+        it('downloads a package for the portal and extracts it into the updateExtractPath given in localconfig.json', async() => {
+            lc.licensekey = 'licensekey0';
             lc.updateExtractPath = extractPath; // Tests dürfen die Originaldateien nicht überschreiben
             saveConfigs();
-            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
-                return db.insert(co.collections.portalmodules.name, {portalId: insertedPortal._id, module: co.modules.base});
-            }).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(200);
-            }).then(function() {
-                return checkExtractedFiles(lc.updateExtractPath, [co.modules.base]);
-            });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(200);
+            checkExtractedFiles(lc.updateExtractPath, [co.modules.base]);
         });
 
-        it('downloads a package for the portal and extracts it into the ./temp/ folder when no updateExtractPath is given', function() {
-            lc.licensekey = 'Testkey';
+        it('downloads a package for the portal and extracts it into the ./temp/ folder when no updateExtractPath is given', async() => {
+            lc.licensekey = 'licensekey0';
             delete lc.updateExtractPath;
             saveConfigs();
-            return db.insert(co.collections.portals.name, {name:'Testportal', isActive: true, licenseKey: lc.licensekey}).then(function(insertedPortal) {
-                return db.insert(co.collections.portalmodules.name, {portalId: insertedPortal._id, module: co.modules.base});
-            }).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(200);
-            }).then(function() {
-                return checkExtractedFiles('./temp/', [co.modules.base]);
-            });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/${co.apis.portalmanagement}/triggerupdate?token=${token}`).send().expect(200);
+            checkExtractedFiles('./temp/', [co.modules.base]);
         });
 
     });
 
-    describe('PUT/', function() {
+    describe('PUT/', () => {
 
         var api = co.apis.portalmanagement;
         var permission = co.permissions.ADMINISTRATION_SETTINGS;
 
-        function createPutSettings() {
-            return Promise.resolve({
+        async function createPutSettings() {
+            return {
                 licenseserverurl: 'http://testhost.avorium.de',
                 licensekey: 'testlicensekey'
-            });
+            };
         }
 
-        it('responds without authentication with 403', function() {
-            return createPutSettings().then(function(putSettings) {
-                return th.put(`/api/${api}`).send(putSettings).expect(403);
-            });
-        });
-        it('responds without write permission with 403', function() {
-            var loginToken;
-            return th.removeWritePermission(th.defaults.user, permission).then(function() {
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                loginToken = token;
-                return createPutSettings();
-            }).then(function(putSettings) {
-                return th.put(`/api/${api}?token=${loginToken}`).send(putSettings).expect(403);
-            });
-        });
-        function checkForUser(user) {
-            return function() {
-                var loginToken;
-                return th.removeClientModule(th.defaults.client, co.modules.portalbase).then(function() {
-                    return th.doLoginAndGetToken(user, th.defaults.password);
-                }).then(function(token) {
-                    loginToken = token;
-                    return createPutSettings();
-                }).then(function(putSettings) {
-                    return th.put(`/api/${api}?token=${loginToken}`).send(putSettings).expect(403);
-                });
-            }
-        }
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(th.defaults.user));
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(th.defaults.adminUser));
-        it('responds with 400 when not sending an object to insert', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.put(`/api/${api}?token=${token}`).expect(400);
-            });
+        th.apiTests.put.defaultNegative(api, permission, createPutSettings, "portal", "portal_usergroup0", "portal_usergroup0_user0", undefined, true);
+
+        it('responds with 200 and updates the licenseserverurl and licensekey properties in the localconfig.json file with the new sent data', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var settings = await createPutSettings();
+            await th.put(`/api/${api}?token=${token}`).send(settings).expect(200);
+            var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
+            assert.ok(updatedLocalConfig.licenseserverurl);
+            assert.strictEqual(updatedLocalConfig.licenseserverurl, settings.licenseserverurl);
+            assert.ok(updatedLocalConfig.licensekey);
+            assert.strictEqual(updatedLocalConfig.licensekey, settings.licensekey);
         });
 
-        it('responds with 200 and updates the licenseserverurl and licensekey properties in the localconfig.json file with the new sent data', function() {
-            var loginToken, settings;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                loginToken = token;
-                return createPutSettings();
-            }).then(function(putSettings) {
-                settings = putSettings;
-                return th.put(`/api/${api}?token=${loginToken}`).send(settings).expect(200);
-            }).then(function() {
-                var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
-                assert.ok(updatedLocalConfig.licenseserverurl);
-                assert.strictEqual(updatedLocalConfig.licenseserverurl, settings.licenseserverurl);
-                assert.ok(updatedLocalConfig.licensekey);
-                assert.strictEqual(updatedLocalConfig.licensekey, settings.licensekey);
-            });
+        it('responds with 200 and does not update the localconfig file when other properties than licenseserverurl and licensekey, or autoUpdateMode are sent', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var settings = {
+                documentspath: 'newdocpath/',
+                tokensecret: 'newtokensecret',
+                newproperty: 'newproperty'
+            };
+            await th.put(`/api/${api}?token=${token}`).send(settings).expect(200);
+            var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
+            assert.strictEqual(updatedLocalConfig.documentspath, lc.documentspath);
+            assert.notStrictEqual(updatedLocalConfig.documentspath, settings.documentspath);
+            assert.strictEqual(updatedLocalConfig.tokensecret, lc.tokensecret);
+            assert.notStrictEqual(updatedLocalConfig.tokensecret, settings.tokensecret);
+            assert.ok(!updatedLocalConfig.newproperty);
         });
 
-        it('responds with 200 and does not update the localconfig file when other properties than licenseserverurl and licensekey, or autoUpdateMode are sent', function() {
-            var loginToken, settings;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                loginToken = token;
-                settings = {
-                    documentspath: 'newdocpath/',
-                    tokensecret: 'newtokensecret',
-                    newproperty: 'newproperty'
-                };
-                return th.put(`/api/${api}?token=${loginToken}`).send(settings).expect(200);
-            }).then(function() {
-                var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
-                assert.strictEqual(updatedLocalConfig.documentspath, lc.documentspath);
-                assert.notStrictEqual(updatedLocalConfig.documentspath, settings.documentspath);
-                assert.strictEqual(updatedLocalConfig.tokensecret, lc.tokensecret);
-                assert.notStrictEqual(updatedLocalConfig.tokensecret, settings.tokensecret);
-                assert.ok(!updatedLocalConfig.newproperty);
-            });
+        it('responds with 200 but does not update the localconfig file when invalid (e.g. null) value for autoUpdateMode is sent', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var settings = { autoUpdateMode: null };
+            await th.put(`/api/${api}?token=${token}`).send(settings).expect(200);
+            var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
+            assert.strictEqual(updatedLocalConfig.autoUpdateMode, lc.autoUpdateMode);
         });
 
-        it('responds with 200 but does not update the localconfig file when invalid (e.g. null) value for autoUpdateMode is sent', function() {
-            var loginToken, settings;
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                loginToken = token;
-                settings = {
-                    autoUpdateMode: null,
-                    documentspath: 'newdocpath/',
-                    tokensecret: 'newtokensecret',
-                    newproperty: 'newproperty'
-                };
-                return th.put(`/api/${api}?token=${loginToken}`).send(settings).expect(200);
-            }).then(function() {
-                var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
-                assert.strictEqual(updatedLocalConfig.documentspath, lc.documentspath);
-                assert.notStrictEqual(updatedLocalConfig.documentspath, settings.documentspath);
-                assert.strictEqual(updatedLocalConfig.tokensecret, lc.tokensecret);
-                assert.notStrictEqual(updatedLocalConfig.tokensecret, settings.tokensecret);
-                assert.ok(!updatedLocalConfig.newproperty);
-            });
+        it('responds with 200 and updates the autoUpdateMode property in the localconfig.json file with the new sent data', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            lc.autoUpdateMode = true;
+            saveConfigs();
+            var settings = { autoUpdateMode: false };
+            await th.put(`/api/${api}?token=${token}`).send(settings).expect(200);
+            var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
+            assert.strictEqual(updatedLocalConfig.autoUpdateMode, settings.autoUpdateMode);
         });
 
-        it('responds with 200 and updates the autoUpdateMode property in the localconfig.json file with the new sent data', function() {
-            var loginToken;
-            var settings = {autoUpdateMode: false}; //autoUpdateMode should have either TRUE or FALSE as value 
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                loginToken = token;
-            }).then(function() {
-                return th.put(`/api/${api}?token=${loginToken}`).send(settings).expect(200);
-            }).then(function() {
-                var updatedLocalConfig = JSON.parse(fs.readFileSync('./config/localconfig.json'));
-                assert.strictEqual(updatedLocalConfig.autoUpdateMode, settings.autoUpdateMode);
-            });
-        })
-
-    });
-
-    describe('DELETE/', function() {
-
-        it('responds with 404', function() {
-            return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token) {
-                return th.del(`/api/${co.apis.extractdocument}?token=${token}`).expect(404);
-            });
-        });
-    
     });
 
 });

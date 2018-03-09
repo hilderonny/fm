@@ -4,10 +4,10 @@
   "description": "Avorium FM",
   "main": "app.js",
   "scripts": {
-    "test": "cross-env HTTPS_PORT=61443 PORT=61080 NODE_ENV=test MONGO_TEST_DB=testdb NODE_TLS_REJECT_UNAUTHORIZED=0 ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --async-only --slow 500 --timeout 900000 -R mocha-teamcity-reporter ./test/**/*.js",
-    "testagent": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=testagentdb ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --async-only --slow 500 --timeout 900000 -R mocha-teamcity-reporter ./test/**/*.js",
-    "testlocal": "cross-env HTTPS_PORT=62443 PORT=62080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=testlocaldb IGNORE_FAILED_TRANSLATION_TESTS=true ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --async-only --slow 500 --timeout 5000 -R spec ./test/**/*.js",
-    "basetest": "cross-env HTTPS_PORT=63443 PORT=63080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=basetestdb ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --async-only --slow 500 --timeout 5000 -R spec ./test/*.js ./test/utils/*.js ./test/api/menu.js"
+    "test": "cross-env HTTPS_PORT=61443 PORT=61080 NODE_ENV=test MONGO_TEST_DB=testdb POSTGRESQL_TEST_DBPREFIX=test NODE_TLS_REJECT_UNAUTHORIZED=0 nyc --reporter=html --reporter=teamcity mocha --async-only --slow 500 --timeout 900000 -R mocha-teamcity-reporter ./test/**/*.js",
+    "testagent": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=testagentdb POSTGRESQL_TEST_DBPREFIX=testagent nyc --reporter=html --reporter=teamcity mocha --async-only --slow 500 --timeout 20000 -R mocha-teamcity-reporter ./test/**/*.js",
+    "testlocal": "cross-env HTTPS_PORT=62443 PORT=62080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=testlocaldb POSTGRESQL_TEST_DBPREFIX=testlocal IGNORE_FAILED_TRANSLATION_TESTS=true nyc --reporter=html --reporter=text mocha --async-only --slow 500 --timeout 10000 -R spec ./test/**/*.js",
+    "basetest": "cross-env HTTPS_PORT=63443 PORT=63080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=basetestdb POSTGRESQL_TEST_DBPREFIX=basetest nyc --reporter=html --reporter=text mocha --async-only --slow 500 --timeout 5000 -R spec ./test/*.js ./test/utils/*.js ./test/api/menu.js"
   },
   "author": "Ronny Hildebrandt",
   "license": "ISC",
@@ -43,9 +43,9 @@
   },
   "devDependencies": {
     "cross-env": "^3.1.3",
-    "istanbul": "^0.4.5",
     "mocha": "^3.5.0",
     "mocha-teamcity-reporter": "^1.1.1",
+    "nyc": "^11.4.1",
     "really-need": "^1.9.2",
     "rimraf": "^2.6.1",
     "supertest": "^2.0.1"
