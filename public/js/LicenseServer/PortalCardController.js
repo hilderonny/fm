@@ -14,7 +14,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
         if (portalModuleToSave.active) {
             $http.post('/api/portalmodules', portalModuleToSave).then(function(response) {
                 portalModuleToUpdate._id = response.data._id;
-                portalModuleToUpdate.active = response.data.active;
+                portalModuleToUpdate.active = true;
                 $rootScope.isLoading = false;
             });
         } else {
