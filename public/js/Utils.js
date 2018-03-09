@@ -123,7 +123,15 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         loadDynamicAttributes: function(scope, modelName, entityId) {
             $http.get('/api/dynamicattributes/values/' + modelName + '/' + entityId).then(function(response) {
-                scope.dynamicAttributes = response.data;
+                var allDynamicAttributes = response.data;
+                var visibleDynamicAttributes = [];
+                //return only the visible dynamic attributes
+                for(i = 0; i < allDynamicAttributes.length; i++){
+                    if(allDynamicAttributes[i].type.isVisible != false){
+                        visibleDynamicAttributes.push(allDynamicAttributes[i]);
+                    }
+                };
+                scope.dynamicAttributes = visibleDynamicAttributes;
             });
         },
 
