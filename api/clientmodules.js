@@ -11,7 +11,7 @@ var mc = require('../config/module-config.json'); // http://stackoverflow.com/a/
 
 router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), async(req, res) => {
     if ((await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(req.params.id)}';`)).rowCount < 1) return res.sendStatus(404);
-    var allModuleKeys = Object.keys(co.modules).filter(mk => mc.modules[mk].forclients).map((k) => co.modules[k]);
+    var allModuleKeys = Object.keys(mc.modules).filter(mk => mc.modules[mk].forclients);
     var clientModulesOfClient = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${Db.replaceQuotes(req.params.id)}' AND modulename IN (${allModuleKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(",")});`)).rows;
     var result = allModuleKeys.map((key) => {
         var existingClientModule = clientModulesOfClient.find((c) => c.modulename === key);

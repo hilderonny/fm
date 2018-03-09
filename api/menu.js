@@ -53,7 +53,7 @@ var extractMenu = (moduleNames) => {
 router.get('/', auth(), async(req, res) => {
     var clientname = req.user.clientname;
     var clientSettings = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: clientname });
-    var allModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
+    var allModuleKeys = Object.keys(mc.modules);
     var modulenames = clientname === Db.PortalDatabaseName
         ? allModuleKeys.filter(mk => mc.modules[mk].forportal) // Portal has only some modules allowed
         : (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}' AND modulename IN (${allModuleKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(",")});`)).rows.map((r) => r.modulename);
