@@ -130,6 +130,7 @@ module.exports.pack = (moduleNameList, version) => {
                 zip.file(fullOfficePath, fs.readFileSync('./' + fullOfficePath));
             });
         });
+        // Add settingsets
         if (requestedModule.settingsets) requestedModule.settingsets.forEach((settingSet) => {
             var fullPath = `public/partial/${settingSet.mainCard}.html`;
             zip.file(fullPath, fs.readFileSync('./' + fullPath));

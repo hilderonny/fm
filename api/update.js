@@ -7,6 +7,7 @@ var fs = require('fs');
 var appPackager = require('../utils/app-packager');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
+var mc = require('../config/module-config.json');
 
 /**
  * API for checking for available updates for a specific portal. Returns the version number of the
@@ -34,6 +35,8 @@ router.get('/download', async(req, res) => {
     if (!portal) return res.sendStatus(403); // No active portal with the given licenseKey found
     var portalModules = await Db.getDynamicObjects(Db.PortalDatabaseName, co.collections.portalmodules.name, { portalname: portal.name });
     var moduleNames = portalModules.map((portalModule) => portalModule.modulename);
+    // Order modulenames the way they are defined in moduleconfig
+    moduleNames = Object.keys(mc.modules).filter(m => moduleNames.indexOf(m) >= 0);
     if (moduleNames.length < 1) return res.sendStatus(404); // At least one module must be configured
     var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
     var version = packageJson.version;
