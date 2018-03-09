@@ -129,10 +129,9 @@ var init = () => {
     app.use(require('compression')()); // Ausgabekompression
     app.set('json spaces', '\t'); // Ausgabe im Response verschönern
     app.use(db.handler); // Datenbankverbindung -> req.db
+    app.use(require('./middlewares/extracttoken')); // Authentifizierung und Authorisierung -> req.user{_id}
     app.use(require('body-parser').json()); // JSON Request-Body-Parser -> req.body
     app.use(require('body-parser').urlencoded({extended:true})); // parse application/x-www-form-urlencoded
-    // app.use(require('./middlewares/security')); // Prevent SQL injection
-    app.use(require('./middlewares/extracttoken')); // Authentifizierung und Authorisierung -> req.user{_id}
     // Include APIs configured in module-config.json
     var apis = extractApisFromModuleConfig();
     apis.forEach((api) => {

@@ -221,7 +221,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.
         name: uuidv4(),
         modelname: dynamicAttribute.modelName,
         label: dynamicAttribute.name_de ? dynamicAttribute.name_de: dynamicAttribute.name_en,
-        isinactive: dynamicAttribute.isInactive,
+        isinactive: !!dynamicAttribute.isInactive, // Convert undefined to false
         dynamicattributetypename: dynamicAttribute.type,
         identifier: null// no identifier for manually created attributes!
     }

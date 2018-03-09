@@ -351,7 +351,7 @@ var Db = {
     },
 
     replaceQuotesAndRemoveSemicolon: (str) => {
-        return str && typeof(str) === "string" ? replaceQuotes(str).replace(/;/g, "") : str;
+        return str && typeof(str) === "string" ? Db.replaceQuotes(str).replace(/;/g, "") : str;
     },
             
     query: async(databaseNameWithoutPrefix, query) => {
