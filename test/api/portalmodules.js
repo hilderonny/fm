@@ -10,17 +10,9 @@ th.createApiTests({
     comparefields: ["_id", "portalId", "module"],
     mapfields: (e, clientname) => { return {
         _id: e.name, 
-        // clientId: clientname, 
         portalId: e.portalname, 
         module: e.modulename
     }},
-    forparent: { 
-        datatypename: "portals", 
-        apisuffix: "forPortal", 
-        parentfield: "portalname",
-        clientparentfield: "portalId",
-        elementname: "portal_portal0"
-    },
     permission: co.permissions.LICENSESERVER_PORTAL,
     elementname: "portal_portalmodule0" ,
     testelement: { 
