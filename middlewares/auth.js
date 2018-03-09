@@ -40,14 +40,14 @@ module.exports = function(permissionKey, readWrite, moduleName) {
  */
 module.exports.canAccess = async(username, permissionKey, readWrite, moduleName) => {
     // Check user against database
-    var userresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${username}';`);
+    var userresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${Db.replaceQuotes(username)}';`);
     var userInAllUsers = userresult.rowCount > 0 ? userresult.rows[0] : undefined;
     if (!userInAllUsers) return false;
     var userInDatabase = await Db.getDynamicObject(userInAllUsers.clientname ? userInAllUsers.clientname : Db.PortalDatabaseName, "users", userInAllUsers.name);
     userInDatabase.clientname = userInAllUsers.clientname; // Relevant for APIs
     // Check whether module is available for the client of the user, ignore portal users
     if (userInAllUsers.clientname && userInAllUsers.clientname !== Db.PortalDatabaseName && moduleName) {
-        var clientmoduleresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${userInAllUsers.clientname}' AND modulename='${moduleName}';`);
+        var clientmoduleresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${Db.replaceQuotes(userInAllUsers.clientname)}' AND modulename='${Db.replaceQuotes(moduleName)}';`);
         if (clientmoduleresult.rowCount < 1) return false;
         var userHasAccess = await checkUser(userInAllUsers.clientname, userInDatabase, permissionKey, readWrite);
         if (!userHasAccess) return false;
@@ -64,7 +64,7 @@ async function checkUser(clientname, userInDatabase, permissionKey, readWrite) {
     if (!userInDatabase.isadmin && permissionKey && readWrite) { // in menu API no key and no readwrite is given
         // Extract the permission for the requested permission key
         var writecondition = readWrite.indexOf('w') >= 0 ? " AND canwrite=true" : "";
-        var permissionresult = await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname='${userInDatabase.usergroupname}' AND key='${permissionKey}'${writecondition};`);
+        var permissionresult = await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname='${Db.replaceQuotes(userInDatabase.usergroupname)}' AND key='${Db.replaceQuotes(permissionKey)}'${writecondition};`);
         return permissionresult.rowCount > 0;
     } else {
         return true;

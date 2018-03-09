@@ -9,7 +9,7 @@ router.post('/', async(req, res) => {
     var username = req.body.username;
     var password = req.body.password;
     // Check user against database
-    var userresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${username}';`);
+    var userresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${Db.replaceQuotes(username)}';`);
     if (userresult.rowCount < 1 || !bcryptjs.compareSync(password, userresult.rows[0].password)) {
         return res.sendStatus(401);
     }

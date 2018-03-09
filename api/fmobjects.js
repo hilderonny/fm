@@ -81,7 +81,7 @@ router.get('/forIds', auth(false, false, co.modules.fmobjects), async(req, res) 
     if (!req.query.ids) {
         return res.send([]);
     }
-    var namestofind = req.query.ids.split(",").map((n) => `'${n}'`).join(",");
+    var namestofind = req.query.ids.split(",").map((n) => `'${Db.replaceQuotes(n)}'`).join(",");
     var fmobjectquery = `
     DROP TABLE IF EXISTS fmobjectpathtype;
     CREATE TEMP TABLE fmobjectpathtype (name text);
@@ -90,7 +90,7 @@ router.get('/forIds', auth(false, false, co.modules.fmobjects), async(req, res) 
         UNION
         (SELECT get_path.name, fmobjects.parentfmobjectname, get_path.depth + 1 FROM fmobjects JOIN get_path on get_path.parentfmobjectname = fmobjects.name)
     )
-    SELECT fmobjects.name AS _id, fmobjects.label AS name, fmobjects.fmobjecttypename AS "type", fmobjects.parentfmobjectname AS "parentId", '${clientname}' AS "clientId", COALESCE(pd.path, '[]') as path FROM fmobjects
+    SELECT fmobjects.name AS _id, fmobjects.label AS name, fmobjects.fmobjecttypename AS "type", fmobjects.parentfmobjectname AS "parentId", '${Db.replaceQuotes(clientname)}' AS "clientId", COALESCE(pd.path, '[]') as path FROM fmobjects
     LEFT JOIN (
         SELECT name, COALESCE(json_agg(row_to_json(row(label)::fmobjectpathtype)) FILTER (WHERE parentfmobjectname IS NOT NULL), '[]') AS path
         FROM (SELECT get_path.name, get_path.parentfmobjectname, fmobjects.label FROM get_path JOIN fmobjects ON get_path.parentfmobjectname = fmobjects.name ORDER BY depth DESC) a
@@ -119,7 +119,7 @@ router.get('/:id', auth(co.permissions.BIM_FMOBJECT, 'r', co.modules.fmobjects),
         FROM (SELECT get_path.name, get_path.parentfmobjectname, fmobjects.label FROM get_path JOIN fmobjects ON get_path.parentfmobjectname = fmobjects.name ORDER BY depth DESC) a
         GROUP BY name
     ) pd ON pd.name = fmobjects.name
-    WHERE fmobjects.name = '${req.params.id}'
+    WHERE fmobjects.name = '${Db.replaceQuotes(req.params.id)}'
     `;
     var fmobject = (await Db.query(clientname, fmobjectquery))[2].rows[0]; // 0 = DROP, 1 = CREATE, 2 = SELECT
     res.send(mapFields(fmobject, clientname));

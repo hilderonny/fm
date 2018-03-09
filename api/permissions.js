@@ -24,7 +24,7 @@ router.get('/forLoggedInUser', auth(), async(req, res) => {
         });
         res.send(adminPermissions);
     } else {
-        var permissions = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${req.user.usergroupname}' AND key IN (${permissionKeysForClient.map((k) => `'${k}'`).join(',')});`)).rows;
+        var permissions = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeysForClient.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows;
         var mappedPermissions = permissions.map((p) => { return {
             key: p.key,
             canRead: true,
@@ -40,7 +40,7 @@ router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r
     var clientname = req.user.clientname;
     var usergroupname = req.user.usergroupname;
     var permissionKeysForClient = await configHelper.getAvailablePermissionKeysForClient(clientname);
-    var permissionsForUserGroup = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${usergroupname}' AND key IN (${permissionKeysForClient.map((k) => `'${k}'`).join(',')});`)).rows;
+    var permissionsForUserGroup = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(usergroupname)}' AND key IN (${permissionKeysForClient.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows;
     var mappedPermissions = permissionKeysForClient.map((pk) => {
         var usergrouppermission = permissionsForUserGroup.find((p) => p.key === pk);
         return {
@@ -58,17 +58,17 @@ router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r
 router.post('/', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var permission = req.body;
-    if (!permission || Object.keys(permission).length < 1 || !permission.userGroupId || !permission.key || (!permission.canRead && permission.canWrite)) return res.sendStatus(400);
+    if (!permission || Object.keys(permission).length < 1 || !permission.userGroupId || !permission.key || (!!!permission.canRead && !!permission.canWrite)) return res.sendStatus(400);
     var permissionKeyForUser = await configHelper.getAvailablePermissionKeysForClient(clientname);
     if (permissionKeyForUser.indexOf(permission.key) < 0) return res.sendStatus(400);
     if (!(await Db.getDynamicObject(clientname, co.collections.usergroups.name, permission.userGroupId))) return res.sendStatus(400);
-    if (!permission.canRead) {
-        await Db.query(clientname, `DELETE FROM permissions WHERE key = '${permission.key}' AND usergroupname = '${permission.userGroupId}';`);
+    if (!!!permission.canRead) {
+        await Db.query(clientname, `DELETE FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.userGroupId)}';`);
     } else {
-        if ((await Db.query(clientname, `SELECT 1 FROM permissions WHERE key = '${permission.key}' AND usergroupname = '${permission.userGroupId}';`)).rowCount > 0) {
-            await Db.query(clientname, `UPDATE permissions SET canwrite = ${permission.canWrite} WHERE key = '${permission.key}' AND usergroupname = '${permission.userGroupId}';`);
+        if ((await Db.query(clientname, `SELECT 1 FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.userGroupId)}';`)).rowCount > 0) {
+            await Db.query(clientname, `UPDATE permissions SET canwrite = ${!!permission.canWrite} WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.userGroupId)}';`);
         } else {
-            await Db.query(clientname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${permission.userGroupId}', '${permission.key}', ${permission.canWrite});`);
+            await Db.query(clientname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${Db.replaceQuotes(permission.userGroupId)}', '${Db.replaceQuotes(permission.key)}', ${!!permission.canWrite});`);
         }
     }
     res.send(permission);

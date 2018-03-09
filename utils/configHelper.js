@@ -69,7 +69,7 @@ var ch = {
             if (moduleConfig.modules.portalbase) modules.push(moduleConfig.modules.portalbase);
             return modules;
         }
-        var modulekeys = (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname = '${clientname}';`)).rows;
+        var modulekeys = (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname = '${Db.replaceQuotes(clientname)}';`)).rows;
         var filteredmodules = modulekeys.map((k) => moduleConfig.modules[k.modulename]);
         return filteredmodules;
     }

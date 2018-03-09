@@ -90,7 +90,7 @@ router.post('/', auth(co.permissions.ADMINISTRATION_USER, "w", co.modules.base),
         return res.sendStatus(400);
     }
     // Check whether username is in use
-    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM allusers WHERE name = '${user.name}';`)).rowCount > 0) return res.sendStatus(409); // Conflict
+    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM allusers WHERE name = '${Db.replaceQuotes(user.name)}';`)).rowCount > 0) return res.sendStatus(409); // Conflict
     // Check whether userGroup exists
     if (!(await Db.getDynamicObject(req.user.clientname, "usergroups", user.userGroupId))) return res.sendStatus(400);
     var usertoinsert = {
@@ -100,8 +100,8 @@ router.post('/', auth(co.permissions.ADMINISTRATION_USER, "w", co.modules.base),
         usergroupname: user.userGroupId,
         isadmin: user.isAdmin
     };
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${usertoinsert.name}', '${usertoinsert.password}', '${req.user.clientname}');`);
-    await Db.query(req.user.clientname, `INSERT INTO users (name, label, password, usergroupname, isadmin) VALUES('${usertoinsert.name}', '${usertoinsert.name}', '${usertoinsert.password}', '${usertoinsert.usergroupname}', ${usertoinsert.isadmin});`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${Db.replaceQuotes(usertoinsert.name)}', '${Db.replaceQuotes(usertoinsert.password)}', '${Db.replaceQuotes(req.user.clientname)}');`);
+    await Db.query(req.user.clientname, `INSERT INTO users (name, label, password, usergroupname, isadmin) VALUES('${Db.replaceQuotes(usertoinsert.name)}', '${Db.replaceQuotes(usertoinsert.name)}', '${Db.replaceQuotes(usertoinsert.password)}', '${Db.replaceQuotes(usertoinsert.usergroupname)}', ${!!usertoinsert.isadmin});`);
     return res.send(mapFields(usertoinsert, req.user));
 });
 

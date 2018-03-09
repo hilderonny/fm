@@ -29,7 +29,7 @@ router.get('/forIds', auth(false, false, co.modules.clients), async(req, res) =>
     var accessAllowed = await auth.canAccess(req.user.name, co.permissions.ADMINISTRATION_CLIENT, "r", co.modules.clients);
     if (!accessAllowed) return res.send([]);
     if (!req.query.ids) return res.send([]);
-    var elements = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name IN (${req.query.ids.split(',').map(id => `'${id}'`).join(",")});`)).rows;
+    var elements = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name IN (${req.query.ids.split(',').map(id => `'${Db.replaceQuotes(id)}'`).join(",")});`)).rows;
     res.send(elements.map(mapFields));
 });
 
@@ -39,7 +39,7 @@ router.get('/', auth(co.permissions.ADMINISTRATION_CLIENT, "r", co.modules.clien
 });
         
 router.get('/:id', auth(co.permissions.ADMINISTRATION_CLIENT, "r", co.modules.clients), async(req, res) => {
-    var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${req.params.id}';`);
+    var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(req.params.id)}';`);
     if (result.rowCount < 1) return res.sendStatus(404);
     res.send(mapFields(result.rows[0]));
 });
@@ -53,7 +53,7 @@ router.post('/newadmin', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modu
     if (!newAdmin || Object.keys(newAdmin).length < 1 || !newAdmin.name || !newAdmin.clientId) {
         return res.sendStatus(400);
     }
-    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${newAdmin.clientId}';`)).rowCount < 1) return res.sendStatus(400);
+    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${Db.replaceQuotes(newAdmin.clientId)}';`)).rowCount < 1) return res.sendStatus(400);
     if (await Db.getDynamicObject(newAdmin.clientId, "users", newAdmin.name)) return res.sendStatus(409);
     var usergroup = { name: uuidv4(), label: newAdmin.name };
     await Db.insertDynamicObject(newAdmin.clientId, "usergroups", usergroup);
@@ -67,9 +67,9 @@ router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clie
     if (!element || Object.keys(element).length < 1 || !element.name) {
         return res.sendStatus(400);
     }
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clients (name, label) VALUES ('${element.name}','${element.name}');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${element.name}','${co.modules.base}');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${element.name}','${co.modules.doc}');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clients (name, label) VALUES ('${Db.replaceQuotes(element.name)}','${Db.replaceQuotes(element.name)}');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(element.name)}','${Db.replaceQuotes(co.modules.base)}');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(element.name)}','${Db.replaceQuotes(co.modules.doc)}');`);
     res.send({_id:element.name,name:element.name});
 });
 
@@ -84,7 +84,7 @@ router.put('/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.cl
     // For the case that only the _id had to be updated, return the original client, because the _id cannot be changed
     if (client._id && Object.keys(client).length < 2) return res.send(client);
     delete client._id; // When client object also contains the _id field
-    var result = await Db.query(Db.PortalDatabaseName, `UPDATE clients SET label = '${client.name}' WHERE name = '${req.params.id}';`);
+    var result = await Db.query(Db.PortalDatabaseName, `UPDATE clients SET label = '${Db.replaceQuotes(client.name)}' WHERE name = '${Db.replaceQuotes(req.params.id)}';`);
     if (result.rowCount < 1) return res.sendStatus(404);
     return res.send(client);
 });

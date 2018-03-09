@@ -113,7 +113,7 @@ router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES
  * }
  */
 router.get('/values/:modelName/:id', auth(false, false, co.modules.base), validateSameClientId(), async(req, res) => {
-    var modelname = req.params.modelName;
+    var modelname = Db.replaceQuotesAndRemoveSemicolon(req.params.modelName);
     // https://dba.stackexchange.com/a/72139, https://dba.stackexchange.com/a/69658/145998
     var query = `
     SELECT
@@ -137,7 +137,7 @@ router.get('/values/:modelName/:id', auth(false, false, co.modules.base), valida
         LEFT JOIN dynamicattributeoptions dao ON dao.dynamicattributename = a.dynamicattributename
     ) b
     LEFT JOIN dynamicattributevalues dav ON dav.dynamicattributename = b.dynamicattributename AND dav.entityname = b.entityname
-    WHERE b.entityname = '${req.params.id}'
+    WHERE b.entityname = '${Db.replaceQuotes(req.params.id)}'
     GROUP BY b.type::jsonb, dav.value
     ORDER BY type::jsonb->>'name_en'
     `;
@@ -188,7 +188,7 @@ router.post('/values/:modelName/:id', auth(false, false, co.modules.base), valid
     var dynamicAttributeValues = req.body;
     if (!Array.isArray(dynamicAttributeValues)) return res.sendStatus(400); 
     if (dynamicAttributeValues.find(v => !v.dynamicAttributeId)) return res.sendStatus(400);
-    var dynamicattributenames = dynamicAttributeValues.map(dav => `'${dav.dynamicAttributeId}'`);
+    var dynamicattributenames = dynamicAttributeValues.map(dav => `'${Db.replaceQuotes(dav.dynamicAttributeId)}'`);
     var dynamicattributes = dynamicattributenames.length > 0 ? (await Db.query(clientname, `SELECT * FROM dynamicattributes WHERE name IN (${dynamicattributenames.join(",")});`)).rows : [];
     if (dynamicattributes.length !== dynamicAttributeValues.length) return res.sendStatus(400); // Some attributes do not exist or multiply defined in body
     var valuestoinsert = dynamicAttributeValues.map(dav => { return {

@@ -56,11 +56,11 @@ router.get('/', auth(), async(req, res) => {
     var allModuleKeys = Object.keys(co.modules).map((k) => co.modules[k]);
     var modulenames = clientname === Db.PortalDatabaseName
         ? allModuleKeys.filter(mk => mc.modules[mk].forportal) // Portal has only some modules allowed
-        : (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${clientname}' AND modulename IN (${allModuleKeys.map((k) => `'${k}'`).join(",")});`)).rows.map((r) => r.modulename);
+        : (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}' AND modulename IN (${allModuleKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(",")});`)).rows.map((r) => r.modulename);
     var fullmenu = extractMenu(modulenames); // Clone it for overwriting
     if (!req.user.isadmin) {
         var permissionKeys = await configHelper.getAvailablePermissionKeysForClient(clientname);
-        var permissions = permissionKeys.length > 0 ? (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${req.user.usergroupname}' AND key IN (${permissionKeys.map((k) => `'${k}'`).join(',')});`)).rows : [];
+        var permissions = permissionKeys.length > 0 ? (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows : [];
         for (var i = fullmenu.length - 1; i >= 0; i--) {
             var mainMenu = fullmenu[i];
             for (var j = mainMenu.items.length - 1; j >= 0; j--) {

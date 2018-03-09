@@ -56,7 +56,7 @@ var extractSettingSets = (isUserAdmin, userClientId, allowedPermissionKeys) => {
 router.get('/', auth(false, false, co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var permissionKeysForClient = await ch.getAvailablePermissionKeysForClient(clientname);
-    var permissionKeysForUser = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${req.user.usergroupname}' AND key IN (${permissionKeysForClient.map((k) => `'${k}'`).join(',')});`)).rows.map((p) => p.key);
+    var permissionKeysForUser = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeysForClient.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows.map((p) => p.key);
     var settingSets = extractSettingSets(req.user.isadmin, clientname, permissionKeysForUser);
     res.send(settingSets);
 });

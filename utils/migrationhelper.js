@@ -22,7 +22,7 @@ async function migrateforclients(collectionname, migratorfunc, singleelementhand
             try {
                 await Db.insertDynamicObject(clientname, collectionname, mappedelement);
             } catch(err) {
-                await Db.query(clientname, `DELETE FROM ${collectionname} WHERE name='${mappedelement.name}';`);
+                await Db.query(clientname, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(collectionname)} WHERE name='${Db.replaceQuotes(mappedelement.name)}';`);
                 await Db.insertDynamicObject(clientname, collectionname, mappedelement);
             }
         }
@@ -32,7 +32,7 @@ async function migrateforclients(collectionname, migratorfunc, singleelementhand
 
 async function migrateforportal(collectionname, migratorfunc) {
     console.log(`Migrating ${collectionname} ...`);
-    await Db.query(Db.PortalDatabaseName, `DELETE FROM ${collectionname};`);
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(collectionname)};`);
     var originalelements = await mongodb.get(collectionname).find();
     for (var i = 0; i < originalelements.length; i++) {
         var originalelement = originalelements[i];
@@ -71,12 +71,12 @@ async function migratebusinesspartners() {
 
 async function migrateclientmodules() {
     console.log("Migrating clientmodules ...");
-    await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules;`);
+    await Db.query(Db.PortalDatabaseName, "DELETE FROM clientmodules;");
     var migrateclientmodules = await mongodb.get(constants.collections.clientmodules.name).find();
     for (var i = 0; i < migrateclientmodules.length; i++) {
         var clientmodule = migrateclientmodules[i];
         if (!mc.modules[clientmodule.module].forclients) continue;
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('${getclientname(clientmodule)}', '${clientmodule.module}');`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES('${Db.replaceQuotes(getclientname(clientmodule))}', '${Db.replaceQuotes(clientmodule.module)}');`);
     }
 }
 
@@ -273,7 +273,7 @@ async function migratepersons() {
 
 async function migrateportalmodules() {
     console.log("Migrating portalmodules ...");
-    await Db.query(Db.PortalDatabaseName, `DELETE FROM portalmodules;`);
+    await Db.query(Db.PortalDatabaseName, "DELETE FROM portalmodules;");
     var portalmodules = await mongodb.get(constants.collections.portalmodules.name).find();
     for (var i = 0; i < portalmodules.length; i++) {
         var portalmodule = portalmodules[i];
@@ -287,7 +287,7 @@ async function migrateportalmodules() {
 
 async function migrateportals() {
     console.log("Migrating portals ...");
-    await Db.query(Db.PortalDatabaseName, `DELETE FROM portals;`);
+    await Db.query(Db.PortalDatabaseName, "DELETE FROM portals;");
     var portals = await mongodb.get(constants.collections.portals.name).find();
     for (var i = 0; i < portals.length; i++) {
         var portal = portals[i];
@@ -328,7 +328,7 @@ async function migrateusergroups() {
 async function migrateusers() {
     console.log("Migrating users ...");
     var usernames = {};
-    await Db.query(Db.PortalDatabaseName, `DELETE FROM allusers;`);
+    await Db.query(Db.PortalDatabaseName, "DELETE FROM allusers;");
     var originalusers = await mongodb.get(constants.collections.users.name).find();
     for (var i = 0; i < originalusers.length; i++) {
         var originaluser = originalusers[i];
@@ -343,7 +343,7 @@ async function migrateusers() {
             isadmin: !!originaluser.isAdmin
         };
         try { // Maybe double names due to corrupt databases
-            await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${username}','${originaluser.pass}','${clientname}');`);
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${Db.replaceQuotes(username)}','${Db.replaceQuotes(originaluser.pass)}','${Db.replaceQuotes(clientname)}');`);
             await Db.insertDynamicObject(clientname, "users", mappeduser);
         } catch(err) {
             console.log(err);

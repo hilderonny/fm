@@ -15,7 +15,9 @@ var uuidv4 = require("uuid").v4;
  * zurück. Dabei ist egal, ob die Entität in type1 oder type2 definiert ist.
  */
 router.get('/:entityType/:id', auth(false, false, co.modules.base), async(req, res) => {
-    var relations = (await Db.query(req.user.clientname, `SELECT * FROM relations WHERE (name1='${req.params.id}' AND datatype1name='${req.params.entityType}') OR (name2='${req.params.id}' AND datatype2name='${req.params.entityType}');`)).rows;
+    var id = Db.replaceQuotes(req.params.id);
+    var entitytype = Db.replaceQuotes(req.params.entityType);
+    var relations = (await Db.query(req.user.clientname, `SELECT * FROM relations WHERE (name1='${id}' AND datatype1name='${entitytype}') OR (name2='${id}' AND datatype2name='${entitytype}');`)).rows;
     res.send(relations.map((r) => { return {
         _id: r.name,
         id1: r.name1,
@@ -38,8 +40,8 @@ router.post('/', auth(false, false, co.modules.base), async(req, res) => {
     var relation = req.body;
     if (!relation || !relation.type1 || !relation.type2 || !relation.id1 || !relation.id2) return res.sendStatus(400);
     try {
-        if ((await Db.query(clientname, `SELECT 1 FROM ${relation.type1} WHERE name='${relation.id1}';`)).rowCount < 1) return res.sendStatus(400);
-        if ((await Db.query(clientname, `SELECT 1 FROM ${relation.type2} WHERE name='${relation.id2}';`)).rowCount < 1) return res.sendStatus(400);
+        if ((await Db.query(clientname, `SELECT 1 FROM ${Db.replaceQuotes(relation.type1)} WHERE name='${Db.replaceQuotes(relation.id1)}';`)).rowCount < 1) return res.sendStatus(400);
+        if ((await Db.query(clientname, `SELECT 1 FROM ${Db.replaceQuotes(relation.type2)} WHERE name='${Db.replaceQuotes(relation.id2)}';`)).rowCount < 1) return res.sendStatus(400);
     } catch(e) {
         // When datatypes do not exist, maybe at other client?
         return res.sendStatus(400);

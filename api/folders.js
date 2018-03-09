@@ -62,7 +62,7 @@ LEFT JOIN (
  * Mit dem Parameter "type" kann man den Dokumententyp filtern, "image" matched zum Beispiel auf alle Bildtypen ( WHERE type LIKE "image*")
  */
 router.get('/allFoldersAndDocuments', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), async(req, res) => {
-    var filter = req.query.type ? ` WHERE documents.type LIKE '${req.query.type}%'` : '';
+    var filter = req.query.type ? ` WHERE documents.type LIKE '${Db.replaceQuotes(req.query.type)}%'` : '';
     var query = `
     (SELECT name AS "_id", label AS "name", parentfoldername AS "parentFolderId", 'folder' AS "type" FROM folders)
     UNION ALL
@@ -88,7 +88,7 @@ router.get('/forIds', auth(false, false, co.modules.documents), async(req, res) 
     if (!req.query.ids) {
         return res.send([]);
     }
-    var namestofind = req.query.ids.split(",").map((n) => `'${n}'`).join(",");
+    var namestofind = req.query.ids.split(",").map((n) => `'${Db.replaceQuotes(n)}'`).join(",");
     var query = `${folderquery} WHERE folders.name IN (${namestofind})`;
     var result = (await Db.query(req.user.clientname, query))[4]; // 0 = DROP, 1 = CREATE, 2 = DROP, 3 = CREATE, 4 = SELECT
     res.send(result.rowCount > 0 ? result.rows.map((r) => mapFields(r, req.user.clientname)) : []);
@@ -100,7 +100,7 @@ router.get('/forIds', auth(false, false, co.modules.documents), async(req, res) 
  * path: [{ name: label }, ...] inbetween folder names from root level to folder
  */
 router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), validateSameClientId(co.collections.folders.name), async(req, res) => {
-    var query = `${folderquery} WHERE folders.name = '${req.params.id}'`;
+    var query = `${folderquery} WHERE folders.name = '${Db.replaceQuotes(req.params.id)}'`;
     var result = (await Db.query(req.user.clientname, query))[4]; // 0 = DROP, 1 = CREATE, 2 = DROP, 3 = CREATE, 4 = SELECT
     if (result.rowCount < 1) return res.sendStatus(404);
     res.send(mapFields(result.rows[0], req.user.clientname));

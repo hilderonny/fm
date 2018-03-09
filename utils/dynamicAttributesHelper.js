@@ -26,9 +26,9 @@ module.exports.deleteAllDynamicAttributeValuesForEntity = async(clientname, id) 
  * }
  */
 module.exports.createDynamicAttribute = async(da) => {
-    var result = await Db.query(da.clientId, `SELECT 1 FROM dynamicattributes WHERE identifier='${da.identifier}';`);
+    var result = await Db.query(da.clientId, `SELECT 1 FROM dynamicattributes WHERE identifier='${Db.replaceQuotes(da.identifier)}';`);
     if (da.identifier && result.rowCount > 0) {
-        await Db.query(da.clientId, `UPDATE dynamicattributes SET isinactive=false WHERE identifier='${da.identifier}';`);
+        await Db.query(da.clientId, `UPDATE dynamicattributes SET isinactive=false WHERE identifier='${Db.replaceQuotes(da.identifier)}';`);
         return result.rows[0];
     } else {
         var insertedDa = {
@@ -96,7 +96,7 @@ module.exports.deactivateDynamicAttributesForClient = async(clientId, moduleName
         var collection = mod.dynamicattributes[collectionName];
         for (var j = 0; j < collection.length; j++) {
             var attributeDefinition = collection[j];
-            await Db.query(clientId, `UPDATE dynamicattributes SET isinactive=true WHERE identifier='${attributeDefinition.identifier}';`);
+            await Db.query(clientId, `UPDATE dynamicattributes SET isinactive=true WHERE identifier='${Db.replaceQuotes(attributeDefinition.identifier)}';`);
         }
     }
 };
@@ -109,7 +109,7 @@ module.exports.deactivateDynamicAttributesForClient = async(clientId, moduleName
  * @returns Promise
 */
 module.exports.createDynamicAttributeOption = async(dao, clientname) => {
-    if ((await Db.query(clientname, `SELECT 1 FROM dynamicattributeoptions WHERE dynamicattributename='${dao.dynamicAttributeId}' AND value='${dao.value}';`)).rowCount < 1) {
+    if ((await Db.query(clientname, `SELECT 1 FROM dynamicattributeoptions WHERE dynamicattributename='${Db.replaceQuotes(dao.dynamicAttributeId)}' AND value='${Db.replaceQuotes(dao.value)}';`)).rowCount < 1) {
         dao = {
             name: uuidv4(),
             dynamicattributename: dao.dynamicAttributeId,

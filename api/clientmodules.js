@@ -10,9 +10,9 @@ var co = require('../utils/constants');
 var mc = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
 
 router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), async(req, res) => {
-    if ((await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${req.params.id}';`)).rowCount < 1) return res.sendStatus(404);
+    if ((await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(req.params.id)}';`)).rowCount < 1) return res.sendStatus(404);
     var allModuleKeys = Object.keys(co.modules).filter(mk => mc.modules[mk].forclients).map((k) => co.modules[k]);
-    var clientModulesOfClient = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${req.params.id}' AND modulename IN (${allModuleKeys.map((k) => `'${k}'`).join(",")});`)).rows;
+    var clientModulesOfClient = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${Db.replaceQuotes(req.params.id)}' AND modulename IN (${allModuleKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(",")});`)).rows;
     var result = allModuleKeys.map((key) => {
         var existingClientModule = clientModulesOfClient.find((c) => c.modulename === key);
         return {
@@ -28,11 +28,11 @@ router.get('/forClient/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.
 router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), async(req, res) => {
     var clientModule = req.body;
     if (!clientModule || Object.keys(clientModule).length < 2 || !clientModule.clientId || !clientModule.module) return res.sendStatus(400);
-    var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${clientModule.clientId}';`);
+    var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(clientModule.clientId)}';`);
     if (result.rowCount < 1) return res.sendStatus(400);
     var client = result.rows[0];
-    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clientmodules WHERE clientname='${clientModule.clientId}' AND modulename = '${clientModule.module}';`)).rowCount < 1) {
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${clientModule.clientId}', '${clientModule.module}');`);
+    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientModule.clientId)}' AND modulename = '${Db.replaceQuotes(clientModule.module)}';`)).rowCount < 1) {
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(clientModule.clientId)}', '${Db.replaceQuotes(clientModule.module)}');`);
         await dah.activateDynamicAttributesForClient(clientModule.clientId, clientModule.module);
     }
     clientModule._id = clientModule.clientId + "_--_" + clientModule.module;
@@ -48,10 +48,10 @@ router.delete('/:id', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules
     if (idparts.length !== 2) return res.sendStatus(404);
     var clientname = idparts[0];
     var modulename = idparts[1];
-    var result = await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clientmodules WHERE clientname='${clientname}' AND modulename = '${modulename}';`);
+    var result = await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}' AND modulename = '${Db.replaceQuotes(modulename)}';`);
     if (result.rowCount < 1) return res.sendStatus(404);
     await dah.deactivateDynamicAttributesForClient(clientname, modulename);
-    await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE clientname='${clientname}' AND modulename = '${modulename}';`);
+    await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}' AND modulename = '${Db.replaceQuotes(modulename)}';`);
     res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
 });
 

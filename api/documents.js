@@ -65,7 +65,7 @@ var downloadDocument = (response, clientname, document) => {
 // Download a specific shared document without authentication 
 router.get('/share/:clientname/:documentname', async(req, res) => {
     var clientname = req.params.clientname;
-    var clientresult = await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${clientname}';`);
+    var clientresult = await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${Db.replaceQuotes(clientname)}';`);
     if(clientresult.rowCount < 1) return res.sendStatus(404);
     var document = await Db.getDynamicObject(clientname, co.collections.documents.name, req.params.documentname);
     if (!document) return res.sendStatus(404);
@@ -90,7 +90,7 @@ router.get('/forIds', auth(false, false, co.modules.documents), async(req, res) 
     if (!req.query.ids) {
         return res.send([]);
     }
-    var namestofind = req.query.ids.split(",").map((n) => `'${n}'`).join(",");
+    var namestofind = req.query.ids.split(",").map((n) => `'${Db.replaceQuotes(n)}'`).join(",");
     var query = `${documentquery} WHERE documents.name IN (${namestofind})`;
     var result = (await Db.query(req.user.clientname, query))[2]; // 0 = DROP, 1 = CREATE, 2 = SELECT
     res.send(result.rowCount > 0 ? result.rows.map((r) => mapFields(r, req.user.clientname)) : []);
@@ -98,7 +98,7 @@ router.get('/forIds', auth(false, false, co.modules.documents), async(req, res) 
 
 // Get a specific document 
 router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), validateSameClientId(co.collections.documents.name), async(req, res) => {
-    var query = `${documentquery} WHERE documents.name = '${req.params.id}'`;
+    var query = `${documentquery} WHERE documents.name = '${Db.replaceQuotes(req.params.id)}'`;
     var result = (await Db.query(req.user.clientname, query))[2]; // 0 = DROP, 1 = CREATE, 2 = SELECT
     if (result.rowCount < 1) return res.sendStatus(404);
     var document = result.rows[0];
