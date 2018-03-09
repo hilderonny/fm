@@ -39,10 +39,10 @@
 
                 <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
 
-                <md-card-actions layout="row" layout-align="end center">
+                <md-card-actions layout="row" layout-align="space-between center">
+                    <md-button class="md-raised md-warn" ng-if="!isNewPerson && canWritePersons" ng-click="deletePerson()"><span translate>TRK_PERSONS_DELETE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="isNewPerson && canWritePersons" ng-click="createPerson()"><span translate>TRK_PERSONS_CREATE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="!isNewPerson && canWritePersons" ng-click="savePerson()"><span translate>TRK_PERSONS_SAVE</span></md-button>
-                    <md-button class="md-raised md-warn" ng-if="!isNewPerson && canWritePersons" ng-click="deletePerson()"><span translate>TRK_PERSONS_DELETE</span></md-button>
                 </md-card-actions>
             </form>
         </md-card-content>
