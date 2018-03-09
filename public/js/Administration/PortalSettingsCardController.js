@@ -41,6 +41,35 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
         $http.post('/api/portalmanagement/triggerupdate/');
     };
 
+    var defaultIntervalValue = 12;
+    $scope.updateLocalConfig = function(autoUpdateMode) {
+        var settingsToSend = {autoUpdateMode: autoUpdateMode};
+        if(autoUpdateMode == true){
+            $scope.settings.updateTimerInterval = defaultIntervalValue; //set an intial default value
+            settingsToSend.updateTimerInterval = defaultIntervalValue;
+        }
+        $http.put('/api/portalmanagement/', settingsToSend).then(function(res){
+           return $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
+        }).then(function(response) {
+            $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            });
+        });
+    }
+
+    $scope.saveTimeInterval = function(){
+        var timerIntervalInMS =  $scope.settings.updateTimerInterval; //save time interval in hours
+        var settingsToSend = {updateTimerInterval: timerIntervalInMS};
+        $http.put('/api/portalmanagement/', settingsToSend).then(function(){
+          return  $http.post('/api/portalmanagement/manageAutoUpdate', settingsToSend);
+        }).then(function(response) {
+            $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
+                $mdToast.show($mdToast.simple().textContent(translations.TRK_SETTINGS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+            });
+        });
+    }
+
+
     // Uploads an update file and extracts it
     $scope.uploadFile = function(fileinput) { // http://stackoverflow.com/a/17923521
         var file = fileinput.files[0];
@@ -87,7 +116,9 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
         $http.get('/api/portalmanagement/').then(function(response) {
             $scope.settings = { 
                 licenseServer: response.data.licenseserverurl, 
-                licenseKey: response.data.licensekey 
+                licenseKey: response.data.licensekey,
+                autoUpdateMode: response.data.autoUpdateMode,
+                updateTimerInterval: response.data.updateTimerInterval
             };
             $scope.canWritePortalSettings = $rootScope.canWrite('PERMISSION_SETTINGS_PORTAL');
             utils.setLocation('/settings/TRK_SETTINGSET_PORTAL_GENERAL');

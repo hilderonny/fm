@@ -23,10 +23,10 @@
 
                 <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
 
-                <md-card-actions layout="row" layout-align="end center">
+                <md-card-actions layout="row" layout-align="space-between center">
+                    <md-button class="md-raised md-warn" ng-click="deleteNote()" ng-if="!isNewNote && canWriteNoteDetails" ><span translate>TRK_NOTE_DELETE</span></md-button>
                     <md-button class="md-raised md-accent" ng-click="createNote()" ng-if="isNewNote && canWriteNoteDetails"  ng-disabled="notesForm.$invalid"><span translate>TRK_NOTE_CREATE</span></md-button>
                     <md-button class="md-raised md-accent" ng-click="saveNote()" ng-if="!isNewNote && canWriteNoteDetails"  ng-disabled="notesForm.$invalid"><span translate>TRK_NOTE_SAVE</span></md-button>
-                    <md-button class="md-raised md-warn" ng-click="deleteNote()" ng-if="!isNewNote && canWriteNoteDetails" ><span translate>TRK_NOTE_DELETE</span></md-button>
                 </md-card-actions>
 
             </form>

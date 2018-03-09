@@ -68,10 +68,10 @@
                     
                     </md-card-content>
 
-                    <md-card-actions layout="row" layout-align="end center">
+                    <md-card-actions layout="row" layout-align="space-between center">
+                        <md-button class="md-raised md-warn" ng-if="!isNewActivity && canWriteActivities" ng-click="deleteActivity()"><span translate>TRK_ACTIVITIES_DELETE</span></md-button>
                         <md-button class="md-raised md-accent" ng-if="isNewActivity && canWriteActivities" ng-click="createActivity()"><span translate>TRK_ACTIVITIES_CREATE</span></md-button>
                         <md-button class="md-raised md-accent" ng-if="!isNewActivity && canWriteActivities" ng-click="saveActivity()"><span translate>TRK_ACTIVITIES_SAVE</span></md-button>
-                        <md-button class="md-raised md-warn" ng-if="!isNewActivity && canWriteActivities" ng-click="deleteActivity()"><span translate>TRK_ACTIVITIES_DELETE</span></md-button>
                     </md-card-actions>
 
                 </form>

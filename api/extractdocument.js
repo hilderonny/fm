@@ -11,7 +11,7 @@ var multer  = require('multer')
 var upload = multer({ dest: 'uploads/' })
 var fs = require('fs');
 var path = require('path');
-var unzip = require('unzip');
+var unzip = require('unzip2');
 var documentsHelper = require('../utils/documentsHelper');
 var co = require('../utils/constants');
 
