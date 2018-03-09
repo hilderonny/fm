@@ -61,10 +61,10 @@
                     <md-button class="md-raised md-accent" ng-click="generateNewLicenseKey()"><span translate>TRK_PORTALS_GENERATE_LICENSEKEY</span></md-button>
                 </md-card-actions>
 
-                <md-card-actions layout="row" layout-align="end center">
+                <md-card-actions layout="row" layout-align="space-between center">
+                    <md-button class="md-raised md-warn" ng-if="!isNewPortal && canWritePortals" ng-click="deletePortal()"><span translate>TRK_PORTALS_DELETE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="isNewPortal && canWritePortals" ng-click="createPortal()" ng-disabled="portalsForm.$invalid"><span translate>TRK_PORTALS_CREATE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="!isNewPortal && canWritePortals" ng-click="savePortal()" ng-disabled="portalsForm.$invalid"><span translate>TRK_PORTALS_SAVE</span></md-button>
-                    <md-button class="md-raised md-warn" ng-if="!isNewPortal && canWritePortals" ng-click="deletePortal()"><span translate>TRK_PORTALS_DELETE</span></md-button>
                 </md-card-actions>
 
             </form>

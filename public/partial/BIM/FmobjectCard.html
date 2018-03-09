@@ -141,10 +141,10 @@
 
                         <ng-include flex ng-if="!isNewFmObject" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
 
-                        <md-card-actions layout="row" layout-align="end center">
+                        <md-card-actions layout="row" layout-align="space-between center">
+                            <md-button class="md-raised md-warn" ng-if="!isNewFmObject && canWriteFmObjects" ng-click="deleteFmObject()"><span translate>TRK_FMOBJECTS_DELETE</span></md-button>
                             <md-button class="md-raised md-accent" ng-if="isNewFmObject && canWriteFmObjects" ng-click="createFmObject($event)"><span translate>TRK_FMOBJECTS_CREATE</span></md-button>
                             <md-button class="md-raised md-accent" ng-if="!isNewFmObject && canWriteFmObjects" ng-click="saveFmObject()"><span translate>TRK_FMOBJECTS_SAVE</span></md-button>
-                            <md-button class="md-raised md-warn" ng-if="!isNewFmObject && canWriteFmObjects" ng-click="deleteFmObject()"><span translate>TRK_FMOBJECTS_DELETE</span></md-button>
                         </md-card-actions>
                     </form>
                 </md-card-content>

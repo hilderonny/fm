@@ -58,10 +58,10 @@
 
                 <ng-include flex ng-if="!isNewUser" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>
                 
-                <md-card-actions layout="row" layout-align="end center">
+                <md-card-actions layout="row" layout-align="space-between center">
+                    <md-button class="md-raised md-warn" ng-if="!isNewUser && canWriteUserDetails" ng-click="deleteUser()"><span translate>TRK_USERS_DELETE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="isNewUser && canWriteUserDetails" ng-click="createUser()" ng-disabled="usersForm.$invalid"><span translate>TRK_USERS_CREATE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="!isNewUser && canWriteUserDetails" ng-click="saveUser()" ng-disabled="usersForm.$invalid"><span translate>TRK_USERS_SAVE</span></md-button>
-                    <md-button class="md-raised md-warn" ng-if="!isNewUser && canWriteUserDetails" ng-click="deleteUser()"><span translate>TRK_USERS_DELETE</span></md-button>
                 </md-card-actions>
 
             </form>

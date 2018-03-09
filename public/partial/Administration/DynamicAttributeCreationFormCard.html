@@ -41,10 +41,15 @@
                     <input ng-if = "language !== 'en'" ng-model="dynamicattribute['name_' + language]" >
                 </md-input-container>
 
-                <md-card-actions layout="row" layout-align="end center">
+                <md-card-actions layout="row" layout-align="space-between center">
+                    <md-button class="md-raised md-warn" ng-if="!isNewAttribute && canWriteDynamicAttributes && !dynamicattribute.identifier" ng-click="deleteAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="isNewAttribute && canWriteDynamicAttributes" ng-click="createAttribute()" ng-disabled="dynamicAttributesForm.$invalid"><span translate>TRK_DYNAMICATTRIBUTES_CREATE</span></md-button>
                     <md-button class="md-raised md-accent" ng-if="!isNewAttribute && canWriteDynamicAttributes" ng-click="saveAttribute()" ng-disabled="dynamicAttributesForm.$invalid"><span translate>TRK_DYNAMICATTRIBUTES_SAVE</span></md-button>
                     <md-button class="md-raised md-warn" ng-if="!isNewAttribute && canWriteDynamicAttributes && !dynamicattribute.identifier" ng-click="deleteAttribute()"><span translate>TRK_DYNAMICATTRIBUTES_DELETE</span></md-button>
+                    <md-button class="md-raised md-warn" ng-if="!isNewAttribute && canWriteDynamicAttributes && dynamicattribute.identifier" ng-click="toggleVisibility()" aria-label="toggle_attribute_visibility">
+                        <span ng-if="attributeVisibility" translate>TRK_DYNAMICATTRIBUTES_DEACTIVATE</span>
+                        <span ng-if="!attributeVisibility" translate>TRK_DYNAMICATTRIBUTES_ACTIVATE</span>
+                    </md-button>                
                 </md-card-actions>
 
             </form>  
