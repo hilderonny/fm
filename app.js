@@ -93,27 +93,27 @@ var prepareIncludes = (fs) => {
     };
 
 // Server initialization
-var init = () => {
+async function init() {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
+    var nocache = require('./middlewares/nocache');
     var db = require('./middlewares/db');
     var nocache = require('./middlewares/nocache');
-    db.init().then(() => {
-        var dah = require('./utils/dynamicAttributesHelper');
-        // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
-        var promises = [];
-        Object.keys(moduleConfig.modules).forEach((moduleName) => {
-            dah.activateDynamicAttributesForClient(null, moduleName);
-        });
-    });
+    await db.init();
+    var dah = require('./utils/dynamicAttributesHelper');
+    // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
+    var promises = [];
+    var moduleNames = Object.keys(moduleConfig.modules);
+    for (var i = 0; i < moduleNames.length; i++) {
+        await dah.activateDynamicAttributesForClient(null, moduleNames[i]);
+    }
     var fs = require('fs');
     // Initialize and migrate PostgreSQL database
-    require("./utils/db").Db.init(localConfig.migratedatabase).then(() => {
-        if (localConfig.migratedatabase) {
-            require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
-        }
-        localConfig.migratedatabase = false;
-        fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
-    });
+    await require("./utils/db").Db.init(localConfig.migratedatabase);
+    if (localConfig.migratedatabase) {
+        await require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
+    }
+    localConfig.migratedatabase = false;
+    fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
     if(localConfig.migratedatabase) {
         console.log("Recreating database. Please restart the app after finishing.");
         return;
@@ -217,18 +217,5 @@ var init = () => {
     }
 };
 
-// Install required dependencies
-if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'development' && localConfig.npmInstallCommand) {
-    console.log('Installing dependencies with npm ...\n');
-    require('child_process').exec(localConfig.npmInstallCommand, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-        }
-        if (stdout) console.log(stdout);
-        if (stderr) console.log(stderr);
-        init();
-    });
-} else {
-    init();
-}
+// Installation of required dependencies must be done by hand when needed
+init();

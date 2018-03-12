@@ -32,7 +32,7 @@ var handleModuleConfig = (originalModuleConfigString, moduleNameList) => {
         var appModule = originalModuleConfigJson.modules[moduleName];
         resultJson.modules[moduleName] = (appModule);
     });
-    return JSON.stringify(resultJson);
+    return JSON.stringify(resultJson, null, 4);
 }
 
 /**

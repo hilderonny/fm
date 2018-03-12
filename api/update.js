@@ -41,7 +41,7 @@ router.get('/download', async(req, res) => {
     var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
     var version = packageJson.version;
     var buffer = await appPackager.pack(moduleNames, version);
-    res.set({'Content-disposition': `attachment; filename=${portal.name} ${version}.zip`}).send(buffer);
+    res.set({'Content-disposition': `attachment; filename=${portal.label}-${version}.zip`}).send(buffer);
 });
 
 /**

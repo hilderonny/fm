@@ -15,7 +15,7 @@ var Db = {
     isInitialized: false,
 
     init: async(dropDatabase) => {
-        if (!dropDatabase && Db.isInitialized) return;
+        if (Db.isInitialized) return;
         Object.keys(Db.pools).forEach((k) => {
             Db.pools[k].end();
             delete Db.pools[k];
@@ -295,14 +295,17 @@ var Db = {
 
     initPortalDatabase: async() => {
         var portalDatabaseName = `${dbprefix}_${Db.PortalDatabaseName}`;
+        var recreateportaladmin = localconfig.recreatePortalAdmin;
         // Create portal database with tables clients and allusers when it does not exist
         if ((await Db.queryDirect("postgres", `SELECT 1 FROM pg_database WHERE datname = '${Db.replaceQuotes(portalDatabaseName)}';`)).rowCount === 0) {
+            // Portal database doea not exist, maybe fresh installation
+            recreateportaladmin = true; // We need this on new installations
             await Db.queryDirect("postgres", `CREATE DATABASE ${Db.replaceQuotesAndRemoveSemicolon(portalDatabaseName)};`);
             await Db.createDefaultTables(Db.PortalDatabaseName); // Create tables users, usergroups and permissions
             await Db.createDefaultPortalTables();
         }
         // When portal admin locked out, recreate it
-        if (localconfig.recreatePortalAdmin) {
+        if (recreateportaladmin) {
             var adminUserGroupName = "admin";
             var adminUserName = "admin";
             var adminUserPassword = "admin";

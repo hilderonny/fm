@@ -1,4 +1,9 @@
 {   
+    "dbprefix": "Prefix to use in the table names in the PostgreSQL database server. Relevant when multiple databases are used on the server",
+    "dbhost": "Host address of the PostgreSQL database server",
+    "dbport": "Port of the PostgreSQL database server as number",
+    "dbuser": "Administrative postgres user qith rights to create databases",
+    "dbpassword": "Password of the administrative user of the postgres database. Was set when installing the postgres database",
     "autoUpdateMode" : "Set to true to enable automatic search for & intallation of updates",
     "dbName" : "Name of the mongo database, e.g. 'db'",
     "documentspath": "Path where the uploaded documents are stored. Can be relative to app.js or absolute, e.g. 'documents/'",
