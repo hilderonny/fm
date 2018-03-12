@@ -3,7 +3,7 @@
  * @example require('testhelper').doLoginAndGetToken('admin', 'admin').then(function(token){ ... });
  */
 var superTest = require('supertest');
-var server = require('../app');
+var app = require('../app');
 var bcryptjs = require('bcryptjs');
 var assert = require('assert');
 var hat = require('hat');
@@ -17,6 +17,19 @@ var Db = require("../utils/db").Db;
 
 var th = module.exports;
 
+async function waitForServer() {
+    return new Promise((resolve, reject) => {
+        var counts = 100;
+        function check() {
+            counts = counts - 1;
+            if (counts < 1) reject("Timeout waiting for server");
+            if (app.server) resolve();
+            else setTimeout(check, 100);
+        }
+        setTimeout(check, 100);
+    });
+}
+
 th.dbObjects = {};
 
 // Generate license key with hat, https://github.com/substack/node-hat
@@ -25,6 +38,11 @@ var generateLicenseKey = () => {
 };
 
 th.cleanDatabase = async () => {
+    await waitForServer();
+    th.get = superTest(app.server).get;
+    th.post = superTest(app.server).post;
+    th.put = superTest(app.server).put;
+    th.del = superTest(app.server).del;
     await Db.init(true);
 };
 
@@ -39,26 +57,6 @@ th.cleanTable = async(tablename, inportal, inclients) => {
 th.doLoginAndGetToken = async(username, password) => {
     return (await th.post("/api/login").send({ username: username, password: password })).body.token;
 };
-
-/**
- * Vereinfachter Zugriff auf superTest.get()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
- */
-th.get = superTest(server).get;
-
-/**
- * Vereinfachter Zugriff auf superTest.post()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
- */
-th.post = superTest(server).post;
-
-/**
- * Vereinfachter Zugriff auf superTest.put()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
- */
-th.put = superTest(server).put;
-
-/**
- * Vereinfachter Zugriff auf superTest.del()-Funktion. Damit spart man sich das Einbinden von superTest in Tests
- */
-th.del = superTest(server).del;
 
 th.prepareClients = async() => {
     await th.cleanTable("clients", true, false);

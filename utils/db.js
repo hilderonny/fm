@@ -15,7 +15,7 @@ var Db = {
     isInitialized: false,
 
     init: async(dropDatabase) => {
-        if (Db.isInitialized) return;
+        if (!dropDatabase && Db.isInitialized) return;
         Object.keys(Db.pools).forEach((k) => {
             Db.pools[k].end();
             delete Db.pools[k];

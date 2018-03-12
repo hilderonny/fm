@@ -7,6 +7,8 @@ process.chdir(__dirname);
 var moduleConfig = require('./config/module-config.json');
 var localConfig = require('./config/localconfig.json');
 
+module.exports = {}; // For tests, see testhelpers
+
 /**
  * Extracts all api paths from the module config
  * usable for app.use().
@@ -193,7 +195,7 @@ async function init() {
 
     if (process.env.NODE_ENV === 'test') {
         // HTTP Server als Modul exportieren, damit Tests damit laufen können
-        module.exports = server;
+        module.exports.server = server;
     }
 
     // Store time of start in cached localconfig to force reload of clients after server restart
