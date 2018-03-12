@@ -17,13 +17,19 @@ var Db = require("../utils/db").Db;
 
 var th = module.exports;
 
-async function waitForServer() {
+th.waitForServer = async() => {
     return new Promise((resolve, reject) => {
         var counts = 100;
         function check() {
             counts = counts - 1;
             if (counts < 1) reject("Timeout waiting for server");
-            if (app.server) resolve();
+            if (app.server) {
+                th.get = superTest(app.server).get;
+                th.post = superTest(app.server).post;
+                th.put = superTest(app.server).put;
+                th.del = superTest(app.server).del;
+                resolve();
+            }
             else setTimeout(check, 100);
         }
         setTimeout(check, 100);
@@ -38,11 +44,7 @@ var generateLicenseKey = () => {
 };
 
 th.cleanDatabase = async () => {
-    await waitForServer();
-    th.get = superTest(app.server).get;
-    th.post = superTest(app.server).post;
-    th.put = superTest(app.server).put;
-    th.del = superTest(app.server).del;
+    await th.waitForServer();
     await Db.init(true);
 };
 
