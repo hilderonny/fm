@@ -57,9 +57,10 @@ router.post('/newadmin', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modu
     if (await Db.getDynamicObject(newAdmin.clientId, "users", newAdmin.name)) return res.sendStatus(409);
     var usergroup = { name: uuidv4(), label: newAdmin.name };
     await Db.insertDynamicObject(newAdmin.clientId, "usergroups", usergroup);
-    var user = { name: newAdmin.name, password: bcryptjs.hashSync(newAdmin.pass), usergroupname: usergroup.name, isadmin: true };
-    await Db.insertDynamicObject(newAdmin.clientId, "users", user);
-    res.send({ _id: user.name, name: user.name, userGroupId: user.usergroupname, clientId: newAdmin.clientId, isAdmin: user.isadmin });
+    var usertoinsert = { name: newAdmin.name, password: bcryptjs.hashSync(newAdmin.pass), usergroupname: usergroup.name, isadmin: true };
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES('${Db.replaceQuotes(usertoinsert.name)}', '${Db.replaceQuotes(usertoinsert.password)}', '${Db.replaceQuotes(newAdmin.clientId)}');`);
+    await Db.query(newAdmin.clientId, `INSERT INTO users (name, label, password, usergroupname, isadmin) VALUES('${Db.replaceQuotes(usertoinsert.name)}', '${Db.replaceQuotes(usertoinsert.name)}', '${Db.replaceQuotes(usertoinsert.password)}', '${Db.replaceQuotes(usertoinsert.usergroupname)}', ${!!usertoinsert.isadmin});`);
+    res.send({ _id: usertoinsert.name, name: usertoinsert.name, userGroupId: usertoinsert.usergroupname, clientId: newAdmin.clientId, isAdmin: usertoinsert.isadmin });
 });
 
 router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), async(req, res) => {
@@ -67,9 +68,7 @@ router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clie
     if (!element || Object.keys(element).length < 1 || !element.name) {
         return res.sendStatus(400);
     }
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clients (name, label) VALUES ('${Db.replaceQuotes(element.name)}','${Db.replaceQuotes(element.name)}');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(element.name)}','${Db.replaceQuotes(co.modules.base)}');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(element.name)}','${Db.replaceQuotes(co.modules.doc)}');`);
+    await Db.createClient(element.name, element.name);
     res.send({_id:element.name,name:element.name});
 });
 
