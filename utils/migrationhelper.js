@@ -230,34 +230,16 @@ async function migratepartneraddresses() {
 }
 
 async function migratepermissions() {
-    var permissionmap = {
-        ADMINISTRATION_CLIENT: 'clients',
-        ADMINISTRATION_SETTINGS: undefined,
-        ADMINISTRATION_USER: 'users',
-        ADMINISTRATION_USERGROUP: 'usergroups',
-        BIM_AREAS: 'fmobjects',
-        BIM_FMOBJECT: 'fmobjects',
-        CORE_RELATIONS: 'relations',
-        CRM_BUSINESSPARTNERS: 'businesspartners',
-        CRM_PERSONS: 'persons',
-        LICENSESERVER_PORTAL: 'portals',
-        OFFICE_ACTIVITY: 'activities',
-        OFFICE_DOCUMENT: 'documents',
-        OFFICE_NOTE: 'notes',
-        SETTINGS_CLIENT: 'clientsettings',
-        SETTINGS_CLIENT_DYNAMICATTRIBUTES: undefined,
-        SETTINGS_PORTAL: undefined,
-        SETTINGS_USER: undefined
+    var originalelements = await mongodb.get(constants.collections.permissions.name).find();
+    for (var i = 0; i < originalelements.length; i++) {
+        var orig = originalelements[i];
+        var clientname = getclientname(orig);
+        try {
+            await Db.query(clientname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${orig.userGroupId.toString()}', '${orig.key}', ${!!orig.canWrite})`);
+        } catch(err) {
+            await Db.query(clientname, `UPDATE permissions SET canwrite = ${!!orig.canWrite} WHERE usergroupname = '${orig.userGroupId.toString()}' AND key = '${orig.key}'`);
+        }
     }
-    await migrateforclients(constants.collections.permissions.name, (orig) => {
-        var datatypename = permissionmap[orig.key];
-        return datatypename ? {
-            name: orig._id.toString(),
-            usergroupname: orig.userGroupId.toString(),
-            canwrite: !!orig.canWrite,
-            datatypename: permissionmap[orig.key]
-        } : undefined;
-    });
 }
 
 async function migratepersons() {
@@ -380,3 +362,5 @@ module.exports.copydatabasefrommongodbtopostgresql = async() => {
     await migraterelations();
     console.log("Migration done.");
 }
+
+migratepermissions();
