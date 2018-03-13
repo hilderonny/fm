@@ -69,6 +69,8 @@ router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clie
         return res.sendStatus(400);
     }
     await Db.createClient(element.name, element.name);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(element.name)}', '${Db.replaceQuotes(co.modules.base)}');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(element.name)}', '${Db.replaceQuotes(co.modules.doc)}');`);
     res.send({_id:element.name,name:element.name});
 });
 
