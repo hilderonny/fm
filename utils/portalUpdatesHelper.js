@@ -9,7 +9,8 @@ var fs = require('fs');
  */
 module.exports.triggerUpdate = function(){
     return new Promise((resolve, reject) => {
-        var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());  //require('../config/localconfig.json') cannot be used becuase require is synchronous and only reads the file once, following calls return the result from cache, which prevents unit testing
+        try {
+            var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());  //require('../config/localconfig.json') cannot be used becuase require is synchronous and only reads the file once, following calls return the result from cache, which prevents unit testing
             var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
             var updateRequest = request(url);
             updateRequest.on('error', function (error) {
@@ -22,11 +23,20 @@ module.exports.triggerUpdate = function(){
                     reject(response);
                 }else{
                     var updateExtractPath = localConfig.updateExtractPath ? localConfig.updateExtractPath : './temp/';
-                    var unzipStream = updateRequest.pipe(unzip.Extract({ path: updateExtractPath }));
-                    unzipStream.on('close', function() {
-                        resolve(true);
+                    var filename = response.headers['content-disposition'].split("=")[1]; // "attachment; filename=abc.zip"
+                    updateRequest.pipe(fs.createWriteStream(updateExtractPath + filename));
+                    response.on("end", () => {
+                        console.log("Herunter geladen");
+                        fs.createReadStream(updateExtractPath + filename).pipe(unzip.Extract({ path: updateExtractPath })).on("close", () => {
+                            console.log("Extrahiert");
+                            resolve(true);
+                        });
                     });
                 }
             });
+        } catch(error) {
+            console.log(error);
+            reject(error);
+        }
     });
 };
