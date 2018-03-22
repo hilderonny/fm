@@ -337,6 +337,10 @@ module.exports.permissions = {
      */
     SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
     /**
+     * Permission to view and edit dynamic objects (recordtypes)
+     */
+    SETTINGS_CLIENT_RECORDTYPES: 'PERMISSION_SETTINGS_CLIENT_RECORDTYPES', // Erstellung von dynamischen Objekten
+    /**
      * Permission to show and change the settings of the portal (license key, etc.)
      */
     SETTINGS_PORTAL: 'PERMISSION_SETTINGS_PORTAL',

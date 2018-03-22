@@ -6,8 +6,8 @@
   "scripts": {
     "test": "cross-env HTTPS_PORT=61443 PORT=61080 NODE_ENV=test MONGO_TEST_DB=testdb POSTGRESQL_TEST_DBPREFIX=test NODE_TLS_REJECT_UNAUTHORIZED=0 nyc --reporter=html --reporter=teamcity mocha --async-only --slow 500 --timeout 900000 -R mocha-teamcity-reporter ./test/**/*.js",
     "testagent": "cross-env HTTPS_PORT=60443 PORT=60080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=testagentdb POSTGRESQL_TEST_DBPREFIX=testagent nyc --reporter=html --reporter=teamcity mocha --async-only --slow 500 --timeout 20000 -R mocha-teamcity-reporter ./test/**/*.js",
-    "testlocal": "cross-env HTTPS_PORT=62443 PORT=62080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=testlocaldb POSTGRESQL_TEST_DBPREFIX=testlocal IGNORE_FAILED_TRANSLATION_TESTS=true nyc --reporter=html --reporter=text mocha --async-only --slow 500 --timeout 10000 -R spec ./test/**/*.js",
-    "basetest": "cross-env HTTPS_PORT=63443 PORT=63080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=basetestdb POSTGRESQL_TEST_DBPREFIX=basetest nyc --reporter=html --reporter=text mocha --async-only --slow 500 --timeout 5000 -R spec ./test/*.js ./test/utils/*.js ./test/api/menu.js"
+    "testlocal": "cross-env HTTPS_PORT=62443 PORT=62080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=testlocaldb POSTGRESQL_TEST_DBPREFIX=testlocal IGNORE_FAILED_TRANSLATION_TESTS=true nyc --reporter=html --reporter=text mocha --async-only --slow 500 --timeout 900000 -R spec ./test/**/*.js",
+    "basetest": "cross-env HTTPS_PORT=63443 PORT=63080 NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0 MONGO_TEST_DB=basetestdb POSTGRESQL_TEST_DBPREFIX=basetest nyc --reporter=html --reporter=text mocha --async-only --slow 500 --timeout 900000 -R spec ./test/*.js ./test/utils/*.js ./test/api/menu.js"
   },
   "author": "Ronny Hildebrandt",
   "license": "ISC",

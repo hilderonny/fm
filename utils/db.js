@@ -166,6 +166,11 @@ var Db = {
     //     return result.rowCount > 0 ? result.rows[0] : undefined;
     // },
 
+    getDataTypes: async(databaseNameWithoutPrefix) => {
+        var result = await Db.query(databaseNameWithoutPrefix, "SELECT name, label, plurallabel, icon FROM datatypes;");
+        return result.rows;
+    },
+
     getDataTypeFields: async(databaseNameWithoutPrefix, datatypename) => {
         return (await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypefields WHERE datatypename='${Db.replaceQuotes(datatypename)}' ORDER BY name;`)).rows;
     },

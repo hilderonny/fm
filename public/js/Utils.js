@@ -40,6 +40,14 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
+        closecard: function(scope, element) {
+            if (scope.params.closeCallback) {
+                scope.params.closeCallback();
+            }
+            utils.removeCardsToTheRightOf(element);
+            utils.removeCard(element);
+        },
+
         // Removes all cards right to the given one
         removeCardsToTheRightOf: function(card) {
             // Erst mal sehen, ob der Parameter überhaupt eine Karte ist
