@@ -41,8 +41,8 @@ app.controller('AdministrationRecordTypeDetailsCardController', function($scope,
     //         if ($scope.params.saveUserCallback) {
     //             $scope.params.saveUserCallback(savedUser);
     //         }
-    //         $translate(['TRK_USERS_CHANGES_SAVED']).then(function(translations) {
-    //             $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_CHANGES_SAVED).hideDelay(1000).position('bottom right'));
+    //         $translate(['']).then(function(translations) {
+    //             $mdToast.show($mdToast.simple().textContent(translations.).hideDelay(1000).position('bottom right'));
     //             $rootScope.isLoading = false;
     //         });
     //     }, function errorCallback(response) {
@@ -56,12 +56,12 @@ app.controller('AdministrationRecordTypeDetailsCardController', function($scope,
 
     // // Click on delete button to delete an existing user
     // $scope.deleteUser = function() {
-    //     $translate(['TRK_USERS_USER_DELETED', 'TRK_YES', 'TRK_NO']).then(function(translations) {
-    //         $translate('TRK_USERS_REALLY_DELETE_USER', { userName: $scope.userName }).then(function(TRK_USERS_REALLY_DELETE_USER) {
+    //     $translate(['', '', '']).then(function(translations) {
+    //         $translate('', { userName: $scope.userName }).then(function() {
     //             var confirm = $mdDialog.confirm()
-    //                 .title(TRK_USERS_REALLY_DELETE_USER)
-    //                 .ok(translations.TRK_YES)
-    //                 .cancel(translations.TRK_NO);
+    //                 .title()
+    //                 .ok(translations.)
+    //                 .cancel(translations.);
     //             $mdDialog.show(confirm).then(function() {
     //                 $rootScope.isLoading = true;
     //                 $http.delete('/api/users/' + $scope.user._id).then(function(response) {
@@ -70,7 +70,7 @@ app.controller('AdministrationRecordTypeDetailsCardController', function($scope,
     //                     }
     //                     utils.removeCardsToTheRightOf($element);
     //                     utils.removeCard($element);
-    //                     $mdToast.show($mdToast.simple().textContent(translations.TRK_USERS_USER_DELETED).hideDelay(1000).position('bottom right'));
+    //                     $mdToast.show($mdToast.simple().textContent(translations.).hideDelay(1000).position('bottom right'));
     //                     $rootScope.isLoading = false;
     //                 });
     //             });

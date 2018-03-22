@@ -96,6 +96,7 @@ module.exports.apis = {
      * API for edititing portals
      */
     portals: 'portals',
+    recordtypes: "recordtypes",
     /**
      * API for editing relations between database entities
      */
@@ -272,6 +273,8 @@ module.exports.modules = {
      * Modul für Notizen
      */
     notes: 'notes',
+    // Administration dynamischer Objekte
+    recordtypes: "recordtypes",
     /**
      * Modul zur Verwaltung des eigenen Portals. Stellt Einstellungsseiten für Lizenzschlüssel und Updates bereit
      */

@@ -67,6 +67,7 @@ var ch = {
             if (moduleConfig.modules.clients) modules.push(moduleConfig.modules.clients);
             if (moduleConfig.modules.licenseserver) modules.push(moduleConfig.modules.licenseserver);
             if (moduleConfig.modules.portalbase) modules.push(moduleConfig.modules.portalbase);
+            if (moduleConfig.modules.recordtypes) modules.push(moduleConfig.modules.recordtypes);
             return modules;
         }
         var modulekeys = (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname = '${Db.replaceQuotes(clientname)}';`)).rows;

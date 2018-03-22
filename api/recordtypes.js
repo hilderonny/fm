@@ -3,18 +3,18 @@ var Db = require("../utils/db").Db;
 var router = require('express').Router();
 var co = require('../utils/constants');
 
-router.get('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.base), async(req, res) => {
+router.get('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     var elements = await Db.getDataTypes(req.user.clientname);
     res.send(elements);
 });
         
-router.get('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.base), async(req, res) => {
+router.get('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     // var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(req.params.id)}';`);
     // if (result.rowCount < 1) return res.sendStatus(404);
     // res.send(mapFields(result.rows[0]));
 });
 
-router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.base), async(req, res) => {
+router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     // var element = req.body;
     // if (!element || Object.keys(element).length < 1 || !element.name) {
     //     return res.sendStatus(400);
@@ -26,7 +26,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.module
     // res.send({_id:clientname,name:element.name});
 });
 
-router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.base), async(req, res) => {
+router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     // var client = req.body;
     // if (!client || Object.keys(client).length < 1) {
     //     return res.sendStatus(400);
@@ -39,7 +39,7 @@ router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.mo
     // return res.send(client);
 });
 
-router.delete('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.base), async(req, res) => {
+router.delete('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     // if (!(await Db.deleteClient(req.params.id))) return res.sendStatus(404);
     // res.sendStatus(204);
 });

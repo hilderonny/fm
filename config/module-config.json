@@ -4,7 +4,7 @@
         "base": {
             "forportal": true,
             "forclients": true,
-            "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "recordtypes", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
+            "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
             "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
@@ -19,7 +19,6 @@
                 "css/icons/material/Exit.svg",
                 "css/icons/material/Forward.svg",
                 "css/icons/material/Help.svg",
-                "css/icons/material/icons8-categorize.svg",
                 "css/icons/material/List.svg",
                 "css/icons/material/Menu.svg",
                 "css/icons/material/Menu2.svg",
@@ -37,7 +36,6 @@
                 "css/icons/office/Delete.svg",
                 "css/icons/office/Edit.svg",
                 "css/icons/office/Exit.svg",
-                "css/icons/office/icons8-categorize.svg",
                 "css/icons/office/Menu.svg",
                 "css/icons/office/Plus Math.svg",
                 "css/icons/office/User.svg",
@@ -70,8 +68,6 @@
                 "partial/Administration/DynamicAttributesCard.html",
                 "partial/Administration/DynamicAttributeElementCard.html",
                 "partial/Administration/DynamicAttributesEntityListCard.html",
-                "partial/Administration/RecordTypeDetailsCard.html",
-                "partial/Administration/RecordTypeListCard.html",
                 "partial/Administration/SettingSetListCard.html",
                 "partial/Administration/UserCard.html",
                 "partial/Administration/UsergroupCard.html",
@@ -110,8 +106,6 @@
                 "public/js/Administration/DynamicAttributeCreationFormCardController.js",
                 "public/js/Administration/DynamicAttributeElementCardController.js",
                 "public/js/Administration/DynamicAttributesEntityListCardController.js",
-                "public/js/Administration/RecordTypeDetailsCardController.js",
-                "public/js/Administration/RecordTypeListCardController.js",
                 "public/js/Administration/SettingSetListCardController.js",
                 "public/js/Administration/UserCardController.js",
                 "public/js/Administration/UsergroupCardController.js",
@@ -137,8 +131,7 @@
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
                 { "mainCard": "Administration/ClientSettingsCard", "title": "TRK_SETTINGSET_CLIENT", "type": "SETTINGSET_TYPE_CLIENT", "icon": "Briefcase", "permission": "PERMISSION_SETTINGS_CLIENT"},
-                { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "View Details", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"},
-                { "mainCard": "Administration/RecordTypeListCard", "title": "TRK_SETTINGSET_RECORDTYPES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "icons8-categorize", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES"}
+                { "mainCard": "Administration/DynamicAttributesEntityListCard", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "View Details", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES"}
             ],
             "clientdatatypes": [
 
@@ -785,6 +778,26 @@
                 { "mainCard": "Administration/PortalSettingsCard", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "type": "SETTINGSET_TYPE_PORTAL", "icon": "Server", "permission": "PERMISSION_SETTINGS_PORTAL" }
             ],
             "utils" :["portalUpdatesHelper"]
+        },
+
+        "recordtypes": {
+            "forportal": true,
+            "forclients": true,
+            "api" : [ "recordtypes" ],
+            "public" : [
+                "css/icons/material/icons8-categorize.svg",
+                "css/icons/office/icons8-categorize.svg",
+                "partial/Administration/RecordTypeDetailsCard.html",
+                "partial/Administration/RecordTypeListCard.html"
+            ],
+            "include" : [
+                "public/js/Administration/RecordTypeDetailsCardController.js",
+                "public/js/Administration/RecordTypeListCardController.js"
+            ],
+            "languages" : [ "en", "de" ],
+            "settingsets" : [
+                { "mainCard": "Administration/RecordTypeListCard", "title": "TRK_SETTINGSET_RECORDTYPES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "icons8-categorize", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES"}
+            ]
         },
 
         "ronnyseins" : {
