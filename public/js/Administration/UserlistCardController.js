@@ -1,7 +1,6 @@
 app.controller('AdministrationUserlistCardController', function($scope, $rootScope, $http, $mdDialog, $element, utils) {
     
     var saveUserCallback = function(savedUser) {
-        $scope.selectedUser.name = savedUser.name;
     };
     var deleteUserCallback = function() {
         $scope.users.splice($scope.users.indexOf($scope.selectedUser), 1);

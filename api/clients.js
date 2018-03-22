@@ -54,7 +54,8 @@ router.post('/newadmin', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modu
         return res.sendStatus(400);
     }
     if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${Db.replaceQuotes(newAdmin.clientId)}';`)).rowCount < 1) return res.sendStatus(400);
-    if (await Db.getDynamicObject(newAdmin.clientId, "users", newAdmin.name)) return res.sendStatus(409);
+    // Check whether username is in use
+    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM allusers WHERE name = '${Db.replaceQuotes(newAdmin.name)}';`)).rowCount > 0) return res.sendStatus(409); // Conflict
     var usergroup = { name: uuidv4(), label: newAdmin.name };
     await Db.insertDynamicObject(newAdmin.clientId, "usergroups", usergroup);
     var usertoinsert = { name: newAdmin.name, password: bcryptjs.hashSync(newAdmin.pass), usergroupname: usergroup.name, isadmin: true };

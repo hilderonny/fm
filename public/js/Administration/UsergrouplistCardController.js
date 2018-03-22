@@ -1,7 +1,6 @@
 app.controller('AdministrationUsergrouplistCardController', function($scope, $rootScope, $http, $mdDialog, $element, utils) {
     
     var saveUserGroupCallback = function(savedUserGroup) {
-        $scope.selectedUserGroup.name = savedUserGroup.name;         
     };
     var deleteUserGroupCallback = function() {
         $scope.userGroups.splice($scope.userGroups.indexOf($scope.selectedUserGroup), 1);

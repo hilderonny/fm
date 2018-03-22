@@ -326,6 +326,7 @@
         },
         
         "areas": {
+            "api" : [ "areas" ],
             "forportal": false,
             "forclients": true,
             "public" : [

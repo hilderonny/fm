@@ -44,10 +44,8 @@ function mapFields(fmobject, clientname) {
 }
 
 // Get all FM objects and their recursive children of the current client as hierarchy. Only _id, name and type are returned
-// When parameter ?forareas=true is set, also area infos are returned
 router.get('/', auth(co.permissions.BIM_FMOBJECT, 'r', co.modules.fmobjects), async(req, res) => {
-    var additionalfields = req.query.forareas ? ", f, bgf, nrf, nuf, tf, vf" : "";
-    var allfmobjects = (await Db.query(req.user.clientname, `SELECT name AS _id, label AS name, fmobjecttypename AS type, parentfmobjectname AS "parentId", ARRAY[]::text[] as children${additionalfields} FROM fmobjects ORDER BY label;`)).rows;
+    var allfmobjects = (await Db.query(req.user.clientname, `SELECT name AS _id, label AS name, fmobjecttypename AS type, parentfmobjectname AS "parentId", ARRAY[]::text[] as children FROM fmobjects ORDER BY label;`)).rows;
     var fmmap = {};
     allfmobjects.forEach((fmo) => {
         fmmap[fmo._id] = fmo;
@@ -134,15 +132,15 @@ router.post('/', auth(co.permissions.BIM_FMOBJECT, 'w', co.modules.fmobjects), a
     }
     var fmobjecttoinsert = { name: uuidv4() };
     if (fmobject.name) fmobjecttoinsert.label = fmobject.name;
-    if (fmobject.type) fmobjecttoinsert.fmobjecttypename = fmobject.name;
+    if (fmobject.type) fmobjecttoinsert.fmobjecttypename = fmobject.type;
     if (fmobject.areatype) fmobjecttoinsert.areatypename = fmobject.areatype;
-    if (fmobject.f) fmobjecttoinsert.f = fmobject.name;
-    if (fmobject.bgf) fmobjecttoinsert.bgf = fmobject.name;
-    if (fmobject.usagestate) fmobjecttoinsert.areausagestatename = fmobject.name;
-    if (fmobject.nrf) fmobjecttoinsert.nrf = fmobject.name;
-    if (fmobject.nuf) fmobjecttoinsert.nuf = fmobject.name;
-    if (fmobject.tf) fmobjecttoinsert.tf = fmobject.name;
-    if (fmobject.vf) fmobjecttoinsert.vf = fmobject.name;
+    if (fmobject.f) fmobjecttoinsert.f = fmobject.f;
+    if (fmobject.bgf) fmobjecttoinsert.bgf = fmobject.bgf;
+    if (fmobject.usagestate) fmobjecttoinsert.areausagestatename = fmobject.usagestate;
+    if (fmobject.nrf) fmobjecttoinsert.nrf = fmobject.nrf;
+    if (fmobject.nuf) fmobjecttoinsert.nuf = fmobject.nuf;
+    if (fmobject.tf) fmobjecttoinsert.tf = fmobject.tf;
+    if (fmobject.vf) fmobjecttoinsert.vf = fmobject.vf;
     if (fmobject.parentId && !(await Db.getDynamicObject(clientname, co.collections.fmobjects.name, fmobject.parentId))) return res.sendStatus(400);
     fmobjecttoinsert.parentfmobjectname = fmobject.parentId ? fmobject.parentId : null;
     if (fmobject.previewImageId && !(await Db.getDynamicObject(clientname, co.collections.documents.name, fmobject.previewImageId))) return res.sendStatus(400);

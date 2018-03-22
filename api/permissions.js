@@ -38,7 +38,7 @@ router.get('/forLoggedInUser', auth(), async(req, res) => {
 
 router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r', co.modules.base), validateSameClientId(co.collections.usergroups.name), async(req, res) => {
     var clientname = req.user.clientname;
-    var usergroupname = req.user.usergroupname;
+    var usergroupname = req.params.id;
     var permissionKeysForClient = await configHelper.getAvailablePermissionKeysForClient(clientname);
     var permissionsForUserGroup = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(usergroupname)}' AND key IN (${permissionKeysForClient.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows;
     var mappedPermissions = permissionKeysForClient.map((pk) => {
