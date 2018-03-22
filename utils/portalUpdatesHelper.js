@@ -1,4 +1,5 @@
-var unzipper = require('unzipper'); // unzip2 does not work for any reason
+// unzip, unzip2 and unzipper do not close the file handles correctly and result in incomplete extractions
+var decompress = require("decompress");
 var request = require('request');
 var fs = require('fs');
 
@@ -28,12 +29,11 @@ module.exports.triggerUpdate = function(){
                 var filename = response.headers['content-disposition'].split("=")[1]; // "attachment; filename=abc.zip"
                 if (!fs.existsSync(updateExtractPath)) fs.mkdirSync(updateExtractPath);
                 console.log("Extracting to path  " + updateExtractPath);
-                updateRequest.pipe(fs.createWriteStream(updateExtractPath + filename)).on("finish", () => {
+                updateRequest.pipe(fs.createWriteStream(updateExtractPath + filename)).on("finish", async() => {
                     console.log("Using package file " + updateExtractPath + filename);
-                    fs.createReadStream(updateExtractPath + filename).pipe(unzipper.Extract({ path: updateExtractPath })).on("close", () => {
-                        console.log("Ready for restart.");
-                        resolve(true);
-                    });
+                    var extractedfiles = await decompress(updateExtractPath + filename, updateExtractPath);
+                    console.log(`Extracted ${extractedfiles.length} files. Ready for restart.`);
+                    resolve(true);
                 });
             }
         });

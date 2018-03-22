@@ -9,7 +9,6 @@ var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var fs = require('fs');
 var request = require('request');
-var unzip = require('unzip2');
 var co = require('../utils/constants');
 var portalUpdatesHelper = require('../utils/portalUpdatesHelper');
 var localConfigHelper = require('../utils/localConfigHelper');

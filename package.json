@@ -20,6 +20,7 @@
     "body-parser": "^1.15.2",
     "child-process": "^1.0.2",
     "compression": "^1.6.2",
+    "decompress": "^4.2.0",
     "express": "^4.14.0",
     "forever-monitor": "^1.7.1",
     "fs": "^0.0.1-security",
@@ -39,7 +40,6 @@
     "stl-obj-viewer": "^0.0.1",
     "uglify-js": "^2.8.29",
     "unzip2": "^0.2.5",
-    "unzipper": "^0.8.11",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
