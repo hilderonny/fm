@@ -69,10 +69,11 @@ router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clie
     if (!element || Object.keys(element).length < 1 || !element.name) {
         return res.sendStatus(400);
     }
-    await Db.createClient(element.name, element.name);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(element.name)}', '${Db.replaceQuotes(co.modules.base)}');`);
-    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(element.name)}', '${Db.replaceQuotes(co.modules.doc)}');`);
-    res.send({_id:element.name,name:element.name});
+    var clientname = uuidv4().replace(/-/g, ""); // UUID contains dashes which cannot be used as database names
+    await Db.createClient(clientname, element.name);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(clientname)}', '${Db.replaceQuotes(co.modules.base)}');`);
+    await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(clientname)}', '${Db.replaceQuotes(co.modules.doc)}');`);
+    res.send({_id:clientname,name:element.name});
 });
 
 /**

@@ -114,7 +114,7 @@ describe('API clients', async() => {
                 assert.ok(typeof(objectFromApi[key]) !== "undefined", `Key ${key} is missing`);
                 assert.strictEqual(objectFromApi[key], testObject[key], `Key ${key} differs`);
             });
-            var objectFromDatabase = mapFields((await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name='${testObject.name}';`)).rows[0]);
+            var objectFromDatabase = mapFields((await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name='${objectFromApi._id}';`)).rows[0]);
             Object.keys(testObject).forEach(function(key) {
                 assert.ok(typeof(objectFromDatabase[key]) !== "undefined", `Key ${key} is missing`);
                 assert.strictEqual(objectFromDatabase[key], testObject[key], `Key ${key} differs`);
@@ -125,7 +125,7 @@ describe('API clients', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
             var newClient = createPostTestElement();
             var createdClient = (await th.post(`/api/${co.apis.clients}?token=${token}`).send(newClient).expect(200)).body;
-            var createdClientModules = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${newClient.name}';`)).rows;
+            var createdClientModules = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${createdClient._id}';`)).rows;
             assert.strictEqual(createdClientModules.length, 2);
             assert.ok(createdClientModules.find((m) => m.modulename === co.modules.base));
             assert.ok(createdClientModules.find((m) => m.modulename === co.modules.doc));
