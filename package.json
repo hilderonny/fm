@@ -39,6 +39,7 @@
     "stl-obj-viewer": "^0.0.1",
     "uglify-js": "^2.8.29",
     "unzip2": "^0.2.5",
+    "unzipper": "^0.8.11",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
