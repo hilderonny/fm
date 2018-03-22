@@ -9,6 +9,10 @@ module.exports.apis = {
      */
     activities: 'activities',
     /**
+     * API for showing areas
+     */
+    areas: 'areas',
+    /**
      * Geschäftspartner
      */
     businesspartners: 'businesspartners',
