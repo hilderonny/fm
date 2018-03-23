@@ -30,13 +30,9 @@ var Db = {
             }
         }
         await Db.initPortalDatabase();
+        await Db.updateRecordTypes();
         Db.isInitialized = true;
     },
-
-    // canWrite: async(clientname, username, datatypename) => {
-    //     var result = await Db.query(clientname, `SELECT 1 FROM users LEFT JOIN permissions ON permissions.usergroup = users.usergroup WHERE users.name = '${username}' AND (users.isadmin = true OR (permissions.datatype = '${datatypename}' AND permissions.canwrite = true));`);
-    //     return result.rowCount > 0;
-    // },
     
     createClient: async(clientName, label) => {
         var clientDatabaseName = `${dbprefix}_${clientName}`;
@@ -48,6 +44,7 @@ var Db = {
     },
 
     createDefaultClientTables: async(clientname) => {
+        // TODO: Replace with Db.updateRecordTypesForDatabase(clientname, recordtypes);
         var modulenames = Object.keys(moduleconfig.modules);
         for (var i = 0; i < modulenames.length; i++) {
             await Db.createDefaultClientTablesForModule(clientname, modulenames[i]);
@@ -94,7 +91,7 @@ var Db = {
 
     createDefaultTables: async(databaseName) => {
         await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT);");
-        await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, istitle BOOLEAN, isrequired BOOLEAN, reference TEXT, PRIMARY KEY (name, datatypename));");
+        await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, istitle BOOLEAN, isrequired BOOLEAN, reference TEXT, formula TEXT, formulaindex NUMERIC, PRIMARY KEY (name, datatypename));");
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, key TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, key));");
     },
 
@@ -108,16 +105,19 @@ var Db = {
         await Db.createDatatypeField(databaseNameWithoutPrefix, datatypename, "name", "Name", constants.fieldtypes.text, nameistitle, true, true, null);
     },
 
-    createDatatypeField: async(databaseNameWithoutPrefix, datatypename, fieldname, label, fieldtype, istitle, isrequired, doNotAddColumn, reference) => {
+    createDatatypeField: async(databaseNameWithoutPrefix, datatypename, fieldname, label, fieldtype, istitle, isrequired, doNotAddColumn, reference, formula, formulaindex) => {
         if ((await Db.query(databaseNameWithoutPrefix, `SELECT 1 FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}' AND name = '${Db.replaceQuotes(fieldname)}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var referencetoinsert = reference ? "'" + Db.replaceQuotes(reference) + "'" : "null";
-        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference) VALUES ('${Db.replaceQuotes(fieldname)}', ${labeltoinsert}, '${Db.replaceQuotes(datatypename)}', '${Db.replaceQuotes(fieldtype)}', ${!!istitle}, ${!!isrequired}, ${referencetoinsert});`);
+        var formulatoinsert = formula ? "'" + Db.replaceQuotes(formula) + "'" : "null";
+        var formulaindextoinsert = formulaindex ? parseInt(formulaindex) : 0;
+        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference, formula, formulaindex) VALUES ('${Db.replaceQuotes(fieldname)}', ${labeltoinsert}, '${Db.replaceQuotes(datatypename)}', '${Db.replaceQuotes(fieldtype)}', ${!!istitle}, ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert});`);
         var columntype;
         switch(fieldtype) {
             case constants.fieldtypes.boolean: columntype = "BOOLEAN"; break;
             case constants.fieldtypes.datetime: columntype = "BIGINT"; break;
             case constants.fieldtypes.decimal: columntype = "NUMERIC"; break;
+            case constants.fieldtypes.formula: columntype = "JSON"; break;
             case constants.fieldtypes.reference: columntype = "TEXT"; break;
             case constants.fieldtypes.text: columntype = "TEXT"; break;
             default: throw new Error(`Unknown field type '${fieldtype}'`);
@@ -143,10 +143,6 @@ var Db = {
         return true;
     },
 
-    // createPermission: async(userGroupName, clientName, datatype, canwrite) => {
-    //     await Db.query(clientName, `INSERT INTO permissions (usergroup, datatype, canwrite) VALUES ('${userGroupName}', '${datatype}', ${canwrite}) ON CONFLICT (usergroup, datatype) DO UPDATE SET canwrite = ${canwrite};`);
-    // },
-
     deleteDynamicObject: async(clientname, datatypename, elementname, filter) => {
         var filterstring = filter ? " AND " + Db.getFilterString(filter) : "";
         return Db.query(clientname, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} WHERE name='${Db.replaceQuotes(elementname)}'${filterstring};`);
@@ -157,14 +153,9 @@ var Db = {
         return Db.query(clientname, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} WHERE ${filterstring};`);
     },
 
-    // deletePermission: async(userGroupName, clientName, datatype) => {
-    //     await Db.query(clientName, `DELETE FROM permissions WHERE usergroup = '${userGroupName}' AND datatype = '${datatype}';`);
-    // },
-
-    // getDataType: async(databaseNameWithoutPrefix, datatypename) => {
-    //     var result = await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypes WHERE name = '${datatypename}';`);
-    //     return result.rowCount > 0 ? result.rows[0] : undefined;
-    // },
+    getDataTypes: async(databaseNameWithoutPrefix) => {
+        return (await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypes;`)).rows;
+    },
 
     getDataTypeFields: async(databaseNameWithoutPrefix, datatypename) => {
         return (await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypefields WHERE datatypename='${Db.replaceQuotes(datatypename)}' ORDER BY name;`)).rows;
@@ -397,6 +388,73 @@ var Db = {
         var filterstring = filter ? " AND " + Db.getFilterString(filter) : "";
         var statement = `UPDATE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} SET ${values.join(',')} WHERE name='${Db.replaceQuotes(elementname)}'${filterstring};`;
         return Db.query(clientname, statement);
+    },
+
+    updateRecordTypeFieldsForDatabase: async(databasename, recordtype) => {
+        if (!recordtype.fields) return;
+        // Retrieve existing record type fields from database
+        var recordtypefieldsfromdatabase = await Db.getDataTypeFields(databasename, recordtype.name);
+        // Update existing ones and insert new ones
+        for (var i = 0; i < recordtype.fields.length; i++) {
+            var field = recordtype.fields[i];
+            var existingfield = recordtypefieldsfromdatabase.find(f => f.name === field.name);
+            if (existingfield) {
+                // Update existing, but type cannot be changed
+                if (existingfield.fieldtype !== field.type) throw new Error(`Type of field '${recordtype.name}.${field.name}' cannot be changed from '${existingfield.fieldtype}' to '${field.type}'`);
+                var labeltoupdate = field.label ? "'" + Db.replaceQuotes(field.label) + "'" : "null";
+                var referencetoupdate = field.reference ? "'" + Db.replaceQuotes(field.reference) + "'" : "null";
+                var formulatoupdate = field.formula ? "'" + Db.replaceQuotes(field.formula) + "'" : "null";
+                var formulaindextoupdate = field.formulaindex ? parseInt(field.formulaindex) : 0;
+                var query = `UPDATE datatypefields SET label=${labeltoupdate}, istitle=${!!(recordtype.titlefield && (recordtype.titlefield === field.name))}, isrequired=${!!field.required}, reference=${referencetoupdate}, formula=${formulatoupdate}, formulaindex=${formulaindextoupdate} WHERE name='${Db.replaceQuotes(field.name)}';`;
+                await Db.query(databasename, query);
+            } else {
+                // Insert new
+                await Db.createDatatypeField(databasename, recordtype.name, field.name, field.label, field.type, recordtype.titlefield && (recordtype.titlefield === field.name), !!field.required, false, field.reference, field.formula, field.formulaindex);
+            }
+        }
+    },
+
+    updateRecordTypesForDatabase: async(databasename, recordtypes) => {
+        // Add relevant columns to datatypefields table
+        // TODO: Remove when all portals have this change through
+        // BETTER: Move this to a migrations.js file which is triggered by localconfig.applymigration flag. This migration file contains all database update methods. The config-flag is reset after run at start (same as recreateportaladmin)
+        await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formula TEXT;");
+        await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formulaindex NUMERIC;");
+        // Retrieve existing record types from database
+        var recordtypesfromdatabase = await Db.getDataTypes(databasename);
+        // Update existing ones and insert new ones
+        for (var i = 0; i < recordtypes.length; i++) {
+            var recordtype = recordtypes[i];
+            if (recordtypesfromdatabase.find(rt => rt.name === recordtype.name)) {
+                // Update existing record type definition
+                var labeltoupdate = recordtype.label ? "'" + Db.replaceQuotes(recordtype.label) + "'" : "null";
+                var plurallabeltoupdate = recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null";
+                var icontoupdate = recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null";
+                var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
+                await Db.query(databasename, query);
+            } else {
+                // Insert new definition
+                await Db.createDatatype(databasename, recordtype.name, recordtype.label, recordtype.plurallabel, (!recordtype.titlefield) || (recordtype.titlefield === "name"), recordtype.icon);
+            }
+            // Handle record type fields
+            await Db.updateRecordTypeFieldsForDatabase(databasename, recordtype);
+        }
+    },
+
+    /**
+     * Updates all tables of all clients and of the portal regarding to possibly updated module-config settings
+     */
+    updateRecordTypes: async() => {
+        // Collect client database names to process
+        var clientnames = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM clients;")).rows.map(r => r.name);
+        // Process portal record types
+        var portaldatatypes = [].concat.apply([], Object.keys(moduleconfig.modules).map(k => moduleconfig.modules[k].portaldatatypes)).filter(a=>a); // See https://stackoverflow.com/a/10865042
+        await Db.updateRecordTypesForDatabase(Db.PortalDatabaseName, portaldatatypes);
+        // Process client record types
+        var clientdatatypes = [].concat.apply([], Object.keys(moduleconfig.modules).map(k => moduleconfig.modules[k].clientdatatypes)).filter(a=>a);
+        for (var i = 0; i < clientnames.length; i++) {
+            await Db.updateRecordTypesForDatabase(clientnames[i], clientdatatypes);
+        }
     }
     
 }

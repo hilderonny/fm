@@ -20,6 +20,7 @@
 |name|API name of the field|
 |label|Label of the field to be shown above input fields, not used for type ```reference```|
 |type|Type of field. Can be ```text```, ```decimal```, ```boolean```, ```datetime```, ```formula```, ```reference```|
+|required|Boolean value to define whether the input of a field value is required or not|
 |reference|API Name of the recordtype which is referenced in picklists when type is ```reference```|
 |formula|Formula of the field when type is ```formula``` as JSON object|
 |formulaindex|Index number which defines in which order the formulas of the element are calculated|

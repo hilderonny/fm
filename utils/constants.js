@@ -224,6 +224,7 @@ module.exports.fieldtypes = {
     boolean: "boolean",
     datetime: "datetime",
     decimal: "decimal",
+    formula: "formula",
     reference: "reference",
     text: "text"
 };
