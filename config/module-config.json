@@ -4,7 +4,7 @@
         "base": {
             "forportal": true,
             "forclients": true,
-            "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
+            "api" : [ "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
             "middlewares": [ "auth", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
@@ -615,7 +615,7 @@
             ],
             "clientdatatypes": [
 
-                { "name": "project", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "fields": [
+                { "name": "projects", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
@@ -626,7 +626,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
                 ] },
 
-                { "name": "property", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "fields": [
+                { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
@@ -637,7 +637,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
                 ] },
 
-                { "name": "building", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "fields": [
+                { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
@@ -648,7 +648,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
                 ] },
 
-                { "name": "level", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "fields": [
+                { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "bgfman", "label": "Brutto-Grundfläche (BGF, manuelle Eingabe)", "type": "decimal" },
@@ -661,7 +661,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
                 ] },
 
-                { "name": "room", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "fields": [
+                { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "nrfman", "label": "Netto-Raumfläche (NRF, manuelle Eingabe)", "type": "decimal" },
@@ -674,7 +674,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF, berechnet)", "type": "formula", "formula": { "childifsumzero" : ["vf", "vfman"] }, "formulaindex": 3 }
                 ] },
 
-                { "name": "area", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "fields": [
+                { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "areacategoryname", "type": "reference", "reference": "areacategories" },
