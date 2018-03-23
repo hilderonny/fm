@@ -197,27 +197,26 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
      * Erstellt nach einer Auswahl eine Verknüpfung via API-Abfrage und
      * aktualisiert die Verknüpfungsliste.
      */
-    $scope.createRelation = function(targetType, targetId) {
+    $scope.createRelation = function(targetType, targetId, relationtype) {
         $rootScope.isLoading = true;
         var sourceType = $scope.relationsEntity.type;
         var sourceId = $scope.relationsEntity.id;
-        var relationToSend =  { 
-            type1: $scope.relationsEntity.type,
-            type2: targetType,
-            id1: $scope.relationsEntity.id,
-            id2: targetId
+        var relationToSend = { 
+            datatype1name: relationtype.isfrom1to2 ? $scope.relationsEntity.type : targetType,
+            datatype2name: relationtype.isfrom1to2 ? targetType : $scope.relationsEntity.type,
+            name1: relationtype.isfrom1to2 ? $scope.relationsEntity.id : targetId,
+            name2: relationtype.isfrom1to2 ? targetId : $scope.relationsEntity.id,
+            relationtypename: relationtype.name
         };
-        $http.post('/api/relations', relationToSend).then(function() {
+        console.log(relationToSend);
+        $http.post('/api/dynamic/relations', relationToSend).then(function() {
             $translate(['TRK_RELATIONS_RELATION_CREATED']).then(function(translations) {
                 $mdToast.show($mdToast.simple().textContent(translations.TRK_RELATIONS_RELATION_CREATED).hideDelay(1000).position('bottom right'));
             });
             // Liste aktualisieren, kann in verschiedenen Skopen existieren
             if ($scope.$parent.onRelationListChanged) {
                 $scope.$parent.onRelationListChanged();
-            } else if ($scope.$parent.onRelationListChanged) { 
-                $scope.$parent.onRelationListChanged();
             }
-           // $rootScope.isLoading = false;
         });
     };
 
@@ -238,7 +237,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
             parent: angular.element(document.body),
             clickOutsideToClose:true
         }).then(function(resolve) { // Nach Auswahl
-            $scope.createRelation($scope.selectedElement.type, $scope.selectedElement.id);
+            $scope.createRelation($scope.selectedElement.type, $scope.selectedElement.id, $scope.relationtype);
             $scope.selectedElement = null; 
         }, function(reject) { // Beim Abbrechen
             $scope.selectedElement = null; 
@@ -262,7 +261,7 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
             parent: angular.element(document.body),
             clickOutsideToClose:true
         }).then(function(resolve) { // Nach Auswahl
-            $scope.createRelation($scope.selectedElement.type, $scope.selectedElement.id);
+            $scope.createRelation($scope.selectedElement.type, $scope.selectedElement.id, $scope.relationtype);
             $scope.selectedElement = null; 
         }, function(reject) { // Beim Abbrechen
             $scope.selectedElement = null; 
@@ -273,6 +272,15 @@ app.controller('CoreRelationsMenuController', function($scope, $rootScope, $http
      * Beim Klicken auf einen Menüeintrag wird die entsprechende Dialogfunktion aufgerufen.
      */
     $scope.onMenuClick = function(menuItem) {
+        // Mögliche Referenztypen laden
+        $http.get('/api/dynamic/relationtypes').then(function(response) {
+            var relationtypes = [];
+            response.data.forEach(function(rt) {
+                relationtypes.push({ name: rt.name, label: rt.labelfrom1to2, isfrom1to2: true });
+                if (rt.name !== "looselycoupled") relationtypes.push({ name: rt.name, label: rt.labelfrom2to1, isfrom1to2: false });
+            });
+            $scope.relationtypes = relationtypes;
+        });
         menuItem.dialogFunction();
     };
 

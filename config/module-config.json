@@ -167,8 +167,19 @@
                     { "name": "datatype1name", "type": "text" },
                     { "name": "name1", "type": "text" },
                     { "name": "datatype2name", "type": "text" },
-                    { "name": "name2", "type": "text" }
+                    { "name": "name2", "type": "text" },
+                    { "name": "relationtypename", "type": "reference", "reference": "relationtypes" }
                 ] },
+
+                { "name": "relationtypes", "label": "Verknüpfungsart", "plurallabel": "Verknüpfungsarten", "titlefield": "label", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "labelfrom1to2", "label": "Beziehung von A zu B", "type": "text" },
+                    { "name": "labelfrom2to1", "label": "Beziehung von B zu A", "type": "text" }
+                ], "values": [
+                    { "name": "dependency", "label": "Abhängigkeit", "labelfrom1to2": "Ist abhängig von", "labelfrom2to1": "Bedingt" },
+                    { "name": "looselycoupled", "label": "Lose Beziehung", "labelfrom1to2": "Steht in Zusammenhang mit", "labelfrom2to1": "Steht in Zusammenhang mit" },
+                    { "name": "parentchild", "label": "Eltern-Kind-Beziehung", "labelfrom1to2": "Ist Elternteil von", "labelfrom2to1": "Ist Kind von" }
+                ]},
 
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
@@ -221,8 +232,19 @@
                     { "name": "datatype1name", "type": "text" },
                     { "name": "name1", "type": "text" },
                     { "name": "datatype2name", "type": "text" },
-                    { "name": "name2", "type": "text" }
+                    { "name": "name2", "type": "text" },
+                    { "name": "relationtypename", "type": "reference", "reference": "relationtypes" }
                 ] },
+
+                { "name": "relationtypes", "label": "Verknüpfungsart", "plurallabel": "Verknüpfungsarten", "titlefield": "label", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "labelfrom1to2", "label": "Beziehung von A zu B", "type": "text" },
+                    { "name": "labelfrom2to1", "label": "Beziehung von B zu A", "type": "text" }
+                ], "values": [
+                    { "name": "dependency", "label": "Abhängigkeit", "labelfrom1to2": "Ist abhängig von", "labelfrom2to1": "Bedingt" },
+                    { "name": "looselycoupled", "label": "Lose Beziehung", "labelfrom1to2": "Steht in Zusammenhang mit", "labelfrom2to1": "Steht in Zusammenhang mit" },
+                    { "name": "parentchild", "label": "Eltern-Kind-Beziehung", "labelfrom1to2": "Ist Elternteil von", "labelfrom2to1": "Ist Kind von" }
+                ]},
 
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }

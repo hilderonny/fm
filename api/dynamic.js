@@ -6,120 +6,26 @@ var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 
-router.get("/:recordtypename", auth(), async(req, res) => {
+// TODO: Correct access authentication on dynamic objects
+router.get("/:recordtypename", auth(false, false, co.modules.base), async(req, res) => {
     try {
         var objects = await Db.getDynamicObjects(req.user.clientname, req.params.recordtypename);
         res.send(objects);
     } catch(error) {
-        res.sendStatus(404); // There is no record type of given name and so there is no table for it
+        res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
     }
 });
 
-// router.get('/model/:modelName', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), async(req, res) => {
-//     var modelname = req.params.modelName;
-//     var dynamicattributes = await Db.getDynamicObjects(req.user.clientname, co.collections.dynamicattributes.name, {modelname: modelname });
-//     res.send(dynamicattributes.map(da => { return mapDynamicAttributeFields(da, req.user.clientname); }));
-// });
-
-// /**
-//  * Returns the concrete option with the given _id.
-//  */
-// router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributeoptions.name), async(req, res) => {
-//     var option = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributeoptions.name, req.params.id);
-//     if (!option) return res.sendStatus(404);
-//     res.send(mapDynamicAttributeOptionField(option, req.user.clientname));
-// });
-
-// /**
-//  * Returns a list of options for a dynamic attribute with the given _id. The type of the dynamic attribute must be picklist.
-//  */
-// router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
-//     var options = await Db.getDynamicObjects(req.user.clientname, co.collections.dynamicattributeoptions.name, { dynamicattributename: req.params.id });
-//     res.send(options.map(option => { return mapDynamicAttributeOptionField(option, req.user.clientname); }));
-// });
-
-// /**
-//  * Returns all values of the dynamic attributes of an entity of a model MODELNAME with the given _id.
-//  * {
-//  *  type: {
-//  *      name_en,
-//  *      name_de,
-//  *      type
-//  *  },
-//  *  value,
-//  *  options: [
-//  *      {
-//  *          _id,
-//  *          text_en,
-//  *          text_de
-//  *      }
-//  *  ]
-//  * }
-//  */
-// router.get('/values/:modelName/:id', auth(false, false, co.modules.base), validateSameClientId(), async(req, res) => {
-//     var modelname = Db.replaceQuotesAndRemoveSemicolon(req.params.modelName);
-//     // https://dba.stackexchange.com/a/72139, https://dba.stackexchange.com/a/69658/145998
-//     var query = `
-//     SELECT
-//         b.type::jsonb,
-//         json_agg(b.options) AS options,
-//         dav.value
-//     FROM (
-//         SELECT
-//             a.*,
-//             CASE WHEN a.dynamicattributetypename = 'picklist' THEN (SELECT row_to_json(dao_) FROM (SELECT dao.name AS _id, dao.label AS text_de, dao.label AS text_en) AS dao_) ELSE NULL END AS options
-//         FROM (
-//             SELECT
-//                 ${modelname}.name AS entityname,
-//                 da.name AS dynamicattributename,
-//                 da.dynamicattributetypename,
-//                 (SELECT row_to_json(da_) FROM (SELECT da.name AS _id, da.label AS name_en, da.label AS name_de, da.dynamicattributetypename AS type) AS da_) AS type
-//             FROM dynamicattributes da, ${modelname}
-//             WHERE (da.isinactive IS NULL OR da.isinactive = false)
-//             AND da.modelname = '${modelname}'
-//         ) a
-//         LEFT JOIN dynamicattributeoptions dao ON dao.dynamicattributename = a.dynamicattributename
-//     ) b
-//     LEFT JOIN dynamicattributevalues dav ON dav.dynamicattributename = b.dynamicattributename AND dav.entityname = b.entityname
-//     WHERE b.entityname = '${Db.replaceQuotes(req.params.id)}'
-//     GROUP BY b.type::jsonb, dav.value
-//     ORDER BY type::jsonb->>'name_en'
-//     `;
-//     var values = (await Db.query(req.user.clientname, query)).rows;
-//     res.send(values); // Kein mapping, das kommt schon richtig aus der Datenbank
-// });
-
-// /**
-//  * Returns a list of all possible data models which can have dynamic attributes
-//  */
-// router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), async(req, res) => {
-//     var models = Object.keys(co.collections).map(k => co.collections[k]).filter(c => c.canHaveAttributes);
-//     res.send(models);
-// });
-
-// /**
-//  * Returns a dynamic attribute with the given _id
-//  */
-// router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
-//     var da = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, req.params.id);
-//     if (!da) return res.sendStatus(404);
-//     res.send(mapDynamicAttributeFields(da, req.user.clientname));
-// });
-
-// /**
-//  * Creates a new option for a dynamic attribute of type picklist.
-//  * Required properties are dynamicattributeid and text_en. 
-//  */
-// router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), async(req, res) => {
-//     var dynamicAttributeOption = req.body;
-//     if(!dynamicAttributeOption || !dynamicAttributeOption.dynamicAttributeId || !dynamicAttributeOption.text_en) return res.sendStatus(400);
-//     var attribute = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, { name: dynamicAttributeOption.dynamicAttributeId, dynamicattributetypename: 'picklist' });
-//     if (!attribute) return res.sendStatus(400);
-//     delete dynamicAttributeOption.value; // Darf per API nicht gesetzt werden
-//     var createdoption = await dynamicAttributesHelper.createDynamicAttributeOption(dynamicAttributeOption, req.user.clientname);
-//     dynamicAttributeOption._id = createdoption.name;
-//     res.send(dynamicAttributeOption);
-// });
+router.post('/:recordtypename', auth(false, false, co.modules.base), async(req, res) => {
+    var newobject = req.body;
+    newobject.name = uuidv4();
+    try {
+        await Db.insertDynamicObject(req.user.clientname, req.params.recordtypename, newobject);
+        res.sendStatus(200);
+    } catch(error) {
+        res.sendStatus(400); // Any error with the request
+    }
+});
 
 // /**
 //  * Creates a new set of values for dynamic attributes for an entity of type MODELNAME and with the given _id.

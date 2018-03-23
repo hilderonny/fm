@@ -42,12 +42,18 @@
         </md-toolbar>
         <md-dialog-content>
             <div class="md-dialog-content">
+                <md-input-container flex>
+                    <label translate>TRK_RELATIONS_TYPE</label>
+                    <md-select name="tp" ng-model="parentScope.relationtype">
+                        <md-option ng-value="relationtype" ng-repeat="relationtype in parentScope.relationtypes | orderBy: 'label'" ng-bind="relationtype.label"></md-option>
+                    </md-select>
+                </md-input-container>
                 <ng-include flex src="'simpleList.html'"></ng-include>
             </div>
         </md-dialog-content>
         <md-dialog-actions layout="row">
             <span flex></span>
-            <md-button class="md-raised md-accent" ng-if="parentScope.selectedElement" ng-click="parentScope.onOkClick()"><span translate>TRK_OK</span></md-button>
+            <md-button class="md-raised md-accent" ng-if="parentScope.selectedElement && parentScope.relationtype" ng-click="parentScope.onOkClick()"><span translate>TRK_OK</span></md-button>
             <md-button class="md-raised" ng-click="parentScope.onCancelClick()"><span translate>TRK_CANCEL</span></md-button>        
         </md-dialog-actions>
     </md-dialog>    
@@ -60,12 +66,18 @@
         </md-toolbar>
         <md-dialog-content>
             <div class="md-dialog-content">
+                <md-input-container flex>
+                    <label translate>TRK_RELATIONS_TYPE</label>
+                    <md-select name="tp" ng-model="parentScope.relationtype">
+                        <md-option ng-value="relationtype" ng-repeat="relationtype in parentScope.relationtypes | orderBy: 'label'" ng-bind="relationtype.label"></md-option>
+                    </md-select>
+                </md-input-container>
                 <ng-include flex src="'hierarchyList.html'"></ng-include>
             </div>
         </md-dialog-content>
         <md-dialog-actions layout="row">
             <span flex></span>
-            <md-button class="md-raised md-accent" ng-if="parentScope.selectedElement" ng-click="parentScope.onOkClick()"><span translate>TRK_OK</span></md-button>
+            <md-button class="md-raised md-accent" ng-if="parentScope.selectedElement && parentScope.relationtype" ng-click="parentScope.onOkClick()"><span translate>TRK_OK</span></md-button>
             <md-button class="md-raised" ng-click="parentScope.onCancelClick()"><span translate>TRK_CANCEL</span></md-button>
         </md-dialog-actions>        
     </md-dialog>
