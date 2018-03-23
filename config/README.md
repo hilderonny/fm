@@ -22,6 +22,7 @@
 |type|Type of field. Can be ```text```, ```decimal```, ```boolean```, ```datetime```, ```formula```, ```reference```|
 |reference|API Name of the recordtype which is referenced in picklists when type is ```reference```|
 |formula|Formula of the field when type is ```formula``` as JSON object|
+|formulaindex|Index number which defines in which order the formulas of the element are calculated|
 
 ### Types
 
@@ -33,7 +34,6 @@
 |datetime|Technically a timestamp in milliseconds, shows datepicker in UI|
 |reference|Picklist of optiones references by this field|
 |formula|Defines that the value of the field is calculated by a formula each time the element or on of its children updates|
-|formulaindex|Index number which defines in which order the formulas of the element are calculated|
 
 ### Formulas
 

@@ -129,6 +129,7 @@ describe('module-config.json', function() {
             '.nyc_output/',
             '.vscode/',
             'basetest.bat',
+            'config/README.md',
             'config/localconfig.json',
             'config/module-config.json', // Is handles especially by re-creating it, so no need to reference it in itself
             'cover.bat',
