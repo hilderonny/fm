@@ -44,49 +44,13 @@ var Db = {
     },
 
     createDefaultClientTables: async(clientname) => {
-        // TODO: Replace with Db.updateRecordTypesForDatabase(clientname, recordtypes);
-        var modulenames = Object.keys(moduleconfig.modules);
-        for (var i = 0; i < modulenames.length; i++) {
-            await Db.createDefaultClientTablesForModule(clientname, modulenames[i]);
-        }
-    },
-
-    createDefaultClientTablesForModule: async(clientname, modulename) => {
-        var clientdatatypes = moduleconfig.modules[modulename].clientdatatypes;
-        if (!clientdatatypes) return;
-        for (var i = 0; i < clientdatatypes.length; i++) {
-            var clientdatatype = clientdatatypes[i];
-            await Db.createDatatype(clientname, clientdatatype.name, clientdatatype.label, clientdatatype.plurallabel, clientdatatype.titlefield === "name", clientdatatype.icon);
-            if (clientdatatype.fields) for (var j = 0; j < clientdatatype.fields.length; j++) {
-                var field = clientdatatype.fields[j];
-                await Db.createDatatypeField(clientname, clientdatatype.name, field.name, field.label, field.type, clientdatatype.titlefield === field.name, field.isrequired, false, field.reference);
-            }
-            if (clientdatatype.values) for (var j = 0; j < clientdatatype.values.length; j++) {
-                await Db.insertDynamicObject(clientname, clientdatatype.name, clientdatatype.values[j]);
-            }
-        }
+        await Db.updateRecordTypesForDatabase(clientname, Db.getClientDataTypesFromConfig());
     },
 
     createDefaultPortalTables: async() => {
         await Db.query(Db.PortalDatabaseName, "CREATE TABLE allusers (name TEXT NOT NULL PRIMARY KEY, password TEXT, clientname TEXT NOT NULL);");
         await Db.query(Db.PortalDatabaseName, "CREATE TABLE clientmodules (clientname TEXT NOT NULL, modulename TEXT NOT NULL, PRIMARY KEY(clientname, modulename));");
-        var modulenames = Object.keys(moduleconfig.modules);
-        var alldatatypes = [];
-        modulenames.forEach(mn => { // Portale bekommen für die Migration alle Module freigeschaltet
-            if (moduleconfig.modules[mn].portaldatatypes) moduleconfig.modules[mn].portaldatatypes.forEach(pdt => {if(!alldatatypes.find(a => a.name === pdt.name)) alldatatypes.push(pdt)});
-            if (moduleconfig.modules[mn].clientdatatypes) moduleconfig.modules[mn].clientdatatypes.forEach(cdt => {if(!alldatatypes.find(a => a.name === cdt.name)) alldatatypes.push(cdt)});
-        })
-        for (var i = 0; i < alldatatypes.length; i++) {
-            var datatype = alldatatypes[i];
-            await Db.createDatatype(Db.PortalDatabaseName, datatype.name, datatype.label, datatype.plurallabel, datatype.titlefield === "name", datatype.icon);
-            if (datatype.fields) for (var k = 0; k < datatype.fields.length; k++) {
-                var field = datatype.fields[k];
-                await Db.createDatatypeField(Db.PortalDatabaseName, datatype.name, field.name, field.label, field.type, datatype.titlefield === field.name, field.isrequired, false, field.reference);
-            }
-            if (datatype.values) for (var k = 0; k < datatype.values.length; k++) {
-                await Db.insertDynamicObject(Db.PortalDatabaseName, datatype.name, datatype.values[k]);
-            }
-        }
+        await Db.updateRecordTypesForDatabase(Db.PortalDatabaseName, Db.getPortalDataTypesFromConfig());
     },
 
     createDefaultTables: async(databaseName) => {
@@ -269,6 +233,10 @@ var Db = {
         return filterlist.join(" AND ");
     },
 
+    getClientDataTypesFromConfig: () => {
+        return [].concat.apply([], Object.keys(moduleconfig.modules).map(k => moduleconfig.modules[k].clientdatatypes)).filter(a=>a);
+    },
+
     getPool: (databasename) => {
         var pool = Db.pools[databasename];
         if (!pool) {
@@ -282,6 +250,10 @@ var Db = {
             Db.pools[databasename] = pool;
         }
         return pool;
+    },
+
+    getPortalDataTypesFromConfig: () => {
+        return [].concat.apply([], Object.keys(moduleconfig.modules).map(k => moduleconfig.modules[k].portaldatatypes)).filter(a=>a); // See https://stackoverflow.com/a/10865042
     },
 
     initPortalDatabase: async() => {
@@ -336,7 +308,7 @@ var Db = {
             }
             return result;
         });
-        var statement = `INSERT INTO ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} (${keys.map(k => Db.replaceQuotesAndRemoveSemicolon(k)).join(',')}) VALUES (${values.join(',')});`;
+        var statement = `INSERT INTO ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} (${keys.map(k => Db.replaceQuotesAndRemoveSemicolon(k)).join(',')}) VALUES (${values.join(',')}) ON CONFLICT DO NOTHING;`; // Ignore duplicate names. Can happen on startup when default values are (re-)inserted
         return Db.query(clientname, statement);
     },
 
@@ -353,7 +325,7 @@ var Db = {
     },
 
     queryDirect: async(databasename, query) => {
-        // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
+        console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
         var pool = Db.getPool(Db.replaceQuotesAndRemoveSemicolon(databasename)); // Sicher ist sicher
         var client = await pool.connect();
         var result = undefined;
@@ -416,8 +388,7 @@ var Db = {
 
     updateRecordTypesForDatabase: async(databasename, recordtypes) => {
         // Add relevant columns to datatypefields table
-        // TODO: Remove when all portals have this change through
-        // BETTER: Move this to a migrations.js file which is triggered by localconfig.applymigration flag. This migration file contains all database update methods. The config-flag is reset after run at start (same as recreateportaladmin)
+        // TODO: Remove when all portals have this change through, cannot be run from updateonstart, because this is triggered after db-init
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formula TEXT;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formulaindex NUMERIC;");
         // Retrieve existing record types from database
@@ -438,6 +409,10 @@ var Db = {
             }
             // Handle record type fields
             await Db.updateRecordTypeFieldsForDatabase(databasename, recordtype);
+            // Handle predefined values
+            if (recordtype.values) for (var j = 0; j < recordtype.values.length; j++) {
+                await Db.insertDynamicObject(databasename, recordtype.name, recordtype.values[j]); // Try to insert. When it already exists, nothing happens
+            }
         }
     },
 
@@ -448,10 +423,10 @@ var Db = {
         // Collect client database names to process
         var clientnames = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM clients;")).rows.map(r => r.name);
         // Process portal record types
-        var portaldatatypes = [].concat.apply([], Object.keys(moduleconfig.modules).map(k => moduleconfig.modules[k].portaldatatypes)).filter(a=>a); // See https://stackoverflow.com/a/10865042
+        var portaldatatypes = Db.getPortalDataTypesFromConfig();
         await Db.updateRecordTypesForDatabase(Db.PortalDatabaseName, portaldatatypes);
         // Process client record types
-        var clientdatatypes = [].concat.apply([], Object.keys(moduleconfig.modules).map(k => moduleconfig.modules[k].clientdatatypes)).filter(a=>a);
+        var clientdatatypes = Db.getClientDataTypesFromConfig();
         for (var i = 0; i < clientnames.length; i++) {
             await Db.updateRecordTypesForDatabase(clientnames[i], clientdatatypes);
         }

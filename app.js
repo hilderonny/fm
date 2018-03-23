@@ -106,16 +106,13 @@ async function init() {
         await dah.activateDynamicAttributesForClient(null, moduleNames[i]);
     }
     var fs = require('fs');
-    // Initialize and migrate PostgreSQL database
-    await require("./utils/db").Db.init(localConfig.migratedatabase);
-    if (localConfig.migratedatabase) {
-        await require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
-    }
-    localConfig.migratedatabase = false;
-    fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
-    if(localConfig.migratedatabase) {
-        console.log("Recreating database. Please restart the app after finishing.");
-        return;
+    // Initialize database
+    await require("./utils/db").Db.init();
+    // Run update scripts on startup
+    if (localConfig.applyupdates) {
+        await require("./updateonstart")();
+        localConfig.applyupdates = false;
+        fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
     }
     // Includes minifizieren
     prepareIncludes(fs);
