@@ -3,7 +3,6 @@
  */
 var assert = require('assert');
 var th = require('../testHelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var ch = require('../../utils/configHelper');
 var Db = require("../../utils/db").Db;

@@ -98,9 +98,6 @@ var prepareIncludes = (fs) => {
 async function init() {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
     var nocache = require('./middlewares/nocache');
-    var db = require('./middlewares/db');
-    var nocache = require('./middlewares/nocache');
-    await db.init();
     var dah = require('./utils/dynamicAttributesHelper');
     // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
     var promises = [];
@@ -130,7 +127,6 @@ async function init() {
     //app.use(require('morgan')('combined', {stream: accessLogStream}));
     app.use(require('compression')()); // Ausgabekompression
     app.set('json spaces', '\t'); // Ausgabe im Response verschönern
-    app.use(db.handler); // Datenbankverbindung -> req.db
     app.use(require('./middlewares/extracttoken')); // Authentifizierung und Authorisierung -> req.user{_id}
     app.use(require('body-parser').json()); // JSON Request-Body-Parser -> req.body
     app.use(require('body-parser').urlencoded({extended:true})); // parse application/x-www-form-urlencoded

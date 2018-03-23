@@ -6,7 +6,6 @@ var rimraf = require('rimraf');
 var path = require('path');
 var fs = require('fs');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var ap = require('../../utils/app-packager');
 var wh = require('../../utils/webHelper');

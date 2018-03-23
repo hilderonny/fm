@@ -5,7 +5,7 @@
             "forportal": true,
             "forclients": true,
             "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
-            "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateSameClientId" ],
+            "middlewares": [ "auth", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
                 "css/base.css",
@@ -126,7 +126,7 @@
                     ]
                 }
             ],
-            "utils": [ "apiHelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "migrationhelper", "localConfigHelper" ],
+            "utils": [ "apiHelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "localConfigHelper" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},

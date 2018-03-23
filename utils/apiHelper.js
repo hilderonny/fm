@@ -126,13 +126,4 @@ var ah = {
 
 }
 
-ah.createDefaultGetIdRoute = (router, tableName, permissionName, moduleName) => {
-    // router.get('/:id', auth(permissionName, 'r', moduleName), validateSameClientId(tableName), (req, res) => {
-    //     req.db.get(tableName).findOne(req.params.id, req.query.fields).then((entity) => {
-    //         // Database element is available here in every case, because validateSameClientId already checked for existence
-    //         res.send(entity);
-    //     });
-    // });
-}
-
 module.exports = ah;
