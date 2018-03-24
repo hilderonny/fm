@@ -708,6 +708,11 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "Verkehrsfläche", "F", 0] }, "formulaindex": 2 }
                 ], "lists": [ "fmobjects" ] },
 
+                { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" }
+                ], "lists": [ "fmobjects" ] },
+
                 { "name": "fmobjecttypes", "label": "FM Objekttyp", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
                 ], "values": [
