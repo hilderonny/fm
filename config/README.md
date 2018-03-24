@@ -12,6 +12,7 @@
 |titlefield|Name of the field which is used as label in lists and so|
 |icon|URL of icon to use for the record type everywhere it is shown|
 |fields|List of fields of the datatype|
+|lists|List of possible places where the datatype is shown in hierarchies or lists, e.g. ```fmobjects``` or ```folders```|
 
 ### Field
 

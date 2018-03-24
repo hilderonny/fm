@@ -230,6 +230,24 @@ module.exports.fieldtypes = {
 };
 
 /**
+ * Mögliche Aufführung von dynamischen Objekten in diversen Listen. In den record types wird
+ * im Feld "lists" vermerkt, in welchen Listen oder Hierarchien der record type auftaucht.
+ * So enthalten die record types "folders" und "documents" beispielsweise eine Referenz auf die
+ * Liste "folders", wodurch der FolderCardController und seine API wissen, welche datentypen sie
+ * anzeigen sollen. Gleiches gilt für "projects", "areas", ... bei der Liste "fmobjects"
+ */
+module.exports.lists = {
+    /**
+     * Record types mit dieser Einstellung tauchen in der Hierarchie der FM OBjekte auf
+     */
+    fmobjects: "fmobjects",
+    /**
+     * Aufführung in der Verzeichnisstruktur des Dokumentenmoduls
+     */
+    folders: "folders"
+};
+
+/**
  * Liste von Modulen, wie sie in der module-config verwendet wird.
  */
 module.exports.modules = {

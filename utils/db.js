@@ -59,12 +59,13 @@ var Db = {
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, key TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, key));");
     },
 
-    createDatatype: async(databaseNameWithoutPrefix, datatypename, label, plurallabel, nameistitle, icon) => {
+    createDatatype: async(databaseNameWithoutPrefix, datatypename, label, plurallabel, nameistitle, icon, lists) => {
         if ((await Db.query(databaseNameWithoutPrefix, `SELECT 1 FROM datatypes WHERE name = '${Db.replaceQuotes(datatypename)}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var plurallabeltoinsert = plurallabel ? "'" + Db.replaceQuotes(plurallabel) + "'" : "null";
         var icontoinsert = icon ? "'" + Db.replaceQuotes(icon) + "'" : "null";
-        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypes (name, label, plurallabel, icon) VALUES ('${Db.replaceQuotes(datatypename)}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert});`);
+        var liststoinsert = lists ? "'{" + lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
+        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypes (name, label, plurallabel, icon) VALUES ('${Db.replaceQuotes(datatypename)}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert});`);
         await Db.query(databaseNameWithoutPrefix, `CREATE TABLE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} (name TEXT PRIMARY KEY);`);
         await Db.createDatatypeField(databaseNameWithoutPrefix, datatypename, "name", "Name", constants.fieldtypes.text, nameistitle, true, true, null);
     },
@@ -389,6 +390,7 @@ var Db = {
     updateRecordTypesForDatabase: async(databasename, recordtypes) => {
         // Add relevant columns to datatypefields table
         // TODO: Remove when all portals have this change through, cannot be run from updateonstart, because this is triggered after db-init
+        await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS lists TEXT[];");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formula TEXT;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formulaindex NUMERIC;");
         // Retrieve existing record types from database
@@ -401,11 +403,12 @@ var Db = {
                 var labeltoupdate = recordtype.label ? "'" + Db.replaceQuotes(recordtype.label) + "'" : "null";
                 var plurallabeltoupdate = recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null";
                 var icontoupdate = recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null";
-                var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
+                var liststoupdate = recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
+                var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate}, lists = ${liststoupdate} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
                 await Db.query(databasename, query);
             } else {
                 // Insert new definition
-                await Db.createDatatype(databasename, recordtype.name, recordtype.label, recordtype.plurallabel, (!recordtype.titlefield) || (recordtype.titlefield === "name"), recordtype.icon);
+                await Db.createDatatype(databasename, recordtype.name, recordtype.label, recordtype.plurallabel, (!recordtype.titlefield) || (recordtype.titlefield === "name"), recordtype.icon, recordtype.lists);
             }
             // Handle record type fields
             await Db.updateRecordTypeFieldsForDatabase(databasename, recordtype);

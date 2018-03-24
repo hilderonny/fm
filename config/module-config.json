@@ -584,14 +584,14 @@
                 { "name": "folders", "label": "Verzeichnis", "plurallabel": "Verzeichnisse", "titlefield": "label", "icon": "/css/icons/material/Folder.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "parentfoldername", "type": "reference", "reference": "folders" }
-                ] },
+                ], "lists": [ "folders" ] },
 
                 { "name": "documents", "label": "Dokument", "plurallabel": "Dokumente", "titlefield": "label", "icon": "/css/icons/material/Document.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "parentfoldername", "type": "reference", "reference": "folders" },
                     { "name": "type", "type": "text" },
                     { "name": "isshared", "label": "Öffentlich zugänglich", "type": "boolean" }
-                ] }
+                ], "lists": [ "folders" ] }
 
             ]
         },
@@ -646,7 +646,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
-                ] },
+                ], "lists": [ "fmobjects" ] },
 
                 { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -657,7 +657,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
-                ] },
+                ], "lists": [ "fmobjects" ] },
 
                 { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -668,7 +668,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
-                ] },
+                ], "lists": [ "fmobjects" ] },
 
                 { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -681,7 +681,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
-                ] },
+                ], "lists": [ "fmobjects" ] },
 
                 { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -694,7 +694,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF, berechnet)", "type": "formula", "formula": { "childifsumzero" : ["nuf", "nufman"] }, "formulaindex": 1 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF, berechnet)", "type": "formula", "formula": { "childifsumzero" : ["tf", "tfman"] }, "formulaindex": 2 },
                     { "name": "vf", "label": "Verkehrsfläche (VF, berechnet)", "type": "formula", "formula": { "childifsumzero" : ["vf", "vfman"] }, "formulaindex": 3 }
-                ] },
+                ], "lists": [ "fmobjects" ] },
 
                 { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -706,7 +706,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "Nutzungsfläche", "F", 0] }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "Technikfläche", "F", 0] }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "Verkehrsfläche", "F", 0] }, "formulaindex": 2 }
-                ] },
+                ], "lists": [ "fmobjects" ] },
 
                 { "name": "fmobjecttypes", "label": "FM Objekttyp", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }

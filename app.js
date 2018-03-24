@@ -112,7 +112,7 @@ async function init() {
     if (localConfig.applyupdates) {
         await require("./updateonstart")();
         localConfig.applyupdates = false;
-        fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
+        // fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
     }
     // Includes minifizieren
     prepareIncludes(fs);
