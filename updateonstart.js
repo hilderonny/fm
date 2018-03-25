@@ -1,5 +1,6 @@
 var Db = require("./utils/db").Db;
 var co = require("./utils/constants");
+var ch = require("./utils/calculationhelper");
 var uuidv4 = require("uuid").v4;
 
 /**
@@ -117,8 +118,15 @@ module.exports = async() => {
                 await Db.insertDynamicObject(clientname, co.collections.dynamicattributevalues.name, { name: newdavname, entityname: dav.entityname, dynamicattributename: newdaname, value: dav.daoname ? newdaoname : dav.value });
             }
         }
-        // TODO: perform calculations for all FM object types
-        // if (clientname === 'rh') debugger;
+        // perform calculations for all FM object types
+        var datatypestocalculate = ["areas", "rooms", "levels", "buildings", "properties", "projects"];
+        for (var j = 0; j < datatypestocalculate.length; j++) {
+            var dt = datatypestocalculate[j];
+            var entitynames = (await Db.query(clientname, `SELECT name FROM ${dt};`)).rows.map(r => r.name);
+            for (var k = 0; k < entitynames.length; k++) {
+                await ch.calculateformula(clientname, dt, entitynames[k]);
+            }
+        }
     }
     console.log("UPDATE FINISHED.");
 };

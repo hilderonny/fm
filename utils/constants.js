@@ -130,6 +130,15 @@ module.exports.apis = {
     users: 'users'
 };
 
+module.exports.formulatypes = {
+    childifsumzero: "childifsumzero",
+    childsum: "childsum",
+    div: "div",
+    ifthenelse: "ifthenelse",
+    prod: "prod",
+    sum: "sum"
+}
+
 /**
  * List of all possible collections (tables). Used for dependency deletions in clients API
  * and its tests.

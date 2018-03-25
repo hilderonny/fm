@@ -74,7 +74,7 @@ var Db = {
         if ((await Db.query(databaseNameWithoutPrefix, `SELECT 1 FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}' AND name = '${Db.replaceQuotes(fieldname)}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var referencetoinsert = reference ? "'" + Db.replaceQuotes(reference) + "'" : "null";
-        var formulatoinsert = formula ? "'" + Db.replaceQuotes(formula) + "'" : "null";
+        var formulatoinsert = formula ? "'" + Db.replaceQuotes(JSON.stringify(formula)) + "'" : "null";
         var formulaindextoinsert = formulaindex ? parseInt(formulaindex) : 0;
         await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference, formula, formulaindex) VALUES ('${Db.replaceQuotes(fieldname)}', ${labeltoinsert}, '${Db.replaceQuotes(datatypename)}', '${Db.replaceQuotes(fieldtype)}', ${!!istitle}, ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert});`);
         var columntype;
@@ -82,7 +82,7 @@ var Db = {
             case constants.fieldtypes.boolean: columntype = "BOOLEAN"; break;
             case constants.fieldtypes.datetime: columntype = "BIGINT"; break;
             case constants.fieldtypes.decimal: columntype = "NUMERIC"; break;
-            case constants.fieldtypes.formula: columntype = "JSON"; break;
+            case constants.fieldtypes.formula: columntype = "NUMERIC"; break;
             case constants.fieldtypes.reference: columntype = "TEXT"; break;
             case constants.fieldtypes.text: columntype = "TEXT"; break;
             default: throw new Error(`Unknown field type '${fieldtype}'`);
@@ -376,9 +376,9 @@ var Db = {
                 if (existingfield.fieldtype !== field.type) throw new Error(`Type of field '${recordtype.name}.${field.name}' cannot be changed from '${existingfield.fieldtype}' to '${field.type}'`);
                 var labeltoupdate = field.label ? "'" + Db.replaceQuotes(field.label) + "'" : "null";
                 var referencetoupdate = field.reference ? "'" + Db.replaceQuotes(field.reference) + "'" : "null";
-                var formulatoupdate = field.formula ? "'" + Db.replaceQuotes(field.formula) + "'" : "null";
+                var formulatoupdate = field.formula ? "'" + Db.replaceQuotes(JSON.stringify(field.formula)) + "'" : "null";
                 var formulaindextoupdate = field.formulaindex ? parseInt(field.formulaindex) : 0;
-                var query = `UPDATE datatypefields SET label=${labeltoupdate}, istitle=${!!(recordtype.titlefield && (recordtype.titlefield === field.name))}, isrequired=${!!field.required}, reference=${referencetoupdate}, formula=${formulatoupdate}, formulaindex=${formulaindextoupdate} WHERE name='${Db.replaceQuotes(field.name)}';`;
+                var query = `UPDATE datatypefields SET label=${labeltoupdate}, istitle=${!!(recordtype.titlefield && (recordtype.titlefield === field.name))}, isrequired=${!!field.required}, reference=${referencetoupdate}, formula=${formulatoupdate}, formulaindex=${formulaindextoupdate} WHERE datatypename='${Db.replaceQuotes(recordtype.name)}' AND name='${Db.replaceQuotes(field.name)}';`;
                 await Db.query(databasename, query);
             } else {
                 // Insert new
