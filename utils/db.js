@@ -7,6 +7,7 @@ var moduleconfig = require('../config/module-config.json');
 var path = require("path");
 var JSZip = require("jszip");
 var rimraf = require("rimraf");
+var decompress = require("decompress");
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
@@ -19,15 +20,16 @@ var Db = {
 
     init: async() => {
         if (Db.isInitialized) return;
-        await Db.backup();
         Object.keys(Db.pools).forEach((k) => {
             Db.pools[k].end();
             delete Db.pools[k];
         });
+        // Backup
+        await Db.backup();
         // Define type parsing, (SELECT typname, oid FROM pg_type order by typname)
         pg.types.setTypeParser(20, (val) => { return parseInt(val); }); // bigint / int8
         pg.types.setTypeParser(1700, (val) => { return parseFloat(val); }); // numeric
-        // if (false /*dropDatabase*/) { // DANGEROUS! Enable this only if you know what you do!
+        // { // DANGEROUS! Enable this only if you know what you do!
         //     var portalDatabases = await Db.queryDirect("postgres", `SELECT * FROM pg_database WHERE datname like '${Db.replaceQuotes(dbprefix)}_%';`);
         //     for (var i = 0; i < portalDatabases.rowCount; i++) {
         //         await Db.queryDirect("postgres", `DROP DATABASE IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(portalDatabases.rows[i].datname)};`);
@@ -35,6 +37,8 @@ var Db = {
         // }
         await Db.initPortalDatabase();
         await Db.updateRecordTypes();
+        // Restore
+        // await Db.restore(path.join(__dirname, "../backup/1522059308260.zip"), "arrange");
         Db.isInitialized = true;
     },
 
@@ -63,7 +67,7 @@ var Db = {
                 var tablename = tables[j].table_name;
                 var outputfile = path.join(databasedir, tablename);
                 await Db.queryDirect(databasename, `COPY ${tablename} TO '${outputfile}';`);
-                zip.file(path.join(databasename, tablename), fs.readFileSync(outputfile));
+                zip.file(path.join(databasename, tablename).replace(/\\/g, "/"), fs.readFileSync(outputfile));
             }
         }
         await new Promise((resolve, reject) => {
@@ -74,10 +78,10 @@ var Db = {
         console.log("BACKUP FINISHED.");
     },
     
-    createClient: async(clientName, label) => {
+    createClient: async(clientName, label, donotaddtoclientstableofportal) => {
         var clientDatabaseName = `${dbprefix}_${clientName}`;
         await Db.queryDirect("postgres", `CREATE DATABASE ${Db.replaceQuotesAndRemoveSemicolon(clientDatabaseName)};`);
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO clients (name, label) VALUES ('${Db.replaceQuotes(clientName)}', '${Db.replaceQuotes(label)}');`);
+        if (!donotaddtoclientstableofportal) await Db.query(Db.PortalDatabaseName, `INSERT INTO clients (name, label) VALUES ('${Db.replaceQuotes(clientName)}', '${Db.replaceQuotes(label)}');`);
         // Prepare client's database
         await Db.createDefaultTables(clientName);
         await Db.createDefaultClientTables(clientName);
@@ -156,6 +160,17 @@ var Db = {
     deleteDynamicObjects: async(clientname, datatypename, filter) => {
         var filterstring = Db.getFilterString(filter);
         return Db.query(clientname, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} WHERE ${filterstring};`);
+    },
+
+    deleteRecordType: async(databasename, recordtypename) => {
+        await Db.query(databasename, `DELETE FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(recordtypename)}';`);
+        await Db.query(databasename, `DELETE FROM datatypes WHERE name = '${Db.replaceQuotes(recordtypename)}';`);
+        await Db.query(databasename, `DROP TABLE IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(recordtypename)};`);
+    },
+
+    deleteRecordTypeField: async(databasename, recordtypename, fieldname) => {
+        await Db.query(databasename, `DELETE FROM datatypefields WHERE name = '${Db.replaceQuotes(fieldname)}' and datatypename = '${Db.replaceQuotes(recordtypename)}';`);
+        await Db.query(databasename, `ALTER TABLE ${Db.replaceQuotesAndRemoveSemicolon(recordtypename)} DROP COLUMN IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(fieldname)};`);
     },
 
     getDataTypes: async(databaseNameWithoutPrefix) => {
@@ -359,6 +374,50 @@ var Db = {
 
     replaceQuotesAndRemoveSemicolon: (str) => {
         return str && typeof(str) === "string" ? Db.replaceQuotes(str).replace(/;/g, "") : str;
+    },
+
+    restore: async(fullzipfilepath, backupdatabaseprefix) => {
+        console.log(`Restoring databases from ${fullzipfilepath} ...`);
+        var extractpath = fullzipfilepath.substring(0, fullzipfilepath.lastIndexOf("."));
+        await decompress(fullzipfilepath, extractpath);
+        var databasefoldernames = fs.readdirSync(extractpath);
+        var existingdatabasenames = (await Db.queryDirect("postgres", `SELECT * FROM pg_database WHERE datname like '${Db.replaceQuotes(dbprefix)}_%';`)).rows.map(d => d.datname);
+        for (var i = 0; i < databasefoldernames.length; i++) {
+            var databasefoldername = databasefoldernames[i];
+            var clientname = databasefoldername.substring(backupdatabaseprefix.length + 1);
+            var databasefolder = path.join(extractpath, databasefoldername);
+            var tablenames = fs.readdirSync(databasefolder);
+            for (var j = 0; j < tablenames.length; j++) {
+                var tablename = Db.replaceQuotesAndRemoveSemicolon(tablenames[j]);
+                var filename = path.join(databasefolder, tablename);
+                var databaseexists = existingdatabasenames.find(d => d === `${dbprefix}_${clientname}`);
+                if (databaseexists) {
+                    var tableexists = (await Db.query(clientname, `SELECT 1 FROM information_schema.tables WHERE table_name='${Db.replaceQuotes(tablename)}';`)).rowCount > 0;
+                    if (tableexists) {
+                        await Db.query(clientname, `DELETE FROM ${tablename};`);
+                        await Db.query(clientname, `COPY ${tablename} FROM '${filename}';`);
+                    }
+                } else {
+                    await Db.createClient(clientname, clientname, true); // The clients table is restored from the backup so do not add the new client here
+                    await Db.query(clientname, `COPY ${tablename} FROM '${filename}';`);
+                    existingdatabasenames.push(`${dbprefix}_${clientname}`);
+                }
+            }
+            // Cleanup record types
+            var existingtablenames = (await Db.query(clientname, "SELECT table_name FROM information_schema.tables WHERE table_schema='public';")).rows.map(r => r.table_name);
+            var existingrecordtypenames = (await Db.getDataTypes(clientname)).map(rt => rt.name);
+            for (var j = 0; j < existingrecordtypenames.length; j++) {
+                var existingrecordtypename = existingrecordtypenames[j];
+                if (existingtablenames.indexOf(existingrecordtypename) < 0) {
+                    await Db.deleteRecordType(clientname, existingrecordtypename);
+                }
+            }
+            
+        }
+        await new Promise((resolve, reject) => {
+            rimraf(extractpath, resolve);
+        });
+        console.log(`Restoring finished.`);
     },
             
     query: async(databaseNameWithoutPrefix, query) => {

@@ -83,11 +83,11 @@ module.exports = async() => {
                     break;
                 case "FMOBJECTS_TYPE_LEVEL": 
                     newdatabasename = "levels";
-                    await Db.insertDynamicObject(clientname, newdatabasename, { name:fmo.name, label: fmo.label, previewimagedocumentname: fmo.previewimagedocumentname, bgfman: fmo.bgf, nrfman: fmo.nrf });
+                    await Db.insertDynamicObject(clientname, newdatabasename, { name:fmo.name, label: fmo.label, previewimagedocumentname: fmo.previewimagedocumentname });
                     break;
                 case "FMOBJECTS_TYPE_ROOM": 
                     newdatabasename = "rooms";
-                    await Db.insertDynamicObject(clientname, newdatabasename, { name:fmo.name, label: fmo.label, previewimagedocumentname: fmo.previewimagedocumentname, nrfman: fmo.nrf, nufman: fmo.nuf, tfman: fmo.tf, vfman: fmo.vf });
+                    await Db.insertDynamicObject(clientname, newdatabasename, { name:fmo.name, label: fmo.label, previewimagedocumentname: fmo.previewimagedocumentname });
                     break;
                 case "FMOBJECTS_TYPE_AREA": 
                     newdatabasename = "areas";
@@ -116,15 +116,6 @@ module.exports = async() => {
                 var newdaoname = `${dav.value}-${newdatabasename}`;
                 var newdavname = `${dav.name}-${newdatabasename}`;
                 await Db.insertDynamicObject(clientname, co.collections.dynamicattributevalues.name, { name: newdavname, entityname: dav.entityname, dynamicattributename: newdaname, value: dav.daoname ? newdaoname : dav.value });
-            }
-        }
-        // perform calculations for all FM object types
-        var datatypestocalculate = ["areas", "rooms", "levels", "buildings", "properties", "projects"];
-        for (var j = 0; j < datatypestocalculate.length; j++) {
-            var dt = datatypestocalculate[j];
-            var entitynames = (await Db.query(clientname, `SELECT name FROM ${dt};`)).rows.map(r => r.name);
-            for (var k = 0; k < entitynames.length; k++) {
-                await ch.calculateformula(clientname, dt, entitynames[k]);
             }
         }
     }

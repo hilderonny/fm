@@ -131,11 +131,8 @@ module.exports.apis = {
 };
 
 module.exports.formulatypes = {
-    childifsumzero: "childifsumzero",
     childsum: "childsum",
-    div: "div",
     ifthenelse: "ifthenelse",
-    prod: "prod",
     sum: "sum"
 }
 
