@@ -28,6 +28,7 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
     $scope.openChildElement = function(fmObject) {
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('BIM/AreasCard', {
+            fmObjects: $scope.fmObjects,
             currentFmObject: fmObject
         }, 'PERMISSION_BIM_AREAS');
     };
@@ -36,7 +37,7 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
         // TODO: Umstellen
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('BIM/FmobjectCard', {
-            fmObjectId: elem.id,
+            fmObjectId: elem.name,
             createFmObjectCallback: changeFmObjectCallback,
             saveFmObjectCallback: changeFmObjectCallback,
             deleteFmObjectCallback: changeFmObjectCallback,
@@ -48,6 +49,17 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
 
     $scope.load = function() {
         $rootScope.isLoading = true;
+        if ($scope.params.fmObjects && $scope.params.currentFmObject) { // We come here only on small devices to show additional cards
+            $scope.currentFmObject = $scope.params.currentFmObject;
+            $scope.fmObjects = $scope.params.fmObjects;
+            $scope.childFmObjects = $scope.currentFmObject._children;
+            // Fetch breadcrumbs
+            $http.get('/api/dynamic/parentpath/' + $scope.currentFmObject._datatypename + '/' + $scope.currentFmObject.name).then(function(breadcrumbsresponse) {
+                $scope.breadcrumbs = breadcrumbsresponse.data.join(' » ');
+                $rootScope.isLoading=false;
+            });
+            return;
+        }
         $http.get('/api/areas').then(function(response) {
             $scope.fmObjects = [];
             var handleFmObject = function(fmObject, depth) {
@@ -58,19 +70,7 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
             };
             response.data.forEach(function(fmObject) { handleFmObject(fmObject, 0); });
             utils.setLocation('/areas');
-            if ($scope.params.currentFmObject) {
-                $scope.currentFmObject = $scope.params.currentFmObject;
-                $scope.childFmObjects = $scope.currentFmObject._children;
-                // Fetch details for path for breadcrumbs
-                // TODO: Create special path API for breadcrumbs
-                // $http.get('/api/fmobjects/' + $scope.currentFmObject._id).then(function(detailsResponse) {
-                //     $scope.breadcrumbs = detailsResponse.data.path.map(function(pathElement){
-                //         return pathElement.name;
-                //     }).join(' » ');
-                // });
-            } else {
-                $scope.childFmObjects = response.data;
-            }
+            $scope.childFmObjects = response.data;
             $rootScope.isLoading=false;
         });
     }

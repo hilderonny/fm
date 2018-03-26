@@ -6,6 +6,28 @@ var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 
+// Get path of all parents of an object as array (root first) for breadcrumbs
+// TODO: Correct access authentication on dynamic objects
+router.get("/parentpath/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
+    var clientname = req.user.clientname;
+    try {
+        var relationsquery = `
+        WITH RECURSIVE get_path(datatype1name, name1, datatype2name, name2, depth) AS (
+            (SELECT datatype1name, name1, datatype2name, name2, 0 FROM relations WHERE relationtypename = 'parentchild')
+            UNION
+            (SELECT relations.datatype1name, relations.name1, get_path.datatype2name, get_path.name2, get_path.depth + 1 FROM relations JOIN get_path on get_path.name1 = relations.name2 WHERE relationtypename = 'parentchild')
+        )
+        SELECT datatype1name, name1, depth FROM get_path WHERE datatype2name = '${Db.replaceQuotes(req.params.recordtypename)}' AND name2 = '${Db.replaceQuotes(req.params.entityname)}';
+        `;
+        var relations = (await Db.query(clientname, relationsquery)).rows;
+        var labelquery = relations.map(r => `SELECT label, ${r.depth} AS depth FROM ${Db.replaceQuotesAndRemoveSemicolon(r.datatype1name)} WHERE name = '${Db.replaceQuotes(r.name1)}'`).join(" UNION ");
+        var labels = (await Db.query(clientname, labelquery)).rows.sort((a, b) => b.depth - a.depth).map(l => l.label);
+        res.send(labels);
+    } catch(error) {
+        res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
+    }
+});
+
 // TODO: Correct access authentication on dynamic objects
 router.get("/:recordtypename", auth(false, false, co.modules.base), async(req, res) => {
     try {
