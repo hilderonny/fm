@@ -123,7 +123,7 @@ async function init() {
     //var accessLogStream = fs.createWriteStream(__dirname + '/access.log', {flags: 'a'});
     //app.use(require('morgan')('combined', {stream: accessLogStream}));
     app.use(require('compression')()); // Ausgabekompression
-    app.set('json spaces', '\t'); // Ausgabe im Response verschönern
+    // app.set('json spaces', '\t'); // Ausgabe im Response verschönern
     app.use(require('./middlewares/extracttoken')); // Authentifizierung und Authorisierung -> req.user{_id}
     app.use(require('body-parser').json()); // JSON Request-Body-Parser -> req.body
     app.use(require('body-parser').urlencoded({extended:true})); // parse application/x-www-form-urlencoded

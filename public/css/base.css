@@ -410,6 +410,10 @@ table.areachildren > tbody > tr > td {
     padding: 4px;
 }
 
+table.areachildren.smalldevice > tbody > tr > td > div > span {
+    white-space: normal;
+}
+
 table.largedevice, table.smalldevice {
     display: table;
 }

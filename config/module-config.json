@@ -637,7 +637,7 @@
             ],
             "clientdatatypes": [
 
-                { "name": "projects", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "fields": [
+                { "name": "projects", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
@@ -648,7 +648,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
                 ], "lists": [ "fmobjects" ] },
 
-                { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "fields": [
+                { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
@@ -659,7 +659,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
                 ], "lists": [ "fmobjects" ] },
 
-                { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "fields": [
+                { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
@@ -670,7 +670,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
                 ], "lists": [ "fmobjects" ] },
 
-                { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "fields": [
+                { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "bgfman", "label": "Brutto-Grundfläche (BGF, manuelle Eingabe)", "type": "decimal" },
@@ -683,7 +683,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
                 ], "lists": [ "fmobjects" ] },
 
-                { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "fields": [
+                { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "nrfman", "label": "Netto-Raumfläche (NRF, manuelle Eingabe)", "type": "decimal" },
@@ -696,7 +696,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF, berechnet)", "type": "formula", "formula": { "childifsumzero" : ["vf", "vfman"] }, "formulaindex": 3 }
                 ], "lists": [ "fmobjects" ] },
 
-                { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "fields": [
+                { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_AREA.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
                     { "name": "areacategoryname", "type": "reference", "reference": "areacategories" },
@@ -708,7 +708,7 @@
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_VF", "f", 0] }, "formulaindex": 2 }
                 ], "lists": [ "fmobjects" ] },
 
-                { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "fields": [
+                { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" }
                 ], "lists": [ "fmobjects" ] },
