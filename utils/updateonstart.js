@@ -1,6 +1,6 @@
-var Db = require("./utils/db").Db;
-var co = require("./utils/constants");
-var ch = require("./utils/calculationhelper");
+var Db = require("./db").Db;
+var co = require("./constants");
+var ch = require("./calculationhelper");
 var uuidv4 = require("uuid").v4;
 
 /**

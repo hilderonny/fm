@@ -4,6 +4,9 @@ var bcryptjs = require("bcryptjs");
 var constants = require("./constants");
 var fs = require("fs");
 var moduleconfig = require('../config/module-config.json');
+var path = require("path");
+var JSZip = require("jszip");
+var rimraf = require("rimraf");
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
@@ -14,8 +17,9 @@ var Db = {
     pools: {},
     isInitialized: false,
 
-    init: async(dropDatabase) => {
-        if (!dropDatabase && Db.isInitialized) return;
+    init: async() => {
+        if (Db.isInitialized) return;
+        await Db.backup();
         Object.keys(Db.pools).forEach((k) => {
             Db.pools[k].end();
             delete Db.pools[k];
@@ -23,15 +27,51 @@ var Db = {
         // Define type parsing, (SELECT typname, oid FROM pg_type order by typname)
         pg.types.setTypeParser(20, (val) => { return parseInt(val); }); // bigint / int8
         pg.types.setTypeParser(1700, (val) => { return parseFloat(val); }); // numeric
-        if (dropDatabase) {
-            var portalDatabases = await Db.queryDirect("postgres", `SELECT * FROM pg_database WHERE datname like '${Db.replaceQuotes(dbprefix)}_%';`);
-            for (var i = 0; i < portalDatabases.rowCount; i++) {
-                await Db.queryDirect("postgres", `DROP DATABASE IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(portalDatabases.rows[i].datname)};`);
-            }
-        }
+        // if (false /*dropDatabase*/) { // DANGEROUS! Enable this only if you know what you do!
+        //     var portalDatabases = await Db.queryDirect("postgres", `SELECT * FROM pg_database WHERE datname like '${Db.replaceQuotes(dbprefix)}_%';`);
+        //     for (var i = 0; i < portalDatabases.rowCount; i++) {
+        //         await Db.queryDirect("postgres", `DROP DATABASE IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(portalDatabases.rows[i].datname)};`);
+        //     }
+        // }
         await Db.initPortalDatabase();
         await Db.updateRecordTypes();
         Db.isInitialized = true;
+    },
+
+    /**
+     * Performs a backup of all relevant databases each time the server starts into /backup/<timestamp>.zip
+     */
+    backup: async() => {
+        // collect database names
+        var databases = (await Db.queryDirect("postgres", `SELECT datname FROM pg_database WHERE datname like '${Db.replaceQuotes(dbprefix)}_%';`)).rows;
+        if (databases.length < 1) return;
+        console.log("CREATING BACKUP ...");
+        var zip = new JSZip();
+        // create backup directory
+        var backupdir = path.join(__dirname, "../backup");
+        var timestamp = Date.now().toString();
+        var timestampdir = path.join(backupdir, timestamp);
+        if (!fs.existsSync(backupdir)) fs.mkdirSync(backupdir);
+        if (!fs.existsSync(timestampdir)) fs.mkdirSync(timestampdir);        
+        // dump all relevant databases
+        for (var i = 0; i < databases.length; i++) {
+            var databasename = databases[i].datname;
+            var tables = (await Db.queryDirect(databasename, "SELECT table_name FROM information_schema.tables WHERE table_schema='public';")).rows;
+            var databasedir = path.join(timestampdir, databasename);
+            if (!fs.existsSync(databasedir)) fs.mkdirSync(databasedir);        
+            for (var j = 0; j < tables.length; j++) {
+                var tablename = tables[j].table_name;
+                var outputfile = path.join(databasedir, tablename);
+                await Db.queryDirect(databasename, `COPY ${tablename} TO '${outputfile}';`);
+                zip.file(path.join(databasename, tablename), fs.readFileSync(outputfile));
+            }
+        }
+        await new Promise((resolve, reject) => {
+            var zipfilename = path.join(backupdir, `${timestamp}.zip`);
+            zip.generateNodeStream({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } }).pipe(fs.createWriteStream(zipfilename)).on("finish", resolve);
+        });
+        rimraf.sync(timestampdir);
+        console.log("BACKUP FINISHED.");
     },
     
     createClient: async(clientName, label) => {

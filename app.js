@@ -110,7 +110,7 @@ async function init() {
     await require("./utils/db").Db.init();
     // Run update scripts on startup
     if (localConfig.applyupdates) {
-        await require("./updateonstart")();
+        await require("./utils/updateonstart")();
         localConfig.applyupdates = false;
         // fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
     }

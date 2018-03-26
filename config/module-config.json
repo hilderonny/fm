@@ -84,7 +84,7 @@
                 "chat.html",
                 "favicon.png"
             ],
-            "root" : [ "app.js", "updateonstart.js", "package.json", "package-lock.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "triggerupdate.js", "config/localconfig.json.template" ],
+            "root" : [ "app.js", "package.json", "package-lock.json", "installwindowsservice.js", "uninstallwindowsservice.js", "keeprunning.js", "triggerupdate.js", "config/localconfig.json.template" ],
             "include" : [
                 "public/js/lib/angular.min.js",
                 "public/js/lib/angular-aria.min.js",
@@ -126,7 +126,7 @@
                     ]
                 }
             ],
-            "utils": [ "apiHelper", "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "localConfigHelper" ],
+            "utils": [ "apiHelper", "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "localConfigHelper", "updateonstart" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
