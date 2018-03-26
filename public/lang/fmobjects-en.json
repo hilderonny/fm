@@ -15,7 +15,7 @@
     "TRK_FMOBJECTS_FM_OBJECT_CREATED" : "FM object created",
     "TRK_FMOBJECTS_FM_OBJECT_DELETED" : "FM object deleted",
     "TRK_FMOBJECTS_FM_OBJECTS" : "FM objects",
-    "TRK_FMOBJECTS_NAME" : "Name",
+    "TRK_FMOBJECTS_LABEL" : "Label",
     "TRK_FMOBJECTS_NEW_ELEMENT" : "Element",
     "TRK_FMOBJECTS_NEW_ELEMENT_IN_ROOT" : "Create new element in top level",
     "TRK_FMOBJECTS_NEW_FM_OBJECT" : "New FM object",

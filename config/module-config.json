@@ -4,7 +4,7 @@
         "base": {
             "forportal": true,
             "forclients": true,
-            "api" : [ "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
+            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
             "middlewares": [ "auth", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",

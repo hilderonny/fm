@@ -13,21 +13,24 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
         closeFmObjectCallback();
     };
 
-    var createFmObjectCallback = function(createdFmObject) {
+    var createFmObjectCallback = function(name) {
         var element = {
-            icon: 'fm/' + createdFmObject.type,
-            name: createdFmObject.name,
-            type: 'fmobjects',
-            id: createdFmObject._id,
-            children: createdFmObject.children ? createdFmObject.children.map(handleFmObject) : [],
-            parent: $scope.selectedFmObject
-        }
-        if ($scope.selectedFmObject) {
-            $scope.selectedFmObject.children.push(element);
-            $scope.selectedFmObject.isOpen = true;
-        } else {
-            $scope.child.children.push(element);
-        }
+            name: name
+        };
+        // var element = {
+        //     icon: 'fm/' + createdFmObject.type,
+        //     name: createdFmObject.name,
+        //     type: 'fmobjects',
+        //     id: createdFmObject._id,
+        //     children: createdFmObject.children ? createdFmObject.children.map(handleFmObject) : [],
+        //     parent: $scope.selectedFmObject
+        // }
+        // if ($scope.selectedFmObject) {
+        //     $scope.selectedFmObject.children.push(element);
+        //     $scope.selectedFmObject.isOpen = true;
+        // } else {
+        //     $scope.child.children.push(element);
+        // }
         $scope.selectFmObject(element);
     };
     
@@ -40,7 +43,7 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
     $scope.selectFmObject = function(fmObject) {
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('BIM/FmobjectCard', {
-            fmObjectId: fmObject.id,
+            name: fmObject.name,
             createFmObjectCallback: createFmObjectCallback, // Wird benötigt, wenn Unterelemente erzeugt werden
             saveFmObjectCallback: saveFmObjectCallback,
             deleteFmObjectCallback: deleteFmObjectCallback,
@@ -61,7 +64,8 @@ app.controller('BIMHierarchyCardController', function($scope, $rootScope, $http,
         $scope.selectedFmObject = null;
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('BIM/FmobjectCard', {
-            parentFmObjectId: null,
+            parentname: null,
+            parentdatatypename: null,
             createFmObjectCallback: createFmObjectCallback,
             closeCallback: closeFmObjectCallback
         }, 'PERMISSION_BIM_FMOBJECT');

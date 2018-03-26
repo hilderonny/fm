@@ -143,4 +143,11 @@ app.directive('resizeHandle', function() {
   }
 });
 
+app.factory('$exceptionHandler', [function($log, logErrorsToBackend) {
+  return function myExceptionHandler(exception, cause) {
+    // Ignore stupid AngularJS errors
+    if (exception.message !== "Cannot read property 'insertBefore' of null") console.error(exception, cause);
+  };
+}]);
+
 app.directUrlMappings = {};

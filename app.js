@@ -112,10 +112,10 @@ async function init() {
     if (localConfig.applyupdates) {
         await require("./utils/updateonstart")();
         localConfig.applyupdates = false;
-        // fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
+        fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
     }
     // Recalculate all formulas because the definitions could have changed in module-config
-    // await require("./utils/calculationhelper").recalculateall();
+// await require("./utils/calculationhelper").recalculateall();
     // Includes minifizieren
     prepareIncludes(fs);
     // Anwendung initialisieren und Handler-Reihenfolge festlegen

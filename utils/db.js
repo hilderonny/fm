@@ -180,8 +180,9 @@ var Db = {
         return result.rowCount > 0 ? result.rows[0] : null;
     },
 
-    getDataTypes: async(databaseNameWithoutPrefix) => {
-        return (await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypes;`)).rows;
+    getDataTypes: async(databaseNameWithoutPrefix, forlist) => {
+        var filter = forlist ? ` WHERE '${Db.replaceQuotes(forlist)}' = ANY (lists)` : "";
+        return (await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypes${filter};`)).rows;
     },
 
     getDataTypeFields: async(databaseNameWithoutPrefix, datatypename) => {

@@ -69,15 +69,16 @@
                         </md-card-actions>
                                 
                         <md-input-container flex>
-                            <label translate>TRK_FMOBJECTS_NAME</label>
-                            <input ng-model="fmObject.name">
+                            <label translate>TRK_FMOBJECTS_LABEL</label>
+                            <input ng-model="fmObject.label">
                         </md-input-container>
 
-                        <md-input-container flex>
+                        <md-input-container flex ng-if="isNewFmObject">
                             <label translate>TRK_FMOBJECTS_TYPE</label>
-                            <md-select ng-model="fmObject.type">
-                                <md-option ng-value="type" ng-repeat="type in types">
-                                    <span translate="TRK_{{type}}"></span>
+                            <md-select ng-model="fmObject.datatypename">
+                                <md-option ng-value="datatype.name" ng-repeat="datatype in datatypes | orderBy: 'label'">
+                                    <md-icon md-svg-src="{{datatype.icon}}"></md-icon>
+                                    <span>{{datatype.label}}</span>
                                 </md-option>
                             </md-select>
                         </md-input-container>
@@ -143,7 +144,7 @@
 
                         <md-card-actions layout="row" layout-align="space-between center">
                             <md-button class="md-raised md-warn" ng-if="!isNewFmObject && canWriteFmObjects" ng-click="deleteFmObject()"><span translate>TRK_FMOBJECTS_DELETE</span></md-button>
-                            <md-button class="md-raised md-accent" ng-if="isNewFmObject && canWriteFmObjects" ng-click="createFmObject($event)"><span translate>TRK_FMOBJECTS_CREATE</span></md-button>
+                            <md-button class="md-raised md-accent" ng-if="isNewFmObject && canWriteFmObjects" ng-disabled="!fmObject.datatypename" ng-click="createFmObject($event)"><span translate>TRK_FMOBJECTS_CREATE</span></md-button>
                             <md-button class="md-raised md-accent" ng-if="!isNewFmObject && canWriteFmObjects" ng-click="saveFmObject()"><span translate>TRK_FMOBJECTS_SAVE</span></md-button>
                         </md-card-actions>
                     </form>
@@ -153,4 +154,5 @@
         </md-tab>
         <ng-include ng-if="!isNewFmObject" src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
     </md-tabs>
+
 </md-card>

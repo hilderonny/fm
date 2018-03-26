@@ -27,22 +27,23 @@ router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypena
     }
 });
 
-// TODO: Correct access authentication on dynamic objects
 router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, res) => {
     try {
-        var objects = await Db.getDynamicObjects(req.user.clientname, req.params.recordtypename);
+        var filter = req.params;
+        delete filter.token;
+        var objects = await Db.getDynamicObjects(req.user.clientname, req.params.recordtypename, filter);
         res.send(objects);
     } catch(error) {
         res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
     }
 });
 
-router.post('/:recordtypename', auth(false, false, co.modules.base), async(req, res) => {
+router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, res) => {
     var newobject = req.body;
     newobject.name = uuidv4();
     try {
         await Db.insertDynamicObject(req.user.clientname, req.params.recordtypename, newobject);
-        res.sendStatus(200);
+        res.send(newobject.name);
     } catch(error) {
         res.sendStatus(400); // Any error with the request
     }
