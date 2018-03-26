@@ -54,6 +54,9 @@ app.controller('BIMFmobjectCardController', function($scope, $rootScope, $http, 
             // $scope.fmObject._id = createdFmObject._id;
             // $scope.fmObjectName = $scope.fmObject.name; 
             // $scope.relationsEntity = { type:'fmobjects', id:createdFmObject._id };
+
+            // TODO: Handle parent relations
+
             if ($scope.params.createFmObjectCallback) {
                 $scope.params.createFmObjectCallback(name);
             }

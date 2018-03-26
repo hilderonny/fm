@@ -10,13 +10,12 @@
 
     <script type="text/ng-template" id="fmObjectHierarchyList.html">
         <md-list class="hierarchy">
-            <md-list-item flex layout="column" ng-repeat="child in child.children">
+            <md-list-item flex layout="column" ng-repeat="child in child.children | orderBy: 'label'">
                 <div flex layout="row" ng-class="{active:selectedFmObject==child}">
-                    <md-icon ng-click="child.isOpen = true" ng-if="!child.isOpen && child.children.length > 0" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>
-                    <md-icon ng-click="child.isOpen = false" ng-if="child.isOpen && child.children.length > 0" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
-                    <md-icon ng-if="child.children.length < 1"></md-icon>
-                    <img ng-click="selectFmObject(child)" ng-src="/css/icons/{{child.icon}}.svg" />
-                    <p class="nowrap" ng-bind="child.name" ng-click="selectFmObject(child)"></p>
+                    <md-icon ng-click="openchild(child)" ng-if="!child.isOpen" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>
+                    <md-icon ng-click="child.isOpen = false" ng-if="child.isOpen" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
+                    <img ng-click="selectFmObject(child)" ng-src="{{child._icon}}" />
+                    <p class="nowrap" ng-bind="child.label" ng-click="selectFmObject(child)"></p>
                 </div>
                 <ng-include flex src="'fmObjectHierarchyList.html'" ng-if="child.isOpen"></ng-include>
             </md-list-item>

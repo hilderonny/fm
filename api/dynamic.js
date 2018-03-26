@@ -5,6 +5,29 @@ var apiHelper = require('../utils/apiHelper');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
+var ph = require('../utils/permissionshelper');
+
+
+// Get a list of all children of the given entity
+router.get("/children/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
+    var clientname = req.user.clientname;
+    var recordtypename = req.params.recordtypename;
+    var entityname = req.params.entityname;
+    var permissions = await ph.getpermissionsforuser(req.user);
+    var relevantrelations = (await Db.query(clientname, `SELECT r.datatype2name, r.name2, dtp.permissionkey, dtc.icon FROM relations r JOIN datatypes dtp ON dtp.name = r.datatype1name JOIN datatypes dtc ON dtc.name = r.datatype2name WHERE r.relationtypename = 'parentchild' AND r.datatype1name = '${Db.replaceQuotes(recordtypename)}' AND r.name1 = '${Db.replaceQuotes(entityname)}';`)).rows;
+    var children = [];
+    for (var i = 0; i < relevantrelations.length; i++) {
+        var rr = relevantrelations[i];
+        if (!permissions.find(p => p.key === rr.permissionkey && p.canRead)) continue; // No permission to access specific datatype entities
+        var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
+        if (child) {
+            child._datatypename = rr.datatype2name;
+            child._icon = rr.icon;
+            children.push(child);
+        }
+    }
+    res.send(children);
+});
 
 // Get path of all parents of an object as array (root first) for breadcrumbs
 router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
@@ -25,6 +48,23 @@ router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypena
     } catch(error) {
         res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
     }
+});
+
+// Get all root elements for a specific list type (parameter forlist). That are those elements which have no parentchild relation where they are children
+router.get("/rootelements/:forlist", auth(false, false, co.modules.base), async(req, res) => {
+    var clientname = req.user.clientname;
+    var forlist = req.params.forlist;
+    var permissions = await ph.getpermissionsforuser(req.user);
+    var relevantdatatypes = (await Db.query(clientname, `SELECT * FROM datatypes WHERE '${Db.replaceQuotes(forlist)}' = ANY (lists);`)).rows;
+    var rootelements = [];
+    for (var i = 0; i < relevantdatatypes.length; i++) { // Must be loop because it is not said, that all datatypes have all required columns so UNION will not work
+        var rdt = relevantdatatypes[i];
+        if (!permissions.find(p => p.key === rdt.permissionkey && p.canRead)) continue; // No permission to access specific datatypes
+        var rdtn = rdt.name;
+        var entities = (await Db.query(clientname, `SELECT e.* FROM ${Db.replaceQuotesAndRemoveSemicolon(rdtn)} e LEFT JOIN relations r ON r.name2 = e.name AND r.relationtypename = 'parentchild' AND r.datatype2name = '${Db.replaceQuotes(rdtn)}' WHERE r.name IS NULL;`)).rows;
+        entities.forEach(e => rootelements.push({ name: e.name, _datatypename: rdt.name, label: e.label, _icon: rdt.icon }));
+    }
+    res.send(rootelements);
 });
 
 router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, res) => {
