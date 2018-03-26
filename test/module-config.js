@@ -128,6 +128,7 @@ describe('module-config.json', function() {
             '.gitignore',
             '.nyc_output/',
             '.vscode/',
+            'backup/',
             'basetest.bat',
             'config/README.md',
             'config/localconfig.json',

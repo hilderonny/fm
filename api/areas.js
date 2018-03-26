@@ -3,10 +3,8 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateSameClientId = require('../middlewares/validateSameClientId');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
-var dah = require('../utils/dynamicAttributesHelper');
 var Db = require("../utils/db").Db;
 
 router.get('/', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {

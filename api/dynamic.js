@@ -7,8 +7,7 @@ var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 
 // Get path of all parents of an object as array (root first) for breadcrumbs
-// TODO: Correct access authentication on dynamic objects
-router.get("/parentpath/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
+router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var clientname = req.user.clientname;
     try {
         var relationsquery = `
@@ -29,7 +28,7 @@ router.get("/parentpath/:recordtypename/:entityname", auth(false, false, co.modu
 });
 
 // TODO: Correct access authentication on dynamic objects
-router.get("/:recordtypename", auth(false, false, co.modules.base), async(req, res) => {
+router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, res) => {
     try {
         var objects = await Db.getDynamicObjects(req.user.clientname, req.params.recordtypename);
         res.send(objects);

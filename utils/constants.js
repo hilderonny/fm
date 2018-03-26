@@ -41,6 +41,10 @@ module.exports.apis = {
      */
     documents: 'documents',
     /**
+     * Dynamic objects
+     */
+    dynamic: "dynamic",
+    /**
      * API zum Administrieren von dynamischen Attributen an Datenbankentitäten
      */
     dynamicattributes: 'dynamicattributes',
@@ -323,6 +327,9 @@ module.exports.permissions = {
      */
     ADMINISTRATION_USER: 'PERMISSION_ADMINISTRATION_USER',
     ADMINISTRATION_USERGROUP: 'PERMISSION_ADMINISTRATION_USERGROUP',
+    /**
+     * Permission to analyze FM object area analyzes
+     */
     BIM_AREAS: 'PERMISSION_BIM_AREAS',
     /**
      * Permission to show and edit FM objects

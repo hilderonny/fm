@@ -13,6 +13,7 @@
 |icon|URL of icon to use for the record type everywhere it is shown|
 |fields|List of fields of the datatype|
 |lists|List of possible places where the datatype is shown in hierarchies or lists, e.g. ```fmobjects``` or ```folders```|
+|permissionkey|Permission key which is required to access entities of this datatype|
 
 ### Field
 

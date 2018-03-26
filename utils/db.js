@@ -103,13 +103,15 @@ var Db = {
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, key TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, key));");
     },
 
-    createDatatype: async(databaseNameWithoutPrefix, datatypename, label, plurallabel, nameistitle, icon, lists) => {
+    createDatatype: async(databaseNameWithoutPrefix, datatypename, label, plurallabel, nameistitle, icon, lists, permissionkey, modulename) => {
         if ((await Db.query(databaseNameWithoutPrefix, `SELECT 1 FROM datatypes WHERE name = '${Db.replaceQuotes(datatypename)}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var plurallabeltoinsert = plurallabel ? "'" + Db.replaceQuotes(plurallabel) + "'" : "null";
         var icontoinsert = icon ? "'" + Db.replaceQuotes(icon) + "'" : "null";
         var liststoinsert = lists ? "'{" + lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
-        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypes (name, label, plurallabel, icon, lists) VALUES ('${Db.replaceQuotes(datatypename)}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert});`);
+        var permissionkeytoinsert = permissionkey ? "'" + Db.replaceQuotes(permissionkey) + "'" : "null";
+        var modulenametoinsert = modulename ? "'" + Db.replaceQuotes(modulename) + "'" : "null";
+        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename) VALUES ('${Db.replaceQuotes(datatypename)}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert});`);
         await Db.query(databaseNameWithoutPrefix, `CREATE TABLE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} (name TEXT PRIMARY KEY);`);
         await Db.createDatatypeField(databaseNameWithoutPrefix, datatypename, "name", "Name", constants.fieldtypes.text, nameistitle, true, true, null);
     },
@@ -171,6 +173,11 @@ var Db = {
     deleteRecordTypeField: async(databasename, recordtypename, fieldname) => {
         await Db.query(databasename, `DELETE FROM datatypefields WHERE name = '${Db.replaceQuotes(fieldname)}' and datatypename = '${Db.replaceQuotes(recordtypename)}';`);
         await Db.query(databasename, `ALTER TABLE ${Db.replaceQuotesAndRemoveSemicolon(recordtypename)} DROP COLUMN IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(fieldname)};`);
+    },
+
+    getDataType: async(databaseNameWithoutPrefix, datatypename) => {
+        var result = await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypes WHERE name = '${Db.replaceQuotes(datatypename)}';`);
+        return result.rowCount > 0 ? result.rows[0] : null;
     },
 
     getDataTypes: async(databaseNameWithoutPrefix) => {
@@ -290,7 +297,11 @@ var Db = {
     },
 
     getClientDataTypesFromConfig: () => {
-        return [].concat.apply([], Object.keys(moduleconfig.modules).map(k => moduleconfig.modules[k].clientdatatypes)).filter(a=>a);
+        return [].concat.apply([], Object.keys(moduleconfig.modules).map(k => {
+            var datatypes = moduleconfig.modules[k].clientdatatypes;
+            if (datatypes && datatypes.length) datatypes.forEach(dt => dt.modulename = k);
+            return datatypes;
+        })).filter(a=>a);
     },
 
     getPool: (databasename) => {
@@ -309,7 +320,11 @@ var Db = {
     },
 
     getPortalDataTypesFromConfig: () => {
-        return [].concat.apply([], Object.keys(moduleconfig.modules).map(k => moduleconfig.modules[k].portaldatatypes)).filter(a=>a); // See https://stackoverflow.com/a/10865042
+        return [].concat.apply([], Object.keys(moduleconfig.modules).map(k => {
+            var datatypes = moduleconfig.modules[k].portaldatatypes;
+            if (datatypes && datatypes.length) datatypes.forEach(dt => dt.modulename = k);
+            return datatypes;
+        })).filter(a=>a); // See https://stackoverflow.com/a/10865042
     },
 
     initPortalDatabase: async() => {
@@ -491,6 +506,8 @@ var Db = {
         // TODO: Remove when all portals have this change through, cannot be run from updateonstart, because this is triggered after db-init
         await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS lists TEXT[];");
         await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS predefined BOOLEAN;");
+        await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS permissionkey TEXT;");
+        await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS modulename TEXT;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formula TEXT;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formulaindex NUMERIC;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS predefined BOOLEAN;");
@@ -505,11 +522,13 @@ var Db = {
                 var plurallabeltoupdate = recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null";
                 var icontoupdate = recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null";
                 var liststoupdate = recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
-                var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate}, lists = ${liststoupdate}, predefined = true WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
+                var permissionkeytoupdate = recordtype.permissionkey ? "'" + Db.replaceQuotes(recordtype.permissionkey) + "'" : "null";
+                var modulenametoupdate = recordtype.modulename ? "'" + Db.replaceQuotes(recordtype.modulename) + "'" : "null";
+                var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate}, lists = ${liststoupdate}, predefined = true, permissionkey = ${permissionkeytoupdate}, modulename = ${modulenametoupdate} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
                 await Db.query(databasename, query);
             } else {
                 // Insert new definition
-                await Db.createDatatype(databasename, recordtype.name, recordtype.label, recordtype.plurallabel, (!recordtype.titlefield) || (recordtype.titlefield === "name"), recordtype.icon, recordtype.lists);
+                await Db.createDatatype(databasename, recordtype.name, recordtype.label, recordtype.plurallabel, (!recordtype.titlefield) || (recordtype.titlefield === "name"), recordtype.icon, recordtype.lists, recordtype.permissionkey, recordtype.modulename);
             }
             // Handle record type fields
             await Db.updateRecordTypeFieldsForDatabase(databasename, recordtype);
