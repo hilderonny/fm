@@ -1,3 +1,3 @@
-<md-tooltip md-direction="bottom"><span translate="{{tooltip}}"></span></md-tooltip>
-<md-icon md-svg-src="{{icon}}"></md-icon>
-<p translate="{{label}}"></p>
+<md-tooltip ng-if="tooltip" md-direction="bottom"><span translate="{{tooltip}}"></span></md-tooltip>
+<md-icon ng-if="icon" md-svg-src="{{icon}}"></md-icon>
+<p ng-if="label" translate="{{label}}"></p>

@@ -33,15 +33,19 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                 element.append(cardcontent);
             }
             return {
-                pre: function preLink(scope, iElement) {
+                pre: function(scope, iElement) {
+                    var closedetails = function() {
+                        delete scope.selectedchild;
+                    };
                     scope.createrootelement = function($event) {
                         // Show selection panel for child types
-                        utils.showselectionpanel($event, "/api/datatypes?forlist=" + scope.params.listfilter, function(selectedelement) {
-                            var datatypename = selectedelement.name;
+                        utils.showselectionpanel($event, "/api/datatypes?forlist=" + scope.params.listfilter, function(selectlistedelement) {
                             utils.removeCardsToTheRightOf(element);
-                            // TODO: Show details card with datatype as parameter. Parameters: datatypename, parentdatatypename, parententityname
-                            // utils.addCardWithPermission(scope.params.detailscard, {
-                            // }, scope.params.permission);
+                            utils.addCardWithPermission("components/DetailsCard", {
+                                icon: scope.params.icon,
+                                datatypename: selectlistedelement.name,
+                                onclose: closedetails
+                            }, scope.params.permission);
                         });
                     };
                     scope.loadrootelements = function() {
@@ -61,15 +65,17 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                     };
                     scope.selectchild = function(child) {
                         utils.removeCardsToTheRightOf(element);
-                        // TODO: Show details card. Parameters: datatypename, entityname
-                        // utils.addCardWithPermission(scope.params.detailscard, {
-                        //     name: child.name,
-                        // }, scope.params.permission).then(function() {
-                        //     scope.selectedchild = child;
-                        // });
+                        utils.addCardWithPermission("components/DetailsCard", {
+                            icon: scope.params.icon,
+                            datatypename: child.datatypename,
+                            entityname: child.name,
+                            onclose: closedetails
+                        }, scope.params.permission).then(function() {
+                            scope.selectedchild = child;
+                        });
                     };
                 },
-                post: function postLink(scope, iElement) {  
+                post: function(scope, iElement) {  
                     $compile(iElement)(scope);
                     scope.loadrootelements();
                 }

@@ -104,6 +104,7 @@
                 "public/js/MainController.js",
 
                 "public/js/components/avt-card.js",
+                "public/js/components/avt-details.js",
                 "public/js/components/avt-hierarchy.js",
                 "public/js/components/avt-toolbar.js",
                 "public/js/components/avt-toolbar-button.js",
@@ -637,7 +638,7 @@
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "components/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects" }
+                        { "mainCard": "components/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects", "directurl": "fmobjects" }
                     ]
                 }
             ],

@@ -24,6 +24,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                 utils.removeAllCards();
                 utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission);
                 $mdSidenav('left').close();
+                if (menuItem.directurl) utils.setLocation('/' + menuItem.directurl);
             }
         } else {
             utils.removeAllCards();
@@ -110,6 +111,14 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                 });
                 $scope.isLoggingIn = false;
                 $scope.currentMenuItem = null;
+                $scope.menu.forEach(function(mainmenu) {
+                    if (mainmenu.items) mainmenu.items.forEach(function(submenu) {
+                        if (submenu.directurl) app.directUrlMappings[submenu.directurl] = {
+                            mainMenu: mainmenu.title,
+                            subMenu: submenu.title
+                        };
+                    });
+                });
                 $scope.handleDirectUrls();
             });
         }).catch(function() {
