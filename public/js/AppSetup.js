@@ -67,6 +67,10 @@ app.config(function($translateProvider) {
   // null ist notwendig, damit sowohl die Blockübersetzung in Mandantenadministrator als auch die Umlaute beim Löschbestätigendialog korrekt angezeigt werden
 });
 
+app.config(['$mdAriaProvider', function ($mdAriaProvider) {
+  $mdAriaProvider.disableWarnings();
+}]);
+
 // Provide password matching, see http://odetocode.com/blogs/scott/archive/2014/10/13/confirm-password-validation-in-angularjs.aspx
 app.directive('compareTo', function() {
   return {

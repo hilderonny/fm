@@ -78,6 +78,7 @@ router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, r
     }
 });
 
+// Create a dynamic object and return its generated name
 router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, res) => {
     var newobject = req.body;
     newobject.name = uuidv4();

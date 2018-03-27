@@ -1,6 +1,14 @@
+var utils = {
+    init: function() {
+        return utils;
+    }
+};
+
+app.factory("utils2", utils.init);
+
 // Define utils factory, http://stackoverflow.com/a/26109991
 app.factory('utils', function($compile, $rootScope, $http, $translate, $location, $anchorScroll) {
-    var utils = {
+    var oldutils = {
 
         // On slow connections clicking on list items multiply adds multiple cards
         // To prevent that, this array is used to remember which cards are to be loaded
@@ -19,11 +27,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
             // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
             if (!$rootScope.canRead(requiredPermission)) return;
-            utils.cardsToAdd.push(cardToAdd);
+            oldutils.cardsToAdd.push(cardToAdd);
             return $http.get('/partial/' + cardTemplateUrl + '.html', { cache: true}).then(function(response) {
                 // Check whether the card should still be shown. When the dummy object is no longer
                 // in the array, the request tooks too long and the user has done something other meanwhile
-                if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response
+                if (oldutils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response
                 var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
                 var card = angular.element(response.data);
                 var domCard = card[0];
@@ -34,8 +42,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
                 window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
                 // Scroll card in view, but wait until the card is put into the dom
-                utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
-                utils.scrollToAnchor(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+                oldutils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+                oldutils.scrollToAnchor(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
                 return Promise.resolve(card);
             });
         },
@@ -48,11 +56,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             }
             if (!card) return;
             // Emtying the array of running requests
-            utils.cardsToAdd = [];
+            oldutils.cardsToAdd = [];
             var nextCard;
             do {
                 nextCard = card.next();
-                utils.removeCard(nextCard);
+                oldutils.removeCard(nextCard);
             } while (nextCard.length > 0);
         },
 
@@ -61,8 +69,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
          * wenn die Bedingungen stimmen.
          */
         replaceCardWithPermission: function(card, cardTemplateUrl, params, requiredPermission) {
-            utils.removeCardsToTheRightOf(card);
-            return utils.addCardWithPermission(cardTemplateUrl, params, requiredPermission);
+            oldutils.removeCardsToTheRightOf(card);
+            return oldutils.addCardWithPermission(cardTemplateUrl, params, requiredPermission);
         },
 
         // Removes a card, when it is set (defined by length > 0) and destroys
@@ -81,7 +89,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             var cards = cardCanvas.children();
             angular.forEach(cards, function(index, key) {
                 var card = cards[key];
-                utils.removeCard(angular.element(card));
+                oldutils.removeCard(angular.element(card));
             });
         },
 
@@ -102,7 +110,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 return;
             } else {
                 if (counter > 0) {
-                    setTimeout(function() { utils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
+                    setTimeout(function() { oldutils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
                 }
             }
         },
@@ -116,7 +124,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 return;
             } else {
                 if (counter > 0) {
-                    setTimeout(function() { utils.scrollToAnchor(domCard, cardCanvas, counter - 1) }, 100);
+                    setTimeout(function() { oldutils.scrollToAnchor(domCard, cardCanvas, counter - 1) }, 100);
                 }
             }
         },
@@ -167,5 +175,5 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         }
 
     }
-    return utils;
+    return oldutils;
 });

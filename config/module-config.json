@@ -101,6 +101,14 @@
                 "public/js/AppSetup.js",
                 "public/js/Utils.js",
                 "public/js/MainController.js",
+
+                "public/js/components/avt-card.js",
+                "public/js/components/avt-hierarchy.js",
+                "public/js/components/avt-toolbar.js",
+                "public/js/components/avt-toolbar-button.js",
+
+                "public/js/controllers/CardController.js",
+
                 "public/js/Administration/ClientSettingsCardController.js",
                 "public/js/Administration/DynamicAttributesCardController.js",
                 "public/js/Administration/DynamicAttributeCreationFormCardController.js",

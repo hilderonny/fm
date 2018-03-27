@@ -1,0 +1,30 @@
+<md-card ng-cloak ng-controller="BIMHierarchyCardController" style="background-image:url('/css/icons/office/Cottage.svg');">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-click="newFmObject()" aria-label="ADD FM OBJECT" ng-if="canWriteFmObjects">
+            <md-tooltip md-direction="bottom"><span translate>TRK_FMOBJECTS_NEW_ELEMENT_IN_ROOT</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+            <p translate>TRK_FMOBJECTS_NEW_ELEMENT</p>
+        </md-button>
+    </md-toolbar>
+
+    <script type="text/ng-template" id="fmObjectHierarchyList.html">
+        <md-list class="hierarchy">
+            <md-list-item flex layout="column" ng-repeat="child in child.children | orderBy: 'label'">
+                <div flex layout="row" ng-class="{active:selectedFmObject==child}">
+                    <md-icon ng-click="openchild(child)" ng-if="!child.isOpen" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>
+                    <md-icon ng-click="child.isOpen = false" ng-if="child.isOpen" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
+                    <img ng-click="selectFmObject(child)" ng-src="{{child._icon}}" />
+                    <p class="nowrap" ng-bind="child.label" ng-click="selectFmObject(child)"></p>
+                </div>
+                <ng-include flex src="'fmObjectHierarchyList.html'" ng-if="child.isOpen"></ng-include>
+            </md-list-item>
+        </md-list>
+    </script>
+
+    <md-card-content>
+        <ng-include flex src="'fmObjectHierarchyList.html'"></ng-include>
+    </md-card-content>
+    <resize-handle></resize-handle>
+    
+</md-card>
