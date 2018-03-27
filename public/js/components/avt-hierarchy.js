@@ -24,7 +24,6 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
         scope: true,
         priority: 900,
         compile: function compile(element, attrs) {
-            var relevantlist = attrs.avtHierarchy;
             element.removeAttr("avt-hierarchy"); //remove the attribute to avoid indefinite loop
             var resizehandle = element[0].querySelector("resize-handle");
             if (resizehandle) {
@@ -34,16 +33,20 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                 element.append(cardcontent);
             }
             return {
-                pre: function preLink(scope, iElement, iAttrs, controller) {
-                    console.log(scope.params);
-                    scope.createrootelement = function() {
-                        utils.removeCardsToTheRightOf(element);
-                        utils.addCardWithPermission(iAttrs.avtDetailsCard, {
-                        }, iAttrs.permission);
+                pre: function preLink(scope, iElement) {
+                    scope.createrootelement = function($event) {
+                        // Show selection panel for child types
+                        utils.showselectionpanel($event, "/api/datatypes?forlist=" + scope.params.listfilter, function(selectedelement) {
+                            var datatypename = selectedelement.name;
+                            utils.removeCardsToTheRightOf(element);
+                            // TODO: Show details card with datatype as parameter. Parameters: datatypename, parentdatatypename, parententityname
+                            // utils.addCardWithPermission(scope.params.detailscard, {
+                            // }, scope.params.permission);
+                        });
                     };
                     scope.loadrootelements = function() {
                         scope.$root.isLoading = true;
-                        $http.get('/api/dynamic/rootelements/' + relevantlist).then(function(response) {
+                        $http.get('/api/dynamic/rootelements/' + scope.params.listfilter).then(function(response) {
                             scope.child = { children: response.data };
                             scope.$root.isLoading = false;
                         });
@@ -58,14 +61,15 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                     };
                     scope.selectchild = function(child) {
                         utils.removeCardsToTheRightOf(element);
-                        utils.addCardWithPermission(iAttrs.avtDetailsCard, {
-                            name: child.name,
-                        }, iAttrs.permission).then(function() {
-                            scope.selectedchild = child;
-                        });
+                        // TODO: Show details card. Parameters: datatypename, entityname
+                        // utils.addCardWithPermission(scope.params.detailscard, {
+                        //     name: child.name,
+                        // }, scope.params.permission).then(function() {
+                        //     scope.selectedchild = child;
+                        // });
                     };
                 },
-                post: function postLink(scope, iElement, iAttrs, controller) {  
+                post: function postLink(scope, iElement) {  
                     $compile(iElement)(scope);
                     scope.loadrootelements();
                 }

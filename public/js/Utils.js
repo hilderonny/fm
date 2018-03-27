@@ -7,7 +7,7 @@ var utils = {
 app.factory("utils2", utils.init);
 
 // Define utils factory, http://stackoverflow.com/a/26109991
-app.factory('utils', function($compile, $rootScope, $http, $translate, $location, $anchorScroll) {
+app.factory('utils', function($compile, $rootScope, $http, $translate, $location, $anchorScroll, $mdPanel) {
     var oldutils = {
 
         // On slow connections clicking on list items multiply adds multiple cards
@@ -172,6 +172,30 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             if ($location.url() === url) return;
             if (!handleLocationChange) $rootScope.ignoreNextLocationChange = true;
             $location.url(url);
+        },
+        showselectionpanel: function(clickevent, listapi, selectioncallback) {
+            var nodeToHandle = clickevent.currentTarget;
+            var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW);
+            $mdPanel.open({
+                attachTo: angular.element(document.body),
+                controller: function($scope, $http, mdPanelRef) {
+                    $http.get(listapi).then(function(datatyperesponse) {
+                        $scope.list = datatyperesponse.data;
+                        $scope.click = function(item) {
+                            selectioncallback(item);
+                            mdPanelRef.close();
+                        }
+                    });
+                },
+                templateUrl: '/partial/components/selectionpanel.html',
+                panelClass: 'select-type-menu',
+                position: position,
+                openFrom: clickevent,
+                clickOutsideToClose: true,
+                escapeToClose: true,
+                focusOnOpen: true,
+                zIndex: 2
+            });
         }
 
     }

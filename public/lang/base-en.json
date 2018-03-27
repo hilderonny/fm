@@ -27,6 +27,8 @@
     "TRK_DYNAMICATTRIBUTES_TYPE_picklist": "Pick list",
     "TRK_ENTER_SEARCH_TERM" : "Enter search term",
     "TRK_HELP": "Help",
+    "TRK_HIERARCHY_NEW_ELEMENT" : "Element",
+    "TRK_HIERARCHY_NEW_ELEMENT_IN_ROOT" : "Create new element in top level",
     "TRK_LOGIN_FAILED_TITLE" : "Login failed",
     "TRK_LOGIN_FAILED_CONTENT" : "The username or password is not correct.",
     "TRK_LOGIN_FAILED_AGAIN" : "Try again?",

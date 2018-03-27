@@ -74,6 +74,7 @@
                 "partial/Administration/UsergrouplistCard.html",
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
+                "partial/components/HierarchyCard.html",
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Core/RelationsMenu.html",
                 "partial/Core/RelationsTab.html",
@@ -106,8 +107,6 @@
                 "public/js/components/avt-hierarchy.js",
                 "public/js/components/avt-toolbar.js",
                 "public/js/components/avt-toolbar-button.js",
-
-                "public/js/controllers/CardController.js",
 
                 "public/js/Administration/ClientSettingsCardController.js",
                 "public/js/Administration/DynamicAttributesCardController.js",
@@ -627,7 +626,6 @@
                 "css/images/FM_edit.png",
                 "css/images/FM_hierarchy.png",
                 "partial/BIM/FmobjectCard.html",
-                "partial/BIM/HierarchyCard.html",
                 "partial/Doc/FmObjects.html"
             ],
             "include" : [
@@ -639,7 +637,7 @@
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "BIM/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects" }
+                        { "mainCard": "components/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects" }
                     ]
                 }
             ],

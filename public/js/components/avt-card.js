@@ -8,13 +8,10 @@ app.directive('avtCard', function($compile) {
         compile: function compile(element, attrs) {
             element.attr('ng-cloak', 'ng-cloak');
             element.append(angular.element("<resize-handle></resize-handle>"));
-            if (attrs.avtBackgroundImage) element.attr("style", "background-image:url('"+ attrs.avtBackgroundImage + "')");
             element.removeAttr("avt-card"); //remove the attribute to avoid indefinite loop
             return {
                 pre: function preLink(scope, iElement, iAttrs, controller) {
-                    console.log(scope.params);
-                    scope.permission = iAttrs.avtPermission;
-                    scope.listFilter = iAttrs.avtListFilter;
+                    if (scope.params.icon) element.attr("style", "background-image:url('/css/icons/office/"+ scope.params.icon + ".svg')");
                 },
                 post: function postLink(scope, iElement, iAttrs, controller) {  
                     $compile(iElement)(scope);

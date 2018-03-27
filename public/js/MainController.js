@@ -50,7 +50,8 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
             if (!subMenu) return;
             $scope.currentMenuItem = subMenu;
             angular.element(document.querySelector('#cardcanvas')).empty();
-            utils.addCardWithPermission(subMenu.mainCard, { preselection: $scope.path[2] }, subMenu.permission);
+            subMenu.preselection = $scope.path[2];
+            utils.addCardWithPermission(subMenu.mainCard, subMenu, subMenu.permission);
         }
     };
 
