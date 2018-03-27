@@ -22,7 +22,7 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
                 menuItem.action();
             } else {
                 utils.removeAllCards();
-                utils.addCardWithPermission(menuItem.mainCard, null, menuItem.permission);
+                utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission);
                 $mdSidenav('left').close();
             }
         } else {

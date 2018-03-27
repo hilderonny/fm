@@ -12,6 +12,7 @@ app.directive('avtCard', function($compile) {
             element.removeAttr("avt-card"); //remove the attribute to avoid indefinite loop
             return {
                 pre: function preLink(scope, iElement, iAttrs, controller) {
+                    console.log(scope.params);
                     scope.permission = iAttrs.avtPermission;
                     scope.listFilter = iAttrs.avtListFilter;
                 },

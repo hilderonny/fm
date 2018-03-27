@@ -10,6 +10,7 @@ app.directive('avtToolbarButton', function($compile) {
             element.attr("ng-click", "onclick()");
             return {
                 pre: function preLink(scope, iElement, iAttrs, controller) {
+                    console.log(scope.params);
                     scope.icon = iAttrs.icon;
                     scope.label = iAttrs.label;
                     scope.tooltip = iAttrs.tooltip;

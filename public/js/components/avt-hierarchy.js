@@ -5,8 +5,9 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
         '   <md-list class="hierarchy">' +
         '        <md-list-item flex layout="column" ng-repeat="child in child.children | orderBy: \'label\'">' +
         '            <div flex layout="row" ng-class="{active:selectedchild==child}">' +
-        '                <md-icon ng-click="openchild(child)" ng-if="!child.isopen" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>' +
-        '                <md-icon ng-click="child.isopen=false" ng-if="child.isopen" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>' +
+        '                <md-icon ng-click="openchild(child)" ng-if="!child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>' +
+        '                <md-icon ng-click="child.isopen=false" ng-if="child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>' +
+        '                <md-icon ng-if="!child.haschildren"></md-icon>' +
         '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" />' +
         '                <p class="nowrap" ng-bind="child.label" ng-click="selectchild(child)"></p>' +
         '            </div>' +
@@ -34,6 +35,7 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
             }
             return {
                 pre: function preLink(scope, iElement, iAttrs, controller) {
+                    console.log(scope.params);
                     scope.createrootelement = function() {
                         utils.removeCardsToTheRightOf(element);
                         utils.addCardWithPermission(iAttrs.avtDetailsCard, {

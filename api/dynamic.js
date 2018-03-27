@@ -14,7 +14,14 @@ router.get("/children/:recordtypename/:entityname", auth(false, false, co.module
     var recordtypename = req.params.recordtypename;
     var entityname = req.params.entityname;
     var permissions = await ph.getpermissionsforuser(req.user);
-    var relevantrelations = (await Db.query(clientname, `SELECT r.datatype2name, r.name2, dtp.permissionkey, dtc.icon FROM relations r JOIN datatypes dtp ON dtp.name = r.datatype1name JOIN datatypes dtc ON dtc.name = r.datatype2name WHERE r.relationtypename = 'parentchild' AND r.datatype1name = '${Db.replaceQuotes(recordtypename)}' AND r.name1 = '${Db.replaceQuotes(entityname)}';`)).rows;
+    var relevantrelations = (await Db.query(clientname, `
+        SELECT r.datatype2name, r.name2, dtp.permissionkey, dtc.icon, CASE WHEN count(rc) > 0 THEN true ELSE false END haschildren FROM relations r 
+        JOIN datatypes dtp ON dtp.name = r.datatype1name 
+        JOIN datatypes dtc ON dtc.name = r.datatype2name 
+        LEFT JOIN relations rc ON rc.name1 = r.name2 AND rc.relationtypename = 'parentchild' AND rc.datatype1name = r.datatype2name
+        WHERE r.relationtypename = 'parentchild' AND r.datatype1name = '${Db.replaceQuotes(recordtypename)}' AND r.name1 = '${Db.replaceQuotes(entityname)}'
+        GROUP BY r.datatype2name, r.name2, dtp.permissionkey, dtc.icon;
+    `)).rows;
     var children = [];
     for (var i = 0; i < relevantrelations.length; i++) {
         var rr = relevantrelations[i];
@@ -23,6 +30,7 @@ router.get("/children/:recordtypename/:entityname", auth(false, false, co.module
         if (child) {
             child.datatypename = rr.datatype2name;
             child.icon = rr.icon;
+            child.haschildren = rr.haschildren;
             children.push(child);
         }
     }
@@ -60,9 +68,17 @@ router.get("/rootelements/:forlist", auth(false, false, co.modules.base), async(
     for (var i = 0; i < relevantdatatypes.length; i++) { // Must be loop because it is not said, that all datatypes have all required columns so UNION will not work
         var rdt = relevantdatatypes[i];
         if (!permissions.find(p => p.key === rdt.permissionkey && p.canRead)) continue; // No permission to access specific datatypes
-        var rdtn = rdt.name;
-        var entities = (await Db.query(clientname, `SELECT e.* FROM ${Db.replaceQuotesAndRemoveSemicolon(rdtn)} e LEFT JOIN relations r ON r.name2 = e.name AND r.relationtypename = 'parentchild' AND r.datatype2name = '${Db.replaceQuotes(rdtn)}' WHERE r.name IS NULL;`)).rows;
-        entities.forEach(e => rootelements.push({ name: e.name, datatypename: rdt.name, label: e.label, icon: rdt.icon }));
+        var rdtn = Db.replaceQuotesAndRemoveSemicolon(rdt.name);
+        var entities = (await Db.query(clientname, `
+            SELECT e.*, CASE WHEN r.childcount > 0 THEN true ELSE false END haschildren FROM ${rdtn} e JOIN (
+                SELECT e.name, count(rc) childcount FROM ${rdtn} e 
+                LEFT JOIN relations rp ON rp.name2 = e.name AND rp.relationtypename = 'parentchild' AND rp.datatype2name = '${rdtn}' 
+                LEFT JOIN relations rc ON rc.name1 = e.name AND rc.relationtypename = 'parentchild' AND rc.datatype1name = '${rdtn}'
+                WHERE rp.name IS NULL
+                GROUP BY e.name
+            ) r ON r.name = e.name;
+        `)).rows;
+        entities.forEach(e => rootelements.push({ name: e.name, datatypename: rdt.name, label: e.label, icon: rdt.icon, haschildren: e.haschildren }));
     }
     res.send(rootelements);
 });
