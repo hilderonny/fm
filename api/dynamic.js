@@ -21,8 +21,8 @@ router.get("/children/:recordtypename/:entityname", auth(false, false, co.module
         if (!permissions.find(p => p.key === rr.permissionkey && p.canRead)) continue; // No permission to access specific datatype entities
         var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
         if (child) {
-            child._datatypename = rr.datatype2name;
-            child._icon = rr.icon;
+            child.datatypename = rr.datatype2name;
+            child.icon = rr.icon;
             children.push(child);
         }
     }
@@ -62,7 +62,7 @@ router.get("/rootelements/:forlist", auth(false, false, co.modules.base), async(
         if (!permissions.find(p => p.key === rdt.permissionkey && p.canRead)) continue; // No permission to access specific datatypes
         var rdtn = rdt.name;
         var entities = (await Db.query(clientname, `SELECT e.* FROM ${Db.replaceQuotesAndRemoveSemicolon(rdtn)} e LEFT JOIN relations r ON r.name2 = e.name AND r.relationtypename = 'parentchild' AND r.datatype2name = '${Db.replaceQuotes(rdtn)}' WHERE r.name IS NULL;`)).rows;
-        entities.forEach(e => rootelements.push({ name: e.name, _datatypename: rdt.name, label: e.label, _icon: rdt.icon }));
+        entities.forEach(e => rootelements.push({ name: e.name, datatypename: rdt.name, label: e.label, icon: rdt.icon }));
     }
     res.send(rootelements);
 });

@@ -1,9 +1,7 @@
-<md-card avt-card avt-background-image="/css/icons/office/Cottage.svg" avt-list-filter="fmobjects" avt-permission="PERMISSION_BIM_FMOBJECT">
+<md-card avt-card avt-background-image="/css/icons/office/Cottage.svg" avt-hierarchy="fmobjects" avt-permission="PERMISSION_BIM_FMOBJECT" avt-details-card="BIM/FmobjectCard">
 
     <md-toolbar avt-toolbar>
-        <button avt-toolbar-button ng-if="canwrite" icon="/css/icons/material/Plus Math.svg" label="TRK_FMOBJECTS_NEW_ELEMENT" tooltip="TRK_FMOBJECTS_NEW_ELEMENT_IN_ROOT"></button>
+        <md-button avt-toolbar-button avt-on-click="createrootelement" ng-if="canwrite" icon="/css/icons/material/Plus Math.svg" label="TRK_FMOBJECTS_NEW_ELEMENT" tooltip="TRK_FMOBJECTS_NEW_ELEMENT_IN_ROOT"></md-button>
     </md-toolbar>
-
-    <md-card-content avt-card-content></md-card-content>
     
 </md-card>

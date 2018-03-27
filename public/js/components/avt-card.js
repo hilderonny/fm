@@ -1,5 +1,4 @@
 
-
 app.directive('avtCard', function($compile) { 
     return {
         restrict: "A",
