@@ -70,7 +70,7 @@ describe('API triggerUpdate', function() {
                 var fullPath = path + fileName;
                 assert.ok(fs.existsSync(fullPath), `File ${fullPath} does not exist`);
             });
-            return Promise.resolve();
+            return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
         }
 
         it('responds with 401 when there is no secret given', function() {

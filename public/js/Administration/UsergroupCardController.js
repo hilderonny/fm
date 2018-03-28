@@ -6,7 +6,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
             $scope.userGroup.permissions.forEach(function(permission) {
                 permission.translationKey = 'TRK_' + permission.key;
             });
-            return Promise.resolve();
+            return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
         });
     };
 

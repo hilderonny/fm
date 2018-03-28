@@ -6,7 +6,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
             $scope.client.clientModules.forEach(function(clientModule) {
                 clientModule.translationKey = 'TRK_MODULE_' + clientModule.module + '_NAME';
             });
-            return Promise.resolve();
+            return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
         });
     };
 

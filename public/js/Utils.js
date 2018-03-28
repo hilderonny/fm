@@ -1,14 +1,7 @@
-var utils = {
-    init: function() {
-        return utils;
-    }
-};
-
-app.factory("utils2", utils.init);
 
 // Define utils factory, http://stackoverflow.com/a/26109991
 app.factory('utils', function($compile, $rootScope, $http, $translate, $location, $anchorScroll, $mdPanel) {
-    var oldutils = {
+    var utils = {
 
         // On slow connections clicking on list items multiply adds multiple cards
         // To prevent that, this array is used to remember which cards are to be loaded
@@ -27,11 +20,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
             // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
             if (!$rootScope.canRead(requiredPermission)) return;
-            oldutils.cardsToAdd.push(cardToAdd);
+            utils.cardsToAdd.push(cardToAdd);
             return $http.get('/partial/' + cardTemplateUrl + '.html', { cache: true}).then(function(response) {
                 // Check whether the card should still be shown. When the dummy object is no longer
                 // in the array, the request tooks too long and the user has done something other meanwhile
-                if (oldutils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response
+                if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response
                 var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
                 var card = angular.element(response.data);
                 var domCard = card[0];
@@ -42,93 +35,28 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
                 window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
                 // Scroll card in view, but wait until the card is put into the dom
-                oldutils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
-                oldutils.scrollToAnchor(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+                utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+                utils.scrollToAnchor(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
                 return Promise.resolve(card);
             });
         },
 
-        // Removes all cards right to the given one
-        removeCardsToTheRightOf: function(card) {
-            // Erst mal sehen, ob der Parameter überhaupt eine Karte ist
-            while (card && card.length > 0 && card[0].tagName !== 'MD-CARD') {
-                card = card.parent();
-            }
-            if (!card) return;
-            // Emtying the array of running requests
-            oldutils.cardsToAdd = [];
-            var nextCard;
-            do {
-                nextCard = card.next();
-                oldutils.removeCard(nextCard);
-            } while (nextCard.length > 0);
-        },
-
-        /**
-         * Schließt alle Karten rechts neben dem angegebenen Element und öffnet eine neue Karte,
-         * wenn die Bedingungen stimmen.
-         */
-        replaceCardWithPermission: function(card, cardTemplateUrl, params, requiredPermission) {
-            oldutils.removeCardsToTheRightOf(card);
-            return oldutils.addCardWithPermission(cardTemplateUrl, params, requiredPermission);
-        },
-
-        // Removes a card, when it is set (defined by length > 0) and destroys
-        // its scope to prevent memory leaks. Should not be called directly.
-        // Call removeCard() instead to have a nice animation.
-        // See https://www.bennadel.com/blog/2706-always-trigger-the-destroy-event-before-removing-elements-in-angularjs-directives.htm
-        removeCard: function(card) {
-            if (card && card.length) {
-                card.scope().$destroy(); // Need to destroy the scope before removing the card from the dom, see link above
-                card.remove(); 
+        handlePreselection: function($scope, collection, selectFunction) {
+            // Check preselection
+            if ($scope.params.preselection) {
+                var elementToSelect = collection.find(function(e) { return e._id === $scope.params.preselection; });
+                if (elementToSelect) selectFunction(elementToSelect);
             }
         },
 
-        removeAllCards: function() {
-            var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
-            var cards = cardCanvas.children();
-            angular.forEach(cards, function(index, key) {
-                var card = cards[key];
-                oldutils.removeCard(angular.element(card));
+        // Loads the fields of the given datatype and returns them as array within a promise
+        loaddatatypefields: function(datatypename) {
+            return $http.get('/api/datatypes/fields/' + datatypename).then(function(response) {
+                return Promise.resolve(response.data);
             });
         },
 
-        /**
-         * Wartet darauf, dass eine Karte gerendert wird und scrollt diese dann ins Blickfeld
-         */
-        waitForOffsetAndScroll: function(domCard, cardCanvas, counter) {
-            if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
-                cardCanvas[0].scrollLeft = domCard.offsetLeft;
-                domCard.style.borderColor = 'white';
-                domCard.style.transform = 'rotate(0deg)';
-                setTimeout(function() {
-                    // Force the tabs in the calendar to recalculate them on mobile devices to enable the paging arrows^, http://stackoverflow.com/a/31899998
-                    var evt = window.document.createEvent('UIEvents'); 
-                    evt.initUIEvent('resize', true, false, window, 0); 
-                    window.dispatchEvent(evt);
-                }, 250);
-                return;
-            } else {
-                if (counter > 0) {
-                    setTimeout(function() { oldutils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
-                }
-            }
-        },
-
-        /**
-         * Wartet auf Rendern der Karte und springt den aktuellen in der URL angegebenen Anker an
-         */
-        scrollToAnchor: function(domCard, cardCanvas, counter) {
-            if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
-                $anchorScroll();
-                return;
-            } else {
-                if (counter > 0) {
-                    setTimeout(function() { oldutils.scrollToAnchor(domCard, cardCanvas, counter - 1) }, 100);
-                }
-            }
-        },
-
+        // TODO: Replace by loaddynamicattributes, or better by loaddynamicobject
         loadDynamicAttributes: function(scope, modelName, entityId) {
             $http.get('/api/dynamicattributes/values/' + modelName + '/' + entityId).then(function(response) {
                 var allDynamicAttributes = response.data;
@@ -143,13 +71,109 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
+        // Loads the dynamic attributes of a given entity
+        loaddynamicattributes: function(datatypename, entityname) {
+            return $http.get('/api/dynamicattributes/values/' + datatypename + '/' + entityname).then(function(response) {
+                var allDynamicAttributes = response.data;
+                var visibleDynamicAttributes = [];
+                //return only the visible dynamic attributes
+                for(i = 0; i < allDynamicAttributes.length; i++){
+                    if(allDynamicAttributes[i].type.isVisible != false){
+                        visibleDynamicAttributes.push(allDynamicAttributes[i]);
+                    }
+                };
+                return visibleDynamicAttributes;
+            });
+        },
+
+        // Loads the fields of the given datatype and returns them as array within a promise
+        loaddynamicobject: function(datatypename, entityname) {
+            return $http.get('/api/dynamic/' + datatypename + '/' + entityname).then(function(response) {
+                return response.data;
+            });
+        },
+
+        // Loads all relations of an entity. In the result each relation has the property "is1" shich shows that the entity is the left hand relation part (name1). Needed for interpreting the relation
+        loadrelations: function(datatypename, entityname) {
+            return Promise.all([
+                $http.get('/api/dynamic/relations?datatype1name=' + datatypename + '&name1=' + entityname),
+                $http.get('/api/dynamic/relations?datatype2name=' + datatypename + '&name2=' + entityname)
+            ]).then(function(responses) {
+                var relations = [];
+                responses.forEach(function(response) {
+                    response.data.forEach(function(relation) {
+                        var is1 = relation.name1 === entityname;
+                        relations.push({
+                            datatypename: is1 ? relation.datatype2name : relation.datatype1name,
+                            name: is1 ? relation.name2 : relation.name1,
+                            relationtypename: relation.relationtypename,
+                            is1: is1
+                        });
+                    });
+                });
+                return relations;
+            });
+        },
+
+        // Loads the meta information about all possible relation types. Needed for titles and labels.
+        loadrelationtypes: function() {
+            return $http.get('/api/dynamic/relationtypes').then(function(response) {
+                return response.data;
+            });
+        },
+
+        removeAllCards: function() {
+            var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
+            var cards = cardCanvas.children();
+            angular.forEach(cards, function(index, key) {
+                var card = cards[key];
+                utils.removeCard(angular.element(card));
+            });
+        },
+
+        // Removes a card, when it is set (defined by length > 0) and destroys
+        // its scope to prevent memory leaks. Should not be called directly.
+        // Call removeCard() instead to have a nice animation.
+        // See https://www.bennadel.com/blog/2706-always-trigger-the-destroy-event-before-removing-elements-in-angularjs-directives.htm
+        removeCard: function(card) {
+            if (card && card.length) {
+                card.scope().$destroy(); // Need to destroy the scope before removing the card from the dom, see link above
+                card.remove(); 
+            }
+        },
+
+        // Removes all cards right to the given one
+        removeCardsToTheRightOf: function(card) {
+            // Erst mal sehen, ob der Parameter überhaupt eine Karte ist
+            while (card && card.length > 0 && card[0].tagName !== 'MD-CARD') {
+                card = card.parent();
+            }
+            if (!card) return;
+            // Emtying the array of running requests
+            utils.cardsToAdd = [];
+            var nextCard;
+            do {
+                nextCard = card.next();
+                utils.removeCard(nextCard);
+            } while (nextCard.length > 0);
+        },
+
+        /**
+         * Schließt alle Karten rechts neben dem angegebenen Element und öffnet eine neue Karte,
+         * wenn die Bedingungen stimmen.
+         */
+        replaceCardWithPermission: function(card, cardTemplateUrl, params, requiredPermission) {
+            utils.removeCardsToTheRightOf(card);
+            return utils.addCardWithPermission(cardTemplateUrl, params, requiredPermission);
+        },
+
         saveEntity: function(scope, modelName, entityId, api, entityToSend) {
             var savedEntity;
             return $http.put(api + entityId, entityToSend).then(function(saveEntityResponse) {
                 savedEntity = saveEntityResponse.data;
                 var dynamicAttributesToSend = [];
                 // Nur die Daten senden, die zwingend notwendig sind. Der Rest kann von der API ermittelt werden
-                if (!scope.dynamicAttributes) return Promise.resolve();
+                if (!scope.dynamicAttributes) return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
                 scope.dynamicAttributes.forEach(function(da) {
                     dynamicAttributesToSend.push({
                         dynamicAttributeId: da.type._id,
@@ -161,18 +185,29 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 return Promise.resolve(savedEntity);
             });
         },
-        handlePreselection: function($scope, collection, selectFunction) {
-            // Check preselection
-            if ($scope.params.preselection) {
-                var elementToSelect = collection.find(function(e) { return e._id === $scope.params.preselection; });
-                if (elementToSelect) selectFunction(elementToSelect);
+
+        /**
+         * Wartet auf Rendern der Karte und springt den aktuellen in der URL angegebenen Anker an
+         */
+        scrollToAnchor: function(domCard, cardCanvas, counter) {
+            if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
+                $anchorScroll();
+                return;
+            } else {
+                if (counter > 0) {
+                    setTimeout(function() { utils.scrollToAnchor(domCard, cardCanvas, counter - 1) }, 100);
+                }
             }
         },
+
+        // Sets the Browser-URL to the given one for direct access
         setLocation: function(url, handleLocationChange) {
             if ($location.url() === url) return;
             if (!handleLocationChange) $rootScope.ignoreNextLocationChange = true;
             $location.url(url);
         },
+
+        // Brings up a popup menu below the button which triggered this function. This menu contains a list of possible datatypes for the given listapi. Used for creating new elements
         showselectionpanel: function(clickevent, listapi, selectioncallback) {
             var nodeToHandle = clickevent.currentTarget;
             var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW);
@@ -196,8 +231,30 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 focusOnOpen: true,
                 zIndex: 2
             });
-        }
+        },
+
+        /**
+         * Wartet darauf, dass eine Karte gerendert wird und scrollt diese dann ins Blickfeld
+         */
+        waitForOffsetAndScroll: function(domCard, cardCanvas, counter) {
+            if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
+                cardCanvas[0].scrollLeft = domCard.offsetLeft;
+                domCard.style.borderColor = 'white';
+                domCard.style.transform = 'rotate(0deg)';
+                setTimeout(function() {
+                    // Force the tabs in the calendar to recalculate them on mobile devices to enable the paging arrows^, http://stackoverflow.com/a/31899998
+                    var evt = window.document.createEvent('UIEvents'); 
+                    evt.initUIEvent('resize', true, false, window, 0); 
+                    window.dispatchEvent(evt);
+                }, 250);
+                return;
+            } else {
+                if (counter > 0) {
+                    setTimeout(function() { utils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
+                }
+            }
+        },
 
     }
-    return oldutils;
+    return utils;
 });

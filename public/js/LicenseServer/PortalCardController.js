@@ -6,7 +6,7 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
             $scope.portal.portalModules.forEach(function(portalModule) {
                 portalModule.translationKey = 'TRK_MODULE_' + portalModule.module + '_NAME';
             });
-            return Promise.resolve();
+            return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
         });
     };
 

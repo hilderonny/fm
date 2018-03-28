@@ -223,7 +223,7 @@ var Db = {
     },
 
     getDynamicObjects: async(clientname, datatypename, filter) => {
-        var filterstring = filter ? " WHERE " + Db.getFilterString(filter) : "";
+        var filterstring = filter && Object.keys(filter).length > 0 ? " WHERE " + Db.getFilterString(filter) : "";
         return (await Db.query(clientname, `SELECT * FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)}${filterstring};`)).rows;
     },
 

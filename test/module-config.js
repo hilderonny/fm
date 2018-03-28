@@ -181,7 +181,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('modules match with those in constants', function() {
@@ -199,7 +199,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('contains all material icons for collections defined in constants', function() {
@@ -213,7 +213,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('permissions match with those in constants', function() {
@@ -251,7 +251,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     /**
@@ -311,7 +311,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
 });
