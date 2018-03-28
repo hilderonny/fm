@@ -48,15 +48,13 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
     };
 
     $scope.load = function() {
-        $rootScope.isLoading = true;
         if ($scope.params.fmObjects && $scope.params.currentFmObject) { // We come here only on small devices to show additional cards
             $scope.currentFmObject = $scope.params.currentFmObject;
             $scope.fmObjects = $scope.params.fmObjects;
             $scope.childFmObjects = $scope.currentFmObject._children;
             // Fetch breadcrumbs
-            $http.get('/api/dynamic/parentpath/' + $scope.currentFmObject._datatypename + '/' + $scope.currentFmObject.name).then(function(breadcrumbsresponse) {
-                $scope.breadcrumbs = breadcrumbsresponse.data.join(' » ');
-                $rootScope.isLoading=false;
+            utils.loadparentlabels($scope.currentFmObject._datatypename, $scope.currentFmObject.name).then(function(breadcrumbs) {
+                $scope.breadcrumbs = breadcrumbs.join(' » ');
             });
             return;
         }

@@ -7,6 +7,7 @@ app.directive('avtCard', function($compile, utils) {
         priority: 1000,
         compile: function compile(element, attrs) {
             element.attr('ng-cloak', 'ng-cloak');
+            element[0].classList.add("ng-cloak");
             element.append(angular.element("<resize-handle></resize-handle>"));
             element.removeAttr("avt-card"); //remove the attribute to avoid indefinite loop
             return function link(scope, iElement, iAttrs) {

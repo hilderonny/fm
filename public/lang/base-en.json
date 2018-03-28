@@ -1,5 +1,11 @@
 {
     "TRK_CANCEL" : "Cancel",
+    "TRK_DETAILS_CREATE" : "Create",
+    "TRK_DETAILS_DELETE" : "Delete",
+    "TRK_DETAILS_DETAILS" : "Details",
+    "TRK_DETAILS_ELEMENT_CREATED" : "Element created",
+    "TRK_DETAILS_NEW_ELEMENT" : "New element",
+    "TRK_DETAILS_SAVE" : "Save",
     "TRK_DYNAMICATTRIBUTES_ACTIVATE": "set visible",
     "TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTE": "Add new attribute",
     "TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTEELEMENT": "Add new pick list option",

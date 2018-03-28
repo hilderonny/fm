@@ -31,6 +31,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 cardCanvas.append(card);
                 var newScope = $rootScope.$new(true);
                 newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
+                newScope.requiredPermission = requiredPermission; // For permission handling in details pages
                 // Compile (render) the new card and attach its new controller
                 $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
                 window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
@@ -38,6 +39,13 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
                 utils.scrollToAnchor(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
                 return Promise.resolve(card);
+            });
+        },
+
+        // Helper function which will return the response.data field from a GET API call as promise result.
+        getresponsedata: function(url) {
+            return $http.get(url).then(function(response) {
+                return response.data;
             });
         },
 
@@ -50,10 +58,13 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         // Loads the fields of the given datatype and returns them as array within a promise
+        loaddatatype: function(datatypename) {
+            return utils.getresponsedata('/api/datatypes/' + datatypename);
+        },
+
+        // Loads the fields of the given datatype and returns them as array within a promise
         loaddatatypefields: function(datatypename) {
-            return $http.get('/api/datatypes/fields/' + datatypename).then(function(response) {
-                return Promise.resolve(response.data);
-            });
+            return utils.getresponsedata('/api/datatypes/fields/' + datatypename);
         },
 
         // TODO: Replace by loaddynamicattributes, or better by loaddynamicobject
@@ -88,9 +99,12 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         // Loads the fields of the given datatype and returns them as array within a promise
         loaddynamicobject: function(datatypename, entityname) {
-            return $http.get('/api/dynamic/' + datatypename + '/' + entityname).then(function(response) {
-                return response.data;
-            });
+            return utils.getresponsedata('/api/dynamic/' + datatypename + '/' + entityname);
+        },
+
+        // Loads the labels of all parent elements of a given entity. Used for breadcrumbs. The order is root element first
+        loadparentlabels: function(datatypename, entityname) {
+            return utils.getresponsedata('/api/dynamic/parentpath/' + datatypename + '/' + entityname);
         },
 
         // Loads all relations of an entity. In the result each relation has the property "is1" shich shows that the entity is the left hand relation part (name1). Needed for interpreting the relation
@@ -117,9 +131,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         // Loads the meta information about all possible relation types. Needed for titles and labels.
         loadrelationtypes: function() {
-            return $http.get('/api/dynamic/relationtypes').then(function(response) {
-                return response.data;
-            });
+            return utils.getresponsedata('/api/dynamic/relationtypes');
         },
 
         removeAllCards: function() {

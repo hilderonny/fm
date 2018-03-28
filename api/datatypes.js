@@ -15,4 +15,10 @@ router.get("/fields/:datatypename", auth(), async(req, res) => {
     res.send(datatypefields);
 });
 
+// Retreive a specific datatype. Used for showing the label on details pages. No authentication required
+router.get("/:datatypename", auth(), async(req, res) => {
+    var datatype = await Db.getDataType(req.user.clientname, req.params.datatypename);
+    res.send(datatype);
+});
+
 module.exports = router;

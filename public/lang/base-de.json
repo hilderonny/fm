@@ -1,5 +1,11 @@
 {   
     "TRK_CANCEL" : "Abbrechen",
+    "TRK_DETAILS_CREATE" : "Erstellen",
+    "TRK_DETAILS_DELETE" : "Löschen",
+    "TRK_DETAILS_DETAILS" : "Details",
+    "TRK_DETAILS_ELEMENT_CREATED" : "Element erstellt",
+    "TRK_DETAILS_NEW_ELEMENT" : "Neues Element",
+    "TRK_DETAILS_SAVE" : "Speichern",
     "TRK_DYNAMICATTRIBUTES_ACTIVATE": "Sichtbar machen",
     "TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTE": "Neues Attribut erstellen",
     "TRK_DYNAMICATTRIBUTES_ADD_ATTRIBUTEELEMENT": "Neues Listenelement erstellen",

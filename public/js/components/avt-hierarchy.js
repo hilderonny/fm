@@ -1,6 +1,6 @@
 
 app.directive('avtHierarchy', function($compile, $http, utils) { 
-    var cardcontent = angular.element(
+    var cardcontent = 
         '<script type="text/ng-template" id="hierarchylist">' +
         '   <md-list class="hierarchy">' +
         '        <md-list-item flex layout="column" ng-repeat="child in child.children | orderBy: \'label\'">' +
@@ -18,7 +18,7 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
         '<md-card-content>' +
         '    <ng-include flex src="\'hierarchylist\'"></ng-include>' +
         '</md-card-content>'
-    );
+    ;
     return {
         restrict: "A",
         scope: true,
@@ -26,12 +26,8 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
         compile: function compile(element, attrs) {
             element.removeAttr("avt-hierarchy"); //remove the attribute to avoid indefinite loop
             var resizehandle = element[0].querySelector("resize-handle");
-            if (resizehandle) {
-                element[0].insertBefore(cardcontent[0], resizehandle); // script
-                element[0].insertBefore(cardcontent[1], resizehandle); // md-card-content
-            } else {
-                element.append(cardcontent);
-            }
+            element.append(angular.element(cardcontent));
+            if (resizehandle) element.append(resizehandle);
             return {
                 pre: function(scope, iElement) {
                     var closedetails = function() {
@@ -44,23 +40,32 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                             utils.addCardWithPermission("components/DetailsCard", {
                                 icon: scope.params.icon,
                                 datatypename: selectlistedelement.name,
-                                onclose: closedetails
+                                onclose: closedetails,
+                                oncreate: function(elementname) {
+                                    if (!scope.selectedchild) { // Root element was created
+                                        utils.loaddynamicobject(selectlistedelement.name, elementname).then(function(newrootelement) {
+                                            newrootelement.datatypename = selectlistedelement.name;
+                                            newrootelement.icon = selectlistedelement.icon;
+                                            newrootelement.children = [];
+                                            console.log(newrootelement);
+                                            scope.child.children.push(newrootelement);
+                                            scope.selectchild(newrootelement);
+                                        });
+                                    }
+                                }
                             }, scope.params.permission);
+                            delete scope.selectedchild;
                         });
                     };
                     scope.loadrootelements = function() {
-                        scope.$root.isLoading = true;
                         $http.get('/api/dynamic/rootelements/' + scope.params.listfilter).then(function(response) {
                             scope.child = { children: response.data };
-                            scope.$root.isLoading = false;
                         });
                     };
                     scope.openchild = function(child) {
-                        scope.$root.isLoading = true;
                         $http.get('/api/dynamic/children/' + child.datatypename + '/' + child.name).then(function(response) {
                             child.children = response.data;
                             child.isopen = true;
-                            scope.$root.isLoading = false;
                         });
                     };
                     scope.selectchild = function(child) {

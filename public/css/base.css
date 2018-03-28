@@ -88,6 +88,17 @@ md-card > ng-include {
     background-color: rgba(255,255,255,0.97);
 }
 
+md-card > div.progress-panel {
+    background-color: rgba(0,0,0,0.9);
+    border-radius: 5px;
+    bottom: 10px;
+    height: 60px;
+    left: initial;
+    right: 10px;
+    top: initial;
+    width: 60px;
+}
+
 md-card.list-details-details {
     flex: 1;
     width: initial;
