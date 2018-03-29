@@ -9,14 +9,12 @@
     "TRK_FMOBJECTS_CHANGES_SAVED" : "Changes saved",
     "TRK_FMOBJECTS_F" : "Area (m²)",
     "TRK_FMOBJECTS_FM_OBJECT" : "FM object",
-    "TRK_FMOBJECTS_FM_OBJECT_DELETED" : "FM object deleted",
     "TRK_FMOBJECTS_FM_OBJECTS" : "FM objects",
     "TRK_FMOBJECTS_LABEL" : "Label",
     "TRK_FMOBJECTS_NEW_FM_OBJECT" : "New FM object",
     "TRK_FMOBJECTS_NO_IMAGE" : "No image",
     "TRK_FMOBJECTS_NRF" : "Net room area",
     "TRK_FMOBJECTS_NUF" : "Simple use area",
-    "TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT" : "Do you really want to delete the FM object \"{{fmObjectName}}\" and all of its child objects?",
     "TRK_FMOBJECTS_SELECT_FM_OBJECT" : "Select FM object",
     "TRK_FMOBJECTS_SELECT_IMAGE" : "Select image",
     "TRK_FMOBJECTS_TF" : "Technology area",
@@ -33,7 +31,5 @@
     "TRK_MODEL_properties" : "Properties",
     "TRK_MODEL_rooms" : "Rooms",
     "TRK_MODULE_fmobjects_NAME" : "FM objects",
-    "TRK_NO" : "No",
-    "TRK_OK" : "OK",
-    "TRK_YES" : "Yes"
+    "TRK_OK" : "OK"
 }

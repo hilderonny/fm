@@ -9,14 +9,12 @@
     "TRK_FMOBJECTS_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_FMOBJECTS_F" : "Fläche (m²)",
     "TRK_FMOBJECTS_FM_OBJECT" : "FM Objekt",
-    "TRK_FMOBJECTS_FM_OBJECT_DELETED" : "FM Objekt gelöscht",
     "TRK_FMOBJECTS_FM_OBJECTS" : "FM Objekte",
     "TRK_FMOBJECTS_LABEL" : "Bezeichnung",
     "TRK_FMOBJECTS_NEW_FM_OBJECT" : "Neues FM Objekt",
     "TRK_FMOBJECTS_NO_IMAGE" : "Kein Bild",
     "TRK_FMOBJECTS_NRF" : "Netto-Raum-Fläche (NRF)",
     "TRK_FMOBJECTS_NUF" : "Nutzungsfläche (NUF)",
-    "TRK_FMOBJECTS_REALLY_DELETE_FM_OBJECT" : "Sollen das FM Objekt \"{{fmObjectName}}\" und alle Unterobjekte wirklich gelöscht werden?",
     "TRK_FMOBJECTS_SAVE" : "Speichern",
     "TRK_FMOBJECTS_SELECT_FM_OBJECT" : "FM Objekt auswählen",
     "TRK_FMOBJECTS_SELECT_IMAGE" : "Bild auswählen",
@@ -34,7 +32,5 @@
     "TRK_MODEL_properties" : "Liegenschaften",
     "TRK_MODEL_rooms" : "Räume",
     "TRK_MODULE_fmobjects_NAME" : "FM Objekte",
-    "TRK_NO" : "Nein",
-    "TRK_OK" : "OK",
-    "TRK_YES" : "Ja"
+    "TRK_OK" : "OK"
 }

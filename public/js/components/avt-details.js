@@ -1,5 +1,5 @@
 
-app.directive('avtDetails', function($compile, $http, $mdToast, $translate, utils) { 
+app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdDialog, utils) { 
     var cardcontent = 
         '<md-card-title flex="none">' +
         '   <md-card-title-text>' +
@@ -73,7 +73,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, util
                         createdelementname = response.data;
                         var childrelation = {
                             datatype1name: scope.params.parentdatatypename,
-                            datatype2name: scope.params.datatypename,
+                            datatype2name: scope.datatype.name,
                             name1: scope.params.parententityname,
                             name2: createdelementname,
                             relationtypename: "parentchild"
@@ -88,6 +88,25 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, util
                         });
                     });
                 };
+                scope.delete = function() {
+                    var translations;
+                    $translate(['TRK_DETAILS_ELEMENT_DELETED', 'TRK_DETAILS_REALLY_DELETE_ELEMENT', 'TRK_YES', 'TRK_NO']).then(function(t) {
+                        translations = t;
+                        var confirm = $mdDialog
+                            .confirm()
+                            .title(translations.TRK_DETAILS_REALLY_DELETE_ELEMENT)
+                            .ok(translations.TRK_YES)
+                            .cancel(translations.TRK_NO);
+                        return $mdDialog.show(confirm);
+                    }).then(function() {
+                        return $http.delete("/api/dynamic/" + scope.datatype.name + "/" + scope.dynamicobject.name);
+                    }).then(function() {
+                        if (scope.params.ondelete) scope.params.ondelete();
+                        utils.removeCardsToTheRightOf(element);
+                        utils.removeCard(element);
+                        $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_DELETED).hideDelay(1000).position('bottom right'));
+                    });
+                },
                 scope.load = function() {
                     scope.dynamicobject = {}; // For new
                     scope.token = $http.defaults.headers.common["x-access-token"]; // For preview image downloads
@@ -101,7 +120,6 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, util
                         entityname ? utils.loaddynamicattributes(datatypename, entityname).then(function(dynamicattributes) { scope.dynamicattributes = dynamicattributes; }) : Promise.resolve(), // TODO: Irrelevant in the future
                         entityname ? utils.loadrelations(datatypename, entityname).then(function(relations) { scope.relations = relations; }) : Promise.resolve(),
                         entityname ? utils.loadparentlabels(datatypename, entityname).then(function(parentlabels) { scope.breadcrumbs = parentlabels.join(' » '); }) : Promise.resolve(),
-                        // TODO: breadcrumbs for new element, when parent is given
                     ]).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                     });

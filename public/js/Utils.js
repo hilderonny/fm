@@ -1,6 +1,6 @@
 
 // Define utils factory, http://stackoverflow.com/a/26109991
-app.factory('utils', function($compile, $rootScope, $http, $translate, $location, $anchorScroll, $mdPanel) {
+app.factory('utils', function($compile, $rootScope, $http, $translate, $location, $anchorScroll, $mdPanel, $mdDialog) {
     var utils = {
 
         // On slow connections clicking on list items multiply adds multiple cards
@@ -144,8 +144,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         // Removes a card, when it is set (defined by length > 0) and destroys
-        // its scope to prevent memory leaks. Should not be called directly.
-        // Call removeCard() instead to have a nice animation.
+        // its scope to prevent memory leaks.
         // See https://www.bennadel.com/blog/2706-always-trigger-the-destroy-event-before-removing-elements-in-angularjs-directives.htm
         removeCard: function(card) {
             if (card && card.length) {
@@ -217,6 +216,31 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             if ($location.url() === url) return;
             if (!handleLocationChange) $rootScope.ignoreNextLocationChange = true;
             $location.url(url);
+        },
+
+        /**
+         * Shows up a dialog with multiple buttons. The buttons parameter is an array of objects, defining the buttons. Button attributes are:
+         * - label: Text to show on the button
+         * - class: CSS class to use, e.g. "md-warn" or "md-primary"
+         * - onclick: function which is called when the button is pressed
+         */
+        showdialog: function(content, buttons) {
+            $mdDialog.show({
+                template:
+                    '<md-dialog>' +
+                    '  <md-dialog-content class="md-dialog-content">' + content + '</md-dialog-content>' +
+                    '  <md-dialog-actions>' +
+                    '    <md-button ng-repeat="button in buttons" ng-click="onclick(button)" class="md-raised {{button.class}}">{{button.label}}</md-button>' +
+                    '  </md-dialog-actions>' +
+                    '</md-dialog>',
+                controller: function($scope, $mdDialog) {
+                    $scope.buttons = buttons;
+                    $scope.onclick = function(button) {
+                        if (button.onclick) button.onclick();
+                        $mdDialog.hide();
+                    }
+                }
+            })
         },
 
         // Brings up a popup menu below the button which triggered this function. This menu contains a list of possible datatypes for the given listapi. Used for creating new elements

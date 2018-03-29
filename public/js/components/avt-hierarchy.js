@@ -44,6 +44,7 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                                     newrootelement.datatypename = datatype.name;
                                     newrootelement.icon = datatype.icon;
                                     if (!scope.child.children) scope.child.children = [];
+                                    newrootelement.parent = scope.child;
                                     scope.child.children.push(newrootelement);
                                     scope.selectchild(newrootelement);
                                 });
@@ -54,12 +55,29 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                 };
                 scope.loadrootelements = function() {
                     $http.get('/api/dynamic/rootelements/' + scope.params.listfilter).then(function(response) {
-                        scope.child = { children: response.data };
+                        var children = response.data;
+                        if (!scope.child) { // Fresh load after card opening
+                            scope.child = { children: children };
+                            scope.child.children.forEach(function(c) {
+                                c.parent = scope.child;
+                            });
+                        } else { // Refresh after deletion of subelements which result in moving sub-sub-childs to the root
+                            children.forEach(function(c) {
+                                if (!scope.child.children.find(function(sc) { return sc.name === c.name; })) {
+                                    // Here we have a moved child
+                                    scope.child.children.push(c);
+                                    c.parent = scope.child;
+                                }
+                            });
+                        }
                     });
                 };
                 scope.openchild = function(child) {
                     $http.get('/api/dynamic/children/' + child.datatypename + '/' + child.name).then(function(response) {
                         child.children = response.data;
+                        child.children.forEach(function(cc) {
+                            cc.parent = child;
+                        });
                         child.isopen = true;
                     });
                 };
@@ -77,10 +95,20 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                                 newchild.icon = datatype.icon;
                                 if (!scope.selectedchild.children) scope.selectedchild.children = [];
                                 scope.selectedchild.children.push(newchild);
+                                newchild.parent = scope.selectedchild;
                                 scope.selectedchild.haschildren = true;
                                 scope.selectedchild.isopen = true;
                                 scope.selectchild(newchild);
                             });
+                        },
+                        ondelete: function() {
+                            console.log("DELETE", scope.selectedchild);
+                            var parentchild = scope.selectedchild.parent;
+                            // Remove deleted element
+                            parentchild.children.splice(parentchild.children.indexOf(scope.selectedchild), 1);
+                            if (parentchild.children.length < 1) parentchild.haschildren = false;
+                            scope.loadrootelements();
+                            delete scope.selectedchild;
                         }
                 }, scope.params.permission).then(function() {
                         scope.selectedchild = child;

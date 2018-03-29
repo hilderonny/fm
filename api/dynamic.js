@@ -7,6 +7,26 @@ var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 var ph = require('../utils/permissionshelper');
 
+// Deletes a dynamic object but without children. They must be deleted separately because of the possibly different permissions.
+router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
+    var clientname = req.user.clientname;
+    var datatypename = req.params.recordtypename;
+    var entityname = req.params.entityname;
+    try {
+        // Delete relations
+        await Db.deleteDynamicObjects(clientname, "relations", { datatype1name: datatypename, name1: entityname});
+        await Db.deleteDynamicObjects(clientname, "relations", { datatype2name: datatypename, name2: entityname});
+        // Delete dynamic attributes
+        await Db.deleteDynamicObjects(clientname, "dynamicattributevalues", { entityname: entityname});
+        // Delete the element itself
+        await Db.deleteDynamicObject(clientname, datatypename, entityname);
+        res.sendStatus(204);
+    } catch(error) {
+        res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
+    }
+
+    // TODO later: For documents, also delete the file
+});
 
 // Get a list of all children of the given entity
 router.get("/children/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
