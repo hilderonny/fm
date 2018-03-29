@@ -102,7 +102,6 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                             });
                         },
                         ondelete: function() {
-                            console.log("DELETE", scope.selectedchild);
                             var parentchild = scope.selectedchild.parent;
                             // Remove deleted element
                             parentchild.children.splice(parentchild.children.indexOf(scope.selectedchild), 1);

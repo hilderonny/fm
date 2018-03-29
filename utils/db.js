@@ -287,12 +287,11 @@ var Db = {
             var value = filter[k];
             var t = typeof(value);
             switch(t) {
-                case "string": value = "'" + Db.replaceQuotes(value) + "'"; break;
-                case "number": break;
-                case "boolean": break;
+                case "string": filterlist.push(`${k} LIKE '${Db.replaceQuotes(value)}'`); break;
+                case "number": filterlist.push(`${k}=${value}`); break;
+                case "boolean": filterlist.push(`${k}=${value}`); break;
                 default: throw new Error(`Type ${t} cannot be used.`);
             }
-            filterlist.push(`${k}=${value}`);
         });
         return filterlist.join(" AND ");
     },

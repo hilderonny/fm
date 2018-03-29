@@ -20,6 +20,11 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
         '                       <input ng-value="dynamicobject[datatypefield.name] || 0" ng-if="datatypefield.fieldtype === \'formula\'" type="number" disabled>' +
         '                       <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
         '                       <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=download&token={{token}}"/>' + // Special handle previewimagedocumentname
+        '                       <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'">' +
+        '                           <md-option ng-value="reference.name" ng-repeat="reference in references[datatypefield.reference] | orderBy: [\'label\', \'name\']">' +
+        '                               <span>{{reference.label || reference.name}}</span>' +
+        '                           </md-option>' +
+        '                       </md-select>' +
         '                   </md-input-container>' +
         '                   <md-card-actions layout="row" layout-align="space-between center">' +
         '                       <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite" ng-click="delete()"><span translate>TRK_DETAILS_DELETE</span></md-button>' +
@@ -109,6 +114,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                 },
                 scope.load = function() {
                     scope.dynamicobject = {}; // For new
+                    scope.references = {};
                     scope.token = $http.defaults.headers.common["x-access-token"]; // For preview image downloads
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
@@ -121,6 +127,14 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         entityname ? utils.loadrelations(datatypename, entityname).then(function(relations) { scope.relations = relations; }) : Promise.resolve(),
                         entityname ? utils.loadparentlabels(datatypename, entityname).then(function(parentlabels) { scope.breadcrumbs = parentlabels.join(' » '); }) : Promise.resolve(),
                     ]).then(function() {
+                        // Collect references
+                        var promises = scope.datatypefields.filter(function(f) { return f.fieldtype === "reference"; }).map(function(f) {
+                            // Special handle preview images
+                            var filter = (f.name === "previewimagedocumentname") ? "?type=image%2F%25" : "";
+                            return utils.getresponsedata("/api/dynamic/" + f.reference + filter).then(function(references) { scope.references[f.reference] = references; });
+                        });
+                        return Promise.all(promises);
+                    }).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                     });
                 };

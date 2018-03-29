@@ -701,7 +701,7 @@
                 { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_AREA.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
-                    { "name": "areacategoryname", "type": "reference", "reference": "areacategories" },
+                    { "name": "areacategoryname", "label": "Kategorie", "type": "reference", "reference": "areacategories" },
                     { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
                     { "name": "areausagestatename", "label": "Nutzungsstatus", "type": "reference", "reference": "areausagestates" },
                     { "name": "f", "label": "Flächeninhalt (m²)", "type": "decimal" },
