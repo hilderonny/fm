@@ -49,7 +49,8 @@ router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypena
         )
         SELECT datatype1name, name1, depth FROM get_path WHERE datatype2name = '${Db.replaceQuotes(req.params.recordtypename)}' AND name2 = '${Db.replaceQuotes(req.params.entityname)}';
         `;
-        var relations = (await Db.query(clientname, relationsquery)).rows;
+        var relations = (await Db.query(clientname, relationsquery)).rows.filter(r => r.datatype1name && r.name1); // When there are no parents (root element created)
+        if (relations.length < 1) return res.send([]);
         var labelquery = relations.map(r => `SELECT label, ${r.depth} AS depth FROM ${Db.replaceQuotesAndRemoveSemicolon(r.datatype1name)} WHERE name = '${Db.replaceQuotes(r.name1)}'`).join(" UNION ");
         var labels = (await Db.query(clientname, labelquery)).rows.sort((a, b) => b.depth - a.depth).map(l => l.label);
         res.send(labels);

@@ -106,6 +106,7 @@
                 "public/js/components/avt-card.js",
                 "public/js/components/avt-details.js",
                 "public/js/components/avt-hierarchy.js",
+                "public/js/components/avt-relations-toolbar-button.js",
                 "public/js/components/avt-toolbar.js",
                 "public/js/components/avt-toolbar-button.js",
 

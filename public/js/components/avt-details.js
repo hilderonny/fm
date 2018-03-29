@@ -45,54 +45,65 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, util
             element.append(angular.element(cardcontent));
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
+                scope.createchildelement = function($event) {
+                    // Show selection panel for child types
+                    utils.showselectionpanel($event, "/api/datatypes?forlist=" + scope.params.listfilter, function(selecteddatatype) {
+                        utils.removeCard(element);
+                        utils.addCardWithPermission("components/DetailsCard", {
+                            parentdatatypename: scope.params.datatypename,
+                            parententityname: scope.params.entityname,
+                            datatypename: selecteddatatype.name,
+                            onclose: function() {
+                                if (scope.params.onclose) scope.params.onclose(); // Hierarchy handles close
+                            },
+                            oncreate: function(datatype, elementname) {
+                                if (scope.params.oncreate) scope.params.oncreate(datatype, elementname); // Hierarchy handles creation callback
+                            },
+                        }, scope.params.permission);
+                    });
+                };
                 scope.create = function() {
                     var objecttosend = {};
                     scope.datatypefields.forEach(function(dtf) {
                         if (dtf.name === "name" || dtf.fieldtype === "formula") return;
                         objecttosend[dtf.name] = scope.dynamicobject[dtf.name];
                     });
-                    console.log(objecttosend, scope.params.datatypename);
-                    $http.post('/api/dynamic/' + scope.params.datatypename, objecttosend).then(function(response) {
-                        var name = response.data;
-                        // $scope.isNewFmObject = false;
-                        // $scope.fmObject._id = createdFmObject._id;
-                        // $scope.fmObjectName = $scope.fmObject.name; 
-                        // $scope.relationsEntity = { type:'fmobjects', id:createdFmObject._id };
-            
-                        // TODO: Handle parent relations
-            
-                        if (scope.params.oncreate) {
-                            scope.params.oncreate(name);
+                    var createdelementname;
+                    $http.post("/api/dynamic/" + scope.datatype.name, objecttosend).then(function(response) {
+                        createdelementname = response.data;
+                        var childrelation = {
+                            datatype1name: scope.params.parentdatatypename,
+                            datatype2name: scope.params.datatypename,
+                            name1: scope.params.parententityname,
+                            name2: createdelementname,
+                            relationtypename: "parentchild"
                         }
-                        $translate(['TRK_DETAILS_ELEMENT_CREATED']).then(function(translations) {
-                            $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_CREATED).hideDelay(1000).position('bottom right'));
+                        return $http.post("/api/dynamic/relations", childrelation);
+                    }).then(function() {
+                        if (scope.params.oncreate) {
+                            scope.params.oncreate(scope.datatype, createdelementname);
+                        }
+                        $translate(["TRK_DETAILS_ELEMENT_CREATED"]).then(function(translations) {
+                            $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_CREATED).hideDelay(1000).position("bottom right"));
                         });
                     });
                 };
                 scope.load = function() {
-                    scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                     scope.dynamicobject = {}; // For new
-                    scope.token = $http.defaults.headers.common['x-access-token']; // For preview image downloads
+                    scope.token = $http.defaults.headers.common["x-access-token"]; // For preview image downloads
+                    var datatypename = scope.params.datatypename;
+                    var entityname = scope.params.entityname;
                     Promise.all([
-                        utils.loaddatatype(scope.params.datatypename).then(function(datatype) { scope.datatype = datatype; }),
-                        utils.loaddatatypefields(scope.params.datatypename).then(function(datatypefields) { scope.datatypefields = datatypefields.filter(function(f) { return f.name !== "name"}); }), // Do not show the entity name
-                        scope.params.entityname ? utils.loadrelationtypes().then(function(relationtypes) { scope.relationtypes = relationtypes; }) : Promise.resolve(),
-                        scope.params.entityname ? utils.loaddynamicobject(scope.params.datatypename, scope.params.entityname).then(function(dynamicobject) { scope.dynamicobject = dynamicobject; }) : Promise.resolve(),
-                        scope.params.entityname ? utils.loaddynamicattributes(scope.params.datatypename, scope.params.entityname).then(function(dynamicattributes) { scope.dynamicattributes = dynamicattributes; }) : Promise.resolve(), // TODO: Irrelevant in the future
-                        scope.params.entityname ? utils.loadrelations(scope.params.datatypename, scope.params.entityname).then(function(relations) { scope.relations = relations; }) : Promise.resolve(),
-                        scope.params.entityname ? utils.loadparentlabels(scope.params.datatypename, scope.params.entityname).then(function(parentlabels) { scope.breadcrumbs = parentlabels.join(' » '); }) : Promise.resolve(),
+                        utils.loaddatatype(datatypename).then(function(datatype) { scope.datatype = datatype; }),
+                        utils.loaddatatypefields(datatypename).then(function(datatypefields) { scope.datatypefields = datatypefields.filter(function(f) { return f.name !== "name"}); }), // Do not show the entity name
+                        entityname ? utils.loadrelationtypes().then(function(relationtypes) { scope.relationtypes = relationtypes; }) : Promise.resolve(),
+                        entityname ? utils.loaddynamicobject(datatypename, entityname).then(function(dynamicobject) { scope.dynamicobject = dynamicobject; }) : Promise.resolve(),
+                        entityname ? utils.loaddynamicattributes(datatypename, entityname).then(function(dynamicattributes) { scope.dynamicattributes = dynamicattributes; }) : Promise.resolve(), // TODO: Irrelevant in the future
+                        entityname ? utils.loadrelations(datatypename, entityname).then(function(relations) { scope.relations = relations; }) : Promise.resolve(),
+                        entityname ? utils.loadparentlabels(datatypename, entityname).then(function(parentlabels) { scope.breadcrumbs = parentlabels.join(' » '); }) : Promise.resolve(),
                         // TODO: breadcrumbs for new element, when parent is given
                     ]).then(function() {
-                        console.log(
-                            // scope.datatype, 
-                            scope.datatypefields, 
-                            // scope.relationtypes, 
-                            // scope.dynamicobject, 
-                            // scope.dynamicattributes, 
-                            // scope.relations, 
-                            // scope.breadcrumbs, 
-                            // "LOADING DONE."
-                        );
+                        scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                     });
                 };
                 $compile(iElement)(scope);
