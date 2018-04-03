@@ -308,6 +308,18 @@ var Db = {
         })).filter(a=>a);
     },
 
+    getparentrelationstructure: async(clientname, recordtypename, entityname) => {
+        var relationsquery = `
+        WITH RECURSIVE get_path(datatype1name, name1, datatype2name, name2, depth) AS (
+            (SELECT datatype1name, name1, datatype2name, name2, 0 FROM relations WHERE relationtypename = 'parentchild')
+            UNION
+            (SELECT relations.datatype1name, relations.name1, get_path.datatype2name, get_path.name2, get_path.depth + 1 FROM relations JOIN get_path on get_path.name1 = relations.name2 WHERE relationtypename = 'parentchild')
+        )
+        SELECT datatype1name, name1, depth FROM get_path WHERE datatype2name = '${Db.replaceQuotes(recordtypename)}' AND name2 = '${Db.replaceQuotes(entityname)}';
+        `;
+        return (await Db.query(clientname, relationsquery)).rows;
+    },
+
     getPool: (databasename) => {
         var pool = Db.pools[databasename];
         if (!pool) {

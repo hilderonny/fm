@@ -129,7 +129,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                     scope.token = $http.defaults.headers.common["x-access-token"]; // For preview image downloads
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
-                    Promise.all([
+                    return Promise.all([
                         utils.loaddatatype(datatypename).then(function(datatype) { scope.datatype = datatype; }),
                         utils.loaddatatypefields(datatypename).then(function(datatypefields) { scope.datatypefields = datatypefields.filter(function(f) { return f.name !== "name"}); }), // Do not show the entity name
                         entityname ? utils.loadrelationtypes().then(function(relationtypes) { scope.relationtypes = relationtypes; }) : Promise.resolve(),
@@ -163,6 +163,8 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         if (scope.params.onsave) {
                             scope.params.onsave(scope.dynamicobject);
                         }
+                        return scope.load(); // To update changed formula results
+                    }).then(function() {
                         $translate(["TRK_DETAILS_CHANGES_SAVED"]).then(function(translations) {
                             $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_CHANGES_SAVED).hideDelay(1000).position("bottom right"));
                         });

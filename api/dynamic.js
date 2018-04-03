@@ -6,6 +6,7 @@ var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 var ph = require('../utils/permissionshelper');
+var ch = require('../utils/calculationhelper');
 
 // Deletes a dynamic object but without children. They must be deleted separately because of the possibly different permissions.
 router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
@@ -13,13 +14,29 @@ router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"
     var datatypename = req.params.recordtypename;
     var entityname = req.params.entityname;
     try {
+        // Remember parents for recalculation
+        var parentrelations = await Db.getDynamicObjects(clientname, "relations", { datatype2name: datatypename, name2: entityname, relationtypename: 'parentchild'});
         // Delete relations
         await Db.deleteDynamicObjects(clientname, "relations", { datatype1name: datatypename, name1: entityname});
         await Db.deleteDynamicObjects(clientname, "relations", { datatype2name: datatypename, name2: entityname});
         // Delete dynamic attributes
         await Db.deleteDynamicObjects(clientname, "dynamicattributevalues", { entityname: entityname});
-        // Delete the element itself
-        await Db.deleteDynamicObject(clientname, datatypename, entityname);
+        // Delete the element itself (can be a relation)
+        // When the object itself is a relation of type "parentchild", then the parent object must be recalculated
+        if (datatypename === "relations") {
+            var existingrelation = await Db.getDynamicObject(clientname, datatypename, entityname);
+            await Db.deleteDynamicObject(clientname, datatypename, entityname); // First delete the relation so that it is not handled by recalculation
+            if (existingrelation.relationtypename === "parentchild") {
+                await ch.calculateentityandparentsrecursively(clientname, existingrelation.datatype1name, name1);
+            }
+        } else {
+            await Db.deleteDynamicObject(clientname, datatypename, entityname);
+        }
+        // Recalculate parents
+        for (var i = 0; i < parentrelations.length; i++) {
+            var relation = parentrelations[i];
+            await ch.calculateentityandparentsrecursively(clientname, relation.datatype1name, r.name1);
+        }
         res.sendStatus(204);
     } catch(error) {
         res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
@@ -61,15 +78,7 @@ router.get("/children/:recordtypename/:entityname", auth(false, false, co.module
 router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var clientname = req.user.clientname;
     try {
-        var relationsquery = `
-        WITH RECURSIVE get_path(datatype1name, name1, datatype2name, name2, depth) AS (
-            (SELECT datatype1name, name1, datatype2name, name2, 0 FROM relations WHERE relationtypename = 'parentchild')
-            UNION
-            (SELECT relations.datatype1name, relations.name1, get_path.datatype2name, get_path.name2, get_path.depth + 1 FROM relations JOIN get_path on get_path.name1 = relations.name2 WHERE relationtypename = 'parentchild')
-        )
-        SELECT datatype1name, name1, depth FROM get_path WHERE datatype2name = '${Db.replaceQuotes(req.params.recordtypename)}' AND name2 = '${Db.replaceQuotes(req.params.entityname)}';
-        `;
-        var relations = (await Db.query(clientname, relationsquery)).rows.filter(r => r.datatype1name && r.name1); // When there are no parents (root element created)
+        var relations = (await Db.getparentrelationstructure(clientname, req.params.recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1); // When there are no parents (root element created)
         if (relations.length < 1) return res.send([]);
         var labelquery = relations.map(r => `SELECT label, ${r.depth} AS depth FROM ${Db.replaceQuotesAndRemoveSemicolon(r.datatype1name)} WHERE name = '${Db.replaceQuotes(r.name1)}'`).join(" UNION ");
         var labels = (await Db.query(clientname, labelquery)).rows.sort((a, b) => b.depth - a.depth).map(l => l.label);
@@ -129,20 +138,36 @@ router.get("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), 
 // Create a dynamic object and return its generated name
 router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, res) => {
     var newobject = req.body;
+    var clientname = req.user.clientname;
+    var recordtypename = req.params.recordtypename;
     newobject.name = uuidv4();
     try {
-        await Db.insertDynamicObject(req.user.clientname, req.params.recordtypename, newobject);
+        await Db.insertDynamicObject(clientname, recordtypename, newobject);
+        // When the new object is a relation of type "parentchild", then the parent object must be recalculated
+        if (recordtypename === "relations" && newobject.relationtypename === "parentchild") {
+            await ch.calculateentityandparentsrecursively(clientname, newobject.datatype1name, name1);
+        }
         res.send(newobject.name);
     } catch(error) {
         res.sendStatus(400); // Any error with the request
     }
 });
 
-// Create a dynamic object and return its generated name
+// Updates a dynamic object
 router.put('/:recordtypename/:entityname', auth.dynamic("recordtypename", "w"), async(req, res) => {
+    var clientname = req.user.clientname;
+    var recordtypename = req.params.recordtypename;
+    var entityname = req.params.entityname;
+    var objecttoupdate = req.body;
     try {
-        delete req.body.name;
-        await Db.updateDynamicObject(req.user.clientname, req.params.recordtypename, req.params.entityname, req.body);
+        delete objecttoupdate.name;
+        await Db.updateDynamicObject(clientname, recordtypename, entityname, objecttoupdate);
+        // When the object is a relation of type "parentchild", then the parent object must be recalculated
+        if (recordtypename === "relations" && objecttoupdate.relationtypename === "parentchild") {
+            await ch.calculateentityandparentsrecursively(clientname, objecttoupdate.datatype1name, name1);
+        }
+        // The objects and its possible parents must be recalculated in every case
+        await ch.calculateentityandparentsrecursively(clientname, recordtypename, entityname);
         res.sendStatus(200);
     } catch(error) {
         res.sendStatus(400); // Error in request

@@ -39,6 +39,19 @@ var ch = {
         value = sum ? parseFloat(sum) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
     },
+    // Recalculates an antity and all of its parents recursively
+    calculateentityandparentsrecursively: async(clientname, datatypename, entityname) => {
+        // Fetch parent structure
+        var parents = (await Db.getparentrelationstructure(clientname, datatypename, entityname)).sort((a, b) => a.depth - b.depth);
+        // Calculate the entity itself
+        await ch.calculateformula(clientname, datatypename, entityname);
+        // Calculate parents, order is important!
+        for (var i = 0; i < parents.length; i++) {
+            var parent = parents[i];
+            await ch.calculateformula(clientname, parent.datatype1name, parent.name1);
+        }
+    },
+    // Calculates all formulas for a specific entity
     calculateformula: async(clientname, datatypename, entityname) => {
         var datatypefields = (await Db.getDataTypeFields(clientname, datatypename)).sort((a,b) => a.formulaindex - b.formulaindex);
         for (var i = 0; i < datatypefields.length; i++) {
