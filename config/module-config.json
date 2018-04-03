@@ -727,10 +727,12 @@
                     { "name": "FMOBJECTS_TYPE_INVENTORY", "label": "Inventar" }
                 ] }, 
 
-                { "name": "areacategories", "label": "Kategorie", "titlefield": "name", "values": [
-                    { "name": "Nutzungsfläche" },
-                    { "name": "Technikfläche" },
-                    { "name": "Verkehrsfläche" }
+                { "name": "areacategories", "label": "Kategorie", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "values": [
+                    { "name": "FMOBJECTS_CATEGORY_NUF", "label": "Nutzungsfläche" },
+                    { "name": "FMOBJECTS_CATEGORY_TF", "label": "Technikfläche" },
+                    { "name": "FMOBJECTS_CATEGORY_VF", "label": "Verkehrsfläche" }
                 ] }, 
 
                 { "name": "areatypes", "label": "Flächenart", "titlefield": "name", "fields": [
