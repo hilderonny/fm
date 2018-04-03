@@ -34,6 +34,9 @@ module.exports = async() => {
     console.log("Migrating FM objects ...");
     for (var i = 0; i < clients.length; i++) {
         var clientname = clients[i].name;
+        // First update all datatypefields to be predefined. Currently there are no other ones
+        await Db.query(clientname, "UPDATE datatypefields SET ispredefined=true;");
+        // Now handle FM objects
         await Db.query(clientname, "DELETE FROM projects;");
         await Db.query(clientname, "DELETE FROM properties;");
         await Db.query(clientname, "DELETE FROM buildings;");

@@ -138,6 +138,17 @@ router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, 
     }
 });
 
+// Create a dynamic object and return its generated name
+router.put('/:recordtypename/:entityname', auth.dynamic("recordtypename", "w"), async(req, res) => {
+    try {
+        delete req.body.name;
+        await Db.updateDynamicObject(req.user.clientname, req.params.recordtypename, req.params.entityname, req.body);
+        res.sendStatus(200);
+    } catch(error) {
+        res.sendStatus(400); // Error in request
+    }
+});
+
 // /**
 //  * Creates a new set of values for dynamic attributes for an entity of type MODELNAME and with the given _id.
 //  */

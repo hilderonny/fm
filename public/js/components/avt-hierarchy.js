@@ -108,6 +108,9 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                             if (parentchild.children.length < 1) parentchild.haschildren = false;
                             scope.loadrootelements();
                             delete scope.selectedchild;
+                        },
+                        onsave: function(updatedentity) {
+                            child.label = updatedentity.label;
                         }
                 }, scope.params.permission).then(function() {
                         scope.selectedchild = child;

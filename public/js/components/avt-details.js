@@ -15,14 +15,25 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
         '           <md-card-content layout="column">' +
         '               <form name="detailsform">' +
         '                   <md-input-container flex ng-repeat="datatypefield in datatypefields | orderBy: \'label\'" ng-if="params.entityname || datatypefield.fieldtype !== \'formula\'">' +
-        '                       <label ng-if="[\'text\', \'formula\', \'reference\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
+        '                       <label ng-if="[\'text\', \'decimal\', \'formula\', \'reference\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
         '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\'">' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'">' +
         '                       <input ng-value="dynamicobject[datatypefield.name] || 0" ng-if="datatypefield.fieldtype === \'formula\'" type="number" disabled>' +
         '                       <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
         '                       <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=download&token={{token}}"/>' + // Special handle previewimagedocumentname
         '                       <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'">' +
         '                           <md-option ng-value="reference.name" ng-repeat="reference in references[datatypefield.reference] | orderBy: [\'label\', \'name\']">' +
         '                               <span>{{reference.label || reference.name}}</span>' +
+        '                           </md-option>' +
+        '                       </md-select>' +
+        '                   </md-input-container>' +
+        '                   <md-input-container flex ng-repeat="attribute in dynamicattributes | orderBy: \'attribute.type.name_en\'">' +
+        '                       <label ng-bind="attribute.type[\'name_\' + $root.currentLanguage]" ng-if="attribute.type.type === \'text\' || attribute.type.type === \'picklist\'"></label>' +
+        '                       <input ng-model="attribute.value" ng-if="attribute.type.type === \'text\'">' +
+        '                       <md-checkbox ng-model="attribute.value" ng-if="attribute.type.type === \'boolean\'"><span ng-bind="attribute.type[\'name_\' + $root.currentLanguage]"></span></md-checkbox>' +
+        '                       <md-select ng-model="attribute.value" ng-if="attribute.type.type === \'picklist\'">' +
+        '                           <md-option ng-value="option[\'_id\']" ng-repeat="option in attribute.options | orderBy: \'text_en\' track by $index">' +
+        '                               <span ng-bind="option[\'text_\' + $root.currentLanguage]"></span>' +
         '                           </md-option>' +
         '                       </md-select>' +
         '                   </md-input-container>' +
@@ -74,16 +85,16 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         objecttosend[dtf.name] = scope.dynamicobject[dtf.name];
                     });
                     var createdelementname;
-                    $http.post("/api/dynamic/" + scope.datatype.name, objecttosend).then(function(response) {
-                        createdelementname = response.data;
+                    utils.createdynamicobject(scope.datatype.name, objecttosend).then(function(elementname) {
+                        createdelementname = elementname;
                         var childrelation = {
                             datatype1name: scope.params.parentdatatypename,
                             datatype2name: scope.datatype.name,
                             name1: scope.params.parententityname,
                             name2: createdelementname,
                             relationtypename: "parentchild"
-                        }
-                        return $http.post("/api/dynamic/relations", childrelation);
+                        };
+                        return utils.createrelation(childrelation);
                     }).then(function() {
                         if (scope.params.oncreate) {
                             scope.params.oncreate(scope.datatype, createdelementname);
@@ -104,7 +115,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                             .cancel(translations.TRK_NO);
                         return $mdDialog.show(confirm);
                     }).then(function() {
-                        return $http.delete("/api/dynamic/" + scope.datatype.name + "/" + scope.dynamicobject.name);
+                        return utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name);
                     }).then(function() {
                         if (scope.params.ondelete) scope.params.ondelete();
                         utils.removeCardsToTheRightOf(element);
@@ -131,13 +142,32 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         var promises = scope.datatypefields.filter(function(f) { return f.fieldtype === "reference"; }).map(function(f) {
                             // Special handle preview images
                             var filter = (f.name === "previewimagedocumentname") ? "?type=image%2F%25" : "";
-                            return utils.getresponsedata("/api/dynamic/" + f.reference + filter).then(function(references) { scope.references[f.reference] = references; });
+                            return utils.getresponsedata("/api/dynamic/" + f.reference + filter).then(function(references) {
+                                if (f.isnullable) references.push({ name: null, label: "" }); // Nullable references like preview images
+                                scope.references[f.reference] = references;
+                            });
                         });
                         return Promise.all(promises);
                     }).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                     });
                 };
+                scope.save = function() {
+                    var datatypename = scope.params.datatypename;
+                    var entityname = scope.params.entityname;
+                    var dynamicattributes = scope.dynamicattributes;
+                    Promise.all([
+                        utils.savedynamicobject(datatypename, scope.dynamicobject),
+                        dynamicattributes && dynamicattributes.length > 0 ? utils.savedynamicattributes(datatypename, entityname, dynamicattributes) : Promise.resolve(),
+                    ]).then(function() {
+                        if (scope.params.onsave) {
+                            scope.params.onsave(scope.dynamicobject);
+                        }
+                        $translate(["TRK_DETAILS_CHANGES_SAVED"]).then(function(translations) {
+                            $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_CHANGES_SAVED).hideDelay(1000).position("bottom right"));
+                        });
+                    });
+                }
                 $compile(iElement)(scope);
                 scope.load();
             };

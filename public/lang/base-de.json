@@ -1,5 +1,6 @@
 {   
     "TRK_CANCEL" : "Abbrechen",
+    "TRK_DETAILS_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_DETAILS_CREATE" : "Erstellen",
     "TRK_DETAILS_DELETE" : "Löschen",
     "TRK_DETAILS_DETAILS" : "Details",

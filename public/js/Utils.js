@@ -42,6 +42,20 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
+        createdynamicobject: function(datatypename, entity) {
+            return $http.post("/api/dynamic/" + datatypename, entity).then(function(response) {
+                return response.data; // name of created element
+            });
+        },
+
+        createrelation: function(relation) {
+            return $http.post("/api/dynamic/relations", relation);
+        },
+
+        deletedynamicobject: function(datatypename, entityname) {
+            return $http.delete("/api/dynamic/" + datatypename + "/" + entityname);
+        },
+
         // Helper function which will return the response.data field from a GET API call as promise result.
         getresponsedata: function(url) {
             return $http.get(url).then(function(response) {
@@ -178,6 +192,19 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             return utils.addCardWithPermission(cardTemplateUrl, params, requiredPermission);
         },
 
+        savedynamicattributes: function(datatypename, entityname, dynamicattributes) {
+            // Nur die Daten senden, die zwingend notwendig sind. Der Rest kann von der API ermittelt werden
+            return $http.post('/api/dynamicattributes/values/' + datatypename + '/' + entityname, dynamicattributes.map(function(da) { return {
+                dynamicAttributeId: da.type._id,
+                value: da.value
+            }; }));
+        },
+
+        savedynamicobject: function(datatypename, entity) {
+            return $http.put("/api/dynamic/" + datatypename + "/" + entity.name, entity);
+        },
+
+        // TODO: Durch savedynamicobject und savedynamicattributes ersetzen
         saveEntity: function(scope, modelName, entityId, api, entityToSend) {
             var savedEntity;
             return $http.put(api + entityId, entityToSend).then(function(saveEntityResponse) {

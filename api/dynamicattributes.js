@@ -119,7 +119,7 @@ router.get('/values/:modelName/:id', auth(false, false, co.modules.base), valida
     SELECT
         b.type::jsonb,
         json_agg(b.options) AS options,
-        dav.value
+        (CASE WHEN b.type::jsonb->>'type' = 'boolean' THEN dav.value ELSE '"' || dav.value || '"' END)::json AS value
     FROM (
         SELECT
             a.*,

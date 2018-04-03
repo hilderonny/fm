@@ -647,7 +647,7 @@
 
                 { "name": "projects", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
@@ -658,7 +658,7 @@
 
                 { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
@@ -669,7 +669,7 @@
 
                 { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
@@ -680,7 +680,7 @@
 
                 { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 2 },
@@ -691,7 +691,7 @@
 
                 { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
@@ -700,7 +700,7 @@
 
                 { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_AREA.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "areacategoryname", "label": "Kategorie", "type": "reference", "reference": "areacategories" },
                     { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
                     { "name": "areausagestatename", "label": "Nutzungsstatus", "type": "reference", "reference": "areausagestates" },
@@ -712,7 +712,7 @@
 
                 { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents" }
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" }
                 ], "lists": [ "fmobjects" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" },
 
                 { "name": "fmobjecttypes", "label": "FM Objekttyp", "titlefield": "label", "fields": [
@@ -758,7 +758,7 @@
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "fmobjecttypename", "label": "Typ", "type": "reference", "reference": "fmobjecttypes" },
                     { "name": "parentfmobjectname", "type": "reference", "reference": "fmobjects" },
-                    { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents" },
+                    { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
                     { "name": "f", "label": "Fläche (m²)", "type": "decimal" },
                     { "name": "bgf", "label": "Brutto-Geschoss-Fläche (BGF)", "type": "decimal" },
