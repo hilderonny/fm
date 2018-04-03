@@ -877,6 +877,10 @@ table.largedevice, table.smalldevice {
         right: -11px;
     }
 
+    md-card-content > section {
+        padding-bottom: 14px;
+    }
+
     md-content.list-details md-card md-toolbar button.close-card {
         display: none;
     }

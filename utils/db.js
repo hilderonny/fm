@@ -289,6 +289,15 @@ var Db = {
         var filterlist = [];
         Object.keys(filter).forEach((k) => {
             var value = filter[k];
+            k = Db.replaceQuotesAndRemoveSemicolon(k);
+            try {
+                value = JSON.parse(value); // Maybe there is an array?
+                if (Array.isArray(value)) {
+                    // Handle "forIds"
+                    filterlist.push(`${k} IN (${value.map(v => `'${Db.replaceQuotes(v)}'`).join(",")})`);
+                    return;
+                }
+            } catch(error) { } // Ignore parser errors
             var t = typeof(value);
             switch(t) {
                 case "string": filterlist.push(`${k} LIKE '${Db.replaceQuotes(value)}'`); break;

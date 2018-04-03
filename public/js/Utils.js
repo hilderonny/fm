@@ -134,6 +134,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                         relations.push({
                             datatypename: is1 ? relation.datatype2name : relation.datatype1name,
                             name: is1 ? relation.name2 : relation.name1,
+                            relationname: relation.name,
                             relationtypename: relation.relationtypename,
                             is1: is1
                         });

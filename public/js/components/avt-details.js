@@ -27,7 +27,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
         '                           </md-option>' +
         '                       </md-select>' +
         '                   </md-input-container>' +
-        '                   <md-input-container flex ng-repeat="attribute in dynamicattributes | orderBy: \'attribute.type.name_en\'">' +
+        '                   <md-input-container flex ng-repeat="attribute in dynamicattributes | orderBy: \'type.name_en\'">' +
         '                       <label ng-bind="attribute.type[\'name_\' + $root.currentLanguage]" ng-if="attribute.type.type === \'text\' || attribute.type.type === \'picklist\'"></label>' +
         '                       <input ng-model="attribute.value" ng-if="attribute.type.type === \'text\'">' +
         '                       <md-checkbox ng-model="attribute.value" ng-if="attribute.type.type === \'boolean\'"><span ng-bind="attribute.type[\'name_\' + $root.currentLanguage]"></span></md-checkbox>' +
@@ -45,6 +45,26 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
         '                   </md-card-actions>' +
         '               </form>' +
         '           </md-card-content>' +
+        '       </md-tab-body>' +
+        '   </md-tab>' +
+        '   <md-tab ng-if="canreadrelations" md-on-select="loadrelations()">' +
+        '       <md-tab-label><span translate>TRK_RELATIONS_RELATIONS</span></md-tab-label>' +
+        '       <md-tab-body>' +
+
+        '           <md-card-content>' +
+        '               <section ng-repeat="relationsection in relationsections | orderBy:\'label\'">' +
+        '                   <md-subheader class="md-no-sticky">{{relationsection.label}}</md-subheader>' +
+        '                   <md-list class="lines-beetween-items">' +
+        '                       <md-list-item ng-repeat="entity in relationsection.entities | orderBy:\'label\'" ng-click="selectrelation(entity)" ng-class="selectedElement === entity ? \'active\' : false">' +
+        '                           <md-icon md-svg-src="{{entity.datatype.icon}}"></md-icon>' +
+        '                           <div class="md-list-item-text multiline"><p>{{entity.label}}</p><p>{{entity.datatype.label}}</p></div>' +
+        '                           <md-button ng-if="canwriterelations" class="md-icon-button md-accent"><md-icon ng-click="deleterelation(entity.relation)" md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>' +
+        '                       </md-list-item>' +
+        '                   </md-list>' +
+        '               </section>' +
+        '           </md-card-content>' +
+
+
         '       </md-tab-body>' +
         '   </md-tab>' +
         '</md-tabs>'
@@ -123,6 +143,21 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_DELETED).hideDelay(1000).position('bottom right'));
                     });
                 },
+                scope.deleterelation = function(relation) {
+                    $translate(['TRK_RELATIONS_DELETED', 'TRK_YES', 'TRK_NO', 'TRK_RELATIONS_REALLY_DELETE_RELATION']).then(function(translations) {
+                        var confirm = $mdDialog.confirm()
+                            .title(translations.TRK_RELATIONS_REALLY_DELETE_RELATION)
+                            .ok(translations.TRK_YES)
+                            .cancel(translations.TRK_NO);
+                        $mdDialog.show(confirm).then(function() {
+                            return utils.deletedynamicobject("relations", relation.relationname);
+                        }).then(function() {
+                            utils.removeCardsToTheRightOf(element);
+                            $mdToast.show($mdToast.simple().textContent(translations.TRK_RELATIONS_DELETED).hideDelay(1000).position('bottom right'));
+                            scope.loadrelations();
+                        });
+                    });
+                },
                 scope.load = function() {
                     scope.dynamicobject = {}; // For new
                     scope.references = {};
@@ -135,7 +170,6 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         entityname ? utils.loadrelationtypes().then(function(relationtypes) { scope.relationtypes = relationtypes; }) : Promise.resolve(),
                         entityname ? utils.loaddynamicobject(datatypename, entityname).then(function(dynamicobject) { scope.dynamicobject = dynamicobject; }) : Promise.resolve(),
                         entityname ? utils.loaddynamicattributes(datatypename, entityname).then(function(dynamicattributes) { scope.dynamicattributes = dynamicattributes; }) : Promise.resolve(), // TODO: Irrelevant in the future
-                        entityname ? utils.loadrelations(datatypename, entityname).then(function(relations) { scope.relations = relations; }) : Promise.resolve(),
                         entityname ? utils.loadparentlabels(datatypename, entityname).then(function(parentlabels) { scope.breadcrumbs = parentlabels.join(' » '); }) : Promise.resolve(),
                     ]).then(function() {
                         // Collect references
@@ -150,6 +184,41 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         return Promise.all(promises);
                     }).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
+                        scope.canwriterelations = scope.$root.canWrite('PERMISSION_CORE_RELATIONS');
+                        scope.canreadrelations = scope.$root.canRead('PERMISSION_CORE_RELATIONS');
+                    });
+                };
+                scope.loadrelations = function() {
+                    var entitiestofetch = {};
+                    return utils.loadrelations(scope.params.datatypename, scope.params.entityname).then(function(relations) { 
+                        scope.relationsections = [];
+                        relations.forEach(function(r) {
+                            var relationtype = scope.relationtypes.find(function(rt) { return rt.name === r.relationtypename; });
+                            if (!relationtype) relationtype = { name: null, labelfrom1to2: "Unspezifische Verknüpfungen", labelfrom2to1: "Unspezifische Verknüpfungen" }; // From older relations which had no type
+                            var relationsection = scope.relationsections.find(function(rs) { return rs.name === relationtype.name && (rs.is1 === r.is1 || [null, "looselycoupled"].indexOf(relationtype.name) >= 0) });
+                            if (!relationsection) {
+                                relationsection = { name: relationtype.name, is1: r.is1, label: r.is1 ? relationtype.labelfrom1to2: relationtype.labelfrom2to1, entities: [] };
+                                scope.relationsections.push(relationsection);
+                            }
+                            if (!entitiestofetch[r.datatypename]) entitiestofetch[r.datatypename] = {};
+                            entitiestofetch[r.datatypename][r.name] = { section: relationsection, relation: r };
+                        });
+                        // Load relevant datatype information
+                        return utils.getresponsedata("/api/datatypes");
+                    }).then(function(datatypes) {
+                        // Load entities
+                        var fetchpromises = Object.keys(entitiestofetch).map(function(k) {
+                            var entitiestofetchfordatatype = entitiestofetch[k];
+                            return utils.getresponsedata("/api/dynamic/" + k + "?name=[" + Object.keys(entitiestofetchfordatatype).map(function(e) { return '"' + e + '"'; }).join(",") + "]").then(function(entities) {
+                                entities.forEach(function(e) {
+                                    e.datatype = datatypes.find(function(dt) { return dt.name === k; });
+                                    var mapper = entitiestofetchfordatatype[e.name];
+                                    e.relation = mapper.relation;
+                                    mapper.section.entities.push(e);
+                                });
+                            });
+                        });
+                        return Promise.all(fetchpromises);
                     });
                 };
                 scope.save = function() {
