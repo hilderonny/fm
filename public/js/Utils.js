@@ -72,14 +72,27 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         // Loads the fields of the given datatype and returns them as array within a promise
-        loaddatatype: function(datatypename) {
-            return utils.getresponsedata('/api/datatypes/' + datatypename);
+        // TODO: OBSOLETE
+        // loaddatatype: function(datatypename) {
+        //     return utils.getresponsedata('/api/datatypes/' + datatypename);
+        // },
+
+        // Loads all datatypes and their field definitions on page load (keyed object)
+        loaddatatypes: function(scope) {
+            scope.datatypes = {};
+            return utils.getresponsedata('/api/datatypes').then(function(datatypes) {
+                datatypes.forEach(function(dt) { scope.datatypes[dt.name] = dt; dt.fields = []; });
+                return utils.getresponsedata('/api/datatypes/fields');
+            }).then(function(fields) {
+                fields.forEach(function(f) { scope.datatypes[f.datatypename].fields.push(f); });
+            });
         },
 
-        // Loads the fields of the given datatype and returns them as array within a promise
-        loaddatatypefields: function(datatypename) {
-            return utils.getresponsedata('/api/datatypes/fields/' + datatypename);
-        },
+        // // Loads the fields of the given datatype and returns them as array within a promise
+        // // TODO: OBSOLETE
+        // loaddatatypefields: function(datatypename) {
+        //     return utils.getresponsedata('/api/datatypes/fields/' + datatypename);
+        // },
 
         // TODO: Replace by loaddynamicattributes, or better by loaddynamicobject
         loadDynamicAttributes: function(scope, modelName, entityId) {
@@ -116,9 +129,51 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             return utils.getresponsedata('/api/dynamic/' + datatypename + '/' + entityname);
         },
 
+        loadmenu: function(scope) {
+            return utils.getresponsedata('/api/menu').then(function (responsedata) {
+                scope.menu = responsedata.menu;
+                scope.menu.push({
+                    "title": "TRK_MENU_LOGOUT",
+                    "icon": "Exit",
+                    "action": function() {
+                        localStorage.removeItem("loginCredentials");
+                        scope.isLoggedIn = false;
+                        scope.searchResults = [];
+                        scope.searchInputVisible = false;
+                        utils.setLocation('/');
+                    }
+                });
+                scope.logourl = responsedata.logourl;
+                // Direct URL mappings
+                scope.menu.forEach(function(mainmenu) {
+                    if (mainmenu.items) mainmenu.items.forEach(function(submenu) {
+                        if (submenu.directurls) {
+                            if (!scope.directUrlMappings) scope.directUrlMappings = {};
+                            submenu.directurls.forEach(function(directurl) {
+                                scope.directUrlMappings[directurl] = {
+                                    mainMenu: mainmenu.title,
+                                    subMenu: submenu.title
+                                };
+                            });
+                        }
+                    });
+                });
+                console.log(scope.menu, scope.directUrlMappings);
+            });
+        },
+
         // Loads the labels of all parent elements of a given entity. Used for breadcrumbs. The order is root element first
         loadparentlabels: function(datatypename, entityname) {
             return utils.getresponsedata('/api/dynamic/parentpath/' + datatypename + '/' + entityname);
+        },
+
+        loadpermissions: function(scope) {
+            return utils.getresponsedata('/api/permissions/forLoggedInUser').then(function(responsedata) {
+                scope.permissions = {};
+                responsedata.forEach(function(permission) {
+                    scope.permissions[permission.key] = permission;
+                });
+            });
         },
 
         // Loads all relations of an entity. In the result each relation has the property "is1" shich shows that the entity is the left hand relation part (name1). Needed for interpreting the relation
@@ -145,8 +200,36 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         // Loads the meta information about all possible relation types. Needed for titles and labels.
-        loadrelationtypes: function() {
-            return utils.getresponsedata('/api/dynamic/relationtypes');
+        loadrelationtypes: function(scope) {
+            return utils.getresponsedata('/api/dynamic/relationtypes').then(function(relationtypes) { scope.relationtypes = relationtypes; });
+        },
+
+        login: function(scope, username, password) {
+            scope.isLoggingIn = true;
+            var user = { username: username, password: password };
+            return $http.post('/api/login', user).then(function(response) {
+                if (response.status !== 200) throw new Error(response.status); // Caught below
+                // Set the token for all requests
+                $http.defaults.headers.common['x-access-token'] = response.data.token;
+                scope.isLoggedIn = true;
+                scope.isPortal = response.data.clientId === "portal";
+                if (scope.isPortal) scope.title = 'TRK_TITLE_PORTAL';
+                // Save login credentials in browser for future access
+                localStorage.setItem("loginCredentials", JSON.stringify(user));
+                scope.isLoggingIn = false;
+            }).catch(function() {
+                localStorage.removeItem("loginCredentials"); // Delete login credentials to prevent login loop
+                scope.isLoggingIn = false;
+                if (hideErrorMessage) return;
+                $translate(['TRK_LOGIN_FAILED_TITLE', 'TRK_LOGIN_FAILED_CONTENT', 'TRK_LOGIN_FAILED_AGAIN']).then(function(translations) {
+                    $mdDialog.show($mdDialog.alert()
+                        .clickOutsideToClose(true)
+                        .title(translations.TRK_LOGIN_FAILED_TITLE)
+                        .textContent(translations.TRK_LOGIN_FAILED_CONTENT)
+                        .ok(translations.TRK_LOGIN_FAILED_AGAIN)
+                    );
+                });
+            });
         },
 
         removeAllCards: function() {

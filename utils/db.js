@@ -186,7 +186,8 @@ var Db = {
     },
 
     getDataTypeFields: async(databaseNameWithoutPrefix, datatypename) => {
-        return (await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypefields WHERE datatypename='${Db.replaceQuotes(datatypename)}' ORDER BY name;`)).rows;
+        var clause = datatypename ? ` WHERE datatypename='${Db.replaceQuotes(datatypename)}'` : "";
+        return (await Db.query(databaseNameWithoutPrefix, `SELECT * FROM datatypefields${clause};`)).rows;
     },
 
     // getDynamicObjectForEdit: async(clientname, username, datatypename, name) => {

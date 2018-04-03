@@ -10,7 +10,7 @@ app.directive('avtRelationsToolbarButton', function($compile) {
             scope.label = "TRK_RELATIONS_LINK";
             scope.tooltip = "TRK_RELATIONS_ADD_LINK";
             scope.onclick = function($event) {
-                
+                console.log("NOW OPEN A RELATIONS CREATION DIALOG!", scope.datatype, scope.dynamicobject, scope.$root.relationtypes, scope.$root.datatypes);
             }
         }
         // compile: function compile(element, attrs) {

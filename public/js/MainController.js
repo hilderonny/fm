@@ -1,9 +1,9 @@
 // Controller for main functions
-app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSidenav, $http, $mdDialog, $translate, $mdDateLocale, $location, $mdPanel, $q, utils) {
+app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $mdDialog, $translate, $mdDateLocale, $location, $mdPanel, $q, utils) {
 
     $scope.$mdMedia = $mdMedia; // https://github.com/angular/material/issues/2341#issuecomment-93680762
 
-
+    var rootscope = $scope.$root;
 
     window.onbeforeunload = function(e) { // Shows up dialog to leave the site
         //return false;
@@ -15,8 +15,8 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     }
 
     // Handle click on sidenav menu item
-    $scope.menuClick = function(menuItem) {
-        $scope.currentMenuItem = menuItem;
+    rootscope.menuClick = function(menuItem) {
+        rootscope.currentMenuItem = menuItem;
         if (menuItem) {
             if (menuItem.action) {
                 menuItem.action();
@@ -34,108 +34,48 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
     }
 
 
-    $scope.handleDirectUrls = function() {
-        var path1 = $scope.path[1];
-        $scope.isShowingDoc = false; // Pauschal ausschalten, wenn vorher aktiv war
+    rootscope.handleDirectUrls = function() {
+        var path1 = rootscope.path[1];
+        rootscope.isShowingDoc = false; // Pauschal ausschalten, wenn vorher aktiv war
         if (!path1) { // Navigate back to dashboard
-            $scope.menuClick(null);
+            rootscope.menuClick(null);
         } else if (path1 === 'doc') { // Sonderbehandlung für Online-Dokumentation
-            $scope.isShowingDoc = true;
+            rootscope.isShowingDoc = true;
             angular.element(document.querySelector('#cardcanvas')).empty();
-            utils.addCardWithPermission('Doc/List', { preselection: $scope.path[2], anchor: $scope.path[3] });
-        } else if (app.directUrlMappings[path1]) {
-            var mapping = app.directUrlMappings[path1];
-            var mainMenu = $scope.menu.find(function(m) { return m.title === mapping.mainMenu; });
+            utils.addCardWithPermission('Doc/List', { preselection: rootscope.path[2], anchor: rootscope.path[3] });
+        } else if (rootscope.directUrlMappings[path1]) {
+            var mapping = rootscope.directUrlMappings[path1];
+            var mainMenu = rootscope.menu.find(function(m) { return m.title === mapping.mainMenu; });
             if (!mainMenu) return;
             var subMenu = mainMenu.items.find(function(mi) { return mi.title === mapping.subMenu; });
             if (!subMenu) return;
-            $scope.currentMenuItem = subMenu;
+            rootscope.currentMenuItem = subMenu;
             angular.element(document.querySelector('#cardcanvas')).empty();
-            subMenu.preselection = $scope.path[2];
+            subMenu.preselection = rootscope.path[2];
             utils.addCardWithPermission(subMenu.mainCard, subMenu, subMenu.permission);
         }
     };
 
-    $rootScope.permissions = {};
-
-    $rootScope.canRead = function(permissionKey) {
-        return !permissionKey || ($rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canRead);
+    rootscope.canRead = function(permissionKey) {
+        return !permissionKey || (rootscope.permissions[permissionKey] && rootscope.permissions[permissionKey].canRead);
     }
 
-    $rootScope.canWrite = function(permissionKey) {
-        return !permissionKey || ($rootScope.permissions[permissionKey] && $rootScope.permissions[permissionKey].canWrite);
+    rootscope.canWrite = function(permissionKey) {
+        return !permissionKey || (rootscope.permissions[permissionKey] && rootscope.permissions[permissionKey].canWrite);
     }
 
     // User clicked on login button
     $scope.doLogin = function(hideErrorMessage) {
-        $scope.title = null;
-        $scope.isLoggingIn = true;
-        // Loads the menu structure from the server
-        var user = {
-            username: $scope.username,
-            password: $scope.password
-        }
-        $http.post('/api/login', user).then(function (response) {
-            if (response.status !== 200) throw new Error(response.status); // Caught below
-            // Set the token for all requests
-            $http.defaults.headers.common['x-access-token'] = response.data.token;
-            $scope.isLoggedIn = true;
-            $scope.isPortal = response.data.clientId === "portal";
-            if ($scope.isPortal) {
-                $scope.title = 'TRK_TITLE_PORTAL';
-            }
-            // Save login credentials in browser for future access
-            localStorage.setItem("loginCredentials", JSON.stringify(user));
-            // Loads the menu structure from the server
-            $http.get('/api/menu').then(function (response) {
-                $scope.menu = response.data.menu;
-                $scope.menu.push({
-                    "title": "TRK_MENU_LOGOUT",
-                    "icon": "Exit",
-                    "action": function() {
-                        localStorage.removeItem("loginCredentials");
-                        $scope.isLoggedIn = false;
-                        $scope.searchResults = [];
-                        $scope.searchInputVisible = false;
-                        utils.setLocation('/');
-                    }
-                });
-                $scope.logourl = response.data.logourl;
-                // Ermittelt zentral alle Berechtigungen für den angemeldeten Benutzer.
-                // Diese können dann per $rootScope.permissions[key] abgefragt werden.
-                return $http.get('/api/permissions/forLoggedInUser');
-            }).then(function(response) {
-                $rootScope.permissions = {};
-                response.data.forEach(function(permission) {
-                    $rootScope.permissions[permission.key] = permission;
-                });
-                $scope.isLoggingIn = false;
-                $scope.currentMenuItem = null;
-                $scope.menu.forEach(function(mainmenu) {
-                    if (mainmenu.items) mainmenu.items.forEach(function(submenu) {
-                        if (submenu.directurl) app.directUrlMappings[submenu.directurl] = {
-                            mainMenu: mainmenu.title,
-                            subMenu: submenu.title
-                        };
-                    });
-                });
-                $scope.handleDirectUrls();
-            });
-        }).catch(function() {
-            localStorage.removeItem("loginCredentials"); // Delete login credentials to prevent login loop
-            $scope.isLoggingIn = false;
-            if (hideErrorMessage) {
-                return;
-            }
-            $translate(['TRK_LOGIN_FAILED_TITLE', 'TRK_LOGIN_FAILED_CONTENT', 'TRK_LOGIN_FAILED_AGAIN']).then(function(translations) {
-                $mdDialog.show(
-                    $mdDialog.alert()
-                        .clickOutsideToClose(true)
-                        .title(translations.TRK_LOGIN_FAILED_TITLE)
-                        .textContent(translations.TRK_LOGIN_FAILED_CONTENT)
-                        .ok(translations.TRK_LOGIN_FAILED_AGAIN)
-                );
-            });
+        rootscope.title = null;
+        return utils.login(rootscope, $scope.username, $scope.password).then(function() {
+            return Promise.all([
+                utils.loadmenu(rootscope).then(function() { console.log("LOADED MENU", rootscope.menu); }),
+                utils.loadpermissions(rootscope).then(function() { console.log("LOADED PERMISSIONS", rootscope.permissions); }),
+                utils.loaddatatypes(rootscope).then(function() { console.log("LOADED DATATYPES", rootscope.datatypes); }),
+                utils.loadrelationtypes(rootscope).then(function() { console.log("LOADED RELATIONTYPES", rootscope.relationtypes); })
+            ]);
+        }).then(function() {
+            rootscope.handleDirectUrls();
         });
     };
 
@@ -149,30 +89,31 @@ app.controller('MainController', function($scope, $rootScope, $mdMedia, $mdSiden
         $mdDateLocale.shortDays = localeData.weekdaysShort();
         $mdDateLocale.firstDayOfWeek = localeData.firstDayOfWeek();
         $translate.use(lang);
-        $rootScope.currentLanguage = lang;
-        $rootScope.langDirection = (lang==='ar'?'rtl':'ltr');
-        $rootScope.$emit('localeChanged', lang); // Tell the activity controller to update its date picker
+        rootscope.currentLanguage = lang;
+        rootscope.langDirection = (lang==='ar'?'rtl':'ltr');
+        rootscope.$emit('localeChanged', lang); // Tell the activity controller to update its date picker
     }
 
-    $rootScope.languages = [ 'de', 'en']; // Define which languages are shown in menu
+    rootscope.languages = [ 'de', 'en']; // Define which languages are shown in menu
 
     $scope.setLang($translate.proposedLanguage());
 
-    if ($rootScope.languages.indexOf($rootScope.currentLanguage) < 0) {
+    if (rootscope.languages.indexOf(rootscope.currentLanguage) < 0) {
         $scope.setLang('en'); // Fallback
     }
 
     // Handle direct URLs, checked after login
 
-    $rootScope.$on('$locationChangeSuccess', function(evt, newUrl, oldUrl) {
-        if ($rootScope.ignoreNextLocationChange) {
-            $rootScope.ignoreNextLocationChange = false;
+    rootscope.$on('$locationChangeSuccess', function(evt, newUrl, oldUrl) {
+        console.log(evt, newUrl, oldUrl);
+        if (rootscope.ignoreNextLocationChange) {
+            rootscope.ignoreNextLocationChange = false;
             return;
         }
-        $scope.path = $location.path().split('/');
-        $scope.hash = $location.hash();
+        rootscope.path = $location.path().split('/');
+        rootscope.hash = $location.hash();
         if (newUrl === oldUrl) return;
-        if ($scope.isLoggedIn) $scope.handleDirectUrls();
+        if (rootscope.isLoggedIn) rootscope.handleDirectUrls();
     });
 
     // Handle more-menu on mobile devices

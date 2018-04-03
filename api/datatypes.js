@@ -9,6 +9,12 @@ router.get("/", auth(co.permissions.ADMINISTRATION_DATATYPES, "r", co.modules.ba
     res.send(datatypes);
 });
 
+// Retreive all datatype fields of all datatypes. The access is public because the API is needed for details pages
+router.get("/fields", auth(), async(req, res) => {
+    var datatypefields = await Db.getDataTypeFields(req.user.clientname);
+    res.send(datatypefields);
+});
+
 // Retreive all datatype fields for a given datatypename. The access is public because the API is needed for details pages
 router.get("/fields/:datatypename", auth(), async(req, res) => {
     var datatypefields = await Db.getDataTypeFields(req.user.clientname, req.params.datatypename);
