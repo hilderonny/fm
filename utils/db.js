@@ -103,7 +103,7 @@ var Db = {
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, key TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, key));");
     },
 
-    createDatatype: async(databaseNameWithoutPrefix, datatypename, label, plurallabel, nameistitle, icon, lists, permissionkey, modulename) => {
+    createDatatype: async(databaseNameWithoutPrefix, datatypename, label, plurallabel, nameistitle, icon, lists, permissionkey, modulename, canhaverelations) => {
         if ((await Db.query(databaseNameWithoutPrefix, `SELECT 1 FROM datatypes WHERE name = '${Db.replaceQuotes(datatypename)}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var plurallabeltoinsert = plurallabel ? "'" + Db.replaceQuotes(plurallabel) + "'" : "null";
@@ -111,7 +111,7 @@ var Db = {
         var liststoinsert = lists ? "'{" + lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
         var permissionkeytoinsert = permissionkey ? "'" + Db.replaceQuotes(permissionkey) + "'" : "null";
         var modulenametoinsert = modulename ? "'" + Db.replaceQuotes(modulename) + "'" : "null";
-        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename) VALUES ('${Db.replaceQuotes(datatypename)}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert});`);
+        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations) VALUES ('${Db.replaceQuotes(datatypename)}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations});`);
         await Db.query(databaseNameWithoutPrefix, `CREATE TABLE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} (name TEXT PRIMARY KEY);`);
         await Db.createDatatypeField(databaseNameWithoutPrefix, datatypename, "name", "Name", constants.fieldtypes.text, nameistitle, true, true, null);
     },
@@ -543,6 +543,7 @@ var Db = {
         await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS ispredefined BOOLEAN;");
         await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS permissionkey TEXT;");
         await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS modulename TEXT;");
+        await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS canhaverelations BOOLEAN;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formula TEXT;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formulaindex NUMERIC;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS ispredefined BOOLEAN;");
@@ -560,7 +561,7 @@ var Db = {
                 var liststoupdate = recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
                 var permissionkeytoupdate = recordtype.permissionkey ? "'" + Db.replaceQuotes(recordtype.permissionkey) + "'" : "null";
                 var modulenametoupdate = recordtype.modulename ? "'" + Db.replaceQuotes(recordtype.modulename) + "'" : "null";
-                var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate}, lists = ${liststoupdate}, ispredefined = true, permissionkey = ${permissionkeytoupdate}, modulename = ${modulenametoupdate} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
+                var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate}, lists = ${liststoupdate}, ispredefined = true, permissionkey = ${permissionkeytoupdate}, modulename = ${modulenametoupdate}, canhaverelations = ${!!recordtype.canhaverelations} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
                 await Db.query(databasename, query);
             } else {
                 // Insert new definition

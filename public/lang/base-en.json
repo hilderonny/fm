@@ -1,5 +1,6 @@
 {
     "TRK_CANCEL" : "Cancel",
+    "TRK_DATATYPES_DATATYPE" : "Data type",
     "TRK_DETAILS_CHANGES_SAVED" : "Changes saved",
     "TRK_DETAILS_CREATE" : "Create",
     "TRK_DETAILS_DELETE" : "Delete",
@@ -75,6 +76,7 @@
     "TRK_PERMISSION_SETTINGS_PORTAL" : "Settings - Portal level",
     "TRK_PERMISSION_SETTINGS_USER" : "Settings - User level",
     "TRK_RELATIONS_ADD_LINK" : "Add link",
+    "TRK_RELATIONS_CREATE_RELATION" : "Create relation",
     "TRK_RELATIONS_DELETED" : "Link removed",
     "TRK_RELATIONS_LINK" : "Link",
     "TRK_RELATIONS_LINKS" : "Links",

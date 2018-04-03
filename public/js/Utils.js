@@ -129,6 +129,10 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             return utils.getresponsedata('/api/dynamic/' + datatypename + '/' + entityname);
         },
 
+        loaddynamicobjects: function(datatypename) {
+            return utils.getresponsedata('/api/dynamic/' + datatypename);
+        },
+
         loadmenu: function(scope) {
             return utils.getresponsedata('/api/menu').then(function (responsedata) {
                 scope.menu = responsedata.menu;
@@ -158,7 +162,6 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                         }
                     });
                 });
-                console.log(scope.menu, scope.directUrlMappings);
             });
         },
 
@@ -331,20 +334,22 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         /**
          * Shows up a dialog with multiple buttons. The buttons parameter is an array of objects, defining the buttons. Button attributes are:
-         * - label: Text to show on the button
+         * - label: Text to show on the button, can be a translation key
          * - class: CSS class to use, e.g. "md-warn" or "md-primary"
          * - onclick: function which is called when the button is pressed
+         * - visible: show button or not
          */
-        showdialog: function(content, buttons) {
+        showdialog: function(parentscope, content, buttons) {
             $mdDialog.show({
                 template:
                     '<md-dialog>' +
                     '  <md-dialog-content class="md-dialog-content">' + content + '</md-dialog-content>' +
                     '  <md-dialog-actions>' +
-                    '    <md-button ng-repeat="button in buttons" ng-click="onclick(button)" class="md-raised {{button.class}}">{{button.label}}</md-button>' +
+                    '    <md-button ng-repeat="button in buttons" ng-click="onclick(button)" ng-if="!button.ishidden" class="md-raised {{button.class}}"><span translate="{{button.label}}"></span></md-button>' +
                     '  </md-dialog-actions>' +
                     '</md-dialog>',
                 controller: function($scope, $mdDialog) {
+                    $scope.parentscope = parentscope;
                     $scope.buttons = buttons;
                     $scope.onclick = function(button) {
                         if (button.onclick) button.onclick();
@@ -358,6 +363,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         showselectionpanel: function(clickevent, listapi, selectioncallback) {
             var nodeToHandle = clickevent.currentTarget;
             var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW);
+            console.log("SHOWING PANEL");
             $mdPanel.open({
                 attachTo: angular.element(document.body),
                 controller: function($scope, $http, mdPanelRef) {
@@ -369,7 +375,14 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                         }
                     });
                 },
-                templateUrl: '/partial/components/selectionpanel.html',
+                // templateUrl: '/partial/components/selectionpanel.html',
+                template: 
+                    '<md-list class="context-menu" role="list">' +
+                    '   <md-list-item ng-repeat="item in list | orderBy : \'label\'" ng-click="click(item)">' +
+                    '       <md-icon md-svg-src="{{item.icon}}"></md-icon>' +
+                    '       <p>{{item.label}}</p>' +
+                    '   </md-list-item>' +
+                    '</md-list>',
                 panelClass: 'select-type-menu',
                 position: position,
                 openFrom: clickevent,

@@ -24,7 +24,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
                 utils.removeAllCards();
                 utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission);
                 $mdSidenav('left').close();
-                if (menuItem.directurl) utils.setLocation('/' + menuItem.directurl);
+                if (menuItem.directurls && menuItem.directurls.length > 0) utils.setLocation('/' + menuItem.directurls[0]); // Use first defined direct URL
             }
         } else {
             utils.removeAllCards();
@@ -69,10 +69,10 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         rootscope.title = null;
         return utils.login(rootscope, $scope.username, $scope.password).then(function() {
             return Promise.all([
-                utils.loadmenu(rootscope).then(function() { console.log("LOADED MENU", rootscope.menu); }),
-                utils.loadpermissions(rootscope).then(function() { console.log("LOADED PERMISSIONS", rootscope.permissions); }),
-                utils.loaddatatypes(rootscope).then(function() { console.log("LOADED DATATYPES", rootscope.datatypes); }),
-                utils.loadrelationtypes(rootscope).then(function() { console.log("LOADED RELATIONTYPES", rootscope.relationtypes); })
+                utils.loadmenu(rootscope),
+                utils.loadpermissions(rootscope),
+                utils.loaddatatypes(rootscope),
+                utils.loadrelationtypes(rootscope)
             ]);
         }).then(function() {
             rootscope.handleDirectUrls();
@@ -105,7 +105,6 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     // Handle direct URLs, checked after login
 
     rootscope.$on('$locationChangeSuccess', function(evt, newUrl, oldUrl) {
-        console.log(evt, newUrl, oldUrl);
         if (rootscope.ignoreNextLocationChange) {
             rootscope.ignoreNextLocationChange = false;
             return;

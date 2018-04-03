@@ -192,14 +192,14 @@
 
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ] }
+                ], "canhaverelations" : true }
 
             ],
             "portaldatatypes": [
@@ -257,14 +257,14 @@
 
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ] }
+                ], "canhaverelations" : true }
                 
             ]
         },
@@ -350,7 +350,7 @@
                     { "name": "comment", "label": "Kommentar", "type": "text" },
                     { "name": "createdbyusername", "label": "Ersteller", "type": "reference", "reference": "users" },
                     { "name": "isforallusers", "label": "Sichtbar für alle Benutzer", "type": "boolean" }
-                ] }
+                ], "canhaverelations" : true }
 
             ]
     
@@ -450,13 +450,13 @@
                     { "name": "industry", "label": "Geschäftsbereich", "type": "text" },
                     { "name": "rolle", "label": "Art der Beziehung", "type": "text" },
                     { "name": "isjuristic", "label": "Juristische Person", "type": "boolean" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "lastname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
                     { "name": "firstname", "label": "Vorname", "type": "text" },
                     { "name": "lastname", "label": "Nachname", "type": "text" },
                     { "name": "description", "label": "Beschreibung", "type": "text" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "partneraddresstypes", "label": "Adressart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" },
@@ -475,7 +475,7 @@
                     { "name": "postcode", "label": "Postleitzahl", "type": "text" },
                     { "name": "city", "label": "Ort", "type": "text" },
                     { "name": "partneraddresstypename", "label": "Art der Adresse", "type": "reference", "reference": "partneraddresstypes" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "communicationmediums", "label": "Kommunikationsmedium", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
@@ -499,7 +499,7 @@
                     { "name": "contact", "label": "Kontakt", "type": "text" },
                     { "name": "personname", "label": "Person", "type": "reference", "reference": "persons" },
                     { "name": "communicationtypename", "label": "Typ", "type": "reference", "reference": "communicationtypes" }
-                ] }
+                ], "canhaverelations" : true }
                 
             ]
         },
@@ -542,7 +542,7 @@
 
                 { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ] }
+                ], "canhaverelations" : true }
                 
             ]
         },
@@ -593,14 +593,14 @@
                 { "name": "folders", "label": "Verzeichnis", "plurallabel": "Verzeichnisse", "titlefield": "label", "icon": "/css/icons/material/Folder.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "parentfoldername", "type": "reference", "reference": "folders" }
-                ], "lists": [ "folders" ] },
+                ], "lists": [ "folders" ], "canhaverelations" : true },
 
                 { "name": "documents", "label": "Dokument", "plurallabel": "Dokumente", "titlefield": "label", "icon": "/css/icons/material/Document.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "parentfoldername", "type": "reference", "reference": "folders" },
                     { "name": "type", "type": "text" },
                     { "name": "isshared", "label": "Öffentlich zugänglich", "type": "boolean" }
-                ], "lists": [ "folders" ] }
+                ], "lists": [ "folders" ], "canhaverelations" : true }
 
             ]
         },
@@ -654,7 +654,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" },
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -665,7 +665,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" },
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -676,7 +676,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" },
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -687,7 +687,7 @@
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 3 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 4 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" },
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -696,7 +696,7 @@
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF, berechnet)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 3 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" },
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_AREA.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -708,12 +708,12 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_NUF", "f", null] }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_TF", "f", null] }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_VF", "f", null] }, "formulaindex": 2 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" },
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" }
-                ], "lists": [ "fmobjects" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" },
+                ], "lists": [ "fmobjects" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "fmobjecttypes", "label": "FM Objekttyp", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
@@ -817,7 +817,7 @@
                     { "name": "licensekey", "label": "Lizenzschlüssel", "type": "text" },
                     { "name": "version", "label": "Version", "type": "text" },
                     { "name": "lastnotification", "label": "Letzte Meldung", "type": "datetime" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "portalmodules", "label": "Portalmodul", "plurallabel": "Portalmodule", "fields": [
                     { "name": "portalname", "type": "reference", "reference": "portals" },
@@ -858,7 +858,7 @@
 
                 { "name": "notes", "label": "Notiz", "plurallabel": "Notizen", "titlefield": "content", "icon": "/css/icons/material/Notes.svg", "fields": [
                     { "name": "content", "label": "Inhalt", "type": "text" }
-                ] }
+                ], "canhaverelations" : true }
 
             ]
         },

@@ -22,6 +22,7 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
     return {
         restrict: "A",
         scope: true,
+        terminal: true,
         priority: 900,
         compile: function compile(element, attrs) {
             element.removeAttr("avt-hierarchy"); //remove the attribute to avoid indefinite loop

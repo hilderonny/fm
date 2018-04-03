@@ -104,6 +104,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                     var createdelementname;
                     utils.createdynamicobject(scope.datatype.name, objecttosend).then(function(elementname) {
                         createdelementname = elementname;
+                        if (!scope.params.parentdatatypename || !scope.params.parententityname) return;
                         var childrelation = {
                             datatype1name: scope.params.parentdatatypename,
                             datatype2name: scope.datatype.name,
@@ -217,6 +218,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         return Promise.all(fetchpromises);
                     });
                 };
+                scope.onrelationcreated = scope.loadrelations;
                 scope.save = function() {
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;

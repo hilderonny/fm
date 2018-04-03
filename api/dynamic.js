@@ -27,7 +27,7 @@ router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"
             var existingrelation = await Db.getDynamicObject(clientname, datatypename, entityname);
             await Db.deleteDynamicObject(clientname, datatypename, entityname); // First delete the relation so that it is not handled by recalculation
             if (existingrelation.relationtypename === "parentchild") {
-                await ch.calculateentityandparentsrecursively(clientname, existingrelation.datatype1name, name1);
+                await ch.calculateentityandparentsrecursively(clientname, existingrelation.datatype1name, existingrelation.name1);
             }
         } else {
             await Db.deleteDynamicObject(clientname, datatypename, entityname);
@@ -35,7 +35,7 @@ router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"
         // Recalculate parents
         for (var i = 0; i < parentrelations.length; i++) {
             var relation = parentrelations[i];
-            await ch.calculateentityandparentsrecursively(clientname, relation.datatype1name, r.name1);
+            await ch.calculateentityandparentsrecursively(clientname, relation.datatype1name, relation.name1);
         }
         res.sendStatus(204);
     } catch(error) {
@@ -145,7 +145,7 @@ router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, 
         await Db.insertDynamicObject(clientname, recordtypename, newobject);
         // When the new object is a relation of type "parentchild", then the parent object must be recalculated
         if (recordtypename === "relations" && newobject.relationtypename === "parentchild") {
-            await ch.calculateentityandparentsrecursively(clientname, newobject.datatype1name, name1);
+            await ch.calculateentityandparentsrecursively(clientname, newobject.datatype1name, newobject.name1);
         }
         res.send(newobject.name);
     } catch(error) {
@@ -164,7 +164,7 @@ router.put('/:recordtypename/:entityname', auth.dynamic("recordtypename", "w"), 
         await Db.updateDynamicObject(clientname, recordtypename, entityname, objecttoupdate);
         // When the object is a relation of type "parentchild", then the parent object must be recalculated
         if (recordtypename === "relations" && objecttoupdate.relationtypename === "parentchild") {
-            await ch.calculateentityandparentsrecursively(clientname, objecttoupdate.datatype1name, name1);
+            await ch.calculateentityandparentsrecursively(clientname, objecttoupdate.datatype1name, objecttoupdate.name1);
         }
         // The objects and its possible parents must be recalculated in every case
         await ch.calculateentityandparentsrecursively(clientname, recordtypename, entityname);
