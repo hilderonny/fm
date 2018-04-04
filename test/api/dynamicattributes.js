@@ -342,13 +342,6 @@ describe('API dynamicattributes', () => {
             await th.post(`/api/${co.apis.dynamicattributes}/option?token=${token}`).send(optionToSend).expect(400);
         });
 
-        it('responds with a not existing dynamicAttributeId with 400', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            var optionToSend = await createTestDynamicAttributeOption(co.dynamicAttributeTypes.picklist);
-            optionToSend.dynamicAttributeId = '999999999999999999999999';
-            await th.post(`/api/${co.apis.dynamicattributes}/option?token=${token}`).send(optionToSend).expect(400);
-        });
-
         it('responds without giving text_en with 400', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var optionToSend = await createTestDynamicAttributeOption(co.dynamicAttributeTypes.picklist);

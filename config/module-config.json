@@ -627,6 +627,8 @@
                 "css/images/FM_addsub.png",
                 "css/images/FM_edit.png",
                 "css/images/FM_hierarchy.png",
+                "partial/components/DetailsCard.html",
+                "partial/components/HierarchyCard.html",
                 "partial/Doc/FmObjects.html"
             ],
             "languages" : [ "en", "de" ],

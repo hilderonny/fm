@@ -57,10 +57,6 @@ module.exports.apis = {
      */
     extractdocument: 'extractdocument',
     /**
-     * API for edititing FM objects
-     */
-    fmobjects: 'fmobjects',
-    /**
      * API for edititing folders
      */
     folders: 'folders',

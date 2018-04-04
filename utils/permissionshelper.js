@@ -18,7 +18,7 @@ var ph = {
                 canRead: true,
                 canWrite: p.canwrite,
                 clientId:clientname,
-                userGroupId: req.user.usergroupname
+                userGroupId: user.usergroupname
             }});
             return mappedPermissions;
         }

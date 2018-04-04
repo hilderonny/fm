@@ -52,14 +52,14 @@ var collectModuleConfigReferencedFiles = () => {
         if (module.menu) module.menu.forEach((menu) => {
             if (menu.mainCard) files.insert(`public/partial/${menu.mainCard}.html`);
             if (menu.icon) {
-                files.insert(`public/css/icons/material/${menu.icon}.svg`);
-                files.insert(`public/css/icons/office/${menu.icon}.svg`);
+                files.insert(`public${menu.icon}`);
+                files.insert(`public${menu.icon.replace(/\/material\//g, "/office/")}`);
             }
             if (menu.items) menu.items.forEach((item) => {
                 if (item.mainCard) files.insert(`public/partial/${item.mainCard}.html`);
                 if (item.icon) {
-                    files.insert(`public/css/icons/material/${item.icon}.svg`);
-                    files.insert(`public/css/icons/office/${item.icon}.svg`);
+                    files.insert(`public${item.icon}`);
+                    files.insert(`public${item.icon.replace(/\/material\//g, "/office/")}`);
                 }
                 if (item.docCard) files.insert(`public/partial/Doc/${item.docCard}.html`);
             });

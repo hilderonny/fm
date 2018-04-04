@@ -298,10 +298,10 @@ var Db = {
             var value = filter[k];
             k = Db.replaceQuotesAndRemoveSemicolon(k);
             try {
-                value = JSON.parse(value); // Maybe there is an array?
-                if (Array.isArray(value)) {
+                var parsedvalue = JSON.parse(value); // Maybe there is an array?
+                if (Array.isArray(parsedvalue)) {
                     // Handle "forIds"
-                    filterlist.push(`${k} IN (${value.map(v => `'${Db.replaceQuotes(v)}'`).join(",")})`);
+                    filterlist.push(`${k} IN (${parsedvalue.map(v => `'${Db.replaceQuotes(v)}'`).join(",")})`);
                     return;
                 }
             } catch(error) { } // Ignore parser errors
