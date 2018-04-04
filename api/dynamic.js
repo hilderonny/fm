@@ -8,13 +8,16 @@ var uuidv4 = require("uuid").v4;
 var ph = require('../utils/permissionshelper');
 var ch = require('../utils/calculationhelper');
 
-async function getchildren(clientname, recordtypename, entityname, permissions) {
+async function getchildren(clientname, recordtypename, entityname, permissions, forlist) {
     var relevantrelations = (await Db.query(clientname, `
         SELECT r.datatype2name, r.name2, dtp.permissionkey, dtc.icon, CASE WHEN count(rc) > 0 THEN true ELSE false END haschildren FROM relations r 
         JOIN datatypes dtp ON dtp.name = r.datatype1name 
         JOIN datatypes dtc ON dtc.name = r.datatype2name 
         LEFT JOIN relations rc ON rc.name1 = r.name2 AND rc.relationtypename = 'parentchild' AND rc.datatype1name = r.datatype2name
-        WHERE r.relationtypename = 'parentchild' AND r.datatype1name = '${Db.replaceQuotes(recordtypename)}' AND r.name1 = '${Db.replaceQuotes(entityname)}'
+        WHERE r.relationtypename = 'parentchild'
+        AND r.datatype1name = '${Db.replaceQuotes(recordtypename)}'
+        AND r.name1 = '${Db.replaceQuotes(entityname)}'
+        AND '${Db.replaceQuotes(forlist)}' = ANY (dtc.lists)
         GROUP BY r.datatype2name, r.name2, dtp.permissionkey, dtc.icon;
     `)).rows;
     var children = [];
@@ -91,23 +94,24 @@ router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"
 });
 
 // Get a list of all children of the given entity
-router.get("/children/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
+router.get("/children/:forlist/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
     var permissions = await ph.getpermissionsforuser(req.user);
-    var children = await getchildren(req.user.clientname, req.params.recordtypename, req.params.entityname, permissions);
+    var children = await getchildren(req.user.clientname, req.params.recordtypename, req.params.entityname, permissions, req.params.forlist);
     res.send(children);
 });
 
 router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var recordtypename = req.params.recordtypename;
+    var forlist = req.params.forlist;
     try {
         var permissions = await ph.getpermissionsforuser(req.user);
         var parentrelations = (await Db.getparentrelationstructure(clientname, recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1).sort((a, b) => b.depth - a.depth);
-        var rootelements = await getrootelements(clientname, req.params.forlist, permissions);
+        var rootelements = await getrootelements(clientname, forlist, permissions);
         var children = rootelements;
         for (var i = 0; i < parentrelations.length; i++) {
             var elementtohandle = children.find(c => c.name === parentrelations[i].name1);
-            children = await getchildren(clientname, elementtohandle.datatypename, elementtohandle.name, permissions);
+            children = await getchildren(clientname, elementtohandle.datatypename, elementtohandle.name, permissions, forlist);
             elementtohandle.children = children;
             elementtohandle.isopen = true; // Selecting the path
         }

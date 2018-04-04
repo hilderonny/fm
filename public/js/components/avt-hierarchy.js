@@ -87,8 +87,8 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                     });
                 };
                 scope.openchild = function(child) {
-                    $http.get('/api/dynamic/children/' + child.datatypename + '/' + child.name).then(function(response) {
-                        child.children = response.data;
+                    return utils.getresponsedata("/api/dynamic/children/" + scope.params.listfilter + "/" + child.datatypename + "/" + child.name).then(function(children) {
+                        child.children = children;
                         child.children.forEach(function(cc) {
                             cc.parent = child;
                         });
