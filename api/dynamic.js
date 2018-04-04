@@ -1,7 +1,5 @@
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateSameClientId = require('../middlewares/validateSameClientId');
-var apiHelper = require('../utils/apiHelper');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
@@ -93,13 +91,14 @@ router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"
     // TODO later: For documents, also delete the file
 });
 
-// Get a list of all children of the given entity
+// Get a list of all children of the given entity. Used for hierarchies when one opens an element which has children
 router.get("/children/:forlist/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
     var permissions = await ph.getpermissionsforuser(req.user);
     var children = await getchildren(req.user.clientname, req.params.recordtypename, req.params.entityname, permissions, req.params.forlist);
     res.send(children);
 });
 
+// Get the entire hierarchy from the root to a specific element with all intermediate children. Used for hierarchies when a direct URL is loaded
 router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var recordtypename = req.params.recordtypename;
@@ -122,6 +121,7 @@ router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth(fals
 });
 
 // Get path of all parents of an object as array (root first) for breadcrumbs
+// TODO: In allgemeine Detailseiten-API integrieren
 router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var clientname = req.user.clientname;
     try {
@@ -135,7 +135,7 @@ router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypena
     }
 });
 
-// Get all root elements for a specific list type (parameter forlist). That are those elements which have no parentchild relation where they are children
+// Get all root elements for a specific list type (parameter forlist). That are those elements which have no parentchild relation where they are children. Used in hierarchies when they are loaded without targettig a specific element (click in menu)
 router.get("/rootelements/:forlist", auth(false, false, co.modules.base), async(req, res) => {
     var permissions = await ph.getpermissionsforuser(req.user);
     var rootelements = await getrootelements(req.user.clientname, req.params.forlist, permissions);
@@ -143,6 +143,7 @@ router.get("/rootelements/:forlist", auth(false, false, co.modules.base), async(
 });
 
 // Get list of all dynamic objects of given record type
+// TODO: Wird das benutzt?
 router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, res) => {
     try {
         var filter = req.query;
@@ -155,6 +156,7 @@ router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, r
 });
 
 // Get a specific dynamic object
+// TODO: In allgemeine Detailseiten-API integrieren
 router.get("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     try {
         var dynamicobject = await Db.getDynamicObject(req.user.clientname, req.params.recordtypename, req.params.entityname);
@@ -202,137 +204,5 @@ router.put('/:recordtypename/:entityname', auth.dynamic("recordtypename", "w"), 
         res.sendStatus(400); // Error in request
     }
 });
-
-// /**
-//  * Creates a new set of values for dynamic attributes for an entity of type MODELNAME and with the given _id.
-//  */
-// router.post('/values/:modelName/:id', auth(false, false, co.modules.base), validateModelName, validateSameClientId(), async(req, res) => {
-//     var clientname = req.user.clientname;
-//     var modelName = req.params.modelName;
-//     var entity = await Db.getDynamicObject(clientname, modelName, req.params.id);
-//     if (!entity) return res.sendStatus(400);
-//     var dynamicAttributeValues = req.body;
-//     if (!Array.isArray(dynamicAttributeValues)) return res.sendStatus(400); 
-//     if (dynamicAttributeValues.find(v => !v.dynamicAttributeId)) return res.sendStatus(400);
-//     var dynamicattributenames = dynamicAttributeValues.map(dav => `'${Db.replaceQuotes(dav.dynamicAttributeId)}'`);
-//     var dynamicattributes = dynamicattributenames.length > 0 ? (await Db.query(clientname, `SELECT * FROM dynamicattributes WHERE name IN (${dynamicattributenames.join(",")});`)).rows : [];
-//     if (dynamicattributes.length !== dynamicAttributeValues.length) return res.sendStatus(400); // Some attributes do not exist or multiply defined in body
-//     var valuestoinsert = dynamicAttributeValues.map(dav => { return {
-//         name: uuidv4(),
-//         entityname: entity.name,
-//         dynamicattributename: dav.dynamicAttributeId,
-//         value: dav.value
-//     }});
-//     for (var i = 0; i < valuestoinsert.length; i++) {
-//         await Db.deleteDynamicObjects(clientname, co.collections.dynamicattributevalues.name, { entityname: entity.name, dynamicattributename: valuestoinsert[i].dynamicattributename });
-//         await Db.insertDynamicObject(clientname, co.collections.dynamicattributevalues.name, valuestoinsert[i]);
-//     }
-//     res.send(valuestoinsert.map(v => { return {
-//         _id: v.name,
-//         entityId: v.entityname,
-//         clientId: clientname,
-//         value: v.value,
-//         dynamicAttributeId: v.dynamicattributename
-//     }}));
-// });
-
-// /**
-//  * Creates a new dynamic attribute. Required properties are modelName, name_en and type.
-//  */
-// router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), async(req, res) => {
-//     var clientname = req.user.clientname;
-//     var dynamicAttribute = req.body;
-//     if (!dynamicAttribute || !dynamicAttribute.type || !co.dynamicAttributeTypes[dynamicAttribute.type] || !dynamicAttribute.modelName || !co.collections[dynamicAttribute.modelName] || !co.collections[dynamicAttribute.modelName].canHaveAttributes || !dynamicAttribute.name_en) return res.sendStatus(400);
-//     var attributetoinsert = {
-//         name: uuidv4(),
-//         modelname: dynamicAttribute.modelName,
-//         label: dynamicAttribute.name_de ? dynamicAttribute.name_de: dynamicAttribute.name_en,
-//         isinactive: !!dynamicAttribute.isInactive, // Convert undefined to false
-//         dynamicattributetypename: dynamicAttribute.type,
-//         identifier: null// no identifier for manually created attributes!
-//     }
-//     await Db.insertDynamicObject(clientname, co.collections.dynamicattributes.name, attributetoinsert);
-//     dynamicAttribute._id = attributetoinsert.name;
-//     res.send(dynamicAttribute);
-// });
-
-// /**
-//  * Updates an option with the given _id for a dynamic attibute.
-//  * The dynamicattributeid of the option cannot be changed.
-//  */
-// router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributeoptions.name), async(req, res) => {
-//     var clientname = req.user.clientname;
-//     var dynamicAttributeOption = req.body;
-//     var attribute = await Db.getDynamicObject(clientname, co.collections.dynamicattributes.name, dynamicAttributeOption.dynamicAttributeId);
-//     if (!attribute) return res.sendStatus(404);
-//     delete dynamicAttributeOption._id;
-//     delete dynamicAttributeOption.dynamicAttributeId;
-//     delete dynamicAttributeOption.clientId; //clientId should not be changed
-//     if(Object.keys(dynamicAttributeOption).length < 1) return res.sendStatus(400);
-//     var updateset = { }
-//     if (dynamicAttributeOption.text_en) updateset.label = dynamicAttributeOption.text_en;
-//     if (dynamicAttributeOption.text_de) updateset.label = dynamicAttributeOption.text_de;
-//     if (dynamicAttributeOption.value) updateset.value = dynamicAttributeOption.value;
-//     await Db.updateDynamicObject(clientname, co.collections.dynamicattributeoptions.name, req.params.id, updateset);
-//     res.send(dynamicAttributeOption);
-// });
-
-// /**
-//  * Updates a dynamic attribute. Changing the type is not supported.
-//  * For this case the attribute needs to be deleted and a new one is to be created.
-//  * Also changing the model is not supported. Only the name_* properties can be updated.
-//  */
-// router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
-//     var clientname = req.user.clientname;
-//     var dynamicAttribute = req.body;
-//     delete dynamicAttribute._id;
-//     delete dynamicAttribute.modelName;
-//     delete dynamicAttribute.type;
-//     delete dynamicAttribute.clientId;
-//     delete dynamicAttribute.identifier;
-//     if(Object.keys(dynamicAttribute).length < 1) return res.sendStatus(400);
-//     var updateset = { }
-//     if (dynamicAttribute.name_en) updateset.label = dynamicAttribute.name_en;
-//     if (dynamicAttribute.name_de) updateset.label = dynamicAttribute.name_de;
-//     await Db.updateDynamicObject(clientname, co.collections.dynamicattributes.name, req.params.id, updateset);
-//     res.send(dynamicAttribute);
-// });
-
-// /**
-//  * Deletes an option with the given _id of a dynamic attribute. 
-//  * Also deletes all existing dynamicattributevalues of the corresponding dynamic 
-//  * attribute where this option is the value.
-//  */
-// router.delete('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributeoptions.name), async(req, res) => {
-//     var clientname = req.user.clientname;
-//     var existing = await Db.getDynamicObject(clientname, co.collections.dynamicattributeoptions.name, req.params.id);
-//     if (existing.value) return res.sendStatus(405);
-//     await Db.deleteDynamicObject(clientname, co.collections.dynamicattributeoptions.name, req.params.id);
-//     await Db.deleteDynamicObjects(clientname, co.collections.dynamicattributevalues.name, { value: req.params.id });
-//     res.sendStatus(204);
-// });
-
-// /**
-//  * Deletes all dynamic attribute values for an entity of type MODELNAME and the given _id.
-//  */
-// router.delete('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(), async(req, res) => {
-//     await Db.deleteDynamicObjects(req.user.clientname, co.collections.dynamicattributevalues.name, { entityname: req.params.id });
-//     return res.sendStatus(204);
-// });
-
-// /**
-//  * Deletes a dynamic attribute with the given _id.
-//  * All existing dynamicattributevalues which exist for the attribute are also deleted.
-//  * When the dynamic attribute is of type picklist, all of its options are also deleted.
-//  */
-// router.delete('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
-//     var clientname = req.user.clientname;
-//     var existing = await Db.getDynamicObject(clientname, co.collections.dynamicattributes.name, req.params.id);
-//     if (existing.identifier) return res.sendStatus(405);
-//     await Db.deleteDynamicObject(clientname, co.collections.dynamicattributes.name, req.params.id);
-//     await Db.deleteDynamicObjects(clientname, co.collections.dynamicattributeoptions.name, { dynamicattributename: req.params.id });
-//     await Db.deleteDynamicObjects(clientname, co.collections.dynamicattributevalues.name, { dynamicattributename: req.params.id });
-//     res.sendStatus(204);
-// });
 
 module.exports = router;

@@ -1,4 +1,8 @@
 {
+    "TRK_DETAILS_NEW_SUBELEMENT" : "Unterelement",
+    "TRK_DETAILS_NEW_SUBELEMENT_IN_THIS_LEVEL" : "Neues Unterelement erstellen",
+    "TRK_HIERARCHY_NEW_ELEMENT" : "Element",
+    "TRK_HIERARCHY_NEW_ELEMENT_IN_ROOT" : "Neues Element auf oberster Ebene erstellen",
     "TRK_MENU_BIM" : "FM",
     "TRK_MENU_BIM_FMOBJECTS" : "FM Objekte",
     "TRK_MODULE_fmobjects_NAME" : "FM Objekte"
