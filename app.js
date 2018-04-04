@@ -115,7 +115,7 @@ async function init() {
         fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
     }
     // Recalculate all formulas because the definitions could have changed in module-config
-// await require("./utils/calculationhelper").recalculateall();
+    await require("./utils/calculationhelper").recalculateall();
     // Includes minifizieren
     prepareIncludes(fs);
     // Anwendung initialisieren und Handler-Reihenfolge festlegen
@@ -215,4 +215,8 @@ async function init() {
 };
 
 // Installation of required dependencies must be done by hand when needed
-init();
+if (process.env.NODE_ENV !== 'test') {
+    init();
+} else {
+    module.exports.init = init;
+}

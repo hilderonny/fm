@@ -55,8 +55,10 @@ var Db = {
     },
     
     createClient: async(clientName, label, donotaddtoclientstableofportal) => {
-        var clientDatabaseName = `${dbprefix}_${clientName}`;
-        await Db.queryDirect("postgres", `CREATE DATABASE ${Db.replaceQuotesAndRemoveSemicolon(clientDatabaseName)};`);
+        var clientDatabaseName = Db.replaceQuotesAndRemoveSemicolon(`${dbprefix}_${clientName}`);
+        if ((await Db.queryDirect("postgres", `SELECT 1 FROM pg_database WHERE datname = '${clientDatabaseName}';`)).rowCount === 0) {
+            await Db.queryDirect("postgres", `CREATE DATABASE ${clientDatabaseName};`);
+        }
         if (!donotaddtoclientstableofportal) await Db.query(Db.PortalDatabaseName, `INSERT INTO clients (name, label) VALUES ('${Db.replaceQuotes(clientName)}', '${Db.replaceQuotes(label)}');`);
         // Prepare client's database
         await Db.createDefaultTables(clientName);
@@ -68,12 +70,17 @@ var Db = {
     },
 
     createDefaultPortalTables: async() => {
+        await Db.query(Db.PortalDatabaseName, "DROP TABLE IF EXISTS allusers;");
+        await Db.query(Db.PortalDatabaseName, "DROP TABLE IF EXISTS clientmodules;");
         await Db.query(Db.PortalDatabaseName, "CREATE TABLE allusers (name TEXT NOT NULL PRIMARY KEY, password TEXT, clientname TEXT NOT NULL);");
         await Db.query(Db.PortalDatabaseName, "CREATE TABLE clientmodules (clientname TEXT NOT NULL, modulename TEXT NOT NULL, PRIMARY KEY(clientname, modulename));");
         await Db.updateRecordTypesForDatabase(Db.PortalDatabaseName, Db.getPortalDataTypesFromConfig());
     },
 
     createDefaultTables: async(databaseName) => {
+        await Db.query(databaseName, "DROP TABLE IF EXISTS datatypes;");
+        await Db.query(databaseName, "DROP TABLE IF EXISTS datatypefields;");
+        await Db.query(databaseName, "DROP TABLE IF EXISTS permissions;");
         await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT, lists TEXT[], ispredefined BOOLEAN);");
         await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, istitle BOOLEAN, isrequired BOOLEAN, reference TEXT, formula TEXT, formulaindex NUMERIC, ispredefined BOOLEAN, isnullable BOOLEAN, PRIMARY KEY (name, datatypename));");
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, key TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, key));");
@@ -89,29 +96,18 @@ var Db = {
         var modulenametoinsert = modulename ? "'" + Db.replaceQuotes(modulename) + "'" : "null";
         await Db.query(databasename, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations) VALUES ('${Db.replaceQuotes(datatypename)}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations});`);
         await Db.query(databasename, `CREATE TABLE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} (name TEXT PRIMARY KEY);`);
-        // Update cache
-        var cacheddatatypes = await Db.getdatatypes(databasename);
-        cacheddatatypes[datatypename] = {
-            name: datatypename,
-            label: label, 
-            plurallabel: plurallabel, 
-            icon: icontoinsert, 
-            lists: lists, 
-            permissionkey: permissionkey, 
-            modulename: modulename, 
-            canhaverelations: !!canhaverelations,
-            fields: []
-        };
+        // Force update of cache in the next request
+        delete Db.datatypes;
         await Db.createDatatypeField(databasename, datatypename, "name", "Name", constants.fieldtypes.text, nameistitle, true, true, null);
     },
 
-    createDatatypeField: async(databaseNameWithoutPrefix, datatypename, fieldname, label, fieldtype, istitle, isrequired, doNotAddColumn, reference, formula, formulaindex, isnullable) => {
-        if ((await Db.query(databaseNameWithoutPrefix, `SELECT 1 FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}' AND name = '${Db.replaceQuotes(fieldname)}';`)).rowCount > 0) return; // Already existing
+    createDatatypeField: async(databasename, datatypename, fieldname, label, fieldtype, istitle, isrequired, doNotAddColumn, reference, formula, formulaindex, isnullable) => {
+        if ((await Db.query(databasename, `SELECT 1 FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}' AND name = '${Db.replaceQuotes(fieldname)}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var referencetoinsert = reference ? "'" + Db.replaceQuotes(reference) + "'" : "null";
         var formulatoinsert = formula ? "'" + Db.replaceQuotes(JSON.stringify(formula)) + "'" : "null";
         var formulaindextoinsert = formulaindex ? parseInt(formulaindex) : 0;
-        await Db.query(databaseNameWithoutPrefix, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference, formula, formulaindex, isnullable) VALUES ('${Db.replaceQuotes(fieldname)}', ${labeltoinsert}, '${Db.replaceQuotes(datatypename)}', '${Db.replaceQuotes(fieldtype)}', ${!!istitle}, ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert}, ${!!isnullable});`);
+        await Db.query(databasename, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference, formula, formulaindex, isnullable) VALUES ('${Db.replaceQuotes(fieldname)}', ${labeltoinsert}, '${Db.replaceQuotes(datatypename)}', '${Db.replaceQuotes(fieldtype)}', ${!!istitle}, ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert}, ${!!isnullable});`);
         var columntype;
         switch(fieldtype) {
             case constants.fieldtypes.boolean: columntype = "BOOLEAN"; break;
@@ -122,21 +118,9 @@ var Db = {
             case constants.fieldtypes.text: columntype = "TEXT"; break;
             default: throw new Error(`Unknown field type '${fieldtype}'`);
         }
-        if (!doNotAddColumn) await Db.query(databaseNameWithoutPrefix, `ALTER TABLE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} ADD COLUMN ${Db.replaceQuotesAndRemoveSemicolon(fieldname)} ${Db.replaceQuotesAndRemoveSemicolon(columntype)};`);
-        // Update cache
-        var cachedfields = (await Db.getdatatypes(databasename))[datatypename].fields;
-        cachedfields[fieldname] = {
-            name: fieldname,
-            label: label ? label : null, 
-            datatypename: datatypename, 
-            fieldtype: fieldtype, 
-            istitle: !!istitle, 
-            isrequired: !!isrequired,
-            reference: reference ? reference : null,
-            formula: formula ? JSON.stringify(formula) : null, 
-            formulaindex: formulaindextoinsert, 
-            isnullable: !!isnullable
-        };
+        if (!doNotAddColumn) await Db.query(databasename, `ALTER TABLE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} ADD COLUMN ${Db.replaceQuotesAndRemoveSemicolon(fieldname)} ${Db.replaceQuotesAndRemoveSemicolon(columntype)};`);
+        // Force update of cache in the next request
+        delete Db.datatypes;
     },
     
     deleteClient: async(clientname) => {
@@ -171,13 +155,15 @@ var Db = {
         await Db.query(databasename, `DELETE FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(recordtypename)}';`);
         await Db.query(databasename, `DELETE FROM datatypes WHERE name = '${Db.replaceQuotes(recordtypename)}';`);
         await Db.query(databasename, `DROP TABLE IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(recordtypename)};`);
-        delete (await Db.getdatatypes(databasename))[recordtypename];
+        // Force update of cache in the next request
+        delete Db.datatypes;
     },
 
     deleteRecordTypeField: async(databasename, recordtypename, fieldname) => {
         await Db.query(databasename, `DELETE FROM datatypefields WHERE name = '${Db.replaceQuotes(fieldname)}' and datatypename = '${Db.replaceQuotes(recordtypename)}';`);
         await Db.query(databasename, `ALTER TABLE ${Db.replaceQuotesAndRemoveSemicolon(recordtypename)} DROP COLUMN IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(fieldname)};`);
-        delete (await Db.getdatatypes(databasename))[recordtypename].fields[fieldname];
+        // Force update of cache in the next request
+        delete Db.datatypes;
     },
 
     getdatatypes: async(databaseNameWithoutPrefix) => {
@@ -225,7 +211,7 @@ var Db = {
     // },
 
     getDynamicObject: async(clientname, datatypename, filterorname) => {
-        var availablefieldnames = Object.keys((await Db.getdatatypes(clientname))[datatypename].fields).map(f => Db.replaceQuotesAndRemoveSemicolon(f));
+        var availablefieldnames = (await Db.query(clientname, `SELECT name FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}';`)).rows.map(f => Db.replaceQuotesAndRemoveSemicolon(f.name));
         if (availablefieldnames.length < 1) return undefined; // No fields defined
         if ((typeof filterorname) === "string") {
             var result = await Db.query(clientname, `SELECT ${availablefieldnames.join(",")} FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} WHERE name='${Db.replaceQuotes(filterorname)}';`);
@@ -237,7 +223,7 @@ var Db = {
     },
 
     getDynamicObjects: async(clientname, datatypename, filter) => {
-        var availablefieldnames = Object.keys((await Db.getdatatypes(clientname))[datatypename].fields).map(f => Db.replaceQuotesAndRemoveSemicolon(f));
+        var availablefieldnames = (await Db.query(clientname, `SELECT name FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}';`)).rows.map(f => Db.replaceQuotesAndRemoveSemicolon(f.name));
         if (availablefieldnames.length < 1) return []; // No fields defined
         var filterstring = filter && Object.keys(filter).length > 0 ? " WHERE " + Db.getFilterString(filter) : "";
         return (await Db.query(clientname, `SELECT ${availablefieldnames.join(",")} FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)}${filterstring};`)).rows;
@@ -366,6 +352,7 @@ var Db = {
 
     init: async() => {
         if (Db.isInitialized) return;
+        console.log(`Initializing database with prefix "${dbprefix}".`);
         Object.keys(Db.pools).forEach((k) => {
             Db.pools[k].end();
             delete Db.pools[k];
@@ -419,10 +406,12 @@ var Db = {
     },
 
     insertDynamicObject: async(clientname, datatypename, element) => {
-        var fieldMap = (await Db.getdatatypes(clientname))[datatypename].fields;
+        var fields = (await Db.query(clientname, `SELECT * FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}';`)).rows;
+        var fieldMap = {};
         var keys = Object.keys(element);
-        Object.keys(fieldMap).forEach((fieldname) => { 
-            if (fieldMap[fieldname].isrequired && (keys.indexOf(fieldname) < 0 || element[fieldname] === undefined)) throw new Error(`Required field '${fieldname}' is missing`);
+        fields.forEach((field) => { 
+            fieldMap[field.name] = field;
+            if (field.isrequired && (keys.indexOf(field.name) < 0 || element[field.name] === undefined)) throw new Error(`Required field '${field.name}' is missing`);
         });
         var values = keys.map((k) => {
             var value = element[k];
@@ -500,12 +489,14 @@ var Db = {
     },
 
     queryDirect: async(databasename, query) => {
-        console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
+        // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
         var pool = Db.getPool(Db.replaceQuotesAndRemoveSemicolon(databasename)); // Sicher ist sicher
         var client = await pool.connect();
         var result = undefined;
         try {
             result = await client.query(query);
+        } catch(error) {
+            console.log("\x1b[1:31m%s\x1b[0m", error);
         } finally {
             client.release();
         }
@@ -513,7 +504,8 @@ var Db = {
     },
 
     updateDynamicObject: async(clientname, datatypename, elementname, element, filter) => {
-        var fieldMap = (await Db.getdatatypes(clientname))[datatypename].fields;
+        var fieldMap = {};
+        (await Db.query(clientname, `SELECT * FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}';`)).rows.forEach(f => fieldMap[f.name] = f);
         var keys = Object.keys(element);
         var values = keys.map(k => {
             var value = element[k];
@@ -540,7 +532,6 @@ var Db = {
         if (!recordtype.fields) return;
         // Retrieve existing record type fields from database
         var recordtypefieldsfromdatabase = (await Db.query(databasename, `SELECT * FROM datatypefields WHERE datatypename='${Db.replaceQuotes(recordtype.name)}';`)).rows;
-        var cachedfields = (await Db.getdatatypes(databasename))[recordtype.name].fields;
         // Update existing ones and insert new ones
         for (var i = 0; i < recordtype.fields.length; i++) {
             var field = recordtype.fields[i];
@@ -555,16 +546,8 @@ var Db = {
                 var isnullabletoupdate = !!field.isnullable;
                 var query = `UPDATE datatypefields SET label=${labeltoupdate}, istitle=${!!(recordtype.titlefield && (recordtype.titlefield === field.name))}, isrequired=${!!field.isrequired}, reference=${referencetoupdate}, formula=${formulatoupdate}, formulaindex=${formulaindextoupdate}, ispredefined = true, isnullable=${!!field.isnullable} WHERE datatypename='${Db.replaceQuotes(recordtype.name)}' AND name='${Db.replaceQuotes(field.name)}';`;
                 await Db.query(databasename, query);
-                // Update cache
-                var cachedfield = cachedfields[field.name];
-                cachedfield.label = field.label ? field.label : null;
-                cachedfield.istitle = !!(recordtype.titlefield && (recordtype.titlefield === field.name));
-                cachedfield.isrequired = !!field.isrequired;
-                cachedfield.reference = field.reference ? field.reference : null;
-                cachedfield.formula = field.formula ? JSON.stringify(field.formula) : null;
-                cachedfield.formulaindex = formulaindextoupdate;
-                cachedfield.ispredefined = true;
-                cachedfield.isnullable = !!field.isnullable;
+                // Force update of cache in the next request
+                delete Db.datatypes;
                 // Remove from existing ones for cleanup
                 recordtypefieldsfromdatabase.splice(recordtypefieldsfromdatabase.indexOf(existingfield), 1);
             } else {
@@ -593,7 +576,6 @@ var Db = {
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS isnullable BOOLEAN;");
         // Retrieve existing record types from database
         var recordtypesfromdatabase = (await Db.query(databasename, `SELECT * FROM datatypes;`)).rows;
-        var cacheddatatypes = await Db.getdatatypes(databasename);
         // Update existing ones and insert new ones
         for (var i = 0; i < recordtypes.length; i++) {
             var recordtype = recordtypes[i];
@@ -607,16 +589,8 @@ var Db = {
                 var modulenametoupdate = recordtype.modulename ? "'" + Db.replaceQuotes(recordtype.modulename) + "'" : "null";
                 var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate}, lists = ${liststoupdate}, ispredefined = true, permissionkey = ${permissionkeytoupdate}, modulename = ${modulenametoupdate}, canhaverelations = ${!!recordtype.canhaverelations} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
                 await Db.query(databasename, query);
-                // Update cache
-                var cacheddatatype = cacheddatatypes[recordtype.name];
-                cacheddatatype.label = recordtype.label ? recordtype.label : null;
-                cacheddatatype.plurallabel = recordtype.plurallabel ? recordtype.plurallabel : null;
-                cacheddatatype.icon = recordtype.icon ? recordtype.icon : null;
-                cacheddatatype.lists = recordtype.lists ? recordtype.lists : [];
-                cacheddatatype.ispredefined = true;
-                cacheddatatype.permissionkey = recordtype.permissionkey ? recordtype.permissionkey : null;
-                cacheddatatype.modulename = recordtype.modulename ? recordtype.modulename : null;
-                cacheddatatype.canhaverelations = !!recordtype.canhaverelations;
+                // Force update of cache in the next request
+                delete Db.datatypes;
             } else {
                 // Insert new definition
                 await Db.createDatatype(databasename, recordtype.name, recordtype.label, recordtype.plurallabel, (!recordtype.titlefield) || (recordtype.titlefield === "name"), recordtype.icon, recordtype.lists, recordtype.permissionkey, recordtype.modulename);
