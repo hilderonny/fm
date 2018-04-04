@@ -44,6 +44,8 @@ var generateLicenseKey = () => {
 };
 
 th.cleanDatabase = async () => {
+    if (app.running) return;
+    app.running = true;
     var dbprefix = Db.replaceQuotes(process.env.POSTGRESQL_TEST_DBPREFIX  || 'test');
     var portalDatabases = await Db.queryDirect("postgres", `SELECT * FROM pg_database WHERE datname like '${dbprefix}_%';`);
     for (var i = 0; i < portalDatabases.rowCount; i++) {
@@ -66,6 +68,7 @@ th.doLoginAndGetToken = async(username, password) => {
 };
 
 th.prepareClients = async() => {
+    await th.cleanTable("clients", true, false);
     await Db.createClient("client0", "client0");
     await Db.createClient("client1", "client1");
 };

@@ -87,27 +87,32 @@ var Db = {
     },
 
     createDatatype: async(databasename, datatypename, label, plurallabel, nameistitle, icon, lists, permissionkey, modulename, canhaverelations) => {
-        if ((await Db.query(databasename, `SELECT 1 FROM datatypes WHERE name = '${Db.replaceQuotes(datatypename)}';`)).rowCount > 0) return; // Already existing
+        var dtn = Db.replaceQuotesAndRemoveSemicolon(datatypename);
+        if ((await Db.query(databasename, `SELECT 1 FROM datatypes WHERE name = '${dtn}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var plurallabeltoinsert = plurallabel ? "'" + Db.replaceQuotes(plurallabel) + "'" : "null";
         var icontoinsert = icon ? "'" + Db.replaceQuotes(icon) + "'" : "null";
         var liststoinsert = lists ? "'{" + lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
         var permissionkeytoinsert = permissionkey ? "'" + Db.replaceQuotes(permissionkey) + "'" : "null";
         var modulenametoinsert = modulename ? "'" + Db.replaceQuotes(modulename) + "'" : "null";
-        await Db.query(databasename, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations) VALUES ('${Db.replaceQuotes(datatypename)}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations});`);
-        await Db.query(databasename, `CREATE TABLE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} (name TEXT PRIMARY KEY);`);
+        await Db.query(databasename, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations) VALUES ('${dtn}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations});`);
+        // Drop an existing table. When a datatype is to be created then it should not exist before
+        await Db.query(databasename, `DROP TABLE IF EXISTS ${dtn};`);
+        await Db.query(databasename, `CREATE TABLE ${dtn} (name TEXT PRIMARY KEY);`);
         // Force update of cache in the next request
         delete Db.datatypes;
         await Db.createDatatypeField(databasename, datatypename, "name", "Name", constants.fieldtypes.text, nameistitle, true, true, null);
     },
 
     createDatatypeField: async(databasename, datatypename, fieldname, label, fieldtype, istitle, isrequired, doNotAddColumn, reference, formula, formulaindex, isnullable) => {
-        if ((await Db.query(databasename, `SELECT 1 FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}' AND name = '${Db.replaceQuotes(fieldname)}';`)).rowCount > 0) return; // Already existing
+        var dtn = Db.replaceQuotesAndRemoveSemicolon(datatypename);
+        var fn = Db.replaceQuotesAndRemoveSemicolon(fieldname);
+        if ((await Db.query(databasename, `SELECT 1 FROM datatypefields WHERE datatypename = '${dtn}' AND name = '${fn}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var referencetoinsert = reference ? "'" + Db.replaceQuotes(reference) + "'" : "null";
         var formulatoinsert = formula ? "'" + Db.replaceQuotes(JSON.stringify(formula)) + "'" : "null";
         var formulaindextoinsert = formulaindex ? parseInt(formulaindex) : 0;
-        await Db.query(databasename, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference, formula, formulaindex, isnullable) VALUES ('${Db.replaceQuotes(fieldname)}', ${labeltoinsert}, '${Db.replaceQuotes(datatypename)}', '${Db.replaceQuotes(fieldtype)}', ${!!istitle}, ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert}, ${!!isnullable});`);
+        await Db.query(databasename, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, istitle, isrequired, reference, formula, formulaindex, isnullable) VALUES ('${fn}', ${labeltoinsert}, '${dtn}', '${Db.replaceQuotes(fieldtype)}', ${!!istitle}, ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert}, ${!!isnullable});`);
         var columntype;
         switch(fieldtype) {
             case constants.fieldtypes.boolean: columntype = "BOOLEAN"; break;
@@ -118,7 +123,11 @@ var Db = {
             case constants.fieldtypes.text: columntype = "TEXT"; break;
             default: throw new Error(`Unknown field type '${fieldtype}'`);
         }
-        if (!doNotAddColumn) await Db.query(databasename, `ALTER TABLE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} ADD COLUMN ${Db.replaceQuotesAndRemoveSemicolon(fieldname)} ${Db.replaceQuotesAndRemoveSemicolon(columntype)};`);
+        if (!doNotAddColumn) {
+            // Drop an existing column to recreate it with possibly another datatype. When a datatype field is to be created then it should not exist before
+            await Db.query(databasename, `ALTER TABLE ${dtn} DROP COLUMN IF EXISTS ${fn};`);
+            await Db.query(databasename, `ALTER TABLE ${dtn} ADD COLUMN ${fn} ${Db.replaceQuotesAndRemoveSemicolon(columntype)};`);
+        }
         // Force update of cache in the next request
         delete Db.datatypes;
     },
