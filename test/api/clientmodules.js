@@ -3,15 +3,13 @@
  */
 var assert = require('assert');
 var fs = require('fs');
-var th = require('../testHelpers');
+var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var moduleConfig = require('../../config/module-config.json');
 var Db = require("../../utils/db").Db;
 
 describe('API clientmodules', () => {
 
-    var server = require('../../app');
-    
     /**
      * Modul-config mit vorgegebenen DAs vorbereiten, wir benutzen ein eigenes Modul "DAtest"
      */

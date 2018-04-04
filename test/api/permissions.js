@@ -2,7 +2,7 @@
  * UNIT Tests for api/permissions
  */
 var assert = require('assert');
-var th = require('../testHelpers');
+var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var ch = require('../../utils/configHelper');
 var Db = require("../../utils/db").Db;

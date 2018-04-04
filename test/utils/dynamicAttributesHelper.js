@@ -2,7 +2,7 @@
  * UNIT Tests for utils/dynamicAttributesHelper
  */
 var assert = require('assert');
-var th = require('../testHelpers');
+var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var dynamicAttributesHelper = require('../../utils/dynamicAttributesHelper');
 var moduleConfig = require('../../config/module-config.json');
