@@ -80,7 +80,8 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
             return function link(scope, iElement) {
                 scope.createchildelement = function($event) {
                     // Show selection panel for child types
-                    utils.showselectionpanel($event, "/api/datatypes?forlist=" + scope.params.listfilter, function(selecteddatatype) {
+                    var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists.indexOf(scope.params.listfilter) >= 0; });
+                    utils.showselectionpanel($event, datatypes, function(selecteddatatype) {
                         utils.removeCard(element);
                         utils.addCardWithPermission("components/DetailsCard", {
                             parentdatatypename: scope.params.datatypename,
@@ -163,7 +164,8 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
                     scope.datatype = scope.$root.datatypes[datatypename];
-                    scope.datatypefields = scope.datatype.fields.filter(function(f) { return f.name !== "name"});
+                    var fieldnames = Object.keys(scope.datatype.fields).filter(function(k) { return k !== "name" });
+                    scope.datatypefields = fieldnames.map(function(fn) { return scope.datatype.fields[fn]; });
                     return Promise.all([
                         entityname ? utils.loaddynamicobject(datatypename, entityname).then(function(dynamicobject) { scope.dynamicobject = dynamicobject; }) : Promise.resolve(),
                         entityname ? utils.loaddynamicattributes(datatypename, entityname).then(function(dynamicattributes) { scope.dynamicattributes = dynamicattributes; }) : Promise.resolve(), // TODO: Irrelevant in the future
@@ -183,6 +185,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                         scope.canwriterelations = scope.$root.canWrite('PERMISSION_CORE_RELATIONS');
                         scope.canreadrelations = scope.$root.canRead('PERMISSION_CORE_RELATIONS');
+                        utils.setLocation("/" + datatypename + "/" + entityname, false);
                     });
                 };
                 scope.loadrelations = function() {
@@ -200,15 +203,12 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                             if (!entitiestofetch[r.datatypename]) entitiestofetch[r.datatypename] = {};
                             entitiestofetch[r.datatypename][r.name] = { section: relationsection, relation: r };
                         });
-                        // Load relevant datatype information
-                        return utils.getresponsedata("/api/datatypes");
-                    }).then(function(datatypes) {
                         // Load entities
                         var fetchpromises = Object.keys(entitiestofetch).map(function(k) {
                             var entitiestofetchfordatatype = entitiestofetch[k];
                             return utils.getresponsedata("/api/dynamic/" + k + "?name=[" + Object.keys(entitiestofetchfordatatype).map(function(e) { return '"' + e + '"'; }).join(",") + "]").then(function(entities) {
                                 entities.forEach(function(e) {
-                                    e.datatype = datatypes.find(function(dt) { return dt.name === k; });
+                                    e.datatype = scope.$root.datatypes[k];
                                     var mapper = entitiestofetchfordatatype[e.name];
                                     e.relation = mapper.relation;
                                     mapper.section.entities.push(e);

@@ -53,10 +53,10 @@ var ch = {
     },
     // Calculates all formulas for a specific entity
     calculateformula: async(clientname, datatypename, entityname) => {
-        var datatypefields = (await Db.getDataTypeFields(clientname, datatypename)).sort((a,b) => a.formulaindex - b.formulaindex);
+        var fieldref = (await Db.getdatatypes(clientname))[datatypename].fields;
+        var datatypefields = Object.keys(fieldref).map(k => fieldref[k]).filter(f => f.fieldtype === co.fieldtypes.formula).sort((a,b) => a.formulaindex - b.formulaindex);
         for (var i = 0; i < datatypefields.length; i++) {
             var dtf = datatypefields[i];
-            if (dtf.fieldtype !== co.fieldtypes.formula) continue;
             var formula = JSON.parse(dtf.formula);
             var keys = Object.keys(formula);
             if (keys.length !== 1) throw new Error(`Invalid formula ${dtf.formula}`);

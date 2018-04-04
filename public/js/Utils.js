@@ -71,28 +71,12 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             }
         },
 
-        // Loads the fields of the given datatype and returns them as array within a promise
-        // TODO: OBSOLETE
-        // loaddatatype: function(datatypename) {
-        //     return utils.getresponsedata('/api/datatypes/' + datatypename);
-        // },
-
         // Loads all datatypes and their field definitions on page load (keyed object)
         loaddatatypes: function(scope) {
-            scope.datatypes = {};
             return utils.getresponsedata('/api/datatypes').then(function(datatypes) {
-                datatypes.forEach(function(dt) { scope.datatypes[dt.name] = dt; dt.fields = []; });
-                return utils.getresponsedata('/api/datatypes/fields');
-            }).then(function(fields) {
-                fields.forEach(function(f) { scope.datatypes[f.datatypename].fields.push(f); });
+                scope.datatypes = datatypes;
             });
         },
-
-        // // Loads the fields of the given datatype and returns them as array within a promise
-        // // TODO: OBSOLETE
-        // loaddatatypefields: function(datatypename) {
-        //     return utils.getresponsedata('/api/datatypes/fields/' + datatypename);
-        // },
 
         // TODO: Replace by loaddynamicattributes, or better by loaddynamicobject
         loadDynamicAttributes: function(scope, modelName, entityId) {
@@ -360,22 +344,18 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         // Brings up a popup menu below the button which triggered this function. This menu contains a list of possible datatypes for the given listapi. Used for creating new elements
-        showselectionpanel: function(clickevent, listapi, selectioncallback) {
+        showselectionpanel: function(clickevent, datatypes, selectioncallback) {
             var nodeToHandle = clickevent.currentTarget;
             var position = $mdPanel.newPanelPosition().relativeTo(nodeToHandle).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW);
-            console.log("SHOWING PANEL");
             $mdPanel.open({
                 attachTo: angular.element(document.body),
                 controller: function($scope, $http, mdPanelRef) {
-                    $http.get(listapi).then(function(datatyperesponse) {
-                        $scope.list = datatyperesponse.data;
-                        $scope.click = function(item) {
-                            selectioncallback(item);
-                            mdPanelRef.close();
-                        }
-                    });
+                    $scope.list = datatypes;
+                    $scope.click = function(item) {
+                        selectioncallback(item);
+                        mdPanelRef.close();
+                    }
                 },
-                // templateUrl: '/partial/components/selectionpanel.html',
                 template: 
                     '<md-list class="context-menu" role="list">' +
                     '   <md-list-item ng-repeat="item in list | orderBy : \'label\'" ng-click="click(item)">' +

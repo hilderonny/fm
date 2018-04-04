@@ -6,7 +6,7 @@ The datatypes and datatypefields collections are no dynamic objects and therefor
 
 |API endpoint|description|
 |:---|:---|
-|/|Get all datatypes. With the test query parameter ```forlist``` one can define, which list definition a datatype must match to be returned. This is useful for filtering datatypes for select boxes (e.g. fmobjects)|
+|/|Get all datatypes.|
 
 ## dynamic
 

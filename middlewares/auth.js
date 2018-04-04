@@ -62,7 +62,7 @@ module.exports.canAccess = async(username, permissionKey, readWrite, moduleName,
     var userInDatabase = await Db.getDynamicObject(userInAllUsers.clientname ? userInAllUsers.clientname : Db.PortalDatabaseName, "users", userInAllUsers.name);
     userInDatabase.clientname = userInAllUsers.clientname; // Relevant for APIs
     if (datatypename) { // Dynamic APIS do not provide permission keys directly but through datatypenames
-        var datatype = await Db.getDataType(userInAllUsers.clientname, datatypename);
+        var datatype = (await Db.getdatatypes(userInAllUsers.clientname))[datatypename];
         if (!datatype) return false;
         permissionKey = datatype.permissionkey; // Use this one!
         moduleName = datatype.modulename; // Use this one!

@@ -1,5 +1,5 @@
 
-app.directive('avtHierarchy', function($compile, $http, utils) { 
+app.directive('avtHierarchy', function($compile, $http, $location, utils) { 
     var cardcontent = 
         '<script type="text/ng-template" id="hierarchylist">' +
         '   <md-list class="hierarchy">' +
@@ -35,7 +35,8 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                 };
                 scope.createrootelement = function($event) {
                     // Show selection panel for child types
-                    utils.showselectionpanel($event, "/api/datatypes?forlist=" + scope.params.listfilter, function(selecteddatatype) {
+                    var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists.indexOf(scope.params.listfilter) >= 0; });
+                    utils.showselectionpanel($event, datatypes, function(selecteddatatype) {
                         utils.removeCardsToTheRightOf(element);
                         utils.addCardWithPermission("components/DetailsCard", {
                             datatypename: selecteddatatype.name,
@@ -52,6 +53,10 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                             }
                         }, scope.params.permission);
                         delete scope.selectedchild;
+                    });
+                };
+                scope.loadelementsfordirectaccess = function(datatypename, entityname) {
+                    $http.get('/api/dynamic/hierarchytoelement/' + datatypename + "/" + entityname).then(function(response) {
                     });
                 };
                 scope.loadrootelements = function() {
@@ -118,7 +123,15 @@ app.directive('avtHierarchy', function($compile, $http, utils) {
                     });
                 };
                 $compile(iElement)(scope);
-                scope.loadrootelements();
+                // Distinguish direct URLs between general menu clicks (without id)  and direct entity calls (with id)
+                var pathparts = $location.path().split("/");
+                if (pathparts.length > 2) { // [0] is empty because path starts with "/"
+                    // direct access to any child of the hierarchy, so load the hierarchy down to the child
+                    scope.loadelementsfordirectaccess(pathparts[1], pathparts[2]);
+                } else {
+                    // general access, load the root elements only
+                    scope.loadrootelements();
+                }
             };
         }
     }
