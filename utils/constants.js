@@ -33,6 +33,10 @@ module.exports.apis = {
      */
     communications: 'communications',
     /**
+     * API zur Abfrage von Datentypen
+     */
+    datatypes: "datatypes",
+    /**
      * API für Dokumentation
      */
     doc: 'doc',
@@ -328,7 +332,6 @@ module.exports.permissions = {
      * Permission to show and edit clients
      */
     ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
-    ADMINISTRATION_DATATYPES: 'PERMISSION_ADMINISTRATION_DATATYPES',
     ADMINISTRATION_SETTINGS: 'PERMISSION_ADMINISTRATION_SETTINGS',
     /**
      * Permission to show and edit users

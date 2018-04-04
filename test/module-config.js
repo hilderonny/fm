@@ -133,7 +133,7 @@ describe('module-config.json', function() {
             'basetest.bat',
             'config/README.md',
             'config/localconfig.json',
-            'config/module-config.json', // Is handles especially by re-creating it, so no need to reference it in itself
+            'config/module-config.json', // Is handled especially by re-creating it, so no need to reference it in itself
             'cover.bat',
             'coverage/',
             'debug.log',
@@ -145,6 +145,7 @@ describe('module-config.json', function() {
             'pub.cert',
             'public/css/local.css',
             'public/index.html',
+            'public/js/components/README.md',
             'public/js/include.js',
             'public/js/include.js.map',
             'temp/',
@@ -207,8 +208,8 @@ describe('module-config.json', function() {
         Object.keys(co.collections).forEach((key) => {
             var collection = co.collections[key];
             if (!collection.canHaveAttributes) return; // Nur relevant bei dynamischen Attributen
-            var filePath = `public/css/icons/material/${collection.icon}.svg`;
-            if (!fs.existsSync(path.join(rootPath, filePath))) errors.push(`File "${filePath}" does not exist.`);
+            var filePath = path.join(rootPath, "public", collection.icon);
+            if (!fs.existsSync(filePath)) errors.push(`File "${filePath}" does not exist.`);
         });
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));

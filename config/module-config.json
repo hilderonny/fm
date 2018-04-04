@@ -74,6 +74,7 @@
                 "partial/Administration/UsergrouplistCard.html",
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
+                "partial/components/DetailsCard.html",
                 "partial/components/HierarchyCard.html",
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Core/RelationsMenu.html",
@@ -627,12 +628,7 @@
                 "css/images/FM_addsub.png",
                 "css/images/FM_edit.png",
                 "css/images/FM_hierarchy.png",
-                "partial/BIM/FmobjectCard.html",
                 "partial/Doc/FmObjects.html"
-            ],
-            "include" : [
-                "public/js/BIM/FmobjectCardController.js",
-                "public/js/BIM/HierarchyCardController.js"
             ],
             "languages" : [ "en", "de" ],
             "menu": [
