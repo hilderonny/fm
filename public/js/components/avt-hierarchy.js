@@ -56,19 +56,27 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                     });
                 };
                 scope.loadelementsfordirectaccess = function(datatypename, entityname) {
-                    $http.get('/api/dynamic/hierarchytoelement/' + datatypename + "/" + entityname).then(function(response) {
+                    return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + scope.params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {
+                        scope.child = { children: rootelements };
+                        var setparentofchildrenrecursively = function(child) {
+                            if (child.name === entityname) scope.selectchild(child);
+                            if (child.children) child.children.forEach(function(c) {
+                                c.parent = child;
+                                setparentofchildrenrecursively(c);
+                            });
+                        };
+                        setparentofchildrenrecursively(scope.child);
                     });
                 };
                 scope.loadrootelements = function() {
-                    $http.get('/api/dynamic/rootelements/' + scope.params.listfilter).then(function(response) {
-                        var children = response.data;
+                    return utils.getresponsedata("/api/dynamic/rootelements/" + scope.params.listfilter).then(function(rootelements) {
                         if (!scope.child) { // Fresh load after card opening
-                            scope.child = { children: children };
+                            scope.child = { children: rootelements };
                             scope.child.children.forEach(function(c) {
                                 c.parent = scope.child;
                             });
                         } else { // Refresh after deletion of subelements which result in moving sub-sub-childs to the root
-                            children.forEach(function(c) {
+                            rootelements.forEach(function(c) {
                                 if (!scope.child.children.find(function(sc) { return sc.name === c.name; })) {
                                     // Here we have a moved child
                                     scope.child.children.push(c);

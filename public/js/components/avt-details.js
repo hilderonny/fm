@@ -140,6 +140,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         utils.removeCardsToTheRightOf(element);
                         utils.removeCard(element);
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_DELETED).hideDelay(1000).position('bottom right'));
+                        utils.setLocation("/" + scope.datatype.name, false);
                     });
                 },
                 scope.deleterelation = function(relation) {

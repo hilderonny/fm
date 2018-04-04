@@ -8,6 +8,51 @@ var uuidv4 = require("uuid").v4;
 var ph = require('../utils/permissionshelper');
 var ch = require('../utils/calculationhelper');
 
+async function getchildren(clientname, recordtypename, entityname, permissions) {
+    var relevantrelations = (await Db.query(clientname, `
+        SELECT r.datatype2name, r.name2, dtp.permissionkey, dtc.icon, CASE WHEN count(rc) > 0 THEN true ELSE false END haschildren FROM relations r 
+        JOIN datatypes dtp ON dtp.name = r.datatype1name 
+        JOIN datatypes dtc ON dtc.name = r.datatype2name 
+        LEFT JOIN relations rc ON rc.name1 = r.name2 AND rc.relationtypename = 'parentchild' AND rc.datatype1name = r.datatype2name
+        WHERE r.relationtypename = 'parentchild' AND r.datatype1name = '${Db.replaceQuotes(recordtypename)}' AND r.name1 = '${Db.replaceQuotes(entityname)}'
+        GROUP BY r.datatype2name, r.name2, dtp.permissionkey, dtc.icon;
+    `)).rows;
+    var children = [];
+    for (var i = 0; i < relevantrelations.length; i++) {
+        var rr = relevantrelations[i];
+        if (!permissions.find(p => p.key === rr.permissionkey && p.canRead)) continue; // No permission to access specific datatype entities
+        var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
+        if (child) {
+            child.datatypename = rr.datatype2name;
+            child.icon = rr.icon;
+            child.haschildren = rr.haschildren;
+            children.push(child);
+        }
+    }
+    return children;
+}
+
+async function getrootelements(clientname, forlist, permissions) {
+    var relevantdatatypes = (await Db.query(clientname, `SELECT * FROM datatypes WHERE '${Db.replaceQuotes(forlist)}' = ANY (lists);`)).rows;
+    var rootelements = [];
+    for (var i = 0; i < relevantdatatypes.length; i++) { // Must be loop because it is not said, that all datatypes have all required columns so UNION will not work
+        var rdt = relevantdatatypes[i];
+        if (!permissions.find(p => p.key === rdt.permissionkey && p.canRead)) continue; // No permission to access specific datatypes
+        var rdtn = Db.replaceQuotesAndRemoveSemicolon(rdt.name);
+        var entities = (await Db.query(clientname, `
+            SELECT e.*, CASE WHEN r.childcount > 0 THEN true ELSE false END haschildren FROM ${rdtn} e JOIN (
+                SELECT e.name, count(rc) childcount FROM ${rdtn} e 
+                LEFT JOIN relations rp ON rp.name2 = e.name AND rp.relationtypename = 'parentchild' AND rp.datatype2name = '${rdtn}' 
+                LEFT JOIN relations rc ON rc.name1 = e.name AND rc.relationtypename = 'parentchild' AND rc.datatype1name = '${rdtn}'
+                WHERE rp.name IS NULL
+                GROUP BY e.name
+            ) r ON r.name = e.name;
+        `)).rows;
+        entities.forEach(e => rootelements.push({ name: e.name, datatypename: rdt.name, label: e.label, icon: rdt.icon, haschildren: e.haschildren }));
+    }
+    return rootelements;
+}
+
 // Deletes a dynamic object but without children. They must be deleted separately because of the possibly different permissions.
 router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var clientname = req.user.clientname;
@@ -47,31 +92,29 @@ router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"
 
 // Get a list of all children of the given entity
 router.get("/children/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
+    var permissions = await ph.getpermissionsforuser(req.user);
+    var children = await getchildren(req.user.clientname, req.params.recordtypename, req.params.entityname, permissions);
+    res.send(children);
+});
+
+router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var recordtypename = req.params.recordtypename;
-    var entityname = req.params.entityname;
-    var permissions = await ph.getpermissionsforuser(req.user);
-    var relevantrelations = (await Db.query(clientname, `
-        SELECT r.datatype2name, r.name2, dtp.permissionkey, dtc.icon, CASE WHEN count(rc) > 0 THEN true ELSE false END haschildren FROM relations r 
-        JOIN datatypes dtp ON dtp.name = r.datatype1name 
-        JOIN datatypes dtc ON dtc.name = r.datatype2name 
-        LEFT JOIN relations rc ON rc.name1 = r.name2 AND rc.relationtypename = 'parentchild' AND rc.datatype1name = r.datatype2name
-        WHERE r.relationtypename = 'parentchild' AND r.datatype1name = '${Db.replaceQuotes(recordtypename)}' AND r.name1 = '${Db.replaceQuotes(entityname)}'
-        GROUP BY r.datatype2name, r.name2, dtp.permissionkey, dtc.icon;
-    `)).rows;
-    var children = [];
-    for (var i = 0; i < relevantrelations.length; i++) {
-        var rr = relevantrelations[i];
-        if (!permissions.find(p => p.key === rr.permissionkey && p.canRead)) continue; // No permission to access specific datatype entities
-        var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
-        if (child) {
-            child.datatypename = rr.datatype2name;
-            child.icon = rr.icon;
-            child.haschildren = rr.haschildren;
-            children.push(child);
+    try {
+        var permissions = await ph.getpermissionsforuser(req.user);
+        var parentrelations = (await Db.getparentrelationstructure(clientname, recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1).sort((a, b) => b.depth - a.depth);
+        var rootelements = await getrootelements(clientname, req.params.forlist, permissions);
+        var children = rootelements;
+        for (var i = 0; i < parentrelations.length; i++) {
+            var elementtohandle = children.find(c => c.name === parentrelations[i].name1);
+            children = await getchildren(clientname, elementtohandle.datatypename, elementtohandle.name, permissions);
+            elementtohandle.children = children;
+            elementtohandle.isopen = true; // Selecting the path
         }
+        res.send(rootelements);
+    } catch(error) {
+        res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
     }
-    res.send(children);
 });
 
 // Get path of all parents of an object as array (root first) for breadcrumbs
@@ -90,26 +133,8 @@ router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypena
 
 // Get all root elements for a specific list type (parameter forlist). That are those elements which have no parentchild relation where they are children
 router.get("/rootelements/:forlist", auth(false, false, co.modules.base), async(req, res) => {
-    var clientname = req.user.clientname;
-    var forlist = req.params.forlist;
     var permissions = await ph.getpermissionsforuser(req.user);
-    var relevantdatatypes = (await Db.query(clientname, `SELECT * FROM datatypes WHERE '${Db.replaceQuotes(forlist)}' = ANY (lists);`)).rows;
-    var rootelements = [];
-    for (var i = 0; i < relevantdatatypes.length; i++) { // Must be loop because it is not said, that all datatypes have all required columns so UNION will not work
-        var rdt = relevantdatatypes[i];
-        if (!permissions.find(p => p.key === rdt.permissionkey && p.canRead)) continue; // No permission to access specific datatypes
-        var rdtn = Db.replaceQuotesAndRemoveSemicolon(rdt.name);
-        var entities = (await Db.query(clientname, `
-            SELECT e.*, CASE WHEN r.childcount > 0 THEN true ELSE false END haschildren FROM ${rdtn} e JOIN (
-                SELECT e.name, count(rc) childcount FROM ${rdtn} e 
-                LEFT JOIN relations rp ON rp.name2 = e.name AND rp.relationtypename = 'parentchild' AND rp.datatype2name = '${rdtn}' 
-                LEFT JOIN relations rc ON rc.name1 = e.name AND rc.relationtypename = 'parentchild' AND rc.datatype1name = '${rdtn}'
-                WHERE rp.name IS NULL
-                GROUP BY e.name
-            ) r ON r.name = e.name;
-        `)).rows;
-        entities.forEach(e => rootelements.push({ name: e.name, datatypename: rdt.name, label: e.label, icon: rdt.icon, haschildren: e.haschildren }));
-    }
+    var rootelements = await getrootelements(req.user.clientname, req.params.forlist, permissions);
     res.send(rootelements);
 });
 
