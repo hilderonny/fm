@@ -79,6 +79,10 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         });
     };
 
+    $scope.getofficeicon = function(icon) {
+        return icon.replace(/\/material\//g, '/office/');
+    }
+
     // Define used languages
     $scope.setLang = function(lang) {
         moment.locale(lang);

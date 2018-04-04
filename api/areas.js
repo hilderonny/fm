@@ -29,7 +29,9 @@ router.get('/', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req
     }
     allfmobjects.forEach(fmo => {
         if (!fmo._parententityname) return;
-        fmmap[fmo._parententityname]._children.push(fmo);
+        var parententity = fmmap[fmo._parententityname];
+        if (!parententity) return;
+        parententity._children.push(fmo);
     });
     res.send(toplevelobjects);
 });

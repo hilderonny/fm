@@ -11,7 +11,7 @@ app.directive('avtCard', function($compile, utils) {
             element.append(angular.element("<resize-handle></resize-handle>"));
             element.removeAttr("avt-card"); //remove the attribute to avoid indefinite loop
             return function link(scope, iElement, iAttrs) {
-                if (scope.params.icon) element.attr("style", "background-image:url('/css/icons/office/"+ scope.params.icon + ".svg')");
+                if (scope.params.icon) element.attr("style", "background-image:url('"+ scope.params.icon.replace(/\/material\//g, "/office/") + "')");
                 scope.closecard = function() {
                     if (scope.params.onclose) scope.params.onclose();
                     utils.removeCardsToTheRightOf(iElement);

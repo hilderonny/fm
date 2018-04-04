@@ -31,7 +31,9 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
                 var closedetails = function() {
+                    var datatypename = scope.selectedchild.datatypename;
                     delete scope.selectedchild;
+                    utils.setLocation('/' + datatypename);
                 };
                 scope.createrootelement = function($event) {
                     // Show selection panel for child types
@@ -100,7 +102,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                     utils.addCardWithPermission("components/DetailsCard", {
                         datatypename: child.datatypename,
                         entityname: child.name,
-                        icon: scope.params.icon,
+                        icon: scope.$root.datatypes[child.datatypename].icon,
                         listfilter: scope.params.listfilter, // For adding childs
                         onclose: closedetails,
                         oncreate: function(datatype, elementname) { // child element was created
@@ -126,7 +128,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                         onsave: function(updatedentity) {
                             child.label = updatedentity.label;
                         }
-                }, scope.params.permission).then(function() {
+                    }, scope.params.permission).then(function() {
                         scope.selectedchild = child;
                     });
                 };

@@ -14,15 +14,15 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
     }
 
     // Event callbacks
-    var changeFmObjectCallback = function(savedFmObject) {
+    var onchangedetails = function() {
         utils.removeCardsToTheRightOf($element);
         $scope.load();
-        closeFmObjectCallback();
+        closedetails();
     };
     
-    var closeFmObjectCallback = function() {
-        $scope.selectedFmObject = false;
-        utils.setLocation('/areas');
+    var closedetails = function() {
+        delete $scope.selectedFmObject;
+        utils.setLocation('/area');
     };
 
     $scope.openChildElement = function(fmObject) {
@@ -36,12 +36,15 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
     $scope.showFmObjectDetails = function(elem) {
         // TODO: Umstellen
         utils.removeCardsToTheRightOf($element);
-        utils.addCardWithPermission('BIM/FmobjectCard', {
-            fmObjectId: elem.name,
-            createFmObjectCallback: changeFmObjectCallback,
-            saveFmObjectCallback: changeFmObjectCallback,
-            deleteFmObjectCallback: changeFmObjectCallback,
-            closeCallback: closeFmObjectCallback
+        utils.addCardWithPermission("components/DetailsCard", {
+            datatypename: elem._datatypename,
+            entityname: elem.name,
+            icon: elem._icon,
+            listfilter: "fmobjects", // For adding childs
+            onclose: closedetails,
+            oncreate: onchangedetails,
+            ondelete: onchangedetails,
+            onsave: onchangedetails
         }, 'PERMISSION_BIM_FMOBJECT').then(function() {
             $scope.selectedFmObject = elem;
         });
@@ -67,7 +70,7 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
                 if (fmObject._children) fmObject._children.forEach(function(child) { handleFmObject(child, depth + 1); });
             };
             response.data.forEach(function(fmObject) { handleFmObject(fmObject, 0); });
-            utils.setLocation('/areas');
+            utils.setLocation('/area');
             $scope.childFmObjects = response.data;
             $rootScope.isLoading=false;
         });

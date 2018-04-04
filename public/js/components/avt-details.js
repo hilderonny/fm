@@ -228,14 +228,15 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         utils.savedynamicobject(datatypename, scope.dynamicobject),
                         dynamicattributes && dynamicattributes.length > 0 ? utils.savedynamicattributes(datatypename, entityname, dynamicattributes) : Promise.resolve(),
                     ]).then(function() {
+                        return scope.load(); // To update changed formula results
+                    }).then(function() {
+                        return $translate(["TRK_DETAILS_CHANGES_SAVED"]).then(function(translations) {
+                            $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_CHANGES_SAVED).hideDelay(1000).position("bottom right"));
+                        });
+                    }).then(function() {
                         if (scope.params.onsave) {
                             scope.params.onsave(scope.dynamicobject);
                         }
-                        return scope.load(); // To update changed formula results
-                    }).then(function() {
-                        $translate(["TRK_DETAILS_CHANGES_SAVED"]).then(function(translations) {
-                            $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_CHANGES_SAVED).hideDelay(1000).position("bottom right"));
-                        });
                     });
                 };
                 scope.selectrelation = function(relation) {

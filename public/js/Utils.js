@@ -122,7 +122,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 scope.menu = responsedata.menu;
                 scope.menu.push({
                     "title": "TRK_MENU_LOGOUT",
-                    "icon": "Exit",
+                    "icon": "/css/icons/material/Exit.svg",
                     "action": function() {
                         localStorage.removeItem("loginCredentials");
                         scope.isLoggedIn = false;
