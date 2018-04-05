@@ -67,7 +67,7 @@ module.exports = async() => {
             }
         }
         // Handle each FM object
-        var fmobjects = await Db.getDynamicObjects(clientname, co.collections.fmobjects.name);
+        var fmobjects = await Db.getDynamicObjects(clientname, "fmobjects");
         for (var j = 0; j < fmobjects.length; j++) {
             var fmo = fmobjects[j];
             var newdatabasename = null;

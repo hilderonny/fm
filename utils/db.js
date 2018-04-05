@@ -38,7 +38,10 @@ var Db = {
             var databasename = databases[i].datname;
             var tables = (await Db.queryDirect(databasename, "SELECT table_name FROM information_schema.tables WHERE table_schema='public';")).rows;
             var databasedir = path.join(timestampdir, databasename);
-            if (!fs.existsSync(databasedir)) fs.mkdirSync(databasedir);        
+            if (!fs.existsSync(databasedir)) {
+                fs.mkdirSync(databasedir);
+                fs.chmodSync(databasedir, 0777); // Needed for postgres COPY TO
+            }
             for (var j = 0; j < tables.length; j++) {
                 var tablename = tables[j].table_name;
                 var outputfile = path.join(databasedir, tablename);
@@ -367,7 +370,7 @@ var Db = {
             delete Db.pools[k];
         });
         // Backup
-        // await Db.backup();
+        await Db.backup();
         // Define type parsing, (SELECT typname, oid FROM pg_type order by typname)
         pg.types.setTypeParser(20, (val) => { return parseInt(val); }); // bigint / int8
         pg.types.setTypeParser(1700, (val) => { return parseFloat(val); }); // numeric
