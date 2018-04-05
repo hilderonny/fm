@@ -50,6 +50,10 @@ app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $transl
                     });
                 });
             }};
+            scope.getlabel = function(entity) {
+                var titlefield = entity.datatype.titlefield ? entity.datatype.titlefield : "name";
+                return entity[titlefield];
+            },
             scope.onclick = function($event) {
                 delete scope.relationtype;
                 delete scope.targetdatatype;
@@ -64,6 +68,13 @@ app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $transl
                 scope.updateokbuttonvisibility();
                 utils.loaddynamicobjects(scope.targetdatatype.name).then(function(elements) {
                     scope.targetelements = elements;
+                    elements.forEach(function(e) {
+                        if (!e.label) {
+                            var titlefield = scope.targetdatatype.titlefield ? scope.targetdatatype.titlefield : "name";
+                            e.label = e[titlefield].substring(0, 100);
+                        }
+                    });
+                    console.log(elements);
                 });
             };
             scope.updateokbuttonvisibility = function() {

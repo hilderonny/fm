@@ -9,7 +9,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
         '                <md-icon ng-click="child.isopen=false" ng-if="child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>' +
         '                <md-icon ng-if="!child.haschildren"></md-icon>' +
         '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" />' +
-        '                <p class="nowrap" ng-bind="child.label" ng-click="selectchild(child)"></p>' +
+        '                <p class="nowrap" ng-bind="getlabel(child)" ng-click="selectchild(child)"></p>' +
         '            </div>' +
         '            <ng-include flex src="\'hierarchylist\'" ng-if="child.isopen"></ng-include>' +
         '        </md-list-item>' +
@@ -30,6 +30,11 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
             element.append(angular.element(cardcontent));
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
+                var titlefields = {};
+                Object.keys(scope.$root.datatypes).forEach(function(k) {
+                    var dt = scope.$root.datatypes[k];
+                    titlefields[k] = dt.titlefield ? dt.titlefield : "name";
+                });
                 var closedetails = function() {
                     var datatypename = scope.selectedchild.datatypename;
                     delete scope.selectedchild;
@@ -57,6 +62,9 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                         delete scope.selectedchild;
                     });
                 };
+                scope.getlabel = function(entity) {
+                    return entity[titlefields[entity.datatypename]];
+                },
                 scope.loadelementsfordirectaccess = function(datatypename, entityname) {
                     return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + scope.params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {
                         scope.child = { children: rootelements };

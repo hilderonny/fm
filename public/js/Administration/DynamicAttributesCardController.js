@@ -31,7 +31,7 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
     $scope.newAttribute = function(){
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Administration/DynamicAttributeCreationFormCard', {
-            modelName: $scope.params.modelName,
+            modelName: $scope.model.name,
             createDynamicAttributeCallback: createDynamicAttributeCallback,
             closeCallback: closeDynamicAttributeCardCallback
         }, 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES');
@@ -57,10 +57,8 @@ app.controller('AdministrationDynamicAttributesCardController', function($scope,
 
     $scope.load = function(){
         $rootScope.isLoading=true;
-        $scope.modelName = $scope.params.modelName;
-        $scope.title =  $scope.params.title;
-        $scope.icon = $scope.params.icon;
-        $http.get('/api/dynamicattributes/model/' + $scope.params.modelName).then(function(attributesFromDataBank){
+        $scope.model = $scope.params.model;
+        $http.get('/api/dynamicattributes/model/' + $scope.model.name).then(function(attributesFromDataBank){
             $scope.attributes = attributesFromDataBank.data;
             $scope.attributes.forEach(function(attr) {
                 attr.icon = $scope.icons[attr.type];

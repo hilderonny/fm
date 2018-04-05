@@ -193,7 +193,11 @@ var Db = {
                     clientdatatypes[dt.name] = dt;
                 });
                 var fields = (await Db.query(clientname, `SELECT * FROM datatypefields;`)).rows;
-                fields.forEach(f => clientdatatypes[f.datatypename].fields[f.name] = f);
+                fields.forEach(f => {
+                    var datatype = clientdatatypes[f.datatypename];
+                    datatype.fields[f.name] = f;
+                    if (f.istitle) datatype.titlefield = f.name;
+                });
             }
         }
         return Db.datatypes[databaseNameWithoutPrefix];
