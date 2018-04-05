@@ -7,9 +7,9 @@ app.directive('avtRelationsTab', function($compile, $translate, $mdDialog, $mdTo
         '        <section ng-repeat="relationsection in relationsections | orderBy:\'label\'">' +
         '            <md-subheader class="md-no-sticky">{{relationsection.label}}</md-subheader>' +
         '            <md-list class="lines-beetween-items">' +
-        '                <md-list-item ng-repeat="entity in relationsection.entities | orderBy:\'getlabel(entity)\'" ng-click="selectrelation(entity.relation)" ng-class="selectedElement === entity ? \'active\' : false">' +
+        '                <md-list-item ng-repeat="entity in relationsection.entities | orderBy:\'label\'" ng-click="selectrelation(entity.relation)" ng-class="selectedElement === entity ? \'active\' : false">' +
         '                    <md-icon md-svg-src="{{entity.datatype.icon}}"></md-icon>' +
-        '                    <div class="md-list-item-text multiline"><p>{{getlabel(entity)}}</p><p>{{entity.datatype.label}}</p></div>' +
+        '                    <div class="md-list-item-text multiline"><p>{{entity.label}}</p><p>{{entity.datatype.label}}</p></div>' +
         '                    <md-button ng-if="canwriterelations" class="md-icon-button md-accent"><md-icon ng-click="deleterelation(entity.relation)" md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>' +
         '                </md-list-item>' +
         '            </md-list>' +
@@ -43,10 +43,6 @@ app.directive('avtRelationsTab', function($compile, $translate, $mdDialog, $mdTo
                         });
                     });
                 },
-                scope.getlabel = function(entity) {
-                    var titlefield = entity.datatype.titlefield ? entity.datatype.titlefield : "name";
-                    return entity[titlefield].substring(0, 100);
-                },
                 scope.loadrelations = function() {
                     var entitiestofetch = {};
                     return utils.loadrelations(scope.params.datatypename, scope.params.entityname).then(function(relations) { 
@@ -70,6 +66,10 @@ app.directive('avtRelationsTab', function($compile, $translate, $mdDialog, $mdTo
                                     e.datatype = scope.$root.datatypes[k];
                                     var mapper = entitiestofetchfordatatype[e.name];
                                     e.relation = mapper.relation;
+                                    if (!e.label) {
+                                        var titlefield = e.datatype.titlefield ? e.datatype.titlefield : "name";
+                                        e.label = e[titlefield].substring(0, 100);
+                                    }
                                     mapper.section.entities.push(e);
                                 });
                             });

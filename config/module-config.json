@@ -76,6 +76,7 @@
                 "partial/Administration/UserSettingsCard.html",
                 "partial/components/DetailsCard.html",
                 "partial/components/HierarchyCard.html",
+                "partial/components/ListCard.html",
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
@@ -103,8 +104,9 @@
                 "public/js/MainController.js",
 
                 "public/js/components/avt-card.js",
-                "public/js/components/avt-details.js",
-                "public/js/components/avt-hierarchy.js",
+                "public/js/components/avt-details-card.js",
+                "public/js/components/avt-hierarchy-card.js",
+                "public/js/components/avt-list-card.js",
                 "public/js/components/avt-relations-tab.js",
                 "public/js/components/avt-relations-toolbar-button.js",
                 "public/js/components/avt-toolbar.js",
@@ -128,7 +130,8 @@
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
                         { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
-                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
+                        { "mainCard": "components/ListCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "listfilter": "users", "directurls": [ "users" ] },
+                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "Benutzer (alt)", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users" },
                         { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] }
                     ]
                 }
@@ -197,7 +200,7 @@
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ], "canhaverelations" : true }
+                ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true }
 
             ],
             "portaldatatypes": [
@@ -262,7 +265,7 @@
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ], "canhaverelations" : true }
+                ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true }
                 
             ]
         },

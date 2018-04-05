@@ -1,5 +1,5 @@
 
-app.directive('avtHierarchy', function($compile, $http, $location, utils) { 
+app.directive('avtHierarchyCard', function($compile, $http, $location, utils) { 
     var cardcontent = 
         '<script type="text/ng-template" id="hierarchylist">' +
         '   <md-list class="hierarchy">' +
@@ -9,7 +9,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
         '                <md-icon ng-click="child.isopen=false" ng-if="child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>' +
         '                <md-icon ng-if="!child.haschildren"></md-icon>' +
         '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" />' +
-        '                <p class="nowrap" ng-bind="getlabel(child)" ng-click="selectchild(child)"></p>' +
+        '                <p class="nowrap" ng-bind="child.label" ng-click="selectchild(child)"></p>' +
         '            </div>' +
         '            <ng-include flex src="\'hierarchylist\'" ng-if="child.isopen"></ng-include>' +
         '        </md-list-item>' +
@@ -25,7 +25,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
         terminal: true,
         priority: 900,
         compile: function compile(element, attrs) {
-            element.removeAttr("avt-hierarchy"); //remove the attribute to avoid indefinite loop
+            element.removeAttr("avt-hierarchy-card"); //remove the attribute to avoid indefinite loop
             var resizehandle = element[0].querySelector("resize-handle");
             element.append(angular.element(cardcontent));
             if (resizehandle) element.append(resizehandle);
@@ -54,6 +54,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                                     newrootelement.icon = datatype.icon;
                                     if (!scope.child.children) scope.child.children = [];
                                     newrootelement.parent = scope.child;
+                                    if (!newrootelement.label) newrootelement.label =  newrootelement[titlefields[newrootelement.datatypename]];
                                     scope.child.children.push(newrootelement);
                                     scope.selectchild(newrootelement);
                                 });
@@ -62,9 +63,6 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                         delete scope.selectedchild;
                     });
                 };
-                scope.getlabel = function(entity) {
-                    return entity[titlefields[entity.datatypename]];
-                },
                 scope.loadelementsfordirectaccess = function(datatypename, entityname) {
                     return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + scope.params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {
                         scope.child = { children: rootelements };
@@ -72,6 +70,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                             if (child.name === entityname) scope.selectchild(child);
                             if (child.children) child.children.forEach(function(c) {
                                 c.parent = child;
+                                if (!c.label) c.label = c[titlefields[c.datatypename]];
                                 setparentofchildrenrecursively(c);
                             });
                         };
@@ -84,6 +83,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                             scope.child = { children: rootelements };
                             scope.child.children.forEach(function(c) {
                                 c.parent = scope.child;
+                                if (!c.label) c.label = c[titlefields[c.datatypename]];
                             });
                         } else { // Refresh after deletion of subelements which result in moving sub-sub-childs to the root
                             rootelements.forEach(function(c) {
@@ -91,6 +91,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                                     // Here we have a moved child
                                     scope.child.children.push(c);
                                     c.parent = scope.child;
+                                    if (!c.label) c.label = c[titlefields[c.datatypename]];
                                 }
                             });
                         }
@@ -101,6 +102,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                         child.children = children;
                         child.children.forEach(function(cc) {
                             cc.parent = child;
+                            if (!cc.label) cc.label =  cc[titlefields[cc.datatypename]];
                         });
                         child.isopen = true;
                     });
@@ -120,6 +122,7 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                                 if (!scope.selectedchild.children) scope.selectedchild.children = [];
                                 scope.selectedchild.children.push(newchild);
                                 newchild.parent = scope.selectedchild;
+                                if (!newchild.label) newchild.label =  newchild[titlefields[newchild.datatypename]];
                                 scope.selectedchild.haschildren = true;
                                 scope.selectedchild.isopen = true;
                                 scope.selectchild(newchild);
@@ -134,7 +137,11 @@ app.directive('avtHierarchy', function($compile, $http, $location, utils) {
                             delete scope.selectedchild;
                         },
                         onsave: function(updatedentity) {
-                            child.label = updatedentity.label;
+                            if (updatedentity.label) {
+                                child.label = updatedentity.label;
+                            } else {
+                                child.label =  updatedentity[titlefields[updatedentity.datatypename]];
+                            }
                         }
                     }, scope.params.permission).then(function() {
                         scope.selectedchild = child;

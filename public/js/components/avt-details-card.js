@@ -1,5 +1,5 @@
 
-app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdDialog, utils) { 
+app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, $mdDialog, utils) { 
     var cardcontent = 
         '<md-card-title flex="none">' +
         '   <md-card-title-text>' +
@@ -56,7 +56,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
         scope: true,
         priority: 900,
         compile: function compile(element, attrs) {
-            element.removeAttr("avt-details");
+            element.removeAttr("avt-details-card");
             element.attr("class", "list-details-details");
             var resizehandle = element[0].querySelector("resize-handle");
             element.append(angular.element(cardcontent));

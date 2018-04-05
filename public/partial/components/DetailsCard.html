@@ -1,7 +1,7 @@
-<md-card avt-card avt-details>
+<md-card avt-card avt-details-card>
 
     <md-toolbar avt-toolbar>
-        <md-button avt-toolbar-button avt-on-click="createchildelement" ng-if="canwrite && params.entityname" icon="/css/icons/material/Plus Math.svg" label="TRK_DETAILS_NEW_SUBELEMENT" tooltip="TRK_DETAILS_NEW_SUBELEMENT_IN_THIS_LEVEL"></md-button>
+        <md-button avt-toolbar-button avt-on-click="createchildelement" ng-if="canwrite && params.entityname && params.listfilter" icon="/css/icons/material/Plus Math.svg" label="TRK_DETAILS_NEW_SUBELEMENT" tooltip="TRK_DETAILS_NEW_SUBELEMENT_IN_THIS_LEVEL"></md-button>
         <md-button avt-toolbar-button avt-relations-toolbar-button ng-if="params.entityname"></md-button>
         <div flex></div>
         <md-button avt-toolbar-button avt-on-click="closecard" ng-if="true" icon="/css/icons/material/Delete.svg"></md-button>
