@@ -275,9 +275,9 @@
             "forclients": true,
             "api" : [ "doc" ],
             "doc" : [
-                { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "Dictionary", "index": 97 },
-                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 },
-                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "News", "index": 99 }
+                { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "/css/icons/material/Dictionary.svg", "index": 97 },
+                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "/css/icons/material/Design.svg", "index": 98 },
+                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "/css/icons/material/News.svg", "index": 99 }
             ],
             "include" : [
                 "public/js/Doc/ListController.js",

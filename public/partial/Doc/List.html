@@ -7,7 +7,7 @@
     <md-card-content>
         <md-list class="lines-beetween-items">
             <md-list-item ng-repeat="menuItem in menu | orderBy: 'index'" ng-click="selectMenuItem(menuItem)" ng-class="selectedMenuItem == menuItem ? 'active' : false" aria-label="{{menuItem.title}}">
-                <md-icon md-svg-src="/css/icons/material/{{menuItem.icon}}.svg"></md-icon>
+                <md-icon md-svg-src="{{menuItem.icon}}"></md-icon>
                 <p><span translate="{{ menuItem.title }}"></span></p>
             </md-list-item>
         </md-list>
