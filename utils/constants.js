@@ -33,6 +33,10 @@ module.exports.apis = {
      */
     communications: 'communications',
     /**
+     * API zur Abfrage von Datentypen
+     */
+    datatypes: "datatypes",
+    /**
      * API für Dokumentation
      */
     doc: 'doc',
@@ -41,6 +45,10 @@ module.exports.apis = {
      */
     documents: 'documents',
     /**
+     * Dynamic objects
+     */
+    dynamic: "dynamic",
+    /**
      * API zum Administrieren von dynamischen Attributen an Datenbankentitäten
      */
     dynamicattributes: 'dynamicattributes',
@@ -48,10 +56,6 @@ module.exports.apis = {
      * API for extracting zipped documents
      */
     extractdocument: 'extractdocument',
-    /**
-     * API for edititing FM objects
-     */
-    fmobjects: 'fmobjects',
     /**
      * API for edititing folders
      */
@@ -131,6 +135,12 @@ module.exports.apis = {
     users: 'users'
 };
 
+module.exports.formulatypes = {
+    childsum: "childsum",
+    ifthenelse: "ifthenelse",
+    sum: "sum"
+}
+
 /**
  * List of all possible collections (tables). Used for dependency deletions in clients API
  * and its tests.
@@ -138,11 +148,11 @@ module.exports.apis = {
  * var collections = require('../utils/constants').collections;
  */
 module.exports.collections = {
-    activities:{name:'activities', icon:'Planner', canHaveAttributes:true},
+    activities:{name:'activities', icon:'/css/icons/material/Planner.svg', canHaveAttributes:true},
     /**
      * Geschäftspartner
      */
-    businesspartners:{name:'businesspartners', icon:'Business', canHaveAttributes:true},
+    businesspartners:{name:'businesspartners', icon:'/css/icons/material/Business.svg', canHaveAttributes:true},
     /**
      * Modulzuordnungen für Mandanten
      */
@@ -154,15 +164,15 @@ module.exports.collections = {
     /**
      * Mandanten
      */
-    clients:{name:'clients', icon:'Briefcase', canHaveAttributes:true},
+    clients:{name:'clients', icon:'/css/icons/material/Briefcase.svg', canHaveAttributes:true},
     /**
      * Kommunikationswege von Personen
      */
-    communications:{name:'communications', icon:'Phone', canHaveAttributes:true},
+    communications:{name:'communications', icon:'/css/icons/material/Phone.svg', canHaveAttributes:true},
     /**
      * Dokumente
      */
-    documents:{name:'documents', icon: 'Document', canHaveAttributes:true},
+    documents:{name:'documents', icon: '/css/icons/material/Document.svg', canHaveAttributes:true},
     /**
      * Mögliche Werte für dynamische Attribute vom Typ picklist
      */
@@ -175,21 +185,28 @@ module.exports.collections = {
     /**
      * FM Objekte
      */
-    fmobjects:{name:'fmobjects', icon:'Cottage', canHaveAttributes:true},
+    //fmobjects:{name:'fmobjects', icon:'Cottage', canHaveAttributes:true},
+    projects:{name:'projects', icon:'/css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg', canHaveAttributes:true},
+    properties:{name:'properties', icon:'/css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg', canHaveAttributes:true},
+    buildings:{name:'buildings', icon:'/css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg', canHaveAttributes:true},
+    levels:{name:'levels', icon:'/css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg', canHaveAttributes:true},
+    rooms:{name:'rooms', icon:'/css/icons/fm/FMOBJECTS_TYPE_ROOM.svg', canHaveAttributes:true},
+    areas:{name:'areas', icon:'/css/icons/fm/FMOBJECTS_TYPE_AREA.svg', canHaveAttributes:true},
+    inventories:{name:'inventories', icon:'/css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg', canHaveAttributes:true},
     /**
      * Verzeichnisse
      */
-    folders:{name:'folders', icon:'Folder', canHaveAttributes:true},
+    folders:{name:'folders', icon:'/css/icons/material/Folder.svg', canHaveAttributes:true},
     markers:{name:'markers', canHaveAttributes:false},
      
     /**
      * Notizen
      */
-    notes:{name:'notes', icon:'Notes', canHaveAttributes:true},
+    notes:{name:'notes', icon:'/css/icons/material/Notes.svg', canHaveAttributes:true},
     /**
      * Adressen von Geschäftspartnern
      */
-    partneraddresses:{name:'partneraddresses', icon:'Address Book', canHaveAttributes:true},
+    partneraddresses:{name:'partneraddresses', icon:'/css/icons/material/Address Book.svg', canHaveAttributes:true},
     /**
      * Zugriffsberechtigungen für Benutzergruppen
      */
@@ -197,7 +214,7 @@ module.exports.collections = {
     /**
      * Personen
      */
-    persons:{name:'persons', icon:'Collaborator Male', canHaveAttributes:true},
+    persons:{name:'persons', icon:'/css/icons/material/Collaborator Male.svg', canHaveAttributes:true},
     /**
      * Modules assigned to portals
      */
@@ -205,7 +222,7 @@ module.exports.collections = {
     /**
      * List of all portals registered to the license server. Only relevant on license server.
      */
-    portals:{name:'portals', icon: 'Server', canHaveAttributes:true},
+    portals:{name:'portals', icon: '/css/icons/material/Server.svg', canHaveAttributes:true},
     /**
      * Relations between database entities
      */
@@ -214,19 +231,38 @@ module.exports.collections = {
     /**
      * Usergroups for users
      */
-    usergroups:{name:'usergroups', icon:'User Group Man Man', canHaveAttributes: true},
+    usergroups:{name:'usergroups', icon:'/css/icons/material/User Group Man Man.svg', canHaveAttributes: true},
     /**
      * Users which can login to the system
      */
-    users:{name:'users', icon:'User', canHaveAttributes: true}
+    users:{name:'users', icon:'/css/icons/material/User.svg', canHaveAttributes: true}
 };
 
 module.exports.fieldtypes = {
     boolean: "boolean",
     datetime: "datetime",
     decimal: "decimal",
+    formula: "formula",
     reference: "reference",
     text: "text"
+};
+
+/**
+ * Mögliche Aufführung von dynamischen Objekten in diversen Listen. In den record types wird
+ * im Feld "lists" vermerkt, in welchen Listen oder Hierarchien der record type auftaucht.
+ * So enthalten die record types "folders" und "documents" beispielsweise eine Referenz auf die
+ * Liste "folders", wodurch der FolderCardController und seine API wissen, welche datentypen sie
+ * anzeigen sollen. Gleiches gilt für "projects", "areas", ... bei der Liste "fmobjects"
+ */
+module.exports.lists = {
+    /**
+     * Record types mit dieser Einstellung tauchen in der Hierarchie der FM OBjekte auf
+     */
+    fmobjects: "fmobjects",
+    /**
+     * Aufführung in der Verzeichnisstruktur des Dokumentenmoduls
+     */
+    folders: "folders"
 };
 
 /**
@@ -301,6 +337,9 @@ module.exports.permissions = {
      */
     ADMINISTRATION_USER: 'PERMISSION_ADMINISTRATION_USER',
     ADMINISTRATION_USERGROUP: 'PERMISSION_ADMINISTRATION_USERGROUP',
+    /**
+     * Permission to analyze FM object area analyzes
+     */
     BIM_AREAS: 'PERMISSION_BIM_AREAS',
     /**
      * Permission to show and edit FM objects

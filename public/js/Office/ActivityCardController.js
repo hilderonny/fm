@@ -24,7 +24,8 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
             $scope.isNewActivity = false;
             $scope.activity._id = createdActivity._id;
             $scope.activityName = $scope.activity.name;
-            $scope.relationsEntity = { type:'activities', id:createdActivity._id };
+            $scope.params.datatypename = 'activities';
+            $scope.params.entityname = createdActivity._id;
             if ($scope.params.createActivityCallback) {
                 $scope.params.createActivityCallback(createdActivity);
             }
@@ -113,7 +114,8 @@ app.controller('OfficeActivityCardController', function($scope, $rootScope, $htt
                 completeActivity.date = new Date(completeActivity.date); // Convert string to Date object
                 $scope.activity = completeActivity;
                 $scope.activityName = completeActivity.name; // Prevent updating the label when changing the input value 
-                $scope.relationsEntity = { type:'activities', id:completeActivity._id };
+                $scope.params.datatypename = 'activities';
+                $scope.params.entityname = completeActivity._id;
                 utils.loadDynamicAttributes($scope, 'activities', $scope.params.activityId);
                 utils.setLocation('/activities/' + completeActivity._id);
                 if (!completeActivity.currentUserCanWrite) $scope.canWriteActivities = false; // Nur Ersteller darf schreiben

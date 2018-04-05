@@ -4,8 +4,8 @@
         "base": {
             "forportal": true,
             "forclients": true,
-            "api" : [ "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
-            "middlewares": [ "auth", "db", "extracttoken", "nocache", "validateSameClientId" ],
+            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
+            "middlewares": [ "auth", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
                 "css/base.css",
@@ -74,9 +74,9 @@
                 "partial/Administration/UsergrouplistCard.html",
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
+                "partial/components/DetailsCard.html",
+                "partial/components/HierarchyCard.html",
                 "partial/Core/DynamicAttributesTab.html",
-                "partial/Core/RelationsMenu.html",
-                "partial/Core/RelationsTab.html",
                 "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
                 "partial/Doc/UserGroups.html",
@@ -101,6 +101,15 @@
                 "public/js/AppSetup.js",
                 "public/js/Utils.js",
                 "public/js/MainController.js",
+
+                "public/js/components/avt-card.js",
+                "public/js/components/avt-details.js",
+                "public/js/components/avt-hierarchy.js",
+                "public/js/components/avt-relations-tab.js",
+                "public/js/components/avt-relations-toolbar-button.js",
+                "public/js/components/avt-toolbar.js",
+                "public/js/components/avt-toolbar-button.js",
+
                 "public/js/Administration/ClientSettingsCardController.js",
                 "public/js/Administration/DynamicAttributesCardController.js",
                 "public/js/Administration/DynamicAttributeCreationFormCardController.js",
@@ -111,22 +120,20 @@
                 "public/js/Administration/UsergroupCardController.js",
                 "public/js/Administration/UsergrouplistCardController.js",
                 "public/js/Administration/UserlistCardController.js",
-                "public/js/Administration/UserSettingsCardController.js",
-                "public/js/Core/RelationsMenuController.js",
-                "public/js/Core/RelationsTabController.js"
+                "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
-                        { "mainCard": "Administration/SettingSetListCard", "icon": "Settings", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
-                        { "mainCard": "Administration/UserlistCard", "icon": "User", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users" },
-                        { "mainCard": "Administration/UsergrouplistCard", "icon": "User Group Man Man", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups" }
+                        { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
+                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
+                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] }
                     ]
                 }
             ],
-            "utils": [ "apiHelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "migrationhelper", "localConfigHelper" ],
+            "utils": [ "apiHelper", "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "localConfigHelper", "permissionshelper", "updateonstart" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "settingsets" : [
                 { "mainCard": "Administration/UserSettingsCard", "title": "TRK_SETTINGSET_USER_GENERAL", "type": "SETTINGSET_TYPE_USER", "icon": "User", "permission": "PERMISSION_SETTINGS_USER"},
@@ -167,19 +174,30 @@
                     { "name": "datatype1name", "type": "text" },
                     { "name": "name1", "type": "text" },
                     { "name": "datatype2name", "type": "text" },
-                    { "name": "name2", "type": "text" }
+                    { "name": "name2", "type": "text" },
+                    { "name": "relationtypename", "type": "reference", "reference": "relationtypes" }
                 ] },
+
+                { "name": "relationtypes", "label": "Verknüpfungsart", "plurallabel": "Verknüpfungsarten", "titlefield": "label", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "labelfrom1to2", "label": "Beziehung von A zu B", "type": "text" },
+                    { "name": "labelfrom2to1", "label": "Beziehung von B zu A", "type": "text" }
+                ], "values": [
+                    { "name": "dependency", "label": "Abhängigkeit", "labelfrom1to2": "Ist abhängig von", "labelfrom2to1": "Bedingt" },
+                    { "name": "looselycoupled", "label": "Lose Beziehung", "labelfrom1to2": "Steht in Zusammenhang mit", "labelfrom2to1": "Steht in Zusammenhang mit" },
+                    { "name": "parentchild", "label": "Eltern-Kind-Beziehung", "labelfrom1to2": "Ist Elternteil von", "labelfrom2to1": "Ist Kind von" }
+                ]},
 
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ] }
+                ], "canhaverelations" : true }
 
             ],
             "portaldatatypes": [
@@ -221,19 +239,30 @@
                     { "name": "datatype1name", "type": "text" },
                     { "name": "name1", "type": "text" },
                     { "name": "datatype2name", "type": "text" },
-                    { "name": "name2", "type": "text" }
+                    { "name": "name2", "type": "text" },
+                    { "name": "relationtypename", "type": "reference", "reference": "relationtypes" }
                 ] },
+
+                { "name": "relationtypes", "label": "Verknüpfungsart", "plurallabel": "Verknüpfungsarten", "titlefield": "label", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "labelfrom1to2", "label": "Beziehung von A zu B", "type": "text" },
+                    { "name": "labelfrom2to1", "label": "Beziehung von B zu A", "type": "text" }
+                ], "values": [
+                    { "name": "dependency", "label": "Abhängigkeit", "labelfrom1to2": "Ist abhängig von", "labelfrom2to1": "Bedingt" },
+                    { "name": "looselycoupled", "label": "Lose Beziehung", "labelfrom1to2": "Steht in Zusammenhang mit", "labelfrom2to1": "Steht in Zusammenhang mit" },
+                    { "name": "parentchild", "label": "Eltern-Kind-Beziehung", "labelfrom1to2": "Ist Elternteil von", "labelfrom2to1": "Ist Kind von" }
+                ]},
 
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "text" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ] }
+                ], "canhaverelations" : true }
                 
             ]
         },
@@ -295,7 +324,7 @@
                 {
                     "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/CalendarCard", "icon": "Planner", "title": "TRK_MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY", "docCard" : "Activities" }
+                        { "mainCard": "Office/CalendarCard", "icon": "/css/icons/material/Planner.svg", "title": "TRK_MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY", "docCard" : "Activities", "directurls": [ "activities" ] }
                     ]
                 }
             ],
@@ -319,7 +348,7 @@
                     { "name": "comment", "label": "Kommentar", "type": "text" },
                     { "name": "createdbyusername", "label": "Ersteller", "type": "reference", "reference": "users" },
                     { "name": "isforallusers", "label": "Sichtbar für alle Benutzer", "type": "boolean" }
-                ] }
+                ], "canhaverelations" : true }
 
             ]
     
@@ -352,7 +381,7 @@
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "BIM/AreasCard", "icon": "surface", "title": "TRK_MENU_BIM_AREAS", "permission" : "PERMISSION_BIM_AREAS", "docCard" : "Areas" }
+                        { "mainCard": "BIM/AreasCard", "icon": "/css/icons/material/surface.svg", "title": "TRK_MENU_BIM_AREAS", "permission" : "PERMISSION_BIM_AREAS", "docCard" : "Areas", "directurls": [ "area" ] }
                     ]
                 }
             ]
@@ -406,8 +435,8 @@
                 {
                     "title": "TRK_MENU_CRM",
                     "items": [
-                        { "mainCard": "CRM/BPListCard", "icon": "Business", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners" },
-                        { "mainCard": "CRM/PersonListCard", "icon": "Collaborator Male", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons" }
+                        { "mainCard": "CRM/BPListCard", "icon": "/css/icons/material/Business.svg", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners", "directurls": [ "businesspartners" ] },
+                        { "mainCard": "CRM/PersonListCard", "icon": "/css/icons/material/Collaborator Male.svg", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons", "directurls": [ "persons" ] }
                     ]
                 }
             ],
@@ -419,13 +448,13 @@
                     { "name": "industry", "label": "Geschäftsbereich", "type": "text" },
                     { "name": "rolle", "label": "Art der Beziehung", "type": "text" },
                     { "name": "isjuristic", "label": "Juristische Person", "type": "boolean" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "lastname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
                     { "name": "firstname", "label": "Vorname", "type": "text" },
                     { "name": "lastname", "label": "Nachname", "type": "text" },
                     { "name": "description", "label": "Beschreibung", "type": "text" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "partneraddresstypes", "label": "Adressart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" },
@@ -468,7 +497,7 @@
                     { "name": "contact", "label": "Kontakt", "type": "text" },
                     { "name": "personname", "label": "Person", "type": "reference", "reference": "persons" },
                     { "name": "communicationtypename", "label": "Typ", "type": "reference", "reference": "communicationtypes" }
-                ] }
+                ], "canhaverelations" : true }
                 
             ]
         },
@@ -503,7 +532,7 @@
                 {
                     "title": "TRK_MENU_PORTAL",
                     "items": [
-                        { "mainCard": "Administration/ClientListCard", "icon": "Briefcase", "title": "TRK_MENU_PORTAL_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT", "docCard" : "Clients" }
+                        { "mainCard": "Administration/ClientListCard", "icon": "/css/icons/material/Briefcase.svg", "title": "TRK_MENU_PORTAL_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT", "docCard" : "Clients", "directurls": [ "clients" ] }
                     ]
                 }
             ],
@@ -511,7 +540,7 @@
 
                 { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ] }
+                ], "canhaverelations" : true }
                 
             ]
         },
@@ -553,7 +582,7 @@
                 {
                     "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/DocumentListCard", "icon": "Document", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents" }
+                        { "mainCard": "Office/DocumentListCard", "icon": "/css/icons/material/Document.svg", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents", "directurls": [ "documents", "folders" ] }
                     ]
                 }
             ],
@@ -562,14 +591,14 @@
                 { "name": "folders", "label": "Verzeichnis", "plurallabel": "Verzeichnisse", "titlefield": "label", "icon": "/css/icons/material/Folder.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "parentfoldername", "type": "reference", "reference": "folders" }
-                ] },
+                ], "lists": [ "folders" ], "canhaverelations" : true },
 
                 { "name": "documents", "label": "Dokument", "plurallabel": "Dokumente", "titlefield": "label", "icon": "/css/icons/material/Document.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "parentfoldername", "type": "reference", "reference": "folders" },
                     { "name": "type", "type": "text" },
                     { "name": "isshared", "label": "Öffentlich zugänglich", "type": "boolean" }
-                ] }
+                ], "lists": [ "folders" ], "canhaverelations" : true }
 
             ]
         },
@@ -577,7 +606,6 @@
         "fmobjects": {
             "forportal": false,
             "forclients": true,
-            "api" : [ "fmobjects" ],
             "public" : [
                 "css/icons/material/Cottage.svg",
                 "css/icons/material/Sort Down.svg",
@@ -596,24 +624,90 @@
                 "css/images/FM_addsub.png",
                 "css/images/FM_edit.png",
                 "css/images/FM_hierarchy.png",
-                "partial/BIM/FmobjectCard.html",
-                "partial/BIM/HierarchyCard.html",
+                "partial/components/DetailsCard.html",
+                "partial/components/HierarchyCard.html",
                 "partial/Doc/FmObjects.html"
-            ],
-            "include" : [
-                "public/js/BIM/FmobjectCardController.js",
-                "public/js/BIM/HierarchyCardController.js"
             ],
             "languages" : [ "en", "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "BIM/HierarchyCard", "icon": "Cottage", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects" }
+                        { "mainCard": "components/HierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
                     ]
                 }
             ],
             "clientdatatypes": [
+
+                { "name": "projects", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
+                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+
+                { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
+                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+
+                { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
+                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+
+                { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 2 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 3 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 4 },
+                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 }
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+
+                { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF, berechnet)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 3 }
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+
+                { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_AREA.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "areacategoryname", "label": "Kategorie", "type": "reference", "reference": "areacategories" },
+                    { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
+                    { "name": "areausagestatename", "label": "Nutzungsstatus", "type": "reference", "reference": "areausagestates" },
+                    { "name": "f", "label": "Flächeninhalt (m²)", "type": "decimal" },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_NUF", "f", null] }, "formulaindex": 0 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_TF", "f", null] }, "formulaindex": 1 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_VF", "f", null] }, "formulaindex": 2 }
+                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+
+                { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" }
+                ], "lists": [ "fmobjects" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "fmobjecttypes", "label": "FM Objekttyp", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
@@ -627,10 +721,12 @@
                     { "name": "FMOBJECTS_TYPE_INVENTORY", "label": "Inventar" }
                 ] }, 
 
-                { "name": "areacategories", "label": "Kategorie", "titlefield": "name", "values": [
-                    { "name": "Nutzungsfläche" },
-                    { "name": "Technikfläche" },
-                    { "name": "Verkehrsfläche" }
+                { "name": "areacategories", "label": "Kategorie", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "values": [
+                    { "name": "FMOBJECTS_CATEGORY_NUF", "label": "Nutzungsfläche" },
+                    { "name": "FMOBJECTS_CATEGORY_TF", "label": "Technikfläche" },
+                    { "name": "FMOBJECTS_CATEGORY_VF", "label": "Verkehrsfläche" }
                 ] }, 
 
                 { "name": "areatypes", "label": "Flächenart", "titlefield": "name", "fields": [
@@ -658,7 +754,7 @@
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "fmobjecttypename", "label": "Typ", "type": "reference", "reference": "fmobjecttypes" },
                     { "name": "parentfmobjectname", "type": "reference", "reference": "fmobjects" },
-                    { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents" },
+                    { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
                     { "name": "f", "label": "Fläche (m²)", "type": "decimal" },
                     { "name": "bgf", "label": "Brutto-Geschoss-Fläche (BGF)", "type": "decimal" },
@@ -700,7 +796,7 @@
                 {
                     "title": "TRK_MENU_LICENSESERVER",
                     "items": [
-                        { "mainCard": "LicenseServer/PortalListCard", "icon": "Server", "title": "TRK_MENU_LICENSESERVER_PORTALS", "permission" : "PERMISSION_LICENSESERVER_PORTAL", "docCard" : "Portals" }
+                        { "mainCard": "LicenseServer/PortalListCard", "icon": "/css/icons/material/Server.svg", "title": "TRK_MENU_LICENSESERVER_PORTALS", "permission" : "PERMISSION_LICENSESERVER_PORTAL", "docCard" : "Portals", "directurls": [ "portals" ] }
                     ]
                 }
             ],
@@ -715,7 +811,7 @@
                     { "name": "licensekey", "label": "Lizenzschlüssel", "type": "text" },
                     { "name": "version", "label": "Version", "type": "text" },
                     { "name": "lastnotification", "label": "Letzte Meldung", "type": "datetime" }
-                ] },
+                ], "canhaverelations" : true },
 
                 { "name": "portalmodules", "label": "Portalmodul", "plurallabel": "Portalmodule", "fields": [
                     { "name": "portalname", "type": "reference", "reference": "portals" },
@@ -748,7 +844,7 @@
                 {
                     "title": "TRK_MENU_OFFICE",
                     "items": [
-                        { "mainCard": "Office/NoteListCard", "icon": "Notes", "title": "TRK_MENU_OFFICE_NOTES", "permission" : "PERMISSION_OFFICE_NOTE", "docCard" : "Notes" }
+                        { "mainCard": "Office/NoteListCard", "icon": "/css/icons/material/Notes.svg", "title": "TRK_MENU_OFFICE_NOTES", "permission" : "PERMISSION_OFFICE_NOTE", "docCard" : "Notes", "directurls": [ "notes" ] }
                     ]
                 }
             ],
@@ -756,7 +852,7 @@
 
                 { "name": "notes", "label": "Notiz", "plurallabel": "Notizen", "titlefield": "content", "icon": "/css/icons/material/Notes.svg", "fields": [
                     { "name": "content", "label": "Inhalt", "type": "text" }
-                ] }
+                ], "canhaverelations" : true }
 
             ]
         },
@@ -828,8 +924,8 @@
                 {
                     "title": "TRK_MENU_LAB",
                     "items": [
-                        { "mainCard": "ronnyseins/AugmentedRealityCard", "icon": "Virtual Reality", "title": "TRK_MENU_LAB_AUGMENTEDREALITY" },
-                        { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "World Map", "title": "TRK_MENU_LAB_GOOGLEMAPS" }
+                        { "mainCard": "ronnyseins/AugmentedRealityCard", "icon": "/css/icons/material/Virtual Reality.svg", "title": "TRK_MENU_LAB_AUGMENTEDREALITY" },
+                        { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "/css/icons/material/World Map.svg", "title": "TRK_MENU_LAB_GOOGLEMAPS" }
                     ]
                 }
             ],

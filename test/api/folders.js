@@ -5,7 +5,6 @@ var assert = require('assert');
 var fs = require('fs');
 var documentsHelper = require('../../utils/documentsHelper');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var dh = require('../../utils/documentsHelper');
 var Db = require("../../utils/db").Db;

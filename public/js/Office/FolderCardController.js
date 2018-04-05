@@ -17,7 +17,8 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
             $scope.folder._id = createdFolder._id;
             $scope.folderName = $scope.folder.name;
             // Information über neuen Ordner für Verknüpfungen-Tab bereit stellen
-            $scope.relationsEntity = { type:'folders', id:createdFolder._id };
+            $scope.params.datatypename = 'folders';
+            $scope.params.entityname = createdFolder._id;
             if ($scope.params.createFolderCallback) {
                 $scope.params.createFolderCallback(createdFolder);
             }
@@ -157,7 +158,8 @@ app.controller('OfficeFolderCardController', function($scope, $rootScope, $http,
                 $scope.breadcrumbs = completeFolder.path.map(function(pathElement){
                     return pathElement.name;
                 }).join(' » ');
-                $scope.relationsEntity = { type:'folders', id:completeFolder._id };
+                $scope.params.datatypename = 'folders';
+                $scope.params.entityname = completeFolder._id;
                 $rootScope.isLoading = false;
             }).then(function() {
                 utils.loadDynamicAttributes($scope, 'folders', $scope.params.folderId);

@@ -98,9 +98,6 @@ var prepareIncludes = (fs) => {
 async function init() {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
     var nocache = require('./middlewares/nocache');
-    var db = require('./middlewares/db');
-    var nocache = require('./middlewares/nocache');
-    await db.init();
     var dah = require('./utils/dynamicAttributesHelper');
     // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
     var promises = [];
@@ -109,17 +106,16 @@ async function init() {
         await dah.activateDynamicAttributesForClient(null, moduleNames[i]);
     }
     var fs = require('fs');
-    // Initialize and migrate PostgreSQL database
-    await require("./utils/db").Db.init(localConfig.migratedatabase);
-    if (localConfig.migratedatabase) {
-        await require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
+    // Initialize database
+    await require("./utils/db").Db.init();
+    // Run update scripts on startup
+    if (localConfig.applyupdates) {
+        await require("./utils/updateonstart")();
+        localConfig.applyupdates = false;
+        fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
     }
-    localConfig.migratedatabase = false;
-    fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
-    if(localConfig.migratedatabase) {
-        console.log("Recreating database. Please restart the app after finishing.");
-        return;
-    }
+    // Recalculate all formulas because the definitions could have changed in module-config
+    await require("./utils/calculationhelper").recalculateall();
     // Includes minifizieren
     prepareIncludes(fs);
     // Anwendung initialisieren und Handler-Reihenfolge festlegen
@@ -129,8 +125,7 @@ async function init() {
     //var accessLogStream = fs.createWriteStream(__dirname + '/access.log', {flags: 'a'});
     //app.use(require('morgan')('combined', {stream: accessLogStream}));
     app.use(require('compression')()); // Ausgabekompression
-    app.set('json spaces', '\t'); // Ausgabe im Response verschönern
-    app.use(db.handler); // Datenbankverbindung -> req.db
+    // app.set('json spaces', '\t'); // Ausgabe im Response verschönern
     app.use(require('./middlewares/extracttoken')); // Authentifizierung und Authorisierung -> req.user{_id}
     app.use(require('body-parser').json()); // JSON Request-Body-Parser -> req.body
     app.use(require('body-parser').urlencoded({extended:true})); // parse application/x-www-form-urlencoded
@@ -220,4 +215,8 @@ async function init() {
 };
 
 // Installation of required dependencies must be done by hand when needed
-init();
+if (process.env.NODE_ENV !== 'test') {
+    init();
+} else {
+    module.exports.init = init;
+}

@@ -275,11 +275,11 @@ describe('API documents', () =>{
             assert.ok(!fs.existsSync(filePath));
         });
 
-        it('Sets the previewImageId of all FM objects to null where it was the id of the deleted document previously', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.del(`/api/documents/client0_document01?token=${token}`).expect(204);
-            var fmobjects = await Db.getDynamicObjects("client0", co.collections.fmobjects.name, { previewimagedocumentname: "client0_document01" });
-            assert.strictEqual(fmobjects.length, 0);
+        xit('Sets the previewImageId of all FM objects to null where it was the id of the deleted document previously', async() => {
+            // var token = await th.defaults.login("client0_usergroup0_user0");
+            // await th.del(`/api/documents/client0_document01?token=${token}`).expect(204);
+            // var fmobjects = await Db.getDynamicObjects("client0", co.collections.fmobjects.name, { previewimagedocumentname: "client0_document01" });
+            // assert.strictEqual(fmobjects.length, 0);
         });
 
     });

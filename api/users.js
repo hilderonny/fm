@@ -79,7 +79,10 @@ router.get('/:id', auth(co.permissions.ADMINISTRATION_USER, "r", co.modules.base
 
 router.post('/newpassword', auth(co.permissions.SETTINGS_USER, "w", co.modules.base), async(req, res) => {
     if (typeof(req.body.pass) === 'undefined') return res.sendStatus(400);
-    await Db.updateDynamicObject(req.user.clientname, "users", req.user.name, { password: bcryptjs.hashSync(req.body.pass) });
+    // Update password in allusers table
+    var password = bcryptjs.hashSync(req.body.pass);
+    await Db.query(Db.PortalDatabaseName, `UPDATE allusers SET password = '${Db.replaceQuotes(password)}' WHERE name = '${Db.replaceQuotes(req.user.name)}';`);
+    await Db.updateDynamicObject(req.user.clientname, "users", req.user.name, { password: password });
     res.sendStatus(200);
 });
 
@@ -111,7 +114,11 @@ router.put('/:id', auth(co.permissions.ADMINISTRATION_USER, "w", co.modules.base
     if (!user || Object.keys(user).length < 1) return res.sendStatus(400);
     // Check whether userGroup exists
     var usertoupdate = {};
-    if (user.pass && user.pass.length > 0) usertoupdate.password = bcryptjs.hashSync(user.pass);
+    if (user.pass && user.pass.length > 0) {
+        usertoupdate.password = bcryptjs.hashSync(user.pass);
+        // Update password in allusers table
+        await Db.query(Db.PortalDatabaseName, `UPDATE allusers SET password = '${Db.replaceQuotes(usertoupdate.password)}' WHERE name = '${Db.replaceQuotes(req.params.id)}';`);
+    }
     if (user.userGroupId) {
         if (!(await Db.getDynamicObject(req.user.clientname, "usergroups", user.userGroupId))) return res.sendStatus(400);
         usertoupdate.usergroupname = user.userGroupId;

@@ -1,7 +1,7 @@
 <md-card ng-cloak ng-controller="OfficeNoteCardController"  style="background-image:url('/css/icons/office/Notes.svg');" class="list-details-details">
     
     <md-toolbar class="md-toolbar-tools md-accent">   
-        <ng-include ng-if="!isNewNote" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <md-button avt-toolbar-button avt-relations-toolbar-button ng-if="params.entityname && $root.canWrite('PERMISSION_CORE_RELATIONS')"></md-button>
         <div flex></div>
         <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
     </md-toolbar>
@@ -38,7 +38,7 @@
             <md-tab-label><span translate>TRK_NOTES_CONTENTS</span></md-tab-label>
             <md-tab-body><ng-include src="'NotesFormTemplate'"></ng-include></md-tab-body>
         </md-tab>
-        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
+        <md-tab ng-if="$root.canRead('PERMISSION_CORE_RELATIONS')" avt-relations-tab></md-tab>
     </md-tabs>    
     <ng-include flex ng-if="isNewNote" src="'NotesFormTemplate'"></ng-include>
     <resize-handle></resize-handle>        

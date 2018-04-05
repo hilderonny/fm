@@ -6,7 +6,7 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
             $scope.userGroup.permissions.forEach(function(permission) {
                 permission.translationKey = 'TRK_' + permission.key;
             });
-            return Promise.resolve();
+            return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
         });
     };
 
@@ -20,7 +20,8 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
             $scope.isNewUserGroup = false;
             $scope.userGroup._id = createdUserGroup._id;
             $scope.userGroupName = $scope.userGroup.name;
-            $scope.relationsEntity = { type:'usergroups', id:createdUserGroup._id };
+            $scope.params.datatypename = 'usergroups';
+            $scope.params.entityname = createdUserGroup._id;
             return $scope.getPermissions();
         }).then(function() {
             if ($scope.params.createUserGroupCallback) {
@@ -133,7 +134,8 @@ app.controller('AdministrationUsergroupCardController', function($scope, $rootSc
                 $scope.userGroup = userGroupsResponse.data;
                 $scope.isNewUserGroup = false;
                 $scope.userGroupName = $scope.userGroup.name; // Prevent updating the label when changing the name input value
-                $scope.relationsEntity = { type:'usergroups', id:$scope.userGroup._id };
+                $scope.params.datatypename = 'usergroups';
+                $scope.params.entityname = $scope.userGroup._id;
                 return $http.get('/api/users/forUserGroup/' + $scope.params.userGroupId + '?ignore403');
             }).then(function(usersResponse) {
                 $scope.userGroup.users = usersResponse.data;
