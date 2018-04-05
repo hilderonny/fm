@@ -150,8 +150,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         // Loads the labels of all parent elements of a given entity. Used for breadcrumbs. The order is root element first
-        loadparentlabels: function(datatypename, entityname) {
-            return utils.getresponsedata('/api/dynamic/parentpath/' + datatypename + '/' + entityname);
+        loadparentlabels: function(forlist, datatypename, entityname) {
+            return utils.getresponsedata("/api/dynamic/parentpath/" + forlist + "/" + datatypename + "/" + entityname);
         },
 
         loadpermissions: function(scope) {

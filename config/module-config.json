@@ -497,7 +497,7 @@
                     { "name": "contact", "label": "Kontakt", "type": "text" },
                     { "name": "personname", "label": "Person", "type": "reference", "reference": "persons" },
                     { "name": "communicationtypename", "label": "Typ", "type": "reference", "reference": "communicationtypes" }
-                ], "canhaverelations" : true }
+                ] }
                 
             ]
         },

@@ -104,8 +104,9 @@ router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth(fals
     var recordtypename = req.params.recordtypename;
     var forlist = req.params.forlist;
     try {
+        var datatypes = await Db.getdatatypes(clientname);
         var permissions = await ph.getpermissionsforuser(req.user);
-        var parentrelations = (await Db.getparentrelationstructure(clientname, recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1).sort((a, b) => b.depth - a.depth);
+        var parentrelations = (await Db.getparentrelationstructure(clientname, recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1 && datatypes[r.datatype1name].lists && datatypes[r.datatype1name].lists.indexOf(forlist) >= 0).sort((a, b) => b.depth - a.depth);
         var rootelements = await getrootelements(clientname, forlist, permissions);
         var children = rootelements;
         for (var i = 0; i < parentrelations.length; i++) {
@@ -122,12 +123,13 @@ router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth(fals
 
 // Get path of all parents of an object as array (root first) for breadcrumbs
 // TODO: In allgemeine Detailseiten-API integrieren
-router.get("/parentpath/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
+router.get("/parentpath/:forlist/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var clientname = req.user.clientname;
     try {
-        var relations = (await Db.getparentrelationstructure(clientname, req.params.recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1); // When there are no parents (root element created)
+        var datatypes = await Db.getdatatypes(clientname);
+        var relations = (await Db.getparentrelationstructure(clientname, req.params.recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1 && datatypes[r.datatype1name].lists && datatypes[r.datatype1name].lists.indexOf(req.params.forlist) >= 0); // When there are no parents (root element created)
         if (relations.length < 1) return res.send([]);
-        var labelquery = relations.map(r => `SELECT label, ${r.depth} AS depth FROM ${Db.replaceQuotesAndRemoveSemicolon(r.datatype1name)} WHERE name = '${Db.replaceQuotes(r.name1)}'`).join(" UNION ");
+        var labelquery = relations.map(r => `SELECT ${datatypes[r.datatype1name].titlefield || 'label'} AS label, ${r.depth} AS depth FROM ${Db.replaceQuotesAndRemoveSemicolon(r.datatype1name)} WHERE name = '${Db.replaceQuotes(r.name1)}'`).join(" UNION ");
         var labels = (await Db.query(clientname, labelquery)).rows.sort((a, b) => b.depth - a.depth).map(l => l.label);
         res.send(labels);
     } catch(error) {
