@@ -42,7 +42,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                 };
                 scope.createrootelement = function($event) {
                     // Show selection panel for child types
-                    var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists.indexOf(scope.params.listfilter) >= 0; });
+                    var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists && dt.lists.indexOf(scope.params.listfilter) >= 0; });
                     utils.showselectionpanel($event, datatypes, function(selecteddatatype) {
                         utils.removeCardsToTheRightOf(element);
                         utils.addCardWithPermission("components/DetailsCard", {

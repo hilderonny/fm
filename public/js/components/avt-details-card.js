@@ -64,7 +64,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
             return function link(scope, iElement) {
                 scope.createchildelement = function($event) {
                     // Show selection panel for child types
-                    var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists.indexOf(scope.params.listfilter) >= 0; });
+                    var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists && dt.lists.indexOf(scope.params.listfilter) >= 0; });
                     utils.showselectionpanel($event, datatypes, function(selecteddatatype) {
                         utils.removeCard(element);
                         utils.addCardWithPermission("components/DetailsCard", {
