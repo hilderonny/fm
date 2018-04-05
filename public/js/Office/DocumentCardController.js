@@ -104,7 +104,8 @@ app.controller('OfficeDocumentCardController', function($scope, $rootScope, $htt
                 return pathElement.name;
             }).join(' » ');
             // Information über das Dokument für Verknüpfungen-Tab bereit stellen
-            $scope.relationsEntity = { type:'documents', id:document._id };
+            $scope.params.datatypename = 'documents';
+            $scope.params.entityname = document._id;
             // Berechtigungen ermitteln
             $scope.canWriteDocuments = $rootScope.canWrite('PERMISSION_OFFICE_DOCUMENT');
             utils.loadDynamicAttributes($scope, 'documents', $scope.params.documentId);

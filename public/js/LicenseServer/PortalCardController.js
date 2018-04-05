@@ -52,7 +52,8 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
             $scope.portal.url = createdPortal.url,
             $scope.portal.comment = createdPortal.comment,
             $scope.portalName = $scope.portal.name;
-            $scope.relationsEntity = { type:'portals', id:createdPortal._id };
+            $scope.params.datatypename = 'portals';
+            $scope.params.entityname = createdPortal._id;
             if ($scope.params.createPortalCallback) {
                 $scope.params.createPortalCallback(createdPortal);
             }
@@ -158,7 +159,8 @@ app.controller('LicenseServerPortalCardController', function($scope, $rootScope,
                 $scope.portalName = completePortal.name; // Prevent updating the label when changing the name input value
                 // Zeitstempel in Datum umwandeln
                 if ($scope.portal.lastNotification) $scope.portal.lastNotification = new Date($scope.portal.lastNotification).toLocaleString();
-                $scope.relationsEntity = { type:'portals', id:completePortal._id };
+                $scope.params.datatypename = 'portals';
+                $scope.params.entityname = completePortal._id;
                 return $scope.getPortalModules();              
             }).then(function() {
                 utils.loadDynamicAttributes($scope, 'portals', $scope.params.portalId);

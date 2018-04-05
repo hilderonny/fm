@@ -77,8 +77,6 @@
                 "partial/components/DetailsCard.html",
                 "partial/components/HierarchyCard.html",
                 "partial/Core/DynamicAttributesTab.html",
-                "partial/Core/RelationsMenu.html",
-                "partial/Core/RelationsTab.html",
                 "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
                 "partial/Doc/UserGroups.html",
@@ -107,6 +105,7 @@
                 "public/js/components/avt-card.js",
                 "public/js/components/avt-details.js",
                 "public/js/components/avt-hierarchy.js",
+                "public/js/components/avt-relations-tab.js",
                 "public/js/components/avt-relations-toolbar-button.js",
                 "public/js/components/avt-toolbar.js",
                 "public/js/components/avt-toolbar-button.js",
@@ -121,9 +120,7 @@
                 "public/js/Administration/UsergroupCardController.js",
                 "public/js/Administration/UsergrouplistCardController.js",
                 "public/js/Administration/UserlistCardController.js",
-                "public/js/Administration/UserSettingsCardController.js",
-                "public/js/Core/RelationsMenuController.js",
-                "public/js/Core/RelationsTabController.js"
+                "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "en", "de" ],
             "menu": [
@@ -476,7 +473,7 @@
                     { "name": "postcode", "label": "Postleitzahl", "type": "text" },
                     { "name": "city", "label": "Ort", "type": "text" },
                     { "name": "partneraddresstypename", "label": "Art der Adresse", "type": "reference", "reference": "partneraddresstypes" }
-                ], "canhaverelations" : true },
+                ] },
 
                 { "name": "communicationmediums", "label": "Kommunikationsmedium", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }

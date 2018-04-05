@@ -85,7 +85,8 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
             $scope.isNewClient = false;
             $scope.client._id = createdClient._id;
             $scope.clientName = $scope.client.name;
-            $scope.relationsEntity = { type:'clients', id:createdClient._id };
+            $scope.params.datatypename = 'clients';
+            $scope.params.entityname = createdClient._id;
             if ($scope.params.createClientCallback) {
                 $scope.params.createClientCallback(createdClient);
             }
@@ -169,8 +170,9 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
                 $scope.isNewClient = false;
                 $scope.client = completeClient;
                 $scope.clientName = completeClient.name; // Prevent updating the label when changing the name input value
-                $scope.relationsEntity = { type:'clients', id:completeClient._id };
-                return $scope.getClientModules();
+                $scope.params.datatypename = 'clients';
+                $scope.params.entityname = completeClient._id;
+                    return $scope.getClientModules();
             }).then(function() {
                 utils.loadDynamicAttributes($scope, 'clients', $scope.params.clientId);
                 utils.setLocation('/clients/' + $scope.params.clientId);

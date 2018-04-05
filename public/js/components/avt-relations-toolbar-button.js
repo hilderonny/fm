@@ -25,8 +25,8 @@ app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $transl
         scope: false,
         link: function(scope, element, attr) {
             scope.icon = "/css/icons/material/Add Link.svg";
-            scope.label = "TRK_RELATIONS_LINK";
-            scope.tooltip = "TRK_RELATIONS_ADD_LINK";
+            scope.label = "TRK_RELATIONS_RELATION";
+            scope.tooltip = "TRK_RELATIONS_ADD_RELATION";
             scope.relationtypes = scope.$root.relationtypes.reduce(function(arr, elem) {
                 arr.push({ name: elem.name, label: elem.labelfrom1to2, is1: true });
                 if (elem.name !== "looselycoupled") arr.push({ name: elem.name, label: elem.labelfrom2to1, is1: false });
@@ -36,14 +36,14 @@ app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $transl
             var okbutton = { label: "TRK_OK", ishidden: true , onclick: function() {
                 var newrelation = {
                     relationtypename: scope.relationtype.name,
-                    datatype1name: scope.relationtype.is1 ? scope.datatype.name : scope.targetdatatype.name,
-                    name1: scope.relationtype.is1 ? scope.dynamicobject.name : scope.targetelement.name,
-                    datatype2name: scope.relationtype.is1 ? scope.targetdatatype.name : scope.datatype.name,
-                    name2: scope.relationtype.is1 ? scope.targetelement.name : scope.dynamicobject.name
+                    datatype1name: scope.relationtype.is1 ? scope.params.datatypename : scope.targetdatatype.name,
+                    name1: scope.relationtype.is1 ? scope.params.entityname : scope.targetelement.name,
+                    datatype2name: scope.relationtype.is1 ? scope.targetdatatype.name : scope.params.datatypename,
+                    name2: scope.relationtype.is1 ? scope.targetelement.name : scope.params.entityname
                 };
                 utils.createrelation(newrelation).then(function() {
-                    if (scope.onrelationcreated) {
-                        scope.onrelationcreated();
+                    if (scope.$root.onrelationcreated) {
+                        scope.$root.onrelationcreated();
                     }
                     $translate(['TRK_RELATIONS_RELATION_CREATED']).then(function(translations) {
                         $mdToast.show($mdToast.simple().textContent(translations.TRK_RELATIONS_RELATION_CREATED).hideDelay(1000).position('bottom right'));
