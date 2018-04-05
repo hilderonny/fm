@@ -12,7 +12,7 @@
             <p translate>TRK_FOLDERS_UPLOAD</p>
             <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadFile(this)" />
         </md-button>
-        <ng-include ng-if="!isNewFolder" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <md-button avt-toolbar-button avt-relations-toolbar-button ng-if="params.entityname && $root.canWrite('PERMISSION_CORE_RELATIONS')"></md-button>
         <div flex></div>
         <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
     </md-toolbar>
@@ -67,7 +67,7 @@
             <md-tab-label><span translate>TRK_FOLDERS_DETAILS</span></md-tab-label>
             <md-tab-body><ng-include src="'FoldersFormTemplate'"></ng-include></md-tab-body>
         </md-tab>
-        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
+        <md-tab ng-if="$root.canRead('PERMISSION_CORE_RELATIONS')" avt-relations-tab></md-tab>
     </md-tabs>
 
     <ng-include flex ng-if="isNewFolder" src="'FoldersFormTemplate'"></ng-include>

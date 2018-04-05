@@ -114,7 +114,7 @@ function extractDocument(zipDocument, clientname) {
                     documentsHelper.createPath(path.dirname(documentPath));
                     // Datei auf Festplatte schreiben und Dokumenten-ID als Dateiname nehmen
                     entry.pipe(fs.createWriteStream(documentPath));
-                    return Promise.resolve();
+                    return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
                 }));
             }
         }).on('error', (err) => { 

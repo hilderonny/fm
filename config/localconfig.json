@@ -15,7 +15,7 @@
     "portalName": "AVT FacilityManagement",
     "npmInstallCommand": "\"C:\\Program Files\\nodejs\\npm.cmd\" install",
     "recreatePortalAdmin": false,
-    "migratedatabase": false,
+    "applyupdates": false,
     "updateExtractPath": "./temp/",
     "serviceName": "Avorium FM",
     "serviceDescription": "Facility management portal",

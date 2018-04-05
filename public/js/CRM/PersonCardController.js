@@ -13,7 +13,8 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
             $scope.person._id = createdPerson._id;
             $scope.personFirstname= $scope.person.firstname;
             $scope.personLastname= $scope.person.lastname;
-            $scope.relationsEntity = { type:'persons', id:createdPerson._id };
+            $scope.params.datatypename = 'persons';
+            $scope.params.entityname = createdPerson._id;
             if ($scope.params.createPersonCallback) {
                 $scope.params.createPersonCallback(createdPerson);
             }
@@ -131,7 +132,8 @@ app.controller('CRMPersonCardController', function($scope, $rootScope, $http, $m
                 $scope.person= completePerson;
                 $scope.personLastname =completePerson.lastname;
                 $scope.personFirstname =completePerson.firstname; 
-                $scope.relationsEntity = { type:'persons', id:completePerson._id };
+                $scope.params.datatypename = 'persons';
+                $scope.params.entityname = completePerson._id;
                 $http.get('/api/communications/forPerson/'+$scope.person._id).then(function(communicationResponse){
                     $scope.communications = communicationResponse.data;
                     utils.loadDynamicAttributes($scope, 'persons', $scope.params.personId);

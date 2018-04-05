@@ -108,7 +108,7 @@ module.exports.pack = (moduleNameList, version) => {
             }
         });
         // Add include files, currently always available
-        requestedModule.include.forEach((includeFileName) => {
+        if (requestedModule.include) requestedModule.include.forEach((includeFileName) => {
             var fullPath = `${includeFileName}`;
             zip.file(fullPath, fs.readFileSync('./' + fullPath));
         });
@@ -124,9 +124,9 @@ module.exports.pack = (moduleNameList, version) => {
                 var fullPath = `public/partial/${item.mainCard}.html`;
                 zip.file(fullPath, fs.readFileSync('./' + fullPath));
                 // Icons
-                var fullMaterialPath = `public/css/icons/material/${item.icon}.svg`;
+                var fullMaterialPath = `public${item.icon}`;
                 zip.file(fullMaterialPath, fs.readFileSync('./' + fullMaterialPath));
-                var fullOfficePath = `public/css/icons/office/${item.icon}.svg`;
+                var fullOfficePath = `public${item.icon.replace(/\/material\//g, "/office/")}`;
                 zip.file(fullOfficePath, fs.readFileSync('./' + fullOfficePath));
             });
         });

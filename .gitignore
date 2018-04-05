@@ -1,5 +1,6 @@
 .nyc_output
 .svn
+backup/
 documents
 node_modules
 uploads

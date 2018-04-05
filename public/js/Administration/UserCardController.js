@@ -24,8 +24,9 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
             $scope.user.pass = '';
             $scope.user.pass2 = '';
             $scope.userName = $scope.user.name;
-            $scope.relationsEntity = { type:'users', id:createdUser._id };
-            if ($scope.params.createUserCallback) {
+            $scope.params.datatypename = 'users';
+            $scope.params.entityname = createdUser._id;
+        if ($scope.params.createUserCallback) {
                 $scope.params.createUserCallback(createdUser);
             }
             $translate(['TRK_USERS_USER_CREATED']).then(function(translations) {
@@ -116,7 +117,8 @@ app.controller('AdministrationUserCardController', function($scope, $rootScope, 
                     $scope.isNewUser = false;
                     $scope.user = completeUser;
                     $scope.userName = completeUser.name; // Prevent updating the label when changing the name input value
-                    $scope.relationsEntity = { type:'users', id:completeUser._id };
+                    $scope.params.datatypename = 'users';
+                    $scope.params.entityname = completeUser._id;
                     for (var i = 0; i < $scope.userGroups.length; i++) {
                         var userGroup = $scope.userGroups[i];
                         if (userGroup._id === completeUser.userGroupId) {

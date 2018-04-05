@@ -52,14 +52,14 @@ var collectModuleConfigReferencedFiles = () => {
         if (module.menu) module.menu.forEach((menu) => {
             if (menu.mainCard) files.insert(`public/partial/${menu.mainCard}.html`);
             if (menu.icon) {
-                files.insert(`public/css/icons/material/${menu.icon}.svg`);
-                files.insert(`public/css/icons/office/${menu.icon}.svg`);
+                files.insert(`public${menu.icon}`);
+                files.insert(`public${menu.icon.replace(/\/material\//g, "/office/")}`);
             }
             if (menu.items) menu.items.forEach((item) => {
                 if (item.mainCard) files.insert(`public/partial/${item.mainCard}.html`);
                 if (item.icon) {
-                    files.insert(`public/css/icons/material/${item.icon}.svg`);
-                    files.insert(`public/css/icons/office/${item.icon}.svg`);
+                    files.insert(`public${item.icon}`);
+                    files.insert(`public${item.icon.replace(/\/material\//g, "/office/")}`);
                 }
                 if (item.docCard) files.insert(`public/partial/Doc/${item.docCard}.html`);
             });
@@ -128,9 +128,12 @@ describe('module-config.json', function() {
             '.gitignore',
             '.nyc_output/',
             '.vscode/',
+            'api/README.md',
+            'backup/',
             'basetest.bat',
+            'config/README.md',
             'config/localconfig.json',
-            'config/module-config.json', // Is handles especially by re-creating it, so no need to reference it in itself
+            'config/module-config.json', // Is handled especially by re-creating it, so no need to reference it in itself
             'cover.bat',
             'coverage/',
             'debug.log',
@@ -142,6 +145,7 @@ describe('module-config.json', function() {
             'pub.cert',
             'public/css/local.css',
             'public/index.html',
+            'public/js/components/README.md',
             'public/js/include.js',
             'public/js/include.js.map',
             'temp/',
@@ -178,7 +182,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('modules match with those in constants', function() {
@@ -196,7 +200,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('contains all material icons for collections defined in constants', function() {
@@ -204,13 +208,13 @@ describe('module-config.json', function() {
         Object.keys(co.collections).forEach((key) => {
             var collection = co.collections[key];
             if (!collection.canHaveAttributes) return; // Nur relevant bei dynamischen Attributen
-            var filePath = `public/css/icons/material/${collection.icon}.svg`;
-            if (!fs.existsSync(path.join(rootPath, filePath))) errors.push(`File "${filePath}" does not exist.`);
+            var filePath = path.join(rootPath, "public", collection.icon);
+            if (!fs.existsSync(filePath)) errors.push(`File "${filePath}" does not exist.`);
         });
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('permissions match with those in constants', function() {
@@ -248,7 +252,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     /**
@@ -308,7 +312,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
 });

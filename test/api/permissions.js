@@ -2,8 +2,7 @@
  * UNIT Tests for api/permissions
  */
 var assert = require('assert');
-var th = require('../testHelpers');
-var db = require('../../middlewares/db');
+var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var ch = require('../../utils/configHelper');
 var Db = require("../../utils/db").Db;
@@ -72,7 +71,7 @@ describe('API permissions', () => {
             });
         });
 
-        it('returns only permissions available to the logged in user (depending on usergroup and client modules', async() => {
+        it('returns only permissions available to the logged in user (depending on usergroup and client modules)', async() => {
             await th.cleanTable("permissions", true, true);
             var expectedPermissions = [
                 { permission: co.permissions.BIM_FMOBJECT, canwrite: true },

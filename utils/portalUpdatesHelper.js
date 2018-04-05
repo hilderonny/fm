@@ -10,8 +10,8 @@ var fs = require('fs');
  */
 module.exports.triggerUpdate = function(){
     return new Promise((resolve, reject) => {
-        var localConfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());  //require('../config/localconfig.json') cannot be used becuase require is synchronous and only reads the file once, following calls return the result from cache, which prevents unit testing
-        var url = `${localConfig.licenseserverurl}/api/update/download?licenseKey=${localConfig.licensekey}`;
+        var localconfig = JSON.parse(fs.readFileSync('./config/localconfig.json').toString());  //require('../config/localconfig.json') cannot be used becuase require is synchronous and only reads the file once, following calls return the result from cache, which prevents unit testing
+        var url = `${localconfig.licenseserverurl}/api/update/download?licenseKey=${localconfig.licensekey}`;
         console.log("Fetching update package from " + url);
         var updateRequest = request(url);
         updateRequest.on('error', function (error) {
@@ -25,13 +25,16 @@ module.exports.triggerUpdate = function(){
                 updateRequest.abort();
                 reject(response);
             }else{
-                var updateExtractPath = localConfig.updateExtractPath ? localConfig.updateExtractPath : './temp/';
+                var updateExtractPath = localconfig.updateExtractPath ? localconfig.updateExtractPath : './temp/';
                 var filename = response.headers['content-disposition'].split("=")[1]; // "attachment; filename=abc.zip"
                 if (!fs.existsSync(updateExtractPath)) fs.mkdirSync(updateExtractPath);
                 console.log("Extracting to path  " + updateExtractPath);
                 updateRequest.pipe(fs.createWriteStream(updateExtractPath + filename)).on("finish", async() => {
                     console.log("Using package file " + updateExtractPath + filename);
                     var extractedfiles = await decompress(updateExtractPath + filename, updateExtractPath);
+                    // Force the applying of updates on the next start
+                    localconfig.applyupdates = true;
+                    fs.writeFileSync("./config/localconfig.json", JSON.stringify(localconfig, null, 4)); // Relative to main entry point
                     console.log(`Extracted ${extractedfiles.length} files. Ready for restart.`);
                     resolve(true);
                 });

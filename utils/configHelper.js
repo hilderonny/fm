@@ -10,7 +10,7 @@ var ch = {
      * Returns a promise with an array of availyble permission keys as parameter
      * @example 
      * var configHelper = require('/utils/configHelper');
-     * configHelper.getAvailablePermissionKeysForClient(req.user.clientId, req.db).then(function(permissionKeys) { ... });
+     * configHelper.getAvailablePermissionKeysForClient(req.user.clientId).then(function(permissionKeys) { ... });
      */
     getAvailablePermissionKeysForClient: async(clientname) => {
         var modules = await ch.getAvailableModulesForClient(clientname);
@@ -44,7 +44,7 @@ var ch = {
      * Git ein Promise zurück, welches als Parameter true oder false liefert.
      * @example 
      * var configHelper = require('/utils/configHelper');
-     * configHelper.isPermissionAvailableToClient(req.user.clientId, 'PERMISSION_ADMINISTRATION_SETTINGS', req.db).then(function(permissionIsAvailable) { ... });
+     * configHelper.isPermissionAvailableToClient(req.user.clientId, 'PERMISSION_ADMINISTRATION_SETTINGS').then(function(permissionIsAvailable) { ... });
     */
     isPermissionAvailableToClient: async(clientname, permissionKey) => {
         var clientPermissionKeys = await ch.getAvailablePermissionKeysForClient(clientname);
@@ -57,7 +57,7 @@ var ch = {
      * Returns a promise with the filtered module config as parameter.
      * @example 
      * var configHelper = require('/utils/configHelper');
-     * configHelper.getAvailableModulesForClient(req.user.clientId, req.db).then(function(modules) { ... });
+     * configHelper.getAvailableModulesForClient(req.user.clientId).then(function(modules) { ... });
      */
     getAvailableModulesForClient: async(clientname) => {
         if (clientname === Db.PortalDatabaseName) {

@@ -6,7 +6,7 @@
             <md-icon md-svg-src="/css/icons/material/Download.svg"></md-icon>
             <p translate>TRK_DOCUMENTS_DOWNLOAD</p>
         </md-button>
-        <ng-include ng-if="!isNewFolder" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <md-button avt-toolbar-button avt-relations-toolbar-button ng-if="params.entityname && $root.canWrite('PERMISSION_CORE_RELATIONS')"></md-button>
         <md-button ng-click="viewInAR()" aria-label="VIEW IN 3D" ng-if="is3Dmodel">
             <md-tooltip md-direction="bottom">In 3D betrachten</md-tooltip>
             <md-icon md-svg-src="/css/icons/material/Virtual Reality.svg"></md-icon>
@@ -70,7 +70,7 @@
             </md-tab-body>
         </md-tab>
         <!-- Tab für Verknüpfungsliste -->
-        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
+        <md-tab ng-if="$root.canRead('PERMISSION_CORE_RELATIONS')" avt-relations-tab></md-tab>
     </md-tabs>
 
     <div class="progress-panel" ng-if="isExtracting">

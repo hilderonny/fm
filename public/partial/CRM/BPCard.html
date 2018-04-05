@@ -6,7 +6,7 @@
             <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
             <p translate>TRK_BUSINESSPARTNERS_ADDRESS</p>
         </md-button>       
-        <ng-include ng-if="!isNewPartner" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
+        <md-button avt-toolbar-button avt-relations-toolbar-button ng-if="params.entityname && $root.canWrite('PERMISSION_CORE_RELATIONS')"></md-button>
         <div flex></div>
         <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
     </md-toolbar>
@@ -75,7 +75,7 @@
                 </md-card-content>
             </md-tab-body>
         </md-tab>
-        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
+        <md-tab ng-if="$root.canRead('PERMISSION_CORE_RELATIONS')" avt-relations-tab></md-tab>
     </md-tabs>
 
     <ng-include flex ng-if="isNewPartner" src="'PartnersFormTemplate'"></ng-include>

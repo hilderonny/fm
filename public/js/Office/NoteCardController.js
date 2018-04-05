@@ -9,7 +9,8 @@ app.controller('OfficeNoteCardController', function($scope, $rootScope, $http, $
             var createdNote = response.data;
             $scope.isNewNote = false;        
             $scope.note._id = createdNote._id;
-            $scope.relationsEntity = { type:'notes', id:createdNote._id };
+            $scope.params.datatypename = 'notes';
+            $scope.params.entityname = createdNote._id;
             if ($scope.params.createNoteCallback) {
                 $scope.params.createNoteCallback(createdNote);
             }
@@ -75,7 +76,8 @@ app.controller('OfficeNoteCardController', function($scope, $rootScope, $http, $
                 var completeNote = noteResponse.data;
                 $scope.isNewNote = false;
                 $scope.note = completeNote;    
-                $scope.relationsEntity = {type:'notes', id:completeNote._id };
+                $scope.params.datatypename = 'notes';
+                $scope.params.entityname = completeNote._id;
                 utils.loadDynamicAttributes($scope, 'notes', $scope.params.noteId);
                 utils.setLocation('/notes/' + $scope.params.noteId);
             });

@@ -13,7 +13,8 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
             $scope.isNewPartner = false;
             $scope.partner._id = createdPartner._id;
             $scope.partnerName = $scope.partner.name;
-            $scope.relationsEntity = { type:'businesspartners', id:createdPartner._id };
+            $scope.params.datatypename = 'businesspartners';
+            $scope.params.entityname = createdPartner._id;
             if ($scope.params.createBPCallback) {
                 $scope.params.createBPCallback(createdPartner);
             }
@@ -138,7 +139,8 @@ app.controller('CRMBPCardController', function($scope, $rootScope, $http, $mdDia
                 $scope.isNewPartner = false;
                 $scope.partner = completePartner;
                 $scope.partnerName = completePartner.name;    
-                $scope.relationsEntity = {type:'businesspartners', id:completePartner._id };
+                $scope.params.datatypename = 'businesspartners';
+                $scope.params.entityname = completePartner._id;
                 $http.get('/api/partneraddresses/forBusinessPartner/' + completePartner._id).then(function(partnerAddressResponse){
                     completePartner.partnerAddresses = partnerAddressResponse.data;
                     utils.loadDynamicAttributes($scope, 'businesspartners', $scope.params.partnerId);

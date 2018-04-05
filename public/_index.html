@@ -106,12 +106,12 @@
 
                             <md-subheader class="md-no-sticky" ng-if="menuItem.items"><span translate="{{ menuItem.title }}"></span></md-subheader>
                             <md-list-item ng-if="menuItem.items" ng-repeat="subMenuItem in menuItem.items" ng-click="menuClick(subMenuItem)" ng-class="{active: currentMenuItem === subMenuItem}" aria-label="{{ subMenuItem.title }}">
-                                <md-icon md-svg-src="/css/icons/material/{{subMenuItem.icon}}.svg" aria-label="{{ subMenuItem.title }} "></md-icon>
+                                <md-icon md-svg-src="{{subMenuItem.icon}}" aria-label="{{ subMenuItem.title }} "></md-icon>
                                 <p><span translate="{{ subMenuItem.title }}"></span></p>
                             </md-list-item>
 
                             <md-list-item ng-if="!menuItem.items" ng-click="menuClick(menuItem)" ng-class="{active: currentMenuItem === menuItem}" aria-label="{{ menuItem.title }}">
-                                <md-icon md-svg-src="/css/icons/material/{{menuItem.icon}}.svg" aria-label="{{ menuItem.title }} "></md-icon>
+                                <md-icon md-svg-src="{{menuItem.icon}}" aria-label="{{ menuItem.title }} "></md-icon>
                                 <p><span translate="{{ menuItem.title }}"></span></p>
                             </md-list-item>
 
@@ -127,17 +127,18 @@
             </md-sidenav>
 
             <md-content flex layout="row" id="cardcanvas" ng-show="currentMenuItem || isShowingDoc">
-                <div class="progress-panel" ng-if=" $root.isLoading">
-                    <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-                </div> 
             </md-content>
+
+            <div class="progress-panel" ng-if="$root.isLoading">
+                <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+            </div> 
 
             <md-content flex layout="row" id="dashboard" ng-show="!currentMenuItem && !isShowingDoc">
                 <div>
                     <ng-repeat ng-repeat="menuItem in menu">
 
                         <md-button class="md-raised" ng-repeat="subMenuItem in menuItem.items" ng-click="menuClick(subMenuItem)" aria-label="{{ subMenuItem.title }}">
-                            <md-icon md-svg-src="/css/icons/office/{{subMenuItem.icon}}.svg"></md-icon>
+                            <md-icon md-svg-src="{{getofficeicon(subMenuItem.icon)}}"></md-icon>
                             <span class="md-subhead" translate="{{ subMenuItem.title }}"></span>
                         </md-button>
                         
