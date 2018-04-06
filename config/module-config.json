@@ -119,10 +119,8 @@
                 "public/js/Administration/DynamicAttributeElementCardController.js",
                 "public/js/Administration/DynamicAttributesEntityListCardController.js",
                 "public/js/Administration/SettingSetListCardController.js",
-                "public/js/Administration/UserCardController.js",
                 "public/js/Administration/UsergroupCardController.js",
                 "public/js/Administration/UsergrouplistCardController.js",
-                "public/js/Administration/UserlistCardController.js",
                 "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "en", "de" ],
