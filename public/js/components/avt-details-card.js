@@ -51,7 +51,6 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '           </md-card-content>' +
         '       </md-tab-body>' +
         '   </md-tab>' +
-        '   <md-tab ng-if="params.entityname && canreadrelations" avt-relations-tab></md-tab>' +
         '</md-tabs>'
     ;
     return {
@@ -77,24 +76,6 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                 // Events for sub elements forwarded to hierarchy
                 scope.ondetailscardclosed = scope.params.onclose;
                 scope.onelementcreated = scope.params.oncreate;
-                // scope.createchildelement = function($event) {
-                //     // Show selection panel for child types
-                //     var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists && dt.lists.indexOf(scope.params.listfilter) >= 0; });
-                //     utils.showselectionpanel($event, datatypes, function(selecteddatatype) {
-                //         utils.removeCard(element);
-                //         utils.addCardWithPermission("components/DetailsCard", {
-                //             parentdatatypename: scope.params.datatypename,
-                //             parententityname: scope.params.entityname,
-                //             datatypename: selecteddatatype.name,
-                //             onclose: function() {
-                //                 if (scope.params.onclose) scope.params.onclose(); // Hierarchy handles close
-                //             },
-                //             oncreate: function(datatype, elementname) {
-                //                 if (scope.params.oncreate) scope.params.oncreate(datatype, elementname); // Hierarchy handles creation callback
-                //             },
-                //         }, scope.params.permission);
-                //     });
-                // };
                 scope.create = function() {
                     var objecttosend = {};
                     scope.datatypefields.forEach(function(dtf) {
@@ -168,7 +149,6 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                         return Promise.all(promises);
                     }).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
-                        scope.canreadrelations = scope.$root.canRead('PERMISSION_CORE_RELATIONS');
                         utils.setLocation("/" + datatypename + (entityname ? "/" + entityname : ""), false);
                     });
                 };

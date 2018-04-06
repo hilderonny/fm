@@ -3,7 +3,7 @@ app.directive('avtAddElementToolbarButton', function($rootScope, $compile, utils
     var template = '<md-button ng-if="$parent.canwrite && $parent.detailscard" avt-toolbar-button ng-click="createelement($event)" icon="/css/icons/material/Plus Math.svg" label="Element" tooltip="Neues Element erstellen"></md-button>';
     return {
         restrict: "A",
-        priority: 800,
+        priority: 890,
         scope: false,
         compile: function compile(element, attrs) {
             if (element.length < 1 || !element[0].toolbar || !attrs.avtAddElementToolbarButton) return;
