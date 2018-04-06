@@ -11,12 +11,12 @@ app.controller('ronnyseinsGoogleMapsCardController', function($scope, $http, $md
         $scope.map.addListener('click', function(e) {
             $scope.createMarker(e.latLng.lat(), e.latLng.lng() );
         });
-        $http.get('/api/markers?fields=_id+lat+lng').then(function(response) {
+        $http.get('/api/dynamic/markers').then(function(response) {
             response.data.forEach(function(marker) {
                 $scope.addMarker(marker);
             });
         });
-        $http.get('/api/users?fields=_id+name+lat+lng').then(function(response) {
+        $http.get('/api/dynamic/users').then(function(response) {
             response.data.forEach(function(user) {
                 if (user.lat && user.lng) {
                     $scope.addUser(user);
@@ -61,13 +61,13 @@ app.controller('ronnyseinsGoogleMapsCardController', function($scope, $http, $md
 
     $scope.createMarker = function(lat, lng) {
         var markerToSend = { lat: lat, lng: lng };
-        $http.post('/api/markers', markerToSend).then(function(response) {
+        $http.post('/api/dynamic/markers', markerToSend).then(function(response) {
             $scope.addMarker(response.data);
         });
     };
 
     $scope.deleteMarker = function(mapMarker) {
-        $http.delete('/api/markers/' + mapMarker._id).then(function(response) {
+        $http.delete('/api/dynamic/markers/' + mapMarker._id).then(function(response) {
             mapMarker.setMap(null);
             mapMarker = null;
         });

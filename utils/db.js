@@ -155,6 +155,10 @@ var Db = {
     },
 
     deleteDynamicObject: async(clientname, datatypename, elementname, filter) => {
+        // Special handling of users
+        if (datatypename === 'users') {
+            await Db.query(Db.PortalDatabaseName, `DELETE FROM allusers WHERE name='${Db.replaceQuotes(elementname)}';`);
+        }
         var filterstring = filter ? " AND " + Db.getFilterString(filter) : "";
         return Db.query(clientname, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} WHERE name='${Db.replaceQuotes(elementname)}'${filterstring};`);
     },
@@ -446,6 +450,10 @@ var Db = {
             }
             return result;
         });
+        // Special handling of users
+        if (datatypename === 'users') {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO allusers (name, password, clientname) VALUES ('${Db.replaceQuotes(element.name)}', '${Db.replaceQuotes(bcryptjs.hashSync(element.password || ""))}', '${Db.replaceQuotes(clientname)}');`);
+        }
         var statement = `INSERT INTO ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} (${keys.map(k => Db.replaceQuotesAndRemoveSemicolon(k)).join(',')}) VALUES (${values.join(',')}) ON CONFLICT DO NOTHING;`; // Ignore duplicate names. Can happen on startup when default values are (re-)inserted
         return Db.query(clientname, statement);
     },
@@ -542,7 +550,12 @@ var Db = {
             }
             return `${k}=${result}`;
         }).filter(k => k !== null);
+        if (values.length < 1) return; // Nothing left to update
         var filterstring = filter ? " AND " + Db.getFilterString(filter) : "";
+        // Special handling of passwords for users
+        if (datatypename === 'users' && element.password && element.password.length) {
+            await Db.query(Db.PortalDatabaseName, `UPDATE allusers SET password = '${Db.replaceQuotes(bcryptjs.hashSync(element.password))}' WHERE name = '${Db.replaceQuotes(elementname)}';`);
+        }
         var statement = `UPDATE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} SET ${values.join(',')} WHERE name='${Db.replaceQuotes(elementname)}'${filterstring};`;
         return Db.query(clientname, statement);
     },
