@@ -42,6 +42,19 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
+        adddetailscard: function(scope, datatypename, entityname, permission, parentdatatypename, parententityname) {
+            return utils.addCardWithPermission(scope.detailscard, {
+                datatypename: datatypename,
+                entityname: entityname,
+                parentdatatypename: parentdatatypename,
+                parententityname: parententityname,
+                onclose: scope.ondetailscardclosed,
+                oncreate: scope.onelementcreated,
+                ondelete: scope.onelementdeleted,
+                onsave: scope.onelementupdated
+            }, permission);
+        },
+
         createdynamicobject: function(datatypename, entity) {
             return $http.post("/api/dynamic/" + datatypename, entity).then(function(response) {
                 return response.data; // name of created element

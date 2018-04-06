@@ -1,13 +1,17 @@
 
 app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, $mdDialog, utils) { 
-    var cardcontent = 
+    var toolbartemplate = 
+        '<md-toolbar avt-toolbar>' +
+        '</md-toolbar>';
+    var cardtitletemplate =
         '<md-card-title flex="none">' +
         '   <md-card-title-text>' +
         '       <span class="md-headline" ng-show="params.entityname" ng-bind="dynamicobject.label"></span>' +
-        '       <span class="md-headline" ng-if="!params.entityname"><span translate>TRK_DETAILS_NEW_ELEMENT</span> ({{datatype.label}})</span>' +
+        '       <span class="md-headline" ng-if="!params.entityname">{{datatype.label}} erstellen</span>' +
         '       <span class="breadcrumbs" ng-show="breadcrumbs" ng-bind="breadcrumbs">BC</span>' +
         '   </md-card-title-text>' +
-        '</md-card-title>' +
+        '</md-card-title>';
+    var tabstemplate = 
         '<md-tabs flex>' +
         '   <md-tab>' +
         '       <md-tab-label><span translate>TRK_DETAILS_DETAILS</span></md-tab-label>' +
@@ -59,27 +63,38 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
             element.removeAttr("avt-details-card");
             element.attr("class", "list-details-details");
             var resizehandle = element[0].querySelector("resize-handle");
-            element.append(angular.element(cardcontent));
+            element[0].toolbar = angular.element(toolbartemplate);
+            element[0].cardtitle = angular.element(cardtitletemplate);
+            element[0].tabs = angular.element(tabstemplate);
+            element.append(element[0].toolbar);
+            element.append(element[0].cardtitle);
+            element.append(element[0].tabs);
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
-                scope.createchildelement = function($event) {
-                    // Show selection panel for child types
-                    var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists && dt.lists.indexOf(scope.params.listfilter) >= 0; });
-                    utils.showselectionpanel($event, datatypes, function(selecteddatatype) {
-                        utils.removeCard(element);
-                        utils.addCardWithPermission("components/DetailsCard", {
-                            parentdatatypename: scope.params.datatypename,
-                            parententityname: scope.params.entityname,
-                            datatypename: selecteddatatype.name,
-                            onclose: function() {
-                                if (scope.params.onclose) scope.params.onclose(); // Hierarchy handles close
-                            },
-                            oncreate: function(datatype, elementname) {
-                                if (scope.params.oncreate) scope.params.oncreate(datatype, elementname); // Hierarchy handles creation callback
-                            },
-                        }, scope.params.permission);
-                    });
+                scope.onbeforecreateelement = function($event) { // When child elements are to be created, remove this card here
+                    utils.removeCard(element);
                 };
+                // Events for sub elements forwarded to hierarchy
+                scope.ondetailscardclosed = scope.params.onclose;
+                scope.onelementcreated = scope.params.oncreate;
+                // scope.createchildelement = function($event) {
+                //     // Show selection panel for child types
+                //     var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists && dt.lists.indexOf(scope.params.listfilter) >= 0; });
+                //     utils.showselectionpanel($event, datatypes, function(selecteddatatype) {
+                //         utils.removeCard(element);
+                //         utils.addCardWithPermission("components/DetailsCard", {
+                //             parentdatatypename: scope.params.datatypename,
+                //             parententityname: scope.params.entityname,
+                //             datatypename: selecteddatatype.name,
+                //             onclose: function() {
+                //                 if (scope.params.onclose) scope.params.onclose(); // Hierarchy handles close
+                //             },
+                //             oncreate: function(datatype, elementname) {
+                //                 if (scope.params.oncreate) scope.params.oncreate(datatype, elementname); // Hierarchy handles creation callback
+                //             },
+                //         }, scope.params.permission);
+                //     });
+                // };
                 scope.create = function() {
                     var objecttosend = {};
                     scope.datatypefields.forEach(function(dtf) {
@@ -154,7 +169,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     }).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                         scope.canreadrelations = scope.$root.canRead('PERMISSION_CORE_RELATIONS');
-                        utils.setLocation("/" + datatypename + "/" + entityname, false);
+                        utils.setLocation("/" + datatypename + (entityname ? "/" + entityname : ""), false);
                     });
                 };
                 scope.save = function() {

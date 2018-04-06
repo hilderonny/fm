@@ -10,14 +10,16 @@ app.directive('avtCard', function($compile, utils) {
             element[0].classList.add("ng-cloak");
             element.append(angular.element("<resize-handle></resize-handle>"));
             element.removeAttr("avt-card"); //remove the attribute to avoid indefinite loop
-            return function link(scope, iElement, iAttrs) {
+            return function link(scope) {
+                scope.canread = scope.$root.canRead(scope.params.permission);
+                scope.canwrite = scope.$root.canWrite(scope.params.permission);
                 if (scope.params.icon) element.attr("style", "background-image:url('"+ scope.params.icon.replace(/\/material\//g, "/office/") + "')");
-                scope.closecard = function() {
+                scope.onclose = function() {
                     if (scope.params.onclose) scope.params.onclose();
-                    utils.removeCardsToTheRightOf(iElement);
-                    utils.removeCard(iElement);
+                    utils.removeCardsToTheRightOf(element);
+                    utils.removeCard(element);
                 }
-                $compile(iElement)(scope);
+                $compile(element)(scope);
             };
         }
     };

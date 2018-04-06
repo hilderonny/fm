@@ -103,7 +103,9 @@
                 "public/js/Utils.js",
                 "public/js/MainController.js",
 
+                "public/js/components/avt-add-element-toolbar-button.js",
                 "public/js/components/avt-card.js",
+                "public/js/components/avt-close-toolbar-button.js",
                 "public/js/components/avt-details-card.js",
                 "public/js/components/avt-hierarchy-card.js",
                 "public/js/components/avt-list-card.js",
@@ -130,7 +132,7 @@
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
                         { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
-                        { "mainCard": "components/ListCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "listfilter": "users", "directurls": [ "users" ] },
+                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "listfilter": "users", "directurls": [ "users" ] },
                         { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "Benutzer (alt)", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users" },
                         { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] }
                     ]
@@ -627,8 +629,7 @@
                 "css/images/FM_addsub.png",
                 "css/images/FM_edit.png",
                 "css/images/FM_hierarchy.png",
-                "partial/components/DetailsCard.html",
-                "partial/components/HierarchyCard.html",
+                "partial/BIM/FmObjectsHierarchyCard.html",
                 "partial/Doc/FmObjects.html"
             ],
             "languages" : [ "en", "de" ],
@@ -636,7 +637,8 @@
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "components/HierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
+                        { "mainCard": "BIM/FmObjectsHierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] },
+                        { "mainCard": "components/HierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "FM Objekte (alt)", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects" }
                     ]
                 }
             ],
