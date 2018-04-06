@@ -242,6 +242,7 @@ module.exports.fieldtypes = {
     datetime: "datetime",
     decimal: "decimal",
     formula: "formula",
+    password: "password",
     reference: "reference",
     text: "text"
 };

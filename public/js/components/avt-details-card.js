@@ -19,13 +19,15 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '           <md-card-content layout="column">' +
         '               <form name="detailsform">' +
         '                   <md-input-container flex ng-repeat="datatypefield in datatypefields | orderBy: \'label\'" ng-if="params.entityname || datatypefield.fieldtype !== \'formula\'">' +
-        '                       <label ng-if="[\'text\', \'decimal\', \'formula\', \'reference\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
-        '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\'">' +
-        '                       <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'">' +
+        '                       <label ng-if="[\'text\', \'decimal\', \'formula\', \'password\', \'reference\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && (datatypefield.name !== \'name\' || !params.entityname)" ng-required="datatypefield.isrequired">' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && datatypefield.name === \'name\' && params.entityname" disabled>' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'password\'" type="password" ng-required="datatypefield.isrequired">' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'" ng-required="datatypefield.isrequired">' +
         '                       <input ng-value="dynamicobject[datatypefield.name] || 0" ng-if="datatypefield.fieldtype === \'formula\'" type="number" disabled>' +
         '                       <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
         '                       <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=download&token={{token}}"/>' + // Special handle previewimagedocumentname
-        '                       <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'">' +
+        '                       <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'" ng-required="datatypefield.isrequired">' +
         '                           <md-option ng-value="reference.name" ng-repeat="reference in references[datatypefield.reference] | orderBy: [\'label\', \'name\']">' +
         '                               <span>{{reference.label || reference.name}}</span>' +
         '                           </md-option>' +
@@ -44,8 +46,8 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '                   <md-card-actions layout="row" layout-align="space-between center">' +
         '                       <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite" ng-click="delete()"><span translate>TRK_DETAILS_DELETE</span></md-button>' +
         '                       <div flex></div>' +
-        '                       <md-button class="md-raised md-accent" ng-if="!params.entityname && canwrite" ng-click="create()"><span translate>TRK_DETAILS_CREATE</span></md-button>' +
-        '                       <md-button class="md-raised md-accent" ng-if="params.entityname && canwrite" ng-click="save()"><span translate>TRK_DETAILS_SAVE</span></md-button>' +
+        '                       <md-button class="md-raised md-accent" ng-if="!params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="create()"><span translate>TRK_DETAILS_CREATE</span></md-button>' +
+        '                       <md-button class="md-raised md-accent" ng-if="params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="save()"><span translate>TRK_DETAILS_SAVE</span></md-button>' +
         '                   </md-card-actions>' +
         '               </form>' +
         '           </md-card-content>' +
@@ -79,7 +81,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                 scope.create = function() {
                     var objecttosend = {};
                     scope.datatypefields.forEach(function(dtf) {
-                        if (dtf.name === "name" || dtf.fieldtype === "formula") return;
+                        if (dtf.fieldtype === "formula") return;
                         objecttosend[dtf.name] = scope.dynamicobject[dtf.name];
                     });
                     var createdelementname;
@@ -130,7 +132,8 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
                     scope.datatype = scope.$root.datatypes[datatypename];
-                    var fieldnames = Object.keys(scope.datatype.fields).filter(function(k) { return k !== "name" });
+                    var fieldnames = Object.keys(scope.datatype.fields);
+                    if (!scope.datatype.candefinename) fieldnames = fieldnames.filter(function(k) { return k !== "name" });
                     scope.datatypefields = fieldnames.map(function(fn) { return scope.datatype.fields[fn]; });
                     return Promise.all([
                         entityname ? utils.loaddynamicobject(datatypename, entityname).then(function(dynamicobject) { scope.dynamicobject = dynamicobject; }) : Promise.resolve(),

@@ -173,7 +173,13 @@ router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, 
     var newobject = req.body;
     var clientname = req.user.clientname;
     var recordtypename = req.params.recordtypename;
-    newobject.name = uuidv4();
+    var datatype = (await Db.getdatatypes(clientname))[recordtypename];
+    if (newobject.name && datatype.candefinename) { // Check whether name can be set by API (users)
+        var existing = await Db.getDynamicObject(clientname, recordtypename, newobject.name);
+        if (existing) return res.sendStatus(409); // Conflict, name is already in use
+    } else {
+        newobject.name = uuidv4();
+    }
     try {
         await Db.insertDynamicObject(clientname, recordtypename, newobject);
         // When the new object is a relation of type "parentchild", then the parent object must be recalculated

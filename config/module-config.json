@@ -197,10 +197,10 @@
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "password", "label": "Passwort", "type": "text" },
+                    { "name": "password", "label": "Passwort", "type": "password" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
-                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true }
+                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups", "isrequired": true }
+                ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true }
 
             ],
             "portaldatatypes": [
@@ -262,10 +262,10 @@
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "password", "label": "Passwort", "type": "text" },
+                    { "name": "password", "label": "Passwort", "type": "password" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
-                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true }
+                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups", "isrequired": true }
+                ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true }
                 
             ]
         },
