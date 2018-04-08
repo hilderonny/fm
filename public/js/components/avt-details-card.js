@@ -44,7 +44,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '                       </md-select>' +
         '                   </md-input-container>' +
         '                   <md-card-actions layout="row" layout-align="space-between center">' +
-        '                       <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite" ng-click="delete()"><span translate>TRK_DETAILS_DELETE</span></md-button>' +
+        '                       <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite" ng-disabled="!candelete" ng-click="delete()"><span translate>TRK_DETAILS_DELETE</span></md-button>' +
         '                       <div flex></div>' +
         '                       <md-button class="md-raised md-accent" ng-if="!params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="create()"><span translate>TRK_DETAILS_CREATE</span></md-button>' +
         '                       <md-button class="md-raised md-accent" ng-if="params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="save()"><span translate>TRK_DETAILS_SAVE</span></md-button>' +
@@ -133,6 +133,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     scope.dynamicobject = {}; // For new
                     scope.references = {};
                     scope.token = $http.defaults.headers.common["x-access-token"]; // For preview image downloads
+                    scope.candelete = true; // For deletio prevention of extensions like usergroups
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
                     scope.datatype = scope.$root.datatypes[datatypename];

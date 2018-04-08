@@ -1,7 +1,7 @@
 
 app.directive('avtUsersTab', function($compile, $translate, $mdDialog, $mdToast, utils) {
     var tabtemplate = 
-        '<md-tab ng-if="$parent.params.entityname && canreadusers" md-on-select="$parent.loadusers()">' +
+        '<md-tab ng-if="$parent.params.entityname && canreadusers">' +
         '   <md-tab-label>Benutzer</md-tab-label>' +
         '   <md-tab-body>' +
         '       <md-card-content>' +
@@ -31,11 +31,13 @@ app.directive('avtUsersTab', function($compile, $translate, $mdDialog, $mdToast,
                 scope.loadusers = function() {
                     utils.getresponsedata("/api/dynamic/users?usergroupname=" + scope.params.entityname).then(function(users) {
                         scope.users = users;
+                        if (users && users.length > 0) scope.candelete = false; // prevent deletion of usergroups with users
                     });
                 };
                 scope.selectuser = function(user) {
                     utils.setLocation("/users/" + user.name, true);
                 };
+                scope.loadusers();
             };
         }
     }
