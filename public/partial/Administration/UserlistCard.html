@@ -1,22 +1,5 @@
-<md-card ng-cloak ng-controller="AdministrationUserlistCardController" style="background-image:url(/css/icons/office/User.svg);">
-    
-    <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button ng-click="newUser()" aria-label="ADD USER" ng-if="canWriteUserDetails">
-            <md-tooltip md-direction="bottom"><span translate>TRK_USERS_CREATE_NEW_USER</span></md-tooltip>
-            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-            <p translate>TRK_USERS_USER</p>
-        </md-button>
-    </md-toolbar>
-    
-    <md-card-content>
-        <md-list class="lines-beetween-items">
-            <md-list-item ng-repeat="user in users | orderBy: 'name'" ng-click="selectUser(user)" ng-class="selectedUser == user ? 'active' : false" aria-label="{{user.name}}">
-                <md-icon md-svg-src="/css/icons/material/User.svg"></md-icon>
-                <p ng-bind="user.name"></p>
-                <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
-            </md-list-item>
-        </md-list>
-    </md-card-content>
-
-    <resize-handle></resize-handle>
-</md-card>
+<md-card 
+    avt-card
+    avt-list-card='{"detailscard":"Administration/UserCard"}'
+    avt-add-element-toolbar-button='{"datatypenames":["users"]}'
+></md-card>

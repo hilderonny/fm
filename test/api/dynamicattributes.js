@@ -156,8 +156,8 @@ describe('API dynamicattributes', () => {
 
         var api = co.apis.dynamicattributes + '/values/users';
 
-        th.apiTests.getId.defaultNegative(api, false, co.collections.users.name);
-        th.apiTests.getId.clientDependentNegative(api, co.collections.users.name);
+        th.apiTests.getId.defaultNegative(api, false, co.collections.users.name, false, false, false, false, false, { name: "testobject", usergroupname: "client0_usergroup0" });
+        th.apiTests.getId.clientDependentNegative(api, co.collections.users.name, false, false, false, { name: "testobject", usergroupname: "client0_usergroup0" });
         
         it('responds without giving a model name and entity id with 404', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");

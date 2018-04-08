@@ -12,8 +12,8 @@ app.directive('avtToolbarButton', function($compile) {
         compile: function compile(element, attrs) {
             var onclickhandler = attrs.avtOnClick;
             element.removeAttr("avt-toolbar-button"); //remove the attribute to avoid indefinite loop
-            element.removeAttr("avt-on-click");
-            element.attr("ng-click", "onclick($event)");
+            // element.removeAttr("avt-on-click");
+            // element.attr("ng-click", "onclick($event)");
             element.append(angular.element(template));
             return function link(scope, iElement, iAttrs) {
                 scope.icon = iAttrs.icon;

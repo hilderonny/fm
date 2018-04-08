@@ -665,8 +665,8 @@ th.apiTests = {
         }
     },
     getId: {
-        defaultNegative: function(api, permission, datatypename, client, usergroup, user, adminuser, ignoreNotExistingId) {
-            var testObject = { name: "testobject" };
+        defaultNegative: function(api, permission, datatypename, client, usergroup, user, adminuser, ignoreNotExistingId, testObject) {
+            if (!testObject) testObject = { name: "testobject" };
             it('responds without authentication with 403', async() => {
                 await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
                 await th.get(`/api/${api}/${testObject.name}`).expect(403);
@@ -696,8 +696,8 @@ th.apiTests = {
                 await th.get(`/api/${api}/999999999999999999999999?token=${token}`).expect(404);
             });
         },
-        clientDependentNegative: function(api, datatypename, client, usergroup, user) {
-            var testObject = { name: "testobject" };
+        clientDependentNegative: function(api, datatypename, client, usergroup, user, testObject) {
+            if (!testObject) testObject = { name: "testobject" };
             it('responds with 404 when the object with the given ID does not belong to the client of the logged in user', async() => {
                 await Db.insertDynamicObject("client1", datatypename, testObject);
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");

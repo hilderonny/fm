@@ -1,13 +1,17 @@
 
-app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdDialog, utils) { 
-    var cardcontent = 
+app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, $mdDialog, utils) { 
+    var toolbartemplate = 
+        '<md-toolbar avt-toolbar>' +
+        '</md-toolbar>';
+    var cardtitletemplate =
         '<md-card-title flex="none">' +
         '   <md-card-title-text>' +
         '       <span class="md-headline" ng-show="params.entityname" ng-bind="dynamicobject.label"></span>' +
-        '       <span class="md-headline" ng-if="!params.entityname"><span translate>TRK_DETAILS_NEW_ELEMENT</span> ({{datatype.label}})</span>' +
+        '       <span class="md-headline" ng-if="!params.entityname">{{datatype.label}} erstellen</span>' +
         '       <span class="breadcrumbs" ng-show="breadcrumbs" ng-bind="breadcrumbs">BC</span>' +
         '   </md-card-title-text>' +
-        '</md-card-title>' +
+        '</md-card-title>';
+    var tabstemplate = 
         '<md-tabs flex>' +
         '   <md-tab>' +
         '       <md-tab-label><span translate>TRK_DETAILS_DETAILS</span></md-tab-label>' +
@@ -15,13 +19,15 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
         '           <md-card-content layout="column">' +
         '               <form name="detailsform">' +
         '                   <md-input-container flex ng-repeat="datatypefield in datatypefields | orderBy: \'label\'" ng-if="params.entityname || datatypefield.fieldtype !== \'formula\'">' +
-        '                       <label ng-if="[\'text\', \'decimal\', \'formula\', \'reference\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
-        '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\'">' +
-        '                       <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'">' +
+        '                       <label ng-if="[\'text\', \'decimal\', \'formula\', \'password\', \'reference\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && (datatypefield.name !== \'name\' || !params.entityname)" ng-required="datatypefield.isrequired">' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && datatypefield.name === \'name\' && params.entityname" disabled>' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'password\'" type="password" ng-required="datatypefield.isrequired">' +
+        '                       <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'" ng-required="datatypefield.isrequired">' +
         '                       <input ng-value="dynamicobject[datatypefield.name] || 0" ng-if="datatypefield.fieldtype === \'formula\'" type="number" disabled>' +
         '                       <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
         '                       <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=download&token={{token}}"/>' + // Special handle previewimagedocumentname
-        '                       <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'">' +
+        '                       <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'" ng-required="datatypefield.isrequired">' +
         '                           <md-option ng-value="reference.name" ng-repeat="reference in references[datatypefield.reference] | orderBy: [\'label\', \'name\']">' +
         '                               <span>{{reference.label || reference.name}}</span>' +
         '                           </md-option>' +
@@ -38,16 +44,15 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
         '                       </md-select>' +
         '                   </md-input-container>' +
         '                   <md-card-actions layout="row" layout-align="space-between center">' +
-        '                       <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite" ng-click="delete()"><span translate>TRK_DETAILS_DELETE</span></md-button>' +
+        '                       <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite" ng-disabled="!candelete" ng-click="delete()"><span translate>TRK_DETAILS_DELETE</span></md-button>' +
         '                       <div flex></div>' +
-        '                       <md-button class="md-raised md-accent" ng-if="!params.entityname && canwrite" ng-click="create()"><span translate>TRK_DETAILS_CREATE</span></md-button>' +
-        '                       <md-button class="md-raised md-accent" ng-if="params.entityname && canwrite" ng-click="save()"><span translate>TRK_DETAILS_SAVE</span></md-button>' +
+        '                       <md-button class="md-raised md-accent" ng-if="!params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="create()"><span translate>TRK_DETAILS_CREATE</span></md-button>' +
+        '                       <md-button class="md-raised md-accent" ng-if="params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="save()"><span translate>TRK_DETAILS_SAVE</span></md-button>' +
         '                   </md-card-actions>' +
         '               </form>' +
         '           </md-card-content>' +
         '       </md-tab-body>' +
         '   </md-tab>' +
-        '   <md-tab ng-if="params.entityname && canreadrelations" avt-relations-tab></md-tab>' +
         '</md-tabs>'
     ;
     return {
@@ -56,34 +61,27 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
         scope: true,
         priority: 900,
         compile: function compile(element, attrs) {
-            element.removeAttr("avt-details");
+            element.removeAttr("avt-details-card");
             element.attr("class", "list-details-details");
             var resizehandle = element[0].querySelector("resize-handle");
-            element.append(angular.element(cardcontent));
+            element[0].toolbar = angular.element(toolbartemplate);
+            element[0].cardtitle = angular.element(cardtitletemplate);
+            element[0].tabs = angular.element(tabstemplate);
+            element.append(element[0].toolbar);
+            element.append(element[0].cardtitle);
+            element.append(element[0].tabs);
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
-                scope.createchildelement = function($event) {
-                    // Show selection panel for child types
-                    var datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.lists.indexOf(scope.params.listfilter) >= 0; });
-                    utils.showselectionpanel($event, datatypes, function(selecteddatatype) {
-                        utils.removeCard(element);
-                        utils.addCardWithPermission("components/DetailsCard", {
-                            parentdatatypename: scope.params.datatypename,
-                            parententityname: scope.params.entityname,
-                            datatypename: selecteddatatype.name,
-                            onclose: function() {
-                                if (scope.params.onclose) scope.params.onclose(); // Hierarchy handles close
-                            },
-                            oncreate: function(datatype, elementname) {
-                                if (scope.params.oncreate) scope.params.oncreate(datatype, elementname); // Hierarchy handles creation callback
-                            },
-                        }, scope.params.permission);
-                    });
+                scope.onbeforecreateelement = function($event) { // When child elements are to be created, remove this card here
+                    utils.removeCard(element);
                 };
+                // Events for sub elements forwarded to hierarchy
+                scope.ondetailscardclosed = scope.params.onclose;
+                scope.onelementcreated = scope.params.oncreate;
                 scope.create = function() {
                     var objecttosend = {};
                     scope.datatypefields.forEach(function(dtf) {
-                        if (dtf.name === "name" || dtf.fieldtype === "formula") return;
+                        if (dtf.fieldtype === "formula") return;
                         objecttosend[dtf.name] = scope.dynamicobject[dtf.name];
                     });
                     var createdelementname;
@@ -105,6 +103,10 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         $translate(["TRK_DETAILS_ELEMENT_CREATED"]).then(function(translations) {
                             $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_CREATED).hideDelay(1000).position("bottom right"));
                         });
+                    }, function(statuscode) {
+                        if (statuscode === 409 && scope.datatype.candefinename) {
+                            $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
+                        }
                     });
                 };
                 scope.delete = function() {
@@ -131,10 +133,12 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                     scope.dynamicobject = {}; // For new
                     scope.references = {};
                     scope.token = $http.defaults.headers.common["x-access-token"]; // For preview image downloads
+                    scope.candelete = true; // For deletio prevention of extensions like usergroups
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
                     scope.datatype = scope.$root.datatypes[datatypename];
-                    var fieldnames = Object.keys(scope.datatype.fields).filter(function(k) { return k !== "name" });
+                    var fieldnames = Object.keys(scope.datatype.fields);
+                    if (!scope.datatype.candefinename) fieldnames = fieldnames.filter(function(k) { return k !== "name" });
                     scope.datatypefields = fieldnames.map(function(fn) { return scope.datatype.fields[fn]; });
                     return Promise.all([
                         entityname ? utils.loaddynamicobject(datatypename, entityname).then(function(dynamicobject) { scope.dynamicobject = dynamicobject; }) : Promise.resolve(),
@@ -153,8 +157,7 @@ app.directive('avtDetails', function($compile, $http, $mdToast, $translate, $mdD
                         return Promise.all(promises);
                     }).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
-                        scope.canreadrelations = scope.$root.canRead('PERMISSION_CORE_RELATIONS');
-                        utils.setLocation("/" + datatypename + "/" + entityname, false);
+                        utils.setLocation("/" + datatypename + (entityname ? "/" + entityname : ""), false);
                     });
                 };
                 scope.save = function() {

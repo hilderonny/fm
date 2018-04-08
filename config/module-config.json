@@ -4,7 +4,7 @@
         "base": {
             "forportal": true,
             "forclients": true,
-            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "usergroups", "users" ],
+            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "users" ],
             "middlewares": [ "auth", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
@@ -75,7 +75,6 @@
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
                 "partial/components/DetailsCard.html",
-                "partial/components/HierarchyCard.html",
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
@@ -102,13 +101,19 @@
                 "public/js/Utils.js",
                 "public/js/MainController.js",
 
+                "public/js/components/avt-add-element-toolbar-button.js",
                 "public/js/components/avt-card.js",
-                "public/js/components/avt-details.js",
-                "public/js/components/avt-hierarchy.js",
+                "public/js/components/avt-close-toolbar-button.js",
+                "public/js/components/avt-details-card.js",
+                "public/js/components/avt-hierarchy-card.js",
+                "public/js/components/avt-list-card.js",
+                "public/js/components/avt-permissions-tab.js",
+                "public/js/components/avt-relations.js",
                 "public/js/components/avt-relations-tab.js",
                 "public/js/components/avt-relations-toolbar-button.js",
                 "public/js/components/avt-toolbar.js",
                 "public/js/components/avt-toolbar-button.js",
+                "public/js/components/avt-users-tab.js",
 
                 "public/js/Administration/ClientSettingsCardController.js",
                 "public/js/Administration/DynamicAttributesCardController.js",
@@ -116,10 +121,6 @@
                 "public/js/Administration/DynamicAttributeElementCardController.js",
                 "public/js/Administration/DynamicAttributesEntityListCardController.js",
                 "public/js/Administration/SettingSetListCardController.js",
-                "public/js/Administration/UserCardController.js",
-                "public/js/Administration/UsergroupCardController.js",
-                "public/js/Administration/UsergrouplistCardController.js",
-                "public/js/Administration/UserlistCardController.js",
                 "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "en", "de" ],
@@ -128,8 +129,8 @@
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
                         { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
-                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
-                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] }
+                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "listfilter": "users", "directurls": [ "users" ] },
+                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "listfilter": "usergroups", "directurls": [ "usergroups" ] }
                     ]
                 }
             ],
@@ -190,14 +191,14 @@
 
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ], "canhaverelations" : true },
+                ], "lists": [ "usergroups" ], "permissionkey": "PERMISSION_ADMINISTRATION_USERGROUP", "canhaverelations" : true },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "password", "label": "Passwort", "type": "text" },
+                    { "name": "password", "label": "Passwort", "type": "password" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
-                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ], "canhaverelations" : true }
+                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups", "isrequired": true }
+                ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true }
 
             ],
             "portaldatatypes": [
@@ -255,14 +256,14 @@
 
                 { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ], "canhaverelations" : true },
+                ], "lists": [ "usergroups" ], "permissionkey": "PERMISSION_ADMINISTRATION_USERGROUP", "canhaverelations" : true },
 
                 { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "password", "label": "Passwort", "type": "text" },
+                    { "name": "password", "label": "Passwort", "type": "password" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
-                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups" }
-                ], "canhaverelations" : true }
+                    { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups", "isrequired": true }
+                ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true }
                 
             ]
         },
@@ -272,9 +273,9 @@
             "forclients": true,
             "api" : [ "doc" ],
             "doc" : [
-                { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "Dictionary", "index": 97 },
-                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "Design", "index": 98 },
-                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "News", "index": 99 }
+                { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "/css/icons/material/Dictionary.svg", "index": 97 },
+                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "/css/icons/material/Design.svg", "index": 98 },
+                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "/css/icons/material/News.svg", "index": 99 }
             ],
             "include" : [
                 "public/js/Doc/ListController.js",
@@ -624,8 +625,8 @@
                 "css/images/FM_addsub.png",
                 "css/images/FM_edit.png",
                 "css/images/FM_hierarchy.png",
-                "partial/components/DetailsCard.html",
-                "partial/components/HierarchyCard.html",
+                "partial/BIM/FmObjectsDetailsCard.html",
+                "partial/BIM/FmObjectsHierarchyCard.html",
                 "partial/Doc/FmObjects.html"
             ],
             "languages" : [ "en", "de" ],
@@ -633,7 +634,7 @@
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "components/HierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
+                        { "mainCard": "BIM/FmObjectsHierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
                     ]
                 }
             ],

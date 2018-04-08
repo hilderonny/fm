@@ -67,7 +67,7 @@ var collectModuleConfigReferencedFiles = () => {
         if (module.doc) module.doc.forEach((doc) => {
             if (doc.docCard) files.insert(`public/partial/Doc/${doc.docCard}.html`);
             if (doc.icon) {
-                files.insert(`public/css/icons/material/${doc.icon}.svg`);
+                files.insert(`public${doc.icon}`);
             }
         });
         // Setting target cards and icons
@@ -304,7 +304,7 @@ describe('module-config.json', function() {
                 var docFileName = `partial/Doc/${doc.docCard}.html`;
                 if (mod.public.indexOf(docFileName) < 0) errors.push(`File "${docFileName}" not referenced in public part of module "${k}".`);
                 if (!doc.icon) errors.push(`Fehlendes "icon" Attribut im "doc"-Abschnitt des Moduls "${k}".`);
-                var iconFileName = `css/icons/material/${doc.icon}.svg`;
+                var iconFileName = `${doc.icon}`.substring(1); // Stript first slash
                 if (mod.public.indexOf(iconFileName) < 0) errors.push(`Icon "${iconFileName}" not referenced in public part of module "${k}".`);
                 checkDocumentationImageLinks(k, mod.public, docFileName, errors);
             });

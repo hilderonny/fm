@@ -125,10 +125,6 @@ module.exports.apis = {
      */
     update: 'update',
     /**
-     * API for editing usergroups
-     */
-    usergroups: 'usergroups',
-    /**
      * API for editing users
      */
     users: 'users'
@@ -242,6 +238,7 @@ module.exports.fieldtypes = {
     datetime: "datetime",
     decimal: "decimal",
     formula: "formula",
+    password: "password",
     reference: "reference",
     text: "text"
 };
