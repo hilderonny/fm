@@ -121,8 +121,6 @@
                 "public/js/Administration/DynamicAttributeElementCardController.js",
                 "public/js/Administration/DynamicAttributesEntityListCardController.js",
                 "public/js/Administration/SettingSetListCardController.js",
-                "public/js/Administration/UsergroupCardController.js",
-                "public/js/Administration/UsergrouplistCardController.js",
                 "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "en", "de" ],
@@ -132,8 +130,7 @@
                     "items": [
                         { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
                         { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "listfilter": "users", "directurls": [ "users" ] },
-                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "listfilter": "usergroups", "directurls": [ "usergroups" ] },
-                        { "mainCard": "Administration/UsergrouplistCardOld", "icon": "/css/icons/material/User Group Man Man.svg", "title": "Benutzergruppen (alt)", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups" }
+                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "listfilter": "usergroups", "directurls": [ "usergroups" ] }
                     ]
                 }
             ],

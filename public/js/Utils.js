@@ -57,6 +57,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         createdynamicobject: function(datatypename, entity) {
             return $http.post("/api/dynamic/" + datatypename, entity).then(function(response) {
+                if (response.status !== 200) return Promise.reject(response.status);
                 return response.data; // name of created element
             });
         },

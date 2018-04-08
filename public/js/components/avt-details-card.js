@@ -103,6 +103,10 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                         $translate(["TRK_DETAILS_ELEMENT_CREATED"]).then(function(translations) {
                             $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_CREATED).hideDelay(1000).position("bottom right"));
                         });
+                    }, function(statuscode) {
+                        if (statuscode === 409 && scope.datatype.candefinename) {
+                            $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
+                        }
                     });
                 };
                 scope.delete = function() {
