@@ -1,4 +1,8 @@
-
+/*
+$parent.detailscard könnte in dieses Attribut aufgenommen werden, damit ein Add User button beispielsweise
+auch in die Detailkarte einer Benutzergruppe rein könnte. Dann müsste der Parameter datatypenames so aufgebohrt
+werden, dass für jeden Datentypnamen die Detailkarte spezifiziert werden kann
+*/
 app.directive('avtAddElementToolbarButton', function($rootScope, $compile, utils) { 
     var template = '<md-button ng-if="$parent.canwrite && $parent.detailscard" avt-toolbar-button ng-click="createelement($event)" icon="/css/icons/material/Plus Math.svg" label="Element" tooltip="Neues Element erstellen"></md-button>';
     return {

@@ -1,0 +1,22 @@
+<md-card ng-cloak ng-controller="AdministrationUsergrouplistCardController" style="background-image:url('/css/icons/office/User Group Man Man.svg');">
+    
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <md-button ng-click="newUsergroup()" aria-label="ADD USERGROUP" ng-if="canWriteUserGroupDetails">
+            <md-tooltip md-direction="bottom"><span translate>TRK_USERGROUPS_CREATE_NEW_USERGROUP</span></md-tooltip>
+            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
+            <p translate>TRK_USERS_USERGROUP</p>
+        </md-button>
+    </md-toolbar>
+    
+    <md-card-content>
+        <md-list class="lines-beetween-items">
+            <md-list-item ng-repeat="userGroup in userGroups | orderBy: 'name'" ng-click="selectUserGroup(userGroup)" ng-class="{active:selectedUserGroup == userGroup}" aria-label="{{userGroup.name}}">
+                <md-icon md-svg-src="/css/icons/material/User Group Man Man.svg"></md-icon>
+                <p ng-bind="userGroup.name"></p>
+                <md-icon md-svg-src="/css/icons/material/Forward.svg" class="md-secondary forward"></md-icon>
+            </md-list-item>
+        </md-list>
+    </md-card-content> 
+
+    <resize-handle></resize-handle>    
+</md-card>

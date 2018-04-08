@@ -44,7 +44,6 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
         scope: false,
         compile: function compile(element, attrs) {
             if (element.length < 1 || !element[0].toolbar) return;
-            // var params = attrs.avtRelations ? JSON.parse(attrs.avtRelations) : {};
             element.removeAttr("avt-relations");
             var toolbar = element[0].toolbar;
             if (toolbar) {
