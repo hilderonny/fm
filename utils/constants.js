@@ -125,10 +125,6 @@ module.exports.apis = {
      */
     update: 'update',
     /**
-     * API for editing usergroups
-     */
-    usergroups: 'usergroups',
-    /**
      * API for editing users
      */
     users: 'users'
