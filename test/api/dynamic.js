@@ -3,7 +3,7 @@ var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 
-describe('API dynamic', () => {
+describe.only('API dynamic', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -16,32 +16,55 @@ describe('API dynamic', () => {
         await th.prepareUsers();
         await th.preparePermissions();
         await th.prepareRelations();
+        await th.preparedatatypes();
+        await th.preparedatatypefields();
+        await th.preparedynamicobjects();
     });
 
-    describe('DELETE/:recordtypename/:entityname', () => {
+    describe.only('DELETE/:recordtypename/:entityname', () => {
 
-        xit('responds without authentication with 403', async () => {
+        it('responds without authentication with 403', async () => {
+            return th.del("/api/dynamic/client0_datatype0/client0_datatype0_entity0").expect(403);
         });
 
-        xit('responds without write permission with 403', async () => {
+        it('responds without write permission with 403', async () => {
+            await th.removeWritePermission("client0", "client0_usergroup0", "permissionkey0");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async () => {
+        it('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async () => {
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async () => {
+        it('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async () => {
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            await th.del(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds with 400 when the recordtypename is invalid', async () => {
+        it('responds with 400 when the recordtypename is invalid', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/dynamic/invalidrecordtypename/client0_datatype0_entity0?token=${token}`).expect(400);
         });
 
-        xit('responds with 404 when the entityname is invalid', async () => {
+        it('responds with 404 when the entityname is invalid', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/dynamic/client0_datatype0/invalidentityname?token=${token}`).expect(404);
         });
 
-        xit('responds with 404 when the object to delete does not belong to client of the logged in user', async () => {
+        it('responds with 404 when the object to delete does not belong to client of the logged in user', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/dynamic/client1_datatype0/client1_datatype0_entity0?token=${token}`).expect(404);
         });
 
-        xit('deletes the object and return 204', async () => {
+        it('deletes the object and return 204', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(204);
+            var existing = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.ok(!existing);
         });
 
         xit('deletes the object even when there are references (e.g. users-usergroups) to the object', async () => {
