@@ -5,6 +5,19 @@ var Db = require("../../utils/db").Db;
 
 describe('API dynamic', () => {
 
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareRelations();
+    });
+
     describe('DELETE/:recordtypename/:entityname', () => {
 
         xit('responds without authentication with 403', async () => {

@@ -258,6 +258,23 @@ th.prepareDocuments = async() => {
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document000", parentfoldername: "client0_folder00", label: "document000", type: "type", isshared: true });
 };
 
+th.preparedatatypes = async() => {
+    await Db.createDatatype("client0", "client0_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], "permissionkey0", "module0", true, true);
+    await Db.createDatatype("client0", "client0_datatype1", "label1", "plurallabel1", true, "icon1", ["list1"], "permissionkey1", "module1", true, false);
+    await Db.createDatatype("client0", "client0_datatype2", "label2", "plurallabel2", false, "icon2", ["list0", "list1"], "permissionkey2", "module2", false, false);
+    await Db.createDatatype("client1", "client1_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], "permissionkey0", "module0", true, true);
+};
+
+th.preparedatatypefields = async() => {
+    await Db.createDatatypeField("client0", "client0_datatype0", "boolean0", "Boolean0", co.fieldtypes.boolean, false, true, false, null, null, null, false); // Required, not nullable
+    await Db.createDatatypeField("client0", "client0_datatype0", "datetime0", "DateTime0", co.fieldtypes.datetime, false, false, false, null, null, null, true);
+    await Db.createDatatypeField("client0", "client0_datatype0", "decimal0", "Decimal0", co.fieldtypes.decimal, false, false, false, null, null, null, true);
+    await Db.createDatatypeField("client0", "client0_datatype0", "formula0", "Formula0", co.fieldtypes.formula, false, false, false, null, { "sum" : ["decimal0", "decimal0"] }, 0, true);
+    await Db.createDatatypeField("client0", "client0_datatype0", "password0", "Password0", co.fieldtypes.password, false, false, false, null, null, null, true);
+    await Db.createDatatypeField("client0", "client0_datatype0", "reference0", "Reference0", co.fieldtypes.reference, false, false, false, "users", null, null, true);
+    await Db.createDatatypeField("client0", "client0_datatype0", "text0", "Text0", co.fieldtypes.text, true, false, false, null, null, null, true);
+};
+
 th.prepareRelations = async() => {
     var map = {
         activities:"client0_activity0",
