@@ -643,45 +643,45 @@
                 { "name": "projects", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
-                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
-                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
-                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
-                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
-                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
-                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
+                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 3 },
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 4 },
+                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
                 ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
-                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
-                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
-                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
-                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
-                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
-                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
+                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 3 },
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 4 },
+                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
                 ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
-                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 0 },
-                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
-                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "childsum" : "kgf" }, "formulaindex": 2 },
-                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 3 },
-                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 4 },
-                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 5 }
+                    { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 3 },
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 4 },
+                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
                 ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "decimal" },
-                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "childsum" : "nrf" }, "formulaindex": 1 },
-                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 2 },
-                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 3 },
-                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 4 },
-                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 }
+                    { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 4 },
+                    { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
+                    { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
+                    { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 3 }
                 ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg", "fields": [

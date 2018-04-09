@@ -184,8 +184,10 @@ router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, 
         await Db.insertDynamicObject(clientname, recordtypename, newobject);
         // When the new object is a relation of type "parentchild", then the parent object must be recalculated
         if (recordtypename === "relations" && newobject.relationtypename === "parentchild") {
-            await ch.calculateentityandparentsrecursively(clientname, newobject.datatype1name, newobject.name1);
+            await ch.calculateentityandparentsrecursively(clientname, newobject.datatype2name, newobject.name2);
         }
+        // The objects and its possible parents must be recalculated in every case
+        await ch.calculateentityandparentsrecursively(clientname, recordtypename, newobject.name);
         res.send(newobject.name);
     } catch(error) {
         res.sendStatus(400); // Any error with the request
