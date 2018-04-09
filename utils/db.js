@@ -572,8 +572,14 @@ var Db = {
                 var additional = "";
                 // Update existing, but type cannot be changed (except password fields)
                 if (existingfield.fieldtype !== field.type) {
-                    if (existingfield.fieldtype !== 'text' && field.type !== 'password') throw new Error(`Type of field '${recordtype.name}.${field.name}' cannot be changed from '${existingfield.fieldtype}' to '${field.type}'`);
-                    else additional = `, fieldtype='${Db.replaceQuotes(field.type)}'`;
+                    if (
+                        (existingfield.fieldtype === 'text' && field.type === 'password') || // Conversion from text to password is possible
+                        (existingfield.fieldtype === 'formula' && field.type === 'decimal') // Conversion from formula to manual numeric input also possible
+                    ) {
+                        additional = `, fieldtype='${Db.replaceQuotes(field.type)}'`;
+                    } else {
+                        throw new Error(`Type of field '${recordtype.name}.${field.name}' cannot be changed from '${existingfield.fieldtype}' to '${field.type}'`);
+                    }
                 }
                 var labeltoupdate = field.label ? "'" + Db.replaceQuotes(field.label) + "'" : "null";
                 var referencetoupdate = field.reference ? "'" + Db.replaceQuotes(field.reference) + "'" : "null";
