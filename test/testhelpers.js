@@ -129,9 +129,6 @@ th.preparePermissions = async() => {
         await Db.query("client0", `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('client0_usergroup0', '${permission}', true);`);
         await Db.query(Db.PortalDatabaseName, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${Db.PortalDatabaseName}_usergroup0', '${permission}', true);`);
     }
-    await Db.query("client0", `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('client0_usergroup0', 'permissionkey0', true);`);
-    await Db.query("client0", `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('client0_usergroup0', 'permissionkey1', true);`);
-    await Db.query("client0", `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('client0_usergroup0', 'permissionkey2', true);`);
 };
 
 th.prepareBusinessPartners = async() => {
@@ -262,10 +259,10 @@ th.prepareDocuments = async() => {
 };
 
 th.preparedatatypes = async() => {
-    await Db.createDatatype("client0", "client0_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], "permissionkey0", co.modules.fmobjects, true, true);
-    await Db.createDatatype("client0", "client0_datatype1", "label1", "plurallabel1", true, "icon1", ["list1"], "permissionkey1", co.modules.documents, true, false);
-    await Db.createDatatype("client0", "client0_datatype2", "label2", "plurallabel2", false, "icon2", ["list0", "list1"], "permissionkey2", co.modules.notes, false, false);
-    await Db.createDatatype("client1", "client1_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], "permissionkey0", co.modules.fmobjects, true, true);
+    await Db.createDatatype("client0", "client0_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, true, true);
+    await Db.createDatatype("client0", "client0_datatype1", "label1", "plurallabel1", true, "icon1", ["list1"], co.permissions.OFFICE_ACTIVITY, co.modules.documents, true, false);
+    await Db.createDatatype("client0", "client0_datatype2", "label2", "plurallabel2", false, "icon2", ["list0", "list1"], co.permissions.BIM_AREAS, co.modules.notes, false, false);
+    await Db.createDatatype("client1", "client1_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, true, true);
 };
 
 th.preparedatatypefields = async() => {
@@ -284,6 +281,7 @@ th.preparedynamicobjects = async() => {
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity1", boolean0: true });
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity2", boolean0: true, decimal0: 345.789 });
     await Db.insertDynamicObject("client0", "client0_datatype1", { name: "client0_datatype1_entity0" });
+    await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity0" });
     await Db.insertDynamicObject("client1", "client1_datatype0", { name: "client1_datatype0_entity0" });
 };
 
@@ -293,6 +291,7 @@ th.preparerelations = async() => {
     th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype1", "client0_datatype1_entity0", "parentchild");
     th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype0", "client0_datatype0_entity1", "dependency");
     th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype0", "client0_datatype0_entity2", "parentchild");
+    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype2", "client0_datatype2_entity0", "parentchild");
 };
 
 th.prepareRelations = async() => {

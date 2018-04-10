@@ -10,7 +10,7 @@ var fs = require("fs");
 
 async function getchildren(clientname, recordtypename, entityname, permissions, forlist) {
     var relevantrelations = (await Db.query(clientname, `
-        SELECT r.datatype2name, r.name2, dtp.permissionkey, dtc.icon, CASE WHEN count(rc) > 0 THEN true ELSE false END haschildren FROM relations r 
+        SELECT r.datatype2name, r.name2, dtc.permissionkey, dtc.icon, CASE WHEN count(rc) > 0 THEN true ELSE false END haschildren FROM relations r 
         JOIN datatypes dtp ON dtp.name = r.datatype1name 
         JOIN datatypes dtc ON dtc.name = r.datatype2name 
         LEFT JOIN relations rc ON rc.name1 = r.name2 AND rc.relationtypename = 'parentchild' AND rc.datatype1name = r.datatype2name
@@ -18,19 +18,17 @@ async function getchildren(clientname, recordtypename, entityname, permissions, 
         AND r.datatype1name = '${Db.replaceQuotes(recordtypename)}'
         AND r.name1 = '${Db.replaceQuotes(entityname)}'
         AND '${Db.replaceQuotes(forlist)}' = ANY (dtc.lists)
-        GROUP BY r.datatype2name, r.name2, dtp.permissionkey, dtc.icon;
+        GROUP BY r.datatype2name, r.name2, dtc.permissionkey, dtc.icon;
     `)).rows;
     var children = [];
     for (var i = 0; i < relevantrelations.length; i++) {
         var rr = relevantrelations[i];
         if (!permissions.find(p => p.key === rr.permissionkey && p.canRead)) continue; // No permission to access specific datatype entities
         var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
-        if (child) {
-            child.datatypename = rr.datatype2name;
-            child.icon = rr.icon;
-            child.haschildren = rr.haschildren;
-            children.push(child);
-        }
+        child.datatypename = rr.datatype2name;
+        child.icon = rr.icon;
+        child.haschildren = rr.haschildren;
+        children.push(child);
     }
     return children;
 }
@@ -95,7 +93,7 @@ router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "w"
 });
 
 // Get a list of all children of the given entity. Used for hierarchies when one opens an element which has children
-router.get("/children/:forlist/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
+router.get("/children/:forlist/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var permissions = await ph.getpermissionsforuser(req.user);
     var children = await getchildren(req.user.clientname, req.params.recordtypename, req.params.entityname, permissions, req.params.forlist);
     res.send(children);
