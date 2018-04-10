@@ -196,6 +196,8 @@ router.put('/:recordtypename/:entityname', auth.dynamic("recordtypename", "w"), 
     var entityname = req.params.entityname;
     var objecttoupdate = req.body;
     try {
+        var existing = Db.getDynamicObject(clientname, recordtypename, entityname);
+        if (!existing) return res.sendStatus(404);
         delete objecttoupdate.name;
         await Db.updateDynamicObject(clientname, recordtypename, entityname, objecttoupdate);
         // When the object is a relation of type "parentchild", then the parent object must be recalculated

@@ -656,6 +656,19 @@ describe.only('API dynamic', () => {
             await th.post(`/api/dynamic/client0_datatype0?token=${token}`).send(entity).expect(400);
         });
 
+        it('creates a new entity and responds with 200', async() => {
+            var entity = prepareEntity();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var name = (await th.post(`/api/dynamic/client0_datatype0?token=${token}`).send({name:"predefinedname"}).expect(200)).text;
+            var createdelement = await Db.getDynamicObject("client0", "client0_datatype0", name);
+            assert.ok(createdelement);
+            assert.strictEqual(createdelement.boolean0, entity.boolean0);
+            assert.strictEqual(createdelement.datetime0, entity.datetime0);
+            assert.strictEqual(createdelement.decimal0, entity.decimal0);
+            assert.strictEqual(createdelement.reference0, entity.reference0);
+            assert.strictEqual(createdelement.text0, entity.text0);
+        });
+
         it('creates a new entity and generates a name when name cannot be defined but was sent', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var name = (await th.post(`/api/dynamic/client0_datatype1?token=${token}`).send({name:"predefinedname"}).expect(200)).text; // client0_datatype1
@@ -664,7 +677,7 @@ describe.only('API dynamic', () => {
             assert.ok(createdelement);
         });
 
-        it('creates a new entity and uses the given when name can be defined', async() => {
+        it('creates a new entity and uses the given name when name can be defined', async() => {
             var entity = prepareEntity();
             entity.name = "definedname";
             var token = await th.defaults.login("client0_usergroup0_user0");
@@ -713,44 +726,128 @@ describe.only('API dynamic', () => {
             await th.post(`/api/dynamic/client0_datatype0?token=${token}`).send(entity).expect(400);
         });
 
+        xit('does not fall into an endless calculation loop, when a ring dependency is created', async() => {
+
+        });
+
     });
 
-    describe('PUT/:recordtypename/:entityname', () => {
+    describe.only('PUT/:recordtypename/:entityname', () => {
 
-        xit('responds without authentication with 403', async() => {
+        function prepareEntity() {
+            return {
+                boolean0: false,
+                datetime0: 3333,
+                decimal0: 4444,
+                reference0: "client0_usergroup0_user1",
+                text0: "BBBB"
+            }
+        }
+
+        it('responds without authentication with 403', async() => {
+            var entity = prepareEntity();
+            return th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0`).send(entity).expect(403);
         });
 
-        xit('responds without write permission with 403', async() => {
+        it('responds without write permission with 403', async() => {
+            var entity = prepareEntity();
+            await th.removeWritePermission("client0", "client0_usergroup0", co.permissions.BIM_FMOBJECT);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).send(entity).expect(403);
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async() => {
+        it('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async() => {
+            var entity = prepareEntity();
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).send(entity).expect(403);
         });
 
-        xit('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async() => {
+        it('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async() => {
+            var entity = prepareEntity();
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            return th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).send(entity).expect(403);
         });
 
-        xit('responds with 400 when the recordtypename is invalid', async() => {
+        it('responds with 403 when the recordtypename is invalid', async() => {
+            var entity = prepareEntity();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.put(`/api/dynamic/invalidrecordtypename/client0_datatype0_entity0?token=${token}`).send(entity).expect(403);
         });
 
-        xit('responds with 404 when the entityname is invalid', async() => {
+        it('responds with 404 when the entityname is invalid', async() => {
+            var entity = prepareEntity();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.put(`/api/dynamic/client0_datatype0/invalidentityname?token=${token}`).send(entity).expect(404);
         });
 
-        xit('responds with 404 when the object to update does not belong to client of the logged in user', async() => {
+        it('responds with 403 when the object to update does not belong to client of the logged in user', async() => {
+            var entity = prepareEntity();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.put(`/api/dynamic/client1_datatype0/client1_datatype0_entity0?token=${token}`).send(entity).expect(403);
         });
 
-        xit('does not update the name when it was sent', async() => {
+        it('does not update the name when it was sent', async() => {
+            var entity = prepareEntity();
+            entity.name = "newname";
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).send(entity).expect(200);
+            var updatedentity = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.ok(updatedentity);
+            var entitywithnewname = await Db.getDynamicObject("client0", "client0_datatype0", "newname");
+            assert.ok(!entitywithnewname);
         });
 
-        xit('updates all given fields of the entity and returns 200', async() => {
+        it('updates all given fields of the entity and returns 200', async() => {
+            var entity = prepareEntity();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).send(entity).expect(200);
+            var updatedentity = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.ok(updatedentity);
+            assert.strictEqual(updatedentity.boolean0, entity.boolean0);
+            assert.strictEqual(updatedentity.datetime0, entity.datetime0);
+            assert.strictEqual(updatedentity.decimal0, entity.decimal0);
+            assert.strictEqual(updatedentity.reference0, entity.reference0);
+            assert.strictEqual(updatedentity.text0, entity.text0);
         });
 
-        xit('does not update fields which are not sent', async() => {
+        it('does not update fields which are not sent', async() => {
+            var entity = prepareEntity();
+            delete entity.boolean0;
+            delete entity.decimal0;
+            delete entity.reference0;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).send(entity).expect(200);
+            var updatedentity = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.ok(updatedentity);
+            assert.strictEqual(updatedentity.boolean0, true);
+            assert.strictEqual(updatedentity.datetime0, entity.datetime0);
+            assert.strictEqual(updatedentity.decimal0, 234.567);
+            assert.strictEqual(updatedentity.reference0, "client0_usergroup0_user0");
+            assert.strictEqual(updatedentity.text0, entity.text0);
         });
 
-        xit('recalculates the formerly referenced parents when the object to update is a relation and its type changed away from "parent-child"', async() => {
+        it('recalculates the formerly referenced parents when the object to update is a relation and its type changed away from "parent-child"', async() => {
+            var relation = {
+                relationtypename: "dependency"
+            };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/relations/client0_client0_datatype0_client0_datatype0_entity0_client0_datatype0_client0_datatype0_entity2?token=${token}`).send(relation).expect(200);
+            var parent = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.strictEqual(parent.formula0, 345.789);
+            assert.strictEqual(parent.formula1, 580.356);
         });
 
-        xit('recalculates the formerly referenced parents when the object to update is a relation and its type changed to "parent-child"', async() => {
+        it('recalculates the formerly referenced parents when the object to update is a relation and its type changed to "parent-child"', async() => {
+            var relation = {
+                relationtypename: "parentchild"
+            };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/relations/client0_client0_datatype0_client0_datatype0_entity0_client0_datatype0_client0_datatype0_entity1?token=${token}`).send(relation).expect(200);
+            var parent = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.strictEqual(parent.formula0, 445.789);
+            assert.strictEqual(parent.formula1, 680.356);
         });
 
         xit('recalculates the formerly referenced parents when the object to update is a relation and its first relation element changed', async() => {
@@ -775,6 +872,10 @@ describe.only('API dynamic', () => {
         });
 
         xit('recalculates the formulas of the updated entity immediately even when the formula is given as parameter', async() => {
+        });
+
+        xit('does not fall into an endless calculation loop, when a ring dependency is created', async() => {
+
         });
 
     });

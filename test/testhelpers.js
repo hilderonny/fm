@@ -56,11 +56,12 @@ th.cleanDatabase = async () => {
 };
 
 th.cleanTable = async(tablename, inportal, inclients) => {
+    // Ignore errors where one wants to delete elements from a non existing database, see th.preparedynamicobjects()
     if (inclients) {
-        await Db.query("client0", `DELETE FROM ${tablename};`);
-        await Db.query("client1", `DELETE FROM ${tablename};`);
+        try { await Db.query("client0", `DELETE FROM ${tablename};`); } catch(err) {}
+        try { await Db.query("client1", `DELETE FROM ${tablename};`); } catch(err) {}
     }
-    if (inportal) await Db.query(Db.PortalDatabaseName, `DELETE FROM ${tablename};`);
+    if (inportal) try { await Db.query(Db.PortalDatabaseName, `DELETE FROM ${tablename};`); } catch(err) {}
 };
 
 th.doLoginAndGetToken = async(username, password) => {
@@ -278,8 +279,12 @@ th.preparedatatypefields = async() => {
 };
 
 th.preparedynamicobjects = async() => {
+    await Db.query("client0", "DELETE FROM client0_datatype0");
+    await Db.query("client0", "DELETE FROM client0_datatype1");
+    await Db.query("client0", "DELETE FROM client0_datatype2");
+    await Db.query("client1", "DELETE FROM client1_datatype0");
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity0", boolean0: true, datetime0: 123, decimal0: 234.567, reference0: "client0_usergroup0_user0", text0: "C0D0E0" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity1", boolean0: true, text0: "C0D0E1" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity1", boolean0: true, decimal0: 111, text0: "C0D0E1" });
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity2", boolean0: true, decimal0: 345.789, text0: "C0D0E2" });
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity3", boolean0: true, text0: "C0D0E3" });
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity4", boolean0: true, text0: "C0D0E4" });
