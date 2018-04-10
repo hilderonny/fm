@@ -341,7 +341,7 @@ var Db = {
         WITH RECURSIVE get_path(datatype1name, name1, datatype2name, name2, depth) AS (
             (SELECT datatype1name, name1, datatype2name, name2, 0 FROM relations WHERE relationtypename = 'parentchild' AND NOT datatype1name IS NULL AND NOT name1 IS NULL)
             UNION
-            (SELECT relations.datatype1name, relations.name1, get_path.datatype2name, get_path.name2, get_path.depth + 1 FROM relations JOIN get_path on get_path.name1 = relations.name2 WHERE relationtypename = 'parentchild')
+            (SELECT relations.datatype1name, relations.name1, get_path.datatype2name, get_path.name2, get_path.depth + 1 FROM relations JOIN get_path on get_path.name1 = relations.name2 WHERE relationtypename = 'parentchild' AND get_path.depth < 64)
         )
         SELECT datatype1name, name1, depth FROM get_path WHERE datatype2name = '${Db.replaceQuotes(recordtypename)}' AND name2 = '${Db.replaceQuotes(entityname)}';
         `;
@@ -545,7 +545,6 @@ var Db = {
                 case constants.fieldtypes.password: if (value === undefined || value === null || value === "") return null; result = `'${Db.replaceQuotes(bcryptjs.hashSync(value))}'`; break; // Passwords cannot be made empty
                 case constants.fieldtypes.reference: result = (value === undefined || value === null) ? "null" : `'${Db.replaceQuotes(value)}'`; break;
                 case constants.fieldtypes.text: result = (value === undefined || value === null) ? "null" : `'${Db.replaceQuotes(value)}'`; break;
-                case constants.fieldtypes.formula: return null; // Ignore formula updates, they are calculated
                 default: throw new Error(`Unknown field type '${field.fieldtype}'`);
             }
             return `${k}=${result}`;

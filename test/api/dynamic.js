@@ -6,7 +6,7 @@ var ch = require("../../utils/calculationhelper");
 var dh = require("../../utils/documentsHelper");
 var Db = require("../../utils/db").Db;
 
-describe.only('API dynamic', () => {
+describe('API dynamic', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -659,7 +659,7 @@ describe.only('API dynamic', () => {
         it('creates a new entity and responds with 200', async() => {
             var entity = prepareEntity();
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var name = (await th.post(`/api/dynamic/client0_datatype0?token=${token}`).send({name:"predefinedname"}).expect(200)).text;
+            var name = (await th.post(`/api/dynamic/client0_datatype0?token=${token}`).send(entity).expect(200)).text;
             var createdelement = await Db.getDynamicObject("client0", "client0_datatype0", name);
             assert.ok(createdelement);
             assert.strictEqual(createdelement.boolean0, entity.boolean0);
@@ -726,13 +726,21 @@ describe.only('API dynamic', () => {
             await th.post(`/api/dynamic/client0_datatype0?token=${token}`).send(entity).expect(400);
         });
 
-        xit('does not fall into an endless calculation loop, when a ring dependency is created', async() => {
-
+        it('does not fall into an endless calculation loop, when a ring dependency is created', async() => {
+            var relation = {
+                datatype1name: "client0_datatype0",
+                name1: "client0_datatype0_entity2",
+                datatype2name: "client0_datatype0",
+                name2: "client0_datatype0_entity0",
+                relationtypename: "parentchild"
+            };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.post(`/api/dynamic/relations?token=${token}`).send(relation).expect(200);
         });
 
     });
 
-    describe.only('PUT/:recordtypename/:entityname', () => {
+    describe('PUT/:recordtypename/:entityname', () => {
 
         function prepareEntity() {
             return {
@@ -835,8 +843,8 @@ describe.only('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_client0_datatype0_client0_datatype0_entity0_client0_datatype0_client0_datatype0_entity2?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
-            assert.strictEqual(parent.formula0, 345.789);
-            assert.strictEqual(parent.formula1, 580.356);
+            assert.strictEqual(parent.formula0, null); // No children anymore
+            assert.strictEqual(parent.formula1, 234.567);
         });
 
         it('recalculates the formerly referenced parents when the object to update is a relation and its type changed to "parent-child"', async() => {
@@ -846,36 +854,65 @@ describe.only('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_client0_datatype0_client0_datatype0_entity0_client0_datatype0_client0_datatype0_entity1?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
-            assert.strictEqual(parent.formula0, 445.789);
-            assert.strictEqual(parent.formula1, 680.356);
+            assert.strictEqual(parent.formula0, 456.789);
+            assert.strictEqual(parent.formula1, 691.356);
         });
 
-        xit('recalculates the formerly referenced parents when the object to update is a relation and its first relation element changed', async() => {
+        it('recalculates the formerly referenced parents when the object to update is a relation and its first relation element changed', async() => {
+            var relation = {
+                name1: "client0_datatype0_entity7"
+            };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/relations/client0_client0_datatype0_client0_datatype0_entity0_client0_datatype0_client0_datatype0_entity2?token=${token}`).send(relation).expect(200);
+            var parent = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.strictEqual(parent.formula0, null); // No children anymore
+            assert.strictEqual(parent.formula1, 234.567);
         });
 
-        xit('recalculates the formerly referenced parents when the object to update is a relation and its second relation element changed', async() => {
+        it('recalculates the formerly referenced parents when the object to update is a relation and its second relation element changed', async() => {
+            var relation = {
+                name2: "client0_datatype0_entity7"
+            };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/relations/client0_client0_datatype0_client0_datatype0_entity0_client0_datatype0_client0_datatype0_entity2?token=${token}`).send(relation).expect(200);
+            var parent = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.strictEqual(parent.formula0, 100); // Now only entity7
+            assert.strictEqual(parent.formula1, 334.567);
         });
 
-        xit('recalculates the new referenced parents when the object to update is a relation and its type changed away from "parent-child"', async() => {
+        it('recalculates the new referenced parents when the object to update is a relation and its first relation element changed', async() => {
+            var relation = {
+                name1: "client0_datatype0_entity7"
+            };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/relations/client0_client0_datatype0_client0_datatype0_entity0_client0_datatype0_client0_datatype0_entity2?token=${token}`).send(relation).expect(200);
+            var parent = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity7");
+            assert.strictEqual(parent.formula0, 345.789);
+            assert.strictEqual(parent.formula1, 445.789);
         });
 
-        xit('recalculates the new referenced parents when the object to update is a relation and its type changed to "parent-child"', async() => {
+        it('recalculates the formulas of the updated entity immediately', async() => {
+            var entity = prepareEntity();
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).send(entity).expect(200);
+            var updatedentity = await Db.getDynamicObject("client0", "client0_datatype0", "client0_datatype0_entity0");
+            assert.ok(updatedentity);
+            assert.strictEqual(updatedentity.formula1, 4789.789);
         });
 
-        xit('recalculates the new referenced parents when the object to update is a relation and its first relation element changed', async() => {
+        it('responds with 400 when a formula is given as attribute', async() => {
+            var entity = prepareEntity();
+            entity.formula0 = 100;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.put(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).send(entity).expect(400);
         });
 
-        xit('recalculates the new referenced parents when the object to update is a relation and its second relation element changed', async() => {
-        });
-
-        xit('recalculates the formulas of the updated entity immediately', async() => {
-        });
-
-        xit('recalculates the formulas of the updated entity immediately even when the formula is given as parameter', async() => {
-        });
-
-        xit('does not fall into an endless calculation loop, when a ring dependency is created', async() => {
-
+        it('does not fall into an endless calculation loop, when a ring dependency is created', async() => {
+            var relation = {
+                name2: "client0_datatype0_entity0"
+            };
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.put(`/api/dynamic/relations/client0_client0_datatype0_client0_datatype0_entity0_client0_datatype0_client0_datatype0_entity2?token=${token}`).send(relation).expect(200);
         });
 
     });

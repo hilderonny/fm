@@ -196,13 +196,15 @@ router.put('/:recordtypename/:entityname', auth.dynamic("recordtypename", "w"), 
     var entityname = req.params.entityname;
     var objecttoupdate = req.body;
     try {
-        var existing = Db.getDynamicObject(clientname, recordtypename, entityname);
-        if (!existing) return res.sendStatus(404);
+        var existingbefore = await Db.getDynamicObject(clientname, recordtypename, entityname);
+        if (!existingbefore) return res.sendStatus(404);
         delete objecttoupdate.name;
         await Db.updateDynamicObject(clientname, recordtypename, entityname, objecttoupdate);
-        // When the object is a relation of type "parentchild", then the parent object must be recalculated
-        if (recordtypename === "relations" && objecttoupdate.relationtypename === "parentchild") {
-            await ch.calculateentityandparentsrecursively(clientname, objecttoupdate.datatype1name, objecttoupdate.name1);
+        // When the object is a relation, then the parent objects must be recalculated
+        if (recordtypename === "relations") {
+            var existingafter = await Db.getDynamicObject(clientname, recordtypename, entityname);
+            await ch.calculateentityandparentsrecursively(clientname, existingbefore.datatype1name, existingbefore.name1);
+            await ch.calculateentityandparentsrecursively(clientname, existingafter.datatype1name, existingafter.name1);
         }
         // The objects and its possible parents must be recalculated in every case
         await ch.calculateentityandparentsrecursively(clientname, recordtypename, entityname);
