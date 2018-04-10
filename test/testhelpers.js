@@ -272,7 +272,8 @@ th.preparedatatypefields = async() => {
     await Db.createDatatypeField("client0", "client0_datatype0", "boolean0", "Boolean0", co.fieldtypes.boolean, false, true, false, null, null, null, false); // Required, not nullable
     await Db.createDatatypeField("client0", "client0_datatype0", "datetime0", "DateTime0", co.fieldtypes.datetime, false, false, false, null, null, null, true);
     await Db.createDatatypeField("client0", "client0_datatype0", "decimal0", "Decimal0", co.fieldtypes.decimal, false, false, false, null, null, null, true);
-    await Db.createDatatypeField("client0", "client0_datatype0", "formula0", "Formula0", co.fieldtypes.formula, false, false, false, null, { "sum" : ["decimal0", "decimal0"] }, 0, true);
+    await Db.createDatatypeField("client0", "client0_datatype0", "formula0", "Formula0", co.fieldtypes.formula, false, false, false, null, { "childsum" : "decimal0" }, 0, true);
+    await Db.createDatatypeField("client0", "client0_datatype0", "formula1", "Formula1", co.fieldtypes.formula, false, false, false, null, { "sum" : ["formula0", "decimal0"] }, 1, true);
     await Db.createDatatypeField("client0", "client0_datatype0", "password0", "Password0", co.fieldtypes.password, false, false, false, null, null, null, true);
     await Db.createDatatypeField("client0", "client0_datatype0", "reference0", "Reference0", co.fieldtypes.reference, false, false, false, "users", null, null, true);
     await Db.createDatatypeField("client0", "client0_datatype0", "text0", "Text0", co.fieldtypes.text, true, false, false, null, null, null, true);
@@ -280,7 +281,18 @@ th.preparedatatypefields = async() => {
 
 th.preparedynamicobjects = async() => {
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity0", boolean0: true, datetime0: 123, decimal0: 234.567, reference0: "client0_usergroup0_user0", text0: "Text" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity1", boolean0: true });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity2", boolean0: true, decimal0: 345.789 });
+    await Db.insertDynamicObject("client0", "client0_datatype1", { name: "client0_datatype1_entity0" });
     await Db.insertDynamicObject("client1", "client1_datatype0", { name: "client1_datatype0_entity0" });
+};
+
+th.preparerelations = async() => {
+    // Only for client0
+    await th.cleanTable("relations", false, true);
+    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype1", "client0_datatype1_entity0", "parentchild");
+    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype0", "client0_datatype0_entity1", "dependency");
+    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype0", "client0_datatype0_entity2", "parentchild");
 };
 
 th.prepareRelations = async() => {
@@ -307,7 +319,7 @@ th.prepareRelations = async() => {
     for (var i = 0; i < keys.length; i++) {
         var datatypename = keys[i];
         var name = map[datatypename];
-        await th.createRelation(datatypename, name, datatypename, name);
+        await th.createRelation(datatypename, name, datatypename, name, null);
     }
 };
 
@@ -360,8 +372,8 @@ th.preparePredefinedDynamicAttibutesForClient = async (clientname) => {
     }
 };
 
-th.createRelation = async(datatype1name, name1, datatype2name, name2) => {
-    await Db.insertDynamicObject("client0", "relations", { name: `client0_${datatype1name}_${name1}_${datatype2name}_${name2}`, datatype1name: datatype1name, name1: name1, datatype2name: datatype2name, name2: name2 });
+th.createRelation = async(datatype1name, name1, datatype2name, name2, relationtypename) => {
+    await Db.insertDynamicObject("client0", "relations", { name: `client0_${datatype1name}_${name1}_${datatype2name}_${name2}`, datatype1name: datatype1name, name1: name1, datatype2name: datatype2name, name2: name2, relationtypename : relationtypename });
 };
 
 th.getModuleForApi = (api) => {

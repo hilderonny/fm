@@ -5,6 +5,8 @@ var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 var ph = require('../utils/permissionshelper');
 var ch = require('../utils/calculationhelper');
+var dh = require("../utils/documentsHelper");
+var fs = require("fs");
 
 async function getchildren(clientname, recordtypename, entityname, permissions, forlist) {
     var relevantrelations = (await Db.query(clientname, `
@@ -55,40 +57,41 @@ async function getrootelements(clientname, forlist, permissions) {
 }
 
 // Deletes a dynamic object but without children. They must be deleted separately because of the possibly different permissions.
-router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
+router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "w"), async(req, res) => {
     var clientname = req.user.clientname;
     var datatypename = req.params.recordtypename;
     var entityname = req.params.entityname;
-    try {
-        // Remember parents for recalculation
-        var parentrelations = await Db.getDynamicObjects(clientname, "relations", { datatype2name: datatypename, name2: entityname, relationtypename: 'parentchild'});
-        // Delete relations
-        await Db.deleteDynamicObjects(clientname, "relations", { datatype1name: datatypename, name1: entityname});
-        await Db.deleteDynamicObjects(clientname, "relations", { datatype2name: datatypename, name2: entityname});
-        // Delete dynamic attributes
-        await Db.deleteDynamicObjects(clientname, "dynamicattributevalues", { entityname: entityname});
-        // Delete the element itself (can be a relation)
-        // When the object itself is a relation of type "parentchild", then the parent object must be recalculated
-        if (datatypename === "relations") {
-            var existingrelation = await Db.getDynamicObject(clientname, datatypename, entityname);
-            await Db.deleteDynamicObject(clientname, datatypename, entityname); // First delete the relation so that it is not handled by recalculation
-            if (existingrelation.relationtypename === "parentchild") {
-                await ch.calculateentityandparentsrecursively(clientname, existingrelation.datatype1name, existingrelation.name1);
-            }
-        } else {
-            await Db.deleteDynamicObject(clientname, datatypename, entityname);
+    // Remember parents for recalculation
+    var parentrelations = await Db.getDynamicObjects(clientname, "relations", { datatype2name: datatypename, name2: entityname, relationtypename: 'parentchild'});
+    // Delete relations
+    await Db.deleteDynamicObjects(clientname, "relations", { datatype1name: datatypename, name1: entityname});
+    await Db.deleteDynamicObjects(clientname, "relations", { datatype2name: datatypename, name2: entityname});
+    // Delete dynamic attributes
+    await Db.deleteDynamicObjects(clientname, "dynamicattributevalues", { entityname: entityname});
+    // Delete the element itself (can be a relation)
+    // When the object itself is a relation of type "parentchild", then the parent object must be recalculated
+    if (datatypename === "relations") {
+        var existingrelation = await Db.getDynamicObject(clientname, datatypename, entityname);
+        await Db.deleteDynamicObject(clientname, datatypename, entityname); // First delete the relation so that it is not handled by recalculation
+        if (existingrelation.relationtypename === "parentchild") {
+            await ch.calculateentityandparentsrecursively(clientname, existingrelation.datatype1name, existingrelation.name1);
         }
-        // Recalculate parents
-        for (var i = 0; i < parentrelations.length; i++) {
-            var relation = parentrelations[i];
-            await ch.calculateentityandparentsrecursively(clientname, relation.datatype1name, relation.name1);
-        }
-        res.sendStatus(204);
-    } catch(error) {
-        res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
+    } else {
+        await Db.deleteDynamicObject(clientname, datatypename, entityname);
     }
-
-    // TODO later: For documents, also delete the file
+    // Special handle documents for which the files must also be deleted
+    if (datatypename === "documents") {
+        var filepath = dh.getDocumentPath(clientname, entityname);
+        await new Promise((resolve, reject) => {
+            fs.unlink(filepath, (err) => { resolve(); }); // Ignore errors on not existing files
+        });
+    }
+    // Recalculate parents
+    for (var i = 0; i < parentrelations.length; i++) {
+        var relation = parentrelations[i];
+        await ch.calculateentityandparentsrecursively(clientname, relation.datatype1name, relation.name1);
+    }
+    res.sendStatus(204);
 });
 
 // Get a list of all children of the given entity. Used for hierarchies when one opens an element which has children
