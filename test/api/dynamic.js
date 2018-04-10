@@ -461,20 +461,19 @@ describe.only('API dynamic', () => {
         });
 
         it('responds with a list of root elements', async() => {
-            function check(e) {
-                var fieldnames = Object.keys(e);
-                assert.ok(fieldnames.indexOf("name") >= 0);
-                assert.ok(fieldnames.indexOf("datatypename") >= 0);
-                assert.ok(fieldnames.indexOf("icon") >= 0);
-                assert.ok(fieldnames.indexOf("haschildren") >= 0);
-            }
             var token = await th.defaults.login("client0_usergroup0_user0");
             var result = (await th.get(`/api/dynamic/rootelements/list0?token=${token}`).expect(200)).body;
             assert.ok(result.length > 0);
             assert.ok(result.find(c => c.name === "client0_datatype0_entity0"));
             assert.ok(result.find(c => c.name === "client0_datatype0_entity1"));
             assert.ok(result.find(c => c.name === "client0_datatype2_entity2"));
-            result.forEach(check);
+            result.forEach(e => {
+                var fieldnames = Object.keys(e);
+                assert.ok(fieldnames.indexOf("name") >= 0);
+                assert.ok(fieldnames.indexOf("datatypename") >= 0);
+                assert.ok(fieldnames.indexOf("icon") >= 0);
+                assert.ok(fieldnames.indexOf("haschildren") >= 0);
+            });
         });
 
         it('does not return root elements for recordtypes where the user has no access to', async() => {
@@ -489,28 +488,46 @@ describe.only('API dynamic', () => {
 
     describe('GET/:recordtypename', () => {
 
-        xit('responds without authentication with 403', async() => {
+        it('responds without authentication with 403', async() => {
+            return th.get("/api/dynamic/client0_datatype0").expect(403);
         });
 
-        xit('responds without read permission with 403', async() => {
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.BIM_FMOBJECT);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/client0_datatype0?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async() => {
+        it('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/client0_datatype0?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async() => {
+        it('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            return th.get(`/api/dynamic/client0_datatype0?token=${token}`).expect(403);
         });
 
-        xit('responds with 400 when the recordtypename is invalid', async() => {
+        it('responds with 403 when the recordtypename is invalid', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/invalidrecordtypename?token=${token}`).expect(403);
         });
 
-        xit('responds with empty list when there are no elements of the given record type', async() => {
+        it('responds with empty list when there are no elements of the given record type', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/client0_datatype3?token=${token}`).expect(200)).body;
+            assert.strictEqual(result.length, 0);
         });
 
-        xit('responds with empty list when the user has no access to the record type', async() => {
-        });
-
-        xit('responds with a list of all elements of the given record type', async() => {
+        it('responds with a list of all elements of the given record type', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/client0_datatype0?token=${token}`).expect(200)).body;
+            assert.ok(result.length > 0);
+            result.forEach(e => {
+                assert.ok(e.name);
+            });
         });
 
     });

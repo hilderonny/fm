@@ -262,6 +262,7 @@ th.preparedatatypes = async() => {
     await Db.createDatatype("client0", "client0_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, true, true);
     await Db.createDatatype("client0", "client0_datatype1", "label1", "plurallabel1", true, "icon1", ["list1"], co.permissions.OFFICE_ACTIVITY, co.modules.documents, true, false);
     await Db.createDatatype("client0", "client0_datatype2", "label2", "plurallabel2", false, "icon2", ["list0", "list1"], co.permissions.BIM_AREAS, co.modules.notes, false, false);
+    await Db.createDatatype("client0", "client0_datatype3", "label3", "plurallabel3", false, "icon3", ["list2"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, false, false); // datatype without elements
     await Db.createDatatype("client1", "client1_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, true, true);
 };
 

@@ -150,25 +150,17 @@ router.get("/rootelements/:forlist", auth(false, false, co.modules.base), async(
 // Get list of all dynamic objects of given record type
 // TODO: Wird das benutzt?
 router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, res) => {
-    try {
-        var filter = req.query;
-        delete filter.token;
-        var objects = await Db.getDynamicObjects(req.user.clientname, req.params.recordtypename, filter);
-        res.send(objects);
-    } catch(error) {
-        res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
-    }
+    var filter = req.query;
+    delete filter.token;
+    var objects = await Db.getDynamicObjects(req.user.clientname, req.params.recordtypename, filter);
+    res.send(objects);
 });
 
 // Get a specific dynamic object
 // TODO: In allgemeine Detailseiten-API integrieren
 router.get("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
-    try {
-        var dynamicobject = await Db.getDynamicObject(req.user.clientname, req.params.recordtypename, req.params.entityname);
-        res.send(dynamicobject);
-    } catch(error) {
-        res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
-    }
+    var dynamicobject = await Db.getDynamicObject(req.user.clientname, req.params.recordtypename, req.params.entityname);
+    res.send(dynamicobject);
 });
 
 // Create a dynamic object and return its generated name
