@@ -76,13 +76,13 @@ var ch = {
             var clients = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM clients;")).rows;
             for (var i = 0; i < clients.length; i++) {
                 var clientname = clients[i].name;
-                // perform calculations for all FM object types, the order here is important!
-                var datatypestocalculate = ["areas", "rooms", "levels", "buildings", "properties", "projects"];
+                // perform calculations for all datatypes beginning with all leaf elements proceeding hierarchically upwards
+                var datatypestocalculate = (await Db.query(clientname, "SELECT DISTINCT datatypename FROM datatypefields WHERE fieldtype = 'formula';")).rows.map(r => r.datatypename);
                 for (var j = 0; j < datatypestocalculate.length; j++) {
                     var dt = datatypestocalculate[j];
-                    var entitynames = (await Db.query(clientname, `SELECT name FROM ${dt};`)).rows.map(r => r.name);
+                    var entitynames = (await Db.query(clientname, `SELECT x.name FROM ${dt} x LEFT JOIN relations r ON r.datatype1name = '${dt}' AND r.name1 = x.name WHERE r IS NULL;`)).rows.map(r => r.name);
                     for (var k = 0; k < entitynames.length; k++) {
-                        await ch.calculateformula(clientname, dt, entitynames[k]);
+                        await ch.calculateentityandparentsrecursively(clientname, dt, entitynames[k]);
                     }
                 }
             }
