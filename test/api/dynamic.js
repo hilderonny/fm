@@ -354,74 +354,135 @@ describe.only('API dynamic', () => {
             assert.ok(!e0.children.find(c => c.name === "client0_datatype2_entity0"));
         });
 
-        it('does not return root elements for recordtypes where the user has no access to (emtpy list)', async() => {
+        it('does not return root elements for recordtypes where the user has no access to', async() => {
             await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.BIM_FMOBJECT);
             var token = await th.defaults.login("client0_usergroup0_user0");
             var result = (await th.get(`/api/dynamic/hierarchytoelement/list0/client0_datatype2/client0_datatype2_entity1?token=${token}`).expect(200)).body;
-            assert.strictEqual(result.length, 0);
+            assert.strictEqual(result.length, 1); // Only client0_datatype2_entity2
         });
 
     });
 
     describe('GET/parentpath/:forlist/:recordtypename/:entityname', () => {
 
-        xit('responds without authentication with 403', async() => {
+        it('responds without authentication with 403', async() => {
+            return th.get("/api/dynamic/parentpath/list0/client0_datatype0/client0_datatype0_entity4").expect(403);
         });
 
-        xit('responds without read permission with 403', async() => {
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.BIM_FMOBJECT);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/parentpath/list0/client0_datatype0/client0_datatype0_entity4?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async() => {
+        it('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/parentpath/list0/client0_datatype0/client0_datatype0_entity4?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async() => {
+        it('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            return th.get(`/api/dynamic/parentpath/list0/client0_datatype0/client0_datatype0_entity4?token=${token}`).expect(403);
         });
 
-        xit('responds with 400 when the recordtypename is invalid', async() => {
+        it('responds with 403 when the recordtypename is invalid', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/parentpath/list0/invalidrecordtypename/client0_datatype0_entity4?token=${token}`).expect(403);
         });
 
-        xit('responds with 404 when the entityname is invalid', async() => {
+        it('responds with empty list when the entityname is invalid', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/parentpath/list0/client0_datatype0/invalidentityname?token=${token}`).expect(200)).body;
+            assert.strictEqual(result.length, 0);
         });
 
-        xit('responds with empty list when the element is a root element without any parents', async() => {
+        it('responds with empty list when the element is a root element without any parents', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/parentpath/list0/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(200)).body;
+            assert.strictEqual(result.length, 0);
         });
 
-        xit('responds with empty list when there are no parents for the given list name', async() => {
+        it('responds with empty list when there are no parents for the given list name', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/parentpath/unknownlistname/client0_datatype0/client0_datatype0_entity4?token=${token}`).expect(200)).body;
+            assert.strictEqual(result.length, 0);
         });
 
-        xit('responds with 404 when the object to request does not belong to client of the logged in user', async() => {
+        it('responds with 403 when the object to request does not belong to client of the logged in user', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/parentpath/list0/client1_datatype0/client1_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds with a list of parents ordered from root (1st) to the element (last)', async() => {
+        it('responds with a list of parent element titles ordered from root to element', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/parentpath/list0/client0_datatype0/client0_datatype0_entity6?token=${token}`).expect(200)).body;
+            // client0_datatype0_entity0 --> client0_datatype0_entity2 --> client0_datatype0_entity4
+            assert.ok(result.length > 2);
+            assert.strictEqual(result[0], "C0D0E0");
+            assert.strictEqual(result[1], "client0_datatype2_entity0");
+            assert.strictEqual(result[2], "C0D0E5");
         });
 
-        xit('does not return parents for recordtypes where the user has no access to', async() => {
+        it('does not return parent labels for recordtypes where the user has no access to', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.BIM_AREAS);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/parentpath/list0/client0_datatype0/client0_datatype0_entity6?token=${token}`).expect(200)).body;
+            assert.ok(result.length > 1);
+            assert.strictEqual(result[0], "C0D0E0");
+            assert.strictEqual(result[1], "C0D0E5");
         });
 
     });
 
     describe('GET/rootelements/:forlist', () => {
 
-        xit('responds without authentication with 403', async() => {
+        it('responds without authentication with 403', async() => {
+            return th.get("/api/dynamic/rootelements/list0").expect(403);
         });
 
-        xit('responds without read permission with 403', async() => {
+        it('responds when the logged in user\'s (normal user) client has no access to the base module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.base);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/rootelements/list0?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to the base module, with 403', async() => {
+        it('responds when the logged in user\'s (administrator) client has no access to the base module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.base);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            return th.get(`/api/dynamic/rootelements/list0?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (administrator) client has no access to the base module, with 403', async() => {
+        it('responds with empty list when there are no root elements for the given list name', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/rootelements/unknownlistname?token=${token}`).expect(200)).body;
+            assert.strictEqual(result.length, 0);
         });
 
-        xit('responds with empty list when there are no root elements for the given list name', async() => {
+        it('responds with a list of root elements', async() => {
+            function check(e) {
+                var fieldnames = Object.keys(e);
+                assert.ok(fieldnames.indexOf("name") >= 0);
+                assert.ok(fieldnames.indexOf("datatypename") >= 0);
+                assert.ok(fieldnames.indexOf("icon") >= 0);
+                assert.ok(fieldnames.indexOf("haschildren") >= 0);
+            }
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/rootelements/list0?token=${token}`).expect(200)).body;
+            assert.ok(result.length > 0);
+            assert.ok(result.find(c => c.name === "client0_datatype0_entity0"));
+            assert.ok(result.find(c => c.name === "client0_datatype0_entity1"));
+            assert.ok(result.find(c => c.name === "client0_datatype2_entity2"));
+            result.forEach(check);
         });
 
-        xit('responds with a list of root elements', async() => {
-            // check for haschildren!
-        });
-
-        xit('does not return root elements for recordtypes where the user has no access to', async() => {
+        it('does not return root elements for recordtypes where the user has no access to', async() => {
+            await th.removeClientModule("client0", co.modules.notes);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/rootelements/list0?token=${token}`).expect(200)).body;
+            assert.ok(result.length > 0);
+            assert.ok(!result.find(c => c.name === "client0_datatype2_entity2"));
         });
 
     });

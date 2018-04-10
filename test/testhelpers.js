@@ -277,15 +277,17 @@ th.preparedatatypefields = async() => {
 };
 
 th.preparedynamicobjects = async() => {
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity0", boolean0: true, datetime0: 123, decimal0: 234.567, reference0: "client0_usergroup0_user0", text0: "Text" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity1", boolean0: true });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity2", boolean0: true, decimal0: 345.789 });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity3", boolean0: true });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity4", boolean0: true });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity5", boolean0: true });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity0", boolean0: true, datetime0: 123, decimal0: 234.567, reference0: "client0_usergroup0_user0", text0: "C0D0E0" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity1", boolean0: true, text0: "C0D0E1" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity2", boolean0: true, decimal0: 345.789, text0: "C0D0E2" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity3", boolean0: true, text0: "C0D0E3" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity4", boolean0: true, text0: "C0D0E4" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity5", boolean0: true, text0: "C0D0E5" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity6", boolean0: true, text0: "C0D0E6" });
     await Db.insertDynamicObject("client0", "client0_datatype1", { name: "client0_datatype1_entity0" });
     await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity0" });
     await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity1" });
+    await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity2" }); // Another root element
     await Db.insertDynamicObject("client1", "client1_datatype0", { name: "client1_datatype0_entity0" });
 };
 
@@ -300,6 +302,7 @@ th.preparerelations = async() => {
     th.createRelation("client0_datatype0", "client0_datatype0_entity2", "client0_datatype0", "client0_datatype0_entity4", "parentchild");
     th.createRelation("client0_datatype2", "client0_datatype2_entity0", "client0_datatype2", "client0_datatype2_entity1", "parentchild");
     th.createRelation("client0_datatype2", "client0_datatype2_entity0", "client0_datatype0", "client0_datatype0_entity5", "parentchild");
+    th.createRelation("client0_datatype0", "client0_datatype0_entity5", "client0_datatype0", "client0_datatype0_entity6", "parentchild");
 };
 
 th.prepareRelations = async() => {
