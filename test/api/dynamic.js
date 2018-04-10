@@ -534,28 +534,54 @@ describe.only('API dynamic', () => {
 
     describe('GET/:recordtypename/:entityname', () => {
 
-        xit('responds without authentication with 403', async() => {
+        it('responds without authentication with 403', async() => {
+            return th.get("/api/dynamic/client0_datatype0/client0_datatype0_entity0").expect(403);
         });
 
-        xit('responds without read permission with 403', async() => {
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.BIM_FMOBJECT);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async() => {
+        it('responds when the logged in user\'s (normal user) client has no access to the module of the record type, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async() => {
+        it('responds when the logged in user\'s (administrator) client has no access to the module of the record type, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.fmobjects);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            return th.get(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds with 400 when the recordtypename is invalid', async() => {
+        it('responds with 403 when the recordtypename is invalid', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/invalidrecordtypename/client0_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds with 404 when the entityname is invalid', async() => {
+        it('responds with 404 when the entityname is invalid', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/client0_datatype0/invalidentityname?token=${token}`).expect(404);
         });
 
-        xit('responds with 404 when the object to request does not belong to client of the logged in user', async() => {
+        it('responds with 403 when the object to request does not belong to client of the logged in user', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/dynamic/client1_datatype0/client1_datatype0_entity0?token=${token}`).expect(403);
         });
 
-        xit('responds with the record data of the given entityname', async() => {
+        it('responds with the record data of the given entityname', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/client0_datatype0/client0_datatype0_entity0?token=${token}`).expect(200)).body;
+            assert.ok(result);
+            assert.strictEqual(result.boolean0, true);
+            assert.strictEqual(result.datetime0, 123);
+            assert.strictEqual(result.decimal0, 234.567);
+            assert.strictEqual(result.reference0, "client0_usergroup0_user0");
+            assert.strictEqual(result.text0, "C0D0E0");
+            assert.strictEqual(result.formula0, 345.789);
+            assert.strictEqual(result.formula1, 580.356);
         });
 
     });

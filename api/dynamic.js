@@ -157,9 +157,9 @@ router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, r
 });
 
 // Get a specific dynamic object
-// TODO: In allgemeine Detailseiten-API integrieren
 router.get("/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var dynamicobject = await Db.getDynamicObject(req.user.clientname, req.params.recordtypename, req.params.entityname);
+    if (!dynamicobject) return res.sendStatus(404);
     res.send(dynamicobject);
 });
 
