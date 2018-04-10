@@ -285,6 +285,7 @@ th.preparedynamicobjects = async() => {
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity4", boolean0: true, text0: "C0D0E4" });
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity5", boolean0: true, text0: "C0D0E5" });
     await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity6", boolean0: true, text0: "C0D0E6" });
+    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity7", boolean0: true, decimal0: 100, text0: "C0D0E7" });
     await Db.insertDynamicObject("client0", "client0_datatype1", { name: "client0_datatype1_entity0" });
     await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity0" });
     await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity1" });
