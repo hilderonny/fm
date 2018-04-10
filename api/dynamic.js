@@ -100,26 +100,25 @@ router.get("/children/:forlist/:recordtypename/:entityname", auth.dynamic("recor
 });
 
 // Get the entire hierarchy from the root to a specific element with all intermediate children. Used for hierarchies when a direct URL is loaded
-router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth(false, false, co.modules.base), async(req, res) => {
+router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var clientname = req.user.clientname;
     var recordtypename = req.params.recordtypename;
     var forlist = req.params.forlist;
-    try {
-        var datatypes = await Db.getdatatypes(clientname);
-        var permissions = await ph.getpermissionsforuser(req.user);
-        var parentrelations = (await Db.getparentrelationstructure(clientname, recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1 && datatypes[r.datatype1name].lists && datatypes[r.datatype1name].lists.indexOf(forlist) >= 0).sort((a, b) => b.depth - a.depth);
-        var rootelements = await getrootelements(clientname, forlist, permissions);
+    var datatypes = await Db.getdatatypes(clientname);
+    var permissions = await ph.getpermissionsforuser(req.user);
+    var parentrelations = (await Db.getparentrelationstructure(clientname, recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1 && datatypes[r.datatype1name].lists && datatypes[r.datatype1name].lists.indexOf(forlist) >= 0).sort((a, b) => b.depth - a.depth);
+    var rootelements = await getrootelements(clientname, forlist, permissions);
+    if (rootelements.length > 0) { // Else can happen when user has no access to the permissions required for the root elements
         var children = rootelements;
         for (var i = 0; i < parentrelations.length; i++) {
             var elementtohandle = children.find(c => c.name === parentrelations[i].name1);
+            if (!elementtohandle) break; // When the user has no access to an intermediate parent
             children = await getchildren(clientname, elementtohandle.datatypename, elementtohandle.name, permissions, forlist);
             elementtohandle.children = children;
             elementtohandle.isopen = true; // Selecting the path
         }
-        res.send(rootelements);
-    } catch(error) {
-        res.sendStatus(400); // Error in request. Maybe the recordtypename does not exist
     }
+    res.send(rootelements);
 });
 
 // Get path of all parents of an object as array (root first) for breadcrumbs
