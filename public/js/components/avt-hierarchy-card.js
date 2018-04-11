@@ -92,6 +92,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                             });
                         };
                         setparentofchildrenrecursively(scope.child);
+                        if (!scope.selectedchild) scope.selectchild({datatypename:datatypename, name: entityname}); // When hierarchy cannot be opened until the child (missing permission)
                     });
                 };
                 scope.loadrootelements = function() {
