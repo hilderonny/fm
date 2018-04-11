@@ -139,7 +139,8 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
                         // Load entities
                         var fetchpromises = Object.keys(entitiestofetch).map(function(k) {
                             var entitiestofetchfordatatype = entitiestofetch[k];
-                            return utils.getresponsedata("/api/dynamic/" + k + "?name=[" + Object.keys(entitiestofetchfordatatype).map(function(e) { return '"' + e + '"'; }).join(",") + "]").then(function(entities) {
+                            return utils.getresponsedata("/api/dynamic/" + k + "?name=[" + Object.keys(entitiestofetchfordatatype).map(function(e) { return '"' + e + '"'; }).join(",") + "]#ignore403").then(function(entities) {
+                                if (!Array.isArray(entities)) return;
                                 entities.forEach(function(e) {
                                     e.datatype = scope.$root.datatypes[k];
                                     var mapper = entitiestofetchfordatatype[e.name];

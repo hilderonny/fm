@@ -107,7 +107,7 @@ router.get("/hierarchytoelement/:forlist/:recordtypename/:entityname", auth.dyna
     var forlist = req.params.forlist;
     var datatypes = await Db.getdatatypes(clientname);
     var permissions = await ph.getpermissionsforuser(req.user);
-    var parentrelations = (await Db.getparentrelationstructure(clientname, recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1 && datatypes[r.datatype1name].lists && datatypes[r.datatype1name].lists.indexOf(forlist) >= 0).sort((a, b) => b.depth - a.depth);
+    var parentrelations = (await Db.getparentrelationstructure(clientname, recordtypename, req.params.entityname)).filter(r => r.datatype1name && r.name1 && datatypes[r.datatype1name] && datatypes[r.datatype1name].lists && datatypes[r.datatype1name].lists.indexOf(forlist) >= 0).sort((a, b) => b.depth - a.depth);
     var rootelements = await getrootelements(clientname, forlist, permissions);
     if (rootelements.length > 0) { // Else can happen when user has no access to the permissions required for the root elements
         var children = rootelements;
@@ -130,6 +130,7 @@ router.get("/parentpath/:forlist/:recordtypename/:entityname", auth.dynamic("rec
     var relations = (await Db.getparentrelationstructure(clientname, req.params.recordtypename, req.params.entityname)).filter(r => 
         r.datatype1name && 
         r.name1 && 
+        datatypes[r.datatype1name] && 
         datatypes[r.datatype1name].lists && 
         datatypes[r.datatype1name].lists.indexOf(req.params.forlist) >= 0 && // When there are no parents (root element created)
         permissionskeys.indexOf(datatypes[r.datatype1name].permissionkey) >= 0

@@ -118,18 +118,28 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     var file = req.file;
     if (!file) return res.sendStatus(400);
     var clientname = req.user.clientname;
-    var parentFolderId = req.body.parentFolderId ? req.body.parentFolderId : null;
-    if (parentFolderId && !(await Db.getDynamicObject(clientname, co.collections.folders.name, parentFolderId))) return res.sendStatus(400);
     var document = {
         name: uuidv4(),
         label: file.originalname,
         type: file.mimetype, 
-        parentfoldername: parentFolderId,
         isshared: false
     };
-    await Db.insertDynamicObject(clientname, co.collections.documents.name, document);
+    await Db.insertDynamicObject(clientname, "documents", document);
     dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', file.path));
-    res.send({ _id: document.name, type: "d", name: document.label });
+    var parentdatatypename = req.body.parentdatatypename;
+    var parententityname = req.body.parententityname;
+    if (parentdatatypename && parententityname) {
+        var relation = {
+            name: uuidv4(),
+            datatype1name: parentdatatypename,
+            name1: parententityname,
+            datatype2name: "documents",
+            name2: document.name,
+            relationtypename: "parentchild"
+        };
+        await Db.insertDynamicObject(clientname, "relations", relation);
+    }
+    res.send(document.name);
 });
 
 // Update meta data of a document

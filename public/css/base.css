@@ -564,7 +564,8 @@ table.largedevice, table.smalldevice {
     height: 100%;
     width: 0;
     padding-left: 100%;
-    cursor:pointer;
+    cursor: pointer;
+    z-index: 9999;
 }
 
 .md-fab .fileupload {

@@ -162,42 +162,22 @@ describe('API documents', () =>{
 
         th.apiTests.post.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, createPostTestObject);
 
-        it('responds with correct document with invalid parentFolderId with 400', async() => {
-            var filePath = createFileForUpload();
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            // https://visionmedia.github.io/superagent/#multipart-requests
-            await th.post(`/api/documents?token=${token}`).field('parentFolderId', 'invalidid').attach('file', filePath).expect(400);
-        });
-
         it('responds without file with 400', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.post(`/api/documents?token=${token}`).field('parentFolderId', 'client0_folder0').expect(400);
+            await th.post(`/api/documents?token=${token}`).field("parentdatatypename", "folders", "parententityname", "client0_folder0").expect(400);
         });
 
         it('responds with correct document for a client which has no documents the correct status and creates document path for client', async() => {
             deleteDocumentsFolder();
             var filePath = createFileForUpload();
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var createddocument = (await th.post(`/api/documents?token=${token}`).field('parentFolderId', 'client0_folder0').attach('file', filePath).expect(200)).body;
-            assert.ok(createddocument);
-            assert.ok(createddocument._id);
-            assert.strictEqual(createddocument.type, "d");
-            assert.strictEqual(createddocument.name, "testDocumentPost.txt");
-            var documentFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, createddocument._id);
+            var createddocumentname = (await th.post(`/api/documents?token=${token}`).field("parentdatatypename", "folders", "parententityname", "client0_folder0").attach('file', filePath).expect(200)).text;
+            assert.ok(createddocumentname);
+            var documentFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, createddocumentname);
             assert.ok(documentFromDatabase);
             assert.strictEqual(documentFromDatabase.label, "testDocumentPost.txt");
-            assert.strictEqual(documentFromDatabase.parentfoldername, "client0_folder0");
             assert.strictEqual(documentFromDatabase.type, "text/plain");
             assert.ok(fs.existsSync(dh.getDocumentPath("client0", documentFromDatabase.name)));
-        });
-
-        it('responds with correct document with no parentFolderId with the inserted document and null as parentFolderId', async() => {
-            deleteDocumentsFolder();
-            var filePath = createFileForUpload();
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            var createddocument = (await th.post(`/api/documents?token=${token}`).attach('file', filePath).expect(200)).body;
-            var documentFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, createddocument._id);
-            assert.strictEqual(documentFromDatabase.parentfoldername, null);
         });
         
     });

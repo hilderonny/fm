@@ -108,6 +108,7 @@
                 "public/js/components/avt-hierarchy-card.js",
                 "public/js/components/avt-list-card.js",
                 "public/js/components/avt-permissions-tab.js",
+                "public/js/components/avt-progress-spinner.js",
                 "public/js/components/avt-relations.js",
                 "public/js/components/avt-relations-tab.js",
                 "public/js/components/avt-relations-toolbar-button.js",
@@ -574,6 +575,8 @@
                 "partial/Office/FolderCard.html"
             ],
             "include" : [
+                "public/js/components/avt-upload-document-toolbar-button.js",
+
                 "public/js/Office/DocumentCardController.js",
                 "public/js/Office/DocumentListCardController.js",
                 "public/js/Office/FolderCardController.js"

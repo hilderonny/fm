@@ -5,7 +5,6 @@
     "dbuser": "postgres",
     "dbpassword": "postgres",
     "autoUpdateMode": false,
-    "dbName": "db",
     "documentspath": "documents/",
     "tokensecret": "schnullibulli",
     "useHTTP": true,
