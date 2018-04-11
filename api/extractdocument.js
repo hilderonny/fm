@@ -4,8 +4,6 @@
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var mime = require('mime');
-var multer  = require('multer')
-var upload = multer({ dest: 'uploads/' })
 var fs = require('fs');
 var path = require('path');
 var documentsHelper = require('../utils/documentsHelper');
