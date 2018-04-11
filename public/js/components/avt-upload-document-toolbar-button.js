@@ -1,11 +1,6 @@
-/*
-$parent.detailscard könnte in dieses Attribut aufgenommen werden, damit ein Add User button beispielsweise
-auch in die Detailkarte einer Benutzergruppe rein könnte. Dann müsste der Parameter datatypenames so aufgebohrt
-werden, dass für jeden Datentypnamen die Detailkarte spezifiziert werden kann
-*/
 app.directive('avtUploadDocumentToolbarButton', function($rootScope, $compile, $translate, $mdToast, $http, utils) { 
     var template = 
-        '<md-button ng-if="$parent.canwrite && (!$parent.params.datatypename || $parent.params.datatypename === \'folders\')" avt-toolbar-button icon="/css/icons/material/Upload.svg" label="Hochladen" tooltip="Dokument hochladen">' +
+        '<md-button ng-if="$parent.canwrite && (!$parent.params.datatypename || $parent.params.datatypename === \'folders\') && !$parent.isnew" avt-toolbar-button icon="/css/icons/material/Upload.svg" label="Hochladen" tooltip="Dokument hochladen">' +
         '   <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadfile(this)" />' +
         '</md-button>';
     return {
@@ -20,9 +15,9 @@ app.directive('avtUploadDocumentToolbarButton', function($rootScope, $compile, $
             return function link(scope) {
                 scope.uploadfile = function(fileinput) {
                     var file = fileinput.files[0];
-                    scope.isinprogress = true;
                     scope.progressmode = "determinate";
                     scope.progressvalue = 0;
+                    scope.isinprogress = true;
                     // http://stackoverflow.com/q/13591345
                     var form = new FormData();
                     var xhr = new XMLHttpRequest;

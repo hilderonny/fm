@@ -53,9 +53,10 @@ function mapFields(e, clientname) {
 }
 
 var downloadDocument = (response, clientname, document, forpreview) => {
+    var dispositiontype = forpreview ? 'inline' : 'attachment';
     var options = {
         headers: {
-            'Content-disposition' : forpreview? 'inline' : 'attachment; filename=' + document.label,
+            'Content-disposition' : dispositiontype + '; filename=' + document.label,
             'Content-Type' : mime.lookup(document.type)
         }
     };

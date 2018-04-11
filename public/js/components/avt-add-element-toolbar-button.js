@@ -4,7 +4,7 @@ auch in die Detailkarte einer Benutzergruppe rein könnte. Dann müsste der Para
 werden, dass für jeden Datentypnamen die Detailkarte spezifiziert werden kann
 */
 app.directive('avtAddElementToolbarButton', function($rootScope, $compile, utils) { 
-    var template = '<md-button ng-if="$parent.canwrite && $parent.detailscard && !$parent.isnew" avt-toolbar-button ng-click="createelement($event)" icon="/css/icons/material/Plus Math.svg" label="Element" tooltip="Neues Element erstellen"></md-button>';
+    var template = '<md-button ng-if="$parent.canwrite && $parent.detailscard && !$parent.isnew && $parent.showaddtoolbarbutton" avt-toolbar-button ng-click="createelement($event)" icon="/css/icons/material/Plus Math.svg" label="Element" tooltip="Neues Element erstellen"></md-button>';
     return {
         restrict: "A",
         priority: 890,
@@ -27,6 +27,8 @@ app.directive('avtAddElementToolbarButton', function($rootScope, $compile, utils
             if (params.icon) button.attr("icon", params.icon);
             return function link(scope) {
                 if (params.detailscard) scope.detailscard = params.detailscard; // For add buttons within details cards
+                // Check whether the datatype of the shown element matches
+                scope.showaddtoolbarbutton = !params.availableondatatypenames || params.availableondatatypenames.indexOf(scope.params.datatypename) >= 0;
                 scope.createelement = function($event) {
                     function opendetailscard(datatypename) {
                         if (scope.onbeforecreateelement) scope.onbeforecreateelement($event); // "Before" handling in hierarchy roots
