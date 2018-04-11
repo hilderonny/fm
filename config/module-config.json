@@ -129,8 +129,8 @@
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
                         { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
-                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "listfilter": "users", "directurls": [ "users" ] },
-                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "listfilter": "usergroups", "directurls": [ "usergroups" ] }
+                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
+                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] }
                     ]
                 }
             ],
@@ -569,6 +569,7 @@
                 "css/images/Documents_uploadmobile.png",
                 "partial/Doc/Documents.html",
                 "partial/Office/DocumentCard.html",
+                "partial/Office/DocumentDetailsCard.html",
                 "partial/Office/DocumentListCard.html",
                 "partial/Office/FolderCard.html"
             ],
@@ -591,15 +592,15 @@
 
                 { "name": "folders", "label": "Verzeichnis", "plurallabel": "Verzeichnisse", "titlefield": "label", "icon": "/css/icons/material/Folder.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "parentfoldername", "type": "reference", "reference": "folders" }
-                ], "lists": [ "folders" ], "canhaverelations" : true },
+                    { "name": "parentfoldername", "type": "reference", "reference": "folders", "ishidden": true }
+                ], "lists": [ "folders" ], "permissionkey": "PERMISSION_OFFICE_DOCUMENT", "canhaverelations" : true },
 
                 { "name": "documents", "label": "Dokument", "plurallabel": "Dokumente", "titlefield": "label", "icon": "/css/icons/material/Document.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "parentfoldername", "type": "reference", "reference": "folders" },
-                    { "name": "type", "type": "text" },
+                    { "name": "parentfoldername", "type": "reference", "reference": "folders", "ishidden": true },
+                    { "name": "type", "type": "text", "ishidden": true },
                     { "name": "isshared", "label": "Öffentlich zugänglich", "type": "boolean" }
-                ], "lists": [ "folders" ], "canhaverelations" : true }
+                ], "lists": [ "folders" ], "permissionkey": "PERMISSION_OFFICE_DOCUMENT", "canhaverelations" : true }
 
             ]
         },
@@ -634,7 +635,7 @@
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "BIM/FmObjectsHierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
+                        { "mainCard": "BIM/FmObjectsHierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
                     ]
                 }
             ],

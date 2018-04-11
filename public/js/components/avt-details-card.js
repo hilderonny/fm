@@ -136,10 +136,11 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     scope.candelete = true; // For deletio prevention of extensions like usergroups
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
+                    if (!entityname) scope.isnew = true; // For add element toolbar button
                     scope.datatype = scope.$root.datatypes[datatypename];
                     var fieldnames = Object.keys(scope.datatype.fields);
                     if (!scope.datatype.candefinename) fieldnames = fieldnames.filter(function(k) { return k !== "name" });
-                    scope.datatypefields = fieldnames.map(function(fn) { return scope.datatype.fields[fn]; });
+                    scope.datatypefields = fieldnames.map(function(fn) { return scope.datatype.fields[fn]; }).filter(function(f) { console.log(f);return !f.ishidden; });
                     return Promise.all([
                         entityname ? utils.loaddynamicobject(datatypename, entityname).then(function(dynamicobject) { scope.dynamicobject = dynamicobject; }) : Promise.resolve(),
                         entityname ? utils.loaddynamicattributes(datatypename, entityname).then(function(dynamicattributes) { scope.dynamicattributes = dynamicattributes; }) : Promise.resolve(), // TODO: Irrelevant in the future

@@ -81,10 +81,14 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                     scope.selectedchild.label = updatedelement.label ? updatedelement.label : updatedelement[titlefields[updatedelement.datatypename]];
                 };
                 scope.loadelementsfordirectaccess = function(datatypename, entityname) {
-                    return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + scope.params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {
+                    return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {
                         scope.child = { children: rootelements };
+                        var isselected = false;
                         var setparentofchildrenrecursively = function(child) {
-                            if (child.name === entityname) scope.selectchild(child);
+                            if (child.name === entityname) {
+                                scope.selectchild(child);
+                                isselected = true;
+                            }
                             if (child.children) child.children.forEach(function(c) {
                                 c.parent = child;
                                 if (!c.label) c.label = c[titlefields[c.datatypename]];
@@ -92,11 +96,11 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                             });
                         };
                         setparentofchildrenrecursively(scope.child);
-                        if (!scope.selectedchild) scope.selectchild({datatypename:datatypename, name: entityname}); // When hierarchy cannot be opened until the child (missing permission)
+                        if (!isselected) scope.selectchild({datatypename:datatypename, name: entityname}); // When hierarchy cannot be opened until the child (missing permission)
                     });
                 };
                 scope.loadrootelements = function() {
-                    return utils.getresponsedata("/api/dynamic/rootelements/" + scope.params.listfilter).then(function(rootelements) {
+                    return utils.getresponsedata("/api/dynamic/rootelements/" + params.listfilter).then(function(rootelements) {
                         if (!scope.child) { // Fresh load after card opening
                             scope.child = { children: rootelements };
                             scope.child.children.forEach(function(c) {
@@ -116,7 +120,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                     });
                 };
                 scope.openchild = function(child) {
-                    return utils.getresponsedata("/api/dynamic/children/" + scope.params.listfilter + "/" + child.datatypename + "/" + child.name).then(function(children) {
+                    return utils.getresponsedata("/api/dynamic/children/" + params.listfilter + "/" + child.datatypename + "/" + child.name).then(function(children) {
                         child.children = children;
                         child.children.forEach(function(cc) {
                             cc.parent = child;

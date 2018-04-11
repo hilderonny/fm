@@ -1,43 +1,5 @@
-<md-card ng-cloak ng-controller="OfficeDocumentListCardController" style="background-image:url(/css/icons/office/Document.svg);">
-
-    <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button ng-if="canWriteDocuments" ng-click="newFolder()" aria-label="ADD FOLDER">
-            <md-tooltip md-direction="bottom"><span translate>TRK_FOLDERS_CREATE_NEW_FOLDER</span></md-tooltip>
-            <md-icon md-svg-src="/css/icons/material/Add Folder.svg"></md-icon>
-            <p translate>TRK_FOLDERS_FOLDER</p>
-        </md-button>
-        <md-button ng-if="canWriteDocuments" aria-label="UPLOAD FILE">
-            <md-tooltip md-direction="bottom"><span translate>TRK_FOLDERS_UPLOAD_DOCUMENT</span></md-tooltip>
-            <md-icon md-svg-src="/css/icons/material/Upload.svg"></md-icon>
-            <p translate>TRK_FOLDERS_UPLOAD</p>
-            <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadFile(this)" />
-        </md-button>
-    </md-toolbar>
-
-    <script type="text/ng-template" id="documentHierarchyList.html">
-        <md-list class="hierarchy">
-            <md-list-item flex layout="column" ng-repeat="child in child.children">
-                <div flex layout="row" ng-class="{active:selectedElement==child}">
-                    <md-icon ng-click="child.isOpen = true" ng-if="!child.isOpen && child.children.length > 0" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>
-                    <md-icon ng-click="child.isOpen = false" ng-if="child.isOpen && child.children.length > 0" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>
-                    <md-icon ng-if="child.children.length < 1"></md-icon>
-                    <img ng-click="selectElement(child)" ng-src="/css/icons/{{child.icon}}.svg" />
-                    <p class="nowrap" ng-bind="child.name" ng-click="selectElement(child)"></p>
-                </div>
-                <ng-include flex src="'documentHierarchyList.html'" ng-if="child.isOpen"></ng-include>
-            </md-list-item>
-        </md-list>
-    </script>
-    
-    <md-card-content>
-        <ng-include flex src="'documentHierarchyList.html'"></ng-include>
-    </md-card-content>
-
-    <div class="progress-panel" ng-if="isUploading">
-        <md-progress-circular md-mode="{{uploadMode}}" value="{{uploadProgress}}"></md-progress-circular>
-        <span>{{uploadProgress}} %</span>
-    </div>
-
-    <resize-handle></resize-handle>
-    
-</md-card>
+<md-card
+    avt-card
+    avt-hierarchy-card='{"listfilter":"folders","detailscard":"Office/DocumentDetailsCard"}'
+    avt-add-element-toolbar-button='{"datatypenames":["folders"],"label":"Verzeichnis","tooltip":"Verzeichnis im Stamm erstellen","icon":"/css/icons/material/Add Folder.svg"}'
+></md-card>
