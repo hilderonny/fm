@@ -150,7 +150,10 @@ var Db = {
         await Db.query(Db.PortalDatabaseName, `DELETE FROM clients WHERE name = '${Db.replaceQuotes(clientname)}';`);
         await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE clientname = '${Db.replaceQuotes(clientname)}';`);
         await Db.query(Db.PortalDatabaseName, `DELETE FROM clientsettings WHERE clientname = '${Db.replaceQuotes(clientname)}';`);
-        // TODO: Also delete documents of client
+        await Db.query(Db.PortalDatabaseName, `DELETE FROM allusers WHERE clientname = '${Db.replaceQuotes(clientname)}';`);
+        // Also delete documents of client
+        var documentpath = path.join(__dirname, '..', localconfig.documentspath ? localconfig.documentspath : 'documents');
+        rimraf.sync(path.join(documentpath, clientname));
         return true;
     },
 
