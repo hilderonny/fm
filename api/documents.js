@@ -52,10 +52,10 @@ function mapFields(e, clientname) {
     };
 }
 
-var downloadDocument = (response, clientname, document) => {
+var downloadDocument = (response, clientname, document, forpreview) => {
     var options = {
         headers: {
-            'Content-disposition' : 'attachment; filename=' + document.label,
+            'Content-disposition' : forpreview? 'inline' : 'attachment; filename=' + document.label,
             'Content-Type' : mime.lookup(document.type)
         }
     };
@@ -105,6 +105,10 @@ router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.document
     // When request parameter "action=download" is given, return the document file.
     if (req.query.action && req.query.action === 'download') {
         return downloadDocument(res, req.user.clientname, document);
+    }
+    // When request parameter "action=preview" is given, return the document file but for showing it in the browser
+    if (req.query.action && req.query.action === 'preview') {
+        return downloadDocument(res, req.user.clientname, document, true);
     }
     res.send(mapFields(document, req.user.clientname));
 });

@@ -26,7 +26,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '                       <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'" ng-required="datatypefield.isrequired">' +
         '                       <input ng-value="dynamicobject[datatypefield.name] || 0" ng-if="datatypefield.fieldtype === \'formula\'" type="number" disabled>' +
         '                       <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
-        '                       <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=download&token={{token}}"/>' + // Special handle previewimagedocumentname
+        '                       <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=preview&token={{token}}" ng-click="openpreviewimage(datatypefield.name)"/>' + // Special handle previewimagedocumentname
         '                       <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'" ng-required="datatypefield.isrequired">' +
         '                           <md-option ng-value="reference.name" ng-repeat="reference in references[datatypefield.reference] | orderBy: [\'label\', \'name\']">' +
         '                               <span>{{reference.label || reference.name}}</span>' +
@@ -159,6 +159,9 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                         utils.setLocation("/" + datatypename + (entityname ? "/" + entityname : ""), false);
                     });
+                };
+                scope.openpreviewimage = function(datatypefieldname) {
+                    window.open('/api/documents/' + scope.dynamicobject[datatypefieldname] + '?action=preview&token=' + scope.token, "_blank");
                 };
                 scope.save = function() {
                     var datatypename = scope.params.datatypename;
