@@ -168,7 +168,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     var entityname = scope.params.entityname;
                     var dynamicattributes = scope.dynamicattributes;
                     Promise.all([
-                        utils.savedynamicobject(datatypename, scope.dynamicobject),
+                        utils.savedynamicobject(scope.datatype, scope.dynamicobject),
                         dynamicattributes && dynamicattributes.length > 0 ? utils.savedynamicattributes(datatypename, entityname, dynamicattributes) : Promise.resolve(),
                     ]).then(function() {
                         return scope.load(); // To update changed formula results

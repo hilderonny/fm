@@ -285,8 +285,14 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             }; }));
         },
 
-        savedynamicobject: function(datatypename, entity) {
-            return $http.put("/api/dynamic/" + datatypename + "/" + entity.name, entity);
+        savedynamicobject: function(datatype, entity) {
+            // Filter out formulas and name
+            var entitytosend = JSON.parse(JSON.stringify(entity));
+            delete entitytosend.name;
+            Object.keys(datatype.fields).map(function(fn) { return datatype.fields[fn]; }).forEach(function(f) { 
+                if (f.fieldtype === "formula") delete entitytosend[f.name];
+            });
+            return $http.put("/api/dynamic/" + datatype.name + "/" + entity.name, entitytosend);
         },
 
         // TODO: Durch savedynamicobject und savedynamicattributes ersetzen
