@@ -76,8 +76,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
     $scope.createClient = function() {
         $rootScope.isLoading = true;
         var clientToSend = { 
-            name: $scope.client.name,
-            comment:$scope.client.comment 
+            name: $scope.client.name
         };
         var createdClient;
         $http.post('/api/clients', clientToSend).then(function(response) {
@@ -105,8 +104,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
     $scope.saveClient = function() {
         $rootScope.isLoading = true;
         var clientToSend = { 
-            name: $scope.client.name,
-            comment:$scope.client.comment
+            name: $scope.client.name
         };
         utils.saveEntity($scope, 'clients', $scope.client._id, '/api/clients/', clientToSend).then(function(savedClient) {
             $scope.clientName = $scope.client.name;
@@ -181,7 +179,7 @@ app.controller('AdministrationClientCardController', function($scope, $rootScope
         } else {
             // New client
             $scope.isNewClient = true;
-            $scope.client = { name : "", comment:'', clientModules: [] };
+            $scope.client = { name : "", clientModules: [] };
             $rootScope.isLoading= false;
         }
         $scope.canWriteClients = $rootScope.canWrite('PERMISSION_ADMINISTRATION_CLIENT');

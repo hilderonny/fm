@@ -7,7 +7,6 @@
     "TRK_CLIENTS_CLIENT_CREATED" : "Client created",
     "TRK_CLIENTS_CLIENT_DELETED" : "Client deleted",
     "TRK_CLIENTS_CLIENTS" : "ClientS",
-    "TRK_CLIENTS_COMMENT" : "Comment",
     "TRK_CLIENTS_CREATE" : "Create",
     "TRK_CLIENTS_CREATEADMIN" : "Create new administrator",
     "TRK_CLIENTS_CREATEADMINDESCRIPTION" : "<p>Please write down the user name and the password for a new administrator <b>BEFORE</b> you press on \"Create\" button. These informations will NOT be displayed again afterwords.</p><p> Clicking on \"Create\" will also result in the creation of a user group of the same name.</p>",

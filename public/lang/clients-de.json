@@ -7,7 +7,6 @@
     "TRK_CLIENTS_CLIENT_CREATED" : "Mandant erstellt",
     "TRK_CLIENTS_CLIENT_DELETED" : "Mandant gelöscht",
     "TRK_CLIENTS_CLIENTS" : "Mandanten",
-    "TRK_CLIENTS_COMMENT" : "Kommentar",
     "TRK_CLIENTS_CREATE" : "Erstellen",
     "TRK_CLIENTS_CREATEADMIN" : "Neuen Administrator erstellen",
     "TRK_CLIENTS_CREATEADMINDESCRIPTION" : "<p>Bitte notieren Sie sich den Benutzernamen und das Passwort des neuen Administrators, <b>BEVOR</b> Sie auf \"Erstellen\" klicken. Diese Daten werden anschließend nicht noch einmal angezeigt.</p><p>Beim Erstellen wird gleichzeitig eine Benutzergruppe mit demselben Namen erstellt.</p>",

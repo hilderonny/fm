@@ -63,10 +63,6 @@
                     <label translate>TRK_CLIENTS_NAME</label>
                     <input ng-model="client.name" name="name">
                 </md-input-container>
-                <md-input-container flex>
-                    <label translate>TRK_CLIENTS_COMMENT</label>
-                    <textarea ng-model="client.comment" rows="5"></textarea>
-                </md-input-container>
 
                 <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
 
