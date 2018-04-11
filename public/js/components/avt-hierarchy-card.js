@@ -56,8 +56,9 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                     delete scope.selectedchild;
                 };
                 scope.onelementcreated = function(datatype, createdelementname) {
-                    if ((!datatype || !createdelementname) && (scope.params.datatypename && scope.params.entityname)) { // Document was extracted
-                        scope.loadelementsfordirectaccess(scope.params.datatypename, scope.params.entityname);
+                    if ((!datatype || !createdelementname) && scope.selectedchild) { // Document was extracted
+                        scope.loadelementsfordirectaccess(scope.selectedchild.datatypename, scope.selectedchild.name);
+                        return;
                     }
                     utils.loaddynamicobject(datatype.name, createdelementname).then(function(newelement) {
                         var selectedchild = scope.selectedchild ? scope.selectedchild : scope.child;

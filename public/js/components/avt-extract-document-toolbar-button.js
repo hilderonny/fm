@@ -1,5 +1,5 @@
 app.directive('avtExtractDocumentToolbarButton', function($compile, $translate, $http, $mdToast, utils) { 
-    var template = '<md-button ng-if="$parent.params.datatypename === \'documents\' && !$parent.isnew && $parent.dynamicobject && [\'application/zip\',\'application/x-zip-compressed\'].indexOf($parent.dynamicobject.type) >= 0" avt-toolbar-button ng-click="extractdocument()" icon="/css/icons/material/open-archive.svg" label="Entpacken" tooltip="Archiv entpacken"></md-button>';
+    var template = '<md-button ng-if="$parent.params.datatypename === \'documents\' && !$parent.isnew && $parent.dynamicobject && [\'application/zip\',\'application/x-zip-compressed\'].indexOf($parent.dynamicobject.type) >= 0" avt-toolbar-button ng-click="extractdocument()" icon="/css/icons/material/icons8-open-archive.svg" label="Entpacken" tooltip="Archiv entpacken"></md-button>';
     return {
         restrict: "A",
         priority: 880,

@@ -10,7 +10,7 @@ var JSZip = require('jszip');
 var path = require('path');
 var Db = require("../../utils/db").Db;
 
-describe('API extractdocument', () => {
+describe.only('API extractdocument', () => {
 
     var zipContent = {
         folders: [
