@@ -5,7 +5,7 @@ werden, dass für jeden Datentypnamen die Detailkarte spezifiziert werden kann
 */
 app.directive('avtUploadDocumentToolbarButton', function($rootScope, $compile, $translate, $mdToast, $http, utils) { 
     var template = 
-        '<md-button ng-if="$parent.canwrite" avt-toolbar-button icon="/css/icons/material/Upload.svg" label="Hochladen" tooltip="Dokument hochladen">' +
+        '<md-button ng-if="$parent.canwrite && (!$parent.params.datatypename || $parent.params.datatypename === \'folders\')" avt-toolbar-button icon="/css/icons/material/Upload.svg" label="Hochladen" tooltip="Dokument hochladen">' +
         '   <input type="file" class="fileupload" onchange="angular.element(this).scope().uploadfile(this)" />' +
         '</md-button>';
     return {
