@@ -64,14 +64,17 @@ var downloadDocument = (response, clientname, document, forpreview) => {
 };
 
 // Download a specific shared document without authentication 
-router.get('/share/:clientname/:documentname', async(req, res) => {
-    var clientname = req.params.clientname;
-    var clientresult = await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${Db.replaceQuotes(clientname)}';`);
-    if(clientresult.rowCount < 1) return res.sendStatus(404);
-    var document = await Db.getDynamicObject(clientname, co.collections.documents.name, req.params.documentname);
-    if (!document) return res.sendStatus(404);
-    if (!document.isshared) return res.sendStatus(403);
-    downloadDocument(res, clientname, document);
+router.get('/share/:documentname', async(req, res) => {
+    var clientnames = (await Db.query(Db.PortalDatabaseName, `SELECT name FROM clients;`)).rows.map(c => c.name);
+    for (var i = 0; i < clientnames.length; i++) {
+        var clientname = clientnames[i];
+        var document = await Db.getDynamicObject(clientname, "documents", req.params.documentname);
+        if (document && document.isshared) {
+            downloadDocument(res, clientname, document);
+            return;
+        }
+    }
+    res.sendStatus(404);
 });
 
 /**

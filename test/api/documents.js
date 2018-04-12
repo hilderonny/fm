@@ -92,23 +92,18 @@ describe('API documents', () =>{
 
     });
 
-    describe('GET/share/:clientid/:documentid', () => {
+    describe('GET/share/:documentid', () => {
 
-        var api = `${co.apis.documents}/share/client0`;
-
-        th.apiTests.getId.defaultNegative(api, co.permissions.OFFICE_DOCUMENT, co.collections.documents.name);
-        th.apiTests.getId.clientDependentNegative(api, co.collections.documents.name);
-
-        it('responds with valid id of non-shared document with 403', async() =>{
-            var elementFromApi = (await th.get(`/api/documents/share/client0/client0_document0`).expect(403)).body;
+        it('responds with valid id of non-shared document with 404', async() =>{
+            await th.get(`/api/documents/share/client0_document0`).expect(404);
         });
 
-        it('responds with 404 when client is unknown', async() =>{
-            var elementFromApi = (await th.get(`/api/documents/share/unknownclient/client0_document000`).expect(404)).body;
+        it('responds with 404 when document is not existing is unknown', async() =>{
+            await th.get(`/api/documents/share/unknowndocumentname`).expect(404);
         });
 
         it('responds with valid id of shared document with document file', async() => {
-            var response = await th.get(`/api/documents/share/client0/client0_document000`).expect(200);
+            var response = await th.get(`/api/documents/share/client0_document000`).expect(200);
             assert.strictEqual(response.type, 'application/octet-stream');
             assert.strictEqual(response.text, "client0_document000");
         });
