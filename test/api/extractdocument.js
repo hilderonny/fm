@@ -10,7 +10,7 @@ var JSZip = require('jszip');
 var path = require('path');
 var Db = require("../../utils/db").Db;
 
-describe.only('API extractdocument', () => {
+describe('API extractdocument', () => {
 
     var zipContent = {
         folders: [
@@ -135,33 +135,41 @@ describe.only('API extractdocument', () => {
         });
 
         it('extracts the ZIP file and creates a folder structure in the folder of the document and documents for all contained files', async() => {
-            var foldersDict = { rootFolder: { folders:[], documents:[] } };
             var token = await th.defaults.login("client0_usergroup0_user0");
             var testdocument = await getTestDocument();
-            var response = await th.get(`/api/${co.apis.extractdocument}/${testdocument.name}?token=${token}`).expect(200);
-            checkResult(response.body);
-            var folders = await Db.getDynamicObjects("client0", co.collections.folders.name);
-            folders.forEach(function(folder) {
-                foldersDict[folder.name] = folder;
-                folder.folders = [];
-                folder.documents = [];
-            });
-            folders.forEach(function(folder) {
-                if (folder.parentfoldername) {
-                    foldersDict[folder.parentfoldername].folders.push(folder);
-                } else {
-                    foldersDict.rootFolder.folders.push(folder);
-                }
-            });
-            var documents = await Db.getDynamicObjects("client0", co.collections.documents.name);
-            documents.forEach(function(document) {
-                if (document.parentfoldername) {
-                    foldersDict[document.parentfoldername].documents.push(document);
-                } else {
-                    foldersDict.rootFolder.documents.push(document);
-                }
-            });
-            compareStructure(foldersDict["client0_folder0"], zipContent);
+            await th.get(`/api/${co.apis.extractdocument}/${testdocument.name}?token=${token}`).expect(200);
+            var folders = await Db.getDynamicObjects("client0", "folders");
+            var f1 = folders.find(f => f.label === 'F1');
+            var f1_1 = folders.find(f => f.label === 'F1_1');
+            var f1_2 = folders.find(f => f.label === 'F1_2');
+            var f2 = folders.find(f => f.label === 'F2');
+            var f2_1 = folders.find(f => f.label === 'F2_1');
+            assert.ok(f1);
+            assert.ok(f1_1);
+            assert.ok(f1_2);
+            assert.ok(f2);
+            assert.ok(f2_1);
+            var documents = await Db.getDynamicObjects("client0", "documents");
+            var da = documents.find(d => d.label === 'Da');
+            var db = documents.find(d => d.label === 'Db');
+            var d1_2_a = documents.find(d => d.label === 'D1_2_a');
+            var d1_2_b = documents.find(d => d.label === 'D1_2_b');
+            var d1_a = documents.find(d => d.label === 'D1_a');
+            var d1_b = documents.find(d => d.label === 'D1_b');
+            assert.ok(da);
+            assert.ok(db);
+            assert.ok(d1_2_a);
+            assert.ok(d1_2_b);
+            assert.ok(d1_a);
+            assert.ok(d1_b);
+            var relations = await Db.getDynamicObjects("client0", "relations");
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === f1.name && r.datatype2name === "folders" && r.name2 === f1_1.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === f1.name && r.datatype2name === "folders" && r.name2 === f1_2.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === f2.name && r.datatype2name === "folders" && r.name2 === f2_1.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === f1.name && r.datatype2name === "documents" && r.name2 === d1_a.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === f1.name && r.datatype2name === "documents" && r.name2 === d1_b.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === f1_2.name && r.datatype2name === "documents" && r.name2 === d1_2_a.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === f1_2.name && r.datatype2name === "documents" && r.name2 === d1_2_b.name && r.relationtypename === "parentchild"));
         });
 
         it('creates no folders or documents when the ZIP file is empty', async() => {
@@ -171,12 +179,16 @@ describe.only('API extractdocument', () => {
             var zipFileBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
             var filePath = dh.getDocumentPath("client0", testdocument.name);
             fs.writeFileSync(filePath, zipFileBuffer);
+            var foldersbeforecount = (await Db.getDynamicObjects("client0", "folders")).length;
+            var documentsbeforecount = (await Db.getDynamicObjects("client0", "documents")).length;
+            var relationsbeforecount = (await Db.getDynamicObjects("client0", "relations")).length;
             await th.get(`/api/${co.apis.extractdocument}/${testdocument.name}?token=${token}`).expect(200);
-            var folders = await Db.getDynamicObjects("client0", co.collections.folders.name, { parentfoldername: testdocument.parentfoldername });
-            assert.strictEqual(folders.length, 2); // Nur die vorbereiteten
-            var documents = await Db.getDynamicObjects("client0", co.collections.documents.name, { parentfoldername: testdocument.parentfoldername });
-            assert.strictEqual(documents.length, 3); // Nur die vorbereiteten und das Testdokument selbst
-            assert.strictEqual(documents[2].name, testdocument.name);
+            var foldersaftercount = (await Db.getDynamicObjects("client0", "folders")).length;
+            var documentsaftercount = (await Db.getDynamicObjects("client0", "documents")).length;
+            var relationsaftercount = (await Db.getDynamicObjects("client0", "relations")).length;
+            assert.strictEqual(foldersaftercount, foldersbeforecount);
+            assert.strictEqual(documentsaftercount, documentsbeforecount);
+            assert.strictEqual(relationsaftercount, relationsbeforecount);
         });
 
         it('creates folder structures in folder of document even if folders with the same name exist (creates duplicates)', async() => {
@@ -185,8 +197,8 @@ describe.only('API extractdocument', () => {
             var folder = {name: "client0_duplicatefolder0", label:'F1', parentfoldername: testdocument.parentfoldername };
             await Db.insertDynamicObject("client0", co.collections.folders.name, folder);
             await th.get(`/api/${co.apis.extractdocument}/${testdocument.name}?token=${token}`).expect(200);
-            var folders = await Db.getDynamicObjects("client0", co.collections.folders.name, { parentfoldername: testdocument.parentfoldername });
-            assert.strictEqual(folders.length, 5); // 3 Vorbereitete und zwei aus ZIP-Datei
+            var folders = (await Db.getDynamicObjects("client0", co.collections.folders.name)).filter(f => f.label === 'F1');
+            assert.strictEqual(folders.length, 2);
         });
 
         it('creates documents for files even if documents with the same name exist (creates duplicates)', async() => {
@@ -195,8 +207,27 @@ describe.only('API extractdocument', () => {
             var document = { name: "client0_duplicatedocument0", label:'Da', parentfoldername: testdocument.parentfoldername, type: "text/plain", isshared: false };
             await Db.insertDynamicObject("client0", co.collections.documents.name, document);
             await th.get(`/api/${co.apis.extractdocument}/${testdocument.name}?token=${token}`).expect(200);
-            var documents = await Db.getDynamicObjects("client0", co.collections.documents.name, { parentfoldername: testdocument.parentfoldername });
-            assert.strictEqual(documents.length, 6); // 3 Vorbereiteter, 1 Testdokument und zwei aus ZIP-Datei
+            var documents = (await Db.getDynamicObjects("client0", co.collections.documents.name)).filter(d => d.label === "Da");
+            assert.strictEqual(documents.length, 2);
+        });
+
+        it('assigns the extracted folders and files to the same parent as the zip file', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var testdocument = await getTestDocument();
+            var relation = { name: "relationziptest", datatype1name: "folders", name1: "client0_folder0", datatype2name: "documents", name2: testdocument.name, relationtypename: "parentchild" };
+            await Db.insertDynamicObject("client0", "relations", relation);
+            await th.get(`/api/${co.apis.extractdocument}/${testdocument.name}?token=${token}`).expect(200);
+            var folders = await Db.getDynamicObjects("client0", "folders");
+            var f1 = folders.find(f => f.label === 'F1');
+            var f2 = folders.find(f => f.label === 'F2');
+            var documents = await Db.getDynamicObjects("client0", "documents");
+            var da = documents.find(d => d.label === 'Da');
+            var db = documents.find(d => d.label === 'Db');
+            var relations = await Db.getDynamicObjects("client0", "relations");
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === "client0_folder0" && r.datatype2name === "folders" && r.name2 === f1.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === "client0_folder0" && r.datatype2name === "folders" && r.name2 === f2.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === "client0_folder0" && r.datatype2name === "documents" && r.name2 === da.name && r.relationtypename === "parentchild"));
+            assert.ok(relations.find(r => r.datatype1name === "folders" && r.name1 === "client0_folder0" && r.datatype2name === "documents" && r.name2 === db.name && r.relationtypename === "parentchild"));
         });
 
     });

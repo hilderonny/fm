@@ -20,14 +20,13 @@ async function extractDocument(zipdocument, clientname) {
     var readstream = fs.createReadStream(filePath);
     await readstream.pipe(unzipper.Parse().on('entry', entry => {
         if (entry.type === "Directory") {
-            if (!folders[entry.path]) folders[entry.path] = { name: uuidv4(), label: path.basename(entry.path) };
+            folders[entry.path] = { name: uuidv4(), label: path.basename(entry.path) };
             entry.autodrain();
         } else {
             var lastslash = entry.path.lastIndexOf("/") + 1;
             var parentpath = path.dirname(entry.path) + "/";
             var filename = path.basename(entry.path);
             var mimetype = mime.lookup(path.extname(filename));
-            if (parentpath !== "./" && !folders[parentpath]) folders[parentpath] = { name: uuidv4() };
             var document = { name: uuidv4(), label: filename, type: mimetype };
             documents[entry.path] = document;
             var documentpath = documentsHelper.getDocumentPath(clientname, document.name);
@@ -35,7 +34,7 @@ async function extractDocument(zipdocument, clientname) {
             entry.pipe(fs.createWriteStream(documentpath));
         }
     })).promise().then(undefined, err => { // ZIP file is corrupted, close readstream correctly
-        if (readstream) readstream.close();
+        readstream.close();
         return Promise.reject(err);
     });
     var relations = [];
