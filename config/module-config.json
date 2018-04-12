@@ -109,6 +109,7 @@
                 "public/js/components/avt-list-card.js",
                 "public/js/components/avt-permissions-tab.js",
                 "public/js/components/avt-progress-spinner.js",
+                "public/js/components/avt-reference-select.js",
                 "public/js/components/avt-relations.js",
                 "public/js/components/avt-relations-tab.js",
                 "public/js/components/avt-relations-toolbar-button.js",
@@ -590,14 +591,14 @@
                 { "name": "folders", "label": "Verzeichnis", "plurallabel": "Verzeichnisse", "titlefield": "label", "icon": "/css/icons/material/Folder.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "parentfoldername", "type": "reference", "reference": "folders", "ishidden": true }
-                ], "lists": [ "folders" ], "permissionkey": "PERMISSION_OFFICE_DOCUMENT", "canhaverelations" : true },
+                ], "lists": [ "folders", "documents" ], "permissionkey": "PERMISSION_OFFICE_DOCUMENT", "canhaverelations" : true },
 
                 { "name": "documents", "label": "Dokument", "plurallabel": "Dokumente", "titlefield": "label", "icon": "/css/icons/material/Document.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "parentfoldername", "type": "reference", "reference": "folders", "ishidden": true },
                     { "name": "type", "type": "text", "ishidden": true },
                     { "name": "isshared", "label": "Öffentlich zugänglich", "type": "boolean" }
-                ], "lists": [ "folders" ], "permissionkey": "PERMISSION_OFFICE_DOCUMENT", "canhaverelations" : true }
+                ], "lists": [ "folders", "documents" ], "permissionkey": "PERMISSION_OFFICE_DOCUMENT", "canhaverelations" : true }
 
             ]
         },

@@ -349,12 +349,13 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                     '<md-dialog>' +
                     '  <md-dialog-content class="md-dialog-content">' + content + '</md-dialog-content>' +
                     '  <md-dialog-actions>' +
-                    '    <md-button ng-repeat="button in buttons" ng-click="onclick(button)" ng-if="!button.ishidden" class="md-raised {{button.class}}"><span translate="{{button.label}}"></span></md-button>' +
+                    '    <md-button ng-repeat="button in dialogbuttons" ng-click="onclick(button)" ng-if="!button.ishidden" class="md-raised {{button.class}}"><span translate="{{button.label}}"></span></md-button>' +
                     '  </md-dialog-actions>' +
                     '</md-dialog>',
+                scope: parentscope,
                 controller: function($scope, $mdDialog) {
-                    $scope.parentscope = parentscope;
-                    $scope.buttons = buttons;
+                    $scope.parentscope = parentscope; // TODO: Not used anymore, use scope instead!
+                    $scope.dialogbuttons = buttons;
                     $scope.onclick = function(button) {
                         if (button.onclick) button.onclick();
                         $mdDialog.hide();

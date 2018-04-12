@@ -32,11 +32,24 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '        <input ng-value="dynamicobject[datatypefield.name] || 0" ng-if="datatypefield.fieldtype === \'formula\'" type="number" disabled>' +
         '        <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
         '        <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=preview&token={{token}}" ng-click="openpreviewimage(datatypefield.name)"/>' + // Special handle previewimagedocumentname
-        '        <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'" ng-required="datatypefield.isrequired">' +
-        '            <md-option ng-value="reference.name" ng-repeat="reference in references[datatypefield.reference] | orderBy: [\'label\', \'name\']">' +
-        '                <span>{{reference.label || reference.name}}</span>' +
-        '            </md-option>' +
-        '        </md-select>' +
+        '        <md-button class="md-raised" ng-if="datatypefield.fieldtype === \'reference\'" ng-required="datatypefield.isrequired" avt-reference-select="datatypefield"></md-button>' +
+        // '        <md-select ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'reference\'" ng-required="datatypefield.isrequired">' +
+        // '            <md-option ng-value="reference.name" ng-repeat="reference in references[datatypefield.reference] | orderBy: [\'label\', \'name\']">' +
+        // '                <span>{{reference.label || reference.name}}</span>' +
+        // '            </md-option>' +
+        // '   <md-list class="hierarchy">' +
+        // '        <md-list-item flex layout="column" ng-repeat="child in child.children | orderBy: \'label\'">' +
+        // '            <div flex layout="row" ng-class="{active:selectedchild==child}">' +
+        // '                <md-icon ng-click="openchild(child)" ng-if="!child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>' +
+        // '                <md-icon ng-click="child.isopen=false" ng-if="child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>' +
+        // '                <md-icon ng-if="!child.haschildren"></md-icon>' +
+        // '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" />' +
+        // '                <p class="nowrap" ng-bind="child.label" ng-click="selectchild(child)"></p>' +
+        // '            </div>' +
+        // '            <ng-include flex src="\'hierarchylist\'" ng-if="child.isopen"></ng-include>' +
+        // '        </md-list-item>' +
+        // '    </md-list>' +
+        // '        </md-select>' +
         '    </md-input-container>' +
         '    <md-input-container flex ng-repeat="attribute in dynamicattributes | orderBy: \'type.name_en\'">' +
         '        <label ng-bind="attribute.type[\'name_\' + $root.currentLanguage]" ng-if="attribute.type.type === \'text\' || attribute.type.type === \'picklist\'"></label>' +
