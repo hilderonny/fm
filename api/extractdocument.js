@@ -17,7 +17,8 @@ async function extractDocument(zipdocument, clientname) {
     var documents = {};
     var filePath = documentsHelper.getDocumentPath(clientname, zipdocument.name);
     var parentrelations = await Db.getDynamicObjects(clientname, "relations", { datatype2name: "documents", name2: zipdocument.name });
-    await fs.createReadStream(filePath).pipe(unzipper.Parse().on('entry', entry => {
+    var readstream = fs.createReadStream(filePath);
+    await readstream.pipe(unzipper.Parse().on('entry', entry => {
         if (entry.type === "Directory") {
             if (!folders[entry.path]) folders[entry.path] = { name: uuidv4(), label: path.basename(entry.path) };
             entry.autodrain();
@@ -33,7 +34,10 @@ async function extractDocument(zipdocument, clientname) {
             documentsHelper.createPath(path.dirname(documentpath));
             entry.pipe(fs.createWriteStream(documentpath));
         }
-    })).promise();
+    })).promise().then(undefined, err => { // ZIP file is corrupted, close readstream correctly
+        if (readstream) readstream.close();
+        return Promise.reject(err);
+    });
     var relations = [];
     var folderkeys = Object.keys(folders);
     for (var i = 0; i < folderkeys.length; i++) {
