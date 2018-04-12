@@ -8,8 +8,9 @@ app.directive('avtReferenceSelect', function($compile, utils) {
         '                <md-icon ng-click="openchild(child)" ng-if="!child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>' +
         '                <md-icon ng-click="child.isopen=false" ng-if="child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>' +
         '                <md-icon ng-if="!child.haschildren"></md-icon>' +
-        '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" />' +
+        '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" ng-if="child.icon" />' +
         '                <p class="nowrap" ng-bind="child.label" ng-click="selectchild(child)"></p>' +
+        '                <md-icon></md-icon>' +
         '            </div>' +
         '            <ng-include flex src="\'hierarchylist\'" ng-if="child.isopen"></ng-include>' +
         '        </md-list-item>' +
@@ -23,39 +24,124 @@ app.directive('avtReferenceSelect', function($compile, utils) {
         terminal: false,
         priority: 1000,
         compile: function compile(element, attrs) {
-            if (!attrs.avtReferenceSelect) return;
-            var datatypefieldscopename = attrs.avtReferenceSelect;
             element.removeAttr("avt-reference-select");
-            element.attr("ng-click", "$parent.showselectdialog()");
-            element.append(angular.element("<span>HU{{$parent.dynamicobject.name}}PE</span>"));
-            return function link(scope, iElement) {
-                var datatypefield = scope[datatypefieldscopename];
-                console.log(datatypefield);
-                scope.showselectdialog = function() {
-                    return utils.getresponsedata("/api/dynamic/rootelements/" + scope.datatypefield.reference).then(function(rootelements) {
-                        console.log(rootelements);
-                        scope.child = { children: rootelements };
-                        scope.child.children.forEach(function(c) {
-                            if (!c.label) c.label = c[titlefields[c.datatypename]];
+            return {
+                pre: function(scope, iElement, iAttr) {
+                    if (scope.datatypefield.fieldtype !== "reference") return iElement.remove();
+                    var buttoncontent = angular.element('<span ng-click="openselectiondialog()"><span>{{selectedreference.label}}</span><md-icon md-svg-src="/css/icons/material/icons8-more.svg"></md-icon></span>');
+                    iElement.append(buttoncontent);
+                    $compile(buttoncontent)(scope);
+                    scope.selectchild = function(child) {
+                        scope.selectedchild = child;
+                    };
+                    scope.openselectiondialog = function() {
+                        var newscope = scope.$new(false);
+                        newscope.selectedchild = scope.selectedreference;
+                        var okbutton = { label: "TRK_OK", ishidden: true, onclick: function() {
+                            scope.selectedreference = newscope.selectedchild;
+                            scope.dynamicobject[scope.datatypefield.name] = scope.selectedreference.name;
+                        }};
+                        newscope.openchild = function(child) {
+                            return utils.getresponsedata("/api/dynamic/children/" + scope.datatypefield.reference + "/" + child.datatypename + "/" + child.name).then(function(children) {
+                                child.children = children;
+                                child.isopen = true;
+                            });
+                        };
+                        newscope.selectchild = function(child) {
+                            newscope.selectedchild = child;
+                        };
+                        newscope.$watch("selectedchild", function(selectedchild) {
+                            okbutton.ishidden = !selectedchild;
                         });
-                        utils.showdialog(scope, selecttemplate, [
-                            { label: "TRK_OK" },
+                        utils.showdialog(newscope, selecttemplate, [
+                            okbutton,
                             { label: "TRK_CANCEL" }
                         ]);
+                    };
+                    scope.$watch("dynamicobject", function(dynamicobject) {
+                        var datatypefield = scope.datatypefield;
+                        var entityname = dynamicobject[datatypefield.name];
+                        utils.getresponsedata("/api/dynamic/hierarchytoelement/" + datatypefield.reference + "/" + datatypefield.reference + "/" + entityname).then(function(rootelements) {
+                            scope.child = { children: rootelements };
+                            var setparentofchildrenrecursively = function(child) {
+                                if (child.name && child.name === entityname) {
+                                    scope.selectedreference = child;
+                                }
+                                if (child.children) child.children.forEach(function(c) {
+                                    c.parent = child;
+                                    if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
+                                    setparentofchildrenrecursively(c);
+                                });
+                            };
+                            setparentofchildrenrecursively(scope.child);
+                        });
+                        var dialogisopen = false;
+                        //iElement.on("click", null);
                     });
-                };
-                scope.onreferenceclick = function() {
-                    console.log(scope);
-                };
-                scope.openchild = function(child) {
-                    console.log(child);
-                    return utils.getresponsedata("/api/dynamic/children/" + scope.datatypefield.reference + "/" + child.datatypename + "/" + child.name).then(function(children) {
-                        child.children = children;
-                        child.isopen = true;
-                    });
-                };
-                $compile(iElement)(scope);
-            };
+                }
+            }
+            // return function link(scope, iElement, iAttr) {
+            //     console.log(iElement, iAttr);
+            //     var buttoncontentscope = scope.$new(true);
+            //     buttoncontentscope.datatypefield = scope.datatypefield;
+            //     $compile(buttoncontent)(buttoncontentscope);
+            //     // buttoncontentscope.$apply();
+            //     var datatypefield = scope.datatypefield;
+            //     // if (datatypefield.fieldtype !== "reference") return;
+            //     // console.log(datatypefield.name, datatypefield.reference, scope.$root.titlefields[datatypefield.reference]);
+            //     buttoncontentscope.dingens = datatypefield.name;
+            //     console.log(scope.dingens, buttoncontentscope.$id, buttoncontentscope.dingens);
+            //     scope.showselectdialog = function() {
+            //         console.log(scope.dynamicobject[datatypefield.name], datatypefield.reference);
+            //         var entityname = scope.dynamicobject[datatypefield.name];
+
+            //         return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + datatypefield.reference + "/" + datatypefield.reference + "/" + entityname).then(function(rootelements) {
+            //             scope.child = { children: rootelements };
+            //             var isselected = false;
+            //             var setparentofchildrenrecursively = function(child) {
+            //                 if (child.name === entityname) {
+            //                     scope.selectedchild = child;
+            //                     isselected = true;
+            //                 }
+            //                 if (child.children) child.children.forEach(function(c) {
+            //                     c.parent = child;
+            //                     if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
+            //                     setparentofchildrenrecursively(c);
+            //                 });
+            //             };
+            //             setparentofchildrenrecursively(scope.child);
+            //             utils.showdialog(scope, selecttemplate, [
+            //                 { label: "TRK_OK" },
+            //                 { label: "TRK_CANCEL" }
+            //             ]);
+            //         });
+
+
+
+            //         // return utils.getresponsedata("/api/dynamic/rootelements/" + scope.datatypefield.reference).then(function(rootelements) {
+            //         //     console.log(rootelements);
+            //         //     scope.child = { children: rootelements };
+            //         //     scope.child.children.forEach(function(c) {
+            //         //         if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
+            //         //     });
+            //         //     utils.showdialog(scope, selecttemplate, [
+            //         //         { label: "TRK_OK" },
+            //         //         { label: "TRK_CANCEL" }
+            //         //     ]);
+            //         // });
+            //     };
+            //     scope.onreferenceclick = function() {
+            //         console.log(scope);
+            //     };
+            //     scope.openchild = function(child) {
+            //         console.log(child);
+            //         return utils.getresponsedata("/api/dynamic/children/" + scope.datatypefield.reference + "/" + child.datatypename + "/" + child.name).then(function(children) {
+            //             child.children = children;
+            //             child.isopen = true;
+            //         });
+            //     };
+            //     // $compile(iElement)(scope);
+            // };
         }
     };
 });

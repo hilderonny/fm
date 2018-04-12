@@ -89,6 +89,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         loaddatatypes: function(scope) {
             return utils.getresponsedata('/api/datatypes').then(function(datatypes) {
                 scope.datatypes = datatypes;
+                scope.titlefields = {};
+                Object.keys(datatypes).forEach(function(k) {
+                    var dt = datatypes[k];
+                    scope.titlefields[k] = dt.titlefield ? dt.titlefield : "name";
+                });
             });
         },
 

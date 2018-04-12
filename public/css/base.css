@@ -105,6 +105,10 @@ md-card.list-details-details {
     min-width: initial;
 }
 
+md-card.list-details-details:last-child > resize-handle {
+    display: none;
+}
+
 md-card-content > md-grid-list {
     height:100%;
 }

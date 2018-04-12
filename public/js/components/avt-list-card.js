@@ -28,11 +28,6 @@ app.directive('avtListCard', function($compile, $location, utils) {
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
                 scope.detailscard = params.detailscard;
-                var titlefields = {};
-                Object.keys(scope.$root.datatypes).forEach(function(k) {
-                    var dt = scope.$root.datatypes[k];
-                    titlefields[k] = dt.titlefield ? dt.titlefield : "name";
-                });
                 scope.onbeforecreateelement = function($event) {
                     delete scope.selectedelement;
                 };
@@ -46,7 +41,7 @@ app.directive('avtListCard', function($compile, $location, utils) {
                     utils.loaddynamicobject(datatype.name, createdelementname).then(function(newelement) {
                         newelement.datatypename = datatype.name;
                         newelement.icon = datatype.icon;
-                        if (!newelement.label) newelement.label =  newelement[titlefields[newelement.datatypename]];
+                        if (!newelement.label) newelement.label =  newelement[scope.$root.titlefields[newelement.datatypename]];
                         scope.elements.push(newelement);
                         scope.selectelement(newelement);
                     });
@@ -56,13 +51,13 @@ app.directive('avtListCard', function($compile, $location, utils) {
                     delete scope.selectedelement;
                 };
                 scope.onelementupdated = function(updatedelement) {
-                    scope.selectedelement.label = updatedelement.label ? updatedelement.label : updatedelement[titlefields[updatedelement.datatypename]];
+                    scope.selectedelement.label = updatedelement.label ? updatedelement.label : updatedelement[scope.$root.titlefields[updatedelement.datatypename]];
                 };
                 scope.loadelements = function() {
                     return utils.getresponsedata("/api/dynamic/rootelements/" + params.listfilter).then(function(elements) {
                         scope.elements = elements;
                         elements.forEach(function(e) {
-                            if (!e.label) e.label = e[titlefields[e.datatypename]];
+                            if (!e.label) e.label = e[scope.$root.titlefields[e.datatypename]];
                         });
                         var pathparts = $location.path().split("/");
                         if (pathparts.length > 2) scope.selectelement(elements.find(function(e) { return e.name === pathparts[2];}));

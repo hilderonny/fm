@@ -56,7 +56,7 @@ var downloadDocument = (response, clientname, document, forpreview) => {
     var dispositiontype = forpreview ? 'inline' : 'attachment';
     var options = {
         headers: {
-            'Content-disposition' : dispositiontype + '; filename=' + document.label,
+            'Content-disposition' : dispositiontype + '; filename=' + encodeURIComponent(document.label), // When file names contain invalid characters it comes to an error here
             'Content-Type' : document.type
         }
     };
