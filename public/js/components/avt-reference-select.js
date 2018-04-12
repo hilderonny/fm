@@ -76,72 +76,9 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                             setparentofchildrenrecursively(scope.child);
                         });
                         var dialogisopen = false;
-                        //iElement.on("click", null);
                     });
                 }
             }
-            // return function link(scope, iElement, iAttr) {
-            //     console.log(iElement, iAttr);
-            //     var buttoncontentscope = scope.$new(true);
-            //     buttoncontentscope.datatypefield = scope.datatypefield;
-            //     $compile(buttoncontent)(buttoncontentscope);
-            //     // buttoncontentscope.$apply();
-            //     var datatypefield = scope.datatypefield;
-            //     // if (datatypefield.fieldtype !== "reference") return;
-            //     // console.log(datatypefield.name, datatypefield.reference, scope.$root.titlefields[datatypefield.reference]);
-            //     buttoncontentscope.dingens = datatypefield.name;
-            //     console.log(scope.dingens, buttoncontentscope.$id, buttoncontentscope.dingens);
-            //     scope.showselectdialog = function() {
-            //         console.log(scope.dynamicobject[datatypefield.name], datatypefield.reference);
-            //         var entityname = scope.dynamicobject[datatypefield.name];
-
-            //         return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + datatypefield.reference + "/" + datatypefield.reference + "/" + entityname).then(function(rootelements) {
-            //             scope.child = { children: rootelements };
-            //             var isselected = false;
-            //             var setparentofchildrenrecursively = function(child) {
-            //                 if (child.name === entityname) {
-            //                     scope.selectedchild = child;
-            //                     isselected = true;
-            //                 }
-            //                 if (child.children) child.children.forEach(function(c) {
-            //                     c.parent = child;
-            //                     if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
-            //                     setparentofchildrenrecursively(c);
-            //                 });
-            //             };
-            //             setparentofchildrenrecursively(scope.child);
-            //             utils.showdialog(scope, selecttemplate, [
-            //                 { label: "TRK_OK" },
-            //                 { label: "TRK_CANCEL" }
-            //             ]);
-            //         });
-
-
-
-            //         // return utils.getresponsedata("/api/dynamic/rootelements/" + scope.datatypefield.reference).then(function(rootelements) {
-            //         //     console.log(rootelements);
-            //         //     scope.child = { children: rootelements };
-            //         //     scope.child.children.forEach(function(c) {
-            //         //         if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
-            //         //     });
-            //         //     utils.showdialog(scope, selecttemplate, [
-            //         //         { label: "TRK_OK" },
-            //         //         { label: "TRK_CANCEL" }
-            //         //     ]);
-            //         // });
-            //     };
-            //     scope.onreferenceclick = function() {
-            //         console.log(scope);
-            //     };
-            //     scope.openchild = function(child) {
-            //         console.log(child);
-            //         return utils.getresponsedata("/api/dynamic/children/" + scope.datatypefield.reference + "/" + child.datatypename + "/" + child.name).then(function(children) {
-            //             child.children = children;
-            //             child.isopen = true;
-            //         });
-            //     };
-            //     // $compile(iElement)(scope);
-            // };
         }
     };
 });

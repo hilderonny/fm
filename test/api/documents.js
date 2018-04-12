@@ -104,7 +104,7 @@ describe('API documents', () =>{
 
         it('responds with valid id of shared document with document file', async() => {
             var response = await th.get(`/api/documents/share/client0_document000`).expect(200);
-            assert.strictEqual(response.type, 'application/octet-stream');
+            assert.strictEqual(response.type, 'type');
             assert.strictEqual(response.text, "client0_document000");
         });
         
@@ -135,7 +135,7 @@ describe('API documents', () =>{
         it('Downloads the document when ?action=download is given', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var response = await th.get(`/api/documents/client0_document000?action=download&token=${token}`).expect(200);
-            assert.strictEqual(response.type, 'application/octet-stream');
+            assert.strictEqual(response.type, 'type');
             assert.strictEqual(response.text, "client0_document000");
         });
         
@@ -248,13 +248,6 @@ describe('API documents', () =>{
             await th.del(`/api/documents/client0_document00?token=${token}`).expect(204);
             var filePath = dh.getDocumentPath("client0", 'client0_document00');
             assert.ok(!fs.existsSync(filePath));
-        });
-
-        xit('Sets the previewImageId of all FM objects to null where it was the id of the deleted document previously', async() => {
-            // var token = await th.defaults.login("client0_usergroup0_user0");
-            // await th.del(`/api/documents/client0_document01?token=${token}`).expect(204);
-            // var fmobjects = await Db.getDynamicObjects("client0", co.collections.fmobjects.name, { previewimagedocumentname: "client0_document01" });
-            // assert.strictEqual(fmobjects.length, 0);
         });
 
     });
