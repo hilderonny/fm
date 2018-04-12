@@ -26,7 +26,7 @@ async function extractDocument(zipdocument, clientname) {
             var lastslash = entry.path.lastIndexOf("/") + 1;
             var parentpath = path.dirname(entry.path) + "/";
             var filename = path.basename(entry.path);
-            var mimetype = mime.lookup(path.extname(filename));
+            var mimetype = mime.getType(path.extname(filename));
             var document = { name: uuidv4(), label: filename, type: mimetype };
             documents[entry.path] = document;
             var documentpath = documentsHelper.getDocumentPath(clientname, document.name);

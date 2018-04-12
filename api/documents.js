@@ -20,7 +20,7 @@ var dh = require('../utils/documentsHelper');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
-var mime = require('send').mime;
+var mime = require("mime");
 var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 
@@ -57,7 +57,7 @@ var downloadDocument = (response, clientname, document, forpreview) => {
     var options = {
         headers: {
             'Content-disposition' : dispositiontype + '; filename=' + document.label,
-            'Content-Type' : mime.lookup(document.type)
+            'Content-Type' : document.type
         }
     };
     return response.sendFile(dh.getDocumentPath(clientname, document.name), options);
@@ -125,7 +125,7 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     var document = {
         name: uuidv4(),
         label: file.originalname,
-        type: file.mimetype, 
+        type: mime.getType(path.extname(file.originalname)),
         isshared: false
     };
     await Db.insertDynamicObject(clientname, "documents", document);
