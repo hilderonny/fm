@@ -113,6 +113,10 @@ md-card-content > md-grid-list {
     height:100%;
 }
 
+md-card.areas-card {
+    flex:2;
+}
+
 md-card.doc md-card-content {
     padding-top:10px;
 }
@@ -419,6 +423,7 @@ table.areas > tbody > tr > td:first-of-type > div > .inset {
 
 table.areas > tbody > tr > td:first-of-type > div > span {
     margin: 4px;
+    white-space: initial;
 }
 
 table.areachildren > tbody > tr > td {

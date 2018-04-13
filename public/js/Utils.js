@@ -18,16 +18,17 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
          */
         addCardWithPermission: function(cardTemplateUrl, params, requiredPermission) {
             var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
+            var card, cardCanvas, domCard;
             // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
-            if (!$rootScope.canRead(requiredPermission)) return;
+            if (!$rootScope.canRead(requiredPermission)) return Promise.resolve();
             utils.cardsToAdd.push(cardToAdd);
             return $http.get('/partial/' + cardTemplateUrl + '.html', { cache: true}).then(function(response) {
                 // Check whether the card should still be shown. When the dummy object is no longer
                 // in the array, the request tooks too long and the user has done something other meanwhile
-                if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return; // So simply ignore the response
-                var cardCanvas = angular.element(document.querySelector('#cardcanvas'));
-                var card = angular.element(response.data);
-                var domCard = card[0];
+                if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return Promise.resolve(); // So simply ignore the response
+                cardCanvas = angular.element(document.querySelector('#cardcanvas'));
+                card = angular.element(response.data);
+                domCard = card[0];
                 cardCanvas.append(card);
                 var newScope = $rootScope.$new(true);
                 newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
@@ -36,8 +37,9 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
                 window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
                 // Scroll card in view, but wait until the card is put into the dom
-                utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
-                utils.scrollToAnchor(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+                return utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+            }).then(function() {
+                if (domCard && cardCanvas) return utils.scrollToAnchor(domCard, cardCanvas, 50).then(function() { return Promise.resolve(card); }); // Try it up to 5 seconds, then abort
                 return Promise.resolve(card);
             });
         },
@@ -324,14 +326,17 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
          * Wartet auf Rendern der Karte und springt den aktuellen in der URL angegebenen Anker an
          */
         scrollToAnchor: function(domCard, cardCanvas, counter) {
-            if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
-                $anchorScroll();
-                return;
-            } else {
-                if (counter > 0) {
-                    setTimeout(function() { utils.scrollToAnchor(domCard, cardCanvas, counter - 1) }, 100);
+            return new Promise(function(resolve, reject) {
+                function doscroll(domCard, cardCanvas, counter) {
+                    if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
+                        $anchorScroll();
+                        resolve();
+                    } else if (counter > 0) {
+                        setTimeout(function() { doscroll(domCard, cardCanvas, counter - 1) }, 100);
+                    } else resolve();
                 }
-            }
+                doscroll(domCard, cardCanvas, counter);
+            });
         },
 
         // Sets the Browser-URL to the given one for direct access
@@ -402,22 +407,25 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
          * Wartet darauf, dass eine Karte gerendert wird und scrollt diese dann ins Blickfeld
          */
         waitForOffsetAndScroll: function(domCard, cardCanvas, counter) {
-            if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
-                cardCanvas[0].scrollLeft = domCard.offsetLeft;
-                domCard.style.borderColor = 'white';
-                domCard.style.transform = 'rotate(0deg)';
-                setTimeout(function() {
-                    // Force the tabs in the calendar to recalculate them on mobile devices to enable the paging arrows^, http://stackoverflow.com/a/31899998
-                    var evt = window.document.createEvent('UIEvents'); 
-                    evt.initUIEvent('resize', true, false, window, 0); 
-                    window.dispatchEvent(evt);
-                }, 250);
-                return;
-            } else {
-                if (counter > 0) {
-                    setTimeout(function() { utils.waitForOffsetAndScroll(domCard, cardCanvas, counter - 1) }, 100);
+            return new Promise(function(resolve, reject) {
+                function dowait(domCard, cardCanvas, counter) {
+                    if (domCard.offsetWidth) { // left could be zero but width must be greater than zero
+                        cardCanvas[0].scrollLeft = domCard.offsetLeft;
+                        domCard.style.borderColor = 'white';
+                        domCard.style.transform = 'rotate(0deg)';
+                        setTimeout(function() {
+                            // Force the tabs in the calendar to recalculate them on mobile devices to enable the paging arrows^, http://stackoverflow.com/a/31899998
+                            var evt = window.document.createEvent('UIEvents'); 
+                            evt.initUIEvent('resize', true, false, window, 0); 
+                            window.dispatchEvent(evt);
+                            resolve();
+                        }, 250);
+                    } else if (counter > 0) {
+                        setTimeout(function() { dowait(domCard, cardCanvas, counter - 1) }, 100);
+                    } else resolve();
                 }
-            }
+                dowait(domCard, cardCanvas, counter);
+            });
         },
 
     }
