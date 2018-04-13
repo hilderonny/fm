@@ -17,20 +17,25 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     // Handle click on sidenav menu item
     rootscope.menuClick = function(menuItem) {
         rootscope.currentMenuItem = menuItem;
+        var promise;
         if (menuItem) {
             if (menuItem.action) {
                 menuItem.action();
             } else {
                 utils.removeAllCards();
-                utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission);
-                $mdSidenav('left').close();
-                if (menuItem.directurls && menuItem.directurls.length > 0) utils.setLocation('/' + menuItem.directurls[0]); // Use first defined direct URL
+                utils.setLocation("/"); // Clear location before switching to another module to prevent handling of element names which are invalid in new context
+                promise = utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission).then(function() {
+                    $mdSidenav('left').close();
+                    if (menuItem.directurls && menuItem.directurls.length > 0) utils.setLocation('/' + menuItem.directurls[0]); // Use first defined direct URL
+                });
             }
         } else {
             utils.removeAllCards();
             $mdSidenav('left').close();
             utils.setLocation('/');
+            promise = Promise.resolve();
         }
+        return promise;
     }
 
 
@@ -38,21 +43,21 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         var path1 = rootscope.path[1];
         rootscope.isShowingDoc = false; // Pauschal ausschalten, wenn vorher aktiv war
         if (!path1) { // Navigate back to dashboard
-            rootscope.menuClick(null);
+            return rootscope.menuClick(null);
         } else if (path1 === 'doc') { // Sonderbehandlung für Online-Dokumentation
             rootscope.isShowingDoc = true;
             angular.element(document.querySelector('#cardcanvas')).empty();
-            utils.addCardWithPermission('Doc/List', { preselection: rootscope.path[2], anchor: rootscope.path[3] });
+            return utils.addCardWithPermission('Doc/List', { preselection: rootscope.path[2], anchor: rootscope.path[3] });
         } else if (rootscope.directUrlMappings[path1]) {
             var mapping = rootscope.directUrlMappings[path1];
             var mainMenu = rootscope.menu.find(function(m) { return m.title === mapping.mainMenu; });
-            if (!mainMenu) return;
+            if (!mainMenu) return Promise.resolve();;
             var subMenu = mainMenu.items.find(function(mi) { return mi.title === mapping.subMenu; });
-            if (!subMenu) return;
+            if (!subMenu) return Promise.resolve();;
             rootscope.currentMenuItem = subMenu;
             angular.element(document.querySelector('#cardcanvas')).empty();
             subMenu.preselection = rootscope.path[2];
-            utils.addCardWithPermission(subMenu.mainCard, subMenu, subMenu.permission);
+            return utils.addCardWithPermission(subMenu.mainCard, subMenu, subMenu.permission);
         }
     };
 
@@ -68,6 +73,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     $scope.doLogin = function(hideErrorMessage) {
         rootscope.title = null;
         return utils.login(rootscope, $scope.username, $scope.password).then(function() {
+            $scope.$root.isLoading = true;
             return Promise.all([
                 utils.loadmenu(rootscope),
                 utils.loadpermissions(rootscope),
@@ -75,7 +81,9 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
                 utils.loadrelationtypes(rootscope)
             ]);
         }).then(function() {
-            rootscope.handleDirectUrls();
+            return rootscope.handleDirectUrls();
+        }).then(function() {
+            $scope.$root.isLoading = false;
         });
     };
 

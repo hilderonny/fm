@@ -1,3 +1,4 @@
+/// OBSOLET
 
 app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $translate, $mdToast, utils) { 
     var dialogcontent = 
@@ -64,6 +65,12 @@ app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $transl
                 scope.updateokbuttonvisibility();
                 utils.loaddynamicobjects(scope.targetdatatype.name).then(function(elements) {
                     scope.targetelements = elements;
+                    elements.forEach(function(e) {
+                        if (!e.label) {
+                            var titlefield = scope.targetdatatype.titlefield ? scope.targetdatatype.titlefield : "name";
+                            e.label = e[titlefield].substring(0, 100);
+                        }
+                    });
                 });
             };
             scope.updateokbuttonvisibility = function() {

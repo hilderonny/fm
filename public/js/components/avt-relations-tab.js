@@ -1,3 +1,4 @@
+/// OBSOLET
 
 app.directive('avtRelationsTab', function($compile, $translate, $mdDialog, $mdToast, utils) {
     var template = 
@@ -66,6 +67,10 @@ app.directive('avtRelationsTab', function($compile, $translate, $mdDialog, $mdTo
                                     e.datatype = scope.$root.datatypes[k];
                                     var mapper = entitiestofetchfordatatype[e.name];
                                     e.relation = mapper.relation;
+                                    if (!e.label) {
+                                        var titlefield = e.datatype.titlefield ? e.datatype.titlefield : "name";
+                                        e.label = e[titlefield].substring(0, 100);
+                                    }
                                     mapper.section.entities.push(e);
                                 });
                             });

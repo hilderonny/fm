@@ -38,7 +38,7 @@ CREATE TEMP TABLE folderchildtype (_id text, name text, type text);
 WITH RECURSIVE get_path(name, parentfoldername, depth) AS (
     (SELECT name, parentfoldername, 0 FROM folders)
     UNION
-    (SELECT get_path.name, folders.parentfoldername, get_path.depth + 1 FROM folders JOIN get_path on get_path.parentfoldername = folders.name)
+    (SELECT get_path.name, folders.parentfoldername, get_path.depth + 1 FROM folders JOIN get_path on get_path.parentfoldername = folders.name WHERE get_path.depth < 64)
 )
 SELECT folders.*, COALESCE(pd.path, '[]') as path, COALESCE(cd.children, '[]') as elements FROM folders
 LEFT JOIN (

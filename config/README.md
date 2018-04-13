@@ -14,6 +14,8 @@
 |fields|List of fields of the datatype|
 |lists|List of possible places where the datatype is shown in hierarchies or lists, e.g. ```fmobjects``` or ```folders```|
 |permissionkey|Permission key which is required to access entities of this datatype|
+|canhaverelations|Defines whether the type can have relations and so should be shown in relation menus|
+|candefinename|When set to true, the name of an object can be defined in POST-API on creation (e.g. for users)|
 
 ### Field
 
@@ -25,8 +27,9 @@
 |name|API name of the field|
 |label|Label of the field to be shown above input fields, not used for type ```reference```|
 |type|Type of field. Can be ```text```, ```decimal```, ```boolean```, ```datetime```, ```formula```, ```reference```|
-|required|Boolean value to define whether the input of a field value is required or not|
+|isrequired|Boolean value to define whether the input of a field value is required or not|
 |reference|API Name of the recordtype which is referenced in picklists when type is ```reference```|
+|ishidden|When set to true, the field should not be shown in client apps|
 
 ### Types
 
@@ -36,6 +39,7 @@
 |decimal|Any number with or without decimal places, shows simple input field|
 |boolean|```true``` or ```false```, shows checkbox|
 |datetime|Technically a timestamp in milliseconds, shows datepicker in UI|
+|password|Encrypted password|
 |reference|Picklist of optiones references by this field|
 |formula|Defines that the value of the field is calculated by a formula each time the element or on of its children updates|
 

@@ -30,10 +30,9 @@ router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r
         var usergrouppermission = permissionsForUserGroup.find((p) => p.key === pk);
         return {
             key: pk,
-            canRead: !!usergrouppermission,
-            canWrite: usergrouppermission ? usergrouppermission.canwrite : false,
-            clientId:clientname,
-            userGroupId: usergroupname
+            canread: !!usergrouppermission,
+            canwrite: usergrouppermission ? usergrouppermission.canwrite : false,
+            usergroupname: usergroupname
         }
     });
     res.send(mappedPermissions);
@@ -43,17 +42,17 @@ router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r
 router.post('/', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var permission = req.body;
-    if (!permission || Object.keys(permission).length < 1 || !permission.userGroupId || !permission.key || (!!!permission.canRead && !!permission.canWrite)) return res.sendStatus(400);
+    if (!permission || Object.keys(permission).length < 1 || !permission.usergroupname || !permission.key || (!!!permission.canread && !!permission.canwrite)) return res.sendStatus(400);
     var permissionKeyForUser = await configHelper.getAvailablePermissionKeysForClient(clientname);
     if (permissionKeyForUser.indexOf(permission.key) < 0) return res.sendStatus(400);
-    if (!(await Db.getDynamicObject(clientname, co.collections.usergroups.name, permission.userGroupId))) return res.sendStatus(400);
-    if (!!!permission.canRead) {
-        await Db.query(clientname, `DELETE FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.userGroupId)}';`);
+    if (!(await Db.getDynamicObject(clientname, co.collections.usergroups.name, permission.usergroupname))) return res.sendStatus(400);
+    if (!!!permission.canread) {
+        await Db.query(clientname, `DELETE FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.usergroupname)}';`);
     } else {
-        if ((await Db.query(clientname, `SELECT 1 FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.userGroupId)}';`)).rowCount > 0) {
-            await Db.query(clientname, `UPDATE permissions SET canwrite = ${!!permission.canWrite} WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.userGroupId)}';`);
+        if ((await Db.query(clientname, `SELECT 1 FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.usergroupname)}';`)).rowCount > 0) {
+            await Db.query(clientname, `UPDATE permissions SET canwrite = ${!!permission.canwrite} WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.usergroupname)}';`);
         } else {
-            await Db.query(clientname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${Db.replaceQuotes(permission.userGroupId)}', '${Db.replaceQuotes(permission.key)}', ${!!permission.canWrite});`);
+            await Db.query(clientname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${Db.replaceQuotes(permission.usergroupname)}', '${Db.replaceQuotes(permission.key)}', ${!!permission.canwrite});`);
         }
     }
     res.send(permission);

@@ -13,9 +13,9 @@
 
     <md-card-content>
         <md-list class="lines-beetween-items">
-            <md-list-item ng-repeat="model in models | orderBy: 'title'" ng-click = "selectModel(model)" ng-class="{active:selectedModel == model}" aria-label="{{model.name}}">
+            <md-list-item ng-repeat="model in models | orderBy: 'label'" ng-click = "selectModel(model)" ng-class="{active:selectedModel == model}" aria-label="{{model.name}}">
                 <md-icon md-svg-src="{{model.icon}}"></md-icon>
-                <p translate="TRK_MODEL_{{model.name}}"></p>
+                <p>{{model.label}}</p>
             </md-list-item>
         </md-list>
     </md-card-content>
