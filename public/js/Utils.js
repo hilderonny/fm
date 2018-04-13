@@ -69,6 +69,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         deletedynamicobject: function(datatypename, entityname) {
+            // TODO: Das Löschen der Kindelemente sollte evetuell manuell durch die client-App erfolgen und gar nicht von der API
+            // unterstützt werden.
             return $http.delete("/api/dynamic/" + datatypename + "/" + entityname);
         },
 

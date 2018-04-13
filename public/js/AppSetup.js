@@ -61,7 +61,7 @@ app.config(function($translateProvider) {
       prefix: '/api/translations/',
       suffix: ''
   });
-  $translateProvider.fallbackLanguage('en');
+  $translateProvider.fallbackLanguage('de');
   $translateProvider.preferredLanguage('de');
   $translateProvider.useSanitizeValueStrategy(null); // Needed to translate HTML code, see https://github.com/angular-translate/angular-translate/issues/1131 and https://angular-translate.github.io/docs/#/guide/19_security
   // null ist notwendig, damit sowohl die Blockübersetzung in Mandantenadministrator als auch die Umlaute beim Löschbestätigendialog korrekt angezeigt werden

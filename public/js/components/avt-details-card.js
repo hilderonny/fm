@@ -111,24 +111,23 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     });
                 };
                 scope.delete = function() {
-                    var translations;
-                    $translate(['TRK_DETAILS_ELEMENT_DELETED', 'TRK_DETAILS_REALLY_DELETE_ELEMENT', 'TRK_YES', 'TRK_NO']).then(function(t) {
-                        translations = t;
-                        var confirm = $mdDialog
-                            .confirm()
-                            .title(translations.TRK_DETAILS_REALLY_DELETE_ELEMENT)
-                            .ok(translations.TRK_YES)
-                            .cancel(translations.TRK_NO);
-                        return $mdDialog.show(confirm);
-                    }).then(function() {
-                        return utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name);
-                    }).then(function() {
+                    function showsuccess(message) {
                         if (scope.params.ondelete) scope.params.ondelete();
                         utils.removeCardsToTheRightOf(element);
                         utils.removeCard(element);
-                        $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_DELETED).hideDelay(1000).position('bottom right'));
+                        $mdToast.show($mdToast.simple().textContent(message).hideDelay(1000).position('bottom right'));
                         utils.setLocation("/" + scope.datatype.name, false);
-                    });
+                    }
+                    utils.showdialog(scope.$new(true), "<p>Soll das Element wirklich gelöscht werden?</p>", [
+                        { label: "Ja", onclick: function() {
+                            utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name).then(function() { showsuccess("Das Element wurde gelöscht"); });
+                        } },
+                        // Erst implementieren, wenn die Berechtigungsthematik mit den Unterelementen gelärt ist
+                        // { label: "Ja, mit Kindelementen", onclick: function() {
+                        //     utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name, true).then(function() { showsuccess("Das Element und alle Kindelemente wurden gelöscht"); });
+                        // } },
+                        { label: "Nein" }
+                    ]);
                 },
                 scope.load = function() {
                     scope.dynamicobject = {}; // For new
