@@ -20,7 +20,7 @@ var dh = require('../utils/documentsHelper');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
-var mime = require('send').mime;
+var mime = require("mime");
 var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
 
@@ -53,24 +53,28 @@ function mapFields(e, clientname) {
 }
 
 var downloadDocument = (response, clientname, document, forpreview) => {
+    var dispositiontype = forpreview ? 'inline' : 'attachment';
     var options = {
         headers: {
-            'Content-disposition' : forpreview? 'inline' : 'attachment; filename=' + document.label,
-            'Content-Type' : mime.lookup(document.type)
+            'Content-disposition' : dispositiontype + '; filename=' + encodeURIComponent(document.label), // When file names contain invalid characters it comes to an error here
+            'Content-Type' : document.type
         }
     };
     return response.sendFile(dh.getDocumentPath(clientname, document.name), options);
 };
 
 // Download a specific shared document without authentication 
-router.get('/share/:clientname/:documentname', async(req, res) => {
-    var clientname = req.params.clientname;
-    var clientresult = await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${Db.replaceQuotes(clientname)}';`);
-    if(clientresult.rowCount < 1) return res.sendStatus(404);
-    var document = await Db.getDynamicObject(clientname, co.collections.documents.name, req.params.documentname);
-    if (!document) return res.sendStatus(404);
-    if (!document.isshared) return res.sendStatus(403);
-    downloadDocument(res, clientname, document);
+router.get('/share/:documentname', async(req, res) => {
+    var clientnames = (await Db.query(Db.PortalDatabaseName, `SELECT name FROM clients;`)).rows.map(c => c.name);
+    for (var i = 0; i < clientnames.length; i++) {
+        var clientname = clientnames[i];
+        var document = await Db.getDynamicObject(clientname, "documents", req.params.documentname);
+        if (document && document.isshared) {
+            downloadDocument(res, clientname, document, true);
+            return;
+        }
+    }
+    res.sendStatus(404);
 });
 
 /**
@@ -118,18 +122,41 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     var file = req.file;
     if (!file) return res.sendStatus(400);
     var clientname = req.user.clientname;
-    var parentFolderId = req.body.parentFolderId ? req.body.parentFolderId : null;
-    if (parentFolderId && !(await Db.getDynamicObject(clientname, co.collections.folders.name, parentFolderId))) return res.sendStatus(400);
     var document = {
         name: uuidv4(),
         label: file.originalname,
-        type: file.mimetype, 
-        parentfoldername: parentFolderId,
+        type: mime.getType(path.extname(file.originalname)),
         isshared: false
     };
-    await Db.insertDynamicObject(clientname, co.collections.documents.name, document);
+    await Db.insertDynamicObject(clientname, "documents", document);
     dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', file.path));
-    res.send({ _id: document.name, type: "d", name: document.label });
+    var parentdatatypename = req.body.parentdatatypename;
+    var parententityname = req.body.parententityname;
+    if (parentdatatypename && parententityname) {
+        var relation = {
+            name: uuidv4(),
+            datatype1name: parentdatatypename,
+            name1: parententityname,
+            datatype2name: "documents",
+            name2: document.name,
+            relationtypename: "parentchild"
+        };
+        await Db.insertDynamicObject(clientname, "relations", relation);
+    }
+    res.send(document.name);
+});
+
+// replace a file for an existing document
+router.post('/:name', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), upload.single('file'), async(req, res) => { // https://github.com/expressjs/multer
+    var file = req.file;
+    var documentname = req.params.name;
+    if (!file) return res.sendStatus(400);
+    var clientname = req.user.clientname;
+    var document = await Db.getDynamicObject(clientname, "documents", documentname);
+    if (!document) return res.sendStatus(404);
+    await Db.updateDynamicObject(clientname, "documents", documentname, { type: mime.getType(path.extname(file.originalname)) });
+    dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', file.path));
+    res.sendStatus(200);
 });
 
 // Update meta data of a document

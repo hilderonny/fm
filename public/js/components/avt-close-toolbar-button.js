@@ -12,9 +12,6 @@ app.directive('avtCloseToolbarButton', function($compile, utils) {
             var button = angular.element(template);
             toolbar.append(angular.element("<div flex></div>"));
             toolbar.append(button);
-            // return function link(scope) {
-            //     scope.close = scope.params.onclose;
-            // };
         }
     }
 });

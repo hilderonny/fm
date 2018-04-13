@@ -1,3 +1,4 @@
+/// OBSOLET
 
 app.directive('avtRelationsTab', function($compile, $translate, $mdDialog, $mdToast, utils) {
     var template = 

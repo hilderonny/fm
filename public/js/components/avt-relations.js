@@ -4,20 +4,20 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
     var createdialogcontent = 
         '<md-input-container flex>' +
         '    <label translate>TRK_RELATIONS_TYPE</label>' +
-        '    <md-select name="tp" ng-model="parentscope.createdialogrelationtype" ng-change="parentscope.createdialogupdateokbuttonvisibility()">' +
-        '        <md-option ng-value="relationtype" ng-repeat="relationtype in parentscope.createdialogrelationtypes | orderBy: \'label\'" ng-bind="relationtype.label"></md-option>' +
+        '    <md-select ng-model="createdialogrelationtype" ng-change="createdialogupdateokbuttonvisibility()">' +
+        '        <md-option ng-value="relationtype" ng-repeat="relationtype in createdialogrelationtypes | orderBy: \'label\'" ng-bind="relationtype.label"></md-option>' +
         '    </md-select>' +
         '</md-input-container>' +
         '<md-input-container flex>' +
         '    <label translate>TRK_DATATYPES_DATATYPE</label>' +
-        '    <md-select name="tp" ng-model="parentscope.createdialogtargetdatatype" ng-change="parentscope.createdialogondatatypechange()">' +
-        '        <md-option ng-value="datatype" ng-repeat="datatype in parentscope.createdialogdatatypes | orderBy: \'label\'" ng-bind="datatype.label"></md-option>' +
+        '    <md-select ng-model="createdialogtargetdatatype" ng-change="createdialogondatatypechange()">' +
+        '        <md-option ng-value="datatype" ng-repeat="datatype in createdialogdatatypes | orderBy: \'label\'" ng-bind="datatype.label"></md-option>' +
         '    </md-select>' +
         '</md-input-container>' +
-        '<md-input-container flex ng-if="parentscope.createdialogtargetdatatype">' +
-        '    <label>{{parentscope.createdialogtargetdatatype.label}}</label>' +
-        '    <md-select name="tp" ng-model="parentscope.createdialogtargetelement" ng-change="parentscope.createdialogupdateokbuttonvisibility()">' +
-        '        <md-option ng-value="element" ng-repeat="element in parentscope.createdialogtargetelements | orderBy: \'label\'" ng-bind="element.label"></md-option>' +
+        '<md-input-container flex ng-show="createdialogtargetdatatype">' +
+        '    <label>{{createdialogtargetdatatype.label}}</label>' +
+        '    <md-select ng-model="createdialogtargetelement" ng-change="createdialogupdateokbuttonvisibility()">' +
+        '        <md-option ng-value="element" ng-repeat="element in createdialogtargetelements | orderBy: \'label\'" ng-bind="element.label"></md-option>' +
         '    </md-select>' +
         '</md-input-container>';
     var tabtemplate = 
@@ -59,51 +59,49 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
                 scope.canwriterelations = scope.$root.canWrite('PERMISSION_CORE_RELATIONS');
                 scope.canreadrelations = scope.$root.canRead('PERMISSION_CORE_RELATIONS');
                 // Toolbar button part
-                scope.createdialogrelationtypes = scope.$root.relationtypes.reduce(function(arr, elem) {
-                    arr.push({ name: elem.name, label: elem.labelfrom1to2, is1: true });
-                    if (elem.name !== "looselycoupled") arr.push({ name: elem.name, label: elem.labelfrom2to1, is1: false });
-                    return arr;
-                }, []);
-                scope.createdialogdatatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.canhaverelations; });
-                var createdialogokbutton = { label: "TRK_OK", ishidden: true , onclick: function() {
-                    var newrelation = {
-                        relationtypename: scope.createdialogrelationtype.name,
-                        datatype1name: scope.createdialogrelationtype.is1 ? scope.params.datatypename : scope.createdialogtargetdatatype.name,
-                        name1: scope.createdialogrelationtype.is1 ? scope.params.entityname : scope.createdialogtargetelement.name,
-                        datatype2name: scope.createdialogrelationtype.is1 ? scope.createdialogtargetdatatype.name : scope.params.datatypename,
-                        name2: scope.createdialogrelationtype.is1 ? scope.createdialogtargetelement.name : scope.params.entityname
-                    };
-                    utils.createrelation(newrelation).then(function() {
-                        if (tabs) scope.tabloadrelations();
-                        $translate(['TRK_RELATIONS_RELATION_CREATED']).then(function(translations) {
-                            $mdToast.show($mdToast.simple().textContent(translations.TRK_RELATIONS_RELATION_CREATED).hideDelay(1000).position('bottom right'));
-                        });
-                    });
-                }};
                 scope.opencreatedialog = function($event) {
-                    delete scope.createdialogrelationtype;
-                    delete scope.createdialogtargetdatatype;
-                    delete scope.createdialogtargetelement;
-                    utils.showdialog(scope, createdialogcontent, [
+                    var dialogscope = scope.$new(false);
+                    dialogscope.createdialogrelationtypes = scope.$root.relationtypes.reduce(function(arr, elem) {
+                        arr.push({ name: elem.name, label: elem.labelfrom1to2, is1: true });
+                        if (elem.name !== "looselycoupled") arr.push({ name: elem.name, label: elem.labelfrom2to1, is1: false });
+                        return arr;
+                    }, []);
+                    dialogscope.createdialogdatatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.canhaverelations; });
+                    dialogscope.createdialogondatatypechange = function() {
+                        delete dialogscope.createdialogtargetelement;
+                        dialogscope.createdialogupdateokbuttonvisibility();
+                        utils.loaddynamicobjects(dialogscope.createdialogtargetdatatype.name).then(function(elements) {
+                            dialogscope.createdialogtargetelements = elements;
+                            elements.forEach(function(e) {
+                                if (!e.label) {
+                                    var titlefield = dialogscope.createdialogtargetdatatype.titlefield ? dialogscope.createdialogtargetdatatype.titlefield : "name";
+                                    e.label = e[titlefield].substring(0, 100);
+                                }
+                            });
+                        });
+                    };
+                    dialogscope.createdialogupdateokbuttonvisibility = function() {
+                        createdialogokbutton.ishidden = !dialogscope.createdialogtargetdatatype || !dialogscope.createdialogrelationtype || !dialogscope.createdialogtargetelement;
+                    };
+                    var createdialogokbutton = { label: "TRK_OK", ishidden: true , onclick: function() {
+                        var newrelation = {
+                            relationtypename: dialogscope.createdialogrelationtype.name,
+                            datatype1name: dialogscope.createdialogrelationtype.is1 ? scope.params.datatypename : dialogscope.createdialogtargetdatatype.name,
+                            name1: dialogscope.createdialogrelationtype.is1 ? scope.params.entityname : dialogscope.createdialogtargetelement.name,
+                            datatype2name: dialogscope.createdialogrelationtype.is1 ? dialogscope.createdialogtargetdatatype.name : scope.params.datatypename,
+                            name2: dialogscope.createdialogrelationtype.is1 ? dialogscope.createdialogtargetelement.name : scope.params.entityname
+                        };
+                        utils.createrelation(newrelation).then(function() {
+                            if (tabs) scope.tabloadrelations();
+                            $translate(['TRK_RELATIONS_RELATION_CREATED']).then(function(translations) {
+                                $mdToast.show($mdToast.simple().textContent(translations.TRK_RELATIONS_RELATION_CREATED).hideDelay(1000).position('bottom right'));
+                            });
+                        });
+                    }};
+                    utils.showdialog(dialogscope, createdialogcontent, [
                         createdialogokbutton,
                         { label: "TRK_CANCEL" }
                     ]);
-                };
-                scope.createdialogondatatypechange = function() {
-                    delete scope.createdialogtargetelement;
-                    scope.createdialogupdateokbuttonvisibility();
-                    utils.loaddynamicobjects(scope.createdialogtargetdatatype.name).then(function(elements) {
-                        scope.createdialogtargetelements = elements;
-                        elements.forEach(function(e) {
-                            if (!e.label) {
-                                var titlefield = scope.createdialogtargetdatatype.titlefield ? scope.createdialogtargetdatatype.titlefield : "name";
-                                e.label = e[titlefield].substring(0, 100);
-                            }
-                        });
-                    });
-                };
-                scope.createdialogupdateokbuttonvisibility = function() {
-                    createdialogokbutton.ishidden = !scope.createdialogtargetdatatype || !scope.createdialogrelationtype || !scope.createdialogtargetelement;
                 };
                 // Tab part
                 scope.tabdeleterelation = function(relation) {
@@ -139,7 +137,8 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
                         // Load entities
                         var fetchpromises = Object.keys(entitiestofetch).map(function(k) {
                             var entitiestofetchfordatatype = entitiestofetch[k];
-                            return utils.getresponsedata("/api/dynamic/" + k + "?name=[" + Object.keys(entitiestofetchfordatatype).map(function(e) { return '"' + e + '"'; }).join(",") + "]").then(function(entities) {
+                            return utils.getresponsedata("/api/dynamic/" + k + "?name=[" + Object.keys(entitiestofetchfordatatype).map(function(e) { return '"' + e + '"'; }).join(",") + "]#ignore403").then(function(entities) {
+                                if (!Array.isArray(entities)) return;
                                 entities.forEach(function(e) {
                                     e.datatype = scope.$root.datatypes[k];
                                     var mapper = entitiestofetchfordatatype[e.name];

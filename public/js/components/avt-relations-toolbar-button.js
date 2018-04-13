@@ -1,3 +1,4 @@
+/// OBSOLET
 
 app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $translate, $mdToast, utils) { 
     var dialogcontent = 

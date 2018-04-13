@@ -9,8 +9,8 @@ var Db = require("../utils/db").Db;
 
 router.get('/', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {
     var clientname = req.user.clientname;
-    // Only those datatypes which are relevant for list "areas"
-    var relevantdatatypes = (await Db.query(clientname, "SELECT * FROM datatypes WHERE 'areas' = ANY (lists);")).rows;
+    // Only those datatypes which are relevant for list "areas_hierarchy"
+    var relevantdatatypes = (await Db.query(clientname, "SELECT * FROM datatypes WHERE 'areas_hierarchy' = ANY (lists);")).rows;
 
     var allfmobjects = [];
     var fmmap = {};

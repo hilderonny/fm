@@ -105,8 +105,16 @@ md-card.list-details-details {
     min-width: initial;
 }
 
+md-card.list-details-details:last-child > resize-handle {
+    display: none;
+}
+
 md-card-content > md-grid-list {
     height:100%;
+}
+
+md-card.areas-card {
+    flex:2;
 }
 
 md-card.doc md-card-content {
@@ -415,6 +423,7 @@ table.areas > tbody > tr > td:first-of-type > div > .inset {
 
 table.areas > tbody > tr > td:first-of-type > div > span {
     margin: 4px;
+    white-space: initial;
 }
 
 table.areachildren > tbody > tr > td {
@@ -427,6 +436,25 @@ table.areachildren.smalldevice > tbody > tr > td > div > span {
 
 table.largedevice, table.smalldevice {
     display: table;
+}
+
+.avt-reference-select {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    font-size: 16px !important;
+    margin: 0;
+    padding: 2px 2px 1px 2px;
+    text-transform: initial;
+    width: 100%;
+}
+
+.avt-reference-select > span {
+    display: flex;
+    flex: 1;    
+}
+
+.avt-reference-select > span > span {
+    flex: 1;
+    text-align: initial;
 }
 
 .nowrap {
@@ -564,7 +592,8 @@ table.largedevice, table.smalldevice {
     height: 100%;
     width: 0;
     padding-left: 100%;
-    cursor:pointer;
+    cursor: pointer;
+    z-index: 9999;
 }
 
 .md-fab .fileupload {

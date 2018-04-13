@@ -41,11 +41,6 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
                 scope.detailscard = params.detailscard;
-                var titlefields = {};
-                Object.keys(scope.$root.datatypes).forEach(function(k) {
-                    var dt = scope.$root.datatypes[k];
-                    titlefields[k] = dt.titlefield ? dt.titlefield : "name";
-                });
                 scope.ondetailscardclosed = function() {
                     if (!scope.selectedchild) return; // when new element card is open
                     var datatypename = scope.selectedchild.datatypename;
@@ -56,12 +51,16 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                     delete scope.selectedchild;
                 };
                 scope.onelementcreated = function(datatype, createdelementname) {
+                    if ((!datatype || !createdelementname) && scope.selectedchild) { // Document was extracted
+                        scope.loadelementsfordirectaccess(scope.selectedchild.datatypename, scope.selectedchild.name);
+                        return;
+                    }
                     utils.loaddynamicobject(datatype.name, createdelementname).then(function(newelement) {
                         var selectedchild = scope.selectedchild ? scope.selectedchild : scope.child;
                         newelement.datatypename = datatype.name;
                         newelement.icon = datatype.icon;
                         newelement.parent = selectedchild;
-                        if (!newelement.label) newelement.label =  newelement[titlefields[newelement.datatypename]];
+                        if (!newelement.label) newelement.label =  newelement[scope.$root.titlefields[newelement.datatypename]];
                         if (!selectedchild.children) selectedchild.children = [];
                         selectedchild.children.push(newelement);
                         selectedchild.haschildren = true;
@@ -78,30 +77,34 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                     delete scope.selectedchild;
                 };
                 scope.onelementupdated = function(updatedelement) {
-                    scope.selectedchild.label = updatedelement.label ? updatedelement.label : updatedelement[titlefields[updatedelement.datatypename]];
+                    scope.selectedchild.label = updatedelement.label ? updatedelement.label : updatedelement[scope.$root.titlefields[updatedelement.datatypename]];
                 };
                 scope.loadelementsfordirectaccess = function(datatypename, entityname) {
-                    return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + scope.params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {
+                    return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {
                         scope.child = { children: rootelements };
+                        var isselected = false;
                         var setparentofchildrenrecursively = function(child) {
-                            if (child.name === entityname) scope.selectchild(child);
+                            if (child.name === entityname) {
+                                scope.selectchild(child);
+                                isselected = true;
+                            }
                             if (child.children) child.children.forEach(function(c) {
                                 c.parent = child;
-                                if (!c.label) c.label = c[titlefields[c.datatypename]];
+                                if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
                                 setparentofchildrenrecursively(c);
                             });
                         };
                         setparentofchildrenrecursively(scope.child);
-                        if (!scope.selectedchild) scope.selectchild({datatypename:datatypename, name: entityname}); // When hierarchy cannot be opened until the child (missing permission)
+                        if (!isselected) scope.selectchild({datatypename:datatypename, name: entityname}); // When hierarchy cannot be opened until the child (missing permission)
                     });
                 };
                 scope.loadrootelements = function() {
-                    return utils.getresponsedata("/api/dynamic/rootelements/" + scope.params.listfilter).then(function(rootelements) {
+                    return utils.getresponsedata("/api/dynamic/rootelements/" + params.listfilter).then(function(rootelements) {
                         if (!scope.child) { // Fresh load after card opening
                             scope.child = { children: rootelements };
                             scope.child.children.forEach(function(c) {
                                 c.parent = scope.child;
-                                if (!c.label) c.label = c[titlefields[c.datatypename]];
+                                if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
                             });
                         } else { // Refresh after deletion of subelements which result in moving sub-sub-childs to the root
                             rootelements.forEach(function(c) {
@@ -109,18 +112,18 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                                     // Here we have a moved child
                                     scope.child.children.push(c);
                                     c.parent = scope.child;
-                                    if (!c.label) c.label = c[titlefields[c.datatypename]];
+                                    if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
                                 }
                             });
                         }
                     });
                 };
                 scope.openchild = function(child) {
-                    return utils.getresponsedata("/api/dynamic/children/" + scope.params.listfilter + "/" + child.datatypename + "/" + child.name).then(function(children) {
+                    return utils.getresponsedata("/api/dynamic/children/" + params.listfilter + "/" + child.datatypename + "/" + child.name).then(function(children) {
                         child.children = children;
                         child.children.forEach(function(cc) {
                             cc.parent = child;
-                            if (!cc.label) cc.label =  cc[titlefields[cc.datatypename]];
+                            if (!cc.label) cc.label =  cc[scope.$root.titlefields[cc.datatypename]];
                         });
                         child.isopen = true;
                     });

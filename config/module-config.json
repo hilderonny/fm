@@ -19,6 +19,7 @@
                 "css/icons/material/Exit.svg",
                 "css/icons/material/Forward.svg",
                 "css/icons/material/Help.svg",
+                "css/icons/material/icons8-more.svg",
                 "css/icons/material/List.svg",
                 "css/icons/material/Menu.svg",
                 "css/icons/material/Menu2.svg",
@@ -108,6 +109,8 @@
                 "public/js/components/avt-hierarchy-card.js",
                 "public/js/components/avt-list-card.js",
                 "public/js/components/avt-permissions-tab.js",
+                "public/js/components/avt-progress-spinner.js",
+                "public/js/components/avt-reference-select.js",
                 "public/js/components/avt-relations.js",
                 "public/js/components/avt-relations-tab.js",
                 "public/js/components/avt-relations-toolbar-button.js",
@@ -129,8 +132,8 @@
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
                         { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
-                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "listfilter": "users", "directurls": [ "users" ] },
-                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "listfilter": "usergroups", "directurls": [ "usergroups" ] }
+                        { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
+                        { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] }
                     ]
                 }
             ],
@@ -555,12 +558,10 @@
                 "css/icons/material/Document.svg",
                 "css/icons/material/Download.svg",
                 "css/icons/material/Folder.svg",
+                "css/icons/material/icons8-open-archive.svg",
+                "css/icons/material/icons8-symlink-file.svg",
                 "css/icons/material/Upload.svg",
-                "css/icons/office/Add Folder.svg",
                 "css/icons/office/Document.svg",
-                "css/icons/office/Download.svg",
-                "css/icons/office/Folder.svg",
-                "css/icons/office/Upload.svg",
                 "css/images/Documents_addfolder.png",
                 "css/images/Documents_editdocument.png",
                 "css/images/Documents_editfolder.png",
@@ -568,14 +569,15 @@
                 "css/images/Documents_upload.png",
                 "css/images/Documents_uploadmobile.png",
                 "partial/Doc/Documents.html",
-                "partial/Office/DocumentCard.html",
-                "partial/Office/DocumentListCard.html",
-                "partial/Office/FolderCard.html"
+                "partial/Office/DocumentDetailsCard.html",
+                "partial/Office/DocumentListCard.html"
             ],
             "include" : [
-                "public/js/Office/DocumentCardController.js",
-                "public/js/Office/DocumentListCardController.js",
-                "public/js/Office/FolderCardController.js"
+                "public/js/components/avt-document-share-link.js",
+                "public/js/components/avt-download-document-toolbar-button.js",
+                "public/js/components/avt-extract-document-toolbar-button.js",
+                "public/js/components/avt-replace-document-toolbar-button.js",
+                "public/js/components/avt-upload-document-toolbar-button.js"
             ],
             "languages" : [ "en", "de" ],
             "utils": [ "documentsHelper" ],
@@ -591,15 +593,15 @@
 
                 { "name": "folders", "label": "Verzeichnis", "plurallabel": "Verzeichnisse", "titlefield": "label", "icon": "/css/icons/material/Folder.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "parentfoldername", "type": "reference", "reference": "folders" }
-                ], "lists": [ "folders" ], "canhaverelations" : true },
+                    { "name": "parentfoldername", "type": "reference", "reference": "folders", "ishidden": true }
+                ], "lists": [ "folders_hierarchy", "documents" ], "permissionkey": "PERMISSION_OFFICE_DOCUMENT", "canhaverelations" : true },
 
                 { "name": "documents", "label": "Dokument", "plurallabel": "Dokumente", "titlefield": "label", "icon": "/css/icons/material/Document.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "parentfoldername", "type": "reference", "reference": "folders" },
-                    { "name": "type", "type": "text" },
+                    { "name": "parentfoldername", "type": "reference", "reference": "folders", "ishidden": true },
+                    { "name": "type", "type": "text", "ishidden": true },
                     { "name": "isshared", "label": "Öffentlich zugänglich", "type": "boolean" }
-                ], "lists": [ "folders" ], "canhaverelations" : true }
+                ], "lists": [ "folders_hierarchy", "documents" ], "permissionkey": "PERMISSION_OFFICE_DOCUMENT", "canhaverelations" : true }
 
             ]
         },
@@ -634,7 +636,7 @@
                 {
                     "title": "TRK_MENU_BIM",
                     "items": [
-                        { "mainCard": "BIM/FmObjectsHierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "listfilter": "fmobjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
+                        { "mainCard": "BIM/FmObjectsHierarchyCard", "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_FMOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
                     ]
                 }
             ],
@@ -649,7 +651,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -660,7 +662,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -671,7 +673,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -682,7 +684,7 @@
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 3 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -691,7 +693,7 @@
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF, berechnet)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 3 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_AREA.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -703,12 +705,12 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_NUF", "f", null] }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_TF", "f", null] }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_VF", "f", null] }, "formulaindex": 2 }
-                ], "lists": [ "fmobjects", "areas" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" }
-                ], "lists": [ "fmobjects" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "fmobjecttypes", "label": "FM Objekttyp", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
@@ -728,7 +730,7 @@
                     { "name": "FMOBJECTS_CATEGORY_NUF", "label": "Nutzungsfläche" },
                     { "name": "FMOBJECTS_CATEGORY_TF", "label": "Technikfläche" },
                     { "name": "FMOBJECTS_CATEGORY_VF", "label": "Verkehrsfläche" }
-                ] }, 
+                ], "lists": [ "areacategories" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" }, 
 
                 { "name": "areatypes", "label": "Flächenart", "titlefield": "name", "fields": [
                     { "name": "areacategoryname", "type": "reference", "reference": "areacategories" }
@@ -742,14 +744,14 @@
                     { "name": "Sonstige Nutzung", "areacategoryname": "Nutzungsfläche" },
                     { "name": "Technische Anlagen", "areacategoryname": "Technikfläche" },
                     { "name": "Verkehrserschließung und -sicherung", "areacategoryname": "Verkehrsfläche" }
-                ] }, 
+                ], "lists": [ "areatypes" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" }, 
 
                 { "name": "areausagestates", "label": "Nutzungsstatus", "titlefield": "name", "values": [
                     { "name": "Ungenutzt" },
                     { "name": "Eigengenutzt" },
                     { "name": "Vermietet" },
                     { "name": "Reserviert" }
-                ] }, 
+                ], "lists": [ "areausagestates" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" }, 
 
                 { "name": "fmobjects", "label": "FM Objekt", "plurallabel": "FM Objekte", "titlefield": "label", "icon": "/css/icons/material/Cottage.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -894,6 +896,8 @@
                 "partial/ronnyseins/GoogleMapsCard.html"
             ],
             "include" : [
+                "public/js/components/avt-viewin3d-toolbar-button.js",
+                
                 "public/js/lib/babylon.js",
                 "public/js/lib/aframe-v0.7.0.min.js",
                 "public/js/lib/aframe-look-at-billboard-component.min.js",
