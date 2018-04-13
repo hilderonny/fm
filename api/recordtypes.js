@@ -4,7 +4,7 @@ var router = require('express').Router();
 var co = require('../utils/constants');
 
 router.get('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
-    var elements = await Db.getDataTypes(req.user.clientname);
+    var elements = await Db.getdatatypes(req.user.clientname);
     res.send(elements);
 });
         
