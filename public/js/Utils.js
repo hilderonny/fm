@@ -359,7 +359,6 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                     '</md-dialog>',
                 scope: parentscope,
                 controller: function($scope, $mdDialog) {
-                    $scope.parentscope = parentscope; // TODO: Not used anymore, use scope instead!
                     $scope.dialogbuttons = buttons;
                     $scope.onclick = function(button) {
                         if (button.onclick) button.onclick();

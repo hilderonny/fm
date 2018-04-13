@@ -79,22 +79,9 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                     scope.$watch("dynamicobject", function(dynamicobject) {
                         if (!dynamicobject || Object.keys(dynamicobject).length < 1) return;
                         var datatypefield = scope.datatypefield;
-                        // var entityname = dynamicobject[datatypefield.name];
                         if (dynamicobject[datatypefield.name]) utils.getresponsedata("/api/dynamic/" + datatypefield.reference + "/" + dynamicobject[datatypefield.name]).then(function(selectedreference) {
                             if (!selectedreference.label) selectedreference.label = selectedreference[scope.$root.titlefields[datatypefield.reference]];
                             scope.selectedreference = selectedreference;
-                        //     scope.child = { children: rootelements };
-                        //     var setparentofchildrenrecursively = function(child) {
-                        //         if (child.name && child.name === entityname) {
-                        //             scope.selectedreference = child;
-                        //         }
-                        //         if (child.children) child.children.forEach(function(c) {
-                        //             c.parent = child;
-                        //             if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
-                        //             setparentofchildrenrecursively(c);
-                        //         });
-                        //     };
-                        //     setparentofchildrenrecursively(scope.child);
                         });
                     });
                 }
