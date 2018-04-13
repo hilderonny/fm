@@ -146,6 +146,19 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     res.send(document.name);
 });
 
+// replace a file for an existing document
+router.post('/:name', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), upload.single('file'), async(req, res) => { // https://github.com/expressjs/multer
+    var file = req.file;
+    var documentname = req.params.name;
+    if (!file) return res.sendStatus(400);
+    var clientname = req.user.clientname;
+    var document = await Db.getDynamicObject(clientname, "documents", documentname);
+    if (!document) return res.sendStatus(404);
+    await Db.updateDynamicObject(clientname, "documents", documentname, { type: mime.getType(path.extname(file.originalname)) });
+    dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', file.path));
+    res.sendStatus(200);
+});
+
 // Update meta data of a document
 router.put('/:id', auth(co.permissions.OFFICE_DOCUMENT, "w", co.modules.documents), validateSameClientId(co.collections.documents.name), async(req, res) => {
     var clientname = req.user.clientname;
