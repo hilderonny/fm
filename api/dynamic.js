@@ -35,7 +35,9 @@ async function getchildren(clientname, recordtypename, entityname, permissions, 
 
 async function getrootelements(clientname, forlist, permissions) {
     var clientmodulenames = (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}';`)).rows.map(r => `'${Db.replaceQuotes(r.modulename)}'`);
-    var relevantdatatypes = (await Db.query(clientname, `SELECT * FROM datatypes WHERE '${Db.replaceQuotes(forlist)}' = ANY (lists) AND modulename IN (${clientmodulenames.join(",")});`)).rows;
+    if (clientname !== Db.PortalDatabaseName && clientmodulenames.length < 1) return [];
+    var additionalfilter = clientname !== Db.PortalDatabaseName ? ` AND modulename IN (${clientmodulenames.join(",")})` : "";
+    var relevantdatatypes = (await Db.query(clientname, `SELECT * FROM datatypes WHERE '${Db.replaceQuotes(forlist)}' = ANY (lists)${additionalfilter};`)).rows;
     var rootelements = [];
     for (var i = 0; i < relevantdatatypes.length; i++) { // Must be loop because it is not said, that all datatypes have all required columns so UNION will not work
         var rdt = relevantdatatypes[i];

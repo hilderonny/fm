@@ -33,12 +33,5 @@ module.exports = async() => {
             await Db.updateDynamicObject(clientname, "documents", document.name, { parentfoldername: null });
         }
     }
-    // Benutzer aus allusers löschen, für die es keine Mandanten mehr gibt
-    var clientnames = clients.map(c => `'${Db.replaceQuotes(c.name)}'`);
-    if (clientnames.length > 0) await Db.query(Db.PortalDatabaseName, `DELETE FROM allusers WHERE clientname NOT IN (${clientnames.join(",")});`);
-    // Verzeichnisse von Mandanten löschen, die es nicht mehr gibt
-    var documentpath = path.join(__dirname, '..', lc.documentspath ? lc.documentspath : 'documents');
-    var clientfoldernames = fs.readdirSync(documentpath).filter(fn => !clients.find(c => c.name === fn));
-    clientfoldernames.forEach(fn => { rimraf.sync(path.join(documentpath, fn)); });
     console.log("UPDATE FINISHED.");
 };
