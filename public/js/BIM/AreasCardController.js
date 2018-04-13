@@ -56,7 +56,7 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
             $scope.fmObjects = $scope.params.fmObjects;
             $scope.childFmObjects = $scope.currentFmObject._children;
             // Fetch breadcrumbs
-            utils.loadparentlabels($scope.currentFmObject._datatypename, $scope.currentFmObject.name).then(function(breadcrumbs) {
+            utils.loadparentlabels("areas_hierarchy", $scope.currentFmObject._datatypename, $scope.currentFmObject.name).then(function(breadcrumbs) {
                 $scope.breadcrumbs = breadcrumbs.join(' » ');
             });
             return;
