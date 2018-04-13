@@ -230,7 +230,6 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             }).catch(function() {
                 localStorage.removeItem("loginCredentials"); // Delete login credentials to prevent login loop
                 scope.isLoggingIn = false;
-                if (hideErrorMessage) return;
                 $translate(['TRK_LOGIN_FAILED_TITLE', 'TRK_LOGIN_FAILED_CONTENT', 'TRK_LOGIN_FAILED_AGAIN']).then(function(translations) {
                     $mdDialog.show($mdDialog.alert()
                         .clickOutsideToClose(true)
