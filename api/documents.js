@@ -70,7 +70,7 @@ router.get('/share/:documentname', async(req, res) => {
         var clientname = clientnames[i];
         var document = await Db.getDynamicObject(clientname, "documents", req.params.documentname);
         if (document && document.isshared) {
-            downloadDocument(res, clientname, document);
+            downloadDocument(res, clientname, document, true);
             return;
         }
     }

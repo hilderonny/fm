@@ -28,6 +28,8 @@ app.directive('avtReferenceSelect', function($compile, utils) {
             return {
                 pre: function(scope, iElement, iAttr) {
                     if (scope.datatypefield.fieldtype !== "reference") return iElement.remove();
+                    iElement.parent().addClass("md-input-has-value"); // For styling label
+                    iElement.addClass("avt-reference-select");
                     var buttoncontent = angular.element('<span ng-click="openselectiondialog()"><span>{{selectedreference.label}}</span><md-icon md-svg-src="/css/icons/material/icons8-more.svg"></md-icon></span>');
                     iElement.append(buttoncontent);
                     $compile(buttoncontent)(scope);
@@ -35,32 +37,8 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                         scope.selectedchild = child;
                     };
                     scope.openselectiondialog = function() {
-                        var newscope = scope.$new(false);
-                        newscope.selectedchild = scope.selectedreference;
-                        var okbutton = { label: "TRK_OK", ishidden: true, onclick: function() {
-                            scope.selectedreference = newscope.selectedchild;
-                            scope.dynamicobject[scope.datatypefield.name] = scope.selectedreference.name;
-                        }};
-                        newscope.openchild = function(child) {
-                            return utils.getresponsedata("/api/dynamic/children/" + scope.datatypefield.reference + "/" + child.datatypename + "/" + child.name).then(function(children) {
-                                child.children = children;
-                                child.isopen = true;
-                            });
-                        };
-                        newscope.selectchild = function(child) {
-                            newscope.selectedchild = child;
-                        };
-                        newscope.$watch("selectedchild", function(selectedchild) {
-                            okbutton.ishidden = !selectedchild;
-                        });
-                        utils.showdialog(newscope, selecttemplate, [
-                            okbutton,
-                            { label: "TRK_CANCEL" }
-                        ]);
-                    };
-                    scope.$watch("dynamicobject", function(dynamicobject) {
                         var datatypefield = scope.datatypefield;
-                        var entityname = dynamicobject[datatypefield.name];
+                        var entityname = scope.dynamicobject[datatypefield.name];
                         utils.getresponsedata("/api/dynamic/hierarchytoelement/" + datatypefield.reference + "/" + datatypefield.reference + "/" + entityname).then(function(rootelements) {
                             scope.child = { children: rootelements };
                             var setparentofchildrenrecursively = function(child) {
@@ -74,8 +52,50 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                                 });
                             };
                             setparentofchildrenrecursively(scope.child);
+                            var newscope = scope.$new(false);
+                            newscope.selectedchild = scope.selectedreference;
+                            var okbutton = { label: "TRK_OK", ishidden: true, onclick: function() {
+                                scope.selectedreference = newscope.selectedchild;
+                                scope.dynamicobject[scope.datatypefield.name] = scope.selectedreference.name;
+                            }};
+                            newscope.openchild = function(child) {
+                                return utils.getresponsedata("/api/dynamic/children/" + scope.datatypefield.reference + "/" + child.datatypename + "/" + child.name).then(function(children) {
+                                    child.children = children;
+                                    child.isopen = true;
+                                });
+                            };
+                            newscope.selectchild = function(child) {
+                                newscope.selectedchild = child;
+                            };
+                            newscope.$watch("selectedchild", function(selectedchild) {
+                                okbutton.ishidden = !selectedchild;
+                            });
+                            utils.showdialog(newscope, selecttemplate, [
+                                okbutton,
+                                { label: "TRK_CANCEL" }
+                            ]);
                         });
-                        var dialogisopen = false;
+                    };
+                    scope.$watch("dynamicobject", function(dynamicobject) {
+                        if (!dynamicobject || Object.keys(dynamicobject).length < 1) return;
+                        var datatypefield = scope.datatypefield;
+                        // var entityname = dynamicobject[datatypefield.name];
+                        if (dynamicobject[datatypefield.name]) utils.getresponsedata("/api/dynamic/" + datatypefield.reference + "/" + dynamicobject[datatypefield.name]).then(function(selectedreference) {
+                            if (!selectedreference.label) selectedreference.label = selectedreference[scope.$root.titlefields[datatypefield.reference]];
+                            scope.selectedreference = selectedreference;
+                        //     scope.child = { children: rootelements };
+                        //     var setparentofchildrenrecursively = function(child) {
+                        //         if (child.name && child.name === entityname) {
+                        //             scope.selectedreference = child;
+                        //         }
+                        //         if (child.children) child.children.forEach(function(c) {
+                        //             c.parent = child;
+                        //             if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
+                        //             setparentofchildrenrecursively(c);
+                        //         });
+                        //     };
+                        //     setparentofchildrenrecursively(scope.child);
+                        });
                     });
                 }
             }

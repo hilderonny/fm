@@ -433,6 +433,25 @@ table.largedevice, table.smalldevice {
     display: table;
 }
 
+.avt-reference-select {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    font-size: 16px !important;
+    margin: 0;
+    padding: 2px 2px 1px 2px;
+    text-transform: initial;
+    width: 100%;
+}
+
+.avt-reference-select > span {
+    display: flex;
+    flex: 1;    
+}
+
+.avt-reference-select > span > span {
+    flex: 1;
+    text-align: initial;
+}
+
 .nowrap {
     text-overflow: ellipsis;
     white-space: nowrap;
