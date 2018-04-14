@@ -2,6 +2,7 @@
 var decompress = require("decompress");
 var request = require('request');
 var fs = require('fs');
+var child_process = require('child_process');
 
 /**
  * Triggers the download and install process of updating the portal.
@@ -36,6 +37,8 @@ module.exports.triggerUpdate = function(){
                     localconfig.applyupdates = true;
                     fs.writeFileSync("./config/localconfig.json", JSON.stringify(localconfig, null, 4)); // Relative to main entry point
                     console.log(`Extracted ${extractedfiles.length} files. Ready for restart.`);
+                    if (localconfig.restartcommand) child_process.exec(localconfig.restartcommand);
+
                     resolve(true);
                 });
             }
