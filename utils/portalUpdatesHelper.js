@@ -37,7 +37,7 @@ module.exports.triggerUpdate = function(){
                     fs.writeFileSync("./config/localconfig.json", JSON.stringify(localconfig, null, 4)); // Relative to main entry point
                     console.log(`Extracted ${extractedfiles.length} files. Ready for restart.`);
                     // Prozess beenden und hoffen, dass er automatisch neu gestartet wird
-                    process.exit(0);
+                    if (process.env.NODE_ENV !== 'test') process.exit(0);
                     resolve(true);
                 });
             }
