@@ -17,6 +17,7 @@
     "recalculateformulasonstart": "When true, all formulas of all elements are recalculated on system start. Useful when an update changed formula behaviour",
     "recreatePortalAdmin": "Set to true to automatically create an user 'admin' with password 'admin' when you locked you out from the portal.",
     "redirectHTTPtoHTTPS": "Set to true to let the HTTP listener redirect all requests to the secure HTTPS listener",
+    "restartcommand": "System command to be executed after each update to restart the node service. For example 'cd /var/www/fmdev && /usr/sbin/service fmdev.avorium.de stop && npm install >> /var/log/syslog && /usr/sbin/service fmdev.avorium.de start'",
     "serviceName": "Name of the windows service when installed as such one, e.g. 'Avorium FM'",
     "serviceDescription": "Description of the windows service when installed as such one, e.g. 'Facility management portal'",
     "tokensecret": "Passphrase to use to encrypt the user tokens, e.g. 'mysupersecretpassphrase'",
