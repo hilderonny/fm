@@ -148,6 +148,7 @@ describe('module-config.json', function() {
             'public/js/components/README.md',
             'public/js/include.js',
             'public/js/include.js.map',
+            'README.md',
             'temp/',
             'test/',
             'test.bat',

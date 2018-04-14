@@ -29,3 +29,9 @@ Um den Neustart nach Updates zu erzwingen, muss eine Shell-Befehlskette in der l
 ```
 "restartcommand": "cd /var/www/fmdev && /usr/sbin/service fmdev.avorium.de stop && npm install >> /var/log/syslog && /usr/sbin/service fmdev.avorium.de start"
 ```
+
+Für Windows-Dienste, die mit ```installwindowsservice.js``` eingerictet wurden, kann so ein Befehl so aussehen (auf die vielen Anführungszeichen achten, Quoting innerhalb Quoting):
+
+```
+"restartcommand": "cmd /c \"c: && cd \iprocloud\www & net stop \"\"IPROCLOUD\"\" & npm install & net start \"\"IPROCLOUD\"\"\""
+```
