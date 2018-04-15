@@ -51,8 +51,6 @@ router.post('/', upload.single('file'), function(req, res) {
         }).on('close', function() {
             // Delete uploaded file
             fs.unlinkSync(filePath);
-            // Node-Module installieren
-            child_process.exec('npm install');
             // Erst antworten, wenn alles ausgepackt ist
             res.sendStatus(200);
             // Prozess beenden und hoffen, dass er automatisch neu gestartet wird
