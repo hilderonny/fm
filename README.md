@@ -35,3 +35,20 @@ Für Windows-Dienste, die mit ```installwindowsservice.js``` eingerictet wurden,
 ```
 "restartcommand": "cmd /c \"c: && cd \iprocloud\www & net stop \"\"IPROCLOUD\"\" & npm install & net start \"\"IPROCLOUD\"\"\""
 ```
+
+
+## Installation auf Raspberry PI 1
+
+Die derzeit neueste Version von PostgreSQL, die man auf dem Raspi installieren kann, ist die 9.6 (reicht aber für arrange). Das geht aber nur unter Raspbian ß (Debian stretch). Die installierte Raspbian-Version bekommt man mit ```cat /etc/os-version``` heraus. Zuerst wird Postgresql installiert.
+
+Will man von jessie upgraden, muss man folgende Befehle eintippen (dauert einige Zeit, von https://linuxconfig.org/raspbian-gnu-linux-upgrade-from-jessie-to-raspbian-stretch-9).
+
+```
+apt-get update
+apt-get upgrade
+apt-get dist-upgrade
+```
+
+```
+apt-get install postgresql-10
+```

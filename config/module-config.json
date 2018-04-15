@@ -893,9 +893,9 @@
                 "public/js/Administration/RecordTypeDetailsCardController.js",
                 "public/js/Administration/RecordTypeListCardController.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "de" ],
             "settingsets" : [
-                { "mainCard": "Administration/RecordTypeListCard", "title": "TRK_SETTINGSET_RECORDTYPES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "icons8-categorize", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES"}
+                { "mainCard": "Administration/RecordTypeListCard", "title": "Datentypen", "type": "SETTINGSET_TYPE_CLIENT", "icon": "icons8-categorize", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES"}
             ]
         },
 
