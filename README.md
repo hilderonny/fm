@@ -47,8 +47,12 @@ Will man von jessie upgraden, muss man folgende Befehle eintippen (dauert einige
 apt-get update
 apt-get upgrade
 apt-get dist-upgrade
+sed -i 's/jessie/stretch/g' /etc/apt/sources.list
+apt-get update
 ```
 
+Die PostgreSQL Datenbank wird dann so installiert:
+
 ```
-apt-get install postgresql-10
+apt-get install postgresql-9.6
 ```

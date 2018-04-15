@@ -7,6 +7,11 @@ router.get('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules
     var elements = await Db.getdatatypes(req.user.clientname);
     res.send(elements);
 });
+
+router.get('/forlist', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
+    var elements = await Db.getdatatypes(req.user.clientname);
+    res.send(Object.keys(elements).map(k => elements[k]));
+});
         
 router.get('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     // var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(req.params.id)}';`);

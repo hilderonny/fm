@@ -1,41 +1,5 @@
-<md-card ng-cloak ng-controller="AdministrationRecordTypeDetailsCardController" style="background-image:url('/css/icons/office/icons8-categorize.svg');" class="list-details-details">
-
-    <md-toolbar class="md-toolbar-tools md-accent">
-        <div flex></div>
-        <md-button class="close-card md-icon-button" ng-click="closecard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
-    </md-toolbar>
-
-    <md-card-title flex="none">
-        <md-card-title-text>
-            <span class="md-headline" ng-if="!isnew"><span ng-bind="label"></span></span>
-            <span class="md-headline" ng-if="isnew" translate>TRK_RECORDTYPES_NEW_RECORDTYPE</span>
-        </md-card-title-text>
-    </md-card-title>
-
-    <md-card-content>
-
-        <form name="recordtypeform" ng-if="isnew" layout="column">
-
-            <md-input-container flex>
-                <label translate>TRK_RECORDTYPES_APINAME</label>
-                <input ng-model="recordtype.name" name="name" ng-required="true" ng-keydown="resetnameerror()">
-                <div ng-messages="recordtypeform.name.$error">
-                    <div ng-message="required" translate>TRK_RECORDTYPES_PLEASE_ENTER_APINAME</div>
-                    <div ng-message="nameinvalid" translate>TRK_RECORDTYPES_APINAME_INVALID</div>
-                </div>
-            </md-input-container>
-
-            <md-input-container flex>
-                <label translate>TRK_RECORDTYPES_LABEL</label>
-                <input ng-model="recordtype.label">
-            </md-input-container>
-
-            <md-card-actions layout="row" layout-align="end center">
-                <md-button class="md-raised md-accent" ng-if="canwrite" ng-click="create()" ng-disabled="recordtypeform.$invalid"><span translate>TRK_RECORDTYPES_CREATE</span></md-button>
-            </md-card-actions>
-
-        </form>
-
-    </md-card-content>
-
-</md-card>
+<md-card
+    avt-card
+    avt-details-card
+    avt-close-toolbar-button
+></md-card>

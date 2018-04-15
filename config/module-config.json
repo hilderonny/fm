@@ -131,7 +131,7 @@
                 {
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
-                        { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
+                        { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings", "directurls": [ "settings" ] },
                         { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
                         { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] }
                     ]
@@ -891,7 +891,9 @@
             ],
             "include" : [
                 "public/js/Administration/RecordTypeDetailsCardController.js",
-                "public/js/Administration/RecordTypeListCardController.js"
+                "public/js/Administration/RecordTypeListCardController.js",
+
+                "public/js/components/avt-recordtype-list-card.js"
             ],
             "languages" : [ "de" ],
             "settingsets" : [

@@ -1,26 +1,4 @@
-<md-card ng-cloak ng-controller="AdministrationRecordTypeListCardController" style="background-image:url('/css/icons/office/icons8-categorize.svg');">
-    
-    <!-- TODO: Refactor to component as in https://docs.angularjs.org/guide/component -->
-
-    <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button ng-click="newrecordtype()" aria-label="ADD RECORD TYPE" ng-if="canwriterecordtypes">
-            <md-tooltip md-direction="bottom"><span translate>TRK_RECORDTYPES_CREATE_NEW_RECORDTYPE</span></md-tooltip>
-            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-            <p translate>TRK_RECORDTYPES_RECORDTYPE</p>
-        </md-button>
-        <div flex></div>
-        <md-button class="close-card md-icon-button" ng-click="closecard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
-    </md-toolbar>
-    
-    <md-card-content>
-        <md-list class="lines-beetween-items">
-            <md-list-item ng-repeat="recordtype in recordtypes | orderBy: 'label'" ng-click="selectrecordtype(recordtype)" ng-class="{active:selectedrecordtype === recordtype}" aria-label="{{recordtype.label}}">
-                <md-icon md-svg-src="/css/icons/material/icons8-categorize.svg"></md-icon>
-                <div class="md-list-item-text multiline"><p>{{recordtype.label}}</p><p>{{recordtype.name}}</p></div>
-            </md-list-item>
-        </md-list>
-    </md-card-content>
-
-    <resize-handle></resize-handle>
-    
-</md-card>
+<md-card 
+    avt-card
+    avt-list-card='{"api":"/api/recordtypes/forlist","detailscard":"Administration/RecordTypeDetailsCard"}'
+></md-card>
