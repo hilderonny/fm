@@ -11,6 +11,7 @@
 |plurallabel|Plural label to be used in list headers in record type administration|
 |titlefield|Name of the field which is used as label in lists and so|
 |icon|URL of icon to use for the record type everywhere it is shown|
+|ismanuallyupdated|Automatically set to true when a recordtype definition is manually updated wo that the checks on startup will not overwrite labels and so|
 |fields|List of fields of the datatype|
 |lists|List of possible places where the datatype is shown in hierarchies or lists, e.g. ```fmobjects``` or ```folders```|
 |permissionkey|Permission key which is required to access entities of this datatype|

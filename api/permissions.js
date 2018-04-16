@@ -12,6 +12,16 @@ var uuidv4 = require("uuid").v4;
 var ph = require("../utils/permissionshelper");
 
 /**
+ * Alle Berechtigungsschlüssel des Mandanten zurück geben.
+ * Wird für Definition von Recordtypes verwendet.
+ */
+router.get("/forclient", auth(), async(req, res) => {
+    var clientname = req.user.clientname;
+    var permissionkeys = await configHelper.getAvailablePermissionKeysForClient(clientname);
+    res.send(permissionkeys);
+});
+
+/**
  * Liefert alle Berechtigungen für den angemeldeten Benutzer. Wird für Verweise verwendet, um
  * Verweismenü zu filtern.
  */

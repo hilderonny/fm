@@ -118,8 +118,9 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     // ]);
                 },
                 scope.load = function() {
-                    var recordtypetitlefields = [ ];
-                    scope.recordtype = { titlefield: "name", fields: [ { name: "name", label: "Name" } ] };
+                    var recordtypetitlefields = [];
+                    var recordtypepermissions = [];
+                    scope.recordtype = { titlefield: "name", fields: [ { name: "name", label: "Name" } ], permissionkey: null };
                     var recordtypename = scope.params.entityname;
                     if (!recordtypename) scope.isnew = true; // For add element toolbar button
                     scope.recordtypefields = [
@@ -128,11 +129,22 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                         { name: "plurallabel", label: "Bezeichnung (Mehrzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Mehrzahl zur Anzeige in Überschriften und Listen" },
                         { name: "titlefield", label: "Titelfeld", fieldtype: "picklist", options: recordtypetitlefields, iseditable: true, tooltip: "Feld, welches den Titel des Datensatzes darstellt" },
                         { name: "icon", label: "Symbol", fieldtype: "text", iseditable: true, tooltip: "URL des Symbols des Datentyps" },
-                        { name: "permissionkey", label: "Berechtigungsschlüssel", fieldtype: "picklist", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Schlüssel der Berechtigung, die notwendig ist, um auf Elemente des Datentyps zuzugreifen" },
+                        { name: "permissionkey", label: "Berechtigungsschlüssel", fieldtype: "picklist", options: recordtypepermissions, iseditable: true, isreadonlywhenpredefined: true, tooltip: "Schlüssel der Berechtigung, die notwendig ist, um auf Elemente des Datentyps zuzugreifen" },
                         { name: "canhaverelations", label: "Kann Verknüpfungen haben", fieldtype: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob dem Datentypen Verknüpfungen zugeordnet werden können" },
                         { name: "candefinename", label: "Name kann festgelegt werden", fieldtype: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob beim Erstellen eines Datensatzes der Datensatzname festgelegt werden kann" }
                     ];
-                    (recordtypename ? utils.getresponsedata('/api/recordtypes/' + recordtypename).then(function(recordtype) { scope.recordtype = recordtype; }) : Promise.resolve()).then(function() {
+                    Promise.all([
+                        utils.getresponsedata('/api/permissions/forclient/').then(function(permissions) { 
+                            return permissions.map(function(p) { return "TRK_" + p; });
+                        }).then($translate).then(function(translations) {
+                            recordtypepermissions.length = 0;
+                            recordtypepermissions.push({ name: null, label: "- keine Berechtigung -" });
+                            Object.keys(translations).forEach(function(k) {
+                                recordtypepermissions.push({ name: k.substring(4), label: translations[k] });
+                            });
+                        }),
+                        (recordtypename ? utils.getresponsedata('/api/recordtypes/' + recordtypename).then(function(recordtype) { scope.recordtype = recordtype; }) : Promise.resolve()),
+                    ]).then(function() {
                         recordtypetitlefields.length = 0;
                         scope.recordtype.fields.forEach(function(f) {
                             recordtypetitlefields.push(f);
@@ -143,23 +155,13 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     });
                 };
                 scope.save = function() {
-                    // var datatypename = scope.params.datatypename;
-                    // var entityname = scope.params.entityname;
-                    // var dynamicattributes = scope.dynamicattributes;
-                    // Promise.all([
-                    //     utils.savedynamicobject(scope.datatype, scope.dynamicobject),
-                    //     dynamicattributes && dynamicattributes.length > 0 ? utils.savedynamicattributes(datatypename, entityname, dynamicattributes) : Promise.resolve(),
-                    // ]).then(function() {
-                    //     return scope.load(); // To update changed formula results
-                    // }).then(function() {
-                    //     return $translate(["TRK_DETAILS_CHANGES_SAVED"]).then(function(translations) {
-                    //         $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_CHANGES_SAVED).hideDelay(1000).position("bottom right"));
-                    //     });
-                    // }).then(function() {
-                    //     if (scope.params.onsave) {
-                    //         scope.params.onsave(scope.dynamicobject);
-                    //     }
-                    // });
+                    return $http.put("/api/recordtypes/" + scope.recordtype.name, scope.recordtype).then(function() {
+                        $mdToast.show($mdToast.simple().textContent("Änderungen gespeichert").hideDelay(1000).position("bottom right"));
+                        if (scope.params.onsave) {
+                            scope.params.onsave(scope.recordtype);
+                        }
+                        scope.$root.titlefields[scope.recordtype.name] = scope.recordtype.titlefield;
+                    });
                 };
                 $compile(iElement)(scope);
                 scope.load();

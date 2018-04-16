@@ -60,7 +60,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                         newelement.datatypename = datatype.name;
                         newelement.icon = datatype.icon;
                         newelement.parent = selectedchild;
-                        if (!newelement.label) newelement.label =  newelement[scope.$root.titlefields[newelement.datatypename]];
+                        newelement.label =  newelement[scope.$root.titlefields[newelement.datatypename]] || newelement.name;
                         if (!selectedchild.children) selectedchild.children = [];
                         selectedchild.children.push(newelement);
                         selectedchild.haschildren = true;
@@ -77,7 +77,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                     delete scope.selectedchild;
                 };
                 scope.onelementupdated = function(updatedelement) {
-                    scope.selectedchild.label = updatedelement.label ? updatedelement.label : updatedelement[scope.$root.titlefields[updatedelement.datatypename]];
+                    scope.selectedchild.label = updatedelement[scope.$root.titlefields[scope.selectedchild.datatypename]] || scope.selectedchild.name;
                 };
                 scope.loadelementsfordirectaccess = function(datatypename, entityname) {
                     return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {
@@ -90,7 +90,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                             }
                             if (child.children) child.children.forEach(function(c) {
                                 c.parent = child;
-                                if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
+                                c.label = c[scope.$root.titlefields[c.datatypename]] || c.name;
                                 setparentofchildrenrecursively(c);
                             });
                         };
@@ -104,7 +104,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                             scope.child = { children: rootelements };
                             scope.child.children.forEach(function(c) {
                                 c.parent = scope.child;
-                                if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
+                                c.label = c[scope.$root.titlefields[c.datatypename]] || c.name;
                             });
                         } else { // Refresh after deletion of subelements which result in moving sub-sub-childs to the root
                             rootelements.forEach(function(c) {
@@ -112,7 +112,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                                     // Here we have a moved child
                                     scope.child.children.push(c);
                                     c.parent = scope.child;
-                                    if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
+                                    c.label = c[scope.$root.titlefields[c.datatypename]] || c.name;
                                 }
                             });
                         }
@@ -123,7 +123,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                         child.children = children;
                         child.children.forEach(function(cc) {
                             cc.parent = child;
-                            if (!cc.label) cc.label =  cc[scope.$root.titlefields[cc.datatypename]];
+                            cc.label =  cc[scope.$root.titlefields[cc.datatypename]] || cc.name;
                         });
                         child.isopen = true;
                     });

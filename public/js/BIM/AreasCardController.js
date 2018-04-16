@@ -65,6 +65,7 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
             $scope.fmObjects = [];
             var handleFmObject = function(fmObject, depth) {
                 fmObject.inset = [];
+                fmObject.label = fmObject[$scope.$root.titlefields[fmObject._datatypename]];
                 for (var i = 0; i < depth; i++) fmObject.inset.push(i);
                 $scope.fmObjects.push(fmObject);
                 if (fmObject._children) fmObject._children.forEach(function(child) { handleFmObject(child, depth + 1); });

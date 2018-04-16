@@ -39,16 +39,24 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.module
 });
 
 router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
-    // var client = req.body;
-    // if (!client || Object.keys(client).length < 1) {
-    //     return res.sendStatus(400);
-    // }
-    // // For the case that only the _id had to be updated, return the original client, because the _id cannot be changed
-    // if (client._id && Object.keys(client).length < 2) return res.send(client);
-    // delete client._id; // When client object also contains the _id field
-    // var result = await Db.query(Db.PortalDatabaseName, `UPDATE clients SET label = '${Db.replaceQuotes(client.name)}' WHERE name = '${Db.replaceQuotes(req.params.id)}';`);
-    // if (result.rowCount < 1) return res.sendStatus(404);
-    // return res.send(client);
+    var recordtype = req.body;
+    var clientname = req.user.clientname;
+    var recordtypename = req.params.name;
+    var existing = (await Db.getdatatypes(clientname))[recordtypename];
+    if (!existing) return res.sendStatus(404);
+    var updateset = {};
+    var keys = Object.keys(recordtype);
+    if (keys.indexOf("label") >= 0) updateset.label = recordtype.label;
+    if (keys.indexOf("plurallabel") >= 0) updateset.plurallabel = recordtype.plurallabel;
+    if (keys.indexOf("titlefield") >= 0) updateset.titlefield = recordtype.titlefield;
+    if (keys.indexOf("icon") >= 0) updateset.icon = recordtype.icon;
+    if (!existing.ispredefined && keys.indexOf("permissionkey") >= 0) updateset.permissionkey = recordtype.permissionkey;
+    if (!existing.ispredefined && keys.indexOf("canhaverelations") >= 0) updateset.canhaverelations = recordtype.canhaverelations;
+    if (!existing.ispredefined && keys.indexOf("candefinename") >= 0) updateset.candefinename = recordtype.candefinename;
+    await Db.updaterecordtype(clientname, recordtypename, updateset);
+    // Force update of cache in the next request
+    delete Db.datatypes;
+    res.sendStatus(200);
 });
 
 router.delete('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
