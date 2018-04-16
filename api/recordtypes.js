@@ -3,20 +3,27 @@ var Db = require("../utils/db").Db;
 var router = require('express').Router();
 var co = require('../utils/constants');
 
+// For retrieving datatypes at client startup
 router.get('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     var elements = await Db.getdatatypes(req.user.clientname);
     res.send(elements);
 });
 
+// For Setting list of record types
 router.get('/forlist', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     var elements = await Db.getdatatypes(req.user.clientname);
     res.send(Object.keys(elements).map(k => elements[k]));
 });
         
+// For detail view of record type
 router.get('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
-    // var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(req.params.id)}';`);
-    // if (result.rowCount < 1) return res.sendStatus(404);
-    // res.send(mapFields(result.rows[0]));
+    var clientname = req.user.clientname;
+    var datatypename = Db.replaceQuotes(req.params.name);
+    var rows = (await Db.query(clientname, `SELECT * FROM datatypes WHERE name='${datatypename}';`)).rows;
+    if (rows.length < 1) return res.sendStatus(404);
+    var datatype = rows[0];
+    datatype.fields = (await Db.query(clientname, `SELECT * FROM datatypefields WHERE datatypename='${datatypename}';`)).rows;
+    res.send(datatype);
 });
 
 router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
