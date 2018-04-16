@@ -65,7 +65,7 @@ app.directive('avtListCard', function($compile, $location, utils) {
                     });
                 };
                 scope.selectelement = function(e) {
-                    if (!scope.detailscard) return;
+                    if (!e || !scope.detailscard) return;
                     utils.removeCardsToTheRightOf(element);
                     utils.adddetailscard(scope, e.datatypename, e.name, scope.params.permission).then(function() {
                         scope.selectedelement = e;

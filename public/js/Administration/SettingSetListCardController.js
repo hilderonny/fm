@@ -12,6 +12,7 @@ app.controller('AdministrationSettingSetListCardController', function($scope,$ro
             closeCallback: closeSettingSetCardCallback
         }, selectedSettingSetItem.permission).then(function() {
             $scope.selectedSettingSetItem = selectedSettingSetItem;
+            utils.setLocation('/settings/' + selectedSettingSetItem.title);
         });
     };
 
