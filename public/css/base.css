@@ -20,6 +20,10 @@ resize-handle:hover {
     background-color: rgba(0, 0, 0, 0.12);
 }
 
+img[src=""], img[ng-src=""] {
+    content:url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+}
+
 md-card {
     position:relative;
     width: 360px;
@@ -265,9 +269,10 @@ md-list.hierarchy > md-list-item > div > md-icon {
     padding-right:4px;
 }
 
-md-list.hierarchy > md-list-item > div > img, table.areas > tbody > tr > td:first-of-type > div > img {
+.md-list-item-inner > img, md-list.hierarchy > md-list-item > div > img, table.areas > tbody > tr > td:first-of-type > div > img {
     margin:auto 4px auto 0;
     height:24px;
+    min-width: 24px;
     opacity: 0.6;
 }
 

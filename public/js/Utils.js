@@ -106,6 +106,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                     var dt = datatypes[k];
                     scope.titlefields[k] = dt.titlefield ? dt.titlefield : "name";
                 });
+                scope.titlefields["recordtypes"] = "label"; // Special handling for record type administration
             });
         },
 

@@ -84,7 +84,7 @@ var Db = {
         await Db.query(databaseName, "DROP TABLE IF EXISTS datatypes;");
         await Db.query(databaseName, "DROP TABLE IF EXISTS datatypefields;");
         await Db.query(databaseName, "DROP TABLE IF EXISTS permissions;");
-        await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT, lists TEXT[], ispredefined BOOLEAN, permissionkey TEXT, modulename TEXT, canhaverelations BOOLEAN, candefinename BOOLEAN, titlefield TEXT;");
+        await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT, lists TEXT[], ispredefined BOOLEAN, permissionkey TEXT, modulename TEXT, canhaverelations BOOLEAN, candefinename BOOLEAN, titlefield TEXT, ismanuallyupdated BOOLEAN;");
         await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, isrequired BOOLEAN, reference TEXT, formula TEXT, formulaindex NUMERIC, ispredefined BOOLEAN, isnullable BOOLEAN, ishidden BOOLEAN, PRIMARY KEY (name, datatypename));");
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, key TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, key));");
     },
@@ -99,7 +99,7 @@ var Db = {
         var permissionkeytoinsert = permissionkey ? "'" + Db.replaceQuotes(permissionkey) + "'" : "null";
         var modulenametoinsert = modulename ? "'" + Db.replaceQuotes(modulename) + "'" : "null";
         var titlefieldtoinsert = titlefield ? "'" + Db.replaceQuotes(titlefield) + "'" : "'name'";
-        await Db.query(databasename, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations, candefinename, titlefield) VALUES ('${dtn}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations}, ${!!candefinename}, ${titlefieldtoinsert});`);
+        await Db.query(databasename, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations, candefinename, titlefield, ismanuallyupdated) VALUES ('${dtn}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations}, ${!!candefinename}, ${titlefieldtoinsert}, false);`);
         // Drop an existing table. When a datatype is to be created then it should not exist before
         await Db.query(databasename, `DROP TABLE IF EXISTS ${dtn};`);
         await Db.query(databasename, `CREATE TABLE ${dtn} (name TEXT PRIMARY KEY);`);
@@ -605,6 +605,21 @@ var Db = {
         }
     },
 
+    updaterecordtype: async(clientname, recordtypename, recordtype) => {
+        var updateset = [];
+        var keys = Object.keys(recordtype);
+        if (keys.indexOf("label") >= 0) updateset.push(`label='${Db.replaceQuotes(recordtype.label)}'`);
+        if (keys.indexOf("plurallabel") >= 0) updateset.push(`plurallabel='${Db.replaceQuotes(recordtype.plurallabel)}'`);
+        if (keys.indexOf("titlefield") >= 0) updateset.push(`titlefield='${Db.replaceQuotes(recordtype.titlefield)}'`);
+        if (keys.indexOf("icon") >= 0) updateset.push(`icon='${Db.replaceQuotes(recordtype.icon)}'`);
+        if (keys.indexOf("permissionkey") >= 0) updateset.push(`permissionkey='${Db.replaceQuotes(recordtype.permissionkey)}'`);
+        if (keys.indexOf("canhaverelations") >= 0) updateset.push(`canhaverelations=${!!recordtype.canhaverelations}`);
+        if (keys.indexOf("candefinename") >= 0) updateset.push(`candefinename=${!!recordtype.candefinename}`);
+        if (updateset.length < 1) return;
+        var query = `UPDATE datatypes SET ${updateset.join(",")}, ismanuallyupdated=true WHERE name = '${Db.replaceQuotes(recordtypename)}';`;
+        await Db.query(clientname, query);
+    },
+
     updateRecordTypesForDatabase: async(databasename, recordtypes) => {
         // Add relevant columns to datatypefields table
         // TODO: Remove when all portals have this change through, cannot be run from updateonstart, because this is triggered after db-init
@@ -615,6 +630,7 @@ var Db = {
         await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS canhaverelations BOOLEAN;");
         await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS candefinename BOOLEAN;");
         await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS titlefield TEXT;");
+        await Db.query(databasename, "ALTER TABLE datatypes ADD COLUMN IF NOT EXISTS ismanuallyupdated BOOLEAN;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formula TEXT;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS formulaindex NUMERIC;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS ispredefined BOOLEAN;");
@@ -625,16 +641,21 @@ var Db = {
         // Update existing ones and insert new ones
         for (var i = 0; i < recordtypes.length; i++) {
             var recordtype = recordtypes[i];
-            if (recordtypesfromdatabase.find(rt => rt.name === recordtype.name)) {
+            var recordtypefromdatabase = recordtypesfromdatabase.find(rt => rt.name === recordtype.name);
+            if (recordtypefromdatabase) {
                 // Update existing record type definition
-                var labeltoupdate = recordtype.label ? "'" + Db.replaceQuotes(recordtype.label) + "'" : "null";
-                var plurallabeltoupdate = recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null";
-                var icontoupdate = recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null";
-                var liststoupdate = recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
-                var permissionkeytoupdate = recordtype.permissionkey ? "'" + Db.replaceQuotes(recordtype.permissionkey) + "'" : "null";
-                var modulenametoupdate = recordtype.modulename ? "'" + Db.replaceQuotes(recordtype.modulename) + "'" : "null";
-                var titlefieldtoupdate = recordtype.titlefield ? "'" + Db.replaceQuotes(recordtype.titlefield) + "'" : "null";
-                var query = `UPDATE datatypes SET label = ${labeltoupdate}, plurallabel = ${plurallabeltoupdate}, icon = ${icontoupdate}, lists = ${liststoupdate}, ispredefined = true, permissionkey = ${permissionkeytoupdate}, modulename = ${modulenametoupdate}, canhaverelations = ${!!recordtype.canhaverelations}, candefinename = ${!!recordtype.candefinename}, titlefield = ${titlefieldtoupdate} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
+                var updateset = [];
+                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`label=${recordtype.label ? "'" + Db.replaceQuotes(recordtype.label) + "'" : "null"}`);
+                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`plurallabel=${recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null"}`);
+                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`icon=${recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null"}`);
+                updateset.push(`lists=${recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'"}`);
+                updateset.push(`ispredefined=true`);
+                updateset.push(`permissionkey=${recordtype.permissionkey ? "'" + Db.replaceQuotes(recordtype.permissionkey) + "'" : "null"}`);
+                updateset.push(`modulename=${recordtype.modulename ? "'" + Db.replaceQuotes(recordtype.modulename) + "'" : "null"}`);
+                updateset.push(`canhaverelations=${!!recordtype.canhaverelations}`);
+                updateset.push(`candefinename=${!!recordtype.candefinename}`);
+                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`titlefield=${recordtype.titlefield ? "'" + Db.replaceQuotes(recordtype.titlefield) + "'" : "null"}`);
+                var query = `UPDATE datatypes SET ${updateset.join(",")} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
                 await Db.query(databasename, query);
                 // Force update of cache in the next request
                 delete Db.datatypes;

@@ -192,11 +192,11 @@
                     { "name": "parentchild", "label": "Eltern-Kind-Beziehung", "labelfrom1to2": "Ist Elternteil von", "labelfrom2to1": "Ist Kind von" }
                 ]},
 
-                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "label", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "lists": [ "usergroups" ], "permissionkey": "PERMISSION_ADMINISTRATION_USERGROUP", "canhaverelations" : true },
 
-                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "label", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "password" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
@@ -257,11 +257,11 @@
                     { "name": "parentchild", "label": "Eltern-Kind-Beziehung", "labelfrom1to2": "Ist Elternteil von", "labelfrom2to1": "Ist Kind von" }
                 ]},
 
-                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "label", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "lists": [ "usergroups" ], "permissionkey": "PERMISSION_ADMINISTRATION_USERGROUP", "canhaverelations" : true },
 
-                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "label", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "password" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
@@ -893,7 +893,8 @@
                 "public/js/Administration/RecordTypeDetailsCardController.js",
                 "public/js/Administration/RecordTypeListCardController.js",
 
-                "public/js/components/avt-recordtype-details-card.js"
+                "public/js/components/avt-recordtype-details-card.js",
+                "public/js/components/avt-recordtype-list-card.js"
             ],
             "languages" : [ "de" ],
             "settingsets" : [

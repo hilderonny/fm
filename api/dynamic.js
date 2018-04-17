@@ -52,7 +52,11 @@ async function getrootelements(clientname, forlist, permissions) {
                 GROUP BY e.name
             ) r ON r.name = e.name;
         `)).rows;
-        entities.forEach(e => rootelements.push({ name: e.name, datatypename: rdt.name, label: e.label, icon: rdt.icon, haschildren: e.haschildren }));
+        entities.forEach(e => {
+            e.datatypename = rdt.name;
+            e.icon = rdt.icon;
+            rootelements.push(e);
+        });
     }
     return rootelements;
 }
