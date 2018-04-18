@@ -22,7 +22,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
     ;
     var formtemplate = 
         '<form name="detailsform">' +
-        '    <md-input-container flex ng-repeat="recordtypefield in recordtypefields">' +
+        '    <md-input-container flex ng-repeat="recordtypefield in recordtypefields" ng-if="recordtypefield.fieldtype !== \'picklist\' || recordtypefield.options.length > 0">' +
         '        <label ng-if="[\'text\', \'picklist\'].indexOf(recordtypefield.fieldtype) >= 0">{{recordtypefield.label}}</label>' +
         '        <input ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'text\'" ng-required="recordtypefield.isrequired" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)">' +
         '        <md-checkbox ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'boolean\'" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)"><span ng-bind="recordtypefield.label"></span></md-checkbox>' +
@@ -68,59 +68,41 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                 scope.ondetailscardclosed = scope.params.onclose;
                 scope.onelementcreated = scope.params.oncreate;
                 scope.create = function() {
-                    // var objecttosend = {};
-                    // scope.datatypefields.forEach(function(dtf) {
-                    //     if (dtf.fieldtype === "formula") return;
-                    //     objecttosend[dtf.name] = scope.dynamicobject[dtf.name];
-                    // });
-                    // var createdelementname;
-                    // utils.createdynamicobject(scope.datatype.name, objecttosend).then(function(elementname) {
-                    //     createdelementname = elementname;
-                    //     if (!scope.params.parentdatatypename || !scope.params.parententityname) return;
-                    //     var childrelation = {
-                    //         datatype1name: scope.params.parentdatatypename,
-                    //         datatype2name: scope.datatype.name,
-                    //         name1: scope.params.parententityname,
-                    //         name2: createdelementname,
-                    //         relationtypename: "parentchild"
-                    //     };
-                    //     return utils.createrelation(childrelation);
-                    // }).then(function() {
-                    //     if (scope.params.oncreate) {
-                    //         scope.params.oncreate(scope.datatype, createdelementname);
-                    //     }
-                    //     $translate(["TRK_DETAILS_ELEMENT_CREATED"]).then(function(translations) {
-                    //         $mdToast.show($mdToast.simple().textContent(translations.TRK_DETAILS_ELEMENT_CREATED).hideDelay(1000).position("bottom right"));
-                    //     });
-                    // }, function(statuscode) {
-                    //     if (statuscode === 409 && scope.datatype.candefinename) {
-                    //         $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
-                    //     }
-                    // });
+                    console.log(scope.recordtype);
+                    var recordtypetosend = {
+                        name: scope.recordtype.name,
+                        permissionkey: scope.recordtype.permissionkey,
+                        canhaverelations: !!scope.recordtype.canhaverelations,
+                        candefinename: !!scope.recordtype.candefinename
+                    };
+                    $http.post("/api/recordtypes", recordtypetosend).then(function(response) {
+                        if (response.status === 409) {
+                            $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
+                            return;
+                        }
+                        if (scope.params.oncreate) {
+                            scope.params.oncreate(scope.recordtype.name);
+                        }
+                        $mdToast.show($mdToast.simple().textContent("Datentyp erstellt").hideDelay(1000).position("bottom right"));
+                    });
                 };
                 scope.delete = function() {
-                    // function showsuccess(message) {
-                    //     if (scope.params.ondelete) scope.params.ondelete();
-                    //     utils.removeCardsToTheRightOf(element);
-                    //     utils.removeCard(element);
-                    //     $mdToast.show($mdToast.simple().textContent(message).hideDelay(1000).position('bottom right'));
-                    //     utils.setLocation("/" + scope.datatype.name, false);
-                    // }
-                    // utils.showdialog(scope.$new(true), "<p>Soll das Element wirklich gelöscht werden?</p>", [
-                    //     { label: "Ja", onclick: function() {
-                    //         utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name).then(function() { showsuccess("Das Element wurde gelöscht"); });
-                    //     } },
-                    //     // Erst implementieren, wenn die Berechtigungsthematik mit den Unterelementen gelärt ist
-                    //     // { label: "Ja, mit Kindelementen", onclick: function() {
-                    //     //     utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name, true).then(function() { showsuccess("Das Element und alle Kindelemente wurden gelöscht"); });
-                    //     // } },
-                    //     { label: "Nein" }
-                    // ]);
+                    utils.showdialog(scope.$new(true), "<p>Soll der Datentyp wirklich gelöscht werden?</p>", [
+                        { label: "Ja", onclick: function() {
+                            $http.delete("/api/recordtypes/" + scope.recordtype.name).then(function() { 
+                                if (scope.params.ondelete) scope.params.ondelete();
+                                utils.removeCardsToTheRightOf(element);
+                                utils.removeCard(element);
+                                $mdToast.show($mdToast.simple().textContent("Der Datentyp wurde gelöscht").hideDelay(1000).position('bottom right'));
+                            });
+                        } },
+                        { label: "Nein" }
+                    ]);
                 },
                 scope.load = function() {
                     var recordtypetitlefields = [];
                     var recordtypepermissions = [];
-                    scope.recordtype = { titlefield: "name", fields: [ { name: "name", label: "Name" } ], permissionkey: null };
+                    scope.recordtype = { titlefield: "name", fields: [], permissionkey: null };
                     var recordtypename = scope.params.entityname;
                     if (!recordtypename) scope.isnew = true; // For add element toolbar button
                     scope.recordtypefields = [

@@ -37,18 +37,14 @@ app.directive('avtRecordtypeListCard', function($compile, $location, utils) {
                     delete scope.selectedelement;
                     // utils.setLocation('/' + datatypename);
                 };
-                scope.onelementcreated = function(datatype, createdelementname) {
-                    // utils.loaddynamicobject(datatype.name, createdelementname).then(function(newelement) {
-                    //     newelement.datatypename = datatype.name;
-                    //     newelement.icon = datatype.icon;
-                    //     newelement.label =  newelement[scope.$root.titlefields[newelement.datatypename]];
-                    //     scope.elements.push(newelement);
-                    //     scope.selectelement(newelement);
-                    // });
+                scope.onelementcreated = function(createdelementname) {
+                    scope.loadelements().then(function() {
+                        scope.selectelement(scope.elements.find(function(e) { return e.name === createdelementname; }));
+                    });
                 };
                 scope.onelementdeleted = function() {
-                    // scope.elements.splice(scope.elements.indexOf(scope.selectedelement), 1);
-                    // delete scope.selectedelement;
+                    scope.elements.splice(scope.elements.indexOf(scope.selectedelement), 1);
+                    delete scope.selectedelement;
                 };
                 scope.onelementupdated = function(updatedelement) {
                     scope.selectedelement.label = updatedelement.label ? updatedelement.label : updatedelement.name;
