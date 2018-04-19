@@ -213,29 +213,6 @@ var Db = {
         return Db.datatypes[databaseNameWithoutPrefix];
     },
 
-    // getDynamicObjectForEdit: async(clientname, username, datatypename, name) => {
-    //     var obj = await Db.query(clientname, `SELECT * FROM ${datatypename} WHERE name = '${name}';`);
-    //     if (obj.rowCount < 1) return undefined;
-    //     var datatype = (await Db.query(clientname, `SELECT label FROM datatypes WHERE name = '${datatypename}';`)).rows[0];
-    //     // Permission
-    //     var canwrite = await Db.canWrite(clientname, username, datatypename);
-    //     // Name field will not be returned because it is not changeable
-    //     var fields = (await Db.query(clientname, `SELECT name, label, fieldtype, isrequired, reference FROM datatypefields WHERE datatype = '${datatypename}' AND NOT name = 'name' ORDER BY label;`)).rows;
-    //     var titlefield = fields.find((f) => f.istitle);
-    //     if (!titlefield) titlefield = "name";
-    //     var result = { datatype: datatype, fields: fields, canwrite: canwrite, label:obj.rows[0][titlefield], obj: obj.rows[0] };
-    //     // Check references
-    //     var referencefields = fields.filter((f) => f.fieldtype === fieldtypes.reference && f.reference);
-    //     for (var i = 0; i < referencefields.length; i++) {
-    //         var rf = referencefields[i];
-    //         result.obj[rf.name] = {
-    //             value: result.obj[rf.name],
-    //             options: await Db.getDynamicObjectsForSelect(clientname, rf.reference)
-    //         };
-    //     }
-    //     return result;
-    // },
-
     getDynamicObject: async(clientname, datatypename, filterorname) => {
         var availablefieldnames = (await Db.query(clientname, `SELECT name FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(datatypename)}' AND NOT fieldtype = 'password';`)).rows.map(f => Db.replaceQuotesAndRemoveSemicolon(f.name));
         if (availablefieldnames.length < 1) return undefined; // No fields defined
@@ -260,54 +237,6 @@ var Db = {
         var filterstring = filter ? " AND " + Db.getFilterString(filter) : "";
         return (await Db.query(clientname, `SELECT * FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} WHERE name IN (${namestofind})${filterstring};`)).rows;
     },
-
-    // getDynamicObjectsForList: async(clientname, username, datatypename) => {
-    //     // Get icon
-    //     var datatype = (await Db.query(clientname, `SELECT label, plurallabel, icon FROM datatypes WHERE name = '${datatypename}';`)).rows[0];
-    //     // Get title field
-    //     var titleresult = await Db.query(clientname, `SELECT name FROM datatypefields WHERE datatype = '${datatypename}' AND istitle = true ORDER BY name;`);
-    //     var titlefield = titleresult.rowCount > 0 ? titleresult.rows[0].name : 'name';
-    //     // Get object list
-    //     var objects = (await Db.query(clientname, `SELECT name, ${titlefield} as firstline FROM ${datatypename} ORDER BY ${titlefield};`)).rows;
-    //     // Permission
-    //     var canwrite = await Db.canWrite(clientname, username, datatypename);
-    //     return {
-    //         datatype: datatype,
-    //         objects: objects,
-    //         canwrite: canwrite
-    //     };
-    // },
-
-    // getDynamicObjectsForSelect: async(clientname, datatype) => {
-    //     // Get title field
-    //     var titleresult = await Db.query(clientname, `SELECT name FROM datatypefields WHERE datatype = '${datatype}' AND istitle = true ORDER BY name;`);
-    //     var titlefield = titleresult.rowCount > 0 ? titleresult.rows[0].name : 'name';
-    //     // Get object list
-    //     var objects = (await Db.query(clientname, `SELECT name, ${titlefield} as label FROM ${datatype} ORDER BY ${titlefield};`)).rows;
-    //     var list = objects.map((o) => { return {
-    //         name: o.name,
-    //         label: o.label
-    //     }});
-    //     return list;
-    // },
-
-    // getEmptyDynamicObject: async(clientname, username, datatypename) => {
-    //     var datatype = (await Db.query(clientname, `SELECT label FROM datatypes WHERE name = '${datatypename}';`)).rows[0];
-    //     var fields = (await Db.query(clientname, `SELECT name, label, fieldtype, isrequired, reference FROM datatypefields WHERE datatype = '${datatypename}' ORDER BY label;`)).rows;
-    //     // Permission
-    //     var canwrite = await Db.canWrite(clientname, username, datatypename);
-    //     var result = { datatype: datatype, canwrite: canwrite, fields: fields, obj: {} };
-    //     // Check references
-    //     var referencefields = fields.filter((f) => f.fieldtype === fieldtypes.reference && f.reference);
-    //     for (var i = 0; i < referencefields.length; i++) {
-    //         var rf = referencefields[i];
-    //         result.obj[rf.name] = {
-    //             value: result.obj[rf.name],
-    //             options: await Db.getDynamicObjectsForSelect(clientname, rf.reference)
-    //         };
-    //     }
-    //     return result;
-    // },
 
     getFilterString(filter) {
         var filterlist = [];

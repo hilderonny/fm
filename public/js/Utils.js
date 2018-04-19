@@ -53,7 +53,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 onclose: scope.ondetailscardclosed,
                 oncreate: scope.onelementcreated,
                 ondelete: scope.onelementdeleted,
-                onsave: scope.onelementupdated
+                onsave: scope.onelementupdated,
+                permission: permission
             }, permission);
         },
 

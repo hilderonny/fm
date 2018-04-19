@@ -895,6 +895,7 @@
                 "css/icons/material/icons8-lock.svg",
                 "css/icons/office/icons8-categorize.svg",
                 "partial/Administration/RecordTypeDetailsCard.html",
+                "partial/Administration/RecordTypeFieldDetailsCard.html",
                 "partial/Administration/RecordTypeListCard.html"
             ],
             "include" : [
@@ -903,6 +904,7 @@
 
                 "public/js/components/avt-recordtype-details-card.js",
                 "public/js/components/avt-recordtype-list-card.js",
+                "public/js/components/avt-recordtypefield-details-card.js",
                 "public/js/components/avt-recordtypefields.js"
             ],
             "languages" : [ "de" ],

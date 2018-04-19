@@ -32,10 +32,7 @@ app.directive('avtRecordtypeListCard', function($compile, $location, utils) {
                     delete scope.selectedelement;
                 };
                 scope.ondetailscardclosed = function() {
-                    // if (!scope.selectedelement) return; // when new element card is open
-                    // var datatypename = scope.selectedelement.datatypename;
                     delete scope.selectedelement;
-                    // utils.setLocation('/' + datatypename);
                 };
                 scope.onelementcreated = function(createdelementname) {
                     scope.loadelements().then(function() {

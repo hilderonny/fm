@@ -61,14 +61,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
             element.append(element[0].tabs);
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
-                scope.onbeforecreateelement = function($event) {
-                    utils.removeCard(element);
-                };
-                // Events for sub elements forwarded to hierarchy
-                scope.ondetailscardclosed = scope.params.onclose;
-                scope.onelementcreated = scope.params.oncreate;
                 scope.create = function() {
-                    console.log(scope.recordtype);
                     var recordtypetosend = {
                         name: scope.recordtype.name,
                         permissionkey: scope.recordtype.permissionkey,

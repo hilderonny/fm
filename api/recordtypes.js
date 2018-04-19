@@ -8,6 +8,16 @@ router.get('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules
     var elements = await Db.getdatatypes(req.user.clientname);
     res.send(elements);
 });
+        
+router.get('/field/:recordtypename/:fieldname', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
+    var clientname = req.user.clientname;
+    var datatypename = Db.replaceQuotes(req.params.recordtypename);
+    var fieldname = Db.replaceQuotes(req.params.fieldname);
+    var rows = (await Db.query(clientname, `SELECT * FROM datatypefields WHERE datatypename='${datatypename}' AND name='${fieldname}';`)).rows;
+    if (rows.length < 1) return res.sendStatus(404);
+    var field = rows[0];
+    res.send(rows[0]);
+});
 
 // For Setting list of record types
 router.get('/forlist', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
