@@ -276,14 +276,13 @@ md-list.hierarchy > md-list-item > div > md-icon {
     opacity: 0.6;
 }
 
-.md-list-item-inner > p > span > md-icon {
+.md-list-item-inner > md-icon.hint {
     height: 16px;
     opacity: 0.3;
 }
 
-.md-list-item-inner > p > span > md-icon > svg {
+.md-list-item-inner > md-icon.hint > svg {
     height: 16px;
-    margin-top: 2px;
 }
 
 md-list.hierarchy > md-list-item > div > p {

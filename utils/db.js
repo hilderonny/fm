@@ -85,7 +85,7 @@ var Db = {
         await Db.query(databaseName, "DROP TABLE IF EXISTS datatypefields;");
         await Db.query(databaseName, "DROP TABLE IF EXISTS permissions;");
         await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT, lists TEXT[], ispredefined BOOLEAN, permissionkey TEXT, modulename TEXT, canhaverelations BOOLEAN, candefinename BOOLEAN, titlefield TEXT, ismanuallyupdated BOOLEAN);");
-        await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, isrequired BOOLEAN, reference TEXT, formula TEXT, formulaindex NUMERIC, ispredefined BOOLEAN, isnullable BOOLEAN, ishidden BOOLEAN, PRIMARY KEY (name, datatypename));");
+        await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, isrequired BOOLEAN, reference TEXT, formula TEXT, formulaindex NUMERIC, ispredefined BOOLEAN, isnullable BOOLEAN, ishidden BOOLEAN, ismanuallyupdated BOOLEAN, PRIMARY KEY (name, datatypename));");
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, key TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, key));");
     },
 
@@ -116,7 +116,7 @@ var Db = {
         var referencetoinsert = reference ? "'" + Db.replaceQuotes(reference) + "'" : "null";
         var formulatoinsert = formula ? "'" + Db.replaceQuotes(JSON.stringify(formula)) + "'" : "null";
         var formulaindextoinsert = formulaindex ? parseInt(formulaindex) : 0;
-        await Db.query(databasename, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, isrequired, reference, formula, formulaindex, isnullable, ishidden, ispredefined) VALUES ('${fn}', ${labeltoinsert}, '${dtn}', '${Db.replaceQuotes(fieldtype)}', ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert}, ${!!isnullable}, ${!!ishidden}, ${!!ispredefined});`);
+        await Db.query(databasename, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, isrequired, reference, formula, formulaindex, isnullable, ishidden, ispredefined, ismanuallyupdated) VALUES ('${fn}', ${labeltoinsert}, '${dtn}', '${Db.replaceQuotes(fieldtype)}', ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert}, ${!!isnullable}, ${!!ishidden}, ${!!ispredefined}, false);`);
         var columntype;
         switch(fieldtype) {
             case constants.fieldtypes.boolean: columntype = "BOOLEAN"; break;
@@ -493,14 +493,14 @@ var Db = {
         return Db.query(clientname, statement);
     },
 
-    updateRecordTypeFieldsForDatabase: async(databasename, recordtype) => {
-        if (!recordtype.fields) return;
+    updateRecordTypeFieldsForDatabase: async(databasename, datatype) => {
+        if (!datatype.fields) return;
         // Retrieve existing record type fields from database
-        var recordtypefieldsfromdatabase = (await Db.query(databasename, `SELECT * FROM datatypefields WHERE datatypename='${Db.replaceQuotes(recordtype.name)}';`)).rows;
+        var fieldsfromdatabase = (await Db.query(databasename, `SELECT * FROM datatypefields WHERE datatypename='${Db.replaceQuotes(datatype.name)}';`)).rows;
         // Update existing ones and insert new ones
-        for (var i = 0; i < recordtype.fields.length; i++) {
-            var field = recordtype.fields[i];
-            var existingfield = recordtypefieldsfromdatabase.find(f => f.name === field.name);
+        for (var i = 0; i < datatype.fields.length; i++) {
+            var field = datatype.fields[i];
+            var existingfield = fieldsfromdatabase.find(f => f.name === field.name);
             if (existingfield) {
                 var additional = "";
                 // Update existing, but type cannot be changed (except password fields)
@@ -511,28 +511,35 @@ var Db = {
                     ) {
                         additional = `, fieldtype='${Db.replaceQuotes(field.type)}'`;
                     } else {
-                        throw new Error(`Type of field '${recordtype.name}.${field.name}' cannot be changed from '${existingfield.fieldtype}' to '${field.type}'`);
+                        throw new Error(`Type of field '${datatype.name}.${field.name}' cannot be changed from '${existingfield.fieldtype}' to '${field.type}'`);
                     }
                 }
-                var labeltoupdate = field.label ? "'" + Db.replaceQuotes(field.label) + "'" : "null";
-                var referencetoupdate = field.reference ? "'" + Db.replaceQuotes(field.reference) + "'" : "null";
-                var formulatoupdate = field.formula ? "'" + Db.replaceQuotes(JSON.stringify(field.formula)) + "'" : "null";
-                var formulaindextoupdate = field.formulaindex ? parseInt(field.formulaindex) : 0;
-                var query = `UPDATE datatypefields SET label=${labeltoupdate}, isrequired=${!!field.isrequired}, reference=${referencetoupdate}, formula=${formulatoupdate}, formulaindex=${formulaindextoupdate}, ispredefined = true, isnullable=${!!field.isnullable}, ishidden=${!!field.ishidden} ${additional} WHERE datatypename='${Db.replaceQuotes(recordtype.name)}' AND name='${Db.replaceQuotes(field.name)}';`;
+                var updateset = [];
+                var keys = Object.keys(field);
+                if (!existingfield.ismanuallyupdated && keys.indexOf("label") >= 0) updateset.push(`label='${Db.replaceQuotes(field.label)}'`);
+                if (keys.indexOf("isrequired") >= 0) updateset.push(`isrequired=${!!field.isrequired}`);
+                if (keys.indexOf("reference") >= 0) updateset.push(`reference='${Db.replaceQuotes(field.reference)}'`);
+                if (keys.indexOf("formula") >= 0) updateset.push(`formula='${Db.replaceQuotes(JSON.stringify(field.formula))}'`);
+                if (keys.indexOf("formulaindex") >= 0) updateset.push(`formulaindex=${parseInt(field.formulaindex)}`);
+                updateset.push(`ispredefined=true`);
+                if (keys.indexOf("isnullable") >= 0) updateset.push(`isnullable=${!!field.isnullable}`);
+                if (keys.indexOf("ishidden") >= 0) updateset.push(`ishidden=${!!field.ishidden}`);
+                if (updateset.length < 1) return;
+                var query = `UPDATE datatypefields SET ${updateset.join(",")} ${additional} WHERE datatypename='${Db.replaceQuotes(datatype.name)}' AND name='${Db.replaceQuotes(field.name)}';`;
                 await Db.query(databasename, query);
                 // Force update of cache in the next request
                 delete Db.datatypes;
                 // Remove from existing ones for cleanup
-                recordtypefieldsfromdatabase.splice(recordtypefieldsfromdatabase.indexOf(existingfield), 1);
+                fieldsfromdatabase.splice(fieldsfromdatabase.indexOf(existingfield), 1);
             } else {
                 // Insert new
-                await Db.createDatatypeField(databasename, recordtype.name, field.name, field.label, field.type, !!field.isrequired, false, field.reference, field.formula, field.formulaindex, field.isnullable);
+                await Db.createDatatypeField(databasename, datatype.name, field.name, field.label, field.type, !!field.isrequired, false, field.reference, field.formula, field.formulaindex, field.isnullable, field.ishidden, true);
             }
         }
         // Delete predefined record type fields which do not exist anymore
-        var fieldstodelete = recordtypefieldsfromdatabase.filter(f => f.name !== "name" && f.ispredefined);
+        var fieldstodelete = fieldsfromdatabase.filter(f => f.name !== "name" && f.ispredefined);
         for (var i = 0; i < fieldstodelete.length; i++) {
-            Db.deleteRecordTypeField(databasename, recordtype.name, fieldstodelete[i].name);
+            Db.deleteRecordTypeField(databasename, datatype.name, fieldstodelete[i].name);
         }
     },
 
@@ -548,6 +555,18 @@ var Db = {
         if (keys.indexOf("candefinename") >= 0) updateset.push(`candefinename=${!!recordtype.candefinename}`);
         if (updateset.length < 1) return;
         var query = `UPDATE datatypes SET ${updateset.join(",")}, ismanuallyupdated=true WHERE name = '${Db.replaceQuotes(recordtypename)}';`;
+        await Db.query(clientname, query);
+    },
+
+    updaterecordtypefield: async(clientname, datatypename, fieldname, field) => {
+        var updateset = [];
+        var keys = Object.keys(field);
+        if (keys.indexOf("label") >= 0) updateset.push(`label='${Db.replaceQuotes(field.label)}'`);
+        if (keys.indexOf("formula") >= 0) updateset.push(`formula='${Db.replaceQuotes(field.formula)}'`);
+        if (keys.indexOf("formulaindex") >= 0) updateset.push(`formulaindex=${parseInt(field.formulaindex)}`);
+        if (keys.indexOf("ishidden") >= 0) updateset.push(`ishidden=${!!field.ishidden}`);
+        if (updateset.length < 1) return;
+        var query = `UPDATE datatypefields SET ${updateset.join(",")}, ismanuallyupdated=true WHERE datatypename='${Db.replaceQuotes(datatypename)}' AND name='${Db.replaceQuotes(fieldname)}';`;
         await Db.query(clientname, query);
     },
 
@@ -567,6 +586,7 @@ var Db = {
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS ispredefined BOOLEAN;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS isnullable BOOLEAN;");
         await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS ishidden BOOLEAN;");
+        await Db.query(databasename, "ALTER TABLE datatypefields ADD COLUMN IF NOT EXISTS ismanuallyupdated BOOLEAN;");
         // Retrieve existing record types from database
         var recordtypesfromdatabase = (await Db.query(databasename, `SELECT * FROM datatypes;`)).rows;
         // Update existing ones and insert new ones

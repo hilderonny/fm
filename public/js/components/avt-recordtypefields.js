@@ -8,8 +8,9 @@ app.directive('avtRecordtypefields', function($rootScope, $compile, $mdDialog, $
         '       <md-card-content>' +
         '           <md-list class="lines-beetween-items">' +
         '               <md-list-item ng-repeat="field in recordtype.fields | orderBy:\'label\'" ng-click="tabselectfield(field)" ng-class="selectedrecordtypefield === field ? \'active\' : false">' +
-       '                   <md-icon md-svg-src="/css/icons/fieldtypes/{{field.fieldtype}}.svg"></md-icon>' +
-        '                   <p>{{field.label}}<span ng-if="field.ispredefined"><md-icon md-svg-src="/css/icons/material/icons8-lock.svg"></md-icon></span></p>' +
+        '                  <md-icon md-svg-src="/css/icons/fieldtypes/{{field.fieldtype}}.svg"></md-icon>' +
+        '                  <div class="md-list-item-text multiline"><p>{{field.label}}</p><p>{{field.name}}</p></div>' +
+        '                  <md-icon class="hint" ng-if="field.ispredefined" md-svg-src="/css/icons/material/icons8-lock.svg"></md-icon>' +
         '               </md-list-item>' +
         '           </md-list>' +
         '       </md-card-content>' +

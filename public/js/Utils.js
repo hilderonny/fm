@@ -406,7 +406,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 template: 
                     '<md-list class="context-menu" role="list">' +
                     '   <md-list-item ng-repeat="item in list | orderBy : \'label\'" ng-click="click(item)">' +
-                    '       <md-icon md-svg-src="{{item.icon}}"></md-icon>' +
+                    '       <img ng-src="{{item.icon}}"/>' +
                     '       <p>{{item.label}}</p>' +
                     '   </md-list-item>' +
                     '</md-list>',

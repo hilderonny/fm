@@ -6,7 +6,7 @@ app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToas
     var cardtitletemplate =
         '<md-card-title flex="none">' +
         '   <md-card-title-text>' +
-        '       <span class="md-headline" ng-show="params.entityname" ng-bind="recordtypefield.label"></span>' +
+        '       <span class="md-headline" ng-show="params.entityname" ng-bind="datatypefield.label"></span>' +
         '       <span class="md-headline" ng-if="!params.entityname">Datentypfeld erstellen</span>' +
         '   </md-card-title-text>' +
         '</md-card-title>';
@@ -22,20 +22,20 @@ app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToas
     ;
     var formtemplate = 
         '<form name="detailsform">' +
-        '    <md-input-container flex ng-repeat="fieldattribute in fieldattributes" ng-if="!fieldattribute.showonlywhentypeis || fieldattribute.showonlywhentypeis === recordtypefield.fieldtype">' +
+        '    <md-input-container flex ng-repeat="fieldattribute in fieldattributes" ng-if="!fieldattribute.showonlywhentypeis || fieldattribute.showonlywhentypeis === datatypefield.fieldtype">' +
         '        <label ng-if="[\'text\', \'decimal\', \'picklist\'].indexOf(fieldattribute.type) >= 0">{{fieldattribute.label}}</label>' +
-        '        <input ng-model="recordtypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && (fieldattribute.name !== \'name\' || !params.entityname)" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
-        '        <input ng-model="recordtypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && fieldattribute.name === \'name\' && params.entityname" disabled>' +
-        '        <input ng-model="recordtypefield[fieldattribute.name]" type="number" ng-if="fieldattribute.type === \'decimal\'" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
-        '        <md-checkbox ng-model="recordtypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'boolean\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)"><span ng-bind="fieldattribute.label"></span></md-checkbox>' +
-        '        <md-select ng-model="recordtypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'picklist\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
+        '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && (fieldattribute.name !== \'name\' || !params.entityname)" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
+        '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && fieldattribute.name === \'name\' && params.entityname" disabled>' +
+        '        <input ng-model="datatypefield[fieldattribute.name]" type="number" ng-if="fieldattribute.type === \'decimal\'" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
+        '        <md-checkbox ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'boolean\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)"><span ng-bind="fieldattribute.label"></span></md-checkbox>' +
+        '        <md-select ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'picklist\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
         '            <md-option ng-value="option[\'name\']" ng-repeat="option in fieldattribute.options | orderBy: \'label\'">' +
         '                <span ng-bind="option[\'label\']"></span>' +
         '            </md-option>' +
         '        </md-select>' +
         '    </md-input-container>' +
         '    <md-card-actions layout="row" layout-align="space-between center">' +
-        '        <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite && !recordtypefield.ispredefined" ng-click="delete()">Löschen</md-button>' +
+        '        <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite && !datatypefield.ispredefined" ng-click="delete()">Löschen</md-button>' +
         '        <div flex></div>' +
         '        <md-button class="md-raised md-accent" ng-if="!params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="create()">Erstellen</md-button>' +
         '        <md-button class="md-raised md-accent" ng-if="params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="save()">Speichern</md-button>' +
@@ -96,9 +96,9 @@ app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToas
                     // ]);
                 },
                 scope.load = function() {
-                    var recordtypename = scope.params.datatypename;
+                    var datatypename = scope.params.datatypename;
                     var fieldname = scope.params.entityname;
-                    scope.recordtypefield = { fieldtype: "text", formulaindex: 0 };
+                    scope.datatypefield = { fieldtype: "text", formulaindex: 0 };
                     var fieldtypes = [
                         { name: "boolean", label: "Wahrheitswert" },
                         { name: "datetime", label: "Datum / Uhrzeit" },
@@ -118,27 +118,26 @@ app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToas
                     scope.fieldattributes = [
                         { name: "name", label: "Name", type: "text", iseditable: false, isrequired: true, tooltip: "API Name des Datentypfeldes, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden" },
                         { name: "label", label: "Bezeichnung", type: "text", iseditable: true, tooltip: "Bezeichnung zur Anzeige an der Oberfläche" },
-                        { name: "fieldtype", label: "Feldtyp", type: "picklist", options: fieldtypes, iseditable: true, isreadonlywhenpredefined: true, tooltip: "Typ des Feldinhaltes" },
+                        { name: "fieldtype", label: "Feldtyp", type: "picklist", options: fieldtypes, iseditable: false, tooltip: "Typ des Feldinhaltes" },
                         { name: "formula", label: "Formel", type: "text", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Berechnungsformel", showonlywhentypeis: "formula" },
                         { name: "formulaindex", label: "Formelindex", type: "decimal", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Index des Formelfeldes. Bestimmt die Reihenfolge der Formelberechnung", showonlywhentypeis: "formula" },
-                        { name: "reference", label: "Verwiesener Datentyp", type: "picklist", options: datatypes, iseditable: true, isreadonlywhenpredefined: true, tooltip: "Datentyp, auf den der Verweis zeigt", showonlywhentypeis: "reference" },
+                        { name: "reference", label: "Verwiesener Datentyp", type: "picklist", options: datatypes, iseditable: false, tooltip: "Datentyp, auf den der Verweis zeigt", showonlywhentypeis: "reference" },
                         { name: "ishidden", label: "Versteckt", type: "boolean", iseditable: true, tooltip: "Gibt an, ob das Feld in Detailseiten angezeigt wird" },
-                        { name: "isnullable", label: "Nullwerte zulassen", type: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob NULL als Wert zugelassen ist" },
-                        { name: "isrequired", label: "Erforderlich", type: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob eine Eingabe für das Feld zwingend erforderlich ist" }
+                        { name: "isnullable", label: "Nullwerte zulassen", type: "boolean", iseditable: false, tooltip: "Gibt an, ob NULL als Wert zugelassen ist" },
+                        { name: "isrequired", label: "Erforderlich", type: "boolean", iseditable: false, tooltip: "Gibt an, ob eine Eingabe für das Feld zwingend erforderlich ist" }
                     ];
-                    if (fieldname) utils.getresponsedata('/api/recordtypes/field/' + recordtypename + "/" + fieldname).then(function(field) {
-                        scope.recordtypefield = field;
+                    if (fieldname) utils.getresponsedata('/api/recordtypes/field/' + datatypename + "/" + fieldname).then(function(field) {
+                        scope.datatypefield = field;
                         scope.canwrite = scope.$root.canWrite(scope.params.permission);
                     });
                 };
                 scope.save = function() {
-                    // return $http.put("/api/recordtypes/" + scope.recordtype.name, scope.recordtype).then(function() {
-                    //     $mdToast.show($mdToast.simple().textContent("Änderungen gespeichert").hideDelay(1000).position("bottom right"));
-                    //     if (scope.params.onsave) {
-                    //         scope.params.onsave(scope.recordtype);
-                    //     }
-                    //     scope.$root.titlefields[scope.recordtype.name] = scope.recordtype.titlefield;
-                    // });
+                    return $http.put("/api/recordtypes/field/" + scope.params.datatypename + "/" + scope.params.entityname, scope.datatypefield).then(function() {
+                        $mdToast.show($mdToast.simple().textContent("Änderungen gespeichert").hideDelay(1000).position("bottom right"));
+                        if (scope.params.onsave) {
+                            scope.params.onsave(scope.datatypefield);
+                        }
+                    });
                 };
                 $compile(iElement)(scope);
                 scope.load();

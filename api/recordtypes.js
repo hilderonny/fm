@@ -47,6 +47,27 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.module
     res.sendStatus(200);
 });
 
+router.put('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
+    var clientname = req.user.clientname;
+    var datatypename = Db.replaceQuotes(req.params.datatypename);
+    var fieldname = Db.replaceQuotes(req.params.fieldname);
+    var field = req.body;
+    var existingdatatype = (await Db.getdatatypes(clientname))[datatypename];
+    if (!existingdatatype) return res.sendStatus(404);
+    var existingfield = existingdatatype.fields[fieldname];
+    if (!existingfield) return res.sendStatus(404);
+    var updateset = {};
+    var keys = Object.keys(field);
+    if (keys.indexOf("label") >= 0) updateset.label = field.label;
+    if (!existingfield.ispredefined && keys.indexOf("formula") >= 0) updateset.formula = field.formula;
+    if (!existingfield.ispredefined && keys.indexOf("formulaindex") >= 0) updateset.formulaindex = field.formulaindex;
+    if (keys.indexOf("ishidden") >= 0) updateset.ishidden = field.ishidden;
+    await Db.updaterecordtypefield(clientname, datatypename, fieldname, updateset);
+    // Force update of cache in the next request
+    delete Db.datatypes;
+    res.sendStatus(200);
+});
+
 router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     var recordtype = req.body;
     var clientname = req.user.clientname;

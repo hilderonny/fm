@@ -104,7 +104,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                         { name: "plurallabel", label: "Bezeichnung (Mehrzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Mehrzahl zur Anzeige in Überschriften und Listen" },
                         { name: "titlefield", label: "Titelfeld", fieldtype: "picklist", options: recordtypetitlefields, iseditable: true, tooltip: "Feld, welches den Titel des Datensatzes darstellt" },
                         { name: "icon", label: "Symbol", fieldtype: "text", iseditable: true, tooltip: "URL des Symbols des Datentyps" },
-                        { name: "permissionkey", label: "Berechtigungsschlüssel", fieldtype: "picklist", options: recordtypepermissions, iseditable: true, isreadonlywhenpredefined: true, tooltip: "Schlüssel der Berechtigung, die notwendig ist, um auf Elemente des Datentyps zuzugreifen" },
+                        { name: "permissionkey", label: "Berechtigungsschlüssel", fieldtype: "picklist", options: recordtypepermissions, iseditable: true, tooltip: "Schlüssel der Berechtigung, die notwendig ist, um auf Elemente des Datentyps zuzugreifen" },
                         { name: "canhaverelations", label: "Kann Verknüpfungen haben", fieldtype: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob dem Datentypen Verknüpfungen zugeordnet werden können" },
                         { name: "candefinename", label: "Name kann festgelegt werden", fieldtype: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob beim Erstellen eines Datensatzes der Datensatzname festgelegt werden kann" }
                     ];
@@ -113,7 +113,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                             return permissions.map(function(p) { return "TRK_" + p; });
                         }).then($translate).then(function(translations) {
                             recordtypepermissions.length = 0;
-                            recordtypepermissions.push({ name: null, label: "- keine Berechtigung -" });
+                            recordtypepermissions.push({ name: null, label: "- keine Berechtigung erforderlich -" });
                             Object.keys(translations).forEach(function(k) {
                                 recordtypepermissions.push({ name: k.substring(4), label: translations[k] });
                             });
