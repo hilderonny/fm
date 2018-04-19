@@ -173,8 +173,10 @@ var Db = {
     },
 
     deleteRecordType: async(databasename, recordtypename) => {
-        await Db.query(databasename, `DELETE FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(recordtypename)}';`);
-        await Db.query(databasename, `DELETE FROM datatypes WHERE name = '${Db.replaceQuotes(recordtypename)}';`);
+        var rtn = Db.replaceQuotes(recordtypename);
+        await Db.query(databasename, `DELETE FROM relations WHERE datatype1name = '${rtn}' OR datatype2name = '${rtn}';`);
+        await Db.query(databasename, `DELETE FROM datatypefields WHERE datatypename = '${rtn}';`);
+        await Db.query(databasename, `DELETE FROM datatypes WHERE name = '${rtn}';`);
         await Db.query(databasename, `DROP TABLE IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(recordtypename)};`);
         // Force update of cache in the next request
         delete Db.datatypes;
