@@ -107,6 +107,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                     scope.titlefields[k] = dt.titlefield ? dt.titlefield : "name";
                 });
                 scope.titlefields["recordtypes"] = "label"; // Special handling for record type administration
+                return Promise.resolve();
             });
         },
 
@@ -178,6 +179,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                         }
                     });
                 });
+                return Promise.resolve();
             });
         },
 
@@ -192,6 +194,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 responsedata.forEach(function(permission) {
                     scope.permissions[permission.key] = permission;
                 });
+                return Promise.resolve();
             });
         },
 
@@ -220,7 +223,10 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         // Loads the meta information about all possible relation types. Needed for titles and labels.
         loadrelationtypes: function(scope) {
-            return utils.getresponsedata('/api/dynamic/relationtypes').then(function(relationtypes) { scope.relationtypes = relationtypes; });
+            return utils.getresponsedata('/api/dynamic/relationtypes').then(function(relationtypes) { 
+                scope.relationtypes = relationtypes;
+                return Promise.resolve();
+            });
         },
 
         login: function(scope, username, password) {

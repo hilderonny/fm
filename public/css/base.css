@@ -276,6 +276,16 @@ md-list.hierarchy > md-list-item > div > md-icon {
     opacity: 0.6;
 }
 
+.md-list-item-inner > p > span > md-icon {
+    height: 16px;
+    opacity: 0.3;
+}
+
+.md-list-item-inner > p > span > md-icon > svg {
+    height: 16px;
+    margin-top: 2px;
+}
+
 md-list.hierarchy > md-list-item > div > p {
     flex: 1 1 100%;
     margin:0;

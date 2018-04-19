@@ -884,7 +884,15 @@
             "forclients": true,
             "api" : [ "recordtypes" ],
             "public" : [
+                "css/icons/fieldtypes/boolean.svg",
+                "css/icons/fieldtypes/datetime.svg",
+                "css/icons/fieldtypes/decimal.svg",
+                "css/icons/fieldtypes/formula.svg",
+                "css/icons/fieldtypes/password.svg",
+                "css/icons/fieldtypes/reference.svg",
+                "css/icons/fieldtypes/text.svg",
                 "css/icons/material/icons8-categorize.svg",
+                "css/icons/material/icons8-lock.svg",
                 "css/icons/office/icons8-categorize.svg",
                 "partial/Administration/RecordTypeDetailsCard.html",
                 "partial/Administration/RecordTypeListCard.html"
@@ -894,7 +902,8 @@
                 "public/js/Administration/RecordTypeListCardController.js",
 
                 "public/js/components/avt-recordtype-details-card.js",
-                "public/js/components/avt-recordtype-list-card.js"
+                "public/js/components/avt-recordtype-list-card.js",
+                "public/js/components/avt-recordtypefields.js"
             ],
             "languages" : [ "de" ],
             "settingsets" : [
