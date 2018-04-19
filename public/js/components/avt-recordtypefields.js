@@ -49,6 +49,17 @@ app.directive('avtRecordtypefields', function($rootScope, $compile, $mdDialog, $
                         scope.selectedrecordtypefield = field;
                     });
                 };
+                scope.onelementcreated = function(createdfield) {
+                    scope.recordtype.fields.push(createdfield);
+                    scope.tabselectfield(createdfield);
+                };
+                scope.onelementdeleted = function() {
+                    scope.recordtype.fields.splice(scope.recordtype.fields.indexOf(scope.selectedrecordtypefield), 1);
+                    delete scope.selectedrecordtypefield;
+                };
+                scope.onelementupdated = function(updatedfield) {
+                    scope.selectedrecordtypefield.label = updatedfield.label;
+                };
             };
         }
     }

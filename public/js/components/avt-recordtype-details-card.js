@@ -24,7 +24,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
         '<form name="detailsform">' +
         '    <md-input-container flex ng-repeat="recordtypefield in recordtypeattributes" ng-if="recordtypefield.fieldtype !== \'picklist\' || recordtypefield.options.length > 0">' +
         '        <label ng-if="[\'text\', \'picklist\'].indexOf(recordtypefield.fieldtype) >= 0">{{recordtypefield.label}}</label>' +
-        '        <input ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'text\'" ng-required="recordtypefield.isrequired" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)">' +
+        '        <input ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'text\'" ng-required="recordtypefield.isrequired" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)" ng-pattern="recordtypefield.pattern">' +
         '        <md-checkbox ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'boolean\'" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)"><span ng-bind="recordtypefield.label"></span></md-checkbox>' +
         '        <md-select ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'picklist\'" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)">' +
         '            <md-option ng-value="option[\'name\']" ng-repeat="option in recordtypefield.options | orderBy: \'label\'">' +
@@ -76,6 +76,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                         if (scope.params.oncreate) {
                             scope.params.oncreate(scope.recordtype.name);
                         }
+                        utils.loaddatatypes(scope.$root); // Reload datatype definitions with fields
                         $mdToast.show($mdToast.simple().textContent("Datentyp erstellt").hideDelay(1000).position("bottom right"));
                     });
                 };
@@ -86,6 +87,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                                 if (scope.params.ondelete) scope.params.ondelete();
                                 utils.removeCardsToTheRightOf(element);
                                 utils.removeCard(element);
+                                utils.loaddatatypes(scope.$root); // Reload datatype definitions with fields
                                 $mdToast.show($mdToast.simple().textContent("Der Datentyp wurde gelöscht").hideDelay(1000).position('bottom right'));
                             });
                         } },
@@ -99,7 +101,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     var recordtypename = scope.params.entityname;
                     if (!recordtypename) scope.isnew = true; // For add element toolbar button
                     scope.recordtypeattributes = [
-                        { name: "name", label: "Name", fieldtype: "text", iseditable: false, isrequired: true, isreadonlywhenpredefined: true, tooltip: "API Name des Datentyps, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden" },
+                        { name: "name", label: "Name", fieldtype: "text", iseditable: false, isrequired: true, isreadonlywhenpredefined: true, tooltip: "API Name des Datentyps, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden", pattern:/^[a-z]*$/ },
                         { name: "label", label: "Bezeichnung (Einzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Einzahl zur Anzeige in Überschriften und Listen" },
                         { name: "plurallabel", label: "Bezeichnung (Mehrzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Mehrzahl zur Anzeige in Überschriften und Listen" },
                         { name: "titlefield", label: "Titelfeld", fieldtype: "picklist", options: recordtypetitlefields, iseditable: true, tooltip: "Feld, welches den Titel des Datensatzes darstellt" },
@@ -136,6 +138,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                             scope.params.onsave(scope.recordtype);
                         }
                         scope.$root.titlefields[scope.recordtype.name] = scope.recordtype.titlefield;
+                        utils.loaddatatypes(scope.$root); // Reload datatype definitions with fields
                     });
                 };
                 $compile(iElement)(scope);

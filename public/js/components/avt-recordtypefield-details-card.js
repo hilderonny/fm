@@ -1,5 +1,5 @@
 
-app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToast, $translate, $mdDialog, utils) { 
+app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $http, $mdToast, $translate, $mdDialog, utils) { 
     var toolbartemplate = 
         '<md-toolbar avt-toolbar>' +
         '</md-toolbar>';
@@ -24,7 +24,7 @@ app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToas
         '<form name="detailsform">' +
         '    <md-input-container flex ng-repeat="fieldattribute in fieldattributes" ng-if="!fieldattribute.showonlywhentypeis || fieldattribute.showonlywhentypeis === datatypefield.fieldtype">' +
         '        <label ng-if="[\'text\', \'decimal\', \'picklist\'].indexOf(fieldattribute.type) >= 0">{{fieldattribute.label}}</label>' +
-        '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && (fieldattribute.name !== \'name\' || !params.entityname)" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
+        '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && (fieldattribute.name !== \'name\' || !params.entityname)" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)" ng-pattern="fieldattribute.pattern">' +
         '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && fieldattribute.name === \'name\' && params.entityname" disabled>' +
         '        <input ng-model="datatypefield[fieldattribute.name]" type="number" ng-if="fieldattribute.type === \'decimal\'" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
         '        <md-checkbox ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'boolean\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)"><span ng-bind="fieldattribute.label"></span></md-checkbox>' +
@@ -64,36 +64,31 @@ app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToas
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
                 scope.create = function() {
-                    // console.log(scope.recordtype);
-                    // var recordtypetosend = {
-                    //     name: scope.recordtype.name,
-                    //     permissionkey: scope.recordtype.permissionkey,
-                    //     canhaverelations: !!scope.recordtype.canhaverelations,
-                    //     candefinename: !!scope.recordtype.candefinename
-                    // };
-                    // $http.post("/api/recordtypes", recordtypetosend).then(function(response) {
-                    //     if (response.status === 409) {
-                    //         $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
-                    //         return;
-                    //     }
-                    //     if (scope.params.oncreate) {
-                    //         scope.params.oncreate(scope.recordtype.name);
-                    //     }
-                    //     $mdToast.show($mdToast.simple().textContent("Datentyp erstellt").hideDelay(1000).position("bottom right"));
-                    // });
+                    return $http.post("/api/recordtypes/field/" + scope.params.datatypename, scope.datatypefield).then(function(response) {
+                        if (response.status === 409) {
+                            $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
+                            return;
+                        }
+                        if (scope.params.oncreate) {
+                            scope.params.oncreate(scope.datatypefield);
+                        }
+                        utils.loaddatatypes($rootScope); // Reload datatype definitions with fields
+                        $mdToast.show($mdToast.simple().textContent("Feld erstellt").hideDelay(1000).position("bottom right"));
+                    });
                 };
                 scope.delete = function() {
-                    // utils.showdialog(scope.$new(true), "<p>Soll der Datentyp wirklich gelöscht werden?</p>", [
-                    //     { label: "Ja", onclick: function() {
-                    //         $http.delete("/api/recordtypes/" + scope.recordtype.name).then(function() { 
-                    //             if (scope.params.ondelete) scope.params.ondelete();
-                    //             utils.removeCardsToTheRightOf(element);
-                    //             utils.removeCard(element);
-                    //             $mdToast.show($mdToast.simple().textContent("Der Datentyp wurde gelöscht").hideDelay(1000).position('bottom right'));
-                    //         });
-                    //     } },
-                    //     { label: "Nein" }
-                    // ]);
+                    utils.showdialog(scope.$new(true), "<p>Soll das Feld wirklich gelöscht werden?</p>", [
+                        { label: "Ja", onclick: function() {
+                            $http.delete("/api/recordtypes/field/" + scope.params.datatypename + "/" + scope.params.entityname).then(function() { 
+                                if (scope.params.ondelete) scope.params.ondelete();
+                                utils.removeCardsToTheRightOf(element);
+                                utils.removeCard(element);
+                                utils.loaddatatypes($rootScope); // Reload datatype definitions with fields
+                                $mdToast.show($mdToast.simple().textContent("Das Feld wurde gelöscht").hideDelay(1000).position('bottom right'));
+                            });
+                        } },
+                        { label: "Nein" }
+                    ]);
                 },
                 scope.load = function() {
                     var datatypename = scope.params.datatypename;
@@ -116,7 +111,7 @@ app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToas
                         };
                     });
                     scope.fieldattributes = [
-                        { name: "name", label: "Name", type: "text", iseditable: false, isrequired: true, tooltip: "API Name des Datentypfeldes, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden" },
+                        { name: "name", label: "Name", type: "text", iseditable: false, isrequired: true, tooltip: "API Name des Datentypfeldes, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden", pattern:/^[a-z]*$/ },
                         { name: "label", label: "Bezeichnung", type: "text", iseditable: true, tooltip: "Bezeichnung zur Anzeige an der Oberfläche" },
                         { name: "fieldtype", label: "Feldtyp", type: "picklist", options: fieldtypes, iseditable: false, tooltip: "Typ des Feldinhaltes" },
                         { name: "formula", label: "Formel", type: "text", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Berechnungsformel", showonlywhentypeis: "formula" },
@@ -137,6 +132,7 @@ app.directive('avtRecordtypefieldDetailsCard', function($compile, $http, $mdToas
                         if (scope.params.onsave) {
                             scope.params.onsave(scope.datatypefield);
                         }
+                        utils.loaddatatypes($rootScope); // Reload datatype definitions with fields
                     });
                 };
                 $compile(iElement)(scope);

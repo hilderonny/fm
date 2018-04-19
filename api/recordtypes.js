@@ -36,14 +36,31 @@ router.get('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.mo
     res.send(datatype);
 });
 
+// TODO: Namen auf nicht erlaubte Namen prüfen (Sub-URLs in diversen APIs, vordefinierte Tabellennamen, wie users, clients, datatypes, datatypefields, etc.)
 router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     var recordtype = req.body;
-    if (!recordtype || Object.keys(recordtype).length < 1 || !recordtype.name) {
+    if (!recordtype || Object.keys(recordtype).length < 1 || !recordtype.name || !recordtype.name.match(/^[a-z]*$/)) {
         return res.sendStatus(400);
     }
     var clientname = req.user.clientname;
     if ((await Db.getdatatypes(clientname))[recordtype.name]) return res.sendStatus(409);
     await Db.createDatatype(clientname, recordtype.name, recordtype.label, recordtype.plurallabel, "name", recordtype.icon, [], recordtype.permissionkey, undefined, recordtype.canhaverelations, recordtype.candefinename);
+    res.sendStatus(200);
+});
+
+// TODO: Namen auf nicht erlaubte Namen prüfen (Sub-URLs in diversen APIs, vordefinierte Tabellennamen, wie users, clients, datatypes, datatypefields, etc.)
+// TODO: Ebenso Formeln auf Gültigkeit prüfen und Verweise auch
+router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
+    var field = req.body;
+    var clientname = req.user.clientname;
+    var datatypename = Db.replaceQuotes(req.params.datatypename);
+    if (!field || Object.keys(field).length < 1 || !field.name || !field.name.match(/^[a-z]*$/)) {
+        return res.sendStatus(400);
+    }
+    var existingdatatype = (await Db.getdatatypes(clientname))[datatypename];
+    if (!existingdatatype) return res.sendStatus(404);
+    if (existingdatatype.fields[field.namename]) return res.sendStatus(409);
+    await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula, field.formulaindex, field.isnullable, field.ishidden, false);
     res.sendStatus(200);
 });
 
@@ -89,11 +106,25 @@ router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.mo
     res.sendStatus(200);
 });
 
+router.delete('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
+    var clientname = req.user.clientname;
+    var datatypename = Db.replaceQuotes(req.params.datatypename);
+    var fieldname = Db.replaceQuotes(req.params.fieldname);
+    var existingdatatype = (await Db.getdatatypes(clientname))[datatypename];
+    if (!existingdatatype) return res.sendStatus(404);
+    var existingfield = existingdatatype.fields[fieldname];
+    if (!existingfield) return res.sendStatus(404);
+    if (existingfield.ispredefined) return res.sendStatus(400);
+    await Db.deleteRecordTypeField(clientname, datatypename, fieldname);
+    res.sendStatus(204);
+});
+
 router.delete('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     var clientname = req.user.clientname;
     var recordtypename = req.params.name;
     var existing = (await Db.getdatatypes(clientname))[recordtypename];
     if (!existing) return res.sendStatus(404);
+    if (existing.ispredefined) return res.sendStatus(400);
     await Db.deleteRecordType(clientname, recordtypename);
     res.sendStatus(204);
 });
