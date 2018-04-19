@@ -84,7 +84,7 @@ var Db = {
         await Db.query(databaseName, "DROP TABLE IF EXISTS datatypes;");
         await Db.query(databaseName, "DROP TABLE IF EXISTS datatypefields;");
         await Db.query(databaseName, "DROP TABLE IF EXISTS permissions;");
-        await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT, lists TEXT[], ispredefined BOOLEAN, permissionkey TEXT, modulename TEXT, canhaverelations BOOLEAN, candefinename BOOLEAN, titlefield TEXT, ismanuallyupdated BOOLEAN;");
+        await Db.query(databaseName, "CREATE TABLE datatypes (name TEXT NOT NULL PRIMARY KEY, label TEXT, plurallabel TEXT, icon TEXT, lists TEXT[], ispredefined BOOLEAN, permissionkey TEXT, modulename TEXT, canhaverelations BOOLEAN, candefinename BOOLEAN, titlefield TEXT, ismanuallyupdated BOOLEAN);");
         await Db.query(databaseName, "CREATE TABLE datatypefields (name TEXT, label TEXT, datatypename TEXT, fieldtype TEXT, isrequired BOOLEAN, reference TEXT, formula TEXT, formulaindex NUMERIC, ispredefined BOOLEAN, isnullable BOOLEAN, ishidden BOOLEAN, PRIMARY KEY (name, datatypename));");
         await Db.query(databaseName, "CREATE TABLE permissions (usergroupname TEXT NOT NULL, key TEXT NOT NULL, canwrite BOOLEAN, PRIMARY KEY (usergroupname, key));");
     },
