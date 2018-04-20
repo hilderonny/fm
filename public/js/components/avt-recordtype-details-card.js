@@ -64,6 +64,9 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                 scope.create = function() {
                     var recordtypetosend = {
                         name: scope.recordtype.name,
+                        label: scope.recordtype.label,
+                        plurallabel: scope.recordtype.plurallabel,
+                        icon: scope.recordtype.icon,
                         permissionkey: scope.recordtype.permissionkey,
                         canhaverelations: !!scope.recordtype.canhaverelations,
                         candefinename: !!scope.recordtype.candefinename

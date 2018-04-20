@@ -190,7 +190,7 @@ var Db = {
     },
 
     getdatatypes: async(databaseNameWithoutPrefix) => {
-        if (!Db.datatypes) {
+        if (!Db.datatypes || !Db.datatypes[databaseNameWithoutPrefix]) {
             Db.datatypes = {};
             var clientnames = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM clients;")).rows.map(c => c.name);
             clientnames.push(Db.PortalDatabaseName);
