@@ -905,7 +905,8 @@
                 "public/js/components/avt-recordtype-details-card.js",
                 "public/js/components/avt-recordtype-list-card.js",
                 "public/js/components/avt-recordtypefield-details-card.js",
-                "public/js/components/avt-recordtypefields.js"
+                "public/js/components/avt-recordtypefields.js",
+                "public/js/components/avt-recordtypevalues.js"
             ],
             "languages" : [ "de" ],
             "settingsets" : [

@@ -67,7 +67,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         createdynamicobject: function(datatypename, entity) {
-            Object.keys($rootScope.datatypes[datatypename].fields).map(function(fn) { return datatype.fields[fn]; }).forEach(function(f) { 
+            var datatype = $rootScope.datatypes[datatypename];
+            Object.keys(datatype.fields).map(function(fn) { return datatype.fields[fn]; }).forEach(function(f) { 
                 if (entity[f.name] && f.fieldtype === "datetime") entity[f.name] = Date.parse(entity[f.name]);
             });
             return $http.post("/api/dynamic/" + datatypename, entity).then(function(response) {
