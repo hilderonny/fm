@@ -305,6 +305,11 @@ var Db = {
         })).filter(a=>a); // See https://stackoverflow.com/a/10865042
     },
 
+    gettextupdateset: (name, value) => {
+        if (value === undefined || value === null) return `${name}=null`;
+        return `${name}='${Db.replaceQuotes(value)}'`;
+    },
+
     init: async() => {
         if (Db.isInitialized) return;
         console.log(`Initializing database with prefix "${dbprefix}".`);
@@ -546,11 +551,12 @@ var Db = {
     updaterecordtype: async(clientname, recordtypename, recordtype) => {
         var updateset = [];
         var keys = Object.keys(recordtype);
-        if (keys.indexOf("label") >= 0) updateset.push(`label='${Db.replaceQuotes(recordtype.label)}'`);
-        if (keys.indexOf("plurallabel") >= 0) updateset.push(`plurallabel='${Db.replaceQuotes(recordtype.plurallabel)}'`);
-        if (keys.indexOf("titlefield") >= 0) updateset.push(`titlefield='${Db.replaceQuotes(recordtype.titlefield)}'`);
-        if (keys.indexOf("icon") >= 0) updateset.push(`icon='${Db.replaceQuotes(recordtype.icon)}'`);
-        if (keys.indexOf("permissionkey") >= 0) updateset.push(`permissionkey='${Db.replaceQuotes(recordtype.permissionkey)}'`);
+        if (keys.indexOf("label") >= 0) updateset.push(Db.gettextupdateset("label", recordtype.label));
+        if (keys.indexOf("plurallabel") >= 0) updateset.push(Db.gettextupdateset("plurallabel", recordtype.plurallabel));
+        if (keys.indexOf("titlefield") >= 0) updateset.push(Db.gettextupdateset("titlefield", recordtype.titlefield));
+        if (keys.indexOf("lists") >= 0) updateset.push(`lists='{${recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",")}}'`);
+        if (keys.indexOf("icon") >= 0) updateset.push(Db.gettextupdateset("icon", recordtype.icon));
+        if (keys.indexOf("permissionkey") >= 0) updateset.push(Db.gettextupdateset("permissionkey", recordtype.permissionkey));
         if (keys.indexOf("canhaverelations") >= 0) updateset.push(`canhaverelations=${!!recordtype.canhaverelations}`);
         if (keys.indexOf("candefinename") >= 0) updateset.push(`candefinename=${!!recordtype.candefinename}`);
         if (updateset.length < 1) return;

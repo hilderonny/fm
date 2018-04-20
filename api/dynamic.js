@@ -36,12 +36,12 @@ async function getchildren(clientname, recordtypename, entityname, permissions, 
 async function getrootelements(clientname, forlist, permissions) {
     var clientmodulenames = (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}';`)).rows.map(r => `'${Db.replaceQuotes(r.modulename)}'`);
     if (clientname !== Db.PortalDatabaseName && clientmodulenames.length < 1) return [];
-    var additionalfilter = clientname !== Db.PortalDatabaseName ? ` AND modulename IN (${clientmodulenames.join(",")})` : "";
+    var additionalfilter = clientname !== Db.PortalDatabaseName ? ` AND (modulename IS NULL OR modulename IN (${clientmodulenames.join(",")}))` : ""; // modulename == null kommt bei benutzerdefinierten Datentypen vor.
     var relevantdatatypes = (await Db.query(clientname, `SELECT * FROM datatypes WHERE '${Db.replaceQuotes(forlist)}' = ANY (lists)${additionalfilter};`)).rows;
     var rootelements = [];
     for (var i = 0; i < relevantdatatypes.length; i++) { // Must be loop because it is not said, that all datatypes have all required columns so UNION will not work
         var rdt = relevantdatatypes[i];
-        if (!permissions.find(p => p.key === rdt.permissionkey && p.canRead)) continue; // No permission to access specific datatypes
+        if (rdt.permissionkey && !permissions.find(p => p.key === rdt.permissionkey && p.canRead)) continue; // No permission to access specific datatypes
         var rdtn = Db.replaceQuotesAndRemoveSemicolon(rdt.name);
         var entities = (await Db.query(clientname, `
             SELECT e.*, CASE WHEN r.childcount > 0 THEN true ELSE false END haschildren FROM ${rdtn} e JOIN (

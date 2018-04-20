@@ -23,10 +23,16 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
     var formtemplate = 
         '<form name="detailsform">' +
         '    <md-input-container flex ng-repeat="recordtypefield in recordtypeattributes" ng-if="recordtypefield.fieldtype !== \'picklist\' || recordtypefield.options.length > 0">' +
-        '        <label ng-if="[\'text\', \'picklist\'].indexOf(recordtypefield.fieldtype) >= 0">{{recordtypefield.label}}</label>' +
+        '        <md-tooltip md-delay="500" md-direction="top">{{recordtypefield.tooltip}}</md-tooltip>' +
+        '        <label ng-if="[\'text\', \'picklist\', \'multipicklist\'].indexOf(recordtypefield.fieldtype) >= 0">{{recordtypefield.label}}</label>' +
         '        <input ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'text\'" ng-required="recordtypefield.isrequired" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)" ng-pattern="recordtypefield.pattern">' +
         '        <md-checkbox ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'boolean\'" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)"><span ng-bind="recordtypefield.label"></span></md-checkbox>' +
         '        <md-select ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'picklist\'" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)">' +
+        '            <md-option ng-value="option[\'name\']" ng-repeat="option in recordtypefield.options | orderBy: \'label\'">' +
+        '                <span ng-bind="option[\'label\']"></span>' +
+        '            </md-option>' +
+        '        </md-select>' +
+        '        <md-select ng-model="recordtype[recordtypefield.name]" ng-if="recordtypefield.fieldtype === \'multipicklist\'" multiple="true" ng-disabled="params.entityname && (!recordtypefield.iseditable || recordtypefield.isreadonlywhenpredefined)">' +
         '            <md-option ng-value="option[\'name\']" ng-repeat="option in recordtypefield.options | orderBy: \'label\'">' +
         '                <span ng-bind="option[\'label\']"></span>' +
         '            </md-option>' +
@@ -66,6 +72,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                         name: scope.recordtype.name,
                         label: scope.recordtype.label,
                         plurallabel: scope.recordtype.plurallabel,
+                        lists: scope.recordtype.lists,
                         icon: scope.recordtype.icon,
                         permissionkey: scope.recordtype.permissionkey,
                         canhaverelations: !!scope.recordtype.canhaverelations,
@@ -100,30 +107,33 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                 scope.load = function() {
                     var recordtypetitlefields = [];
                     var recordtypepermissions = [];
-                    scope.recordtype = { titlefield: "name", fields: [], permissionkey: null };
+                    var recordtypelists = [];
+                    scope.recordtype = { titlefield: "name", label: "", plurallabel: "", lists: [], fields: [], icon: "", permissionkey: "", canhaverelations: true, candefinename: false };
                     var recordtypename = scope.params.entityname;
                     if (!recordtypename) scope.isnew = true; // For add element toolbar button
                     scope.recordtypeattributes = [
                         { name: "name", label: "Name", fieldtype: "text", iseditable: false, isrequired: true, isreadonlywhenpredefined: true, tooltip: "API Name des Datentyps, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden", pattern:/^[a-z]*$/ },
                         { name: "label", label: "Bezeichnung (Einzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Einzahl zur Anzeige in Überschriften und Listen" },
                         { name: "plurallabel", label: "Bezeichnung (Mehrzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Mehrzahl zur Anzeige in Überschriften und Listen" },
+                        { name: "lists", label: "Enthaltende Listen", fieldtype: "multipicklist", options: recordtypelists, iseditable: true, tooltip: "Listen und Hierarchien, in denen der Datentyp aufgeführt wird" },
                         { name: "titlefield", label: "Titelfeld", fieldtype: "picklist", options: recordtypetitlefields, iseditable: true, tooltip: "Feld, welches den Titel des Datensatzes darstellt" },
                         { name: "icon", label: "Symbol", fieldtype: "text", iseditable: true, tooltip: "URL des Symbols des Datentyps" },
-                        { name: "permissionkey", label: "Berechtigungsschlüssel", fieldtype: "picklist", options: recordtypepermissions, iseditable: true, tooltip: "Schlüssel der Berechtigung, die notwendig ist, um auf Elemente des Datentyps zuzugreifen" },
+                        // { name: "permissionkey", label: "Berechtigungsschlüssel", fieldtype: "picklist", options: recordtypepermissions, iseditable: true, tooltip: "Schlüssel der Berechtigung, die notwendig ist, um auf Elemente des Datentyps zuzugreifen" },
                         { name: "canhaverelations", label: "Kann Verknüpfungen haben", fieldtype: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob dem Datentypen Verknüpfungen zugeordnet werden können" },
-                        { name: "candefinename", label: "Name kann festgelegt werden", fieldtype: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob beim Erstellen eines Datensatzes der Datensatzname festgelegt werden kann" }
+                        // { name: "candefinename", label: "Name kann festgelegt werden", fieldtype: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob beim Erstellen eines Datensatzes der Datensatzname festgelegt werden kann" }
                     ];
                     Promise.all([
                         utils.getresponsedata('/api/permissions/forclient/').then(function(permissions) { 
                             return permissions.map(function(p) { return "TRK_" + p; });
                         }).then($translate).then(function(translations) {
                             recordtypepermissions.length = 0;
-                            recordtypepermissions.push({ name: null, label: "- keine Berechtigung erforderlich -" });
+                            recordtypepermissions.push({ name: "", label: "- keine Berechtigung erforderlich -" });
                             Object.keys(translations).forEach(function(k) {
                                 recordtypepermissions.push({ name: k.substring(4), label: translations[k] });
                             });
                         }),
                         (recordtypename ? utils.getresponsedata('/api/recordtypes/' + recordtypename).then(function(recordtype) { scope.recordtype = recordtype; }) : Promise.resolve()),
+                        utils.getresponsedata('/api/recordtypes/lists').then(function(lists) { lists.forEach(function(l) { recordtypelists.push({ name: l, label: l}); }); })
                     ]).then(function() {
                         recordtypetitlefields.length = 0;
                         scope.recordtype.fields.forEach(function(f) {

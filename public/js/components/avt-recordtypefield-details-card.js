@@ -23,6 +23,7 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
     var formtemplate = 
         '<form name="detailsform">' +
         '    <md-input-container flex ng-repeat="fieldattribute in fieldattributes" ng-if="!fieldattribute.showonlywhentypeis || fieldattribute.showonlywhentypeis === datatypefield.fieldtype">' +
+        '        <md-tooltip md-delay="500" md-direction="top">{{fieldattribute.tooltip}}</md-tooltip>' +
         '        <label ng-if="[\'text\', \'decimal\', \'picklist\'].indexOf(fieldattribute.type) >= 0">{{fieldattribute.label}}</label>' +
         '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && (fieldattribute.name !== \'name\' || !params.entityname)" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)" ng-pattern="fieldattribute.pattern">' +
         '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && fieldattribute.name === \'name\' && params.entityname" disabled>' +
