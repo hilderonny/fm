@@ -67,6 +67,9 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         },
 
         createdynamicobject: function(datatypename, entity) {
+            Object.keys($rootScope.datatypes[datatypename].fields).map(function(fn) { return datatype.fields[fn]; }).forEach(function(f) { 
+                if (entity[f.name] && f.fieldtype === "datetime") entity[f.name] = Date.parse(entity[f.name]);
+            });
             return $http.post("/api/dynamic/" + datatypename, entity).then(function(response) {
                 if (response.status !== 200) return Promise.reject(response.status);
                 return response.data; // name of created element
@@ -315,6 +318,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             delete entitytosend.name;
             Object.keys(datatype.fields).map(function(fn) { return datatype.fields[fn]; }).forEach(function(f) { 
                 if (f.fieldtype === "formula") delete entitytosend[f.name];
+                if (entitytosend[f.name] && f.fieldtype === "datetime") entitytosend[f.name] = Date.parse(entitytosend[f.name]);
             });
             return $http.put("/api/dynamic/" + datatype.name + "/" + entity.name, entitytosend);
         },

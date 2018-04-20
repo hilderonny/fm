@@ -44,11 +44,15 @@ var ch = {
         // Fetch parent structure
         var parents = (await Db.getparentrelationstructure(clientname, datatypename, entityname)).sort((a, b) => a.depth - b.depth);
         // Calculate the entity itself
-        await ch.calculateformula(clientname, datatypename, entityname);
+        try {
+            await ch.calculateformula(clientname, datatypename, entityname);
+        } catch(error) { } // Ignore calculation errors for invalid formulas
         // Calculate parents, order is important!
         for (var i = 0; i < parents.length; i++) {
             var parent = parents[i];
-            await ch.calculateformula(clientname, parent.datatype1name, parent.name1);
+            try {
+                await ch.calculateformula(clientname, parent.datatype1name, parent.name1);
+            } catch(error) { } // Ignore calculation errors for invalid formulas
         }
     },
     // Calculates all formulas for a specific entity
@@ -58,6 +62,7 @@ var ch = {
         for (var i = 0; i < datatypefields.length; i++) {
             var dtf = datatypefields[i];
             var formula = JSON.parse(dtf.formula);
+            if (!formula) throw new Error(`Invalid formula ${dtf.formula}`);
             var keys = Object.keys(formula);
             if (keys.length !== 1) throw new Error(`Invalid formula ${dtf.formula}`);
             var key = keys[0];
