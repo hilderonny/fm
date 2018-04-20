@@ -40,7 +40,8 @@
     "uglify-js": "^2.8.29",
     "unzip2": "^0.2.5",
     "unzipper": "^0.8.12",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "webdav-server": "^2.3.16"
   },
   "devDependencies": {
     "cross-env": "^3.1.3",
