@@ -1,5 +1,5 @@
 
-app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, $mdDialog, utils) { 
+app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, $mdDialog, $filter, utils) { 
     var toolbartemplate = 
         '<md-toolbar avt-toolbar>' +
         '</md-toolbar>';
@@ -29,7 +29,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && datatypefield.name === \'name\' && params.entityname" disabled>' +
         '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'password\'" type="password" ng-required="datatypefield.isrequired">' +
         '        <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'" ng-required="datatypefield.isrequired">' +
-        '        <input ng-value="dynamicobject[datatypefield.name] || 0" ng-if="datatypefield.fieldtype === \'formula\'" type="number" disabled>' +
+        '        <input ng-value="trimnumber(dynamicobject[datatypefield.name] || 0)" ng-if="datatypefield.fieldtype === \'formula\'" disabled>' +
         '        <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
         '        <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=preview&token={{token}}" ng-click="openpreviewimage(datatypefield.name)"/>' + // Special handle previewimagedocumentname
         '        <md-button ng-required="datatypefield.isrequired" avt-reference-select></md-button>' +
@@ -183,6 +183,9 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                         }
                     });
                 };
+                scope.trimnumber = function(number) {
+                    return $filter('number')(number, 2);
+                }
                 $compile(iElement)(scope);
                 scope.load();
             };

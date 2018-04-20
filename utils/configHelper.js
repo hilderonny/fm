@@ -70,7 +70,7 @@ var ch = {
             return modules;
         }
         var modulekeys = (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname = '${Db.replaceQuotes(clientname)}';`)).rows;
-        var filteredmodules = modulekeys.map((k) => moduleConfig.modules[k.modulename]);
+        var filteredmodules = modulekeys.map((k) => moduleConfig.modules[k.modulename]).filter(m => m); // The filtering is needed because it can be that an update removed a module wchich is still referenced in the database
         return filteredmodules;
     }
 
