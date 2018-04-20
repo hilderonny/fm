@@ -52,10 +52,12 @@ app.directive('avtRecordtypefields', function($rootScope, $compile, $mdDialog, $
                 scope.onelementcreated = function(createdfield) {
                     scope.recordtype.fields.push(createdfield);
                     scope.tabselectfield(createdfield);
+                    if (scope.recordtypetitlefields) scope.recordtypetitlefields.push(createdfield);
                 };
                 scope.onelementdeleted = function() {
                     scope.recordtype.fields.splice(scope.recordtype.fields.indexOf(scope.selectedrecordtypefield), 1);
                     delete scope.selectedrecordtypefield;
+                    if (scope.recordtypetitlefields) scope.recordtypetitlefields.splice(scope.recordtypetitlefields.indexOf(scope.selectedrecordtypefield), 1);
                 };
                 scope.onelementupdated = function(updatedfield) {
                     scope.selectedrecordtypefield.label = updatedfield.label;

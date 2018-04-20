@@ -105,7 +105,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     ]);
                 },
                 scope.load = function() {
-                    var recordtypetitlefields = [];
+                    scope.recordtypetitlefields = [];
                     var recordtypepermissions = [];
                     var recordtypelists = [];
                     scope.recordtype = { titlefield: "name", label: "", plurallabel: "", lists: [], fields: [], icon: "", permissionkey: "", canhaverelations: true, candefinename: false };
@@ -116,7 +116,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                         { name: "label", label: "Bezeichnung (Einzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Einzahl zur Anzeige in Überschriften und Listen" },
                         { name: "plurallabel", label: "Bezeichnung (Mehrzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Mehrzahl zur Anzeige in Überschriften und Listen" },
                         { name: "lists", label: "Enthaltende Listen", fieldtype: "multipicklist", options: recordtypelists, iseditable: true, tooltip: "Listen und Hierarchien, in denen der Datentyp aufgeführt wird" },
-                        { name: "titlefield", label: "Titelfeld", fieldtype: "picklist", options: recordtypetitlefields, iseditable: true, tooltip: "Feld, welches den Titel des Datensatzes darstellt" },
+                        { name: "titlefield", label: "Titelfeld", fieldtype: "picklist", options: scope.recordtypetitlefields, iseditable: true, tooltip: "Feld, welches den Titel des Datensatzes darstellt" },
                         { name: "icon", label: "Symbol", fieldtype: "text", iseditable: true, tooltip: "URL des Symbols des Datentyps" },
                         { name: "canhaverelations", label: "Kann Verknüpfungen haben", fieldtype: "boolean", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Gibt an, ob dem Datentypen Verknüpfungen zugeordnet werden können" },
                     ];
@@ -133,9 +133,9 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                         (recordtypename ? utils.getresponsedata('/api/recordtypes/' + recordtypename).then(function(recordtype) { scope.recordtype = recordtype; }) : Promise.resolve()),
                         utils.getresponsedata('/api/recordtypes/lists').then(function(lists) { lists.forEach(function(l) { recordtypelists.push({ name: l, label: l}); }); })
                     ]).then(function() {
-                        recordtypetitlefields.length = 0;
+                        scope.recordtypetitlefields.length = 0;
                         scope.recordtype.fields.forEach(function(f) {
-                            recordtypetitlefields.push(f);
+                            scope.recordtypetitlefields.push(f);
                             if (!f.label) f.label = f.name;
                         });
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
