@@ -529,7 +529,9 @@
             ],
             "include" : [
                 "public/js/Administration/ClientCardController.js",
-                "public/js/Administration/ClientListCardController.js"
+                "public/js/Administration/ClientListCardController.js",
+                "public/js/components/avt-clientmodules-tab.js",
+                "public/js/components/avt-createadmin-toolbar-button.js"
             ],
             "languages" : [ "en", "de" ],
             "menu": [

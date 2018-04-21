@@ -30,7 +30,9 @@ var extractApisFromModuleConfig = () => {
  * die include.js einen dynamischen Nachlader, damit man vernünftig debuggen kann.
  */
 var prepareIncludes = (fs) => {
-    if (process.env.NODE_ENV === 'development') {
+    // Minification is too slow for raspberry (takes more then 10 minutes), another idea is needed, e.g. leave out minified libraries
+    // See https://medium.com/@adamhooper/make-uglifyjs-way-faster-by-using-it-sooner-c2c39a9ad27e
+    // if (process.env.NODE_ENV === 'development') {
         var incJs = '';
         var counter = 0;
         Object.keys(moduleConfig.modules).forEach((moduleName) => {
@@ -46,20 +48,20 @@ var prepareIncludes = (fs) => {
         var replacedAgain = replaced.replace('###PORTALNAME###', localConfig.portalName).replace('###PORTALLOGO###', localConfig.portalLogo);        
       
         fs.writeFileSync('./public/index.html', replacedAgain);
-    } else {
-        console.log('Minifying client JavaScript. Can take up to 15 seconds. Please wait ...');
-        var includes = [];
-        Object.keys(moduleConfig.modules).forEach((moduleName) => {
-            var appModule = moduleConfig.modules[moduleName];
-            if (appModule.include) appModule.include.forEach((include) => {
-                includes.push('./' + include);
-            });
-        });
-        var minifiedJs = require('uglify-js').minify(includes, { mangle:false, compress:false, outSourceMap:"include.js.map", output: { max_line_len: 100000 } });
-        fs.writeFileSync('./public/js/include.js', minifiedJs.code);
-        fs.writeFileSync('./public/js/include.js.map', minifiedJs.map);
-        fs.writeFileSync('./public/index.html', fs.readFileSync('./public/_index.html').toString().replace('###PORTALNAME###', localConfig.portalName).replace('###PORTALLOGO###', localConfig.portalLogo));
-    }
+    // } else {
+    //     console.log('Minifying client JavaScript. Can take up to 15 seconds. Please wait ...');
+    //     var includes = [];
+    //     Object.keys(moduleConfig.modules).forEach((moduleName) => {
+    //         var appModule = moduleConfig.modules[moduleName];
+    //         if (appModule.include) appModule.include.forEach((include) => {
+    //             includes.push('./' + include);
+    //         });
+    //     });
+    //     var minifiedJs = require('uglify-js').minify(includes, { mangle:false, compress:false, outSourceMap:"include.js.map", output: { max_line_len: 100000 } });
+    //     fs.writeFileSync('./public/js/include.js', minifiedJs.code);
+    //     fs.writeFileSync('./public/js/include.js.map', minifiedJs.map);
+    //     fs.writeFileSync('./public/index.html', fs.readFileSync('./public/_index.html').toString().replace('###PORTALNAME###', localConfig.portalName).replace('###PORTALLOGO###', localConfig.portalLogo));
+    // }
 };
 
     var timerId; 
