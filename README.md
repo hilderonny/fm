@@ -49,6 +49,9 @@ apt-get upgrade
 apt-get dist-upgrade
 sed -i 's/jessie/stretch/g' /etc/apt/sources.list
 apt-get update
+apt-get upgrade
+apt-get dist-upgrade
+apt-get autoremove
 ```
 
 Die PostgreSQL Datenbank wird dann so installiert:

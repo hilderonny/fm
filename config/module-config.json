@@ -899,9 +899,6 @@
                 "partial/Administration/RecordTypeListCard.html"
             ],
             "include" : [
-                "public/js/Administration/RecordTypeDetailsCardController.js",
-                "public/js/Administration/RecordTypeListCardController.js",
-
                 "public/js/components/avt-recordtype-details-card.js",
                 "public/js/components/avt-recordtype-list-card.js",
                 "public/js/components/avt-recordtypefield-details-card.js",

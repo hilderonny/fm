@@ -4,12 +4,17 @@ var router = require('express').Router();
 var co = require('../utils/constants');
 var ch = require("../utils/configHelper");
 
-// For retrieving datatypes at client startup
+/**
+ * This API is for administering datatypes in the recordtype module.
+ * Nicht mit /api/datatypes verwechseln, welches im base-Modul enthalten ist
+ */
+
+// For Setting list of record types
 router.get('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     var elements = await Db.getdatatypes(req.user.clientname);
-    res.send(elements);
+    res.send(Object.keys(elements).map(k => elements[k]));
 });
-        
+
 router.get('/field/:recordtypename/:fieldname', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     var clientname = req.user.clientname;
     var datatypename = Db.replaceQuotes(req.params.recordtypename);
@@ -18,12 +23,6 @@ router.get('/field/:recordtypename/:fieldname', auth(co.permissions.SETTINGS_CLI
     if (rows.length < 1) return res.sendStatus(404);
     var field = rows[0];
     res.send(rows[0]);
-});
-
-// For Setting list of record types
-router.get('/forlist', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
-    var elements = await Db.getdatatypes(req.user.clientname);
-    res.send(Object.keys(elements).map(k => elements[k]));
 });
 
 // Retreive all possible lists from module-config

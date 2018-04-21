@@ -48,7 +48,7 @@ app.directive('avtRecordtypeListCard', function($compile, $location, utils) {
                     scope.selectedelement.icon = updatedelement.icon;
                 };
                 scope.loadelements = function() {
-                    return utils.getresponsedata("/api/recordtypes/forlist").then(function(elements) {
+                    return utils.getresponsedata("/api/recordtypes").then(function(elements) {
                         scope.elements = elements;
                         elements.forEach(function(e) {
                             if (!e.label) e.label = e.name;
