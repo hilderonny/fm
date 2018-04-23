@@ -381,15 +381,15 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                     '<md-dialog>' +
                     '  <md-dialog-content class="md-dialog-content">' + content + '</md-dialog-content>' +
                     '  <md-dialog-actions>' +
-                    '    <md-button ng-repeat="button in dialogbuttons" ng-click="onclick(button)" ng-if="!button.ishidden" class="md-raised {{button.class}}"><span translate="{{button.label}}"></span></md-button>' +
+                    '    <md-button ng-repeat="button in dialogbuttons" ng-click="onclick(button)" ng-if="!button.ishidden" class="md-raised {{button.class}}">{{button.label}}</md-button>' +
                     '  </md-dialog-actions>' +
                     '</md-dialog>',
                 scope: parentscope,
                 controller: function($scope, $mdDialog) {
                     $scope.dialogbuttons = buttons;
                     $scope.onclick = function(button) {
-                        if (button.onclick) button.onclick();
-                        $mdDialog.hide();
+                        var result = button.onclick && button.onclick() === false ? false : true;
+                        if (result) $mdDialog.hide();
                     }
                 }
             })

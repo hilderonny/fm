@@ -54,7 +54,7 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                             setparentofchildrenrecursively(scope.child);
                             var newscope = scope.$new(false);
                             newscope.selectedchild = scope.selectedreference;
-                            var okbutton = { label: "TRK_OK", ishidden: true, onclick: function() {
+                            var okbutton = { label: "OK", ishidden: true, onclick: function() {
                                 scope.selectedreference = newscope.selectedchild;
                                 scope.dynamicobject[scope.datatypefield.name] = scope.selectedreference.name;
                             }};
@@ -72,7 +72,7 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                             });
                             utils.showdialog(newscope, selecttemplate, [
                                 okbutton,
-                                { label: "TRK_CANCEL" }
+                                { label: "Abbrechen" }
                             ]);
                         });
                     };

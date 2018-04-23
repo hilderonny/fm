@@ -83,7 +83,7 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
                     dialogscope.createdialogupdateokbuttonvisibility = function() {
                         createdialogokbutton.ishidden = !dialogscope.createdialogtargetdatatype || !dialogscope.createdialogrelationtype || !dialogscope.createdialogtargetelement;
                     };
-                    var createdialogokbutton = { label: "TRK_OK", ishidden: true , onclick: function() {
+                    var createdialogokbutton = { label: "OK", ishidden: true , onclick: function() {
                         var newrelation = {
                             relationtypename: dialogscope.createdialogrelationtype.name,
                             datatype1name: dialogscope.createdialogrelationtype.is1 ? scope.params.datatypename : dialogscope.createdialogtargetdatatype.name,
@@ -100,7 +100,7 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
                     }};
                     utils.showdialog(dialogscope, createdialogcontent, [
                         createdialogokbutton,
-                        { label: "TRK_CANCEL" }
+                        { label: "Abbrechen" }
                     ]);
                 };
                 // Tab part

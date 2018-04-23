@@ -55,7 +55,7 @@ describe('API clientmodules', () => {
         delete moduleConfig.modules.DAtest;
     });
 
-    describe('GET/forClient/:id', () => {
+    describe('GET/forClient/:name', () => {
 
         it('responds without authentication with 403', async() => {
             await th.get(`/api/clientmodules/forClient/client0`).expect(403);
@@ -67,7 +67,7 @@ describe('API clientmodules', () => {
             await th.get(`/api/clientmodules/forClient/client0?token=${token}`).expect(403);
         });
 
-        it('responds with not existing id with 404', async() => {
+        it('responds with not existing name with 404', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
             await th.get(`/api/clientmodules/forClient/999999999999999999999999?token=${token}`).expect(404);
         });
@@ -101,7 +101,7 @@ describe('API clientmodules', () => {
     describe('POST/', () => {
 
         function createTestObject() {
-            return { clientId: "client0", module: "ronnyseins" };
+            return { clientname: "client0", module: "ronnyseins" };
         }
 
         it('responds without authentication with 403', async() => {
@@ -121,32 +121,27 @@ describe('API clientmodules', () => {
             await th.post(`/api/clientmodules?token=${token}`).expect(400);
         });
 
-        it('responds with the created element containing an _id field', async() => {
+        it('responds with 200 on success and created the assignment', async() => {
             var testObject = createTestObject();
             var token = await th.defaults.login("portal_usergroup0_user0");
-            var objectFromApi = (await th.post(`/api/clientmodules?token=${token}`).send(testObject).expect(200)).body;
-            assert.strictEqual(objectFromApi._id, testObject.clientId + "_--_" + testObject.module);
-            assert.strictEqual(objectFromApi.clientId, testObject.clientId);
-            assert.strictEqual(objectFromApi.module, testObject.module);
-            var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${testObject.clientId}' AND modulename='${testObject.module}';`);
-            assert.ok(result.rowCount > 0);
-            var objectFromDatabase = result.rows[0];
-            assert.strictEqual(objectFromDatabase.clientname, testObject.clientId);
-            assert.strictEqual(objectFromDatabase.modulename, testObject.module);
+            await th.post(`/api/clientmodules?token=${token}`).send(testObject).expect(200);
+            var clientmodulefromdatabase = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${testObject.clientname}' AND modulename='${testObject.module}';`)).rows;
+            assert.ok(clientmodulefromdatabase.length > 0);
+            assert.strictEqual(clientmodulefromdatabase[0].clientname, testObject.clientname);
+            assert.strictEqual(clientmodulefromdatabase[0].modulename, testObject.module);
         });
 
-        it('responds with the existing assignment when an assignment between a client and a module already exists', async() => {
-            var testObject = { clientId: "client0", module: "activities" };
+        it('responds with 200 when an assignment between a client and a module already exists', async() => {
+            var testObject = { clientname: "client0", module: "activities" };
             var token = await th.defaults.login("portal_usergroup0_user0");
-            var objectFromApi = (await th.post(`/api/clientmodules?token=${token}`).send(testObject).expect(200)).body;
-            assert.strictEqual(objectFromApi._id, testObject.clientId + "_--_" + testObject.module);
-            var result = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${testObject.clientId}' AND modulename='${testObject.module}';`);
-            assert.ok(result.rowCount > 0);
+            await th.post(`/api/clientmodules?token=${token}`).send(testObject).expect(200);
+            var clientmodulefromdatabase = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${testObject.clientname}' AND modulename='${testObject.module}';`)).rows;
+            assert.ok(clientmodulefromdatabase.length > 0);
         });
 
         it('Vorgegebene DAs, die noch nicht existieren, werden angelegt und sind nicht inaktiv', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
-            var moduleAssignment = { module: 'DAtest', clientId: "client0" };
+            var moduleAssignment = { module: 'DAtest', clientname: "client0" };
             await th.post(`/api/clientmodules?token=${token}`).send(moduleAssignment).expect(200);
             var das = (await Db.query("client0", "SELECT * FROM dynamicattributes WHERE identifier IS NOT NULL;")).rows;
             assert.strictEqual(das.length, 2);
@@ -163,7 +158,7 @@ describe('API clientmodules', () => {
             await Db.insertDynamicObject("client0", "dynamicattributes", { name: "datest001", identifier: 'DAtest_user_1', label: 'DAtest_user_1', dynamicattributetypename: co.dynamicAttributeTypes.text });
             // Der Rest wie oben
             var token = await th.defaults.login("portal_usergroup0_user0");
-            var moduleAssignment = { module: 'DAtest', clientId: "client0" };
+            var moduleAssignment = { module: 'DAtest', clientname: "client0" };
             await th.post(`/api/clientmodules?token=${token}`).send(moduleAssignment).expect(200);
             var das = (await Db.query("client0", "SELECT * FROM dynamicattributes WHERE identifier IS NOT NULL;")).rows;
             assert.strictEqual(das.length, 2);
@@ -176,7 +171,7 @@ describe('API clientmodules', () => {
             await Db.insertDynamicObject("client0", "dynamicattributes", { name: "datest001", identifier: 'DAtest_user_1', label: 'DAtest_user_1', dynamicattributetypename: co.dynamicAttributeTypes.text, isinactive: true });
             // Der Rest wie oben
             var token = await th.defaults.login("portal_usergroup0_user0");
-            var moduleAssignment = { module: 'DAtest', clientId: "client0" };
+            var moduleAssignment = { module: 'DAtest', clientname: "client0" };
             await th.post(`/api/clientmodules?token=${token}`).send(moduleAssignment).expect(200);
             var das = (await Db.query("client0", "SELECT * FROM dynamicattributes WHERE identifier IS NOT NULL;")).rows;
             assert.strictEqual(das.length, 2);
@@ -186,29 +181,34 @@ describe('API clientmodules', () => {
         
     });
 
-    describe('DELETE/:id', () => {
+    describe('DELETE/:clientname/:modulename', () => {
 
         it('responds without authentication with 403', async() => {
             await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', 'DAtest');`);
-            await th.del(`/api/clientmodules/client0_--_DAtest`).expect(403);
+            await th.del(`/api/clientmodules/client0/DAtest`).expect(403);
         });
 
         it('responds without write permission with 403', async() => {
             await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', 'DAtest');`);
             await th.removeWritePermission("portal", "portal_usergroup0", co.permissions.ADMINISTRATION_CLIENT);
             var token = await th.defaults.login("portal_usergroup0_user0");
-            await th.del(`/api/clientmodules/client0_--_DAtest?token=${token}`).expect(403);
+            await th.del(`/api/clientmodules/client0/DAtest?token=${token}`).expect(403);
         });
 
-        it('responds with 404 when the _id is invalid', async() => {
+        it('responds with 404 when the clientname is invalid', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
-            await th.del(`/api/clientmodules/invalidId?token=${token}`).expect(404);
+            await th.del(`/api/clientmodules/invalidclientname/DAtest?token=${token}`).expect(404);
         });
 
-        it('deletes the object and return 204', async() => {
+        it('responds with 404 when the modulename is invalid', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/clientmodules/client0/invalidmodulename?token=${token}`).expect(404);
+        });
+
+        it('deletes the clientmodule and return 204', async() => {
             await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', 'DAtest');`);
             var token = await th.defaults.login("portal_usergroup0_user0");
-            await th.del(`/api/clientmodules/client0_--_DAtest?token=${token}`).expect(204);
+            await th.del(`/api/clientmodules/client0/DAtest?token=${token}`).expect(204);
             var result = await Db.query(Db.PortalDatabaseName, "SELECT 1 FROM clientmodules WHERE clientname='client0' and modulename='DAtest';");
             assert.ok(result.rowCount < 1);
         });
@@ -219,7 +219,7 @@ describe('API clientmodules', () => {
             await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('client0', 'DAtest');`);
             // Deaktivieren
             var token = await th.defaults.login("portal_usergroup0_user0");
-            await th.del(`/api/clientmodules/client0_--_DAtest?token=${token}`).expect(204);
+            await th.del(`/api/clientmodules/client0/DAtest?token=${token}`).expect(204);
             var das = (await Db.query("client0", "SELECT * FROM dynamicattributes WHERE identifier IS NOT NULL;")).rows;
             assert.strictEqual(das.length, 1);
             assert.strictEqual(das[0].identifier, 'DAtest_user_1');

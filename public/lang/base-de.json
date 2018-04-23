@@ -1,5 +1,4 @@
 {   
-    "TRK_CANCEL" : "Abbrechen",
     "TRK_DATATYPES_DATATYPE" : "Datentyp",
     "TRK_DETAILS_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_DETAILS_CREATE" : "Erstellen",
@@ -52,7 +51,6 @@
     "TRK_MODEL_users": "Benutzer",
     "TRK_MODULE_base_NAME" : "Basis",
     "TRK_NO" : "Nein",
-    "TRK_OK" : "OK",
     "TRK_PERMISSION_ADMINISTRATION_CLIENT" : "Administration - Mandanten",
     "TRK_PERMISSION_ADMINISTRATION_SETTINGS" : "Administration - Einstellungen",
     "TRK_PERMISSION_ADMINISTRATION_USER" : "Administration - Benutzer",

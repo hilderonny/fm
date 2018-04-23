@@ -528,12 +528,10 @@
                 "partial/Doc/Clients.html"
             ],
             "include" : [
-                "public/js/Administration/ClientCardController.js",
-                "public/js/Administration/ClientListCardController.js",
                 "public/js/components/avt-clientmodules-tab.js",
                 "public/js/components/avt-createadmin-toolbar-button.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_PORTAL",
@@ -546,7 +544,7 @@
 
                 { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ], "canhaverelations" : true }
+                ], "lists": [ "clients" ], "permissionkey": "PERMISSION_ADMINISTRATION_CLIENT", "canhaverelations" : true }
                 
             ]
         },

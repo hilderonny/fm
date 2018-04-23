@@ -34,7 +34,7 @@ app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $transl
                 return arr;
             }, []);
             scope.datatypes = Object.keys(scope.$root.datatypes).map(function(k) { return scope.$root.datatypes[k]; }).filter(function(dt) { return dt.canhaverelations; });
-            var okbutton = { label: "TRK_OK", ishidden: true , onclick: function() {
+            var okbutton = { label: "OK", ishidden: true , onclick: function() {
                 var newrelation = {
                     relationtypename: scope.relationtype.name,
                     datatype1name: scope.relationtype.is1 ? scope.params.datatypename : scope.targetdatatype.name,
@@ -57,7 +57,7 @@ app.directive('avtRelationsToolbarButton', function($compile, $mdDialog, $transl
                 delete scope.targetelement;
                 utils.showdialog(scope, dialogcontent, [
                     okbutton,
-                    { label: "TRK_CANCEL" }
+                    { label: "Abbrechen" }
                 ]);
             };
             scope.ondatatypechange = function() {
