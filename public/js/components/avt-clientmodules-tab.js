@@ -9,7 +9,7 @@ app.directive('avtClientmodulesTab', function($compile, $mdDialog, $mdToast, $ht
         '               <md-list-item ng-repeat="clientmodule in clientmodules | orderBy: \'translationkey | translate\'">' +
         '                   <md-icon md-svg-src="/css/icons/material/Module.svg"></md-icon>' +
         '                   <p translate="{{ clientmodule.translationkey }}"></p>' +
-        '                   <md-button class="md-icon-button" ng-click="switchactive(clientmodule)">' +
+        '                   <md-button class="md-icon-button" ng-click="switchclientmoduleactive(clientmodule)">' +
         '                       <md-icon ng-if="clientmodule.active" md-svg-src="/css/icons/material/Checkmark.svg"></md-icon>' +
         '                       <md-icon class="grayedout" ng-if="!clientmodule.active" md-svg-src="/css/icons/material/Unavailable.svg"></md-icon>' +
         '                   </md-button>' +
@@ -39,7 +39,7 @@ app.directive('avtClientmodulesTab', function($compile, $mdDialog, $mdToast, $ht
                         });
                     });
                 };
-                scope.switchactive = function(clientmodule) {
+                scope.switchclientmoduleactive = function(clientmodule) {
                     if (!scope.canwrite) return;
                     if (!clientmodule.active) {
                         $http.post('/api/clientmodules', { clientname: clientmodule.clientname, module: clientmodule.module }).then(function() {

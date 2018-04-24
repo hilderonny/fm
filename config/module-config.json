@@ -523,7 +523,7 @@
                 "css/images/Clients_editclient.png",
                 "css/images/Clients_list.png",
                 "css/images/Clients_modules.png",
-                "partial/Administration/ClientCard.html",
+                "partial/Administration/ClientDetailsCard.html",
                 "partial/Administration/ClientListCard.html",
                 "partial/Doc/Clients.html"
             ],
@@ -787,14 +787,15 @@
                 "css/images/Portals_list.png",
                 "css/images/Portals_modules.png",
                 "partial/Doc/Portals.html",
-                "partial/LicenseServer/PortalCard.html",
+                "partial/LicenseServer/PortalDetailsCard.html",
                 "partial/LicenseServer/PortalListCard.html"
             ],
             "include" : [
-                "public/js/LicenseServer/PortalCardController.js",
-                "public/js/LicenseServer/PortalListCardController.js"
+                "public/js/components/avt-downloadportalpackage-toolbar-button.js",
+                "public/js/components/avt-generatelicensekey-button.js",
+                "public/js/components/avt-portalmodules-tab.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "de" ],
             "menu" : [
                 {
                     "title": "TRK_MENU_LICENSESERVER",
@@ -814,7 +815,7 @@
                     { "name": "licensekey", "label": "Lizenzschlüssel", "type": "text" },
                     { "name": "version", "label": "Version", "type": "text" },
                     { "name": "lastnotification", "label": "Letzte Meldung", "type": "datetime" }
-                ], "canhaverelations" : true },
+                    ], "lists": [ "portals" ], "permissionkey": "PERMISSION_LICENSESERVER_PORTAL", "canhaverelations" : true },
 
                 { "name": "portalmodules", "label": "Portalmodul", "plurallabel": "Portalmodule", "fields": [
                     { "name": "portalname", "type": "reference", "reference": "portals" },

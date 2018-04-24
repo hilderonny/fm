@@ -1,7 +1,4 @@
 {
-    "TRK_CLIENTS_CLIENT" : "Mandant",
-    "TRK_CLIENTS_CLIENTS" : "Mandanten",
-    "TRK_CLIENTS_SELECT_CLIENT" : "Mandant auswählen",
     "TRK_MENU_PORTAL_CLIENTS" : "Mandanten",
     "TRK_MENU_PORTAL" : "Portal",
     "TRK_MODEL_clients": "Mandanten",
