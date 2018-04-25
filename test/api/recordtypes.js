@@ -26,16 +26,57 @@ describe('API recordtypes', () => {
 
         th.apiTests.get.defaultNegative(co.apis.recordtypes, co.permissions.SETTINGS_CLIENT_RECORDTYPES); 
 
-        xit('returns all datatypes of the client including their fields', async () => {
-        //     var token = await th.defaults.login("client0_usergroup0_user0");
-        //     var activitiesFromDatabase = (await Db.getDynamicObjects("client0", "activities")).map((a) => { return { _id: a.name, clientId: "client0", date: (new Date(a.date)).toISOString(), name: a.label, task: a.task, isDone: a.isdone, type: a.activitytypename, comment: a.comment, createdByUserId: a.createdbyusername, isForAllUsers: a.isforallusers } });
-        //     var activitiesFromRequest = (await th.get(`/api/${co.apis.activities}?token=${token}`).expect(200)).body;
-        //     assert.ok(activitiesFromRequest.length === activitiesFromDatabase.length - 1);
-        //     activitiesFromDatabase.pop(); //Remove last element for comparing
-        //     compareActivities(activitiesFromRequest, activitiesFromDatabase);
+        it('returns all datatypes of the client including their fields', async () => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var recordtypes = (await th.get(`/api/recordtypes?token=${token}`).expect(200)).body;
+            assert.ok(recordtypes.length > 3);
+            var rt0 = recordtypes.find(r => r.name === "client0_datatype0");
+            assert.ok(rt0);
+            assert.strictEqual(rt0.candefinename, true);
+            assert.strictEqual(rt0.canhaverelations, true);
+            assert.ok(rt0.fields);
+            assert.strictEqual(rt0.fields.boolean0.datatypename, "client0_datatype0");
+            assert.strictEqual(rt0.fields.boolean0.fieldtype, "boolean");
+            assert.strictEqual(rt0.fields.boolean0.formula, null);
+            assert.strictEqual(rt0.fields.boolean0.formulaindex, 0);
+            assert.strictEqual(rt0.fields.boolean0.ishidden, false);
+            assert.strictEqual(rt0.fields.boolean0.ismanuallyupdated, false);
+            assert.strictEqual(rt0.fields.boolean0.isnullable, false);
+            assert.strictEqual(rt0.fields.boolean0.ispredefined, false);
+            assert.strictEqual(rt0.fields.boolean0.isrequired, true);
+            assert.strictEqual(rt0.fields.boolean0.label, "Boolean0");
+            assert.strictEqual(rt0.fields.boolean0.name, "boolean0");
+            assert.strictEqual(rt0.fields.boolean0.reference, null);
+            assert.ok(rt0.fields.datetime0);
+            assert.ok(rt0.fields.decimal0);
+            assert.ok(rt0.fields.formula0);
+            assert.ok(rt0.fields.formula1);
+            assert.ok(rt0.fields.name);
+            assert.ok(rt0.fields.password0);
+            assert.ok(rt0.fields.reference0);
+            assert.ok(rt0.fields.text0);
+            assert.strictEqual(rt0.icon, "icon0");
+            assert.strictEqual(rt0.ismanuallyupdated, false);
+            assert.strictEqual(rt0.ispredefined, false);
+            assert.strictEqual(rt0.label, "label0");
+            assert.ok(rt0.lists);
+            assert.strictEqual(rt0.lists.length, 1);
+            assert.strictEqual(rt0.lists[0], "list0");
+            assert.strictEqual(rt0.modulename, "fmobjects");
+            assert.strictEqual(rt0.name, "client0_datatype0");
+            assert.strictEqual(rt0.permissionkey, "PERMISSION_BIM_FMOBJECT");
+            assert.strictEqual(rt0.plurallabel, "plurallabel0");
+            assert.strictEqual(rt0.titlefield, "text0");
+            assert.ok(recordtypes.find(r => r.name === "client0_datatype1"));
+            assert.ok(recordtypes.find(r => r.name === "client0_datatype2"));
+            assert.ok(recordtypes.find(r => r.name === "client0_datatype3"));
         });
 
-        xit('does not return datatypes of other clients', async() => {});
+        it('does not return datatypes of other clients', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var recordtypes = (await th.get(`/api/recordtypes?token=${token}`).expect(200)).body;
+            assert.ok(!recordtypes.find(r => r.name === "client1_datatype0"));
+        });
 
     });
     
@@ -177,7 +218,7 @@ describe('API recordtypes', () => {
 
         xit('responds with 404 when the field does not exist for the datatype even when it exists for another datatype', async() => {});
 
-        xit('updates the field and returns 200', async() => {});
+        xit('updates the field and sets the attribute "ismanuallyupdated" to true', async() => {});
 
         xit('does not update the label when it is not set', async() => {});
 
@@ -187,7 +228,7 @@ describe('API recordtypes', () => {
 
         xit('does not update the ishidden attribute when it is not set', async() => {});
 
-        xit('does nothing but returns 200 when no atteibutes to update are sent', async() => {});
+        xit('does nothing but returns 200 when no attributes to update are sent', async() => {});
 
         xit('does not update the name when it was sent', async() => {});
 
@@ -234,7 +275,7 @@ describe('API recordtypes', () => {
 
         xit('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {});
 
-        xit('updates the datatype and returns 200', async() => {});
+        xit('updates the datatype and sets the attribute "ismanuallyupdated" to true', async() => {});
 
         xit('does not update the label when it is not set', async() => {});
 

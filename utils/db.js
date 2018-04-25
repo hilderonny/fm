@@ -99,7 +99,7 @@ var Db = {
         var permissionkeytoinsert = permissionkey ? "'" + Db.replaceQuotes(permissionkey) + "'" : "null";
         var modulenametoinsert = modulename ? "'" + Db.replaceQuotes(modulename) + "'" : "null";
         var titlefieldtoinsert = titlefield ? "'" + Db.replaceQuotes(titlefield) + "'" : "'name'";
-        await Db.query(databasename, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations, candefinename, titlefield, ismanuallyupdated) VALUES ('${dtn}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations}, ${!!candefinename}, ${titlefieldtoinsert}, false);`);
+        await Db.query(databasename, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations, candefinename, titlefield, ismanuallyupdated, ispredefined) VALUES ('${dtn}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations}, ${!!candefinename}, ${titlefieldtoinsert}, false, false);`);
         // Drop an existing table. When a datatype is to be created then it should not exist before
         await Db.query(databasename, `DROP TABLE IF EXISTS ${dtn};`);
         await Db.query(databasename, `CREATE TABLE ${dtn} (name TEXT PRIMARY KEY);`);
