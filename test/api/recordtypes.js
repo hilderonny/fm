@@ -82,17 +82,65 @@ describe('API recordtypes', () => {
     
     describe('GET/field/:recordtypename/:fieldname', () => {
 
-        // th.apiTests.get.defaultNegative(co.apis.recordtypes + "/client0_datatype0/boolean0", co.permissions.SETTINGS_CLIENT_RECORDTYPES); 
+        it('responds without authentication with 403', async() => {
+            return th.get("/api/recordtypes/field/client0_datatype0/boolean0").expect(403);
+        });
 
-        xit('returns 404 when the recordtype does not exist in the client', async() => {});
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.SETTINGS_CLIENT_RECORDTYPES);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/field/client0_datatype0/boolean0?token=${token}`).expect(403);
+        });
 
-        xit('returns 404 when the field does not exist in the client', async() => {});
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.recordtypes);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/field/client0_datatype0/boolean0?token=${token}`).expect(403);
+        });
 
-        xit('returns 404 when the recordtype does not exist in the client but in another client', async() => {});
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.recordtypes);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            return th.get(`/api/recordtypes/field/client0_datatype0/boolean0?token=${token}`).expect(403);
+        });
 
-        xit('returns 404 when the field does not exist in the client but in another client', async() => {});
+        it('returns 404 when the recordtype does not exist in the client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/field/unknownrecordtype/boolean0?token=${token}`).expect(404);
+        });
 
-        xit('returns the request field information', async() => {});
+        it('returns 404 when the field does not exist in the client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/field/client0_datatype0/unknownfield?token=${token}`).expect(404);
+        });
+
+        it('returns 404 when the recordtype does not exist in the client but in another client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/field/client1_datatype0/boolean0?token=${token}`).expect(404);
+        });
+
+        it('returns 404 when the field does not exist in the client but in another client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/field/client0_datatype0/client1_text0?token=${token}`).expect(404);
+        });
+
+        it('returns the requested field information', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var field = (await th.get(`/api/recordtypes/field/client0_datatype0/boolean0?token=${token}`).expect(200)).body;
+            assert.ok(field);
+            assert.strictEqual(field.datatypename, "client0_datatype0");
+            assert.strictEqual(field.fieldtype, "boolean");
+            assert.strictEqual(field.formula, null);
+            assert.strictEqual(field.formulaindex, 0);
+            assert.strictEqual(field.ishidden, false);
+            assert.strictEqual(field.ismanuallyupdated, false);
+            assert.strictEqual(field.isnullable, false);
+            assert.strictEqual(field.ispredefined, false);
+            assert.strictEqual(field.isrequired, true);
+            assert.strictEqual(field.label, "Boolean0");
+            assert.strictEqual(field.name, "boolean0");
+            assert.strictEqual(field.reference, null);
+        });
 
     });
     

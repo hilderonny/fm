@@ -276,6 +276,8 @@ th.preparedatatypefields = async() => {
     await Db.createDatatypeField("client0", "client0_datatype0", "password0", "Password0", co.fieldtypes.password, false, false, null, null, null, true);
     await Db.createDatatypeField("client0", "client0_datatype0", "reference0", "Reference0", co.fieldtypes.reference, false, false, "users", null, null, true);
     await Db.createDatatypeField("client0", "client0_datatype0", "text0", "Text0", co.fieldtypes.text, false, false, null, null, null, true);
+    await Db.createDatatypeField("client1", "client1_datatype0", "boolean0", "Boolean0", co.fieldtypes.boolean, true, false, null, null, null, false); // Required, not nullable
+    await Db.createDatatypeField("client1", "client1_datatype0", "client1_text0", "Text0", co.fieldtypes.text, false, false, null, null, null, true);
 };
 
 th.preparedynamicobjects = async() => {
