@@ -49,7 +49,8 @@ router.get('/lists', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.mo
     res.send(lists);
 });
         
-// For detail view of record type
+// For detail view of record type.
+// Returns the fields as array instead of object
 router.get('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     var clientname = req.user.clientname;
     var datatypename = Db.replaceQuotes(req.params.name);

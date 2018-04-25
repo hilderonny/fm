@@ -148,22 +148,118 @@ describe('API recordtypes', () => {
 
         th.apiTests.get.defaultNegative(co.apis.recordtypes + "/lists", co.permissions.SETTINGS_CLIENT_RECORDTYPES); 
 
-        xit('retreives all list names for the user\'s client defined in module config', async() => {});
+        it('retreives all list names for the user\'s client defined in module config', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var lists = (await th.get(`/api/recordtypes/lists?token=${token}`).expect(200)).body;
+            assert.ok(lists.length > 3);
+            assert.ok(lists.indexOf("client0_datatype0") >= 0);
+            assert.ok(lists.indexOf("client0_datatype1") >= 0);
+            assert.ok(lists.indexOf("client0_datatype2") >= 0);
+            assert.ok(lists.indexOf("client0_datatype3") >= 0);
+        });
 
-        xit('retreives only list names for modules which are available to the client', async() => {});
+        it('retreives only list names for modules which are available to the client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var lists = (await th.get(`/api/recordtypes/lists?token=${token}`).expect(200)).body;
+            assert.ok(lists.indexOf("client1_datatype0") < 0);
+        });
 
-        xit('retreives list names of portaldatatypes when logged in user is a portal user', async() => {});
+        it('retreives list names of portaldatatypes when logged in user is a portal user', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var lists = (await th.get(`/api/recordtypes/lists?token=${token}`).expect(200)).body;
+            assert.ok(lists.indexOf("users") >= 0);
+            assert.ok(lists.indexOf("clients") >= 0);
+            assert.ok(lists.indexOf("portals") >= 0);
+            assert.ok(lists.indexOf("documents") < 0);
+        });
 
-        xit('retreives list names of clientdatatypes when logged in user is a client user', async() => {});
+        it('retreives list names of clientdatatypes when logged in user is a client user', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var lists = (await th.get(`/api/recordtypes/lists?token=${token}`).expect(200)).body;
+            assert.ok(lists.indexOf("users") >= 0);
+            assert.ok(lists.indexOf("documents") >= 0);
+            assert.ok(lists.indexOf("portals") < 0);
+            assert.ok(lists.indexOf("clients") < 0);
+        });
 
     });
 
     describe('GET/:name', () => {
-        
-        // th.apiTests.getId.defaultNegative(co.apis.recordtypes, co.permissions.SETTINGS_CLIENT_RECORDTYPES, "recordtypes");
-        // th.apiTests.getId.clientDependentNegative(co.apis.recordtypes, "recordtypes");
 
-        xit('returns the datatype and its fields', async() => {});
+        it('responds without authentication with 403', async() => {
+            return th.get("/api/recordtypes/client0_datatype0").expect(403);
+        });
+
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.SETTINGS_CLIENT_RECORDTYPES);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/client0_datatype0?token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.recordtypes);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/client0_datatype0?token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.recordtypes);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            return th.get(`/api/recordtypes/client0_datatype0?token=${token}`).expect(403);
+        });
+
+        it('returns 404 when the recordtype does not exist in the client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/unknownrecordtype?token=${token}`).expect(404);
+        });
+
+        it('returns 404 when the recordtype does not exist in the client but in another client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            return th.get(`/api/recordtypes/client1_datatype0?token=${token}`).expect(404);
+        });
+
+        it('returns the datatype and its fields', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatype = (await th.get(`/api/recordtypes/client0_datatype0?token=${token}`).expect(200)).body;
+            assert.ok(datatype);
+            assert.strictEqual(datatype.candefinename, true);
+            assert.strictEqual(datatype.canhaverelations, true);
+            assert.ok(datatype.fields);
+            var booleanfield = datatype.fields.find(f => f.name === "boolean0");
+            assert.ok(booleanfield);
+            assert.strictEqual(booleanfield.datatypename, "client0_datatype0");
+            assert.strictEqual(booleanfield.fieldtype, "boolean");
+            assert.strictEqual(booleanfield.formula, null);
+            assert.strictEqual(booleanfield.formulaindex, 0);
+            assert.strictEqual(booleanfield.ishidden, false);
+            assert.strictEqual(booleanfield.ismanuallyupdated, false);
+            assert.strictEqual(booleanfield.isnullable, false);
+            assert.strictEqual(booleanfield.ispredefined, false);
+            assert.strictEqual(booleanfield.isrequired, true);
+            assert.strictEqual(booleanfield.label, "Boolean0");
+            assert.strictEqual(booleanfield.name, "boolean0");
+            assert.strictEqual(booleanfield.reference, null);
+            assert.ok(datatype.fields.find(f => f.name === "datetime0"));
+            assert.ok(datatype.fields.find(f => f.name === "decimal0"));
+            assert.ok(datatype.fields.find(f => f.name === "formula0"));
+            assert.ok(datatype.fields.find(f => f.name === "formula1"));
+            assert.ok(datatype.fields.find(f => f.name === "name"));
+            assert.ok(datatype.fields.find(f => f.name === "password0"));
+            assert.ok(datatype.fields.find(f => f.name === "reference0"));
+            assert.ok(datatype.fields.find(f => f.name === "text0"));
+            assert.strictEqual(datatype.icon, "icon0");
+            assert.strictEqual(datatype.ismanuallyupdated, false);
+            assert.strictEqual(datatype.ispredefined, false);
+            assert.strictEqual(datatype.label, "label0");
+            assert.ok(datatype.lists);
+            assert.strictEqual(datatype.lists.length, 1);
+            assert.strictEqual(datatype.lists[0], "list0");
+            assert.strictEqual(datatype.modulename, "fmobjects");
+            assert.strictEqual(datatype.name, "client0_datatype0");
+            assert.strictEqual(datatype.permissionkey, "PERMISSION_BIM_FMOBJECT");
+            assert.strictEqual(datatype.plurallabel, "plurallabel0");
+            assert.strictEqual(datatype.titlefield, "text0");
+        });
 
     });
 
