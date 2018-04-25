@@ -64,7 +64,6 @@ router.get('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.mo
 router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     var recordtype = req.body;
     if (!recordtype || 
-        Object.keys(recordtype).length < 1 || 
         !recordtype.name || 
         !recordtype.name.match(/^[a-z]*$/ || 
         (recordtype.lists && !Array.isArray(recordtype.lists)))) {
@@ -74,7 +73,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.module
     if ((await Db.getdatatypes(clientname))[recordtype.name]) return res.sendStatus(409);
     if (!recordtype.lists) recordtype.lists = [];
     if (recordtype.lists.indexOf(recordtype.name) < 0) recordtype.lists.push(recordtype.name);
-    await Db.createDatatype(clientname, recordtype.name, recordtype.label || "", recordtype.plurallabel || "", "name", recordtype.icon || "", recordtype.lists || [], recordtype.permissionkey || "", null, !!recordtype.canhaverelations, !!recordtype.candefinename);
+    await Db.createDatatype(clientname, recordtype.name, recordtype.label || "", recordtype.plurallabel || "", "name", recordtype.icon || "", recordtype.lists, recordtype.permissionkey || "", null, !!recordtype.canhaverelations, !!recordtype.candefinename);
     res.sendStatus(200);
 });
 
@@ -84,7 +83,7 @@ router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTY
     var field = req.body;
     var clientname = req.user.clientname;
     var datatypename = Db.replaceQuotes(req.params.datatypename);
-    if (!field || Object.keys(field).length < 1 || !field.name || !field.name.match(/^[a-z]*$/)) {
+    if (!field || !field.name || !field.name.match(/^[a-z]*$/)) {
         return res.sendStatus(400);
     }
     var existingdatatype = (await Db.getdatatypes(clientname))[datatypename];
@@ -108,7 +107,7 @@ router.put('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIEN
     if (keys.indexOf("label") >= 0) updateset.label = field.label;
     if (!existingfield.ispredefined && keys.indexOf("formula") >= 0) updateset.formula = field.formula;
     if (!existingfield.ispredefined && keys.indexOf("formulaindex") >= 0) updateset.formulaindex = field.formulaindex;
-    if (keys.indexOf("ishidden") >= 0) updateset.ishidden = field.ishidden;
+    if (keys.indexOf("ishidden") >= 0) updateset.ishidden = !!field.ishidden;
     await Db.updaterecordtypefield(clientname, datatypename, fieldname, updateset);
     // Force update of cache in the next request
     delete Db.datatypes;
