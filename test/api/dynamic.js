@@ -434,6 +434,16 @@ describe('API dynamic', () => {
             assert.strictEqual(result[1], "C0D0E5");
         });
 
+        it('returns the name of elements where the datatypes have no labels defined', async() => {
+            await Db.query("client0", "UPDATE datatypes SET titlefield = null WHERE name='client0_datatype0';");
+            delete Db.datatypes;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/parentpath/list0/client0_datatype0/client0_datatype0_entity6?token=${token}`).expect(200)).body;
+            // client0_datatype0_entity0 --> client0_datatype0_entity2 --> client0_datatype0_entity4
+            assert.ok(result.length > 2);
+            assert.strictEqual(result[0], "client0_datatype0_entity0");
+        });
+
     });
 
     describe('GET/rootelements/:forlist', () => {
@@ -482,6 +492,12 @@ describe('API dynamic', () => {
             var result = (await th.get(`/api/dynamic/rootelements/list0?token=${token}`).expect(200)).body;
             assert.ok(result.length > 0);
             assert.ok(!result.find(c => c.name === "client0_datatype2_entity2"));
+        });
+
+        it('responds with a list of root elements on the portal (there are no clientmodules defined)', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/rootelements/users?token=${token}`).expect(200)).body;
+            assert.ok(result.length > 0);
         });
 
     });

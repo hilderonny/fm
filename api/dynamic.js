@@ -35,7 +35,7 @@ async function getchildren(clientname, recordtypename, entityname, permissions, 
 
 async function getrootelements(clientname, forlist, permissions) {
     var clientmodulenames = (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}';`)).rows.map(r => `'${Db.replaceQuotes(r.modulename)}'`);
-    if (clientname !== Db.PortalDatabaseName && clientmodulenames.length < 1) return [];
+    // Die Modulzuordnungen von Portalen selbst werden nicht in  den clientmodules gepflegt und müssen daher unbeachtet gelassen werden
     var additionalfilter = clientname !== Db.PortalDatabaseName ? ` AND (modulename IS NULL OR modulename IN (${clientmodulenames.join(",")}))` : ""; // modulename == null kommt bei benutzerdefinierten Datentypen vor.
     var relevantdatatypes = (await Db.query(clientname, `SELECT * FROM datatypes WHERE '${Db.replaceQuotes(forlist)}' = ANY (lists)${additionalfilter};`)).rows;
     var rootelements = [];
