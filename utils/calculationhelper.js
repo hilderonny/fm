@@ -95,6 +95,18 @@ var ch = {
             console.log(error);
         }
         console.log("Recalculation finished.");
+    },
+    // Recalculate all entites of a datatype and their parents
+    recalculateforupdateddatatype: async(clientname, datatypename) => { // Called in db.js in line 154
+        try {
+            // perform calculations beginning with all leaf elements proceeding hierarchically upwards
+            var entitynames = (await Db.query(clientname, `SELECT x.name FROM ${datatypename} x LEFT JOIN relations r ON r.datatype1name = '${datatypename}' AND r.name1 = x.name WHERE r IS NULL;`)).rows.map(r => r.name);
+            for (var k = 0; k < entitynames.length; k++) {
+                await ch.calculateentityandparentsrecursively(clientname, datatypename, entitynames[k]);
+            }
+        } catch(error) {
+            console.log(error);
+        }
     }
 }
 

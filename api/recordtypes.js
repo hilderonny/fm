@@ -2,7 +2,8 @@ var auth = require('../middlewares/auth');
 var Db = require("../utils/db").Db;
 var router = require('express').Router();
 var co = require('../utils/constants');
-var ch = require("../utils/configHelper");
+var confighelper = require("../utils/configHelper");
+var ch = require("../utils/calculationhelper");
 
 /**
  * This API is for administering datatypes in the recordtype module.
@@ -28,7 +29,7 @@ router.get('/field/:recordtypename/:fieldname', auth(co.permissions.SETTINGS_CLI
 // Retreive all possible lists from module-config
 router.get('/lists', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, "r", co.modules.recordtypes), async(req, res) => {
     var clientname = req.user.clientname;
-    var modules = await ch.getAvailableModulesForClient(clientname);
+    var modules = await confighelper.getAvailableModulesForClient(clientname);
     var datatypescope = clientname === Db.PortalDatabaseName ? "portaldatatypes" : "clientdatatypes";
     // Obtain fields from module config
     var lists = modules.reduce((arr, mod) => {
@@ -95,7 +96,11 @@ router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTY
     if (!existingdatatype) return res.sendStatus(404);
     if (existingdatatype.fields[field.name]) return res.sendStatus(409);
     try {
-        await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula, field.formulaindex, field.isnullable, field.ishidden, false);
+        await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula ? JSON.parse(field.formula) : undefined, field.formulaindex, field.isnullable, field.ishidden, false);
+        // Recalculate all entities of the datatype when a formula field was added
+        if (field.fieldtype === co.fieldtypes.formula) {
+            await ch.recalculateforupdateddatatype(clientname, datatypename);
+        }
         res.sendStatus(200);
     } catch(error) {
         res.sendStatus(400); // Invalid formula and so

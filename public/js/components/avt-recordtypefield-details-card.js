@@ -65,7 +65,6 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
                 scope.create = function() {
-                    if (scope.datatypefield.fieldtype === "formula") scope.datatypefield.formula = JSON.parse(scope.datatypefield.formula);
                     return $http.post("/api/recordtypes/field/" + scope.params.datatypename, scope.datatypefield).then(function(response) {
                         if (response.status === 409) {
                             $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
@@ -125,12 +124,10 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
                     ];
                     if (fieldname) utils.getresponsedata('/api/recordtypes/field/' + datatypename + "/" + fieldname).then(function(field) {
                         scope.datatypefield = field;
-                        if (field.fieldtype === "formula") field.formula = JSON.stringify(field.formula);
                         scope.canwrite = scope.$root.canWrite(scope.params.permission);
                     });
                 };
                 scope.save = function() {
-                    if (scope.datatypefield.fieldtype === "formula") scope.datatypefield.formula = JSON.parse(scope.datatypefield.formula);
                     return $http.put("/api/recordtypes/field/" + scope.params.datatypename + "/" + scope.params.entityname, scope.datatypefield).then(function() {
                         $mdToast.show($mdToast.simple().textContent("Änderungen gespeichert").hideDelay(1000).position("bottom right"));
                         if (scope.params.onsave) {

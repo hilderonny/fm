@@ -4,6 +4,7 @@
 var assert = require('assert');
 var th = require('../testhelpers');
 var co = require('../../utils/constants');
+var ch = require("../../utils/calculationhelper");
 var Db = require("../../utils/db").Db;
 
 describe('API recordtypes', () => {
@@ -14,17 +15,18 @@ describe('API recordtypes', () => {
     });
 
     beforeEach(async() => {
+        await Db.deleteRecordType("client0", "testrecordtypename");
         await th.prepareClientModules();
         await th.prepareUserGroups();
         await th.prepareUsers();
         await th.preparePermissions();
         await th.preparedatatypes();
-        await th.preparedatatypefields();
-    });
-
-    afterEach(async() => {
-        await Db.deleteRecordType("client0", "testrecordtypename");
         await Db.deleteRecordTypeField("client0", "clientnulldatatypenull", "testrecordtypefieldname");
+        await Db.deleteRecordTypeField("client0", "clientnulldatatypenull", "datatypeonefield");
+        await th.preparedatatypefields();
+        await th.preparedynamicobjects();
+        await th.preparerelations();
+        await ch.calculateentityandparentsrecursively("client0", "clientnulldatatypenull", "clientnulldatatypenullentity2");
     });
     
     describe('GET/', () => {
@@ -526,31 +528,31 @@ describe('API recordtypes', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var fieldtosend = createPostTestRecordtypefield();
             fieldtosend.fieldtype = "formula";
-            fieldtosend.formula = "invalidformula";
+            fieldtosend.formula = "invalid formula";
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = {};
+            fieldtosend.formula = JSON.stringify({});
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { unknownformula: "A" };
+            fieldtosend.formula = JSON.stringify({ unknownformula: "A" });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { childsum: 13 };
+            fieldtosend.formula = JSON.stringify({ childsum: 13 });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { ifthenelse: "eins" };
+            fieldtosend.formula = JSON.stringify({ ifthenelse: "eins" });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { ifthenelse: ["A"] };
+            fieldtosend.formula = JSON.stringify({ ifthenelse: ["A"] });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { ifthenelse: [ "A", "13", "B", 42 ] };
+            fieldtosend.formula = JSON.stringify({ ifthenelse: [ "A", "13", "B", 42 ] });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { ifthenelse: [ 1, 13, "B", 42 ] };
+            fieldtosend.formula = JSON.stringify({ ifthenelse: [ 1, 13, "B", 42 ] });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { ifthenelse: [ "A", 13, 2, 42 ] };
+            fieldtosend.formula = JSON.stringify({ ifthenelse: [ "A", 13, 2, 42 ] });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { ifthenelse: [ "A", 13, "B", "42" ] };
+            fieldtosend.formula = JSON.stringify({ ifthenelse: [ "A", 13, "B", "42" ] });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { sum: "eins" };
+            fieldtosend.formula = JSON.stringify({ sum: "eins" });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { sum: [] };
+            fieldtosend.formula = JSON.stringify({ sum: [] });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-            fieldtosend.formula = { sum: [ 1, "2" ] };
+            fieldtosend.formula = JSON.stringify({ sum: [ 1, "2" ] });
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
         });
 
@@ -680,12 +682,12 @@ describe('API recordtypes', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var fieldtosend = createPostTestRecordtypefield();
             fieldtosend.fieldtype = "formula";
-            fieldtosend.formula = { childsum: "childfield" };
+            fieldtosend.formula = JSON.stringify({ childsum: "childfield" });
             fieldtosend.formulaindex = 13;
             await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
             var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
             assert.strictEqual(fieldfromdatabase.fieldtype, fieldtosend.fieldtype);
-            assert.strictEqual(fieldfromdatabase.formula, JSON.stringify(fieldtosend.formula));
+            assert.strictEqual(fieldfromdatabase.formula, fieldtosend.formula);
             assert.strictEqual(fieldfromdatabase.formulaindex, fieldtosend.formulaindex);
         });
 
@@ -716,7 +718,15 @@ describe('API recordtypes', () => {
             assert.strictEqual(fieldfromdatabase.ispredefined, false);
         });
 
-        xit('recalculates the formulas of all parents when the fieldtype is formula and so a new formula was created which was perhaps referenced in a parent\'s formula', async() => {
+        it('recalculates the formula of all entities of the datatype when a new formula field was created', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "formula";
+            fieldtosend.formula = JSON.stringify({ childsum: "decimal0" });
+            fieldtosend.formulaindex = 13;
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var entity = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
+            assert.strictEqual(entity.testrecordtypefieldname, 345.789);
         });
 
     });
