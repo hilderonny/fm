@@ -90,13 +90,14 @@ var Db = {
     },
 
     createDatatype: async(databasename, datatypename, label, plurallabel, titlefield, icon, lists, permissionkey, modulename, canhaverelations, candefinename) => {
+        if (!datatypename.match(/^[a-z]*$/)) throw new Error("The datatype name must only contain lowercase letters!");
         var dtn = Db.replaceQuotesAndRemoveSemicolon(datatypename);
         if ((await Db.query(databasename, `SELECT 1 FROM datatypes WHERE name = '${dtn}';`)).rowCount > 0) return; // Already existing
-        var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
-        var plurallabeltoinsert = plurallabel ? "'" + Db.replaceQuotes(plurallabel) + "'" : "null";
-        var icontoinsert = icon ? "'" + Db.replaceQuotes(icon) + "'" : "null";
+        var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "''";
+        var plurallabeltoinsert = plurallabel ? "'" + Db.replaceQuotes(plurallabel) + "'" : "''";
+        var icontoinsert = icon ? "'" + Db.replaceQuotes(icon) + "'" : "''";
         var liststoinsert = lists ? "'{" + lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'";
-        var permissionkeytoinsert = permissionkey ? "'" + Db.replaceQuotes(permissionkey) + "'" : "null";
+        var permissionkeytoinsert = permissionkey ? "'" + Db.replaceQuotes(permissionkey) + "'" : "''";
         var modulenametoinsert = modulename ? "'" + Db.replaceQuotes(modulename) + "'" : "null";
         var titlefieldtoinsert = titlefield ? "'" + Db.replaceQuotes(titlefield) + "'" : "'name'";
         await Db.query(databasename, `INSERT INTO datatypes (name, label, plurallabel, icon, lists, permissionkey, modulename, canhaverelations, candefinename, titlefield, ismanuallyupdated, ispredefined) VALUES ('${dtn}', ${labeltoinsert}, ${plurallabeltoinsert}, ${icontoinsert}, ${liststoinsert}, ${permissionkeytoinsert}, ${modulenametoinsert}, ${!!canhaverelations}, ${!!candefinename}, ${titlefieldtoinsert}, false, false);`);

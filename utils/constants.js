@@ -424,3 +424,12 @@ module.exports.dynamicAttributeTypes = {
      */
     picklist: 'picklist'
 };
+
+// Names which are used by API routes and therefor are not allowed as datatypenames
+module.exports.forbiddendatatypenames = [
+    "field",
+    "children",
+    "hierarchytoelement",
+    "parentpath",
+    "rootelements"
+];

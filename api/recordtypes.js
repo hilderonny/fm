@@ -66,8 +66,9 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.module
     var recordtype = req.body;
     if (!recordtype || 
         !recordtype.name || 
-        !recordtype.name.match(/^[a-z]*$/ || 
-        (recordtype.lists && !Array.isArray(recordtype.lists)))) {
+        !recordtype.name.match(/^[a-z]*$/) || 
+        (recordtype.lists && !Array.isArray(recordtype.lists)) ||
+        co.forbiddendatatypenames.indexOf(recordtype.name) >= 0) {
         return res.sendStatus(400);
     }
     var clientname = req.user.clientname;

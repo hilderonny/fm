@@ -21,6 +21,10 @@ describe('API recordtypes', () => {
         await th.preparedatatypes();
         await th.preparedatatypefields();
     });
+
+    afterEach(async() => {
+        await Db.deleteRecordType("client0", "testrecordtypename");
+    });
     
     describe('GET/', () => {
 
@@ -30,12 +34,12 @@ describe('API recordtypes', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var recordtypes = (await th.get(`/api/recordtypes?token=${token}`).expect(200)).body;
             assert.ok(recordtypes.length > 3);
-            var rt0 = recordtypes.find(r => r.name === "client0_datatype0");
+            var rt0 = recordtypes.find(r => r.name === "clientnulldatatypenull");
             assert.ok(rt0);
             assert.strictEqual(rt0.candefinename, true);
             assert.strictEqual(rt0.canhaverelations, true);
             assert.ok(rt0.fields);
-            assert.strictEqual(rt0.fields.boolean0.datatypename, "client0_datatype0");
+            assert.strictEqual(rt0.fields.boolean0.datatypename, "clientnulldatatypenull");
             assert.strictEqual(rt0.fields.boolean0.fieldtype, "boolean");
             assert.strictEqual(rt0.fields.boolean0.formula, null);
             assert.strictEqual(rt0.fields.boolean0.formulaindex, 0);
@@ -63,19 +67,19 @@ describe('API recordtypes', () => {
             assert.strictEqual(rt0.lists.length, 1);
             assert.strictEqual(rt0.lists[0], "list0");
             assert.strictEqual(rt0.modulename, "fmobjects");
-            assert.strictEqual(rt0.name, "client0_datatype0");
+            assert.strictEqual(rt0.name, "clientnulldatatypenull");
             assert.strictEqual(rt0.permissionkey, "PERMISSION_BIM_FMOBJECT");
             assert.strictEqual(rt0.plurallabel, "plurallabel0");
             assert.strictEqual(rt0.titlefield, "text0");
-            assert.ok(recordtypes.find(r => r.name === "client0_datatype1"));
-            assert.ok(recordtypes.find(r => r.name === "client0_datatype2"));
-            assert.ok(recordtypes.find(r => r.name === "client0_datatype3"));
+            assert.ok(recordtypes.find(r => r.name === "clientnulldatatypeone"));
+            assert.ok(recordtypes.find(r => r.name === "clientnulldatatypetwo"));
+            assert.ok(recordtypes.find(r => r.name === "clientnulldatatypethree"));
         });
 
         it('does not return datatypes of other clients', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var recordtypes = (await th.get(`/api/recordtypes?token=${token}`).expect(200)).body;
-            assert.ok(!recordtypes.find(r => r.name === "client1_datatype0"));
+            assert.ok(!recordtypes.find(r => r.name === "clientonedatatypenull"));
         });
 
     });
@@ -83,25 +87,25 @@ describe('API recordtypes', () => {
     describe('GET/field/:recordtypename/:fieldname', () => {
 
         it('responds without authentication with 403', async() => {
-            return th.get("/api/recordtypes/field/client0_datatype0/boolean0").expect(403);
+            return th.get("/api/recordtypes/field/clientnulldatatypenull/boolean0").expect(403);
         });
 
         it('responds without read permission with 403', async() => {
             await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.SETTINGS_CLIENT_RECORDTYPES);
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/field/client0_datatype0/boolean0?token=${token}`).expect(403);
+            return th.get(`/api/recordtypes/field/clientnulldatatypenull/boolean0?token=${token}`).expect(403);
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
             await th.removeClientModule("client0", co.modules.recordtypes);
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/field/client0_datatype0/boolean0?token=${token}`).expect(403);
+            return th.get(`/api/recordtypes/field/clientnulldatatypenull/boolean0?token=${token}`).expect(403);
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
             await th.removeClientModule("client0", co.modules.recordtypes);
             var token = await th.defaults.login("client0_usergroup0_user1");
-            return th.get(`/api/recordtypes/field/client0_datatype0/boolean0?token=${token}`).expect(403);
+            return th.get(`/api/recordtypes/field/clientnulldatatypenull/boolean0?token=${token}`).expect(403);
         });
 
         it('returns 404 when the recordtype does not exist in the client', async() => {
@@ -111,24 +115,24 @@ describe('API recordtypes', () => {
 
         it('returns 404 when the field does not exist in the client', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/field/client0_datatype0/unknownfield?token=${token}`).expect(404);
+            return th.get(`/api/recordtypes/field/clientnulldatatypenull/unknownfield?token=${token}`).expect(404);
         });
 
         it('returns 404 when the recordtype does not exist in the client but in another client', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/field/client1_datatype0/boolean0?token=${token}`).expect(404);
+            return th.get(`/api/recordtypes/field/clientonedatatypenull/boolean0?token=${token}`).expect(404);
         });
 
         it('returns 404 when the field does not exist in the client but in another client', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/field/client0_datatype0/client1_text0?token=${token}`).expect(404);
+            return th.get(`/api/recordtypes/field/clientnulldatatypenull/client1_text0?token=${token}`).expect(404);
         });
 
         it('returns the requested field information', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var field = (await th.get(`/api/recordtypes/field/client0_datatype0/boolean0?token=${token}`).expect(200)).body;
+            var field = (await th.get(`/api/recordtypes/field/clientnulldatatypenull/boolean0?token=${token}`).expect(200)).body;
             assert.ok(field);
-            assert.strictEqual(field.datatypename, "client0_datatype0");
+            assert.strictEqual(field.datatypename, "clientnulldatatypenull");
             assert.strictEqual(field.fieldtype, "boolean");
             assert.strictEqual(field.formula, null);
             assert.strictEqual(field.formulaindex, 0);
@@ -152,16 +156,16 @@ describe('API recordtypes', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var lists = (await th.get(`/api/recordtypes/lists?token=${token}`).expect(200)).body;
             assert.ok(lists.length > 3);
-            assert.ok(lists.indexOf("client0_datatype0") >= 0);
-            assert.ok(lists.indexOf("client0_datatype1") >= 0);
-            assert.ok(lists.indexOf("client0_datatype2") >= 0);
-            assert.ok(lists.indexOf("client0_datatype3") >= 0);
+            assert.ok(lists.indexOf("clientnulldatatypenull") >= 0);
+            assert.ok(lists.indexOf("clientnulldatatypeone") >= 0);
+            assert.ok(lists.indexOf("clientnulldatatypetwo") >= 0);
+            assert.ok(lists.indexOf("clientnulldatatypethree") >= 0);
         });
 
         it('retreives only list names for modules which are available to the client', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var lists = (await th.get(`/api/recordtypes/lists?token=${token}`).expect(200)).body;
-            assert.ok(lists.indexOf("client1_datatype0") < 0);
+            assert.ok(lists.indexOf("clientonedatatypenull") < 0);
         });
 
         it('retreives list names of portaldatatypes when logged in user is a portal user', async() => {
@@ -187,25 +191,25 @@ describe('API recordtypes', () => {
     describe('GET/:name', () => {
 
         it('responds without authentication with 403', async() => {
-            return th.get("/api/recordtypes/client0_datatype0").expect(403);
+            return th.get("/api/recordtypes/clientnulldatatypenull").expect(403);
         });
 
         it('responds without read permission with 403', async() => {
             await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.SETTINGS_CLIENT_RECORDTYPES);
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/client0_datatype0?token=${token}`).expect(403);
+            return th.get(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(403);
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
             await th.removeClientModule("client0", co.modules.recordtypes);
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/client0_datatype0?token=${token}`).expect(403);
+            return th.get(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(403);
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
             await th.removeClientModule("client0", co.modules.recordtypes);
             var token = await th.defaults.login("client0_usergroup0_user1");
-            return th.get(`/api/recordtypes/client0_datatype0?token=${token}`).expect(403);
+            return th.get(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(403);
         });
 
         it('returns 404 when the recordtype does not exist in the client', async() => {
@@ -215,19 +219,19 @@ describe('API recordtypes', () => {
 
         it('returns 404 when the recordtype does not exist in the client but in another client', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/client1_datatype0?token=${token}`).expect(404);
+            return th.get(`/api/recordtypes/clientonedatatypenull?token=${token}`).expect(404);
         });
 
         it('returns the datatype and its fields', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var datatype = (await th.get(`/api/recordtypes/client0_datatype0?token=${token}`).expect(200)).body;
+            var datatype = (await th.get(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(200)).body;
             assert.ok(datatype);
             assert.strictEqual(datatype.candefinename, true);
             assert.strictEqual(datatype.canhaverelations, true);
             assert.ok(datatype.fields);
             var booleanfield = datatype.fields.find(f => f.name === "boolean0");
             assert.ok(booleanfield);
-            assert.strictEqual(booleanfield.datatypename, "client0_datatype0");
+            assert.strictEqual(booleanfield.datatypename, "clientnulldatatypenull");
             assert.strictEqual(booleanfield.fieldtype, "boolean");
             assert.strictEqual(booleanfield.formula, null);
             assert.strictEqual(booleanfield.formulaindex, 0);
@@ -255,7 +259,7 @@ describe('API recordtypes', () => {
             assert.strictEqual(datatype.lists.length, 1);
             assert.strictEqual(datatype.lists[0], "list0");
             assert.strictEqual(datatype.modulename, "fmobjects");
-            assert.strictEqual(datatype.name, "client0_datatype0");
+            assert.strictEqual(datatype.name, "clientnulldatatypenull");
             assert.strictEqual(datatype.permissionkey, "PERMISSION_BIM_FMOBJECT");
             assert.strictEqual(datatype.plurallabel, "plurallabel0");
             assert.strictEqual(datatype.titlefield, "text0");
@@ -265,38 +269,195 @@ describe('API recordtypes', () => {
 
     describe('POST/', () => {
 
-        // function createPostTestActivity() {
-        //     return { date: (new Date()).toISOString(), name: "testactivity0", task: null, isDone: false, type: "ACTIVITIES_TYPE_WARRANTY", comment: "comment", isForAllUsers: false };
-        // }
+        function createPostTestRecordtype() {
+            return {
+                name: "testrecordtypename",
+                label: "testrecordtypelabel",
+                plurallabel: "testrecordtypeplurallabel",
+                lists: ["testlist0", "testlist1" ] ,
+                icon: "testrecordtypeicon",
+                permissionkey: "testrecordtypepermissionkey",
+                canhaverelations: true,
+                candefinename: true
+            };
+        }
 
-        // th.apiTests.post.defaultNegative(co.apis.activities, co.permissions.OFFICE_ACTIVITY, createPostTestActivity);
-        // th.apiTests.post.defaultPositive(co.apis.activities, co.collections.activities.name, createPostTestActivity, mapActivities);
+        th.apiTests.post.defaultNegative(co.apis.recordtypes, co.permissions.SETTINGS_CLIENT_RECORDTYPES, createPostTestRecordtype);
 
-        xit('responds with 400 when no name is given', async() => {});
+        it('responds with 400 when no name is given', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            delete datatypetosend.name;
+            return th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when name contains characters other than a-z', async() => {});
+        it('responds with 400 when name contains characters other than a-z', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.name = "aUb";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+            datatypetosend.name = "a0b";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+            datatypetosend.name = "a'b";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+            datatypetosend.name = "a\"b";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+            datatypetosend.name = "a-b";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+            datatypetosend.name = "a_b";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when lists is given but is not an array', async() => {});
+        it('responds with 400 when lists is given but is not an array', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.lists = "notanarray";
+            return th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when name is now allowed (used by API routes)', async() => {});
+        it('responds with 400 when name is not allowed (used by API routes)', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            for (var i = 0; i < co.forbiddendatatypenames.length; i++) {
+                datatypetosend.name = co.forbiddendatatypenames[i];
+                await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+            }
+        });
 
-        xit('responds with 409 when a record type with the given name already exists', async() => {});
+        it('responds with 409 when a record type with the given name already exists', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.name = "clientnulldatatypenull";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(409);
+        });
 
-        xit('creates the recordtype and a field "name" which is set as titlefield and returns 200', async() => {});
+        it('creates the recordtype and a field "name" which is set as titlefield and returns 200', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.ok(datatypefromdb);
+            assert.strictEqual(datatypefromdb.name, datatypetosend.name);
+            assert.strictEqual(datatypefromdb.label, datatypetosend.label);
+            assert.strictEqual(datatypefromdb.plurallabel, datatypetosend.plurallabel);
+            var lists = datatypefromdb.lists;
+            assert.ok(lists);
+            assert.ok(lists.length > 1);
+            assert.ok(lists.indexOf("testlist0") >= 0);
+            assert.ok(lists.indexOf("testlist1") >= 0);
+            assert.strictEqual(datatypefromdb.icon, datatypetosend.icon);
+            assert.strictEqual(datatypefromdb.permissionkey, datatypetosend.permissionkey);
+            assert.strictEqual(datatypefromdb.canhaverelations, datatypetosend.canhaverelations);
+            assert.strictEqual(datatypefromdb.candefinename, datatypetosend.candefinename);
+            assert.strictEqual(datatypefromdb.titlefield, "name");
+            assert.strictEqual(datatypefromdb.modulename, null);
+            assert.strictEqual(datatypefromdb.ismanuallyupdated, false);
+            assert.strictEqual(datatypefromdb.ispredefined, false);
+            var fields = datatypefromdb.fields;
+            assert.ok(fields);
+            var namefield = fields.name;
+            assert.ok(namefield);
+        });
 
-        xit('appends the recordtypename to the lists field when not already contained', async() => {});
+        it('appends the recordtypename to the lists field when not already contained', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.ok(datatypefromdb.lists.indexOf(datatypetosend.name) >= 0);
+        });
 
-        xit('does not append the recordtypename to the lists field when already contained', async() => {});
+        it('does not append the recordtypename to the lists field when already contained', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.lists.push(datatypetosend.name);
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.lists.length, 3);
+            assert.ok(datatypefromdb.lists.indexOf(datatypetosend.name) >= 0);
+        });
 
-        xit('creates the lists field when not sent in request', async() => {});
+        it('creates the lists field when not sent in request', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            delete datatypetosend.lists;
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.ok(datatypefromdb.lists);
+            assert.ok(datatypefromdb.lists.length > 0);
+        });
 
-        xit('sets the label to "" when not given', async() => {});
+        it('sets the label to "" when not given', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            delete datatypetosend.label;
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.label, "");
+        });
 
-        xit('sets the plurallabel to "" when not given', async() => {});
+        it('sets the plurallabel to "" when not given', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            delete datatypetosend.plurallabel;
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.plurallabel, "");
+        });
 
-        xit('sets the icon to "" when not given', async() => {});
+        it('sets the icon to "" when not given', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            delete datatypetosend.icon;
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.icon, "");
+        });
 
-        xit('sets the permissionkey to "" when not given', async() => {});
+        it('sets the permissionkey to "" when not given', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            delete datatypetosend.permissionkey;
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.permissionkey, "");
+        });
+
+        it('ignores the attribute "titlefield" when sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.titlefield = "newtitlefield";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.titlefield, "name");
+        });
+
+        it('ignores the attribute "modulename" when sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.modulename = "newmodulename";
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.modulename, null);
+        });
+
+        it('ignores the attribute "ismanuallyupdated" when sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.ismanuallyupdated = true;
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.ismanuallyupdated, false);
+        });
+
+        it('ignores the attribute "ispredefined" when sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.ispredefined = true;
+            await th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdb = (await Db.getdatatypes("client0"))[datatypetosend.name];
+            assert.strictEqual(datatypefromdb.ispredefined, false);
+        });
 
     });
 
