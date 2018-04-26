@@ -601,11 +601,11 @@ var Db = {
         if (["undefined", "string"].indexOf(typeof(field.label)) < 0) throw new Error("label must be a string!");
         if (["undefined", "boolean"].indexOf(typeof(field.ishidden)) < 0) throw new Error("ishidden must be a boolean!");
         if (["undefined", "number"].indexOf(typeof(field.formulaindex)) < 0) throw new Error("formulaindex must be an int!");
-        if (existingfield.type === constants.fieldtypes.formula && !Db.isformulavalid(field.formula)) throw new Error("Formula is invalid!");
+        if (existingfield.fieldtype === constants.fieldtypes.formula && field.formula && !Db.isformulavalid(field.formula)) throw new Error("Formula is invalid!");
         var updateset = [];
         var keys = Object.keys(field);
         if (keys.indexOf("label") >= 0) updateset.push(`label='${Db.replaceQuotes(field.label)}'`);
-        if (keys.indexOf("formula") >= 0) updateset.push(`formula='${Db.replaceQuotes(JSON.stringify(formula))}'`);
+        if (keys.indexOf("formula") >= 0) updateset.push(`formula='${Db.replaceQuotes(JSON.stringify(field.formula))}'`);
         if (keys.indexOf("formulaindex") >= 0) updateset.push(`formulaindex=${parseInt(field.formulaindex)}`);
         if (keys.indexOf("ishidden") >= 0) updateset.push(`ishidden=${!!field.ishidden}`);
         if (updateset.length < 1) return;

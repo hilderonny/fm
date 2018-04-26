@@ -12,7 +12,7 @@ var ch = {
             var child = await Db.getDynamicObject(clientname, childrelation.datatype2name, childrelation.name2);
             if (child[formuladef]) sum += child[formuladef];
         }
-        value = sum ? parseFloat(sum) : null; // Prevent NaN
+        var value = typeof(sum) === "number" ? parseFloat(sum) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
     },
     calculate_ifthenelse: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
@@ -20,7 +20,7 @@ var ch = {
         var entity = await Db.getDynamicObject(clientname, datatypename, entityname);
         var elsedef = formuladef[3];
         var value = (entity[formuladef[0]] === formuladef[1]) ? entity[formuladef[2]] : (typeof(elsedef) === 'string' ? entity[elsedef] : elsedef);
-        value = value ? parseFloat(value) : null; // Prevent NaN
+        value = typeof(value) === "number" ? parseFloat(value) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
     },
     calculate_sum: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
@@ -36,7 +36,7 @@ var ch = {
             }
             if (entity[fieldname]) sum += minus ? -entity[fieldname] : entity[fieldname];
         }
-        value = sum ? parseFloat(sum) : null; // Prevent NaN
+        var value = typeof(sum) === "number" ? parseFloat(sum) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
     },
     // Recalculates an antity and all of its parents recursively

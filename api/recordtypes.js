@@ -127,6 +127,10 @@ router.put('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIEN
         await Db.updaterecordtypefield(clientname, datatypename, fieldname, updateset);
         // Force update of cache in the next request
         delete Db.datatypes;
+        // Recalculate all entities of the datatype when a formula field was changed
+        if (existingfield.fieldtype === co.fieldtypes.formula && ( field.formula || field.formulaindex)) {
+            await ch.recalculateforupdateddatatype(clientname, datatypename);
+        }
         res.sendStatus(200);
     } catch(error) {
         res.sendStatus(400);

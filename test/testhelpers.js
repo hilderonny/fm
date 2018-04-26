@@ -275,7 +275,7 @@ th.preparedatatypefields = async() => {
     await Db.createDatatypeField("client0", "clientnulldatatypenull", "formula1", "Formula1", co.fieldtypes.formula, false, false, undefined, { sum : ["formula0", "decimal0"] }, 1, true);
     await Db.createDatatypeField("client0", "clientnulldatatypenull", "password0", "Password0", co.fieldtypes.password, false, false, undefined, undefined, undefined, true);
     await Db.createDatatypeField("client0", "clientnulldatatypenull", "reference0", "Reference0", co.fieldtypes.reference, false, false, "users", undefined, undefined, true);
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "text0", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "text0", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true, false, false);
     await Db.createDatatypeField("client0", "clientnulldatatypeone", "datatypeonefield", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
     await Db.createDatatypeField("client1", "clientonedatatypenull", "boolean0", "Boolean0", co.fieldtypes.boolean, false, false, undefined, undefined, undefined, true); // Required, not nullable
     await Db.createDatatypeField("client1", "clientonedatatypenull", "clientonetextnull", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);

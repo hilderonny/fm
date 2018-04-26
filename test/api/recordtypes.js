@@ -15,14 +15,13 @@ describe('API recordtypes', () => {
     });
 
     beforeEach(async() => {
+        await Db.deleteRecordType("client0", "clientnulldatatypenull");
         await Db.deleteRecordType("client0", "testrecordtypename");
         await th.prepareClientModules();
         await th.prepareUserGroups();
         await th.prepareUsers();
         await th.preparePermissions();
         await th.preparedatatypes();
-        await Db.deleteRecordTypeField("client0", "clientnulldatatypenull", "testrecordtypefieldname");
-        await Db.deleteRecordTypeField("client0", "clientnulldatatypenull", "datatypeonefield");
         await th.preparedatatypefields();
         await th.preparedynamicobjects();
         await th.preparerelations();
@@ -788,6 +787,12 @@ describe('API recordtypes', () => {
             await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(400);
         });
 
+        it('responds with 400 when no attributes to update are sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {};
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text0?token=${token}`).send(fieldtosend).expect(400);
+        });
+
         it('responds with 404 when the datatype does not exist for the client', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var fieldtosend = {
@@ -797,13 +802,31 @@ describe('API recordtypes', () => {
             await th.put(`/api/recordtypes/field/invalidtatatypename/text0?token=${token}`).send(fieldtosend).expect(404);
         });
 
-        xit('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {
+        it('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                label: "updatedlabel",
+                ishidden: true
+            };
+            await th.put(`/api/recordtypes/field/clientonedatatypenull/boolean0?token=${token}`).send(fieldtosend).expect(404);
         });
 
-        xit('responds with 404 when the field does not exist for the datatype', async() => {
+        it('responds with 404 when the field does not exist for the datatype', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                label: "updatedlabel",
+                ishidden: true
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/unknownfieldname?token=${token}`).send(fieldtosend).expect(404);
         });
 
-        xit('responds with 404 when the field does not exist for the datatype even when it exists for another datatype', async() => {
+        it('responds with 404 when the field does not exist for the datatype even when it exists for another datatype', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                label: "updatedlabel",
+                ishidden: true
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/clientonetextnull?token=${token}`).send(fieldtosend).expect(404);
         });
 
         it('updates the field and sets the attribute "ismanuallyupdated" to true', async() => {
@@ -819,46 +842,152 @@ describe('API recordtypes', () => {
             assert.strictEqual(fieldfromdatabase.ismanuallyupdated, true);
         });
 
-        xit('does not update the label when it is not set', async() => {
+        it('does not update the label when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                ishidden: true
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text0?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.text0;
+            assert.strictEqual(fieldfromdatabase.label, "Text0");
         });
 
-        xit('does not update the formula when it is not set', async() => {
+        it('does not update the formula when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                ishidden: true
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.formula0;
+            assert.strictEqual(fieldfromdatabase.formula, JSON.stringify({ childsum : "decimal0" }));
         });
 
-        xit('does not update the formulaindex when it is not set', async() => {
+        it('does not update the formulaindex when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                ishidden: true
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula1?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.formula1;
+            assert.strictEqual(fieldfromdatabase.formulaindex, 1);
         });
 
-        xit('does not update the ishidden attribute when it is not set', async() => {
+        it('does not update the ishidden attribute when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                label: "updatedlabel"
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text0?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.text0;
+            assert.strictEqual(fieldfromdatabase.ishidden, false);
         });
 
-        xit('does nothing but returns 200 when no attributes to update are sent', async() => {
+        it('does not update the name when it was sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                name: "newname",
+                label: "updatedlabel"
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text0?token=${token}`).send(fieldtosend).expect(200);
+            assert.ok((await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.text0);
+            assert.ok(!(await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.newname);
         });
 
-        xit('does not update the name when it was sent', async() => {
+        it('does not update the fieldtype when it was sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                fieldtype: "boolean",
+                label: "updatedlabel"
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text0?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.text0;
+            assert.strictEqual(fieldfromdatabase.fieldtype, "text");
         });
 
-        xit('does not update the fieldtype when it was sent', async() => {
+        it('does not update isrequired when it was sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                isrequired: true,
+                label: "updatedlabel"
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text0?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.text0;
+            assert.strictEqual(fieldfromdatabase.isrequired, false);
         });
 
-        xit('does not update isrequired when it was sent', async() => {
+        it('does not update the reference when it was sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                reference: "clientnulldatatypetwo",
+                label: "updatedlabel"
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/reference0?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.reference0;
+            assert.strictEqual(fieldfromdatabase.reference, "users");
         });
 
-        xit('does not update the reference when it was sent', async() => {
+        it('does not update isnullable when it was sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                isnullable: false,
+                label: "updatedlabel"
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text0?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.text0;
+            assert.strictEqual(fieldfromdatabase.isnullable, true);
         });
 
-        xit('does not update isnullable when it was sent', async() => {
+        it('recalculates the formulas of all instances when the formula changed', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                formula: { sum : ["decimal0", "decimal0"] }
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(200);
+            var entities = await Db.getDynamicObjects("client0", "clientnulldatatypenull");
+            assert.ok(entities.length > 0);
+            for (var i = 0; i < entities.length; i++) {
+                var entity = entities[i];
+                if (entity.decimal0 === null) {
+                    assert.strictEqual(entity.formula0, 0); // 0, not null because of formula type "sum"
+                } else {
+                    assert.strictEqual(entity.formula0, entity.decimal0 + entity.decimal0);
+                }
+            }
         });
 
-        xit('recalculates the formulas of all instances when the formula changed', async() => {
+        it('recalculates the formulas of all instances when the formulaindex changed', async() => {
+            // All formulas must be set to zero before recalculation on the entity
+            await Db.query("client0", "UPDATE clientnulldatatypenull SET formula0=0;");
+            await Db.query("client0", "UPDATE clientnulldatatypenull SET formula1=0;");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                formulaindex: 2
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(200);
+            var entity = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity2");
+            assert.strictEqual(entity.formula1, 345.789);
         });
 
-        xit('recalculates the formulas of all instances when the formulaindex changed', async() => {
+        it('recalculates the formulas of all parents when the formula changed', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                formula: { sum : ["decimal0", "decimal0"] }
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(200);
+            var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
+            assert.strictEqual(parent.formula1, 703.701); // 3 x decimal0
         });
 
-        xit('recalculates the formulas of all parents when the formula changed', async() => {
-        });
-
-        xit('recalculates the formulas of all parents when the formulaindex changed', async() => {
+        it('recalculates the formulas of all parents when the formulaindex changed', async() => {
+            await Db.query("client0", "UPDATE clientnulldatatypenull SET formula0=0;");
+            await Db.query("client0", "UPDATE clientnulldatatypenull SET formula1=0;");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                formulaindex: 2
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(200);
+            var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity2");
+            assert.strictEqual(parent.formula1, 345.789); // formula0=0 + decimal0=345.789
         });
 
     });
