@@ -268,16 +268,17 @@ th.preparedatatypes = async() => {
 };
 
 th.preparedatatypefields = async() => {
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "boolean0", "Boolean0", co.fieldtypes.boolean, true, false, null, null, null, false); // Required, not nullable
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "datetime0", "DateTime0", co.fieldtypes.datetime, false, false, null, null, null, true);
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "decimal0", "Decimal0", co.fieldtypes.decimal, false, false, null, null, null, true);
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "formula0", "Formula0", co.fieldtypes.formula, false, false, null, { "childsum" : "decimal0" }, 0, true);
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "formula1", "Formula1", co.fieldtypes.formula, false, false, null, { "sum" : ["formula0", "decimal0"] }, 1, true);
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "password0", "Password0", co.fieldtypes.password, false, false, null, null, null, true);
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "reference0", "Reference0", co.fieldtypes.reference, false, false, "users", null, null, true);
-    await Db.createDatatypeField("client0", "clientnulldatatypenull", "text0", "Text0", co.fieldtypes.text, false, false, null, null, null, true);
-    await Db.createDatatypeField("client1", "clientonedatatypenull", "boolean0", "Boolean0", co.fieldtypes.boolean, false, false, null, null, null, true); // Required, not nullable
-    await Db.createDatatypeField("client1", "clientonedatatypenull", "client1_text0", "Text0", co.fieldtypes.text, false, false, null, null, null, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "boolean0", "Boolean0", co.fieldtypes.boolean, true, false, undefined, undefined, undefined, false); // Required, not nullable
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "datetime0", "DateTime0", co.fieldtypes.datetime, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "decimal0", "Decimal0", co.fieldtypes.decimal, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "formula0", "Formula0", co.fieldtypes.formula, false, false, undefined, { childsum : "decimal0" }, 0, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "formula1", "Formula1", co.fieldtypes.formula, false, false, undefined, { sum : ["formula0", "decimal0"] }, 1, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "password0", "Password0", co.fieldtypes.password, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "reference0", "Reference0", co.fieldtypes.reference, false, false, "users", undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "text0", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypeone", "datatypeonefield", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client1", "clientonedatatypenull", "boolean0", "Boolean0", co.fieldtypes.boolean, false, false, undefined, undefined, undefined, true); // Required, not nullable
+    await Db.createDatatypeField("client1", "clientonedatatypenull", "clientonetextnull", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
 };
 
 th.preparedynamicobjects = async() => {

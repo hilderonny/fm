@@ -91,6 +91,9 @@ var Db = {
 
     createDatatype: async(databasename, datatypename, label, plurallabel, titlefield, icon, lists, permissionkey, modulename, canhaverelations, candefinename) => {
         if (!datatypename.match(/^[a-z]*$/)) throw new Error("The datatype name must only contain lowercase letters!");
+        if (["undefined", "boolean"].indexOf(typeof(canhaverelations)) < 0) throw new Error("canhaverelations must be a boolean!");
+        if (["undefined", "boolean"].indexOf(typeof(candefinename)) < 0) throw new Error("candefinename must be a boolean!");
+        if (lists && !Array.isArray(lists)) throw new Error("lists must be an array!");
         var dtn = Db.replaceQuotesAndRemoveSemicolon(datatypename);
         if ((await Db.query(databasename, `SELECT 1 FROM datatypes WHERE name = '${dtn}';`)).rowCount > 0) return; // Already existing
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "''";
@@ -106,13 +109,22 @@ var Db = {
         await Db.query(databasename, `CREATE TABLE ${dtn} (name TEXT PRIMARY KEY);`);
         // Force update of cache in the next request
         delete Db.datatypes;
-        await Db.createDatatypeField(databasename, datatypename, "name", "Name", constants.fieldtypes.text, true, true, null, null, null, false, false, true);
+        await Db.createDatatypeField(databasename, datatypename, "name", "Name", constants.fieldtypes.text, true, true, undefined, undefined, undefined, false, false, true);
     },
 
-    createDatatypeField: async(databasename, datatypename, fieldname, label, fieldtype, isrequired, doNotAddColumn, reference, formula, formulaindex, isnullable, ishidden, ispredefined) => {
+    createDatatypeField: async(databasename, datatypename, fieldname, label, fieldtype, isrequired, doNotAddColumn, reference, formula, formulaindex, isnullable, ishidden, ispredefined, ignoremissingreference) => {
+        if (["undefined", "boolean"].indexOf(typeof(isrequired)) < 0) throw new Error("isrequired must be a boolean!");
+        if (["undefined", "boolean"].indexOf(typeof(isnullable)) < 0) throw new Error("isnullable must be a boolean!");
+        if (["undefined", "boolean"].indexOf(typeof(ishidden)) < 0) throw new Error("ishidden must be a boolean!");
+        if (["undefined", "number"].indexOf(typeof(formulaindex)) < 0) throw new Error("formulaindex must be an int!");
         var dtn = Db.replaceQuotesAndRemoveSemicolon(datatypename);
         var fn = Db.replaceQuotesAndRemoveSemicolon(fieldname);
         if ((await Db.query(databasename, `SELECT 1 FROM datatypefields WHERE datatypename = '${dtn}' AND name = '${fn}';`)).rowCount > 0) return; // Already existing
+        if (!ignoremissingreference && fieldtype === constants.fieldtypes.reference) { // On startup there can be missing references but this is okay
+            var referencedatatype = (await Db.getdatatypes(databasename))[reference];
+            if (!referencedatatype) throw new Error(`Referenced datatype "${reference}" does not exist!`);
+        }
+        if (fieldtype === constants.fieldtypes.formula && !Db.isformulavalid(formula)) throw new Error("Formula is invalid!");
         var labeltoinsert = label ? "'" + Db.replaceQuotes(label) + "'" : "null";
         var referencetoinsert = reference ? "'" + Db.replaceQuotes(reference) + "'" : "null";
         var formulatoinsert = formula ? "'" + Db.replaceQuotes(JSON.stringify(formula)) + "'" : "null";
@@ -398,6 +410,21 @@ var Db = {
         return Db.query(clientname, statement);
     },
 
+    isformulavalid: (formula) => {
+        var keys = Object.keys(formula);
+        if (
+            typeof(formula) === "object" &&
+            keys.length === 1 &&
+            Object.keys(constants.formulatypes).indexOf(keys[0]) >= 0 &&
+            (
+                (keys.indexOf("childsum") === 0 && formula.childsum && typeof(formula.childsum) === "string") ||
+                (keys.indexOf("ifthenelse") === 0 && Array.isArray(formula.ifthenelse) && formula.ifthenelse.length === 4 && typeof(formula.ifthenelse[0]) === "string" && typeof(formula.ifthenelse[2]) === "string") ||
+                (keys.indexOf("sum") === 0 && Array.isArray(formula.sum) && formula.sum.filter(f => typeof(f) === "string").length === formula.sum.length)
+            )
+        ) return true;
+        return false;
+    },
+
     replaceQuotes: (str) => {
         return str && typeof(str) === "string" ? str.replace(/'/g, "''") : str;
     },
@@ -539,7 +566,7 @@ var Db = {
                 fieldsfromdatabase.splice(fieldsfromdatabase.indexOf(existingfield), 1);
             } else {
                 // Insert new
-                await Db.createDatatypeField(databasename, datatype.name, field.name, field.label, field.type, !!field.isrequired, false, field.reference, field.formula, field.formulaindex, field.isnullable, field.ishidden, true);
+                await Db.createDatatypeField(databasename, datatype.name, field.name, field.label, field.type, !!field.isrequired, false, field.reference, field.formula, field.formulaindex, field.isnullable, field.ishidden, true, true);
             }
         }
         // Delete predefined record type fields which do not exist anymore
@@ -619,7 +646,7 @@ var Db = {
                 delete Db.datatypes;
             } else {
                 // Insert new definition
-                await Db.createDatatype(databasename, recordtype.name, recordtype.label, recordtype.plurallabel, recordtype.titlefield, recordtype.icon, recordtype.lists, recordtype.permissionkey, recordtype.modulename);
+                await Db.createDatatype(databasename, recordtype.name, recordtype.label, recordtype.plurallabel, recordtype.titlefield, recordtype.icon, recordtype.lists, recordtype.permissionkey, recordtype.modulename, recordtype.canhaverelations, recordtype.candefinename);
             }
             // Handle record type fields
             await Db.updateRecordTypeFieldsForDatabase(databasename, recordtype);

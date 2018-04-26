@@ -75,12 +75,15 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.module
     if ((await Db.getdatatypes(clientname))[recordtype.name]) return res.sendStatus(409);
     if (!recordtype.lists) recordtype.lists = [];
     if (recordtype.lists.indexOf(recordtype.name) < 0) recordtype.lists.push(recordtype.name);
-    await Db.createDatatype(clientname, recordtype.name, recordtype.label || "", recordtype.plurallabel || "", "name", recordtype.icon || "", recordtype.lists, recordtype.permissionkey || "", null, !!recordtype.canhaverelations, !!recordtype.candefinename);
-    res.sendStatus(200);
+    try {
+        await Db.createDatatype(clientname, recordtype.name, recordtype.label || "", recordtype.plurallabel || "", "name", recordtype.icon || "", recordtype.lists, recordtype.permissionkey || "", null, recordtype.canhaverelations, recordtype.candefinename);
+        res.sendStatus(200);
+    } catch(error) {
+        res.sendStatus(400); // Invalid attribute types and so
+    }
 });
 
-// TODO: Namen auf nicht erlaubte Namen prüfen (Sub-URLs in diversen APIs, vordefinierte Tabellennamen, wie users, clients, datatypes, datatypefields, etc.)
-// TODO: Ebenso Formeln auf Gültigkeit prüfen und Verweise auch
+// TODO: Formeln auf Gültigkeit prüfen und Verweise auch
 router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     var field = req.body;
     var clientname = req.user.clientname;
@@ -90,9 +93,13 @@ router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTY
     }
     var existingdatatype = (await Db.getdatatypes(clientname))[datatypename];
     if (!existingdatatype) return res.sendStatus(404);
-    if (existingdatatype.fields[field.namename]) return res.sendStatus(409);
-    await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula, field.formulaindex, field.isnullable, field.ishidden, false);
-    res.sendStatus(200);
+    if (existingdatatype.fields[field.name]) return res.sendStatus(409);
+    try {
+        await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula, field.formulaindex, field.isnullable, field.ishidden, false);
+        res.sendStatus(200);
+    } catch(error) {
+        res.sendStatus(400); // Invalid formula and so
+    }
 });
 
 router.put('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {

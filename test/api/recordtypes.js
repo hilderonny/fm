@@ -24,6 +24,7 @@ describe('API recordtypes', () => {
 
     afterEach(async() => {
         await Db.deleteRecordType("client0", "testrecordtypename");
+        await Db.deleteRecordTypeField("client0", "clientnulldatatypenull", "testrecordtypefieldname");
     });
     
     describe('GET/', () => {
@@ -125,7 +126,7 @@ describe('API recordtypes', () => {
 
         it('returns 404 when the field does not exist in the client but in another client', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            return th.get(`/api/recordtypes/field/clientnulldatatypenull/client1_text0?token=${token}`).expect(404);
+            return th.get(`/api/recordtypes/field/clientnulldatatypenull/clientonetextnull?token=${token}`).expect(404);
         });
 
         it('returns the requested field information', async() => {
@@ -324,6 +325,20 @@ describe('API recordtypes', () => {
             }
         });
 
+        it('responds with 400 when canhaverelations is not of type boolean', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.canhaverelations = "notboolean";
+            return th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+        });
+
+        it('responds with 400 when candefinename is not of type boolean', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPostTestRecordtype();
+            datatypetosend.candefinename = "notboolean";
+            return th.post(`/api/recordtypes?token=${token}`).send(datatypetosend).expect(400);
+        });
+
         it('responds with 409 when a record type with the given name already exists', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var datatypetosend = createPostTestRecordtype();
@@ -463,40 +478,246 @@ describe('API recordtypes', () => {
 
     describe('POST/field/:datatypename', () => {
 
-        // function createPostTestActivity() {
-        //     return { date: (new Date()).toISOString(), name: "testactivity0", task: null, isDone: false, type: "ACTIVITIES_TYPE_WARRANTY", comment: "comment", isForAllUsers: false };
-        // }
+        function createPostTestRecordtypefield() {
+            return {
+                name: "testrecordtypefieldname",
+                label: "testrecordtypefieldlabel",
+                fieldtype: "text",
+                isrequired: true,
+                isnullable: true,
+                ishidden: true
+            };
+        }
 
-        // th.apiTests.post.defaultNegative(co.apis.activities, co.permissions.OFFICE_ACTIVITY, createPostTestActivity);
-        // th.apiTests.post.defaultPositive(co.apis.activities, co.collections.activities.name, createPostTestActivity, mapActivities);
+        th.apiTests.post.defaultNegative(co.apis.recordtypes + "/field/clientnulldatatypenull", co.permissions.SETTINGS_CLIENT_RECORDTYPES, createPostTestRecordtypefield);
 
-        xit('responds with 400 when no name is given', async() => {});
+        it('responds with 400 when no name is given', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            delete fieldtosend.name;
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 400 when name contains characters other than a-z', async() => {});
+        it('responds with 400 when name contains characters other than a-z', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.name = "aUb";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.name = "a0b";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.name = "a'b";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.name = "a\"b";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.name = "a-b";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.name = "a_b";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 400 when fieldtype is invalid', async() => {});
+        it('responds with 400 when fieldtype is invalid', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "invalidfieldtype";
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 400 when fieldtype is formula and formula is invalid', async() => {});
+        it('responds with 400 when fieldtype is formula and formula is invalid', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "formula";
+            fieldtosend.formula = "invalidformula";
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = {};
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { unknownformula: "A" };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { childsum: 13 };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { ifthenelse: "eins" };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { ifthenelse: ["A"] };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { ifthenelse: [ "A", "13", "B", 42 ] };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { ifthenelse: [ 1, 13, "B", 42 ] };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { ifthenelse: [ "A", 13, 2, 42 ] };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { ifthenelse: [ "A", 13, "B", "42" ] };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { sum: "eins" };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { sum: [] };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+            fieldtosend.formula = { sum: [ 1, "2" ] };
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 400 when isrequired is not of type boolean', async() => {});
+        it('responds with 400 when isrequired is not of type boolean', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.isrequired = "notboolean";
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 400 when isnullable is not of type boolean', async() => {});
+        it('responds with 400 when isnullable is not of type boolean', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.isnullable = "notboolean";
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 400 when ishidden is not of type boolean', async() => {});
+        it('responds with 400 when ishidden is not of type boolean', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.ishidden = "notboolean";
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 400 when formulaindex is not of type int', async() => {});
+        it('responds with 400 when formulaindex is not of type int', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.formulaindex = "notint";
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 404 when reference targets an invalid datatype', async() => {});
+        it('responds with 400 when fieldtype is reference and reference targets an invalid datatype', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "reference";
+            fieldtosend.reference = "invaliddatatype";
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
+        });
 
-        xit('responds with 404 when datatype does not exist for client', async() => {});
+        it('responds with 404 when datatype does not exist for client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            return th.post(`/api/recordtypes/field/invaliddatatype?token=${token}`).send(fieldtosend).expect(404);
+        });
 
-        xit('responds with 404 when datatype does not exist for client but for other client', async() => {});
+        it('responds with 404 when datatype does not exist for client but for other client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            return th.post(`/api/recordtypes/field/clientonedatatypenull?token=${token}`).send(fieldtosend).expect(404);
+        });
 
-        xit('responds with 409 when a field with the given name already exists for the datatype', async() => {});
+        it('responds with 409 when a field with the given name already exists for the datatype', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.name = "name";
+            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(409);
+        });
 
-        xit('creates the field and returns 200', async() => {});
+        it('creates the field and returns 200 on correct fieldtype "text"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.ok(fieldfromdatabase);
+            assert.strictEqual(fieldfromdatabase.datatypename, "clientnulldatatypenull");
+            assert.strictEqual(fieldfromdatabase.fieldtype, "text");
+            assert.strictEqual(fieldfromdatabase.formula, null);
+            assert.strictEqual(fieldfromdatabase.formulaindex, 0);
+            assert.strictEqual(fieldfromdatabase.ishidden, fieldtosend.ishidden);
+            assert.strictEqual(fieldfromdatabase.ismanuallyupdated, false);
+            assert.strictEqual(fieldfromdatabase.isnullable, fieldtosend.isnullable);
+            assert.strictEqual(fieldfromdatabase.ispredefined, false);
+            assert.strictEqual(fieldfromdatabase.isrequired, fieldtosend.isrequired);
+            assert.strictEqual(fieldfromdatabase.label, fieldtosend.label);
+            assert.strictEqual(fieldfromdatabase.name, fieldtosend.name);
+            assert.strictEqual(fieldfromdatabase.reference, null);
+        });
 
-        xit('creates the field even when one with the given name already exists for another datatype', async() => {});
+        it('creates the field and returns 200 on correct fieldtype "decimal"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "decimal";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.strictEqual(fieldfromdatabase.fieldtype, fieldtosend.fieldtype);
+        });
+
+        it('creates the field and returns 200 on correct fieldtype "boolean"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "boolean";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.strictEqual(fieldfromdatabase.fieldtype, fieldtosend.fieldtype);
+        });
+
+        it('creates the field and returns 200 on correct fieldtype "datetime"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "datetime";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.strictEqual(fieldfromdatabase.fieldtype, fieldtosend.fieldtype);
+        });
+
+        it('creates the field and returns 200 on correct fieldtype "password"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "password";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.strictEqual(fieldfromdatabase.fieldtype, fieldtosend.fieldtype);
+        });
+
+        it('creates the field and returns 200 on correct fieldtype "reference"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "reference";
+            fieldtosend.reference = "clientnulldatatypeone";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.strictEqual(fieldfromdatabase.fieldtype, fieldtosend.fieldtype);
+            assert.strictEqual(fieldfromdatabase.reference, fieldtosend.reference);
+        });
+
+        it('creates the field and returns 200 on correct fieldtype "formula"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.fieldtype = "formula";
+            fieldtosend.formula = { childsum: "childfield" };
+            fieldtosend.formulaindex = 13;
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.strictEqual(fieldfromdatabase.fieldtype, fieldtosend.fieldtype);
+            assert.strictEqual(fieldfromdatabase.formula, JSON.stringify(fieldtosend.formula));
+            assert.strictEqual(fieldfromdatabase.formulaindex, fieldtosend.formulaindex);
+        });
+
+        it('creates the field even when one with the given name already exists for another datatype', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.name = "datatypeonefield";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.ok(fieldfromdatabase);
+        });
+
+        it('ignores the attribute "datatypename" when sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.datatypename = "customdatatypename";
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.strictEqual(fieldfromdatabase.datatypename, "clientnulldatatypenull");
+        });
+
+        it('ignores the attribute "ispredefined" when sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = createPostTestRecordtypefield();
+            fieldtosend.ispredefined = true;
+            await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields[fieldtosend.name];
+            assert.strictEqual(fieldfromdatabase.ispredefined, false);
+        });
+
+        xit('recalculates the formulas of all parents when the fieldtype is formula and so a new formula was created which was perhaps referenced in a parent\'s formula', async() => {
+        });
 
     });
 
@@ -544,6 +765,14 @@ describe('API recordtypes', () => {
         xit('does not update the reference when it was sent', async() => {});
 
         xit('does not update isnullable when it was sent', async() => {});
+
+        xit('recalculates the formulas of all instances when the formula changed', async() => {});
+
+        xit('recalculates the formulas of all instances when the formulaindex changed', async() => {});
+
+        xit('recalculates the formulas of all parents when the formula changed', async() => {});
+
+        xit('recalculates the formulas of all parents when the formulaindex changed', async() => {});
 
     });
 
@@ -610,10 +839,6 @@ describe('API recordtypes', () => {
 
         xit('does not update ispredefined when it was sent', async() => {});
 
-        xit('recalculates the formula of all instances when the formula changed', async() => {});
-
-        xit('recalculates the formula of all instances when the formulaindex changed', async() => {});
-
     });
 
     describe('DELETE/field/:datatypename/:fieldname', () => {
@@ -635,6 +860,8 @@ describe('API recordtypes', () => {
         xit('responds with 404 when the field does not exist for the datatype even when it exists for another datatype', async() => {});
 
         xit('deletes the field and its corresponding table column and returns 204', async() => {});
+
+        xit('recalculates the formulas of all parents when the field was referenced in a formula', async() => {});
 
     });
 
@@ -659,6 +886,8 @@ describe('API recordtypes', () => {
         xit('deletes the datatype, its table and returns 204', async() => {});
 
         xit('deletes the datatype even when it is references within an own field (ring dependencies are possible and okay)', async() => {});
+
+        xit('recalculates the formulas of all parents', async() => {});
 
     });
 

@@ -49,8 +49,5 @@
 |Formula|Description|
 |:--|:--|
 |childsum:A|Summarizes the field named "A" of all childelements. When a child has no such field, then ```0``` is assumed as value of the child|
-|childifsumzero:[A,B]|Summarizes the field named "A" of all childelements and takes this value. When a child has no such field, then ```0``` is assumed as value of the child. When the sum is zero (0), then the value of the field "B" of the current element is returned|
 |ifthenelse:[A,B,C,D]|When the field named "A" has the concrete value "B" then the value of the field named "C" is used, otherwise the discrete value "D" is returned|
 |sum:[A,...]|Summarizes the values of all of the given field names of the element. Prefixing a field name with "-" negates the value of the field|
-|prod:[A,...]|Multiplies the values of all of the given field names of the element. Prefixing a field name with "-" negates the value of the field|
-|div:[A,B]|Divides the value of field "A" by the value of field "B". Prefixing a field name with "-" negates the value of the field|
