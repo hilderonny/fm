@@ -121,11 +121,16 @@ router.put('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIEN
     if (keys.indexOf("label") >= 0) updateset.label = field.label;
     if (!existingfield.ispredefined && keys.indexOf("formula") >= 0) updateset.formula = field.formula;
     if (!existingfield.ispredefined && keys.indexOf("formulaindex") >= 0) updateset.formulaindex = field.formulaindex;
-    if (keys.indexOf("ishidden") >= 0) updateset.ishidden = !!field.ishidden;
-    await Db.updaterecordtypefield(clientname, datatypename, fieldname, updateset);
-    // Force update of cache in the next request
-    delete Db.datatypes;
-    res.sendStatus(200);
+    if (keys.indexOf("ishidden") >= 0) updateset.ishidden = field.ishidden;
+    if (Object.keys(updateset).length < 1) return res.sendStatus(400);
+    try {
+        await Db.updaterecordtypefield(clientname, datatypename, fieldname, updateset);
+        // Force update of cache in the next request
+        delete Db.datatypes;
+        res.sendStatus(200);
+    } catch(error) {
+        res.sendStatus(400);
+    }
 });
 
 router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
@@ -144,6 +149,7 @@ router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.mo
     if (!existing.ispredefined && keys.indexOf("permissionkey") >= 0) updateset.permissionkey = recordtype.permissionkey;
     if (!existing.ispredefined && keys.indexOf("canhaverelations") >= 0) updateset.canhaverelations = recordtype.canhaverelations;
     if (!existing.ispredefined && keys.indexOf("candefinename") >= 0) updateset.candefinename = recordtype.candefinename;
+    if (Object.keys(updateset).length < 1) return res.sendStatus(400);
     await Db.updaterecordtype(clientname, recordtypename, updateset);
     // Force update of cache in the next request
     delete Db.datatypes;

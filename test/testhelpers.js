@@ -847,12 +847,12 @@ th.apiTests = {
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}${withoutid ? "" : `/${testObject._id}`}?token=${token}`).expect(400);
             });
-            if (!withoutid) it('responds with 404 when the _id is invalid', async() => {
+            if (!withoutid) it('responds with 404 when the name is invalid', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/invalidId?token=${token}`).send(testObject).expect(404);
             });
-            if (!withoutid) it('does not update the _id when it was sent', async() => {
+            if (!withoutid) it('does not update the name when it was sent', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
                 var originalId = testObject._id;
