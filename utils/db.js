@@ -579,9 +579,21 @@ var Db = {
     updaterecordtype: async(clientname, recordtypename, recordtype) => {
         var updateset = [];
         var keys = Object.keys(recordtype);
+        if (["undefined", "string"].indexOf(typeof(recordtype.label)) < 0) throw new Error("label must be a string!");
+        if (["undefined", "string"].indexOf(typeof(recordtype.plurallabel)) < 0) throw new Error("plurallabel must be a string!");
+        if (["undefined", "string"].indexOf(typeof(recordtype.titlefield)) < 0) throw new Error("titlefield must be a string!");
+        if (typeof(recordtype.lists) !== "undefined" && (!Array.isArray(recordtype.lists) || recordtype.lists.find(l => typeof(l) !== "string"))) throw new Error("lists must be an array of strings!");
+        if (["undefined", "string"].indexOf(typeof(recordtype.icon)) < 0) throw new Error("icon must be a string!");
+        if (["undefined", "string"].indexOf(typeof(recordtype.permissionkey)) < 0) throw new Error("permissionkey must be a string!");
+        if (["undefined", "boolean"].indexOf(typeof(recordtype.canhaverelations)) < 0) throw new Error("canhaverelations must be a boolean!");
+        if (["undefined", "boolean"].indexOf(typeof(recordtype.candefinename)) < 0) throw new Error("candefinename must be a boolean!");
+        if (["undefined", "boolean"].indexOf(typeof(recordtype.ishidden)) < 0) throw new Error("ishidden must be a boolean!");
         if (keys.indexOf("label") >= 0) updateset.push(Db.gettextupdateset("label", recordtype.label));
         if (keys.indexOf("plurallabel") >= 0) updateset.push(Db.gettextupdateset("plurallabel", recordtype.plurallabel));
-        if (keys.indexOf("titlefield") >= 0) updateset.push(Db.gettextupdateset("titlefield", recordtype.titlefield));
+        if (keys.indexOf("titlefield") >= 0) {
+            if (!(await Db.getdatatypes(clientname))[recordtypename].fields[recordtype.titlefield]) throw new Error("titlefield must refer to an existing field!");
+            updateset.push(Db.gettextupdateset("titlefield", recordtype.titlefield));
+        }
         if (keys.indexOf("lists") >= 0) updateset.push(`lists='{${recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",")}}'`);
         if (keys.indexOf("icon") >= 0) updateset.push(Db.gettextupdateset("icon", recordtype.icon));
         if (keys.indexOf("permissionkey") >= 0) updateset.push(Db.gettextupdateset("permissionkey", recordtype.permissionkey));

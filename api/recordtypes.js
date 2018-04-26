@@ -154,10 +154,14 @@ router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.mo
     if (!existing.ispredefined && keys.indexOf("canhaverelations") >= 0) updateset.canhaverelations = recordtype.canhaverelations;
     if (!existing.ispredefined && keys.indexOf("candefinename") >= 0) updateset.candefinename = recordtype.candefinename;
     if (Object.keys(updateset).length < 1) return res.sendStatus(400);
-    await Db.updaterecordtype(clientname, recordtypename, updateset);
-    // Force update of cache in the next request
-    delete Db.datatypes;
-    res.sendStatus(200);
+    try {
+        await Db.updaterecordtype(clientname, recordtypename, updateset);
+        // Force update of cache in the next request
+        delete Db.datatypes;
+        res.sendStatus(200);
+    } catch(error) {
+        res.sendStatus(400);
+    }
 });
 
 router.delete('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {

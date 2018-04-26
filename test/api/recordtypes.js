@@ -994,66 +994,249 @@ describe('API recordtypes', () => {
 
     describe('PUT/:name', () => {
 
-        // async function createPutTestActivity(clientname) {
-        //     var testactivity = { name: clientname + "_testactivity", date: (new Date()).getTime(), label: "client0_activity0", task: null, isdone: true, activitytypename: "ACTIVITIES_TYPE_NONE", comment: "comment", createdbyusername: "client0_usergroup0_user0", isforallusers: false };
-        //     await Db.insertDynamicObject(clientname, "activities", testactivity);
-        //     return mapActivities([testactivity], clientname)[0];
-        // }
+        function createPutTestRecordtype() {
+            return {
+                _id: "clientnulldatatypenull",
+                label: "testrecordtypelabel",
+                plurallabel: "testrecordtypeplurallabel",
+                titlefield: "formula0",
+                lists: [ "updatedlist1", "updatedlist2" ],
+                icon: "testrecordtypeicon",
+                permissionkey: "testrecordtypepermissionkey",
+                canhaverelations: false,
+                candefinename: false
+            };
+        }
 
-        // th.apiTests.put.defaultNegative(co.apis.activities, co.permissions.OFFICE_ACTIVITY, createPutTestActivity);
-        // th.apiTests.put.clientDependentNegative(co.apis.activities, createPutTestActivity);
+        th.apiTests.put.defaultNegative(co.apis.recordtypes, co.permissions.SETTINGS_CLIENT_RECORDTYPES, createPutTestRecordtype);
 
-        xit('responds with 400 when the titlefield is given but there is no field of this name', async() => {});
+        it('responds with 400 when the titlefield is given but there is no field of this name', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.titlefield = "unknownfield";
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when label is not of type text', async() => {});
+        it('responds with 400 when label is not of type text', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.label = 123;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when plurallabel is not of type text', async() => {});
+        it('responds with 400 when plurallabel is not of type text', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.plurallabel = 123;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when titlefield is not of type text', async() => {});
+        it('responds with 400 when titlefield is not of type text', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.titlefield = 123;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when lists is not of an array of type text', async() => {});
+        it('responds with 400 when lists is not an array of type text', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.lists = "noarray";
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+            datatypetosend.lists = [ 1, "zwei" ];
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when icon is not of type text', async() => {});
+        it('responds with 400 when icon is not of type text', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.icon = 123;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when permissionkey is not of type text', async() => {});
+        it('responds with 400 when permissionkey is not of type text', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.permissionkey = 123;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when canhaverelations is not of type boolean', async() => {});
+        it('responds with 400 when canhaverelations is not of type boolean', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.canhaverelations = "notboolean";
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 400 when candefinename is not of type boolean', async() => {});
+        it('responds with 400 when candefinename is not of type boolean', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.candefinename = "notboolean";
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 404 when the datatype does not exist for the client', async() => {});
+        it('responds with 400 when no attributes to update are sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = {};
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(400);
+        });
 
-        xit('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {});
+        it('responds with 404 when the datatype does not exist for the client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            await th.put(`/api/recordtypes/unknowndatatype?token=${token}`).send(datatypetosend).expect(404);
+        });
 
-        xit('updates the datatype and sets the attribute "ismanuallyupdated" to true', async() => {});
+        it('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            await th.put(`/api/recordtypes/clientonedatatypenull?token=${token}`).send(datatypetosend).expect(404);
+        });
 
-        xit('does not update the label when it is not set', async() => {});
+        it('updates the datatype and sets the attribute "ismanuallyupdated" to true', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.label, datatypetosend.label);
+            assert.strictEqual(datatypefromdatabase.plurallabel, datatypetosend.plurallabel);
+            assert.strictEqual(datatypefromdatabase.titlefield, datatypetosend.titlefield);
+            assert.strictEqual(JSON.stringify(datatypefromdatabase.lists), JSON.stringify(datatypetosend.lists));
+            assert.strictEqual(datatypefromdatabase.icon, datatypetosend.icon);
+            assert.strictEqual(datatypefromdatabase.permissionkey, datatypetosend.permissionkey);
+            assert.strictEqual(datatypefromdatabase.canhaverelations, datatypetosend.canhaverelations);
+            assert.strictEqual(datatypefromdatabase.candefinename, datatypetosend.candefinename);
+            assert.strictEqual(datatypefromdatabase.ismanuallyupdated, true);
+        });
 
-        xit('does not update the plurallabel when it is not set', async() => {});
+        it('does not update the label when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            delete datatypetosend.label;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.label, "label0");
+        });
 
-        xit('does not update the titlefield when it is not set', async() => {});
+        it('does not update the plurallabel when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            delete datatypetosend.plurallabel;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.plurallabel, "plurallabel0");
+        });
 
-        xit('does not update the lists when it is not set', async() => {});
+        it('does not update the titlefield when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            delete datatypetosend.titlefield;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.titlefield, "text0");
+        });
 
-        xit('does not update the icon when it is not set', async() => {});
+        it('does not update the lists when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            delete datatypetosend.lists;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(JSON.stringify(datatypefromdatabase.lists), JSON.stringify(["list0"]));
+        });
 
-        xit('does not update the permissionkey when it is not set', async() => {});
+        it('empties the list when an emtpy list is sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.lists = [];
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(JSON.stringify(datatypefromdatabase.lists), JSON.stringify([]));
+        });
 
-        xit('does not update the permissionkey when it is set but predefined', async() => {});
+        it('does not update the icon when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            delete datatypetosend.icon;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.icon, "icon0");
+        });
 
-        xit('does not update the canhaverelations when it is not set', async() => {});
+        it('does not update the permissionkey when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            delete datatypetosend.permissionkey;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.permissionkey, co.permissions.BIM_FMOBJECT);
+        });
 
-        xit('does not update the canhaverelations when it is set but predefined', async() => {});
+        it('does not update the permissionkey when it is set but predefined', async() => {
+            await Db.query("client0", "UPDATE datatypes SET ispredefined=true WHERE name='clientnulldatatypenull';");
+            delete Db.datatypes;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.permissionkey, co.permissions.BIM_FMOBJECT);
+        });
 
-        xit('does not update the candefinename when it is not set', async() => {});
+        it('does not update canhaverelations when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            delete datatypetosend.canhaverelations;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.canhaverelations, true);
+        });
 
-        xit('does not update the candefinename when it is set but predefined', async() => {});
+        it('does not update canhaverelations when it is set but predefined', async() => {
+            await Db.query("client0", "UPDATE datatypes SET ispredefined=true WHERE name='clientnulldatatypenull';");
+            delete Db.datatypes;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.canhaverelations, true);
+        });
 
-        xit('does nothing but returns 200 when no atteibutes to update are sent', async() => {});
+        it('does not update candefinename when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            delete datatypetosend.candefinename;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.candefinename, true);
+        });
 
-        xit('does not update the name when it was sent', async() => {});
+        it('does not update candefinename when it is set but predefined', async() => {
+            await Db.query("client0", "UPDATE datatypes SET ispredefined=true WHERE name='clientnulldatatypenull';");
+            delete Db.datatypes;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.candefinename, true);
+        });
 
-        xit('does not update ispredefined when it was sent', async() => {});
+        it('does not update the name when it was sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.name = "newname";
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            assert.ok((await Db.getdatatypes("client0"))["clientnulldatatypenull"]);
+            assert.ok(!(await Db.getdatatypes("client0"))["newname"]);
+        });
+
+        it('does not update ispredefined when it was sent', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var datatypetosend = createPutTestRecordtype();
+            datatypetosend.ispredefined = true;
+            await th.put(`/api/recordtypes/clientnulldatatypenull?token=${token}`).send(datatypetosend).expect(200);
+            var datatypefromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.strictEqual(datatypefromdatabase.ispredefined, false);
+        });
 
     });
 

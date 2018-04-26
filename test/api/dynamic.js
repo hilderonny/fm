@@ -859,7 +859,7 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity2?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula0, null); // No children anymore
+            assert.strictEqual(parent.formula0, 0); // No children anymore
             assert.strictEqual(parent.formula1, 234.567);
         });
 
@@ -881,7 +881,7 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity2?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula0, null); // No children anymore
+            assert.strictEqual(parent.formula0, 0); // No children anymore
             assert.strictEqual(parent.formula1, 234.567);
         });
 
