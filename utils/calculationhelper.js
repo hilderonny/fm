@@ -12,7 +12,7 @@ var ch = {
             var child = await Db.getDynamicObject(clientname, childrelation.datatype2name, childrelation.name2);
             if (child[formuladef]) sum += child[formuladef];
         }
-        value = sum ? parseFloat(sum) : null; // Prevent NaN
+        var value = typeof(sum) === "number" ? parseFloat(sum) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
     },
     calculate_ifthenelse: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
@@ -20,7 +20,7 @@ var ch = {
         var entity = await Db.getDynamicObject(clientname, datatypename, entityname);
         var elsedef = formuladef[3];
         var value = (entity[formuladef[0]] === formuladef[1]) ? entity[formuladef[2]] : (typeof(elsedef) === 'string' ? entity[elsedef] : elsedef);
-        value = value ? parseFloat(value) : null; // Prevent NaN
+        value = typeof(value) === "number" ? parseFloat(value) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
     },
     calculate_sum: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
@@ -36,7 +36,7 @@ var ch = {
             }
             if (entity[fieldname]) sum += minus ? -entity[fieldname] : entity[fieldname];
         }
-        value = sum ? parseFloat(sum) : null; // Prevent NaN
+        var value = typeof(sum) === "number" ? parseFloat(sum) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
     },
     // Recalculates an antity and all of its parents recursively
@@ -44,11 +44,15 @@ var ch = {
         // Fetch parent structure
         var parents = (await Db.getparentrelationstructure(clientname, datatypename, entityname)).sort((a, b) => a.depth - b.depth);
         // Calculate the entity itself
-        await ch.calculateformula(clientname, datatypename, entityname);
+        try {
+            await ch.calculateformula(clientname, datatypename, entityname);
+        } catch(error) { } // Ignore calculation errors for invalid formulas
         // Calculate parents, order is important!
         for (var i = 0; i < parents.length; i++) {
             var parent = parents[i];
-            await ch.calculateformula(clientname, parent.datatype1name, parent.name1);
+            try {
+                await ch.calculateformula(clientname, parent.datatype1name, parent.name1);
+            } catch(error) { } // Ignore calculation errors for invalid formulas
         }
     },
     // Calculates all formulas for a specific entity
@@ -58,6 +62,7 @@ var ch = {
         for (var i = 0; i < datatypefields.length; i++) {
             var dtf = datatypefields[i];
             var formula = JSON.parse(dtf.formula);
+            if (!formula) throw new Error(`Invalid formula ${dtf.formula}`);
             var keys = Object.keys(formula);
             if (keys.length !== 1) throw new Error(`Invalid formula ${dtf.formula}`);
             var key = keys[0];
@@ -90,6 +95,18 @@ var ch = {
             console.log(error);
         }
         console.log("Recalculation finished.");
+    },
+    // Recalculate all entites of a datatype and their parents
+    recalculateforupdateddatatype: async(clientname, datatypename) => { // Called in db.js in line 154
+        try {
+            // perform calculations beginning with all leaf elements proceeding hierarchically upwards
+            var entitynames = (await Db.query(clientname, `SELECT x.name FROM ${datatypename} x LEFT JOIN relations r ON r.datatype1name = '${datatypename}' AND r.name1 = x.name WHERE r IS NULL;`)).rows.map(r => r.name);
+            for (var k = 0; k < entitynames.length; k++) {
+                await ch.calculateentityandparentsrecursively(clientname, datatypename, entitynames[k]);
+            }
+        } catch(error) {
+            console.log(error);
+        }
     }
 }
 

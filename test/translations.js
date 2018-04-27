@@ -98,9 +98,8 @@ function getHardToFindTranslationKeysForModule(moduleName) {
         case 'activities': return [ 'TRK_ACTIVITIES_ACTIVITY', 'TRK_ACTIVITIES_ACTIVITIES', 'TRK_ACTIVITIES_SELECT_ACTIVITY', 'TRK_MODEL_activities' ];
         case 'base': return [ 'TRK_MODEL_users', 'TRK_MODEL_usergroups', 'TRK_DYNAMICATTRIBUTES_NAME_de', 'TRK_DYNAMICATTRIBUTES_NAME_en', 'TRK_DYNAMICATTRIBUTES_TYPE_text', 'TRK_DYNAMICATTRIBUTES_TYPE_boolean', 'TRK_DYNAMICATTRIBUTES_TYPE_picklist', "TRK_DETAILS_NEW_SUBELEMENT", "TRK_DETAILS_NEW_SUBELEMENT_IN_THIS_LEVEL", "TRK_RELATIONS_CREATE_RELATION" ];
         case 'businesspartners': return [ 'TRK_BUSINESSPARTNERS_BUSINESSPARTNER', 'TRK_BUSINESSPARTNERS_BUSINESSPARTNERS', 'TRK_PERSONS_PERSON', 'TRK_PERSONS_PERSONS', 'TRK_BUSINESSPARTNERS_SELECT_BUSINESSPARTNER', 'TRK_PERSONS_SELECT_PERSON', 'TRK_MODEL_businesspartners', 'TRK_MODEL_communications', 'TRK_MODEL_partneraddresses', 'TRK_MODEL_persons' ];
-        case 'clients' : return [ 'TRK_CLIENTS_CLIENT', 'TRK_CLIENTS_CLIENTS', 'TRK_CLIENTS_SELECT_CLIENT', 'TRK_MODEL_clients' ];
+        case 'clients' : return [ 'TRK_MODEL_clients' ];
         case 'documents' : return [ 'TRK_MODEL_documents', 'TRK_MODEL_folders' ];
-        case 'licenseserver' : return [ 'TRK_PORTALS_PORTAL', 'TRK_PORTALS_PORTALS', 'TRK_PORTALS_SELECT_PORTAL' ];
         case 'notes' : return [ 'TRK_NOTES_NOTE', 'TRK_NOTES_SELECT_NOTE' ];
         case 'portalbase' : return [ 'TRK_MODEL_portals' ];
         default: return [];

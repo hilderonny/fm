@@ -40,10 +40,10 @@ describe('API datatypes', () => {
         it('also returns all custom datatypes and their field definitions', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var datatypesfromapi = (await th.get(`/api/datatypes?token=${token}`).expect(200)).body;
-            assert.ok(datatypesfromapi["client0_datatype0"]);
-            assert.ok(datatypesfromapi["client0_datatype1"]);
-            assert.ok(datatypesfromapi["client0_datatype2"]);
-            var dt0 = datatypesfromapi["client0_datatype0"];
+            assert.ok(datatypesfromapi["clientnulldatatypenull"]);
+            assert.ok(datatypesfromapi["clientnulldatatypeone"]);
+            assert.ok(datatypesfromapi["clientnulldatatypetwo"]);
+            var dt0 = datatypesfromapi["clientnulldatatypenull"];
             var fields = dt0.fields;
             assert.ok(fields);
             assert.ok(fields.boolean0);

@@ -32,6 +32,10 @@ module.exports = async() => {
             await Db.insertDynamicObject(clientname, "relations", relation);
             await Db.updateDynamicObject(clientname, "documents", document.name, { parentfoldername: null });
         }
+        // Namensfelder auf predefined setzen
+        await Db.query(clientname, "UPDATE datatypefields SET ispredefined=true WHERE name='name';");
     }
+    // Namensfelder auf predefined setzen
+    await Db.query(Db.PortalDatabaseName, "UPDATE datatypefields SET ispredefined=true WHERE name='name';");
     console.log("UPDATE FINISHED.");
 };

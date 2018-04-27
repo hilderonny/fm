@@ -11,6 +11,7 @@
 |plurallabel|Plural label to be used in list headers in record type administration|
 |titlefield|Name of the field which is used as label in lists and so|
 |icon|URL of icon to use for the record type everywhere it is shown|
+|ismanuallyupdated|Automatically set to true when a recordtype definition is manually updated wo that the checks on startup will not overwrite labels and so|
 |fields|List of fields of the datatype|
 |lists|List of possible places where the datatype is shown in hierarchies or lists, e.g. ```fmobjects``` or ```folders```|
 |permissionkey|Permission key which is required to access entities of this datatype|
@@ -48,8 +49,5 @@
 |Formula|Description|
 |:--|:--|
 |childsum:A|Summarizes the field named "A" of all childelements. When a child has no such field, then ```0``` is assumed as value of the child|
-|childifsumzero:[A,B]|Summarizes the field named "A" of all childelements and takes this value. When a child has no such field, then ```0``` is assumed as value of the child. When the sum is zero (0), then the value of the field "B" of the current element is returned|
 |ifthenelse:[A,B,C,D]|When the field named "A" has the concrete value "B" then the value of the field named "C" is used, otherwise the discrete value "D" is returned|
 |sum:[A,...]|Summarizes the values of all of the given field names of the element. Prefixing a field name with "-" negates the value of the field|
-|prod:[A,...]|Multiplies the values of all of the given field names of the element. Prefixing a field name with "-" negates the value of the field|
-|div:[A,B]|Divides the value of field "A" by the value of field "B". Prefixing a field name with "-" negates the value of the field|

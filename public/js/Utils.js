@@ -53,11 +53,24 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 onclose: scope.ondetailscardclosed,
                 oncreate: scope.onelementcreated,
                 ondelete: scope.onelementdeleted,
-                onsave: scope.onelementupdated
+                onsave: scope.onelementupdated,
+                permission: permission
             }, permission);
         },
 
+        closecard: function(scope, element) {
+            if (scope.params.closeCallback) {
+                scope.params.closeCallback();
+            }
+            utils.removeCardsToTheRightOf(element);
+            utils.removeCard(element);
+        },
+
         createdynamicobject: function(datatypename, entity) {
+            var datatype = $rootScope.datatypes[datatypename];
+            Object.keys(datatype.fields).map(function(fn) { return datatype.fields[fn]; }).forEach(function(f) { 
+                if (entity[f.name] && f.fieldtype === "datetime") entity[f.name] = Date.parse(entity[f.name]);
+            });
             return $http.post("/api/dynamic/" + datatypename, entity).then(function(response) {
                 if (response.status !== 200) return Promise.reject(response.status);
                 return response.data; // name of created element
@@ -98,6 +111,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                     var dt = datatypes[k];
                     scope.titlefields[k] = dt.titlefield ? dt.titlefield : "name";
                 });
+                scope.titlefields["recordtypes"] = "label"; // Special handling for record type administration
+                return Promise.resolve();
             });
         },
 
@@ -169,6 +184,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                         }
                     });
                 });
+                return Promise.resolve();
             });
         },
 
@@ -183,6 +199,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 responsedata.forEach(function(permission) {
                     scope.permissions[permission.key] = permission;
                 });
+                return Promise.resolve();
             });
         },
 
@@ -211,7 +228,10 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         // Loads the meta information about all possible relation types. Needed for titles and labels.
         loadrelationtypes: function(scope) {
-            return utils.getresponsedata('/api/dynamic/relationtypes').then(function(relationtypes) { scope.relationtypes = relationtypes; });
+            return utils.getresponsedata('/api/dynamic/relationtypes').then(function(relationtypes) { 
+                scope.relationtypes = relationtypes;
+                return Promise.resolve();
+            });
         },
 
         login: function(scope, username, password) {
@@ -299,6 +319,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             delete entitytosend.name;
             Object.keys(datatype.fields).map(function(fn) { return datatype.fields[fn]; }).forEach(function(f) { 
                 if (f.fieldtype === "formula") delete entitytosend[f.name];
+                if (entitytosend[f.name] && f.fieldtype === "datetime") entitytosend[f.name] = Date.parse(entitytosend[f.name]);
             });
             return $http.put("/api/dynamic/" + datatype.name + "/" + entity.name, entitytosend);
         },
@@ -360,15 +381,15 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                     '<md-dialog>' +
                     '  <md-dialog-content class="md-dialog-content">' + content + '</md-dialog-content>' +
                     '  <md-dialog-actions>' +
-                    '    <md-button ng-repeat="button in dialogbuttons" ng-click="onclick(button)" ng-if="!button.ishidden" class="md-raised {{button.class}}"><span translate="{{button.label}}"></span></md-button>' +
+                    '    <md-button ng-repeat="button in dialogbuttons" ng-click="onclick(button)" ng-if="!button.ishidden" class="md-raised {{button.class}}">{{button.label}}</md-button>' +
                     '  </md-dialog-actions>' +
                     '</md-dialog>',
                 scope: parentscope,
                 controller: function($scope, $mdDialog) {
                     $scope.dialogbuttons = buttons;
                     $scope.onclick = function(button) {
-                        if (button.onclick) button.onclick();
-                        $mdDialog.hide();
+                        var result = button.onclick && button.onclick() === false ? false : true;
+                        if (result) $mdDialog.hide();
                     }
                 }
             })
@@ -390,7 +411,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 template: 
                     '<md-list class="context-menu" role="list">' +
                     '   <md-list-item ng-repeat="item in list | orderBy : \'label\'" ng-click="click(item)">' +
-                    '       <md-icon md-svg-src="{{item.icon}}"></md-icon>' +
+                    '       <img ng-src="{{item.icon}}"/>' +
                     '       <p>{{item.label}}</p>' +
                     '   </md-list-item>' +
                     '</md-list>',

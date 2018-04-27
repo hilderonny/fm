@@ -35,12 +35,12 @@
                             <span ng-bind="fmObject.label"></span>
                         </div>
                     </td>
-                    <td ng-bind="fmObject.bgf | number:0"></td>
-                    <td ng-bind="fmObject.nrf | number:0"></td>
-                    <td ng-bind="fmObject.kgf | number:0"></td>
-                    <td ng-bind="fmObject.nuf | number:0"></td>
-                    <td ng-bind="fmObject.tf | number:0"></td>
-                    <td ng-bind="fmObject.vf | number:0"></td>
+                    <td ng-bind="fmObject.bgf | number:2"></td>
+                    <td ng-bind="fmObject.nrf | number:2"></td>
+                    <td ng-bind="fmObject.kgf | number:2"></td>
+                    <td ng-bind="fmObject.nuf | number:2"></td>
+                    <td ng-bind="fmObject.tf | number:2"></td>
+                    <td ng-bind="fmObject.vf | number:2"></td>
                 </tr>
             </tbody>
         </table>
@@ -49,27 +49,27 @@
             <tbody>
                 <tr ng-if="currentFmObject.bgf !== undefined">
                     <th translate="TRK_AREAS_BGF"></th>
-                    <td ng-bind="currentFmObject.bgf | number:0"></td>
+                    <td ng-bind="currentFmObject.bgf | number:2"></td>
                 </tr>
                 <tr ng-if="currentFmObject.nrf !== undefined">
                     <th translate="TRK_AREAS_NRF"></th>
-                    <td ng-bind="currentFmObject.nrf | number:0"></td>
+                    <td ng-bind="currentFmObject.nrf | number:2"></td>
                 </tr>
                 <tr ng-if="currentFmObject.kgf !== undefined">
                     <th translate="TRK_AREAS_KGF"></th>
-                    <td ng-bind="currentFmObject.kgf | number:0"></td>
+                    <td ng-bind="currentFmObject.kgf | number:2"></td>
                 </tr>
                 <tr ng-if="currentFmObject.nuf !== undefined">
                     <th translate="TRK_AREAS_NUF"></th>
-                    <td ng-bind="currentFmObject.nuf | number:0"></td>
+                    <td ng-bind="currentFmObject.nuf | number:2"></td>
                 </tr>
                 <tr ng-if="currentFmObject.tf !== undefined">
                     <th translate="TRK_AREAS_TF"></th>
-                    <td ng-bind="currentFmObject.tf | number:0"></td>
+                    <td ng-bind="currentFmObject.tf | number:2"></td>
                 </tr>
                 <tr ng-if="currentFmObject.vf !== undefined">
                     <th translate="TRK_AREAS_VF"></th>
-                    <td ng-bind="currentFmObject.vf | number:0"></td>
+                    <td ng-bind="currentFmObject.vf | number:2"></td>
                 </tr>
             </tbody>
         </table>

@@ -44,7 +44,7 @@ describe('API settingsets', () => {
 
             assert.strictEqual(settings[1].type, co.settingSetTypes.CLIENT);
             assert.ok(settings[1].items);
-            assert.strictEqual(settings[1].items.length, 2);
+            assert.strictEqual(settings[1].items.length, 3);
             assert.strictEqual(settings[1].items[0].mainCard, "Administration/ClientSettingsCard");
             assert.strictEqual(settings[1].items[0].icon, "Briefcase");
             assert.strictEqual(settings[1].items[0].title, "TRK_SETTINGSET_CLIENT");
@@ -53,6 +53,10 @@ describe('API settingsets', () => {
             assert.strictEqual(settings[1].items[1].icon, "View Details");
             assert.strictEqual(settings[1].items[1].title, "TRK_SETTINGSET_DYNAMICATTRIBUTES");
             assert.strictEqual(settings[1].items[1].permission, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES);
+            assert.strictEqual(settings[1].items[2].mainCard, "Administration/RecordTypeListCard");
+            assert.strictEqual(settings[1].items[2].icon, "icons8-categorize");
+            assert.strictEqual(settings[1].items[2].title, "TRK_SETTINGSET_RECORDTYPES");
+            assert.strictEqual(settings[1].items[2].permission, co.permissions.SETTINGS_CLIENT_RECORDTYPES);
 
             assert.strictEqual(settings[2].type, co.settingSetTypes.PORTAL);
             assert.ok(settings[2].items);
@@ -77,7 +81,7 @@ describe('API settingsets', () => {
 
             assert.strictEqual(settings[1].type, co.settingSetTypes.CLIENT);
             assert.ok(settings[1].items);
-            assert.strictEqual(settings[1].items.length, 2);
+            assert.strictEqual(settings[1].items.length, 3);
             assert.strictEqual(settings[1].items[0].mainCard, "Administration/ClientSettingsCard");
             assert.strictEqual(settings[1].items[0].icon, "Briefcase");
             assert.strictEqual(settings[1].items[0].title, "TRK_SETTINGSET_CLIENT");
@@ -86,6 +90,10 @@ describe('API settingsets', () => {
             assert.strictEqual(settings[1].items[1].icon, "View Details");
             assert.strictEqual(settings[1].items[1].title, "TRK_SETTINGSET_DYNAMICATTRIBUTES");
             assert.strictEqual(settings[1].items[1].permission, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES);
+            assert.strictEqual(settings[1].items[2].mainCard, "Administration/RecordTypeListCard");
+            assert.strictEqual(settings[1].items[2].icon, "icons8-categorize");
+            assert.strictEqual(settings[1].items[2].title, "TRK_SETTINGSET_RECORDTYPES");
+            assert.strictEqual(settings[1].items[2].permission, co.permissions.SETTINGS_CLIENT_RECORDTYPES);
 
             assert.strictEqual(settings[2].type, co.settingSetTypes.PORTAL);
             assert.ok(settings[2].items);
@@ -110,7 +118,7 @@ describe('API settingsets', () => {
 
             assert.strictEqual(settings[1].type, co.settingSetTypes.CLIENT);
             assert.ok(settings[1].items);
-            assert.strictEqual(settings[1].items.length, 2);
+            assert.strictEqual(settings[1].items.length, 3);
             assert.strictEqual(settings[1].items[0].mainCard, "Administration/ClientSettingsCard");
             assert.strictEqual(settings[1].items[0].icon, "Briefcase");
             assert.strictEqual(settings[1].items[0].title, "TRK_SETTINGSET_CLIENT");
@@ -119,11 +127,16 @@ describe('API settingsets', () => {
             assert.strictEqual(settings[1].items[1].icon, "View Details");
             assert.strictEqual(settings[1].items[1].title, "TRK_SETTINGSET_DYNAMICATTRIBUTES");
             assert.strictEqual(settings[1].items[1].permission, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES);
+            assert.strictEqual(settings[1].items[2].mainCard, "Administration/RecordTypeListCard");
+            assert.strictEqual(settings[1].items[2].icon, "icons8-categorize");
+            assert.strictEqual(settings[1].items[2].title, "TRK_SETTINGSET_RECORDTYPES");
+            assert.strictEqual(settings[1].items[2].permission, co.permissions.SETTINGS_CLIENT_RECORDTYPES);
         });
 
         it('responds only with setting sets the logged in user has read permission to', async() => {
             await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.SETTINGS_USER);
             await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES);
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.SETTINGS_CLIENT_RECORDTYPES);
             var token = await th.defaults.login("client0_usergroup0_user0");
             var settings = (await th.get(`/api/settingsets?token=${token}`).expect(200)).body;
             assert.strictEqual(settings.length, 1);
