@@ -27,6 +27,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
                 promise = utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission).then(function() {
                     $mdSidenav('left').close();
                     if (menuItem.directurls && menuItem.directurls.length > 0) utils.setLocation('/' + menuItem.directurls[0]); // Use first defined direct URL
+                    return Promise.resolve();
                 });
             }
         } else {
@@ -51,13 +52,15 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         } else if (rootscope.directUrlMappings[path1]) {
             var mapping = rootscope.directUrlMappings[path1];
             var mainMenu = rootscope.menu.find(function(m) { return m.title === mapping.mainMenu; });
-            if (!mainMenu) return Promise.resolve();;
+            if (!mainMenu) return Promise.resolve();
             var subMenu = mainMenu.items.find(function(mi) { return mi.title === mapping.subMenu; });
-            if (!subMenu) return Promise.resolve();;
+            if (!subMenu) return Promise.resolve();
             rootscope.currentMenuItem = subMenu;
             angular.element(document.querySelector('#cardcanvas')).empty();
             subMenu.preselection = rootscope.path[2];
             return utils.addCardWithPermission(subMenu.mainCard, subMenu, subMenu.permission);
+        } else {
+            return Promise.resolve();
         }
     };
 

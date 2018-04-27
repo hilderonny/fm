@@ -1,5 +1,4 @@
 {   
-    "TRK_CANCEL" : "Abbrechen",
     "TRK_DATATYPES_DATATYPE" : "Datentyp",
     "TRK_DETAILS_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_DETAILS_CREATE" : "Erstellen",
@@ -52,7 +51,6 @@
     "TRK_MODEL_users": "Benutzer",
     "TRK_MODULE_base_NAME" : "Basis",
     "TRK_NO" : "Nein",
-    "TRK_OK" : "OK",
     "TRK_PERMISSION_ADMINISTRATION_CLIENT" : "Administration - Mandanten",
     "TRK_PERMISSION_ADMINISTRATION_SETTINGS" : "Administration - Einstellungen",
     "TRK_PERMISSION_ADMINISTRATION_USER" : "Administration - Benutzer",
@@ -68,6 +66,7 @@
     "TRK_PERMISSION_OFFICE_NOTE" : "Büro - Notizen",
     "TRK_PERMISSION_SETTINGS_CLIENT" : "Einstellungen - Mandantenebene",
     "TRK_PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" : "Einstellungen - dynamische Attribute",
+    "TRK_PERMISSION_SETTINGS_CLIENT_RECORDTYPES" : "Einstellungen - dynamische Objekte",
     "TRK_PERMISSION_SETTINGS_PORTAL" : "Einstellungen - Portalebene",
     "TRK_PERMISSION_SETTINGS_USER" : "Einstellungen - Benutzerebene",
     "TRK_RELATIONS_ADD_RELATION" : "Verknüpfung hinzufügen",

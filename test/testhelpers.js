@@ -260,56 +260,59 @@ th.prepareDocuments = async() => {
 };
 
 th.preparedatatypes = async() => {
-    await Db.createDatatype("client0", "client0_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, true, true);
-    await Db.createDatatype("client0", "client0_datatype1", "label1", "plurallabel1", true, "icon1", ["list1"], co.permissions.OFFICE_ACTIVITY, co.modules.documents, true, false);
-    await Db.createDatatype("client0", "client0_datatype2", "label2", "plurallabel2", false, "icon2", ["list0", "list1"], co.permissions.BIM_AREAS, co.modules.notes, false, false);
-    await Db.createDatatype("client0", "client0_datatype3", "label3", "plurallabel3", false, "icon3", ["list2"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, false, false); // datatype without elements
-    await Db.createDatatype("client1", "client1_datatype0", "label0", "plurallabel0", false, "icon0", ["list0"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, true, true);
+    await Db.createDatatype("client0", "clientnulldatatypenull", "label0", "plurallabel0", "text0", "icon0", ["list0"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, true, true);
+    await Db.createDatatype("client0", "clientnulldatatypeone", "label1", "plurallabel1", "name", "icon1", ["list1"], co.permissions.OFFICE_ACTIVITY, co.modules.documents, true, false);
+    await Db.createDatatype("client0", "clientnulldatatypetwo", "label2", "plurallabel2", "name", "icon2", ["list0", "list1"], co.permissions.BIM_AREAS, co.modules.notes, false, false);
+    await Db.createDatatype("client0", "clientnulldatatypethree", "label3", "plurallabel3", "name", "icon3", ["list2"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, false, false); // datatype without elements
+    await Db.createDatatype("client1", "clientonedatatypenull", "label0", "plurallabel0", "name", "icon0", ["list0"], co.permissions.BIM_FMOBJECT, co.modules.fmobjects, true, true);
 };
 
 th.preparedatatypefields = async() => {
-    await Db.createDatatypeField("client0", "client0_datatype0", "boolean0", "Boolean0", co.fieldtypes.boolean, false, true, false, null, null, null, false); // Required, not nullable
-    await Db.createDatatypeField("client0", "client0_datatype0", "datetime0", "DateTime0", co.fieldtypes.datetime, false, false, false, null, null, null, true);
-    await Db.createDatatypeField("client0", "client0_datatype0", "decimal0", "Decimal0", co.fieldtypes.decimal, false, false, false, null, null, null, true);
-    await Db.createDatatypeField("client0", "client0_datatype0", "formula0", "Formula0", co.fieldtypes.formula, false, false, false, null, { "childsum" : "decimal0" }, 0, true);
-    await Db.createDatatypeField("client0", "client0_datatype0", "formula1", "Formula1", co.fieldtypes.formula, false, false, false, null, { "sum" : ["formula0", "decimal0"] }, 1, true);
-    await Db.createDatatypeField("client0", "client0_datatype0", "password0", "Password0", co.fieldtypes.password, false, false, false, null, null, null, true);
-    await Db.createDatatypeField("client0", "client0_datatype0", "reference0", "Reference0", co.fieldtypes.reference, false, false, false, "users", null, null, true);
-    await Db.createDatatypeField("client0", "client0_datatype0", "text0", "Text0", co.fieldtypes.text, true, false, false, null, null, null, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "boolean0", "Boolean0", co.fieldtypes.boolean, true, false, undefined, undefined, undefined, false); // Required, not nullable
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "datetime0", "DateTime0", co.fieldtypes.datetime, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "decimal0", "Decimal0", co.fieldtypes.decimal, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "formula0", "Formula0", co.fieldtypes.formula, false, false, undefined, { childsum : "decimal0" }, 0, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "formula1", "Formula1", co.fieldtypes.formula, false, false, undefined, { sum : ["formula0", "decimal0"] }, 1, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "password0", "Password0", co.fieldtypes.password, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "reference0", "Reference0", co.fieldtypes.reference, false, false, "users", undefined, undefined, true);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "text0", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true, false, false);
+    await Db.createDatatypeField("client0", "clientnulldatatypeone", "datatypeonefield", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
+    await Db.createDatatypeField("client1", "clientonedatatypenull", "boolean0", "Boolean0", co.fieldtypes.boolean, false, false, undefined, undefined, undefined, true); // Required, not nullable
+    await Db.createDatatypeField("client1", "clientonedatatypenull", "clientonetextnull", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
 };
 
 th.preparedynamicobjects = async() => {
-    await Db.query("client0", "DELETE FROM client0_datatype0");
-    await Db.query("client0", "DELETE FROM client0_datatype1");
-    await Db.query("client0", "DELETE FROM client0_datatype2");
-    await Db.query("client1", "DELETE FROM client1_datatype0");
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity0", boolean0: true, datetime0: 123, decimal0: 234.567, reference0: "client0_usergroup0_user0", text0: "C0D0E0" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity1", boolean0: true, decimal0: 111, text0: "C0D0E1" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity2", boolean0: true, decimal0: 345.789, text0: "C0D0E2" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity3", boolean0: true, text0: "C0D0E3" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity4", boolean0: true, text0: "C0D0E4" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity5", boolean0: true, text0: "C0D0E5" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity6", boolean0: true, text0: "C0D0E6" });
-    await Db.insertDynamicObject("client0", "client0_datatype0", { name: "client0_datatype0_entity7", boolean0: true, decimal0: 100, text0: "C0D0E7" });
-    await Db.insertDynamicObject("client0", "client0_datatype1", { name: "client0_datatype1_entity0" });
-    await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity0" });
-    await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity1" });
-    await Db.insertDynamicObject("client0", "client0_datatype2", { name: "client0_datatype2_entity2" }); // Another root element
-    await Db.insertDynamicObject("client1", "client1_datatype0", { name: "client1_datatype0_entity0" });
+    await Db.query("client0", "DELETE FROM clientnulldatatypenull");
+    await Db.query("client0", "DELETE FROM clientnulldatatypeone");
+    await Db.query("client0", "DELETE FROM clientnulldatatypetwo");
+    await Db.query("client1", "DELETE FROM clientonedatatypenull");
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity0", boolean0: true, datetime0: 123, decimal0: 234.567, reference0: "client0_usergroup0_user0", text0: "C0D0E0" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity1", boolean0: true, decimal0: 111, text0: "C0D0E1" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity2", boolean0: true, decimal0: 345.789, text0: "C0D0E2" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity3", boolean0: true, text0: "C0D0E3" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity4", boolean0: true, text0: "C0D0E4" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity5", boolean0: true, text0: "C0D0E5" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity6", boolean0: true, text0: "C0D0E6" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity7", boolean0: true, decimal0: 100, text0: "C0D0E7" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypeone", { name: "clientnulldatatypeoneentity0" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypetwo", { name: "clientnulldatatypetwoentity0" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypetwo", { name: "clientnulldatatypetwoentity1" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypetwo", { name: "clientnulldatatypetwoentity2" }); // Another root element
+    await Db.insertDynamicObject("client1", "clientonedatatypenull", { name: "clientonedatatypenullentity0" });
 };
 
 th.preparerelations = async() => {
     // Only for client0
     await th.cleanTable("relations", false, true);
-    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype1", "client0_datatype1_entity0", "parentchild");
-    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype0", "client0_datatype0_entity1", "dependency");
-    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype0", "client0_datatype0_entity2", "parentchild");
-    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype2", "client0_datatype2_entity0", "parentchild");
-    th.createRelation("client0_datatype0", "client0_datatype0_entity0", "client0_datatype0", "client0_datatype0_entity3", "parentchild");
-    th.createRelation("client0_datatype0", "client0_datatype0_entity2", "client0_datatype0", "client0_datatype0_entity4", "parentchild");
-    th.createRelation("client0_datatype2", "client0_datatype2_entity0", "client0_datatype2", "client0_datatype2_entity1", "parentchild");
-    th.createRelation("client0_datatype2", "client0_datatype2_entity0", "client0_datatype0", "client0_datatype0_entity5", "parentchild");
-    th.createRelation("client0_datatype0", "client0_datatype0_entity5", "client0_datatype0", "client0_datatype0_entity6", "parentchild");
+    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypeone", "clientnulldatatypeoneentity0", "parentchild");
+    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity1", "dependency");
+    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity2", "parentchild");
+    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypetwo", "clientnulldatatypetwoentity0", "parentchild");
+    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity3", "parentchild");
+    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity2", "clientnulldatatypenull", "clientnulldatatypenullentity4", "parentchild");
+    th.createRelation("clientnulldatatypetwo", "clientnulldatatypetwoentity0", "clientnulldatatypetwo", "clientnulldatatypetwoentity1", "parentchild");
+    th.createRelation("clientnulldatatypetwo", "clientnulldatatypetwoentity0", "clientnulldatatypenull", "clientnulldatatypenullentity5", "parentchild");
+    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity5", "clientnulldatatypenull", "clientnulldatatypenullentity6", "parentchild");
 };
 
 th.prepareRelations = async() => {
@@ -844,12 +847,12 @@ th.apiTests = {
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}${withoutid ? "" : `/${testObject._id}`}?token=${token}`).expect(400);
             });
-            if (!withoutid) it('responds with 404 when the _id is invalid', async() => {
+            if (!withoutid) it('responds with 404 when the name is invalid', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
                 await th.put(`/api/${api}/invalidId?token=${token}`).send(testObject).expect(404);
             });
-            if (!withoutid) it('does not update the _id when it was sent', async() => {
+            if (!withoutid) it('does not update the name when it was sent', async() => {
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 var testObject = await createTestObject(client ? client : "client0");
                 var originalId = testObject._id;

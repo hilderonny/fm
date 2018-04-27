@@ -24,13 +24,14 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
     var formtemplate = 
         '<form name="detailsform">' +
         '    <md-input-container flex ng-repeat="datatypefield in datatypefields | orderBy: \'label\'" ng-if="params.entityname || datatypefield.fieldtype !== \'formula\'">' +
-        '        <label ng-if="[\'text\', \'decimal\', \'formula\', \'password\', \'reference\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
+        '        <label ng-if="[\'text\', \'decimal\', \'formula\', \'password\', \'reference\', \'datetime\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
         '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && (datatypefield.name !== \'name\' || !params.entityname)" ng-required="datatypefield.isrequired">' +
         '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && datatypefield.name === \'name\' && params.entityname" disabled>' +
         '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'password\'" type="password" ng-required="datatypefield.isrequired">' +
         '        <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'" ng-required="datatypefield.isrequired">' +
         '        <input ng-value="trimnumber(dynamicobject[datatypefield.name] || 0)" ng-if="datatypefield.fieldtype === \'formula\'" disabled>' +
         '        <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
+        '        <md-datepicker ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'datetime\'" md-open-on-focus read-only></md-datepicker>' +
         '        <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=preview&token={{token}}" ng-click="openpreviewimage(datatypefield.name)"/>' + // Special handle previewimagedocumentname
         '        <md-button ng-required="datatypefield.isrequired" avt-reference-select></md-button>' +
         '    </md-input-container>' +
@@ -142,7 +143,13 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     if (!scope.datatype.candefinename) fieldnames = fieldnames.filter(function(k) { return k !== "name" });
                     scope.datatypefields = fieldnames.map(function(fn) { return scope.datatype.fields[fn]; }).filter(function(f) { return !f.ishidden; });
                     return Promise.all([
-                        entityname ? utils.loaddynamicobject(datatypename, entityname).then(function(dynamicobject) { scope.dynamicobject = dynamicobject; }) : Promise.resolve(),
+                        entityname ? utils.loaddynamicobject(datatypename, entityname).then(function(dynamicobject) {
+                            scope.datatypefields.filter(function(f) { return f.fieldtype === "datetime"; }).forEach(function(f) { // Convert datetime from long to datepicker format
+                                dynamicobject[f.name] = new Date(dynamicobject[f.name]);
+                                // Den datetime Picker kann man ggf. durch http://logbon72.github.io/angular-material-datetimepicker/ ersetzen, welcher auch Zeitauswahl beherrscht.
+                            });
+                            scope.dynamicobject = dynamicobject; 
+                        }) : Promise.resolve(),
                         entityname ? utils.loaddynamicattributes(datatypename, entityname).then(function(dynamicattributes) { scope.dynamicattributes = dynamicattributes; }) : Promise.resolve(), // TODO: Irrelevant in the future
                         entityname ? utils.loadparentlabels(scope.params.listfilter, datatypename, entityname).then(function(parentlabels) { scope.breadcrumbs = parentlabels.join(' » '); }) : Promise.resolve(),
                     ]).then(function() {

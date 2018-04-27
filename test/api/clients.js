@@ -136,7 +136,7 @@ describe('API clients', async() => {
     describe('POST/newadmin', async() => {
 
         function createPostNewAdminTestElement() {
-            return { name: "client0_newadmin", pass: 'password', clientId: "client0" };
+            return { name: "client0_newadmin", password: 'password', clientname: "client0" };
         }
 
         th.apiTests.post.defaultNegative(co.apis.clients + "/newAdmin", co.permissions.ADMINISTRATION_CLIENT, createPostNewAdminTestElement, false, "portal", "portal_usergroup0", "portal_usergroup0_user0");
@@ -147,31 +147,37 @@ describe('API clients', async() => {
         });
 
         it('responds with 400 when no username is given', async() => {
-            var newAdmin = { pass: 'password', clientId: "client0" };
+            var newAdmin = { password: 'password', clientname: "client0" };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(400);
+        });
+
+        it('responds with 400 when no password is given', async() => {
+            var newAdmin = { name: "client0_usergroup0_user0", clientname: "client0" };
             var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(400);
         });
 
         it('responds with 409 when username is in use', async() => {
-            var newAdmin = { name: "client0_usergroup0_user0", pass: 'password', clientId: "client0" };
+            var newAdmin = { name: "client0_usergroup0_user0", password: 'password', clientname: "client0" };
             var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(409);
         });
 
-        it('responds with 400 when no clientId is given', async() => {
-            var newAdmin = { name: "client0_newadmin", pass: 'password' };
+        it('responds with 400 when no clientname is given', async() => {
+            var newAdmin = { name: "client0_newadmin", password: 'password' };
             var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(400);
         });
 
-        it('responds with 400 when clientId is invalid', async() => {
-            var newAdmin = { name: "client0_newadmin", pass: 'password', clientId: "invalidId" };
+        it('responds with 400 when clientname is invalid', async() => {
+            var newAdmin = { name: "client0_newadmin", password: 'password', clientname: "invalidId" };
             var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(400);
         });
 
         it('responds with 200 and creates a new admin in a new user group with the same name as the username', async() => {
-            var newAdmin = { name: "client0_newadmin", pass: 'password', clientId: "client0" };
+            var newAdmin = { name: "client0_newadmin", password: 'password', clientname: "client0" };
             var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(200);
             var createdUser = await Db.getDynamicObject("client0", "users", newAdmin.name);

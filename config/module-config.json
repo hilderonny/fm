@@ -131,7 +131,7 @@
                 {
                     "title": "TRK_MENU_ADMINISTRATION",
                     "items": [
-                        { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings" },
+                        { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings", "directurls": [ "settings" ] },
                         { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
                         { "mainCard": "Administration/UsergrouplistCard", "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] }
                     ]
@@ -192,11 +192,11 @@
                     { "name": "parentchild", "label": "Eltern-Kind-Beziehung", "labelfrom1to2": "Ist Elternteil von", "labelfrom2to1": "Ist Kind von" }
                 ]},
 
-                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "label", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "lists": [ "usergroups" ], "permissionkey": "PERMISSION_ADMINISTRATION_USERGROUP", "canhaverelations" : true },
 
-                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "label", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "password" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
@@ -257,11 +257,11 @@
                     { "name": "parentchild", "label": "Eltern-Kind-Beziehung", "labelfrom1to2": "Ist Elternteil von", "labelfrom2to1": "Ist Kind von" }
                 ]},
 
-                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "name", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
+                { "name": "usergroups", "label": "Benutzergruppe", "plurallabel": "Benutzergruppen", "titlefield": "label", "icon": "/css/icons/material/User Group Man Man.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "lists": [ "usergroups" ], "permissionkey": "PERMISSION_ADMINISTRATION_USERGROUP", "canhaverelations" : true },
 
-                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "name", "icon": "/css/icons/material/User.svg", "fields": [
+                { "name": "users", "label": "Benutzer", "plurallabel": "Benutzer", "titlefield": "label", "icon": "/css/icons/material/User.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "password", "label": "Passwort", "type": "password" },
                     { "name": "isadmin", "label": "Administrator", "type": "boolean" },
@@ -523,15 +523,15 @@
                 "css/images/Clients_editclient.png",
                 "css/images/Clients_list.png",
                 "css/images/Clients_modules.png",
-                "partial/Administration/ClientCard.html",
+                "partial/Administration/ClientDetailsCard.html",
                 "partial/Administration/ClientListCard.html",
                 "partial/Doc/Clients.html"
             ],
             "include" : [
-                "public/js/Administration/ClientCardController.js",
-                "public/js/Administration/ClientListCardController.js"
+                "public/js/components/avt-clientmodules-tab.js",
+                "public/js/components/avt-createadmin-toolbar-button.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_PORTAL",
@@ -544,7 +544,7 @@
 
                 { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
-                ], "canhaverelations" : true }
+                ], "lists": [ "clients" ], "permissionkey": "PERMISSION_ADMINISTRATION_CLIENT", "canhaverelations" : true }
                 
             ]
         },
@@ -644,7 +644,7 @@
 
                 { "name": "projects", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": true },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 3 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 4 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 },
@@ -655,7 +655,7 @@
 
                 { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": true },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 3 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 4 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 },
@@ -666,7 +666,7 @@
 
                 { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": true },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "formula", "formula": { "childsum" : "bgf" }, "formulaindex": 3 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 4 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 5 },
@@ -677,7 +677,7 @@
 
                 { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": true },
                     { "name": "bgf", "label": "Brutto-Grundfläche (BGF)", "type": "decimal" },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 4 },
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
@@ -688,7 +688,7 @@
 
                 { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": true },
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
@@ -697,7 +697,7 @@
 
                 { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_AREA.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": true },
                     { "name": "areacategoryname", "label": "Kategorie", "type": "reference", "reference": "areacategories" },
                     { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
                     { "name": "areausagestatename", "label": "Nutzungsstatus", "type": "reference", "reference": "areausagestates" },
@@ -709,7 +709,7 @@
 
                 { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
-                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": "true" }
+                    { "name": "previewimagedocumentname", "label": "Foto", "type": "reference", "reference": "documents", "isnullable": true }
                 ], "lists": [ "fmobjects_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "fmobjecttypes", "label": "FM Objekttyp", "titlefield": "label", "fields": [
@@ -757,7 +757,7 @@
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "fmobjecttypename", "label": "Typ", "type": "reference", "reference": "fmobjecttypes" },
                     { "name": "parentfmobjectname", "type": "reference", "reference": "fmobjects" },
-                    { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents", "isnullable": "true" },
+                    { "name": "previewimagedocumentname", "label": "Bild", "type": "reference", "reference": "documents", "isnullable": true },
                     { "name": "areatypename", "label": "Flächenart", "type": "reference", "reference": "areatypes" },
                     { "name": "f", "label": "Fläche (m²)", "type": "decimal" },
                     { "name": "bgf", "label": "Brutto-Geschoss-Fläche (BGF)", "type": "decimal" },
@@ -787,14 +787,15 @@
                 "css/images/Portals_list.png",
                 "css/images/Portals_modules.png",
                 "partial/Doc/Portals.html",
-                "partial/LicenseServer/PortalCard.html",
+                "partial/LicenseServer/PortalDetailsCard.html",
                 "partial/LicenseServer/PortalListCard.html"
             ],
             "include" : [
-                "public/js/LicenseServer/PortalCardController.js",
-                "public/js/LicenseServer/PortalListCardController.js"
+                "public/js/components/avt-downloadportalpackage-toolbar-button.js",
+                "public/js/components/avt-generatelicensekey-button.js",
+                "public/js/components/avt-portalmodules-tab.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "de" ],
             "menu" : [
                 {
                     "title": "TRK_MENU_LICENSESERVER",
@@ -814,7 +815,7 @@
                     { "name": "licensekey", "label": "Lizenzschlüssel", "type": "text" },
                     { "name": "version", "label": "Version", "type": "text" },
                     { "name": "lastnotification", "label": "Letzte Meldung", "type": "datetime" }
-                ], "canhaverelations" : true },
+                    ], "lists": [ "portals" ], "permissionkey": "PERMISSION_LICENSESERVER_PORTAL", "canhaverelations" : true },
 
                 { "name": "portalmodules", "label": "Portalmodul", "plurallabel": "Portalmodule", "fields": [
                     { "name": "portalname", "type": "reference", "reference": "portals" },
@@ -877,6 +878,38 @@
                 { "mainCard": "Administration/PortalSettingsCard", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "type": "SETTINGSET_TYPE_PORTAL", "icon": "Server", "permission": "PERMISSION_SETTINGS_PORTAL" }
             ],
             "utils" :["portalUpdatesHelper"]
+        },
+
+        "recordtypes": {
+            "forportal": true,
+            "forclients": true,
+            "api" : [ "recordtypes" ],
+            "public" : [
+                "css/icons/fieldtypes/boolean.svg",
+                "css/icons/fieldtypes/datetime.svg",
+                "css/icons/fieldtypes/decimal.svg",
+                "css/icons/fieldtypes/formula.svg",
+                "css/icons/fieldtypes/password.svg",
+                "css/icons/fieldtypes/reference.svg",
+                "css/icons/fieldtypes/text.svg",
+                "css/icons/material/icons8-categorize.svg",
+                "css/icons/material/icons8-lock.svg",
+                "css/icons/office/icons8-categorize.svg",
+                "partial/Administration/RecordTypeDetailsCard.html",
+                "partial/Administration/RecordTypeFieldDetailsCard.html",
+                "partial/Administration/RecordTypeListCard.html"
+            ],
+            "include" : [
+                "public/js/components/avt-recordtype-details-card.js",
+                "public/js/components/avt-recordtype-list-card.js",
+                "public/js/components/avt-recordtypefield-details-card.js",
+                "public/js/components/avt-recordtypefields.js",
+                "public/js/components/avt-recordtypevalues.js"
+            ],
+            "languages" : [ "de" ],
+            "settingsets" : [
+                { "mainCard": "Administration/RecordTypeListCard", "title": "TRK_SETTINGSET_RECORDTYPES", "type": "SETTINGSET_TYPE_CLIENT", "icon": "icons8-categorize", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES"}
+            ]
         },
 
         "ronnyseins" : {

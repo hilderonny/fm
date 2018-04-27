@@ -3,7 +3,8 @@ var auth = require('../middlewares/auth');
 var moduleConfig = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
 var Db = require("../utils/db").Db;
 var co = require('../utils/constants');
-var ch = require('../utils/configHelper');
+var ph = require("../utils/permissionshelper");
+
 
 /**
  * Extracts the setting sets structure from the module configuration for further processing
@@ -21,14 +22,14 @@ var ch = require('../utils/configHelper');
  *     }
  * ]
  */
-var extractSettingSets = (isUserAdmin, userClientId, allowedPermissionKeys) => {
+var extractSettingSets = (userClientId, allowedPermissionKeys) => {
     var settingSets = {};
     Object.keys(moduleConfig.modules).forEach((moduleName) => {
         var appModule = moduleConfig.modules[moduleName];
         if (!appModule.settingsets) return;
         appModule.settingsets.forEach((settingSet) => {
             var permission = settingSet.permission;
-            if (!isUserAdmin && allowedPermissionKeys.indexOf(permission) < 0) return; // Filter out setting sets the user has no access to
+            if (allowedPermissionKeys.indexOf(permission) < 0) return; // Filter out setting sets the user has no access to
             // Check whether the user is a client user and tries to access portal level settings and forbid it
             if (userClientId !== Db.PortalDatabaseName && permission === co.permissions.SETTINGS_PORTAL) return;
             if (!settingSets[settingSet.type]) {
@@ -55,9 +56,10 @@ var extractSettingSets = (isUserAdmin, userClientId, allowedPermissionKeys) => {
  */
 router.get('/', auth(false, false, co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
-    var permissionKeysForClient = await ch.getAvailablePermissionKeysForClient(clientname);
-    var permissionKeysForUser = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeysForClient.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows.map((p) => p.key);
-    var settingSets = extractSettingSets(req.user.isadmin, clientname, permissionKeysForUser);
+    var permissionkeys = (await ph.getpermissionsforuser(req.user)).map(p => p.key);
+    // var permissionKeysForClient = await ch.getAvailablePermissionKeysForClient(clientname);
+    // var permissionKeysForUser = (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeysForClient.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows.map((p) => p.key);
+    var settingSets = extractSettingSets(clientname, permissionkeys);
     res.send(settingSets);
 });
 

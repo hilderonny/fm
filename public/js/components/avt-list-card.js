@@ -7,7 +7,7 @@ app.directive('avtListCard', function($compile, $location, utils) {
         '<md-card-content>' +
         '   <md-list class="lines-beetween-items">' +
         '       <md-list-item ng-repeat="element in elements | orderBy: \'label\'" ng-click="selectelement(element)" ng-class="selectedelement === element ? \'active\' : false">' +
-        '          <md-icon md-svg-src="{{element.icon}}"></md-icon>' +
+        '          <img ng-src="{{element.icon}}" />' +
         '          <p ng-bind="element.label"></p>' +
         '       </md-list-item>' +
         '   </md-list>' +
@@ -41,7 +41,7 @@ app.directive('avtListCard', function($compile, $location, utils) {
                     utils.loaddynamicobject(datatype.name, createdelementname).then(function(newelement) {
                         newelement.datatypename = datatype.name;
                         newelement.icon = datatype.icon;
-                        if (!newelement.label) newelement.label =  newelement[scope.$root.titlefields[newelement.datatypename]];
+                        newelement.label =  newelement[scope.$root.titlefields[newelement.datatypename]] || newelement.name;
                         scope.elements.push(newelement);
                         scope.selectelement(newelement);
                     });
@@ -51,20 +51,21 @@ app.directive('avtListCard', function($compile, $location, utils) {
                     delete scope.selectedelement;
                 };
                 scope.onelementupdated = function(updatedelement) {
-                    scope.selectedelement.label = updatedelement.label ? updatedelement.label : updatedelement[scope.$root.titlefields[updatedelement.datatypename]];
+                    scope.selectedelement.label = updatedelement[scope.$root.titlefields[scope.selectedelement.datatypename]] || updatedelement.name;
                 };
                 scope.loadelements = function() {
-                    return utils.getresponsedata("/api/dynamic/rootelements/" + params.listfilter).then(function(elements) {
+                    var api = params.api ? params.api : "/api/dynamic/rootelements/" + params.listfilter;
+                    return utils.getresponsedata(api).then(function(elements) {
                         scope.elements = elements;
                         elements.forEach(function(e) {
-                            if (!e.label) e.label = e[scope.$root.titlefields[e.datatypename]];
+                            e.label = e[scope.$root.titlefields[e.datatypename]] || e.name;
                         });
                         var pathparts = $location.path().split("/");
                         if (pathparts.length > 2) scope.selectelement(elements.find(function(e) { return e.name === pathparts[2];}));
                     });
                 };
                 scope.selectelement = function(e) {
-                    if (!scope.detailscard) return;
+                    if (!e || !scope.detailscard) return;
                     utils.removeCardsToTheRightOf(element);
                     utils.adddetailscard(scope, e.datatypename, e.name, scope.params.permission).then(function() {
                         scope.selectedelement = e;

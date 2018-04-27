@@ -100,6 +100,7 @@ module.exports.apis = {
      * API for edititing portals
      */
     portals: 'portals',
+    recordtypes: "recordtypes",
     /**
      * API for editing relations between database entities
      */
@@ -305,6 +306,8 @@ module.exports.modules = {
      * Modul für Notizen
      */
     notes: 'notes',
+    // Administration dynamischer Objekte
+    recordtypes: "recordtypes",
     /**
      * Modul zur Verwaltung des eigenen Portals. Stellt Einstellungsseiten für Lizenzschlüssel und Updates bereit
      */
@@ -373,6 +376,10 @@ module.exports.permissions = {
      */
     SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen
     /**
+     * Permission to view and edit dynamic objects (recordtypes)
+     */
+    SETTINGS_CLIENT_RECORDTYPES: 'PERMISSION_SETTINGS_CLIENT_RECORDTYPES', // Erstellung von dynamischen Objekten
+    /**
      * Permission to show and change the settings of the portal (license key, etc.)
      */
     SETTINGS_PORTAL: 'PERMISSION_SETTINGS_PORTAL',
@@ -417,3 +424,12 @@ module.exports.dynamicAttributeTypes = {
      */
     picklist: 'picklist'
 };
+
+// Names which are used by API routes and therefor are not allowed as datatypenames
+module.exports.forbiddendatatypenames = [
+    "field",
+    "children",
+    "hierarchytoelement",
+    "parentpath",
+    "rootelements"
+];

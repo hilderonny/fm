@@ -30,8 +30,10 @@ router.get('/', auth(), async(req, res) => {
         datatypefields dtf,
         LATERAL (
             SELECT * FROM json_to_recordset(search_in_table_column(dtf.datatypename, dtf.name, '${Db.replaceQuotes(searchTerm)}')) as v(name text, title text)
-        ) tbl
-    WHERE dtf.istitle = true 
+        ) tbl,
+		datatypes dt
+    WHERE dtf.datatypename = dt.name
+	AND dt.titlefield = dtf.name
     ORDER BY LOWER(tbl.title);
     `;
     var result = (await Db.query(req.user.clientname, query))[4].rows; // 0 = DROP, 1 = CREATE, 2 = DROP, 3 = CREATE, 4 = SELECT
