@@ -23,7 +23,8 @@ async function getchildren(clientname, recordtypename, entityname, permissions, 
     var children = [];
     for (var i = 0; i < relevantrelations.length; i++) {
         var rr = relevantrelations[i];
-        if (!permissions.find(p => p.key === rr.permissionkey && p.canRead)) continue; // No permission to access specific datatype entities
+        // In custom datatypes there currently are no permissions defined
+        if (!permissions.find(p => (!rr.permissionkey || p.key === rr.permissionkey) && p.canRead)) continue; // No permission to access specific datatype entities
         var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
         child.datatypename = rr.datatype2name;
         child.icon = rr.icon;
