@@ -172,18 +172,25 @@ router.delete('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CL
     if (!existingdatatype) return res.sendStatus(404);
     var existingfield = existingdatatype.fields[fieldname];
     if (!existingfield) return res.sendStatus(404);
-    if (existingfield.ispredefined) return res.sendStatus(400);
+    if (existingfield.ispredefined || existingdatatype.titlefield === fieldname) return res.sendStatus(400);
     await Db.deleteRecordTypeField(clientname, datatypename, fieldname);
+    if (existingfield.fieldtype === co.fieldtypes.formula) {
+        await ch.recalculateforupdateddatatype(clientname, datatypename);
+    }
     res.sendStatus(204);
 });
 
 router.delete('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.modules.recordtypes), async(req, res) => {
     var clientname = req.user.clientname;
-    var recordtypename = req.params.name;
-    var existing = (await Db.getdatatypes(clientname))[recordtypename];
+    var datatypename = Db.replaceQuotes(req.params.name);
+    var existing = (await Db.getdatatypes(clientname))[datatypename];
     if (!existing) return res.sendStatus(404);
     if (existing.ispredefined) return res.sendStatus(400);
-    await Db.deleteRecordType(clientname, recordtypename);
+    var referencingfields = await Db.query(clientname, `SELECT 1 FROM datatypefields WHERE fieldtype='reference' AND reference='${datatypename}';`);
+    if (referencingfields.rowCount > 0) return res.sendStatus(400);
+    var existingrelationstootherdatatypes = await Db.query(clientname, `SELECT 1 FROM relations WHERE (datatype1name='${datatypename}' AND NOT datatype2name='${datatypename}') OR (datatype2name='${datatypename}' AND NOT datatype1name='${datatypename}');`);
+    if (existingrelationstootherdatatypes.rowCount > 0) return res.sendStatus(400);
+    await Db.deleteRecordType(clientname, datatypename);
     res.sendStatus(204);
 });
 

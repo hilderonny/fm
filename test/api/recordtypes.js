@@ -26,6 +26,7 @@ describe('API recordtypes', () => {
         await th.preparedynamicobjects();
         await th.preparerelations();
         await ch.calculateentityandparentsrecursively("client0", "clientnulldatatypenull", "clientnulldatatypenullentity2");
+        delete Db.datatypes;
     });
     
     describe('GET/', () => {
@@ -1242,51 +1243,115 @@ describe('API recordtypes', () => {
 
     describe('DELETE/field/:datatypename/:fieldname', () => {
 
-        // th.apiTests.delete.defaultNegative(co.apis.activities, co.permissions.OFFICE_ACTIVITY, getDeleteActivityId);
-        // th.apiTests.delete.clientDependentNegative(co.apis.activities, getDeleteActivityId);
-        // th.apiTests.delete.defaultPositive(co.apis.activities, co.collections.activities.name, getDeleteActivityId);
+        th.apiTests.delete.defaultNegative(co.apis.recordtypes + "/field/clientnulldatatypenull", co.permissions.SETTINGS_CLIENT_RECORDTYPES, () => "datetime0");
 
-        xit('responds with 400 when the field is set as titlefield in the datatype', async() => {});
+        it('responds with 400 when the field is set as titlefield in the datatype', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/field/clientnulldatatypenull/text0?token=${token}`).expect(400);
+        });
 
-        xit('responds with 400 when the field is predefined', async() => {});
+        it('responds with 400 when the field is predefined', async() => {
+            await Db.query("client0", "UPDATE datatypefields SET ispredefined=true WHERE datatypename='clientnulldatatypenull' AND name='datetime0';");
+            delete Db.datatypes;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/field/clientnulldatatypenull/datetime0?token=${token}`).expect(400);
+        });
 
-        xit('responds with 404 when the datatype does not exist for the client', async() => {});
+        it('responds with 404 when the datatype does not exist for the client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/field/unknowndatatype/datetime0?token=${token}`).expect(404);
+        });
 
-        xit('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {});
+        it('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/field/clientonedatatypenull/boolean0?token=${token}`).expect(404);
+        });
 
-        xit('responds with 404 when the field does not exist for the datatype', async() => {});
+        it('responds with 404 when the field does not exist for the datatype', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/field/clientnulldatatypenull/unknownfield?token=${token}`).expect(404);
+        });
 
-        xit('responds with 404 when the field does not exist for the datatype even when it exists for another datatype', async() => {});
+        it('responds with 404 when the field does not exist for the datatype even when it exists for another datatype', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/field/clientnulldatatypenull/datatypeonefield?token=${token}`).expect(404);
+        });
 
-        xit('deletes the field and its corresponding table column and returns 204', async() => {});
+        it('deletes the field and its corresponding table column and returns 204', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/field/clientnulldatatypenull/datetime0?token=${token}`).expect(204);
+            var field = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.datetime0;
+            assert.ok(!field);
+            var result = await Db.query("client0", "SELECT 1 FROM information_schema.columns WHERE table_name = 'clientnulldatatypenull' AND column_name='datetime0';");
+            assert.strictEqual(result.rowCount, 0);
+        });
 
-        xit('recalculates the formulas of all parents when the field was referenced in a formula', async() => {});
+        it('recalculates the formulas of all parents when the field was referenced in a formula', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).expect(204);
+            var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
+            assert.strictEqual(parent.formula1, 234.567); // only decimal0
+        });
 
     });
 
     describe('DELETE/:name', () => {
 
-        // th.apiTests.delete.defaultNegative(co.apis.activities, co.permissions.OFFICE_ACTIVITY, getDeleteActivityId);
-        // th.apiTests.delete.clientDependentNegative(co.apis.activities, getDeleteActivityId);
-        // th.apiTests.delete.defaultPositive(co.apis.activities, co.collections.activities.name, getDeleteActivityId);
+        th.apiTests.delete.defaultNegative(co.apis.recordtypes, co.permissions.SETTINGS_CLIENT_RECORDTYPES, () => "clientnulldatatypenull");
 
-        xit('responds with 400 when the datatype is predefined', async() => {});
+        it('responds with 400 when the datatype is predefined', async() => {
+            await Db.query("client0", "UPDATE datatypes SET ispredefined=true WHERE name='clientnulldatatypenull';");
+            delete Db.datatypes;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(400);
+        });
 
-        xit('responds with 400 when datatype is still references by a reference field of another datatype', async() => {});
+        it('responds with 400 when datatype is still referenced by a reference field of another datatype', async() => {
+            await Db.query("client0", "DELETE FROM relations;");
+            await Db.query("client0", "UPDATE datatypefields SET reference='clientnulldatatypeone' WHERE datatypename='clientnulldatatypenull' AND name='reference0';");
+            delete Db.datatypes;
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/clientnulldatatypeone?token=${token}`).expect(400);
+        });
 
-        xit('responds with 400 when datatype is still references within a relation (datatype1name)', async() => {});
+        it('responds with 400 when datatype is still referenced within a relation (datatype1name)', async() => {
+            await Db.query("client0", "DELETE FROM relations WHERE NOT datatype1name='clientnulldatatypenull';");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(400);
+        });
 
-        xit('responds with 400 when datatype is still references within a relation (datatype2name)', async() => {});
+        it('responds with 400 when datatype is still referenced within a relation (datatype2name)', async() => {
+            await Db.query("client0", "DELETE FROM relations WHERE NOT datatype2name='clientnulldatatypenull';");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(400);
+        });
 
-        xit('responds with 404 when the datatype does not exist for the client', async() => {});
+        it('responds with 404 when the datatype does not exist for the client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/unknowndatatype?token=${token}`).expect(404);
+        });
 
-        xit('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {});
+        it('responds with 404 when the datatype does not exist for the client, even when it exists for another client', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/clientonedatatypenull?token=${token}`).expect(404);
+        });
 
-        xit('deletes the datatype, its table and returns 204', async() => {});
+        it('deletes the datatype, its table and returns 204', async() => {
+            await Db.query("client0", "DELETE FROM relations;");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(204);
+            var datatype = (await Db.getdatatypes("client0"))["clientnulldatatypenull"];
+            assert.ok(!datatype);
+            var result = await Db.query("client0", "SELECT 1 FROM information_schema.tables WHERE table_name = 'clientnulldatatypenull';");
+            assert.strictEqual(result.rowCount, 0);
+        });
 
-        xit('deletes the datatype even when it is references within an own field (ring dependencies are possible and okay)', async() => {});
-
-        xit('recalculates the formulas of all parents', async() => {});
+        it('deletes the datatype even when it is references within an own field (ring dependencies are possible and okay)', async() => {
+            await Db.query("client0", "DELETE FROM relations WHERE NOT datatype1name='clientnulldatatypenull';");
+            await Db.query("client0", "DELETE FROM relations WHERE NOT datatype2name='clientnulldatatypenull';");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.del(`/api/recordtypes/clientnulldatatypenull?token=${token}`).expect(204);
+        });
 
     });
 
