@@ -195,7 +195,7 @@ async function init() {
         module.exports.server = server;
     }
 
-    await require("./webdav/webdav.js").dav.init();
+    await require("./utils/webdav.js").dav.init();
 
  
     // Store time of start in cached localconfig to force reload of clients after server restart

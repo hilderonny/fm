@@ -580,7 +580,7 @@
                 "public/js/components/avt-upload-document-toolbar-button.js"
             ],
             "languages" : [ "en", "de" ],
-            "utils": [ "documentsHelper" ],
+            "utils": [ "documentsHelper" , "webdav" ],
             "menu": [
                 {
                     "title": "TRK_MENU_OFFICE",
@@ -956,15 +956,6 @@
                 ] }
 
             ]
-        },
-        "webdav":{
-            "forportal": true,
-            "forclients": true,
-            "api" : [ "documents" , "folders" ],
-            "include" : [
-                "webdav/webdav.js"               
-            ]
-        }             
-        
+        } 
     }
 }

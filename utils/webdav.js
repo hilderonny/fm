@@ -36,9 +36,33 @@ var moduleconfig = require('../config/module-config.json');
             });
 
             // await require("./utils/db").Db.init();
+           /** $http.get('/api/documents').then(function (response) {        
+                $scope.doc = response.data;  
+                console.log(doc);
+  
+            });
+*/
             WebDavserver.setFileSystem('/newfolder', new webdav.PhysicalFileSystem('./documents/rf'), (success) => {
                 WebDavserver.start(() => console.log('READY'));
             });
+           /** const name = '92d7a719-2597-439f-b2aa-1244c7c9cccb';
+            const ctx = WebDavserver.ExternalRequestContext.create(server);
+            WebDavserver.getResource(ctx, '/api/documents/' + name, (e, r) => {
+                if(e) return isValid(false, 'Could not find //' + name, e);
+    
+                if(!type.isFile)
+                    return callback(r, server);
+                
+                r.openWriteStream((e, wStream) => {
+                    if(e) return isValid(false, 'Could not open the resource for writing.', e);
+                    wStream.end(content, (e) => {
+                        if(e) return isValid(false, 'Could not write content to the resource.', e);
+    
+                        callback(r, server);
+                    });
+                })
+            })**/
+
 
         }
     }
