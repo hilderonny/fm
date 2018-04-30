@@ -956,7 +956,15 @@
                 ] }
 
             ]
-        }
+        },
+        "webdav":{
+            "forportal": true,
+            "forclients": true,
+            "api" : [ "documents" , "folders" ],
+            "include" : [
+                "webdav/webdav.js"               
+            ]
+        }             
         
     }
 }
