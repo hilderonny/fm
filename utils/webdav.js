@@ -9,13 +9,16 @@ var Db = require("../utils/db").Db;
         prepareListOfUsers: async()=>{
 
             var userResult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers;`);
-          //  console.log(userResult);
+            console.log(userResult);
         //    console.log(userResult.rows.length);
             // User manager (tells who are the users)
             const userManager = new webdav.SimpleUserManager();
             for(i = 0; i < userResult.rows.length; i++){
-                userManager.addUser('test'+ i, 'test'+ i, false);
-            }
+                var currentUserName = userResult.rows[i].name;
+                var currentPassword = userResult.rows[i].password;
+               //TODO find a way to compare the hashed password form the DB agains the plain text pw form the user input
+                userManager.addUser(currentUserName, "pw" + i, false); //TODO replace dummy pw with the one from the DB
+            } 
 
             return userManager;
         },
@@ -31,8 +34,8 @@ var Db = require("../utils/db").Db;
             for(i = 0; i < numUsers; i++){
                 var currentUser = Object.entries(users)[i][1];
                 //console.log(currentUser);
-                console.log(i);
-                console.log(Object.entries(users)[i][1].username);
+                //console.log(i);
+               // console.log(Object.entries(users)[i][1].username);
                 
                 privilegeManager.setRights(currentUser, '/', [ 'all' ]);
             }
@@ -49,6 +52,7 @@ var Db = require("../utils/db").Db;
                 hostname: '127.0.0.1', //localhost
                 requireAuthentification: true,
                 httpAuthentication: new webdav.HTTPDigestAuthentication(userManager, 'Default realm'),
+                //httpAuthentication: new webdav.HTTPBasicAuthentication(userManager),
                 privilegeManager: privilegeManager
             });
 
