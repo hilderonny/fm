@@ -2,17 +2,48 @@ const webdav = require('webdav-server').v2;
 var moduleconfig = require('../config/module-config.json');
 var fs = require("fs");
 var moduleconfig = require('../config/module-config.json');
+var Db = require("../utils/db").Db;
 
     var dav = {
-        init: async()=>{
+
+        prepareListOfUsers: async()=>{
+
+            var userResult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers;`);
+          //  console.log(userResult);
+        //    console.log(userResult.rows.length);
             // User manager (tells who are the users)
             const userManager = new webdav.SimpleUserManager();
-            const user = userManager.addUser('test', 'test', false);
+            for(i = 0; i < userResult.rows.length; i++){
+                userManager.addUser('test'+ i, 'test'+ i, false);
+            }
 
+            return userManager;
+        },
+
+        parceUserRights: async(userManager)=>{
             // Privilege manager (tells which users can access which files/folders)
             const privilegeManager = new webdav.SimplePathPrivilegeManager();
-            privilegeManager.setRights(user, '/', [ 'all' ]);
+            var users = await userManager.users;
+            //console.log("USERS: " + users);
+            console.log(Object.entries(users));
+           //console.log(Object.entries(users).length);
+           var numUsers = Object.entries(users).length;
+            for(i = 0; i < numUsers; i++){
+                var currentUser = Object.entries(users)[i][1];
+                //console.log(currentUser);
+                console.log(i);
+                console.log(Object.entries(users)[i][1].username);
+                
+                privilegeManager.setRights(currentUser, '/', [ 'all' ]);
+            }
+            return privilegeManager;
+        },
 
+        init: async()=>{
+
+            var userManager = await(dav.prepareListOfUsers(userManager));
+            var privilegeManager = await(dav.parceUserRights(userManager));
+            
             const WebDavserver = new webdav.WebDAVServer({
                 port: 56789, //avoid default port, which might be already in use
                 hostname: '127.0.0.1', //localhost
@@ -30,10 +61,6 @@ var moduleconfig = require('../config/module-config.json');
                 next();
             })
         
-            WebDavserver.start(httpServer => {
-                console.log('Server started with success on the port: ' + httpServer.address().port);
-                console.log('address: ' + httpServer.address().address);                
-            });
 
             // await require("./utils/db").Db.init();
            /** $http.get('/api/documents').then(function (response) {        
@@ -42,8 +69,8 @@ var moduleconfig = require('../config/module-config.json');
   
             });
 */
-            WebDavserver.setFileSystem('/newfolder', new webdav.PhysicalFileSystem('./documents/rf'), (success) => {
-                WebDavserver.start(() => console.log('READY'));
+            WebDavserver.setFileSystem('/documents', new webdav.PhysicalFileSystem('./documents'), (success) => {
+                WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
             });
            /** const name = '92d7a719-2597-439f-b2aa-1244c7c9cccb';
             const ctx = WebDavserver.ExternalRequestContext.create(server);
