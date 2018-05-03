@@ -602,6 +602,7 @@ var Db = {
         if (updateset.length < 1) return;
         var query = `UPDATE datatypes SET ${updateset.join(",")}, ismanuallyupdated=true WHERE name = '${Db.replaceQuotes(recordtypename)}';`;
         await Db.query(clientname, query);
+        delete Db.datatypes;
     },
 
     updaterecordtypefield: async(clientname, datatypename, fieldname, field) => {
@@ -623,6 +624,7 @@ var Db = {
         if (updateset.length < 1) return;
         var query = `UPDATE datatypefields SET ${updateset.join(",")}, ismanuallyupdated=true WHERE datatypename='${Db.replaceQuotes(datatypename)}' AND name='${Db.replaceQuotes(fieldname)}';`;
         await Db.query(clientname, query);
+        delete Db.datatypes;
     },
 
     updateRecordTypesForDatabase: async(databasename, recordtypes) => {

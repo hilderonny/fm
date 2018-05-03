@@ -243,21 +243,21 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 $http.defaults.headers.common['x-access-token'] = response.data.token;
                 scope.isLoggedIn = true;
                 scope.isPortal = response.data.clientId === "portal";
-                if (scope.isPortal) scope.title = 'TRK_TITLE_PORTAL';
+                if (scope.isPortal) scope.title = 'Portalverwaltung';
                 // Save login credentials in browser for future access
                 localStorage.setItem("loginCredentials", JSON.stringify(user));
                 scope.isLoggingIn = false;
             }).catch(function() {
                 localStorage.removeItem("loginCredentials"); // Delete login credentials to prevent login loop
                 scope.isLoggingIn = false;
-                $translate(['TRK_LOGIN_FAILED_TITLE', 'TRK_LOGIN_FAILED_CONTENT', 'TRK_LOGIN_FAILED_AGAIN']).then(function(translations) {
-                    $mdDialog.show($mdDialog.alert()
-                        .clickOutsideToClose(true)
-                        .title(translations.TRK_LOGIN_FAILED_TITLE)
-                        .textContent(translations.TRK_LOGIN_FAILED_CONTENT)
-                        .ok(translations.TRK_LOGIN_FAILED_AGAIN)
-                    );
-                });
+                scope.$root.isLoading = false;
+                $mdDialog.show($mdDialog.alert()
+                    .clickOutsideToClose(true)
+                    .title("Anmeldung fehlgeschlagen")
+                    .textContent("Der Benutzername oder das Passwort ist nicht korrekt.")
+                    .ok("Wiederholen")
+                );
+                throw new Error("Login failed"); // Prevent further loading in MainController.dologin()
             });
         },
 
