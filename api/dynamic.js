@@ -82,6 +82,8 @@ router.delete("/:recordtypename/:entityname", auth.dynamic("recordtypename", "w"
         if (existingrelation.relationtypename === "parentchild") {
             await ch.calculateentityandparentsrecursively(clientname, existingrelation.datatype1name, existingrelation.name1);
         }
+    } else if (datatypename === "clients") { // When deleting clients, their tables must also be deleted
+        await Db.deleteClient(entityname);
     } else {
         await Db.deleteDynamicObject(clientname, datatypename, entityname);
     }
@@ -181,13 +183,20 @@ router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, 
         var existing = await Db.getDynamicObject(clientname, recordtypename, newobject.name);
         if (existing) return res.sendStatus(409); // Conflict, name is already in use
     } else {
-        newobject.name = uuidv4();
+        newobject.name = uuidv4().replace(/-/g, "");
     }
     try {
-        await Db.insertDynamicObject(clientname, recordtypename, newobject);
-        // When the new object is a relation of type "parentchild", then the parent object must be recalculated
-        if (recordtypename === "relations" && newobject.relationtypename === "parentchild") {
-            await ch.calculateentityandparentsrecursively(clientname, newobject.datatype2name, newobject.name2);
+        // When the new object is a client, its table must be created
+        if (recordtypename === "clients") {
+            await Db.createClient(newobject.name, newobject.label);
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(newobject.name)}', '${Db.replaceQuotes(co.modules.base)}');`);
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(newobject.name)}', '${Db.replaceQuotes(co.modules.doc)}');`);
+        } else {
+            await Db.insertDynamicObject(clientname, recordtypename, newobject);
+            // When the new object is a relation of type "parentchild", then the parent object must be recalculated
+            if (recordtypename === "relations" && newobject.relationtypename === "parentchild") {
+                await ch.calculateentityandparentsrecursively(clientname, newobject.datatype2name, newobject.name2);
+            }
         }
         // The objects and its possible parents must be recalculated in every case
         await ch.calculateentityandparentsrecursively(clientname, recordtypename, newobject.name);

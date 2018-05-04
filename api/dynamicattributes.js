@@ -192,7 +192,7 @@ router.post('/values/:modelName/:id', auth(false, false, co.modules.base), valid
     var dynamicattributes = dynamicattributenames.length > 0 ? (await Db.query(clientname, `SELECT * FROM dynamicattributes WHERE name IN (${dynamicattributenames.join(",")});`)).rows : [];
     if (dynamicattributes.length !== dynamicAttributeValues.length) return res.sendStatus(400); // Some attributes do not exist or multiply defined in body
     var valuestoinsert = dynamicAttributeValues.map(dav => { return {
-        name: uuidv4(),
+        name: uuidv4().replace(/-/g, ""),
         entityname: entity.name,
         dynamicattributename: dav.dynamicAttributeId,
         value: dav.value
@@ -218,7 +218,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.
     var dynamicAttribute = req.body;
     if (!dynamicAttribute || !dynamicAttribute.type || !co.dynamicAttributeTypes[dynamicAttribute.type] || !dynamicAttribute.modelName || !co.collections[dynamicAttribute.modelName] || !co.collections[dynamicAttribute.modelName].canHaveAttributes || !dynamicAttribute.name_en) return res.sendStatus(400);
     var attributetoinsert = {
-        name: uuidv4(),
+        name: uuidv4().replace(/-/g, ""),
         modelname: dynamicAttribute.modelName,
         label: dynamicAttribute.name_de ? dynamicAttribute.name_de: dynamicAttribute.name_en,
         isinactive: !!dynamicAttribute.isInactive, // Convert undefined to false

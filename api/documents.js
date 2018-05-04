@@ -123,7 +123,7 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     if (!file) return res.sendStatus(400);
     var clientname = req.user.clientname;
     var document = {
-        name: uuidv4(),
+        name: uuidv4().replace(/-/g, ""),
         label: file.originalname,
         type: mime.getType(path.extname(file.originalname)),
         isshared: false
@@ -134,7 +134,7 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     var parententityname = req.body.parententityname;
     if (parentdatatypename && parententityname) {
         var relation = {
-            name: uuidv4(),
+            name: uuidv4().replace(/-/g, ""),
             datatype1name: parentdatatypename,
             name1: parententityname,
             datatype2name: "documents",

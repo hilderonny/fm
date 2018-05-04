@@ -46,10 +46,19 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '        </md-select>' +
         '    </md-input-container>' +
         '    <md-card-actions layout="row" layout-align="space-between center">' +
-        '        <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite" ng-disabled="!candelete" ng-click="delete()"><span translate>TRK_DETAILS_DELETE</span></md-button>' +
+        '        <md-button class="md-raised md-warn" ng-if="params.entityname && canwrite" ng-disabled="!candelete" ng-click="delete()">' +
+        '           <md-progress-circular ng-if="isactionpending" class="md-primary" md-diameter="20px"></md-progress-circular>' +
+        '           <span ng-if="!isactionpending" translate>TRK_DETAILS_DELETE</span>' +
+        '        </md-button>' +
         '        <div flex></div>' +
-        '        <md-button class="md-raised md-accent" ng-if="!params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="create()"><span translate>TRK_DETAILS_CREATE</span></md-button>' +
-        '        <md-button class="md-raised md-accent" ng-if="params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="save()"><span translate>TRK_DETAILS_SAVE</span></md-button>' +
+        '        <md-button class="md-raised md-accent" ng-if="!params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="create()">' +
+        '           <md-progress-circular ng-if="isactionpending" class="md-primary" md-diameter="20px"></md-progress-circular>' +
+        '           <span ng-if="!isactionpending" translate>TRK_DETAILS_CREATE</span>' +
+        '        </md-button>' +
+        '        <md-button class="md-raised md-accent" ng-if="params.entityname && canwrite" ng-disabled="detailsform.$invalid" ng-click="save()">' +
+        '           <md-progress-circular ng-if="isactionpending" class="md-primary" md-diameter="20px"></md-progress-circular>' +
+        '           <span ng-if="!isactionpending" translate>TRK_DETAILS_SAVE</span>' +
+        '        </md-button>' +
         '    </md-card-actions>' +
         '</form>'
 ;
@@ -81,6 +90,8 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                 scope.ondetailscardclosed = scope.params.onclose;
                 scope.onelementcreated = scope.params.oncreate;
                 scope.create = function() {
+                    if (scope.isactionpending) return;
+                    scope.isactionpending = true;
                     var objecttosend = {};
                     scope.datatypefields.forEach(function(dtf) {
                         if (dtf.fieldtype === "formula") return;
@@ -109,9 +120,11 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                         if (statuscode === 409 && scope.datatype.candefinename) {
                             $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
                         }
+                        scope.isactionpending = false;
                     });
                 };
                 scope.delete = function() {
+                    if (scope.isactionpending) return;
                     function showsuccess(message) {
                         if (scope.params.ondelete) scope.params.ondelete();
                         utils.removeCardsToTheRightOf(element);
@@ -121,6 +134,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     }
                     utils.showdialog(scope.$new(true), "<p>Soll das Element wirklich gelöscht werden?</p>", [
                         { label: "Ja", onclick: function() {
+                            scope.isactionpending = true;
                             utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name).then(function() { showsuccess("Das Element wurde gelöscht"); });
                         } },
                         // Erst implementieren, wenn die Berechtigungsthematik mit den Unterelementen gelärt ist
@@ -166,12 +180,15 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     }).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                         utils.setLocation("/" + datatypename + (entityname ? "/" + entityname : ""), false);
+                        scope.isactionpending = false;
                     });
                 };
                 scope.openpreviewimage = function(datatypefieldname) {
                     window.open('/api/documents/' + scope.dynamicobject[datatypefieldname] + '?action=preview&token=' + scope.token, "_blank");
                 };
                 scope.save = function() {
+                    if (scope.isactionpending) return;
+                    scope.isactionpending = true;
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
                     var dynamicattributes = scope.dynamicattributes;
@@ -188,6 +205,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                         if (scope.params.onsave) {
                             scope.params.onsave(scope.dynamicobject);
                         }
+                        scope.isactionpending = false;
                     });
                 };
                 scope.trimnumber = function(number) {
