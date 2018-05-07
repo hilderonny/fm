@@ -5,6 +5,7 @@
     <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-template-component@^3.2.1/dist/aframe-template-component.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.5.1/dist/aframe-look-at-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
 </head>
 
 <body>
@@ -29,8 +30,8 @@
         <a-entity template="src:#axestemplate" position="0 0 -4"></a-entity>
 
         <a-text id="text" color="black" position="0 2 -4" value="TEXT"></a-text>
-
-        <a-sky color="#ECECEC"></a-sky>
+        
+        <a-entity environment="preset: forest; dressingAmount: 500"></a-entity>
 
         <a-entity windows-motion-controls="hand: left">
             <a-entity template="src:#axestemplate" position="0 0 0" scale="0.1 0.1 0.1"></a-entity>
