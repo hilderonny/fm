@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-template-component@^3.2.1/dist/aframe-template-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.5.1/dist/aframe-look-at-component.min.js"></script>
+</head>
+
+<body>
+    <a-scene>
+        <a-assets>
+            <script id="arrowtemplate" type="text/html">
+                <a-cone color="${color}" position="0 -0.25 0" height="0.5" radius-bottom="0.1" radius-top="0"></a-cone>
+                <a-cylinder color="${color}" position="0 -0.75 0" radius="0.05" height="0.5"></a-cylinder>
+                <a-text value="${text}" rotation="${textrotation}" color="${color}"></a-text>
+            </script>
+            <script id="axestemplate" type="text/html">
+                <a-entity template="src:#arrowtemplate" data-color="red" data-text="X" position="1 0 0" rotation="0 0 -90" data-textrotation="0 0 90"></a-entity>
+                <a-entity template="src:#arrowtemplate" data-color="green" data-text="Y" position="0 1 0" data-textrotation="0 0 0"></a-entity>
+                <a-entity template="src:#arrowtemplate" data-color="blue" data-text="Z" position="0 0 1" rotation="90 0 0" data-textrotation="-90 0 0"></a-entity>
+            </script>
+            <script id="fingertargettemplate" type="text/html">
+                <a-cylinder color="yellow" position="0 0 -1" radius="0.005" height="2" rotation="90 0 0"></a-cylinder>
+                <a-entity template="src:#axestemplate" position="0 0 -2" scale="0.05 0.05 0.05"></a-entity>
+            </script>
+        </a-assets>
+
+        <a-entity template="src:#axestemplate" position="0 0 -4"></a-entity>
+
+        <a-text id="text" color="black" position="0 2 -4" value="TEXT"></a-text>
+
+        <a-sky color="#ECECEC"></a-sky>
+
+        <a-entity windows-motion-controls="hand: left">
+            <a-entity template="src:#axestemplate" position="0 0 0" scale="0.1 0.1 0.1"></a-entity>
+            <a-entity rotation="-35 0 0">
+                <a-entity template="src:#fingertargettemplate"></a-entity>
+            </a-entity>
+        </a-entity>
+
+        <a-entity windows-motion-controls="hand: right">
+            <a-entity template="src:#axestemplate" position="0 0 0" scale="0.1 0.1 0.1"></a-entity>
+            <a-entity rotation="-35 0 0">
+                <a-entity template="src:#fingertargettemplate"></a-entity>
+            </a-entity>
+        </a-entity>
+
+    </a-scene>
+
+</body>
+
+</html>
