@@ -926,7 +926,8 @@
                 "css/icons/office/World Map.svg",
                 "partial/ronnyseins/3DCard.html",
                 "partial/ronnyseins/AugmentedRealityCard.html",
-                "partial/ronnyseins/GoogleMapsCard.html"
+                "partial/ronnyseins/GoogleMapsCard.html",
+                "partial/ronnyseins/mixedreality.html"
             ],
             "include" : [
                 "public/js/components/avt-viewin3d-toolbar-button.js",
