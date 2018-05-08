@@ -23,6 +23,7 @@ var dah = require('../utils/dynamicAttributesHelper');
 var mime = require("mime");
 var Db = require("../utils/db").Db;
 var uuidv4 = require("uuid").v4;
+var request = require('request');
 
 var documentquery = `
 DROP TABLE IF EXISTS folderpathtype;
@@ -158,6 +159,63 @@ router.post('/:name', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.docum
     dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', file.path));
     res.sendStatus(200);
 });
+
+// Create a document via upload from URL
+// Required parameter: url_string
+// Optional parameters: parentdatatypename, parententityname
+router.post('/urlupload', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), async(req, res) => {
+    var url = req.body.url_string;
+    if (!url) return res.sendStatus(400);
+    var fileRequest = request(url);
+    fileRequest.on('error', function (error) {
+        fileRequest.abort();
+        reject(error);
+    });
+    fileRequest.on('response', function (response) {
+        if (response.statusCode === 301) return res.status(301).send(response);
+        if (response.statusCode !== 200) {
+            fileRequest.abort();
+            reject(response);
+            return;
+        }
+        var contentType = response.headers['content-type'];
+        if (contentType.includes('text/html')) return res.sendStatus(400); // file URL cannot be handled by the application
+        var filename;
+        if (response.headers['content-disposition']) {
+            filename = response.headers['content-disposition'].split("=")[1]; // "attachment; filename=abc.zip"
+        } else {
+            var url_string_array = url.split("/");
+            filename = url_string_array[url_string_array.length - 1];
+        }
+        var clientname = req.user.clientname;
+        var document = {
+            name: uuidv4().replace(/-/g, ""),
+            label: filename,
+            type: contentType,
+            isshared: false
+        };
+        let fileStream = fs.createWriteStream(filename);
+        fileRequest.pipe(fileStream).on('finish', async() => {
+            await Db.insertDynamicObject(clientname, "documents", document);
+            dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', filename));
+            var parentdatatypename = req.body.parentdatatypename;
+            var parententityname = req.body.parententityname;
+            if (parentdatatypename && parententityname) {
+                var relation = {
+                    name: uuidv4().replace(/-/g, ""),
+                    datatype1name: parentdatatypename,
+                    name1: parententityname,
+                    datatype2name: "documents",
+                    name2: document.name,
+                    relationtypename: "parentchild"
+                };
+                await Db.insertDynamicObject(clientname, "relations", relation);
+            }
+            res.send(document.name);
+        });
+    });
+});
+
 
 // Update meta data of a document
 router.put('/:id', auth(co.permissions.OFFICE_DOCUMENT, "w", co.modules.documents), validateSameClientId(co.collections.documents.name), async(req, res) => {
