@@ -87,6 +87,18 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             return $http.delete("/api/dynamic/" + datatypename + "/" + entityname);
         },
 
+        // Go up all parents until one is found which's tag name is the given one
+        // Used in avt-drag-drop-document for finding the list item for a tag
+        // From: https://stackoverflow.com/a/7333885
+        getparentnode: function(element, parenttagname) {
+            var lcptn = parenttagname.toLowerCase();
+            while (element.parentNode) {
+                element = element.parentNode;
+                if (element && element.tagName && element.tagName.toLowerCase() === lcptn) return element;
+            }
+            return false; // No parent with the given tagname found
+        },
+
         // Helper function which will return the response.data field from a GET API call as promise result.
         getresponsedata: function(url) {
             return $http.get(url).then(function(response) {
@@ -100,6 +112,22 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 var elementToSelect = collection.find(function(e) { return e._id === $scope.params.preselection; });
                 if (elementToSelect) selectFunction(elementToSelect);
             }
+        },
+
+        importfromurl: function(scope, url, parentdatatypename, parententityname) {
+            return new Promise(function(resolve, reject) {
+                var datatosend = { url: url };
+                if (parentdatatypename) datatosend.parentdatatypename = parentdatatypename;
+                if (parententityname) datatosend.parententityname = parententityname;
+                scope.progressmode = 'indeterminate';
+                scope.isinprogress = true;
+                $http.post('/api/documents/urlupload', datatosend).then(function(response) {
+                    scope.isinprogress = false;
+                    if (response.status >= 400) return reject();
+                    if (response.status === 301) return utils.importfromurl(scope, response.url, parentdatatypename, parententityname).then(resolve, reject);
+                    resolve(response.data);
+                });
+            });
         },
 
         // Loads all datatypes and their field definitions on page load (keyed object)
@@ -422,6 +450,39 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 escapeToClose: true,
                 focusOnOpen: true,
                 zIndex: 2
+            });
+        },
+
+        uploadfile: function(scope, filedata, parentdatatypename, parententityname) {
+            return new Promise(function(resolve, reject) {
+                scope.progressmode = "determinate";
+                scope.progressvalue = 0;
+                scope.isinprogress = true;
+                // http://stackoverflow.com/q/13591345
+                var form = new FormData();
+                var xhr = new XMLHttpRequest;
+                // Additional POST variables required by the API script
+                if (parententityname) form.append('parententityname', parententityname);
+                if (parentdatatypename) form.append('parentdatatypename', parentdatatypename);
+                form.append('file', filedata);
+                xhr.upload.onprogress = function (e) {
+                    // Event listener for when the file is uploading
+                    if (e.lengthComputable) {
+                        var progress = Math.round(e.loaded / e.total * 100);
+                        scope.progressvalue = progress;
+                    } else {
+                        scope.progressmode = 'indeterminate';
+                    }
+                }
+                xhr.onreadystatechange = function (e) { // https://developer.mozilla.org/de/docs/Web/API/XMLHttpRequest
+                    if (e.target.readyState === 4) {
+                        scope.isinprogress = false;
+                        var uploadeddocumentname = e.target.response;
+                        resolve(uploadeddocumentname);
+                    }
+                }
+                xhr.open('POST', 'api/documents?token=' + $http.defaults.headers.common['x-access-token']);
+                xhr.send(form);
             });
         },
 

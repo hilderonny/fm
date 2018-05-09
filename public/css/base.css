@@ -256,6 +256,11 @@ md-list.hierarchy > md-list-item {
     padding:0;
 }
 
+md-list.hierarchy > md-list-item.highlighted > div {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
 md-list.hierarchy > md-list-item > div {
     width:100%;
     cursor: pointer;

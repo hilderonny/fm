@@ -38,7 +38,7 @@ app.directive('avtReplaceDocumentToolbarButton', function($rootScope, $compile, 
                             $mdToast.show($mdToast.simple().textContent("Dokument hochgeladen und ersetzt.").hideDelay(1000).position('bottom right'));
                         }
                     }
-                    xhr.open('POST', 'api/documents/' + scope.dynamicobject.name + '?token=' + $http.defaults.headers.common['x-access-token']);
+                    xhr.open('POST', 'api/documents/replace/' + scope.dynamicobject.name + '?token=' + $http.defaults.headers.common['x-access-token']);
                     xhr.send(form);
                 }
             };
