@@ -20,14 +20,14 @@ async function extractDocument(zipdocument, clientname) {
     var readstream = fs.createReadStream(filePath);
     await readstream.pipe(unzipper.Parse().on('entry', entry => {
         if (entry.type === "Directory") {
-            folders[entry.path] = { name: uuidv4(), label: path.basename(entry.path) };
+            folders[entry.path] = { name: uuidv4().replace(/-/g, ""), label: path.basename(entry.path) };
             entry.autodrain();
         } else {
             var lastslash = entry.path.lastIndexOf("/") + 1;
             var parentpath = path.dirname(entry.path) + "/";
             var filename = path.basename(entry.path);
             var mimetype = mime.getType(path.extname(filename));
-            var document = { name: uuidv4(), label: filename, type: mimetype };
+            var document = { name: uuidv4().replace(/-/g, ""), label: filename, type: mimetype };
             documents[entry.path] = document;
             var documentpath = documentsHelper.getDocumentPath(clientname, document.name);
             documentsHelper.createPath(path.dirname(documentpath));
@@ -45,10 +45,10 @@ async function extractDocument(zipdocument, clientname) {
         var parentpath = path.dirname(k) + "/";
         if (parentpath === "./") {
             parentrelations.forEach(pr => {
-                relations.push({ name: uuidv4(), datatype1name: pr.datatype1name, name1: pr.name1, datatype2name: "folders", name2: folder.name, relationtypename: "parentchild" });
+                relations.push({ name: uuidv4().replace(/-/g, ""), datatype1name: pr.datatype1name, name1: pr.name1, datatype2name: "folders", name2: folder.name, relationtypename: "parentchild" });
             });
         } else {
-            relations.push({ name: uuidv4(), datatype1name: "folders", name1: folders[parentpath].name, datatype2name: "folders", name2: folder.name, relationtypename: "parentchild" });
+            relations.push({ name: uuidv4().replace(/-/g, ""), datatype1name: "folders", name1: folders[parentpath].name, datatype2name: "folders", name2: folder.name, relationtypename: "parentchild" });
         }
         await Db.insertDynamicObject(clientname, "folders", folder);
     }
@@ -59,10 +59,10 @@ async function extractDocument(zipdocument, clientname) {
         var parentpath = path.dirname(k) + "/";
         if (parentpath === "./") {
             parentrelations.forEach(pr => {
-                relations.push({ name: uuidv4(), datatype1name: pr.datatype1name, name1: pr.name1, datatype2name: "documents", name2: document.name, relationtypename: "parentchild" });
+                relations.push({ name: uuidv4().replace(/-/g, ""), datatype1name: pr.datatype1name, name1: pr.name1, datatype2name: "documents", name2: document.name, relationtypename: "parentchild" });
             });
         } else {
-            relations.push({ name: uuidv4(), datatype1name: "folders", name1: folders[parentpath].name, datatype2name: "documents", name2: document.name, relationtypename: "parentchild" });
+            relations.push({ name: uuidv4().replace(/-/g, ""), datatype1name: "folders", name1: folders[parentpath].name, datatype2name: "documents", name2: document.name, relationtypename: "parentchild" });
         }
         await Db.insertDynamicObject(clientname, "documents", document);
     }

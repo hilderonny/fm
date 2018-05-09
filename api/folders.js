@@ -113,7 +113,7 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     if (!folder || Object.keys(folder).length < 1) {
         return res.sendStatus(400);
     }
-    var foldertoinsert = { name: uuidv4() };
+    var foldertoinsert = { name: uuidv4().replace(/-/g, "") };
     if (folder.name) foldertoinsert.label = folder.name;
     if (folder.parentFolderId && !(await Db.getDynamicObject(clientname, co.collections.folders.name, folder.parentFolderId))) return res.sendStatus(400);
     foldertoinsert.parentfoldername = folder.parentFolderId ? folder.parentFolderId : null;

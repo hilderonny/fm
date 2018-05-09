@@ -32,7 +32,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT, 'w', co.modules.base), asy
     if (!clientSettings || Object.keys(clientSettings).length < 1) return res.sendStatus(400);
     // Alle Einstellungen des Mandanten pauschal löschen
     await Db.deleteDynamicObjects(Db.PortalDatabaseName, "clientsettings", { clientname: req.user.clientname });
-    var insertedsetting = { name: uuidv4(), clientname: req.user.clientname, logourl: clientSettings.logourl };
+    var insertedsetting = { name: uuidv4().replace(/-/g, ""), clientname: req.user.clientname, logourl: clientSettings.logourl };
     await Db.insertDynamicObject(Db.PortalDatabaseName, "clientsettings", insertedsetting);
     res.send(mapFields(insertedsetting));
 });

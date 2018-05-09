@@ -32,7 +32,7 @@ router.post('/', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licen
     if (result.rowCount < 1) return res.sendStatus(400);
     var portal = result.rows[0];
     if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM portalmodules WHERE portalname='${portalname}' AND modulename = '${modulename}';`)).rowCount < 1) {
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('${uuidv4()}', '${portalname}', '${modulename}');`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('${uuidv4().replace(/-/g, "")}', '${portalname}', '${modulename}');`);
     }
     res.sendStatus(200);
 });
