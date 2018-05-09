@@ -126,7 +126,8 @@ module.exports.apis = {
 module.exports.formulatypes = {
     childsum: "childsum",
     ifthenelse: "ifthenelse",
-    sum: "sum"
+    sum: "sum",
+    concat: "concat"
 }
 
 /**

@@ -6,6 +6,16 @@ var lc = require('../config/localconfig.json');
 var path = require("path");
 var fs = require("fs");
 
+
+async function convertformulas(clientname) {
+    var fields = (await Db.query(clientname, "select name, datatypename from datatypefields where fieldtype='formula';")).rows;
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        var query = `ALTER TABLE ${field.datatypename} ALTER COLUMN ${field.name} TYPE TEXT;`;
+        await Db.query(clientname, query);
+    }
+}
+
 /**
  * Update scripts which are run at system startup, when the localconfig flag "applyupdates" is set to true
  */
@@ -14,6 +24,8 @@ module.exports = async() => {
     var clients = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM clients;")).rows;
     for (var i = 0; i < clients.length; i++) {
         var clientname = clients[i].name;
+        // 09.05.2018: Formeln sind nun Text
+        await convertformulas(clientname);
         // 09.05.2018: Kommunikationswege von Personen auf Beziehungen umstellen
         var datatypes = await Db.getdatatypes(clientname);
         var communicationsexisting = (await Db.query(clientname, "SELECT 1 FROM information_schema.tables WHERE table_name='communications';")).rowCount > 0;
@@ -60,5 +72,7 @@ module.exports = async() => {
             await Db.query(clientname, "DELETE FROM communications;");
         }
     }
+    // 09.05.2018: Formeln sind nun Text
+    await convertformulas(Db.PortalDatabaseName);
     console.log("UPDATE FINISHED.");
 };

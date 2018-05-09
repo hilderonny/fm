@@ -15,7 +15,7 @@
     "npmInstallCommand": "\"C:\\Program Files\\nodejs\\npm.cmd\" install",
     "recreatePortalAdmin": false,
     "applyupdates": false,
-    "recalculateformulasonstart": false,
+    "recalculateformulasonstart": true,
     "updateExtractPath": "./temp/",
     "serviceName": "Avorium FM",
     "serviceDescription": "Facility management portal",

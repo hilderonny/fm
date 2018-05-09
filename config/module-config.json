@@ -450,10 +450,11 @@
                     { "name": "isjuristic", "label": "Juristische Person", "type": "boolean" }
                 ], "canhaverelations" : true },
 
-                { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "lastname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
+                { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "fullname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
                     { "name": "firstname", "label": "Vorname", "type": "text" },
                     { "name": "lastname", "label": "Nachname", "type": "text" },
-                    { "name": "description", "label": "Beschreibung", "type": "text" }
+                    { "name": "description", "label": "Beschreibung", "type": "text" },
+                    { "name": "fullname", "label": "Vollständiger Name", "ishidden": true, "type": "formula", "formula": { "concat" : ["@lastname", ", ", "@firstname"] }, "formulaindex": 0 }
                 ], "lists": [ "persons_hierarchy" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
 
                 { "name": "partneraddresstypes", "label": "Adressart", "titlefield": "label", "fields": [

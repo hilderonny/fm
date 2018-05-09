@@ -10,7 +10,7 @@ var ch = {
         for (var i = 0; i < childrelations.length; i++) {
             var childrelation = childrelations[i];
             var child = await Db.getDynamicObject(clientname, childrelation.datatype2name, childrelation.name2);
-            if (child[formuladef]) sum += child[formuladef];
+            if (child[formuladef]) sum += parseFloat(child[formuladef]);
         }
         var value = typeof(sum) === "number" ? parseFloat(sum) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
@@ -34,10 +34,27 @@ var ch = {
                 minus = true;
                 fieldname = fieldname.substring(1);
             }
-            if (entity[fieldname]) sum += minus ? -entity[fieldname] : entity[fieldname];
+            if (entity[fieldname]) sum += minus ? -parseFloat(entity[fieldname]) : parseFloat(entity[fieldname]);
         }
         var value = typeof(sum) === "number" ? parseFloat(sum) : null; // Prevent NaN
         await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
+    },
+    calculate_concat: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
+        if (formuladef.length < 1) throw new Error(`concat must be array of at least 1 element, not ${datatypefield.formula}`);
+        var entity = await Db.getDynamicObject(clientname, datatypename, entityname);
+        var concattedstring = "";
+        for (var i = 0; i < formuladef.length; i++) {
+            var part = formuladef[i];
+            if (part.indexOf("@") === 0) {
+                // Field
+                fieldname = part.substring(1);
+                if (entity[fieldname]) concattedstring += entity[fieldname];
+            } else {
+                // String
+                concattedstring += part;
+            }
+        }
+        await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}='${Db.replaceQuotes(concattedstring)}' WHERE name='${Db.replaceQuotes(entityname)}';`);
     },
     // Recalculates an antity and all of its parents recursively
     calculateentityandparentsrecursively: async(clientname, datatypename, entityname) => {
@@ -46,7 +63,9 @@ var ch = {
         // Calculate the entity itself
         try {
             await ch.calculateformula(clientname, datatypename, entityname);
-        } catch(error) { } // Ignore calculation errors for invalid formulas
+        } catch(error) {
+            console.log(error);
+        } // Ignore calculation errors for invalid formulas
         // Calculate parents, order is important!
         for (var i = 0; i < parents.length; i++) {
             var parent = parents[i];
@@ -71,6 +90,7 @@ var ch = {
                 case co.formulatypes.childsum: await ch.calculate_childsum(clientname, datatypename, entityname, dtf, formuladef); break;
                 case co.formulatypes.ifthenelse: await ch.calculate_ifthenelse(clientname, datatypename, entityname, dtf, formuladef); break;
                 case co.formulatypes.sum: await ch.calculate_sum(clientname, datatypename, entityname, dtf, formuladef); break;
+                case co.formulatypes.concat: await ch.calculate_concat(clientname, datatypename, entityname, dtf, formuladef); break;
                 default: throw new Error(`Unknown formula type "${key}"`);
             }
         }
@@ -85,7 +105,8 @@ var ch = {
                 var datatypestocalculate = (await Db.query(clientname, "SELECT DISTINCT datatypename FROM datatypefields WHERE fieldtype = 'formula';")).rows.map(r => r.datatypename);
                 for (var j = 0; j < datatypestocalculate.length; j++) {
                     var dt = datatypestocalculate[j];
-                    var entitynames = (await Db.query(clientname, `SELECT x.name FROM ${dt} x LEFT JOIN relations r ON r.datatype1name = '${dt}' AND r.name1 = x.name WHERE r IS NULL;`)).rows.map(r => r.name);
+                    var query = `SELECT x.name FROM ${dt} x LEFT JOIN relations r ON r.datatype1name = '${dt}' AND r.name1 = x.name WHERE r IS NULL OR (r.relationtypename='parentchild' AND NOT r.datatype2name IN (${datatypestocalculate.map(d => `'${d}'`).join(",")}));`;
+                    var entitynames = (await Db.query(clientname, query)).rows.map(r => r.name);
                     for (var k = 0; k < entitynames.length; k++) {
                         await ch.calculateentityandparentsrecursively(clientname, dt, entitynames[k]);
                     }
