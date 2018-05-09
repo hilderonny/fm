@@ -1,5 +1,4 @@
 {
-    "TRK_CANCEL" : "Abbrechen",
     "TRK_DOCUMENTS_FILE_EXTRACTED" : "Datei entpackt",
     "TRK_FOLDERS_DOCUMENT_UPLOADED" : "Das Dokument wurde hochgeladen",
     "TRK_FOLDERS_ENTER_URL" : "URL eingeben",
@@ -10,6 +9,5 @@
     "TRK_MENU_OFFICE_DOCUMENTS" : "Dokumente",
     "TRK_MODEL_documents": "Dokumente",
     "TRK_MODEL_folders": "Verzeichnisse",
-    "TRK_MODULE_documents_NAME" : "Dokumente",
-    "TRK_OK" : "OK"
+    "TRK_MODULE_documents_NAME" : "Dokumente"
 }

@@ -1,5 +1,4 @@
 {
-    "TRK_CANCEL" : "Cancel",
     "TRK_DOCUMENTS_FILE_EXTRACTED" : "File was successfully extracted",
     "TRK_FOLDERS_DOCUMENT_UPLOADED" : "Upload complete",
     "TRK_FOLDERS_ENTER_URL" : "Enter URL",
@@ -10,6 +9,5 @@
     "TRK_MENU_OFFICE_DOCUMENTS" : "Documents",
     "TRK_MODEL_documents": "Documents",
     "TRK_MODEL_folders": "Folders",
-    "TRK_MODULE_documents_NAME" : "Documents",
-    "TRK_OK" : "OK"
+    "TRK_MODULE_documents_NAME" : "Documents"
 }

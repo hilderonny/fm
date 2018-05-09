@@ -44,46 +44,6 @@ app.directive('avtUploadDocumentToolbarButton', function ($rootScope, $compile, 
                         scope.menuPanel = panelRef;
                     });
                 };
-                // scope.onCancelClick = function () {
-                //     $mdDialog.cancel();
-                // };
-                // scope.onSubmitURL = function (url) {
-                //     $mdDialog.cancel();
-                // if (!url) {
-                //     var url = scope.submitedURL;
-                // }
-                // var urlToSend = { 'url_string': url };
-                // $http.post('/api/documents/urlupload', urlToSend).then(function successCallback(response) {
-                //     if (response.status === 409) {
-                //         return;
-                //     } else if (response.status === 400) {
-                //         $translate(['TRK_FOLDERS_DOCUMENT_URL_ALERT_MESSAGE', 'TRK_FOLDERS_DOCUMENT_URL_ALERT_TITLE']).then(function (translations) {
-                //             var alert = $mdDialog.alert()
-                //                 .title(translations.TRK_FOLDERS_DOCUMENT_URL_ALERT_TITLE)
-                //                 .textContent(translations.TRK_FOLDERS_DOCUMENT_URL_ALERT_MESSAGE)
-                //                 .ok('OK');
-
-                //             $mdDialog
-                //                 .show(alert)
-                //                 .finally(function () {
-                //                     alert = undefined;
-                //                 });
-                //         });
-                //         return;
-                //     } else if (response.status === 301) {
-                //         var redirectURL = response.url;
-                //         $scope.onSubmitURL(redirectURL);
-                //         return;
-                //     } else {
-                //         $scope.selectedElement = null;
-                //         var uploadedDocument = response.data;
-                //         uploadDocumentCallback(uploadedDocument);
-                //         $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function (translations) {
-                //             $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
-                //         });
-                //     }
-                // });
-                // };
                 scope.uploadfile = function (fileinput) {
                     var file = fileinput.files[0];
                     scope.progressmode = "determinate";
