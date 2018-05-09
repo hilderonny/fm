@@ -32,7 +32,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '        <input ng-value="trimnumber(dynamicobject[datatypefield.name] || 0)" ng-if="datatypefield.fieldtype === \'formula\'" disabled>' +
         '        <md-checkbox ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'boolean\'"><span ng-bind="datatypefield.label"></span></md-checkbox>' +
         '        <md-datepicker ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'datetime\'" md-open-on-focus read-only></md-datepicker>' +
-        '        <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/{{dynamicobject[datatypefield.name]}}?action=preview&token={{token}}" ng-click="openpreviewimage(datatypefield.name)"/>' + // Special handle previewimagedocumentname
+        '        <img ng-if="datatypefield.name === \'previewimagedocumentname\' && dynamicobject[datatypefield.name]" ng-src="/api/documents/preview/{{dynamicobject[datatypefield.name]}}?token={{token}}" ng-click="openpreviewimage(datatypefield.name)"/>' + // Special handle previewimagedocumentname
         '        <md-button ng-required="datatypefield.isrequired" avt-reference-select></md-button>' +
         '    </md-input-container>' +
         '    <md-input-container flex ng-repeat="attribute in dynamicattributes | orderBy: \'type.name_en\'">' +
@@ -184,7 +184,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     });
                 };
                 scope.openpreviewimage = function(datatypefieldname) {
-                    window.open('/api/documents/' + scope.dynamicobject[datatypefieldname] + '?action=preview&token=' + scope.token, "_blank");
+                    window.open('/api/documents/preview/' + scope.dynamicobject[datatypefieldname] + '?token=' + scope.token, "_blank");
                 };
                 scope.save = function() {
                     if (scope.isactionpending) return;

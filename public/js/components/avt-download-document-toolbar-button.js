@@ -11,7 +11,7 @@ app.directive('avtDownloadDocumentToolbarButton', function($compile, utils) {
             toolbar.append(button);
             return function link(scope) {
                 scope.downloaddocument = function() {
-                    window.open('/api/documents/' + scope.dynamicobject.name + '?action=preview&token=' + scope.token, "_blank");
+                    window.open('/api/documents/preview/' + scope.dynamicobject.name + '?token=' + scope.token, "_blank");
                 }
             };
         }

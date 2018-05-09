@@ -4,6 +4,7 @@
     "TRK_FOLDERS_DOCUMENT_UPLOADED" : "Upload complete",
     "TRK_FOLDERS_ENTER_URL" : "Enter URL",
     "TRK_FOLDERS_FILE_UPLOAD" : "Browse files",
+    "TRK_FOLDERS_URL_INVALID_MESSAGE" : "The given URL is invalid.",
     "TRK_FOLDERS_URL_UPLOAD" : "Enter URL",
     "TRK_MENU_OFFICE" : "Office",
     "TRK_MENU_OFFICE_DOCUMENTS" : "Documents",

@@ -46,52 +46,6 @@ describe('API documents', () =>{
         if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
     });
 
-    function compareElement(actual, expected) {
-        ["_id", "clientId", "name", "parentFolderId", "type", "isShared"].forEach((f) => {
-            assert.ok(typeof(actual[f]) !== "undefined");
-            assert.strictEqual(actual[f], expected[f]);
-        });
-    }
-
-    function mapFields(e, clientname) {
-        return {
-            _id: e.name,
-            clientId: clientname,
-            name: e.label,
-            parentFolderId: e.parentfoldername,
-            type: e.type,
-            isShared: e.isshared
-        }
-    }
-    
-    describe('GET/forIds', () => {
-
-        async function createTestDocuments(clientname) {
-            return [ { _id: clientname + "_document0" } ];
-        }
-
-        th.apiTests.getForIds.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, co.collections.documents.name, createTestDocuments);
-        th.apiTests.getForIds.clientDependentNegative(co.apis.documents, co.collections.documents.name, createTestDocuments);
-        th.apiTests.getForIds.defaultPositive(co.apis.documents, co.collections.documents.name, createTestDocuments);
-
-        it('returns the full path for each document', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            var documentsFromApi = (await th.get(`/api/documents/forIds?ids=client0_document0,client0_document00,client0_document000&token=${token}`).expect(200)).body;
-            assert.strictEqual(documentsFromApi.length, 3);
-            var sortedDocuments = documentsFromApi.sort((a, b) => a._id.localeCompare(b._id));
-            assert.strictEqual(sortedDocuments[0]._id, "client0_document0");
-            assert.strictEqual(sortedDocuments[0].path.length, 0);
-            assert.strictEqual(sortedDocuments[1]._id, "client0_document00");
-            assert.strictEqual(sortedDocuments[1].path.length, 1);
-            assert.strictEqual(sortedDocuments[1].path[0].name, "folder0");
-            assert.strictEqual(sortedDocuments[2]._id, "client0_document000");
-            assert.strictEqual(sortedDocuments[2].path.length, 2);
-            assert.strictEqual(sortedDocuments[2].path[0].name, "folder0");
-            assert.strictEqual(sortedDocuments[2].path[1].name, "folder00");
-        });
-
-    });
-
     describe('GET/share/:documentid', () => {
 
         it('responds with valid id of non-shared document with 404', async() =>{
@@ -110,31 +64,32 @@ describe('API documents', () =>{
         
     });
 
-    describe('GET/:id', () => {
+    describe('GET/download/:id', () => {
 
-        th.apiTests.getId.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, co.collections.documents.name);
-        th.apiTests.getId.clientDependentNegative(co.apis.documents, co.collections.documents.name);
+        th.apiTests.getId.defaultNegative(co.apis.documents + "/download", co.permissions.OFFICE_DOCUMENT, co.collections.documents.name);
+        th.apiTests.getId.clientDependentNegative(co.apis.documents + "/download", co.collections.documents.name);
 
-        it('responds with existing document id with all details of the document', async() => {
+        it('Downloads the document', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var elementFromDatabase = mapFields(await Db.getDynamicObject("client0", co.collections.documents.name, "client0_document00"), "client0");
-            var elementFromApi = (await th.get(`/api/documents/client0_document00?token=${token}`).expect(200)).body;
-            compareElement(elementFromApi, elementFromDatabase);
+            var response = await th.get(`/api/documents/download/client0_document000?token=${token}`).expect(200);
+            assert.ok(response.headers["content-disposition"]);
+            assert.ok(response.headers["content-disposition"].indexOf("attachment") >= 0);
+            assert.strictEqual(response.type, 'type');
+            assert.strictEqual(response.text, "client0_document000");
         });
+        
+    });
 
-        it('Contains the full path in correct order', async() => {
-            // For client0_document000: client0_folder0 » client0_folder00
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            var documentFromApi = (await th.get(`/api/documents/client0_document000?token=${token}`).expect(200)).body;
-            assert.ok(documentFromApi.path);
-            assert.strictEqual(documentFromApi.path.length, 2);
-            assert.strictEqual(documentFromApi.path[0].name, 'folder0');
-            assert.strictEqual(documentFromApi.path[1].name, 'folder00');
-        });
+    describe('GET/preview/:id', () => {
 
-        it('Downloads the document when ?action=download is given', async() => {
+        th.apiTests.getId.defaultNegative(co.apis.documents + "/preview", co.permissions.OFFICE_DOCUMENT, co.collections.documents.name);
+        th.apiTests.getId.clientDependentNegative(co.apis.documents + "/preview", co.collections.documents.name);
+
+        it('Downloads the document for preview', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var response = await th.get(`/api/documents/client0_document000?action=download&token=${token}`).expect(200);
+            var response = await th.get(`/api/documents/preview/client0_document000?token=${token}`).expect(200);
+            assert.ok(response.headers["content-disposition"]);
+            assert.ok(response.headers["content-disposition"].indexOf("inline") >= 0);
             assert.strictEqual(response.type, 'type');
             assert.strictEqual(response.text, "client0_document000");
         });
@@ -177,78 +132,4 @@ describe('API documents', () =>{
         
     });
 
-    describe('PUT/:id', () => {
-
-        async function createPutTestObject(client) {
-            return { _id: client + "_document0", clientId: client, name: "document0" }
-        }
-
-        th.apiTests.put.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, createPutTestObject);
-        th.apiTests.put.clientDependentNegative(co.apis.documents, createPutTestObject);
-
-        it('responds with correct document with invalid new parentFolderId with 400', async() => {
-            var elementupdate = { parentFolderId: "invalidid" };
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.put(`/api/documents/client0_document00?token=${token}`).send(elementupdate).expect(400);
-        });
-
-        it(`updates the document and returns the updated entity`, async() => {
-            var elementupdate = { name: "newdocumentname" };
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.put(`/api/documents/client0_document00?token=${token}`).send(elementupdate).expect(200);
-            var elementFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, "client0_document00");
-            assert.strictEqual(elementFromDatabase.label, elementupdate.name);
-        });
-
-        it('responds with correct document without parentFolderId with updated document and old parentFolderId', async() => {
-            var elementupdate = { name: "newdocumentname" };
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.put(`/api/documents/client0_document00?token=${token}`).send(elementupdate).expect(200);
-            var elementFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, "client0_document00");
-            assert.strictEqual(elementFromDatabase.parentfoldername, "client0_folder0");
-        });
-
-        it('responds with correct document containing null as parentFolderId with updated document and null as parentFolderId', async() => {
-            var elementupdate = { parentFolderId: null };
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.put(`/api/documents/client0_document00?token=${token}`).send(elementupdate).expect(200);
-            var elementFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, "client0_document00");
-            assert.strictEqual(elementFromDatabase.parentfoldername, null);
-        });
-
-        it('responds with correct document with correct new parentFolderId with the updated document and the ID of the new parent folder as parentFolderId', async() => {
-            var elementupdate = { parentFolderId: "client0_folder1" };
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.put(`/api/documents/client0_document00?token=${token}`).send(elementupdate).expect(200);
-            var elementFromDatabase = await Db.getDynamicObject("client0", co.collections.documents.name, "client0_document00");
-            assert.strictEqual(elementFromDatabase.parentfoldername, "client0_folder1");
-        });
-        
-    });
-
-    describe('DELETE/:id', () => {
-
-        async function getDeleteDocumentId(clientname) {
-            return clientname + "_document00";
-        }
-
-        th.apiTests.delete.defaultNegative(co.apis.documents, co.permissions.OFFICE_DOCUMENT, getDeleteDocumentId);
-        th.apiTests.delete.clientDependentNegative(co.apis.documents, getDeleteDocumentId);
-        th.apiTests.delete.defaultPositive(co.apis.documents, co.collections.documents.name, getDeleteDocumentId);
-
-        it('responds with a correct id with 204 and deletes the document', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.del(`/api/documents/client0_document00?token=${token}`).expect(204);
-            var document = await Db.getDynamicObject("client0", co.collections.documents.name, "client0_document00");
-            assert.ok(!document);
-        });
-
-        it('deletes all files of the affected documents', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.del(`/api/documents/client0_document00?token=${token}`).expect(204);
-            var filePath = dh.getDocumentPath("client0", 'client0_document00');
-            assert.ok(!fs.existsSync(filePath));
-        });
-
-    });
 });
