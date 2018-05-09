@@ -162,10 +162,6 @@ module.exports.collections = {
      */
     clients:{name:'clients', icon:'/css/icons/material/Briefcase.svg', canHaveAttributes:true},
     /**
-     * Kommunikationswege von Personen
-     */
-    communications:{name:'communications', icon:'/css/icons/material/Phone.svg', canHaveAttributes:true},
-    /**
      * Dokumente
      */
     documents:{name:'documents', icon: '/css/icons/material/Document.svg', canHaveAttributes:true},
