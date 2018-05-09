@@ -8,6 +8,7 @@ var path = require("path");
 var JSZip = require("jszip");
 var rimraf = require("rimraf");
 var decompress = require("decompress");
+var uuidv4 = require("uuid").v4;
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
@@ -148,6 +149,11 @@ var Db = {
         }
         // Force update of cache in the next request
         delete Db.datatypes;
+    },
+
+    // Convinient way to generate names for entities.
+    createName: () => {
+        return uuidv4().replace(/-/g, "");
     },
     
     deleteClient: async(clientname) => {

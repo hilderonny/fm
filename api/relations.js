@@ -8,7 +8,6 @@ var validateSameClientId = require('../middlewares/validateSameClientId');
 var co = require('../utils/constants');
 var dah = require('../utils/dynamicAttributesHelper');
 var Db = require("../utils/db").Db;
-var uuidv4 = require("uuid").v4;
 
 /**
  * Sucht alle Verknüpfungen zu einer Entität einer bestimmten ID und liefert diese als Liste
@@ -47,7 +46,7 @@ router.post('/', auth(false, false, co.modules.base), async(req, res) => {
         return res.sendStatus(400);
     }
     var relationtoinsert = {
-        name: uuidv4().replace(/-/g, ""),
+        name: Db.createName(),
         name1: relation.id1,
         datatype1name: relation.type1,
         name2: relation.id2,

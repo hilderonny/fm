@@ -8,7 +8,6 @@ var apiHelper = require('../utils/apiHelper');
 var co = require('../utils/constants');
 var configHelper = require('../utils/configHelper');
 var Db = require("../utils/db").Db;
-var uuidv4 = require("uuid").v4;
 var ph = require("../utils/permissionshelper");
 
 /**

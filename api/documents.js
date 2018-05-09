@@ -22,7 +22,6 @@ var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
 var mime = require("mime");
 var Db = require("../utils/db").Db;
-var uuidv4 = require("uuid").v4;
 var request = require('request');
 
 var downloadDocument = (response, clientname, document, forpreview) => {
@@ -72,7 +71,7 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     if (!file) return res.sendStatus(400);
     var clientname = req.user.clientname;
     var document = {
-        name: uuidv4().replace(/-/g, ""),
+        name: Db.createName(),
         label: file.originalname,
         type: mime.getType(path.extname(file.originalname)),
         isshared: false
@@ -83,7 +82,7 @@ router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents)
     var parententityname = req.body.parententityname;
     if (parentdatatypename && parententityname) {
         var relation = {
-            name: uuidv4().replace(/-/g, ""),
+            name: Db.createName(),
             datatype1name: parentdatatypename,
             name1: parententityname,
             datatype2name: "documents",
@@ -124,7 +123,7 @@ router.post('/urlupload', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.d
         }
         var clientname = req.user.clientname;
         var document = {
-            name: uuidv4().replace(/-/g, ""),
+            name: Db.createName(),
             label: filename,
             type: contentType,
             isshared: false
@@ -137,7 +136,7 @@ router.post('/urlupload', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.d
             var parententityname = req.body.parententityname;
             if (parentdatatypename && parententityname) {
                 var relation = {
-                    name: uuidv4().replace(/-/g, ""),
+                    name: Db.createName(),
                     datatype1name: parentdatatypename,
                     name1: parententityname,
                     datatype2name: "documents",

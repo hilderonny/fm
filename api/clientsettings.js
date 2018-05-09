@@ -5,7 +5,6 @@ var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
-var uuidv4 = require("uuid").v4;
 
 function mapFields(e) {
     return {
@@ -32,7 +31,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT, 'w', co.modules.base), asy
     if (!clientSettings || Object.keys(clientSettings).length < 1) return res.sendStatus(400);
     // Alle Einstellungen des Mandanten pauschal löschen
     await Db.deleteDynamicObjects(Db.PortalDatabaseName, "clientsettings", { clientname: req.user.clientname });
-    var insertedsetting = { name: uuidv4().replace(/-/g, ""), clientname: req.user.clientname, logourl: clientSettings.logourl };
+    var insertedsetting = { name: Db.createName(), clientname: req.user.clientname, logourl: clientSettings.logourl };
     await Db.insertDynamicObject(Db.PortalDatabaseName, "clientsettings", insertedsetting);
     res.send(mapFields(insertedsetting));
 });

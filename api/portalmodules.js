@@ -5,7 +5,6 @@ var co = require('../utils/constants');
 var auth = require('../middlewares/auth');
 var Db = require("../utils/db").Db;
 var mc = require('../config/module-config.json');
-var uuidv4 = require("uuid").v4;
 var router = require('express').Router();
 
 router.get("/forportal/:name", auth(co.permissions.LICENSESERVER_PORTAL, 'r', co.modules.licenseserver), async(req, res) => {
@@ -32,7 +31,7 @@ router.post('/', auth(co.permissions.LICENSESERVER_PORTAL, 'w', co.modules.licen
     if (result.rowCount < 1) return res.sendStatus(400);
     var portal = result.rows[0];
     if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM portalmodules WHERE portalname='${portalname}' AND modulename = '${modulename}';`)).rowCount < 1) {
-        await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('${uuidv4().replace(/-/g, "")}', '${portalname}', '${modulename}');`);
+        await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('${Db.createName()}', '${portalname}', '${modulename}');`);
     }
     res.sendStatus(200);
 });
