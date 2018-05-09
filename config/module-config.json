@@ -482,7 +482,7 @@
                 { "name": "emailcontacts", "label": "E-Mail", "plurallabel": "E-Mails", "titlefield": "address", "icon": "/css/icons/material/Email.svg", "fields": [
                     { "name": "address", "label": "E-Mail-Adresse", "type": "text" },
                     { "name": "emailcontacttypename", "label": "Typ", "type": "reference", "reference": "emailcontacttypes" }
-                ], "lists": [ "persons_hierarchy" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
+                ], "lists": [ "persons_hierarchy", "persons_children" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
 
                 { "name": "emailcontacttypes", "label": "E-Mail-Art", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
@@ -495,7 +495,7 @@
                 { "name": "phonecontacts", "label": "Telefon", "plurallabel": "Telefone", "titlefield": "number", "icon": "/css/icons/material/Phone.svg", "fields": [
                     { "name": "number", "label": "Telefonnummer", "type": "text" },
                     { "name": "phonecontacttypename", "label": "Typ", "type": "reference", "reference": "phonecontacttypes" }
-                ], "lists": [ "persons_hierarchy" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
+                ], "lists": [ "persons_hierarchy", "persons_children" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
 
                 { "name": "phonecontacttypes", "label": "Telefon-Art", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
