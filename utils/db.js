@@ -8,6 +8,7 @@ var path = require("path");
 var JSZip = require("jszip");
 var rimraf = require("rimraf");
 var decompress = require("decompress");
+var uuidv4 = require("uuid").v4;
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
@@ -135,7 +136,7 @@ var Db = {
             case constants.fieldtypes.boolean: columntype = "BOOLEAN"; break;
             case constants.fieldtypes.datetime: columntype = "BIGINT"; break;
             case constants.fieldtypes.decimal: columntype = "NUMERIC"; break;
-            case constants.fieldtypes.formula: columntype = "NUMERIC"; break;
+            case constants.fieldtypes.formula: columntype = "TEXT"; break;
             case constants.fieldtypes.password: columntype = "TEXT"; break;
             case constants.fieldtypes.reference: columntype = "TEXT"; break;
             case constants.fieldtypes.text: columntype = "TEXT"; break;
@@ -148,6 +149,11 @@ var Db = {
         }
         // Force update of cache in the next request
         delete Db.datatypes;
+    },
+
+    // Convinient way to generate names for entities.
+    createName: () => {
+        return uuidv4().replace(/-/g, "");
     },
     
     deleteClient: async(clientname) => {
@@ -419,7 +425,8 @@ var Db = {
             (
                 (keys.indexOf("childsum") === 0 && formula.childsum && typeof(formula.childsum) === "string") ||
                 (keys.indexOf("ifthenelse") === 0 && Array.isArray(formula.ifthenelse) && formula.ifthenelse.length === 4 && typeof(formula.ifthenelse[0]) === "string" && typeof(formula.ifthenelse[2]) === "string") ||
-                (keys.indexOf("sum") === 0 && Array.isArray(formula.sum) && formula.sum.filter(f => typeof(f) === "string").length === formula.sum.length)
+                (keys.indexOf("sum") === 0 && Array.isArray(formula.sum) && formula.sum.filter(f => typeof(f) === "string").length === formula.sum.length) ||
+                (keys.indexOf("concat") === 0 && Array.isArray(formula.concat))
             )
         ) return true;
         return false;

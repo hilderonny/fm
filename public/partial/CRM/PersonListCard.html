@@ -1,20 +1,5 @@
-<md-card ng-cloak  ng-controller="CRMPersonListCardController" style="background-image:url('/css/icons/office/Collaborator Male.svg');">
-    
-    <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button ng-click="newPerson()" aria-label="ADD PERSON" ng-if="canWritePersons">
-            <md-tooltip md-direction="bottom"><span translate>TRK_PERSONS_CREATE_NEW_PERSON</span></md-tooltip>
-            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-            <p translate>TRK_PERSONS_PERSON</p>
-        </md-button>
-    </md-toolbar>
-    
-    <md-card-content>
-        <md-list class="lines-beetween-items">
-            <md-list-item ng-repeat="person in persons | orderBy: 'lastname' " ng-click="selectPerson(person)" ng-class="selectedPerson == person ? 'active' : false" aria-label="{{person.lastname}}">
-                <md-icon md-svg-src="/css/icons/material/Collaborator Male.svg"></md-icon>
-                <p>{{person.lastname}}, {{person.firstname}}</p> 
-            </md-list-item>
-        </md-list>
-    </md-card-content>
-    <resize-handle></resize-handle>
-</md-card>
+<md-card
+    avt-card
+    avt-hierarchy-card='{"listfilter":"persons_hierarchy","detailscard":"CRM/PersonCard"}'
+    avt-add-element-toolbar-button='{"datatypenames":["persons"],"label":"Person","tooltip":"Neue Person","icon":"/css/icons/material/Plus Math.svg"}'
+></md-card>

@@ -29,10 +29,6 @@ module.exports.apis = {
      */
     clientsettings: 'clientsettings',
     /**
-     * API für Kommunikationswege
-     */
-    communications: 'communications',
-    /**
      * API zur Abfrage von Datentypen
      */
     datatypes: "datatypes",
@@ -85,10 +81,6 @@ module.exports.apis = {
      */
     permissions: 'permissions',
     /**
-     * API for providing permissions to persons
-     */
-    persons: 'persons',
-    /**
      * API for handling local portal settings like license key or checking for available updates
      */
     portalmanagement: 'portalmanagement',
@@ -134,7 +126,8 @@ module.exports.apis = {
 module.exports.formulatypes = {
     childsum: "childsum",
     ifthenelse: "ifthenelse",
-    sum: "sum"
+    sum: "sum",
+    concat: "concat"
 }
 
 /**
@@ -161,10 +154,6 @@ module.exports.collections = {
      * Mandanten
      */
     clients:{name:'clients', icon:'/css/icons/material/Briefcase.svg', canHaveAttributes:true},
-    /**
-     * Kommunikationswege von Personen
-     */
-    communications:{name:'communications', icon:'/css/icons/material/Phone.svg', canHaveAttributes:true},
     /**
      * Dokumente
      */

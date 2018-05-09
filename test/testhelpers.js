@@ -152,12 +152,6 @@ th.preparePersons = async() => {
     await Db.insertDynamicObject("client1", "persons", { name: "client1_person0", firstname: "fn2", lastname: "ln2", description: "d2" });
 };
 
-th.prepareCommunications = async() => {
-    await th.cleanTable("communications", false, true);
-    await Db.insertDynamicObject("client0", "communications", { name: "client0_communication0", contact: "c0", personname: "client0_person0", communicationtypename: "emailwork" });
-    await Db.insertDynamicObject("client0", "communications", { name: "client0_communication1", contact: "c1", personname: "client0_person1", communicationtypename: "phonemobile" });
-};
-
 th.prepareNotes = async() => {
     await th.cleanTable("notes", false, true);
     await Db.insertDynamicObject("client0", "notes", { name: "client0_note0", content: "content0" });

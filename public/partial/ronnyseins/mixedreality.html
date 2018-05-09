@@ -6,6 +6,7 @@
     <script src="https://unpkg.com/aframe-template-component@^3.2.1/dist/aframe-template-component.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.5.1/dist/aframe-look-at-component.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-teleport-controls/dist/aframe-teleport-controls.min.js"></script>
 </head>
 
 <body>
@@ -33,14 +34,14 @@
         
         <a-entity environment="preset: forest; dressingAmount: 500"></a-entity>
 
-        <a-entity windows-motion-controls="hand: left">
+        <a-entity windows-motion-controls="hand: left" teleport-controls="startEvents:['axismove']">
             <a-entity template="src:#axestemplate" position="0 0 0" scale="0.1 0.1 0.1"></a-entity>
             <a-entity rotation="-35 0 0">
                 <a-entity template="src:#fingertargettemplate"></a-entity>
             </a-entity>
         </a-entity>
 
-        <a-entity windows-motion-controls="hand: right">
+        <a-entity windows-motion-controls="hand: right" teleport-controls>
             <a-entity template="src:#axestemplate" position="0 0 0" scale="0.1 0.1 0.1"></a-entity>
             <a-entity rotation="-35 0 0">
                 <a-entity template="src:#fingertargettemplate"></a-entity>

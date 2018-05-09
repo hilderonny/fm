@@ -131,7 +131,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                 scope.selectchild = function(child) {
                     if (!scope.detailscard) return;
                     utils.removeCardsToTheRightOf(element);
-                    utils.adddetailscard(scope, child.datatypename, child.name, scope.params.permission).then(function() {
+                    utils.adddetailscard(scope, child.datatypename, child.name, scope.params.permission, undefined, undefined, params.listfilter).then(function() {
                         scope.selectedchild = child;
                     });
                 };

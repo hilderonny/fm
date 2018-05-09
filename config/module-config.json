@@ -394,7 +394,7 @@
         "businesspartners" : {
             "forportal": false,
             "forclients": true,
-            "api":[ "businesspartners", "partneraddresses", "persons", "communications"],
+            "api":[ "businesspartners", "partneraddresses" ],
             "public": [
                 "css/icons/material/Address Book.svg",
                 "css/icons/material/Business.svg",
@@ -420,7 +420,6 @@
                 "partial/CRM/BPAddressCard.html",
                 "partial/CRM/BPCard.html",
                 "partial/CRM/BPListCard.html",
-                "partial/CRM/CommunicationCard.html",
                 "partial/CRM/PersonCard.html",
                 "partial/CRM/PersonListCard.html",
                 "partial/Doc/BusinessPartners.html",
@@ -429,18 +428,15 @@
             "include":[
                 "public/js/CRM/BPAddressCardController.js",
                 "public/js/CRM/BPCardController.js",
-                "public/js/CRM/BPListCardController.js",
-                "public/js/CRM/CommunicationCardController.js",
-                "public/js/CRM/PersonCardController.js",
-                "public/js/CRM/PersonListCardController.js"
+                "public/js/CRM/BPListCardController.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_CRM",
                     "items": [
                         { "mainCard": "CRM/BPListCard", "icon": "/css/icons/material/Business.svg", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners", "directurls": [ "businesspartners" ] },
-                        { "mainCard": "CRM/PersonListCard", "icon": "/css/icons/material/Collaborator Male.svg", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons", "directurls": [ "persons" ] }
+                        { "mainCard": "CRM/PersonListCard", "icon": "/css/icons/material/Collaborator Male.svg", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons", "directurls": [ "persons", "emailcontacts", "phonecontacts" ] }
                     ]
                 }
             ],
@@ -454,11 +450,12 @@
                     { "name": "isjuristic", "label": "Juristische Person", "type": "boolean" }
                 ], "canhaverelations" : true },
 
-                { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "lastname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
+                { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "fullname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
                     { "name": "firstname", "label": "Vorname", "type": "text" },
                     { "name": "lastname", "label": "Nachname", "type": "text" },
-                    { "name": "description", "label": "Beschreibung", "type": "text" }
-                ], "canhaverelations" : true },
+                    { "name": "description", "label": "Beschreibung", "type": "text" },
+                    { "name": "fullname", "label": "Vollständiger Name", "ishidden": true, "type": "formula", "formula": { "concat" : ["@lastname", ", ", "@firstname"] }, "formulaindex": 0 }
+                ], "lists": [ "persons_hierarchy" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
 
                 { "name": "partneraddresstypes", "label": "Adressart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" },
@@ -479,30 +476,32 @@
                     { "name": "partneraddresstypename", "label": "Art der Adresse", "type": "reference", "reference": "partneraddresstypes" }
                 ] },
 
-                { "name": "communicationmediums", "label": "Kommunikationsmedium", "titlefield": "label", "fields": [
+                { "name": "emailcontacts", "label": "E-Mail", "plurallabel": "E-Mails", "titlefield": "address", "icon": "/css/icons/material/Email.svg", "fields": [
+                    { "name": "address", "label": "E-Mail-Adresse", "type": "text" },
+                    { "name": "emailcontacttypename", "label": "Typ", "type": "reference", "reference": "emailcontacttypes" }
+                ], "lists": [ "persons_hierarchy", "persons_children" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
+
+                { "name": "emailcontacttypes", "label": "E-Mail-Art", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
-                ], "values": [
-                    { "name": "email", "label": "E-Mail" },
-                    { "name": "phone", "label": "Telefon" }
-                ] }, 
+                ], "lists": [ "emailcontacttypes" ], "values": [
+                    { "name": "private", "label": "Privat" },
+                    { "name": "work", "label": "Arbeit" },
+                    { "name": "other", "label": "Andere" }
+                ] },
 
-                { "name": "communicationtypes", "label": "Kommunikationsart", "titlefield": "label", "fields": [
-                    { "name": "label", "type": "text" },
-                    { "name": "communicationmediumname", "label": "Medium", "type": "reference", "reference": "communicationmediums" }
-                ], "values": [
-                    { "name": "emailwork", "label": "Arbeit", "communicationmediumname": "email" },
-                    { "name": "emailother", "label": "Andere", "communicationmediumname": "email" },
-                    { "name": "phonework", "label": "Arbeit", "communicationmediumname": "phone" },
-                    { "name": "phonemobile", "label": "Mobil", "communicationmediumname": "phone" },
-                    { "name": "phoneother", "label": "Andere", "communicationmediumname": "phone" }
-                ] }, 
+                { "name": "phonecontacts", "label": "Telefon", "plurallabel": "Telefone", "titlefield": "number", "icon": "/css/icons/material/Phone.svg", "fields": [
+                    { "name": "number", "label": "Telefonnummer", "type": "text" },
+                    { "name": "phonecontacttypename", "label": "Typ", "type": "reference", "reference": "phonecontacttypes" }
+                ], "lists": [ "persons_hierarchy", "persons_children" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
 
-                { "name": "communications", "label": "Kommunikationsweg", "plurallabel": "Kommunikationswege", "titlefield": "contact", "icon": "/css/icons/material/Phone.svg", "fields": [
-                    { "name": "contact", "label": "Kontakt", "type": "text" },
-                    { "name": "personname", "label": "Person", "type": "reference", "reference": "persons" },
-                    { "name": "communicationtypename", "label": "Typ", "type": "reference", "reference": "communicationtypes" }
-                ] }
-                
+                { "name": "phonecontacttypes", "label": "Telefon-Art", "titlefield": "label", "fields": [
+                    { "name": "label", "type": "text" }
+                ], "lists": [ "phonecontacttypes" ], "values": [
+                    { "name": "private", "label": "Privat" },
+                    { "name": "mobile", "label": "Mobil" },
+                    { "name": "work", "label": "Arbeit" },
+                    { "name": "other", "label": "Andere" }
+                ] }                
             ]
         },
 

@@ -720,7 +720,7 @@ describe('API recordtypes', () => {
             fieldtosend.formulaindex = 13;
             await th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(200);
             var entity = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(entity.testrecordtypefieldname, 345.789);
+            assert.strictEqual(entity.testrecordtypefieldname, '345.789');
         });
 
     });
@@ -949,9 +949,9 @@ describe('API recordtypes', () => {
             for (var i = 0; i < entities.length; i++) {
                 var entity = entities[i];
                 if (entity.decimal0 === null) {
-                    assert.strictEqual(entity.formula0, 0); // 0, not null because of formula type "sum"
+                    assert.strictEqual(entity.formula0, '0'); // 0, not null because of formula type "sum"
                 } else {
-                    assert.strictEqual(entity.formula0, entity.decimal0 + entity.decimal0);
+                    assert.strictEqual(entity.formula0, (entity.decimal0 + entity.decimal0).toString());
                 }
             }
         });
@@ -966,7 +966,7 @@ describe('API recordtypes', () => {
             };
             await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(200);
             var entity = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity2");
-            assert.strictEqual(entity.formula1, 345.789);
+            assert.strictEqual(entity.formula1, '345.789');
         });
 
         it('recalculates the formulas of all parents when the formula changed', async() => {
@@ -976,7 +976,7 @@ describe('API recordtypes', () => {
             };
             await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula1, 703.701); // 3 x decimal0
+            assert.strictEqual(parent.formula1, '703.701'); // 3 x decimal0
         });
 
         it('recalculates the formulas of all parents when the formulaindex changed', async() => {
@@ -988,7 +988,7 @@ describe('API recordtypes', () => {
             };
             await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity2");
-            assert.strictEqual(parent.formula1, 345.789); // formula0=0 + decimal0=345.789
+            assert.strictEqual(parent.formula1, '345.789'); // formula0=0 + decimal0=345.789
         });
 
     });
@@ -1290,7 +1290,7 @@ describe('API recordtypes', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.del(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).expect(204);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula1, 234.567); // only decimal0
+            assert.strictEqual(parent.formula1, '234.567'); // only decimal0
         });
 
     });
