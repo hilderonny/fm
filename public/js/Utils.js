@@ -44,10 +44,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
-        adddetailscard: function(scope, datatypename, entityname, permission, parentdatatypename, parententityname) {
+        adddetailscard: function(scope, datatypename, entityname, permission, parentdatatypename, parententityname, listfilter) {
             return utils.addCardWithPermission(scope.detailscard, {
                 datatypename: datatypename,
                 entityname: entityname,
+                listfilter: listfilter,
                 parentdatatypename: parentdatatypename,
                 parententityname: parententityname,
                 onclose: scope.ondetailscardclosed,

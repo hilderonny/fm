@@ -1,7 +1,6 @@
 var auth = require('../middlewares/auth');
 var validateSameClientId = require('../middlewares/validateSameClientId');
 var Db = require("./db").Db;
-var uuidv4 = require("uuid").v4;
 var rh = require('./relationsHelper');
 var dah = require('./dynamicAttributesHelper');
 
@@ -77,7 +76,7 @@ var ah = {
                     return res.sendStatus(400);
                 }
             }
-            element.name = uuidv4().replace(/-/g, "");
+            element.name = Db.createName();
             if (config.post !== true && !(await config.post(element, req, res))) return; // Callback can handle errors and returns false in this case
             await Db.insertDynamicObject(req.user.clientname, config.apiname, element);
             res.send(config.mapfields(element, req.user));

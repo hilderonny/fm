@@ -1,7 +1,6 @@
 var co = require('../utils/constants');
 var moduleConfig = require('../config/module-config.json');
 var Db = require("../utils/db").Db;
-var uuidv4 = require("uuid").v4;
 
 module.exports.deleteAllDynamicAttributeValuesForEntity = async(clientname, id) => {
     await Db.deleteDynamicObjects(clientname, "dynamicattributevalues", { entityname: id });
@@ -32,7 +31,7 @@ module.exports.createDynamicAttribute = async(da) => {
         return result.rows[0];
     } else {
         var insertedDa = {
-            name: uuidv4().replace(/-/g, ""),
+            name: Db.createName(),
             modelname: da.modelName,
             label: da.name_en,
             isinactive: false,
@@ -111,7 +110,7 @@ module.exports.deactivateDynamicAttributesForClient = async(clientId, moduleName
 module.exports.createDynamicAttributeOption = async(dao, clientname) => {
     if ((await Db.query(clientname, `SELECT 1 FROM dynamicattributeoptions WHERE dynamicattributename='${Db.replaceQuotes(dao.dynamicAttributeId)}' AND value='${Db.replaceQuotes(dao.value)}';`)).rowCount < 1) {
         dao = {
-            name: uuidv4().replace(/-/g, ""),
+            name: Db.createName(),
             dynamicattributename: dao.dynamicAttributeId,
             label: dao.text_de ? dao.text_de : dao.text_en,
             value: dao.value

@@ -1,11 +1,20 @@
 var Db = require("./db").Db;
 var co = require("./constants");
 var ch = require("./calculationhelper");
-var uuidv4 = require("uuid").v4;
 var rimraf = require("rimraf");
 var lc = require('../config/localconfig.json');
 var path = require("path");
 var fs = require("fs");
+
+
+async function convertformulas(clientname) {
+    var fields = (await Db.query(clientname, "select name, datatypename from datatypefields where fieldtype='formula';")).rows;
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        var query = `ALTER TABLE ${field.datatypename} ALTER COLUMN ${field.name} TYPE TEXT;`;
+        await Db.query(clientname, query);
+    }
+}
 
 /**
  * Update scripts which are run at system startup, when the localconfig flag "applyupdates" is set to true
@@ -15,27 +24,55 @@ module.exports = async() => {
     var clients = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM clients;")).rows;
     for (var i = 0; i < clients.length; i++) {
         var clientname = clients[i].name;
-        // Seitdem die Kategorien Labels haben, tauchten diese doppelt auf. Die ohne Labels müssen raus
-        await Db.query(clientname, "DELETE FROM areacategories WHERE LABEL IS null;");
-        // Verzeichnisse und Dokumente per Relationen verknüpfen
-        var folderswithparents = (await Db.query(clientname, "SELECT * FROM folders WHERE NOT parentfoldername IS NULL;")).rows;
-        for (var j = 0; j < folderswithparents.length; j++) {
-            var document = folderswithparents[j];
-            var relation = { name: uuidv4().replace(/-/g, ""), datatype1name: "folders", name1: document.parentfoldername, datatype2name: "folders", name2: document.name, relationtypename: "parentchild" };
-            await Db.insertDynamicObject(clientname, "relations", relation);
-            await Db.updateDynamicObject(clientname, "folders", document.name, { parentfoldername: null });
+        // 09.05.2018: Formeln sind nun Text
+        await convertformulas(clientname);
+        // 09.05.2018: Kommunikationswege von Personen auf Beziehungen umstellen
+        var datatypes = await Db.getdatatypes(clientname);
+        var communicationsexisting = (await Db.query(clientname, "SELECT 1 FROM information_schema.tables WHERE table_name='communications';")).rowCount > 0;
+        if (communicationsexisting) {
+            var communications = await Db.getDynamicObjects(clientname, "communications");
+            for (var j = 0; j < communications.length; j++) {
+                var comm = communications[j];
+                if (comm.contact.indexOf("@") > 0) { // Geht nicht anders, der Kommunikationstyp war verloren gegangen
+                    // E-Mails
+                    var emailcontact = {
+                        name: Db.createName(),
+                        address: comm.contact,
+                        emailcontacttypename: "work" // Geht nicht anders, der Kommunikationstyp war verloren gegangen
+                    };
+                    await Db.insertDynamicObject(clientname, "emailcontacts", emailcontact);
+                    var relation = {
+                        name: Db.createName(),
+                        datatype1name: co.collections.persons.name,
+                        name1: comm.personname,
+                        datatype2name: "emailcontacts",
+                        name2: emailcontact.name,
+                        relationtypename: "parentchild"
+                    };
+                    await Db.insertDynamicObject(clientname, co.collections.relations.name, relation);
+                } else {
+                    // Telefon
+                    var phonecontact = {
+                        name: Db.createName(),
+                        number: comm.contact,
+                        phonecontacttypename: "work"
+                    };
+                    await Db.insertDynamicObject(clientname, "phonecontacts", phonecontact);
+                    var relation = {
+                        name: Db.createName(),
+                        datatype1name: co.collections.persons.name,
+                        name1: comm.personname,
+                        datatype2name: "phonecontacts",
+                        name2: phonecontact.name,
+                        relationtypename: "parentchild"
+                    };
+                    await Db.insertDynamicObject(clientname, co.collections.relations.name, relation);
+                }
+            }
+            await Db.query(clientname, "DELETE FROM communications;");
         }
-        var documentswithparents = (await Db.query(clientname, "SELECT * FROM documents WHERE NOT parentfoldername IS NULL;")).rows;
-        for (var j = 0; j < documentswithparents.length; j++) {
-            var document = documentswithparents[j];
-            var relation = { name: uuidv4().replace(/-/g, ""), datatype1name: "folders", name1: document.parentfoldername, datatype2name: "documents", name2: document.name, relationtypename: "parentchild" };
-            await Db.insertDynamicObject(clientname, "relations", relation);
-            await Db.updateDynamicObject(clientname, "documents", document.name, { parentfoldername: null });
-        }
-        // Namensfelder auf predefined setzen
-        await Db.query(clientname, "UPDATE datatypefields SET ispredefined=true WHERE name='name';");
     }
-    // Namensfelder auf predefined setzen
-    await Db.query(Db.PortalDatabaseName, "UPDATE datatypefields SET ispredefined=true WHERE name='name';");
+    // 09.05.2018: Formeln sind nun Text
+    await convertformulas(Db.PortalDatabaseName);
     console.log("UPDATE FINISHED.");
 };

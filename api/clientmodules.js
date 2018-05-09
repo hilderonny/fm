@@ -3,7 +3,6 @@
  */
 var auth = require('../middlewares/auth');
 var Db = require("../utils/db").Db;
-var uuidv4 = require("uuid").v4;
 var dah = require('../utils/dynamicAttributesHelper');
 var router = require('express').Router();
 var co = require('../utils/constants');

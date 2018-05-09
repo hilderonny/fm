@@ -2,7 +2,6 @@ var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
-var uuidv4 = require("uuid").v4;
 var ph = require('../utils/permissionshelper');
 var ch = require('../utils/calculationhelper');
 var dh = require("../utils/documentsHelper");
@@ -183,7 +182,7 @@ router.post('/:recordtypename', auth.dynamic("recordtypename", "w"), async(req, 
         var existing = await Db.getDynamicObject(clientname, recordtypename, newobject.name);
         if (existing) return res.sendStatus(409); // Conflict, name is already in use
     } else {
-        newobject.name = uuidv4().replace(/-/g, "");
+        newobject.name = Db.createName();
     }
     try {
         // When the new object is a client, its table must be created
