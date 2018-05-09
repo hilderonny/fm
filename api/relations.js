@@ -47,7 +47,7 @@ router.post('/', auth(false, false, co.modules.base), async(req, res) => {
         return res.sendStatus(400);
     }
     var relationtoinsert = {
-        name: uuidv4(),
+        name: uuidv4().replace(/-/g, ""),
         name1: relation.id1,
         datatype1name: relation.type1,
         name2: relation.id2,

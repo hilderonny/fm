@@ -21,14 +21,14 @@ module.exports = async() => {
         var folderswithparents = (await Db.query(clientname, "SELECT * FROM folders WHERE NOT parentfoldername IS NULL;")).rows;
         for (var j = 0; j < folderswithparents.length; j++) {
             var document = folderswithparents[j];
-            var relation = { name: uuidv4(), datatype1name: "folders", name1: document.parentfoldername, datatype2name: "folders", name2: document.name, relationtypename: "parentchild" };
+            var relation = { name: uuidv4().replace(/-/g, ""), datatype1name: "folders", name1: document.parentfoldername, datatype2name: "folders", name2: document.name, relationtypename: "parentchild" };
             await Db.insertDynamicObject(clientname, "relations", relation);
             await Db.updateDynamicObject(clientname, "folders", document.name, { parentfoldername: null });
         }
         var documentswithparents = (await Db.query(clientname, "SELECT * FROM documents WHERE NOT parentfoldername IS NULL;")).rows;
         for (var j = 0; j < documentswithparents.length; j++) {
             var document = documentswithparents[j];
-            var relation = { name: uuidv4(), datatype1name: "folders", name1: document.parentfoldername, datatype2name: "documents", name2: document.name, relationtypename: "parentchild" };
+            var relation = { name: uuidv4().replace(/-/g, ""), datatype1name: "folders", name1: document.parentfoldername, datatype2name: "documents", name2: document.name, relationtypename: "parentchild" };
             await Db.insertDynamicObject(clientname, "relations", relation);
             await Db.updateDynamicObject(clientname, "documents", document.name, { parentfoldername: null });
         }

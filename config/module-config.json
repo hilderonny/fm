@@ -560,6 +560,7 @@
                 "css/icons/material/Folder.svg",
                 "css/icons/material/icons8-open-archive.svg",
                 "css/icons/material/icons8-symlink-file.svg",
+                "css/icons/material/icons8-website.svg",
                 "css/icons/material/Upload.svg",
                 "css/icons/office/Document.svg",
                 "css/images/Documents_addfolder.png",
@@ -575,6 +576,7 @@
             "include" : [
                 "public/js/components/avt-document-share-link.js",
                 "public/js/components/avt-download-document-toolbar-button.js",
+                "public/js/components/avt-drag-drop-document.js",
                 "public/js/components/avt-extract-document-toolbar-button.js",
                 "public/js/components/avt-replace-document-toolbar-button.js",
                 "public/js/components/avt-upload-document-toolbar-button.js"
@@ -926,7 +928,8 @@
                 "css/icons/office/World Map.svg",
                 "partial/ronnyseins/3DCard.html",
                 "partial/ronnyseins/AugmentedRealityCard.html",
-                "partial/ronnyseins/GoogleMapsCard.html"
+                "partial/ronnyseins/GoogleMapsCard.html",
+                "partial/ronnyseins/mixedreality.html"
             ],
             "include" : [
                 "public/js/components/avt-viewin3d-toolbar-button.js",
