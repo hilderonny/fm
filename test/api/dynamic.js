@@ -127,34 +127,34 @@ describe('API dynamic', () => {
 
         it('recalculates all parent objects recursively when the object to delete itself is a relation of type "parentchild"', async() => {
             var before = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(before.formula1, 580.356);
+            assert.strictEqual(before.formula1, '580.356');
             var token = await th.defaults.login("client0_usergroup0_user0");
             var r = await Db.getDynamicObjects("client0", "relations");
             await th.del(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity2?token=${token}`).expect(204);
             var after = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(after.formula1, 234.567);
+            assert.strictEqual(after.formula1, '234.567');
         });
 
         it('does not trigger recalculation of related objects when the object to delete itself is a relation but not of type "parentchild"', async() => {
             Db.query("client0", "UPDATE clientnulldatatypenull SET formula0=10, formula1=20 WHERE name='clientnulldatatypenullentity0';");
             var before = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(before.formula0, 10);
-            assert.strictEqual(before.formula1, 20);
+            assert.strictEqual(before.formula0, '10');
+            assert.strictEqual(before.formula1, '20');
             var token = await th.defaults.login("client0_usergroup0_user0");
             var r = await Db.getDynamicObjects("client0", "relations");
             await th.del(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity1?token=${token}`).expect(204);
             var after = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(before.formula0, 10);
-            assert.strictEqual(before.formula1, 20);
+            assert.strictEqual(before.formula0, '10');
+            assert.strictEqual(before.formula1, '20');
         });
 
         it('recalculates all parent objects recursively of the object to be deleted', async() => {
             var before = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(before.formula1, 580.356);
+            assert.strictEqual(before.formula1, '580.356');
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.del(`/api/dynamic/clientnulldatatypenull/clientnulldatatypenullentity2?token=${token}`).expect(204);
             var after = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(after.formula1, 234.567);
+            assert.strictEqual(after.formula1, '234.567');
         });
 
         it('also deletes attached files when the object is a document', async() => {
@@ -596,8 +596,8 @@ describe('API dynamic', () => {
             assert.strictEqual(result.decimal0, 234.567);
             assert.strictEqual(result.reference0, "client0_usergroup0_user0");
             assert.strictEqual(result.text0, "C0D0E0");
-            assert.strictEqual(result.formula0, 345.789);
-            assert.strictEqual(result.formula1, 580.356);
+            assert.strictEqual(result.formula0, '345.789');
+            assert.strictEqual(result.formula1, '580.356');
         });
 
     });
@@ -723,8 +723,8 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var name = (await th.post(`/api/dynamic/relations?token=${token}`).send(relation).expect(200)).text;
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula0, 445.789);
-            assert.strictEqual(parent.formula1, 680.356);
+            assert.strictEqual(parent.formula0, '445.789');
+            assert.strictEqual(parent.formula1, '680.356');
         });
 
         it('recalculates the formulas of the created entity immediately', async() => {
@@ -732,7 +732,7 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var name = (await th.post(`/api/dynamic/clientnulldatatypenull?token=${token}`).send(entity).expect(200)).text;
             var createdelement = await Db.getDynamicObject("client0", "clientnulldatatypenull", name);
-            assert.strictEqual(createdelement.formula1, 222);
+            assert.strictEqual(createdelement.formula1, '222');
         });
 
         it('responds with 400 when a formula is given as attribute', async() => {
@@ -859,8 +859,8 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity2?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula0, 0); // No children anymore
-            assert.strictEqual(parent.formula1, 234.567);
+            assert.strictEqual(parent.formula0, '0'); // No children anymore
+            assert.strictEqual(parent.formula1, '234.567');
         });
 
         it('recalculates the formerly referenced parents when the object to update is a relation and its type changed to "parent-child"', async() => {
@@ -870,8 +870,8 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity1?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula0, 456.789);
-            assert.strictEqual(parent.formula1, 691.356);
+            assert.strictEqual(parent.formula0, '456.789');
+            assert.strictEqual(parent.formula1, '691.356');
         });
 
         it('recalculates the formerly referenced parents when the object to update is a relation and its first relation element changed', async() => {
@@ -881,8 +881,8 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity2?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula0, 0); // No children anymore
-            assert.strictEqual(parent.formula1, 234.567);
+            assert.strictEqual(parent.formula0, '0'); // No children anymore
+            assert.strictEqual(parent.formula1, '234.567');
         });
 
         it('recalculates the formerly referenced parents when the object to update is a relation and its second relation element changed', async() => {
@@ -892,8 +892,8 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity2?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
-            assert.strictEqual(parent.formula0, 100); // Now only entity7
-            assert.strictEqual(parent.formula1, 334.567);
+            assert.strictEqual(parent.formula0, '100'); // Now only entity7
+            assert.strictEqual(parent.formula1, '334.567');
         });
 
         it('recalculates the new referenced parents when the object to update is a relation and its first relation element changed', async() => {
@@ -903,8 +903,8 @@ describe('API dynamic', () => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.put(`/api/dynamic/relations/client0_clientnulldatatypenull_clientnulldatatypenullentity0_clientnulldatatypenull_clientnulldatatypenullentity2?token=${token}`).send(relation).expect(200);
             var parent = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity7");
-            assert.strictEqual(parent.formula0, 345.789);
-            assert.strictEqual(parent.formula1, 445.789);
+            assert.strictEqual(parent.formula0, '345.789');
+            assert.strictEqual(parent.formula1, '445.789');
         });
 
         it('recalculates the formulas of the updated entity immediately', async() => {
@@ -913,7 +913,7 @@ describe('API dynamic', () => {
             await th.put(`/api/dynamic/clientnulldatatypenull/clientnulldatatypenullentity0?token=${token}`).send(entity).expect(200);
             var updatedentity = await Db.getDynamicObject("client0", "clientnulldatatypenull", "clientnulldatatypenullentity0");
             assert.ok(updatedentity);
-            assert.strictEqual(updatedentity.formula1, 4789.789);
+            assert.strictEqual(updatedentity.formula1, '4789.789');
         });
 
         it('responds with 400 when a formula is given as attribute', async() => {
