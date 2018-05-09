@@ -28,7 +28,6 @@ describe('API search', () => {
         await th.prepareFmObjects();
         await th.prepareMarkers();
         await th.preparePartnerAddresses();
-        await th.prepareCommunications();
         await th.preparePortals();
         await th.preparePortalModules();
         await th.prepareRelations();

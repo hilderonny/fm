@@ -29,10 +29,6 @@ module.exports.apis = {
      */
     clientsettings: 'clientsettings',
     /**
-     * API für Kommunikationswege
-     */
-    communications: 'communications',
-    /**
      * API zur Abfrage von Datentypen
      */
     datatypes: "datatypes",
@@ -84,10 +80,6 @@ module.exports.apis = {
      * API Für Personen
      */
     permissions: 'permissions',
-    /**
-     * API for providing permissions to persons
-     */
-    persons: 'persons',
     /**
      * API for handling local portal settings like license key or checking for available updates
      */
