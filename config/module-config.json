@@ -576,6 +576,7 @@
             "include" : [
                 "public/js/components/avt-document-share-link.js",
                 "public/js/components/avt-download-document-toolbar-button.js",
+                "public/js/components/avt-drag-drop-document.js",
                 "public/js/components/avt-extract-document-toolbar-button.js",
                 "public/js/components/avt-replace-document-toolbar-button.js",
                 "public/js/components/avt-upload-document-toolbar-button.js"

@@ -44,39 +44,13 @@ app.directive('avtUploadDocumentToolbarButton', function ($rootScope, $compile, 
                         scope.menuPanel = panelRef;
                     });
                 };
-                scope.uploadfile = function (fileinput) {
-                    var file = fileinput.files[0];
-                    scope.progressmode = "determinate";
-                    scope.progressvalue = 0;
-                    scope.isinprogress = true;
-                    // http://stackoverflow.com/q/13591345
-                    var form = new FormData();
-                    var xhr = new XMLHttpRequest;
-                    // Additional POST variables required by the API script
-                    form.append('parententityname', scope.params.entityname ? scope.params.entityname : "");
-                    form.append('parentdatatypename', scope.params.datatypename ? scope.params.datatypename : "");
-                    form.append('file', file);
-                    xhr.upload.onprogress = function (e) {
-                        // Event listener for when the file is uploading
-                        if (e.lengthComputable) {
-                            var progress = Math.round(e.loaded / e.total * 100);
-                            scope.progressvalue = progress;
-                        } else {
-                            scope.progressmode = 'indeterminate';
-                        }
-                    }
-                    xhr.onreadystatechange = function (e) { // https://developer.mozilla.org/de/docs/Web/API/XMLHttpRequest
-                        if (e.target.readyState === 4) {
-                            scope.isinprogress = false;
-                            var uploadeddocumentname = e.target.response;
-                            $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function (translations) {
-                                $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
-                            });
-                            utils.setLocation('/documents/' + uploadeddocumentname, true); // Force loading of details card
-                        }
-                    }
-                    xhr.open('POST', 'api/documents?token=' + $http.defaults.headers.common['x-access-token']);
-                    xhr.send(form);
+                scope.uploadfile = function(fileinput) {
+                    utils.uploadfile(scope, fileinput.files[0], scope.params.datatypename, scope.params.entityname).then(function(documentname) {
+                        $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function (translations) {
+                            $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
+                        });
+                        utils.setLocation('/documents/' + documentname, true); // Force loading of details card
+                    });
                 };
                 scope.uploadFromFile = function () {
                     scope.menuPanel.close();
@@ -95,30 +69,16 @@ app.directive('avtUploadDocumentToolbarButton', function ($rootScope, $compile, 
                     dialogscope.url = "";
                     var urluploadokbutton = {
                         label: "OK", onclick: function () {
-                            var datatosend = { 
-                                url: dialogscope.url
-                            };
-                            if (scope.params.entityname && scope.params.datatypename) {
-                                datatosend.parentdatatypename = scope.params.datatypename;
-                                datatosend.parententityname = scope.params.entityname;
-                            }
-                            scope.progressmode = 'indeterminate';
-                            scope.isinprogress = true;
-                            $http.post('/api/documents/urlupload', datatosend).then(function(response) {
-                                scope.isinprogress = false;
-                                if (response.status === 409) return;
-                                if (response.status === 400) {
-                                    return $translate('TRK_FOLDERS_URL_INVALID_MESSAGE').then(function (message) {
-                                        var alert = $mdDialog.alert().textContent(message).ok('OK');
-                                        $mdDialog.show(alert);
-                                    });
-                                }
-                                if (response.status === 301) return $scope.onSubmitURL(response.url);
-                                var uploadeddocumentname = response.data;
+                            utils.importfromurl(scope, dialogscope.url, scope.params.datatypename, scope.params.entityname).then(function(documentname) {
                                 $translate(['TRK_FOLDERS_DOCUMENT_UPLOADED']).then(function (translations) {
                                     $mdToast.show($mdToast.simple().textContent(translations.TRK_FOLDERS_DOCUMENT_UPLOADED).hideDelay(1000).position('bottom right'));
                                 });
-                                utils.setLocation('/documents/' + uploadeddocumentname, true); // Force loading of details card
+                                utils.setLocation('/documents/' + documentname, true); // Force loading of details card
+                            }, function(error) {
+                                $translate('TRK_FOLDERS_URL_INVALID_MESSAGE').then(function (message) {
+                                    var alert = $mdDialog.alert().textContent(message).ok('OK');
+                                    $mdDialog.show(alert);
+                                });
                             });
                         }
                     };
