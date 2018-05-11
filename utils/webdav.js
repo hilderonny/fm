@@ -3,6 +3,9 @@ var moduleconfig = require('../config/module-config.json');
 var fs = require("fs");
 var moduleconfig = require('../config/module-config.json');
 var Db = require("../utils/db").Db;
+var ph = require('../utils/permissionshelper');
+
+
 
     var dav = {
 
@@ -51,7 +54,7 @@ var Db = require("../utils/db").Db;
                 port: 56789, //avoid default port, which might be already in use
                 hostname: '127.0.0.1', //localhost
                 requireAuthentification: true,
-                httpAuthentication: new webdav.HTTPDigestAuthentication(userManager, 'Default realm'),
+                 httpAuthentication: new webdav.HTTPDigestAuthentication(userManager, 'Default realm'),
                 //httpAuthentication: new webdav.HTTPBasicAuthentication(userManager),
                 privilegeManager: privilegeManager
             });
@@ -63,8 +66,18 @@ var Db = require("../utils/db").Db;
             WebDavserver.afterRequest((arg, next) => {
                 console.log('>>', arg.request.method, arg.fullUri(), '>', arg.response.statusCode, arg.response.statusMessage, arg.response.body);
                 next();
-            })
+            }); 
+
+           // await require("../utils/webdavfoldersanddocuments.js").davdocs.setfiels();
+
+           var fileManager = require("../utils/webdavfoldersanddocuments").davdocs.setfiles(WebDavserver);
+
         
+        
+          
+
+
+        //
 
             // await require("./utils/db").Db.init();
            /** $http.get('/api/documents').then(function (response) {        
@@ -73,9 +86,7 @@ var Db = require("../utils/db").Db;
   
             });
 */
-            WebDavserver.setFileSystem('/documents', new webdav.PhysicalFileSystem('./documents'), (success) => {
-                WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
-            });
+          
            /** const name = '92d7a719-2597-439f-b2aa-1244c7c9cccb';
             const ctx = WebDavserver.ExternalRequestContext.create(server);
             WebDavserver.getResource(ctx, '/api/documents/' + name, (e, r) => {
