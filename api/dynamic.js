@@ -26,7 +26,7 @@ async function getchildren(clientname, recordtypename, entityname, permissions, 
         if (!permissions.find(p => (!rr.permissionkey || p.key === rr.permissionkey) && p.canRead)) continue; // No permission to access specific datatype entities
         var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
         child.datatypename = rr.datatype2name;
-        child.icon = rr.icon;
+        if (!child.icon) child.icon = rr.icon; // Set the icon to the one of the datatype when the object itself has no icon
         child.haschildren = rr.haschildren;
         children.push(child);
     }
@@ -54,7 +54,7 @@ async function getrootelements(clientname, forlist, permissions) {
         `)).rows;
         entities.forEach(e => {
             e.datatypename = rdt.name;
-            e.icon = rdt.icon;
+            if (!e.icon) e.icon = rdt.icon; // Set the icon to the one of the datatype when the object itself has no icon
             rootelements.push(e);
         });
     }
