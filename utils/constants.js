@@ -65,10 +65,6 @@ module.exports.apis = {
      */
     menu: 'menu',
     /**
-     * API für Notizen
-     */
-    notes: 'notes',
-    /**
      * API Für Personen
      */
     permissions: 'permissions',
