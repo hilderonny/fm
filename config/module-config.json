@@ -850,7 +850,7 @@
             "clientdatatypes": [
 
                 { "name": "notes", "label": "Notiz", "plurallabel": "Notizen", "titlefield": "content", "icon": "/css/icons/material/Notes.svg", "fields": [
-                    { "name": "content", "label": "Inhalt", "type": "text" }
+                    { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
                 ], "canhaverelations" : true }
 
             ]
