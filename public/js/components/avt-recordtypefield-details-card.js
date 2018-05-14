@@ -25,11 +25,11 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
         '    <md-input-container flex ng-repeat="fieldattribute in fieldattributes" ng-if="!fieldattribute.showonlywhentypeis || fieldattribute.showonlywhentypeis === datatypefield.fieldtype">' +
         '        <md-tooltip md-delay="500" md-direction="top">{{fieldattribute.tooltip}}</md-tooltip>' +
         '        <label ng-if="[\'text\', \'decimal\', \'picklist\'].indexOf(fieldattribute.type) >= 0">{{fieldattribute.label}}</label>' +
-        '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && (fieldattribute.name !== \'name\' || !params.entityname)" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)" ng-pattern="fieldattribute.pattern">' +
+        '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && (fieldattribute.name !== \'name\' || !params.entityname)" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || (field.ispredefined && fieldattribute.isreadonlywhenpredefined))" ng-pattern="fieldattribute.pattern">' +
         '        <input ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'text\' && fieldattribute.name === \'name\' && params.entityname" disabled>' +
-        '        <input ng-model="datatypefield[fieldattribute.name]" type="number" ng-if="fieldattribute.type === \'decimal\'" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
-        '        <md-checkbox ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'boolean\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)"><span ng-bind="fieldattribute.label"></span></md-checkbox>' +
-        '        <md-select ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'picklist\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || fieldattribute.isreadonlywhenpredefined)">' +
+        '        <input ng-model="datatypefield[fieldattribute.name]" type="number" ng-if="fieldattribute.type === \'decimal\'" ng-required="fieldattribute.isrequired" ng-disabled="params.entityname && (!fieldattribute.iseditable || (field.ispredefined && fieldattribute.isreadonlywhenpredefined))">' +
+        '        <md-checkbox ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'boolean\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || (field.ispredefined && fieldattribute.isreadonlywhenpredefined))"><span ng-bind="fieldattribute.label"></span></md-checkbox>' +
+        '        <md-select ng-model="datatypefield[fieldattribute.name]" ng-if="fieldattribute.type === \'picklist\'" ng-disabled="params.entityname && (!fieldattribute.iseditable || (field.ispredefined && fieldattribute.isreadonlywhenpredefined))">' +
         '            <md-option ng-value="option[\'name\']" ng-repeat="option in fieldattribute.options | orderBy: \'label\'">' +
         '                <span ng-bind="option[\'label\']"></span>' +
         '            </md-option>' +
@@ -115,6 +115,7 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
                         { name: "name", label: "Name", type: "text", iseditable: false, isrequired: true, tooltip: "API Name des Datentypfeldes, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden", pattern:/^[a-z]*$/ },
                         { name: "label", label: "Bezeichnung", type: "text", iseditable: true, tooltip: "Bezeichnung zur Anzeige an der Oberfläche" },
                         { name: "fieldtype", label: "Feldtyp", type: "picklist", options: fieldtypes, iseditable: false, tooltip: "Typ des Feldinhaltes" },
+                        { name: "rows", label: "Anzahl Zeilen", type: "decimal", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Anzahl von Zeilen, die für das Testfeld angezeigt werden", showonlywhentypeis: "text" },
                         { name: "formula", label: "Formel", type: "text", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Berechnungsformel", showonlywhentypeis: "formula" },
                         { name: "formulaindex", label: "Formelindex", type: "decimal", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Index des Formelfeldes. Bestimmt die Reihenfolge der Formelberechnung", showonlywhentypeis: "formula" },
                         { name: "reference", label: "Verwiesener Datentyp", type: "picklist", options: datatypes, iseditable: false, tooltip: "Datentyp, auf den der Verweis zeigt", showonlywhentypeis: "reference" },
@@ -124,6 +125,7 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
                     ];
                     if (fieldname) utils.getresponsedata('/api/recordtypes/field/' + datatypename + "/" + fieldname).then(function(field) {
                         scope.datatypefield = field;
+                        console.log(field);
                         scope.canwrite = scope.$root.canWrite(scope.params.permission);
                     });
                 };

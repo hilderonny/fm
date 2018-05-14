@@ -99,7 +99,6 @@ function getHardToFindTranslationKeysForModule(moduleName) {
         case 'base': return [ 'TRK_MODEL_users', 'TRK_MODEL_usergroups', 'TRK_DYNAMICATTRIBUTES_NAME_de', 'TRK_DYNAMICATTRIBUTES_NAME_en', 'TRK_DYNAMICATTRIBUTES_TYPE_text', 'TRK_DYNAMICATTRIBUTES_TYPE_boolean', 'TRK_DYNAMICATTRIBUTES_TYPE_picklist', "TRK_DETAILS_NEW_SUBELEMENT", "TRK_DETAILS_NEW_SUBELEMENT_IN_THIS_LEVEL", "TRK_RELATIONS_CREATE_RELATION" ];
         case 'clients' : return [ 'TRK_MODEL_clients' ];
         case 'documents' : return [ 'TRK_MODEL_documents', 'TRK_MODEL_folders' ];
-        case 'notes' : return [ 'TRK_NOTES_NOTE', 'TRK_NOTES_SELECT_NOTE' ];
         case 'portalbase' : return [ 'TRK_MODEL_portals' ];
         default: return [];
     }

@@ -30,6 +30,7 @@
 |type|Type of field. Can be ```text```, ```decimal```, ```boolean```, ```datetime```, ```formula```, ```reference```|
 |isrequired|Boolean value to define whether the input of a field value is required or not|
 |reference|API Name of the recordtype which is referenced in picklists when type is ```reference```|
+|rows|Number of rows which should be shown for textfields|
 |ishidden|When set to true, the field should not be shown in client apps|
 
 ### Types
