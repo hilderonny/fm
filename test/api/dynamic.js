@@ -165,6 +165,16 @@ describe('API dynamic', () => {
             assert.ok(!fs.existsSync(filepath));
         });
 
+        it('also deletes the table and document files when the object is a client', async() => {
+            await Db.createClient("testclient", "label");
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/dynamic/clients/testclient?token=${token}`).expect(204);
+            var filepath = dh.getDocumentPath("testclient", "");
+            assert.ok(!fs.existsSync(filepath));
+            var result = await Db.query(Db.PortalDatabaseName, "SELECT 1 FROM information_schema.tables WHERE table_name = 'testclient';");
+            assert.strictEqual(result.rowCount, 0);
+        });
+
     });
     
     describe('GET/children/:forlist/:recordtypename/:entityname', () => {
@@ -243,9 +253,19 @@ describe('API dynamic', () => {
             assert.ok(!result.find(c => c.name === "clientnulldatatypetwoentity0"));
         });
 
-        xit('returns the icon of the entity when it has such an attribute "icon"', async() => {});
+        it('returns the icon of the entity when it has such an attribute "icon"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/children/list0/clientnulldatatypenull/clientnulldatatypenullentity0?token=${token}`).expect(200)).body;
+            var entity3 = result.find(r => r.name === "clientnulldatatypenullentity3");
+            assert.strictEqual(entity3.icon, "clientnulldatatypenullentity3_customicon.png");
+        });
 
-        xit('returns the icon of the datatype when the entity has no own "icon" attribute', async() => {});
+        it('returns the icon of the datatype when the entity has no own "icon" attribute', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/children/list0/clientnulldatatypetwo/clientnulldatatypetwoentity0?token=${token}`).expect(200)).body;
+            var entity1 = result.find(r => r.name === "clientnulldatatypetwoentity1");
+            assert.strictEqual(entity1.icon, "icon2");
+        });
 
     });
 
@@ -504,9 +524,19 @@ describe('API dynamic', () => {
             assert.ok(result.length > 0);
         });
 
-        xit('returns the icon of the entity when it has such an attribute "icon"', async() => {});
+        it('returns the icon of the entity when it has such an attribute "icon"', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/rootelements/list0?token=${token}`).expect(200)).body;
+            var entity0 = result.find(r => r.name === "clientnulldatatypenullentity0");
+            assert.strictEqual(entity0.icon, "clientnulldatatypenullentity0_customicon.png");
+        });
 
-        xit('returns the icon of the datatype when the entity has no own "icon" attribute', async() => {});
+        it('returns the icon of the datatype when the entity has no own "icon" attribute', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/rootelements/list0?token=${token}`).expect(200)).body;
+            var entity2 = result.find(r => r.name === "clientnulldatatypetwoentity2");
+            assert.strictEqual(entity2.icon, "icon2");
+        });
 
     });
 
@@ -760,6 +790,21 @@ describe('API dynamic', () => {
             };
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.post(`/api/dynamic/relations?token=${token}`).send(relation).expect(200);
+        });
+
+        it("creates a table and assigns the base and doc modules to the new client when the entity to create is a client", async() => {
+            var newclient = {
+                label: "posttestclient"
+            };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var name = (await th.post(`/api/dynamic/clients?token=${token}`).send(newclient).expect(200)).text;
+            var createdclient = await Db.getDynamicObject(Db.PortalDatabaseName, "clients", name);
+            assert.ok(createdclient);
+            var cms = await Db.getDynamicObjects(Db.PortalDatabaseName, co.collections.clientmodules.name);
+            var clientmodules = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${name}';`)).rows;
+            assert.strictEqual(clientmodules.length, 2);
+            assert.ok(clientmodules.find(cm => cm.modulename === co.modules.base));
+            assert.ok(clientmodules.find(cm => cm.modulename === co.modules.doc));
         });
 
     });
