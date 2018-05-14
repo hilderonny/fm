@@ -96,7 +96,7 @@ router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTY
     if (!existingdatatype) return res.sendStatus(404);
     if (existingdatatype.fields[field.name]) return res.sendStatus(409);
     try {
-        await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula ? JSON.parse(field.formula) : undefined, field.formulaindex, field.isnullable, field.ishidden, false);
+        await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula ? JSON.parse(field.formula) : undefined, field.formulaindex, field.isnullable, field.ishidden, false, false, field.rows);
         // Recalculate all entities of the datatype when a formula field was added
         if (field.fieldtype === co.fieldtypes.formula) {
             await ch.recalculateforupdateddatatype(clientname, datatypename);
@@ -122,6 +122,7 @@ router.put('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIEN
     if (!existingfield.ispredefined && keys.indexOf("formula") >= 0) updateset.formula = field.formula;
     if (!existingfield.ispredefined && keys.indexOf("formulaindex") >= 0) updateset.formulaindex = field.formulaindex;
     if (keys.indexOf("ishidden") >= 0) updateset.ishidden = field.ishidden;
+    if (keys.indexOf("rows") >= 0) updateset.rows = field.rows;
     if (Object.keys(updateset).length < 1) return res.sendStatus(400);
     try {
         await Db.updaterecordtypefield(clientname, datatypename, fieldname, updateset);

@@ -823,7 +823,6 @@
         "notes": {
             "forportal": false,
             "forclients": true,
-            "api" : [ "notes" ],
             "public" : [
                 "css/icons/material/Notes.svg",                
                 "css/images/Notes_add_button.png",
@@ -834,11 +833,7 @@
                 "partial/Office/NoteListCard.html",
                 "partial/Doc/Notes.html"
             ],
-            "include" : [
-                "public/js/Office/NoteCardController.js",
-                "public/js/Office/NoteListCardController.js"
-            ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_OFFICE",
@@ -850,8 +845,8 @@
             "clientdatatypes": [
 
                 { "name": "notes", "label": "Notiz", "plurallabel": "Notizen", "titlefield": "content", "icon": "/css/icons/material/Notes.svg", "fields": [
-                    { "name": "content", "label": "Inhalt", "type": "text" }
-                ], "canhaverelations" : true }
+                    { "name": "content", "label": "Inhalt", "type": "text", "rows": 4 }
+                ], "lists": [ "notes_hierarchy" ], "permissionkey": "PERMISSION_OFFICE_NOTE", "canhaverelations" : true }
 
             ]
         },

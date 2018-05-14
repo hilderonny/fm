@@ -25,7 +25,8 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '<form name="detailsform">' +
         '    <md-input-container flex ng-repeat="datatypefield in datatypefields | orderBy: \'label\'" ng-if="params.entityname || datatypefield.fieldtype !== \'formula\'">' +
         '        <label ng-if="[\'text\', \'decimal\', \'formula\', \'password\', \'reference\', \'datetime\'].indexOf(datatypefield.fieldtype) >= 0">{{datatypefield.label}}</label>' +
-        '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && (datatypefield.name !== \'name\' || !params.entityname)" ng-required="datatypefield.isrequired">' +
+        '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && (datatypefield.name !== \'name\' || !params.entityname) && (!datatypefield.rows || datatypefield.rows < 2)" ng-required="datatypefield.isrequired">' +
+        '        <textarea ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && (datatypefield.name !== \'name\' || !params.entityname) && datatypefield.rows > 1" ng-required="datatypefield.isrequired" ng-attr-rows="{{datatypefield.rows}}"></textarea>' +
         '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'text\' && datatypefield.name === \'name\' && params.entityname" disabled>' +
         '        <input ng-model="dynamicobject[datatypefield.name]" ng-if="datatypefield.fieldtype === \'password\'" type="password" ng-required="datatypefield.isrequired">' +
         '        <input ng-model="dynamicobject[datatypefield.name]" type="number" ng-if="datatypefield.fieldtype === \'decimal\'" ng-required="datatypefield.isrequired">' +

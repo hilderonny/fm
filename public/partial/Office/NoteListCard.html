@@ -1,20 +1,5 @@
-<md-card ng-cloak ng-controller="OfficeNoteListCardController" style="background-image:url('/css/icons/office/Notes.svg');">
-    
-    <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button  ng-click= "newNote()" aria-label="ADD Note" ng-if="canWriteNoteDetails">
-            <md-tooltip md-direction="bottom"><span translate>TRK_NOTES_CREATE_NEW_NOTE</span></md-tooltip>
-            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-            <p translate>TRK_NOTES_NOTES</p>
-        </md-button>
-    </md-toolbar>
-    
-    <md-card-content>
-        <md-list class="lines-beetween-items">
-            <md-list-item ng-repeat="note in notes | orderBy: 'title' "ng-click="selectNote(note)" ng-class="selectedNote == note ? 'active' : false" aria-label="{{note.title}}" >
-               {{note.title = note.content.length > 50 ? note.content.substring(0, 50) + '. . .' : note.content}}
-            </md-list-item>
-        </md-list>
-    </md-card-content>
-
-    <resize-handle></resize-handle>
-</md-card>
+<md-card
+    avt-card
+    avt-hierarchy-card='{"listfilter":"notes_hierarchy","detailscard":"Office/NoteCard"}'
+    avt-add-element-toolbar-button='{"datatypenames":["notes"],"label":"Notiz","tooltip":"Neue Notiz","icon":"/css/icons/material/Plus Math.svg"}'
+></md-card>
