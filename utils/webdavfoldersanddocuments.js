@@ -33,7 +33,7 @@ async function getrootelements(clientname, forlist, permissions) {
 var davdocs={
     setfiles: async(WebDavserver)=>{
 
-        var user={clientname: "rf", isadmin:true}
+        var user={clientname: "5a620ac917252917087cd8db", isadmin:true}
         var permissions = await ph.getpermissionsforuser(user);
         var rootelements = await getrootelements(user.clientname, "folders_hierarchy", permissions);
 //        myutils.getchildren(clientname, clickedelement.datatypename, clickedelement.name, permissions, "folders_hierarchy")
@@ -44,9 +44,21 @@ var davdocs={
             for (i = 0; i < rootelements.length; i++) {
                 var currentDataItem = rootelements[i]; 
                 if(currentDataItem.datatypename == "folders"){
-                    result[currentDataItem.label]= (currentDataItem.label+':webdav.ResourceType.Directory');
+                    var objFolder = {
+                        currentDataItem: {
+                            title: currentDataItem.label,
+                            type: webdav.ResourceType.Directory
+                        }
+                    }
+                    result[currentDataItem.label]= objFolder;
                 }else{
-                    result[currentDataItem.label]=(currentDataItem.label+ ': webdav.ResourceType.File');
+                    var objFile = {
+                        currentDataItem: {
+                            title: currentDataItem.label,
+                            type: webdav.ResourceType.File
+                        }
+                    }
+                    result[currentDataItem.label]= objFile;
                 }
             }
 
@@ -81,10 +93,6 @@ var davdocs={
         /**var myfilesystem = new webdav.PhysicalFileSystem('./documents');      
                    
        
-
-
-        
-
     WebDavserver.setFileSystem('/folder1', new webdav.VirtualFileSystem(),true,(success) => console.log(success));
         WebDavserver.setFileSystem('/documents', new webdav.PhysicalFileSystem('./documents'), (success) => {
         WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
@@ -92,18 +100,7 @@ var davdocs={
         
     }
         
-                
-        
-
 }
-
-
-
-
-
-
-
-
 
     /**WebDavserver.setFileSystem('/documents', new webdav.PhysicalFileSystem('./documents'), (success) => {
     WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));**/
