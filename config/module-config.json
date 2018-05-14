@@ -417,7 +417,6 @@
                 "css/images/Persons_commlist.png",
                 "css/images/Persons_edit.png",
                 "css/images/Persons_list.png",
-                "partial/CRM/BPAddressCard.html",
                 "partial/CRM/BPCard.html",
                 "partial/CRM/BPListCard.html",
                 "partial/CRM/PersonCard.html",
@@ -425,17 +424,12 @@
                 "partial/Doc/BusinessPartners.html",
                 "partial/Doc/Persons.html"
             ],
-            "include":[
-                "public/js/CRM/BPAddressCardController.js",
-                "public/js/CRM/BPCardController.js",
-                "public/js/CRM/BPListCardController.js"
-            ],
             "languages" : [ "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_CRM",
                     "items": [
-                        { "mainCard": "CRM/BPListCard", "icon": "/css/icons/material/Business.svg", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners", "directurls": [ "businesspartners" ] },
+                        { "mainCard": "CRM/BPListCard", "icon": "/css/icons/material/Business.svg", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners", "directurls": [ "businesspartners", "partneraddresses" ] },
                         { "mainCard": "CRM/PersonListCard", "icon": "/css/icons/material/Collaborator Male.svg", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons", "directurls": [ "persons", "emailcontacts", "phonecontacts" ] }
                     ]
                 }
@@ -448,19 +442,12 @@
                     { "name": "industry", "label": "Geschäftsbereich", "type": "text" },
                     { "name": "rolle", "label": "Art der Beziehung", "type": "text" },
                     { "name": "isjuristic", "label": "Juristische Person", "type": "boolean" }
-                ], "canhaverelations" : true },
-
-                { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "fullname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
-                    { "name": "firstname", "label": "Vorname", "type": "text" },
-                    { "name": "lastname", "label": "Nachname", "type": "text" },
-                    { "name": "description", "label": "Beschreibung", "type": "text" },
-                    { "name": "fullname", "label": "Vollständiger Name", "ishidden": true, "type": "formula", "formula": { "concat" : ["@lastname", ", ", "@firstname"] }, "formulaindex": 0 }
-                ], "lists": [ "persons_hierarchy" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
+                ], "lists": [ "businesspartners_hierarchy" ], "permissionkey": "PERMISSION_CRM_BUSINESSPARTNERS", "canhaverelations" : true },
 
                 { "name": "partneraddresstypes", "label": "Adressart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" },
                     { "name": "icon", "type": "text" }
-                ], "values": [
+                ], "lists": [ "partneraddresstypes" ], "values": [
                     { "name": "Primaryaddress", "label": "Primäradresse", "icon": "/css/icons/material/Rating.svg" },
                     { "name": "Postaddress", "label": "Postadresse", "icon": "/css/icons/material/Post Office.svg" },
                     { "name": "Delivaryaddress", "label": "Lieferadresse", "icon": "/css/icons/material/Truck.svg" },
@@ -469,12 +456,19 @@
 
                 { "name": "partneraddresses", "label": "Adresse", "plurallabel": "Adressen", "titlefield": "addressee", "icon": "/css/icons/material/Address Book.svg", "fields": [
                     { "name": "addressee", "label": "Adressat", "type": "text" },
-                    { "name": "businesspartnername", "label": "Geschäftspartner", "type": "reference", "reference": "businesspartners" },
                     { "name": "street", "label": "Straße und Hausnummer", "type": "text" },
+                    { "name": "businesspartnername", "label": "Geschäftspartner", "type": "reference", "reference": "businesspartners", "ishidden": true },
                     { "name": "postcode", "label": "Postleitzahl", "type": "text" },
                     { "name": "city", "label": "Ort", "type": "text" },
                     { "name": "partneraddresstypename", "label": "Art der Adresse", "type": "reference", "reference": "partneraddresstypes" }
-                ] },
+                ], "lists": [ "businesspartners_hierarchy", "businesspartners_children" ], "permissionkey": "PERMISSION_CRM_BUSINESSPARTNERS", "canhaverelations" : true },
+
+                { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "fullname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
+                    { "name": "firstname", "label": "Vorname", "type": "text" },
+                    { "name": "lastname", "label": "Nachname", "type": "text" },
+                    { "name": "description", "label": "Beschreibung", "type": "text" },
+                    { "name": "fullname", "label": "Vollständiger Name", "ishidden": true, "type": "formula", "formula": { "concat" : ["@lastname", ", ", "@firstname"] }, "formulaindex": 0 }
+                ], "lists": [ "persons_hierarchy" ], "permissionkey": "PERMISSION_CRM_PERSONS", "canhaverelations" : true },
 
                 { "name": "emailcontacts", "label": "E-Mail", "plurallabel": "E-Mails", "titlefield": "address", "icon": "/css/icons/material/Email.svg", "fields": [
                     { "name": "address", "label": "E-Mail-Adresse", "type": "text" },
