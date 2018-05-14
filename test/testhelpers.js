@@ -270,6 +270,7 @@ th.preparedatatypefields = async() => {
     await Db.createDatatypeField("client0", "clientnulldatatypenull", "password0", "Password0", co.fieldtypes.password, false, false, undefined, undefined, undefined, true);
     await Db.createDatatypeField("client0", "clientnulldatatypenull", "reference0", "Reference0", co.fieldtypes.reference, false, false, "users", undefined, undefined, true);
     await Db.createDatatypeField("client0", "clientnulldatatypenull", "text0", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true, false, false);
+    await Db.createDatatypeField("client0", "clientnulldatatypenull", "icon", "Icon-URL", co.fieldtypes.text, false, false, undefined, undefined, undefined, true, false, false);
     await Db.createDatatypeField("client0", "clientnulldatatypeone", "datatypeonefield", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
     await Db.createDatatypeField("client1", "clientonedatatypenull", "boolean0", "Boolean0", co.fieldtypes.boolean, false, false, undefined, undefined, undefined, true); // Required, not nullable
     await Db.createDatatypeField("client1", "clientonedatatypenull", "clientonetextnull", "Text0", co.fieldtypes.text, false, false, undefined, undefined, undefined, true);
@@ -280,10 +281,10 @@ th.preparedynamicobjects = async() => {
     await Db.query("client0", "DELETE FROM clientnulldatatypeone");
     await Db.query("client0", "DELETE FROM clientnulldatatypetwo");
     await Db.query("client1", "DELETE FROM clientonedatatypenull");
-    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity0", boolean0: true, datetime0: 123, decimal0: 234.567, reference0: "client0_usergroup0_user0", text0: "C0D0E0" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity0", boolean0: true, datetime0: 123, decimal0: 234.567, reference0: "client0_usergroup0_user0", text0: "C0D0E0", icon: "clientnulldatatypenullentity0_customicon.png" });
     await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity1", boolean0: true, decimal0: 111, text0: "C0D0E1" });
     await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity2", boolean0: true, decimal0: 345.789, text0: "C0D0E2" });
-    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity3", boolean0: true, text0: "C0D0E3" });
+    await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity3", boolean0: true, text0: "C0D0E3", icon: "clientnulldatatypenullentity3_customicon.png" });
     await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity4", boolean0: true, text0: "C0D0E4" });
     await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity5", boolean0: true, text0: "C0D0E5" });
     await Db.insertDynamicObject("client0", "clientnulldatatypenull", { name: "clientnulldatatypenullentity6", boolean0: true, text0: "C0D0E6" });

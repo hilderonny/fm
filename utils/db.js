@@ -201,9 +201,10 @@ var Db = {
         delete Db.datatypes;
     },
 
-    deleteRecordTypeField: async(databasename, recordtypename, fieldname) => {
+    deleteRecordTypeField: async(databasename, recordtypename, fieldname, donotdropcolumn) => {
         await Db.query(databasename, `DELETE FROM datatypefields WHERE name = '${Db.replaceQuotes(fieldname)}' and datatypename = '${Db.replaceQuotes(recordtypename)}';`);
-        await Db.query(databasename, `ALTER TABLE ${Db.replaceQuotesAndRemoveSemicolon(recordtypename)} DROP COLUMN IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(fieldname)};`);
+        // Columns must not be dropped automatically. They need to be removed in utils/updateonstart.js
+        if (!donotdropcolumn) await Db.query(databasename, `ALTER TABLE ${Db.replaceQuotesAndRemoveSemicolon(recordtypename)} DROP COLUMN IF EXISTS ${Db.replaceQuotesAndRemoveSemicolon(fieldname)};`);
         // Force update of cache in the next request
         delete Db.datatypes;
     },
@@ -579,7 +580,7 @@ var Db = {
         // Delete predefined record type fields which do not exist anymore
         var fieldstodelete = fieldsfromdatabase.filter(f => f.name !== "name" && f.ispredefined);
         for (var i = 0; i < fieldstodelete.length; i++) {
-            Db.deleteRecordTypeField(databasename, datatype.name, fieldstodelete[i].name);
+            Db.deleteRecordTypeField(databasename, datatype.name, fieldstodelete[i].name, true);
         }
     },
 
