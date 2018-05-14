@@ -788,6 +788,14 @@ describe('API recordtypes', () => {
             await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula0?token=${token}`).send(fieldtosend).expect(400);
         });
 
+        it('responds with 400 when rows is not of type int', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                rows: "notint"
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text1?token=${token}`).send(fieldtosend).expect(400);
+        });
+
         it('responds with 400 when no attributes to update are sent', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var fieldtosend = {};
@@ -871,6 +879,16 @@ describe('API recordtypes', () => {
             await th.put(`/api/recordtypes/field/clientnulldatatypenull/formula1?token=${token}`).send(fieldtosend).expect(200);
             var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.formula1;
             assert.strictEqual(fieldfromdatabase.formulaindex, 1);
+        });
+
+        it('does not update the rows when it is not set', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var fieldtosend = {
+                ishidden: true
+            };
+            await th.put(`/api/recordtypes/field/clientnulldatatypenull/text1?token=${token}`).send(fieldtosend).expect(200);
+            var fieldfromdatabase = (await Db.getdatatypes("client0"))["clientnulldatatypenull"].fields.text1;
+            assert.strictEqual(fieldfromdatabase.rows, 5);
         });
 
         it('does not update the ishidden attribute when it is not set', async() => {
