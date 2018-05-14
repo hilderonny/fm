@@ -4,8 +4,7 @@ var fs = require("fs");
 var moduleconfig = require('../config/module-config.json');
 var Db = require("../utils/db").Db;
 var ph = require('../utils/permissionshelper');
-
-
+var userManagerClass = require("../utils/webdavusermanagement").customUserManager;
 
     var dav = {
 
@@ -29,14 +28,18 @@ var ph = require('../utils/permissionshelper');
         parceUserRights: async(userManager)=>{
             // Privilege manager (tells which users can access which files/folders)
             const privilegeManager = new webdav.SimplePathPrivilegeManager();
-            var users = await userManager.users;
-            //console.log("USERS: " + users);
-            console.log(Object.entries(users));
-           //console.log(Object.entries(users).length);
+            var users;
+            await userManager.getUsers(function(e,usersRes){
+                // console.log("USERS in PM: " + usersRes);
+                users = usersRes;
+            });
+           console.log("USERS in PM: " + Object.entries(users));
+            //console.log("HERE:", Object.entries(users));
+          // console.log(Object.entries(users).length);
            var numUsers = Object.entries(users).length;
             for(i = 0; i < numUsers; i++){
                 var currentUser = Object.entries(users)[i][1];
-                //console.log(currentUser);
+                console.log(currentUser);
                 //console.log(i);
                // console.log(Object.entries(users)[i][1].username);
                 
@@ -48,12 +51,21 @@ var ph = require('../utils/permissionshelper');
         init: async()=>{
 
             var userManager = await(dav.prepareListOfUsers(userManager));
+            
+
+            var customUserManager = new userManagerClass();
+            await customUserManager.setUsers();
+
+
             var privilegeManager = await(dav.parceUserRights(userManager));
+            
+           // console.log("USERS: ", customUserManager.users);
             
             const WebDavserver = new webdav.WebDAVServer({
                 port: 56789, //avoid default port, which might be already in use
                 hostname: '127.0.0.1', //localhost
                 requireAuthentification: true,
+
                  httpAuthentication: new webdav.HTTPDigestAuthentication(userManager, 'Default realm'),
                 //httpAuthentication: new webdav.HTTPBasicAuthentication(userManager),
                 privilegeManager: privilegeManager
@@ -71,11 +83,6 @@ var ph = require('../utils/permissionshelper');
            // await require("../utils/webdavfoldersanddocuments.js").davdocs.setfiels();
 
            var fileManager = require("../utils/webdavfoldersanddocuments").davdocs.setfiles(WebDavserver);
-
-        
-        
-          
-
 
         //
 
