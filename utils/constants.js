@@ -13,10 +13,6 @@ module.exports.apis = {
      */
     areas: 'areas',
     /**
-     * Geschäftspartner
-     */
-    businesspartners: 'businesspartners',
-    /**
      * API for assigning modules to clients
      */
     clientmodules: 'clientmodules',
@@ -73,10 +69,6 @@ module.exports.apis = {
      */
     notes: 'notes',
     /**
-     * API für Adressen von Geschäftspartnern
-     */
-    partneraddresses: 'partneraddresses',
-    /**
      * API Für Personen
      */
     permissions: 'permissions',
@@ -125,9 +117,9 @@ module.exports.apis = {
 
 module.exports.formulatypes = {
     childsum: "childsum",
+    concat: "concat",
     ifthenelse: "ifthenelse",
     sum: "sum",
-    concat: "concat"
 }
 
 /**

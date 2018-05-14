@@ -243,6 +243,10 @@ describe('API dynamic', () => {
             assert.ok(!result.find(c => c.name === "clientnulldatatypetwoentity0"));
         });
 
+        xit('returns the icon of the entity when it has such an attribute "icon"', async() => {});
+
+        xit('returns the icon of the datatype when the entity has no own "icon" attribute', async() => {});
+
     });
 
     describe('GET/hierarchytoelement/:forlist/:recordtypename/:entityname', () => {
@@ -499,6 +503,10 @@ describe('API dynamic', () => {
             var result = (await th.get(`/api/dynamic/rootelements/users?token=${token}`).expect(200)).body;
             assert.ok(result.length > 0);
         });
+
+        xit('returns the icon of the entity when it has such an attribute "icon"', async() => {});
+
+        xit('returns the icon of the datatype when the entity has no own "icon" attribute', async() => {});
 
     });
 

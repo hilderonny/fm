@@ -394,17 +394,16 @@
         "businesspartners" : {
             "forportal": false,
             "forclients": true,
-            "api":[ "businesspartners", "partneraddresses" ],
             "public": [
                 "css/icons/material/Address Book.svg",
+                "css/icons/material/Billaddress.svg",
                 "css/icons/material/Business.svg",
                 "css/icons/material/Collaborator Male.svg",
+                "css/icons/material/Delivaryaddress.svg",
                 "css/icons/material/Email.svg",
                 "css/icons/material/Phone.svg",
-                "css/icons/material/Post Office.svg",
-                "css/icons/material/Purchase Order.svg",
-                "css/icons/material/Rating.svg",
-                "css/icons/material/Truck.svg",
+                "css/icons/material/Postaddress.svg",
+                "css/icons/material/Primaryaddress.svg",
                 "css/icons/office/Business.svg",               
                 "css/icons/office/Collaborator Male.svg",
                 "css/images/Businesspartners_add.png",
@@ -448,10 +447,10 @@
                     { "name": "label", "type": "text" },
                     { "name": "icon", "type": "text" }
                 ], "lists": [ "partneraddresstypes" ], "values": [
-                    { "name": "Primaryaddress", "label": "Primäradresse", "icon": "/css/icons/material/Rating.svg" },
-                    { "name": "Postaddress", "label": "Postadresse", "icon": "/css/icons/material/Post Office.svg" },
-                    { "name": "Delivaryaddress", "label": "Lieferadresse", "icon": "/css/icons/material/Truck.svg" },
-                    { "name": "Billaddress", "label": "Rechnungsadresse", "icon": "/css/icons/material/Purchase Order.svg" }
+                    { "name": "Primaryaddress", "label": "Primäradresse", "icon": "/css/icons/material/Primaryaddress.svg" },
+                    { "name": "Postaddress", "label": "Postadresse", "icon": "/css/icons/material/Postaddress.svg" },
+                    { "name": "Delivaryaddress", "label": "Lieferadresse", "icon": "/css/icons/material/Delivaryaddress.svg" },
+                    { "name": "Billaddress", "label": "Rechnungsadresse", "icon": "/css/icons/material/Billaddress.svg" }
                 ] }, 
 
                 { "name": "partneraddresses", "label": "Adresse", "plurallabel": "Adressen", "titlefield": "addressee", "icon": "/css/icons/material/Address Book.svg", "fields": [
@@ -460,7 +459,8 @@
                     { "name": "businesspartnername", "label": "Geschäftspartner", "type": "reference", "reference": "businesspartners", "ishidden": true },
                     { "name": "postcode", "label": "Postleitzahl", "type": "text" },
                     { "name": "city", "label": "Ort", "type": "text" },
-                    { "name": "partneraddresstypename", "label": "Art der Adresse", "type": "reference", "reference": "partneraddresstypes" }
+                    { "name": "partneraddresstypename", "label": "Art der Adresse", "type": "reference", "reference": "partneraddresstypes" },
+                    { "name": "icon", "label": "Icon-URL", "ishidden": true, "type": "formula", "formula": { "concat" : ["/css/icons/material/", "@partneraddresstypename", ".svg"] }, "formulaindex": 0 }
                 ], "lists": [ "businesspartners_hierarchy", "businesspartners_children" ], "permissionkey": "PERMISSION_CRM_BUSINESSPARTNERS", "canhaverelations" : true },
 
                 { "name": "persons", "label": "Person", "plurallabel": "Personen", "titlefield": "fullname", "icon": "/css/icons/material/Collaborator Male.svg", "fields": [
