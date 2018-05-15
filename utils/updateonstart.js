@@ -71,6 +71,24 @@ module.exports = async() => {
             }
             await Db.query(clientname, "DELETE FROM communications;");
         }
+        // 14.05.2018 Adressen von Geschäftspartnern auf Beziehungen umstellen
+        var partneraddressesexisting = (await Db.query(clientname, "SELECT 1 FROM information_schema.tables WHERE table_name='partneraddresses';")).rowCount > 0;
+        if (partneraddressesexisting) {
+            var partneraddresses = (await Db.query(clientname, "SELECT * FROM partneraddresses WHERE NOT businesspartnername IS NULL;")).rows;
+            for (var j = 0; j < partneraddresses.length; j++) {
+                var pa = partneraddresses[j];
+                var relation = {
+                    name: Db.createName(),
+                    datatype1name: co.collections.businesspartners.name,
+                    name1: pa.businesspartnername,
+                    datatype2name: "partneraddresses",
+                    name2: pa.name,
+                    relationtypename: "parentchild"
+                };
+                await Db.insertDynamicObject(clientname, co.collections.relations.name, relation);
+            }
+            await Db.query(clientname, "UPDATE partneraddresses SET businesspartnername=NULL;");
+        }
     }
     // 09.05.2018: Formeln sind nun Text
     await convertformulas(Db.PortalDatabaseName);
