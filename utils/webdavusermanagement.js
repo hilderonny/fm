@@ -1,3 +1,4 @@
+const webdav = require('webdav-server').v2;
 var bcryptjs = require('bcryptjs');
 var Db = require("../utils/db").Db;
 
@@ -5,14 +6,9 @@ var userListHelper = async function(){
     return new Promise(resolve => {   
         Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers;`).then((usersfromdatabase) => {
             var users =  usersfromdatabase.rows.map((userfromdb) => {
-                return {
-                    uid: userfromdb.name,
-                    isAdministrator: false,
-                    isDefaultUser: false,
-                    username: userfromdb.name,
-                    clientname: userfromdb.clientname,
-                    password: userfromdb.password
-                }
+
+                var newUser = new webdav.SimpleUser(userfromdb.name, "test", true, false)
+                return newUser; 
             });
             resolve(users);
         });
@@ -28,20 +24,8 @@ class customUserManager {
         
         //getUsers(callback : (error : Error, users ?: IUser[]) => void)
         getUsers(callback) {
-           /* Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers;`).then((usersfromdatabase) => {
-                var error = null;
-                var users = usersfromdatabase.map((userfromdb) => {
-                    return {
-                        uid: userfromdb.name,
-                        isAdministrator: false,
-                        isDefaultUser: false,
-                        username: userfromdb.name,
-                        password: null
-                    }
-                });
-                callback(error, users);
-            });*/
             var error = null;
+           // console.log("getUsers: ",  this.users);
             callback(error,  this.users);
         }
 
@@ -51,21 +35,37 @@ class customUserManager {
 
         //getUserByName(name : string, callback : (error : Error, user ?: IUser) => void)
         getUserByName(name, callback){
-             var listOfUsers = this.users;
-             if(!listOfUsers[name]){
-                 callback(Error, null);
-             }else{
-                 callback(null, listOfUsers[name]);
-             }
+
+
+            Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${name}';`).then((userfromdatabase) => {
+                console.log("userfromdatabase: ", userfromdatabase);
+                var user =  userfromdatabase.rows.map((userfromdb) => {
+
+                        var newUser = new webdav.SimpleUser(userfromdb.name, userfromdb.password, false, false)
+                        return newUser; 
+                    });
+
+                return user[0]}).then(function(user){
+                        if(!user){
+                            callback(Error, null);
+                        }else{
+                            console.log("!UserFromDB: ", user);
+                            callback(null, user);
+                        }
+                    });
+
         }
 
         //getUserByNamePassword(name : string, password : string, callback : (error : Error, user ?: IUser) => void)
         getUserByNamePassword(name, password, callback){
+        
             this.getUserByName(name, (e, user) => {
-                if(e)
-                    return callback(e);
-                    
-                if(!bcryptjs.compareSync(password, user.password)){
+                if(e){
+                     return callback(e);
+                }
+                  // console.log("User From DB: ", user); 
+                if(bcryptjs.compareSync(password, user.password)){
+                    delete user.password;
                     callback(null, user);
                 }else{
                     callback(Error);
@@ -75,7 +75,12 @@ class customUserManager {
         
         //getDefaultUser(callback : (user : IUser) => void)
         getDefaultUser(callback){
-            callback(null);
+            var defautUser  =  {uid: "defaultUser",
+                                isAdministrator: false,
+                                isDefaultUser: true,
+                                username: "defaultUser",
+                                password: null}
+            callback(defautUser);
         }
        
     }

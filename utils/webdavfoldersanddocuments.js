@@ -106,4 +106,13 @@ var davdocs={
     WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));**/
 
 
-    module.exports.davdocs = davdocs;
+
+class arrangeFS extends webdav.VirtualFileSystem {
+    _readDir(path, ctx, callback){
+        var err = null;
+       callback(err, ["testFile1", "testFile2"]);
+    }
+}
+
+module.exports.davdocs = davdocs;
+module.exports.arrangeFS = arrangeFS;

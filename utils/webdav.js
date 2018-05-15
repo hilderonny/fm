@@ -57,18 +57,38 @@ var userManagerClass = require("../utils/webdavusermanagement").customUserManage
             await customUserManager.setUsers();
 
 
-            var privilegeManager = await(dav.parceUserRights(userManager));
+            var privilegeManager = new webdav.SimplePathPrivilegeManager(); //await(dav.parceUserRights(customUserManager));
             
            // console.log("USERS: ", customUserManager.users);
+
+           var fs = require('fs');
+            // SSL für HTTPS-Server vorbereiten, siehe https://franciskim.co/2015/07/30/how-to-use-ssl-https-for-express-4-x-node-js/
+            var credentials = { 
+                key: fs.existsSync('./priv.key') ? fs.readFileSync('./priv.key', 'utf8') : null, 
+                cert: fs.existsSync('./pub.cert') ? fs.readFileSync('./pub.cert', 'utf8') : null
+            };
             
+            
+            privilegeManager.__proto__._can=function(a,b,c,d,e){
+                console.log(d)
+                if (d.indexOf('canRead')>=0){
+                    e(null,true);
+                }else{
+                    e(null,false);
+                }
+                
+            };
+
+            var arrangeFS = require("../utils/webdavfoldersanddocuments").arrangeFS;
             const WebDavserver = new webdav.WebDAVServer({
                 port: 56789, //avoid default port, which might be already in use
                 hostname: '127.0.0.1', //localhost
                 requireAuthentification: true,
-
-                 httpAuthentication: new webdav.HTTPDigestAuthentication(userManager, 'Default realm'),
-                //httpAuthentication: new webdav.HTTPBasicAuthentication(userManager),
-                privilegeManager: privilegeManager
+                //httpAuthentication: new webdav.HTTPDigestAuthentication(userManager, 'Default realm'),
+                httpAuthentication: new webdav.HTTPBasicAuthentication(customUserManager),
+                https: credentials,
+                privilegeManager: privilegeManager,
+                rootFileSystem:new  arrangeFS()
             });
 
             /*WebDavserver.beforeRequest(function(){
@@ -80,9 +100,12 @@ var userManagerClass = require("../utils/webdavusermanagement").customUserManage
                 next();
             }); 
 
+
+            WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
+
            // await require("../utils/webdavfoldersanddocuments.js").davdocs.setfiels();
 
-           var fileManager = require("../utils/webdavfoldersanddocuments").davdocs.setfiles(WebDavserver);
+           //var fileManager = require("../utils/webdavfoldersanddocuments").davdocs.setfiles(WebDavserver);
 
         //
 
