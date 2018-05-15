@@ -31,9 +31,9 @@ async function getrootelements(clientname, forlist, permissions) {
     return rootelements;
 }
 var davdocs={
-    setfiles: async(WebDavserver)=>{
+    setfiles: async(WebDavserver, clientname)=>{
 
-        var user={clientname: "rf", isadmin:true}
+        var user={clientname: clientname, isadmin:true}
         var permissions = await ph.getpermissionsforuser(user);
         var rootelements = await getrootelements(user.clientname, "folders_hierarchy", permissions);
 
@@ -56,9 +56,8 @@ var davdocs={
         }
      
         var rootDataItemsArr = await buildJSON(rootelements);
-        var rootDataItemsObj = json = Object.assign({}, rootDataItemsArr);
+      //  var rootDataItemsObj = json = Object.assign({}, rootDataItemsArr);
 
-        console.log(rootDataItemsArr, rootDataItemsObj);
 
         const ctx = WebDavserver.createExternalContext();
         WebDavserver.rootFileSystem().addSubTree(WebDavserver.createExternalContext(), rootDataItemsArr, (e) => {
