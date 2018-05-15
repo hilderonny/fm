@@ -33,10 +33,11 @@ async function getrootelements(clientname, forlist, permissions) {
 var davdocs={
     setfiles: async(WebDavserver)=>{
 
-        var user={clientname: "5a620ac917252917087cd8db", isadmin:true}
+        var user={clientname: "rf", isadmin:true}
         var permissions = await ph.getpermissionsforuser(user);
         var rootelements = await getrootelements(user.clientname, "folders_hierarchy", permissions);
-//        myutils.getchildren(clientname, clickedelement.datatypename, clickedelement.name, permissions, "folders_hierarchy")
+
+     // myutils.getchildren(clientname, clickedelement.datatypename, clickedelement.name, permissions, "folders_hierarchy")
         
         console.log(rootelements);
         var buildJSON =  async function(rootelements){
@@ -44,43 +45,23 @@ var davdocs={
             for (i = 0; i < rootelements.length; i++) {
                 var currentDataItem = rootelements[i]; 
                 if(currentDataItem.datatypename == "folders"){
-                    var objFolder = {
-                        currentDataItem: {
-                            title: currentDataItem.label,
-                            type: webdav.ResourceType.Directory
-                        }
-                    }
+                    var objFolder = {}
                     result[currentDataItem.label]= objFolder;
                 }else{
-                    var objFile = {
-                        currentDataItem: {
-                            title: currentDataItem.label,
-                            type: webdav.ResourceType.File
-                        }
-                    }
-                    result[currentDataItem.label]= objFile;
+                    result[currentDataItem.label]= currentDataItem.label;
                 }
             }
 
             return result;
         }
+     
         var rootDataItemsArr = await buildJSON(rootelements);
         var rootDataItemsObj = json = Object.assign({}, rootDataItemsArr);
 
-        console.log(rootDataItemsArr);
+        console.log(rootDataItemsArr, rootDataItemsObj);
 
         const ctx = WebDavserver.createExternalContext();
-        WebDavserver.rootFileSystem().addSubTree(WebDavserver.createExternalContext(), rootDataItemsArr/*{
-            'folder1': {                                   // /folder1
-                'file1.txt': webdav.ResourceType.File,     // /folder1/file1.txt
-                'file2.txt': webdav.ResourceType.File,     // /folder1/file2.txt
-                'folder2': {
-                    'file3.txt': webdav.ResourceType.File  // /folder1/folder2/file1.txt
-                }
-            },
-            'file0.txt': webdav.ResourceType.File,// /file0.txt               
-
-        }*/, (e) => {
+        WebDavserver.rootFileSystem().addSubTree(WebDavserver.createExternalContext(), rootDataItemsArr, (e) => {
             if(e)
                 throw e;
         });
