@@ -6,6 +6,16 @@ var Db = require("../utils/db").Db;
 var router = require('express').Router();
 var co = require('../utils/constants');
 var bcryptjs = require("bcryptjs");
+var eh = require("../utils/exporthelper");
+
+router.get('/export/:clientname', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), async(req, res) => {
+    var withdatatypes = req.query.datatypes;
+    var withcontent = req.query.content;
+    var withfiles = req.query.files;
+    var prefix = req.params.clientname + "_" + Date.now().toString();
+    var buffer = await eh.export(req.params.clientname, req.query.datatypes, req.query.content, req.query.files, prefix);
+    res.set({'Content-disposition': `attachment; filename=${prefix}.zip`}).send(buffer);
+});
 
 /**
  * Creates an admin for a client. Must be defined before the overall POST handler below,

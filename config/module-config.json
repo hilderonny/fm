@@ -534,6 +534,7 @@
                     ]
                 }
             ],
+            "utils": [ "exporthelper" ],
             "portaldatatypes": [
 
                 { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
