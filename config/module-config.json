@@ -521,6 +521,7 @@
                 "partial/Doc/Clients.html"
             ],
             "include" : [
+                "public/js/components/avt-clientexport-toolbar-button.js",
                 "public/js/components/avt-clientmodules-tab.js",
                 "public/js/components/avt-createadmin-toolbar-button.js"
             ],
