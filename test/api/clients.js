@@ -29,6 +29,45 @@ describe('API clients', async() => {
         await Db.deleteClient("testclient");
     });
 
+    describe('GET/export/:clientname', async() => {
+
+        it('responds without authentication with 403', async() => {
+            await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true`).expect(403);
+        });
+
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.ADMINISTRATION_CLIENT);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.clients);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.clients);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`).expect(403);
+        });
+
+        xit('responds with 404 when clientname is invalid', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/export/invalidid?datatypes=true&content=true&files=true&token=${token}`).send().expect(404);
+        });
+
+        xit('contains datatypes when datatypes are requested', async() => {});
+
+        xit('contains database content when content is requested', async() => {});
+
+        xit('contains document files when files are requested', async() => {});
+
+        xit('ignores document file when there is no file for an existing document', async() => {});
+
+    });
+
     describe('POST/', async() => {
 
         function createPostTestElement() {
