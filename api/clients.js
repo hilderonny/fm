@@ -10,6 +10,7 @@ var eh = require("../utils/exporthelper");
 
 router.get('/export/:clientname', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), async(req, res) => {
     var clientname = req.params.clientname;
+    if ((await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name = '${Db.replaceQuotes(clientname)}';`)).rowCount < 1) return res.sendStatus(404);
     var withdatatypes = req.query.datatypes === "true";
     var withcontent = req.query.content === "true";
     var withfiles = req.query.files === "true";

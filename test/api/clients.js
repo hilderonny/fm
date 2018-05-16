@@ -8,6 +8,8 @@ var Db = require("../../utils/db").Db;
 var localconfig = require('../../config/localconfig.json');
 var fs = require("fs");
 var dh = require("../../utils/documentsHelper");
+var request = require('request');
+var unzip2 = require('unzip2');
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
@@ -29,7 +31,34 @@ describe('API clients', async() => {
         await Db.deleteClient("testclient");
     });
 
-    describe('GET/export/:clientname', async() => {
+    describe.only('GET/export/:clientname', async() => {
+
+        async function getFilesInPackage(url) {
+            var filesInPackage = [];
+            await new Promise(function(resolve, reject) {
+                var updateRequest = request(url);
+                updateRequest.on('error', function (error) {
+                    updateRequest.abort();
+                    reject(error);
+                });
+                updateRequest.on('response', function (response) {
+                    if (response.statusCode !== 200) {
+                        updateRequest.abort();
+                        reject(response.statusCode);
+                    }
+                });
+                updateRequest.pipe(unzip2.Parse())
+                .on('error', reject)
+                .on('entry', function(entry) {
+                    if(entry.type === 'File') {
+                        filesInPackage.push(entry.path);
+                    }
+                    entry.autodrain(); // Speicher bereinigen
+                })
+                .on('close', resolve);
+            });
+            return filesInPackage;
+        }
 
         it('responds without authentication with 403', async() => {
             await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true`).expect(403);
@@ -53,12 +82,22 @@ describe('API clients', async() => {
             await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`).expect(403);
         });
 
-        xit('responds with 404 when clientname is invalid', async() => {
+        it('responds with 404 when clientname is invalid', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
             await th.post(`/api/clients/export/invalidid?datatypes=true&content=true&files=true&token=${token}`).send().expect(404);
         });
 
-        xit('contains datatypes when datatypes are requested', async() => {});
+        it.only('contains datatypes when datatypes are requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            console.log(files);
+        });
+
+        xit('does not contain datatypes when datatypes are not requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=false&content=true&files=true&token=${token}`;
+        });
 
         xit('contains database content when content is requested', async() => {});
 
