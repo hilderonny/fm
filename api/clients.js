@@ -9,11 +9,12 @@ var bcryptjs = require("bcryptjs");
 var eh = require("../utils/exporthelper");
 
 router.get('/export/:clientname', auth(co.permissions.ADMINISTRATION_CLIENT, 'r', co.modules.clients), async(req, res) => {
-    var withdatatypes = req.query.datatypes;
-    var withcontent = req.query.content;
-    var withfiles = req.query.files;
-    var prefix = req.params.clientname + "_" + Date.now().toString();
-    var buffer = await eh.export(req.params.clientname, req.query.datatypes, req.query.content, req.query.files, prefix);
+    var clientname = req.params.clientname;
+    var withdatatypes = req.query.datatypes === "true";
+    var withcontent = req.query.content === "true";
+    var withfiles = req.query.files === "true";
+    var prefix = clientname + "_" + Date.now().toString();
+    var buffer = await eh.export(clientname, withdatatypes, withcontent, withfiles, prefix);
     res.set({'Content-disposition': `attachment; filename=${prefix}.zip`}).send(buffer);
 });
 
