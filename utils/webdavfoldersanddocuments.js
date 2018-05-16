@@ -35,7 +35,6 @@ var davdocs={
        // var clientname = "rf";
         var clientname = "5a620ac917252917087cd8db";
         var user={clientname: clientname, isadmin:true}
-       // console.log(WebDavserver.res)
         var permissions = await ph.getpermissionsforuser(user);
         var rootelements = await getrootelements(user.clientname, "folders_hierarchy", permissions);
 
@@ -66,7 +65,7 @@ var davdocs={
             if(e)
                 throw e;
         });
-        WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
+       // WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
 
      /**   WebDavserver.getResource(ctx, '/folder1/file2.txt').readDir((e, files) => {
             if(e)

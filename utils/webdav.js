@@ -37,8 +37,9 @@ var arrangePrivilegeManager = require("../utils/webdavusermanagement").customPri
                 next();
             }); 
             
+            WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
             var fileManager = require("../utils/webdavfoldersanddocuments").davdocs.setfiles(WebDavserver);
-           // WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
+            
 
            
 
