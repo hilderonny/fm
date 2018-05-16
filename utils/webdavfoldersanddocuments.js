@@ -31,15 +31,17 @@ async function getrootelements(clientname, forlist, permissions) {
     return rootelements;
 }
 var davdocs={
-    setfiles: async(WebDavserver, clientname)=>{
-
+    setfiles: async(WebDavserver)=>{
+       // var clientname = "rf";
+        var clientname = "5a620ac917252917087cd8db";
         var user={clientname: clientname, isadmin:true}
+       // console.log(WebDavserver.res)
         var permissions = await ph.getpermissionsforuser(user);
         var rootelements = await getrootelements(user.clientname, "folders_hierarchy", permissions);
 
      // myutils.getchildren(clientname, clickedelement.datatypename, clickedelement.name, permissions, "folders_hierarchy")
         
-        console.log(rootelements);
+       // console.log(rootelements);
         var buildJSON =  async function(rootelements){
             var result = [];
             for (i = 0; i < rootelements.length; i++) {

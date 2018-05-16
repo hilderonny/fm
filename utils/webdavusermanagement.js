@@ -1,6 +1,8 @@
 const webdav = require('webdav-server').v2;
 var bcryptjs = require('bcryptjs');
 var Db = require("../utils/db").Db;
+var co = require("../utils/constants");
+var ph = require('../utils/permissionshelper');
 
 var userListHelper = async function(){
     return new Promise(resolve => {   
@@ -41,15 +43,15 @@ class customUserManager {
                 console.log("userfromdatabase: ", userfromdatabase);
                 var user =  userfromdatabase.rows.map((userfromdb) => {
 
-                        var newUser = new webdav.SimpleUser(userfromdb.name, userfromdb.password, false, false)
-                        return newUser; 
+                        var newUser = new webdav.SimpleUser(userfromdb.name, userfromdb.password, false, false);
+                        newUser.clientname = userfromdb.clientname;
+                        return newUser;
                     });
 
                 return user[0]}).then(function(user){
                         if(!user){
                             callback(Error, null);
                         }else{
-                            console.log("!UserFromDB: ", user);
                             callback(null, user);
                         }
                     });
@@ -85,34 +87,44 @@ class customUserManager {
        
     }
     
-    class customPrivilegeManager {}
+    class customPrivilegeManager extends webdav.PrivilegeManager {
 
-    class HTTPownAuthentication  {
-        constructor(userManager, realm){
-            this.realm = realm;
-            this.userManager = userManager;
-        };
+            //overrive _can function
+            _can(path, simpleUser, resource, privilege, callback){
+    
+                   Db.getDynamicObject(simpleUser.clientname, co.collections.users.name, simpleUser.username).then((completeuser) => {
+                    completeuser.clientname = simpleUser.clientname; //filed has to be added becuse it is not contained in the DB record
+                    var permissionsFromDB = ph.getpermissionsforuser(completeuser);
+                    return permissionsFromDB;
+                    }).then(function(permissionsFromDB){
+                        console.log("permissionsFromDB: ", co.permissions.OFFICE_DOCUMENT);
+                        console.log("permissionsFromDB: ", permissionsFromDB);
+                        var  relevant_permission_key; 
+                        
+                        for(i = 0; i < permissionsFromDB.length; i++){
+                            var currentPermission = permissionsFromDB[i];
+                            if(currentPermission.key == co.permissions.OFFICE_DOCUMENT){
+                                relevant_permission_key = currentPermission;
+                                break;
+                            }
+                        }
 
-      //  askForAuthentication() : {[headeName : string] : string}
-      //  getUser(ctx : HTTPRequestContext, callback : (error : Error, user ?: IUser) => void) : void
-      askForAuthentication(){
-        var headerName = { 'WWW-Authenticate': 'Basic realm="' + this.realm + '"'};
-        return headerName;
-      }
+                        return relevant_permission_key;
+                        }).then(function(relevant_permission_key){
+                            if(relevant_permission_key.length < 1){
+                                 callback(null,false);
+                            }else{
 
-      getUser(context, callback){
-          var authHeader = context.headers.find('Authorization');
-          console.log(authHeader);
-         // var value = Buffer.from(/^Basic \s*([a-zA-Z0-9]+=*)\s*$/.exec(authHeader)[1], 'base64').toString().split(':', 2);
-          //var username = value[0];
-         // var password = value[1];
-          //console.log(username);
-          var dummyUser = {};
-          return dummyUser; 
-      }
+                               if (privilege.indexOf('canRead')>=0){
+                                    callback(null, relevant_permission_key.canRead);
+                                }else{
+                                    callback(null, relevant_permission_key.canWrite);
+                                }
+                            }
+                        });
+            };
 
     }
     
     module.exports.customUserManager = customUserManager;
     module.exports.customPrivilegeManager = customPrivilegeManager;
-    module.exports.HTTPownAuthentication = HTTPownAuthentication;
