@@ -31,7 +31,7 @@ describe('API clients', async() => {
         await Db.deleteClient("testclient");
     });
 
-    describe.only('GET/export/:clientname', async() => {
+    describe('GET/export/:clientname', async() => {
 
         async function getFilesInPackage(url) {
             var filesInPackage = [];
@@ -84,26 +84,62 @@ describe('API clients', async() => {
 
         it('responds with 404 when clientname is invalid', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
-            await th.post(`/api/clients/export/invalidid?datatypes=true&content=true&files=true&token=${token}`).send().expect(404);
+            await th.get(`/api/clients/export/invalidid?datatypes=true&content=true&files=true&token=${token}`).expect(404);
         });
 
-        it.only('contains datatypes when datatypes are requested', async() => {
+        it('contains datatypes when datatypes are requested', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
             var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`;
             var files = await getFilesInPackage(url);
-            console.log(files);
+            var expectedprefix = "client0_";
+            files.forEach(file => {
+                assert.strictEqual(file.indexOf(expectedprefix), 0);
+            });
+            assert.ok(files.find(file => file.indexOf("\\datatypes") > 0));
+            assert.ok(files.find(file => file.indexOf("\\datatypefields") > 0));
         });
 
-        xit('does not contain datatypes when datatypes are not requested', async() => {
+        it('does not contain datatypes when datatypes are not requested', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
             var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=false&content=true&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            assert.ok(!files.find(file => file.indexOf("\\datatypes") > 0));
+            assert.ok(!files.find(file => file.indexOf("\\datatypefields") > 0));
         });
 
-        xit('contains database content when content is requested', async() => {});
+        it('contains database content when content is requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            var expecteddatatypenames = (await Db.query("client0", "SELECT name FROM datatypes;")).rows.map(row => row.name);
+            expecteddatatypenames.forEach(expecteddatatypename => {
+                assert.ok(files.find(file => file.indexOf("\\content\\" + expecteddatatypename) > 0));
+            });
+        });
 
-        xit('contains document files when files are requested', async() => {});
+        it('does not contain database content when content is not requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=false&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            assert.ok(!files.find(file => file.indexOf("\\content\\") > 0));
+        });
 
-        xit('ignores document file when there is no file for an existing document', async() => {});
+        it('contains document files when files are requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            var expecteddocumentfilenames = (await Db.getDynamicObjects("client0", co.collections.documents.name)).map(document => document.name);
+            expecteddocumentfilenames.forEach(expecteddocumentfilename => {
+                assert.ok(files.find(file => file.indexOf("\\files\\" + expecteddocumentfilename) > 0));
+            });
+        });
+
+        it('ignores document file when there is no file for an existing document', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=false&token=${token}`;
+            var files = await getFilesInPackage(url);
+            assert.ok(!files.find(file => file.indexOf("\\files\\") > 0));
+        });
 
     });
 
