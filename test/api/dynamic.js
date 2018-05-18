@@ -773,11 +773,13 @@ describe('API dynamic', () => {
             assert.strictEqual(createdelement.formula1, '222');
         });
 
-        it('responds with 400 when a formula is given as attribute', async() => {
+        it('does not set the formula value when a formula is given as attribute', async() => {
             var entity = prepareEntity();
-            entity.formula0 = 555;
+            entity.formula0 = "newformulavalue";
             var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.post(`/api/dynamic/clientnulldatatypenull?token=${token}`).send(entity).expect(400);
+            var name = (await th.post(`/api/dynamic/clientnulldatatypenull?token=${token}`).send(entity).expect(200)).text;
+            var createdelement = await Db.getDynamicObject("client0", "clientnulldatatypenull", name);
+            assert.notEqual(createdelement.formula0, entity.formula0);
         });
 
         it('does not fall into an endless calculation loop, when a ring dependency is created', async() => {

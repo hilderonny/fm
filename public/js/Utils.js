@@ -454,10 +454,10 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
-        uploadfile: function(scope, filedata, parentdatatypename, parententityname, url) {
+        uploadfile: function(scope, filedata, parentdatatypename, parententityname, url, indeterminate) {
             if (!url) url = 'api/documents?token=' + $http.defaults.headers.common['x-access-token'];
             return new Promise(function(resolve, reject) {
-                scope.progressmode = "determinate";
+                scope.progressmode = indeterminate ? "indeterminate" : "determinate";
                 scope.progressvalue = 0;
                 scope.isinprogress = true;
                 // http://stackoverflow.com/q/13591345
@@ -469,7 +469,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 form.append('file', filedata);
                 xhr.upload.onprogress = function (e) {
                     // Event listener for when the file is uploading
-                    if (e.lengthComputable) {
+                    if (e.lengthComputable && !indeterminate) {
                         var progress = Math.round(e.loaded / e.total * 100);
                         scope.progressvalue = progress;
                     } else {

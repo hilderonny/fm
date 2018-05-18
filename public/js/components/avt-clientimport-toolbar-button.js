@@ -31,7 +31,7 @@ app.directive('avtClientimportToolbarButton', function ($compile, $http, $mdDial
                         label: "Importieren", ishidden: true, onclick: function () {
                             console.log(newscope.settings);
                             var url = 'api/clients/import?label=' + encodeURIComponent(newscope.settings.label) + '&token=' + $http.defaults.headers.common['x-access-token'];
-                            utils.uploadfile(scope, newscope.settings.fileinput.files[0], null, null, url).then(function (clientname) {
+                            utils.uploadfile(scope, newscope.settings.fileinput.files[0], null, null, url, true).then(function (clientname) {
                                 if (clientname === "Error") { // Some errors occured
                                     $mdDialog.show($mdDialog.alert()
                                         .clickOutsideToClose(true)
@@ -40,11 +40,11 @@ app.directive('avtClientimportToolbarButton', function ($compile, $http, $mdDial
                                         .ok("OK")
                                     );
                                 } else {
-                                    $mdDialog.hide();
                                     $mdToast.show($mdToast.simple().textContent("Mandant importiert").hideDelay(1000).position('bottom right'));
                                     utils.setLocation('/clients/' + clientname, true); // Force loading of details card
                                 }
                             });
+                            $mdDialog.hide();
                             return false;
                         }
                     };
