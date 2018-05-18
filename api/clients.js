@@ -31,6 +31,7 @@ router.post('/import', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.module
         var clientname = await eh.import(zipfile, label, withdatatypes, withcontent, withfiles);
         res.send(clientname);
     } catch(error) {
+        console.log(error);
         res.send("Error"); // Error in parsing zip file
     }
 });

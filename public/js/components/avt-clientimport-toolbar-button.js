@@ -9,17 +9,8 @@ app.directive('avtClientimportToolbarButton', function ($compile, $http, $mdDial
         '       <input ng-model="settings.zipfile" name="zipfile" type="file"accept=".zip" onchange="angular.element(this).scope().validateform(this);">' +
         '   </md-input-container>' +
         '   <md-input-container flex>' +
-        '       <label>Neuer Name des Mandanten</label>' +
+        '       <label>Neuer Name des neuen Mandanten</label>' +
         '       <input ng-model="settings.label" name="label">' +
-        '   </md-input-container>' +
-        '   <md-input-container flex>' +
-        '       <md-checkbox ng-model="settings.datatypes" name="datatypes"><span>Datentypen</span></md-checkbox>' +
-        '   </md-input-container>' +
-        '   <md-input-container flex>' +
-        '       <md-checkbox ng-model="settings.content" name="content"><span>Datenbankinhalte</span></md-checkbox>' +
-        '   </md-input-container>' +
-        '   <md-input-container flex>' +
-        '       <md-checkbox ng-model="settings.files" name="files"><span>Dateien</span></md-checkbox>' +
         '   </md-input-container>' +
         '</form>'
         ;
@@ -35,11 +26,11 @@ app.directive('avtClientimportToolbarButton', function ($compile, $http, $mdDial
             return function link(scope) {
                 scope.importclient = function () {
                     var newscope = scope.$new(false);
-                    newscope.settings = { zipfile: null, label: "", datatypes: true, content: true, files: true };
+                    newscope.settings = { zipfile: null, label: "" };
                     var okbutton = {
                         label: "Importieren", ishidden: true, onclick: function () {
                             console.log(newscope.settings);
-                            var url = 'api/clients/import?label=' + encodeURIComponent(newscope.settings.label) + '&datatypes=' + newscope.settings.datatypes + '&content=' + newscope.settings.content + '&files=' + newscope.settings.files + '&token=' + $http.defaults.headers.common['x-access-token'];
+                            var url = 'api/clients/import?label=' + encodeURIComponent(newscope.settings.label) + '&token=' + $http.defaults.headers.common['x-access-token'];
                             utils.uploadfile(scope, newscope.settings.fileinput.files[0], null, null, url).then(function (clientname) {
                                 if (clientname === "Error") { // Some errors occured
                                     $mdDialog.show($mdDialog.alert()
