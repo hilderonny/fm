@@ -454,7 +454,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
-        uploadfile: function(scope, filedata, parentdatatypename, parententityname) {
+        uploadfile: function(scope, filedata, parentdatatypename, parententityname, url) {
+            if (!url) url = 'api/documents?token=' + $http.defaults.headers.common['x-access-token'];
             return new Promise(function(resolve, reject) {
                 scope.progressmode = "determinate";
                 scope.progressvalue = 0;
@@ -462,7 +463,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 // http://stackoverflow.com/q/13591345
                 var form = new FormData();
                 var xhr = new XMLHttpRequest;
-                // Additional POST variables required by the API script
+                // Additional POST variables may be required by the API script
                 if (parententityname) form.append('parententityname', parententityname);
                 if (parentdatatypename) form.append('parentdatatypename', parentdatatypename);
                 form.append('file', filedata);
@@ -479,10 +480,10 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                     if (e.target.readyState === 4) {
                         scope.isinprogress = false;
                         var uploadeddocumentname = e.target.response;
-                        resolve(uploadeddocumentname);
+                        resolve(e.target.response); // In most cases the name of the uploaded document is returned. In client import the new clientname is returned
                     }
                 }
-                xhr.open('POST', 'api/documents?token=' + $http.defaults.headers.common['x-access-token']);
+                xhr.open('POST', url);
                 xhr.send(form);
             });
         },

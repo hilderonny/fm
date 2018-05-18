@@ -2,7 +2,7 @@ app.directive('avtClientexportToolbarButton', function($compile, $http, $mdDialo
     var buttontemplate = '<md-button ng-if="canread" avt-toolbar-button ng-click="exportclient()" icon="/css/icons/material/icons8-database-export.svg" label="Export" tooltip="Mandanten in ZIP-Datei exportieren"></md-button>';
     var dialogtemplate = 
         '<h2>Mandantenexport</h2>' +
-        '<form name="administratorsForm" layout="column">' +
+        '<form name="clientexportform" layout="column">' +
         '   <p>Bitte wählen Sie die Inhalte, die exportiert werden sollen.</p>' +
         '   <md-input-container flex>' +
         '       <md-checkbox ng-model="settings.datatypes" name="datatypes"><span>Datentypen</span></md-checkbox>' +

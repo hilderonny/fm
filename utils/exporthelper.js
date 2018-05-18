@@ -4,6 +4,7 @@ var dh = require("./documentsHelper");
 var co = require("./constants");
 var path = require("path");
 var fs = require("fs");
+var unzip = require('unzip2');
 
 var eh = {
     export: async (clientname, withdatatypes, withcontent, withfiles, prefix) => {
@@ -37,6 +38,43 @@ var eh = {
         }
 
         return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+    },
+
+    import: async (zipfile, label, withdatatypes, withcontent, withfiles) => {
+        return new Promise((resolve, reject) => {
+            var filePath = path.join(__dirname, '/../', zipfile.path);
+            var parser = unzip.Parse();
+            fs.createReadStream(filePath)
+                .pipe(parser)
+                .on('entry', (entry) => {
+                    var pathparts = entry.path.split("\\");
+                    if (pathparts.length < 2) throw new Error("Missing root path: " + entry.path);
+                    if (withdatatypes && pathparts.length === 2 && pathparts[1] === "datatypes") {
+                        console.log("Handling datatypes");
+                    }
+                    if (withdatatypes && pathparts.length === 2 && pathparts[1] === "datatypefields") {
+                        console.log("Handling datatypefields");
+                    }
+                    if (withcontent && pathparts.length === 3 && pathparts[1] === "content") {
+                        console.log("Handling datatype " + pathparts[2]);
+                    }
+                    if (withfiles && pathparts.length === 3 && pathparts[1] === "files") {
+                        console.log("Handling file " + pathparts[2]);
+                    }
+                    entry.autodrain();
+                    //     var fullPath = path.join(__dirname, '/../', extractPath, entry.path);
+                    //     createPath(path.dirname(fullPath));
+                    //     entry.pipe(fs.createWriteStream(fullPath));
+                })
+                .on('error', (error) => {
+                    throw new Error(error);
+                }).on('close', function () {
+                    // Delete uploaded file
+                    fs.unlinkSync(filePath);
+                    // Erst antworten, wenn alles ausgepackt ist
+                    resolve();
+                });
+        });
     }
 }
 
