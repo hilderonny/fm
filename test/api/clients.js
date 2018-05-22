@@ -170,6 +170,72 @@ describe('API clients', async() => {
 
     });
 
+    describe("POST/import", async() => {
+
+        // th.apiTests.post.defaultNegative(co.apis.clients + "/import", co.permissions.ADMINISTRATION_CLIENT, createImportTestElementFunction, false, "portal", "portal_usergroup0", "portal_usergroup0_user0");
+
+        xit('responds with "Error" when no file was posted', async() => {
+        });
+
+        xit('responds with "Error" when posted file was not a ZIP file', async() => {
+        });
+
+        xit('responds with "Error" when ZIP file has no root folder in it', async() => {
+        });
+
+        xit('Creates a client when ZIP file has correct structure (even withou content)', async() => {
+        });
+
+        xit('Sets the label of the client when it was sent', async() => {
+        });
+
+        xit('Creates datatypes when ZIP file contains datatype definitions', async() => {
+        });
+
+        xit('Creates datatype fields when ZIP file contains datatype AND datatypefield definitions', async() => {
+        });
+
+        xit('Does not create datatype fields when datatypefields are contained but datatypes are not contained', async() => {
+        });
+
+        xit('responds with "Error" when datatypes file contains invalid content', async() => {
+        });
+
+        xit('responds with "Error" when datatypefields file contains invalid content', async() => {
+        });
+
+        xit('Creates database content when content folder was included', async() => {
+        });
+
+        xit('Ignores content tables, for which no datatype exists', async() => {
+        });
+
+        xit('Ignores content table fields, for which no datatype field exists', async() => {
+        });
+
+        xit('responds with "Error" when content table of ZIP file has invalid content (wrong attribute type)', async() => {
+        });
+
+        xit('does not insert formula values even if they are contained in the content table in the ZIP file', async() => {
+        });
+
+        xit('recalculates all formulas of the newly created client', async() => {
+        });
+
+        xit('Extracts document files when they are contained in the "files" folder', async() => {
+        });
+
+        xit('Extracts files even when no documents exist for them in the database', async() => {
+        });
+
+        xit('Deletes the uploaded ZIP file from the upload folder after correct processing', async() => {
+        });
+
+        xit('Deletes the uploaded ZIP file from the upload folder after errornous processing', async() => {
+        });
+
+    });
+
     describe('POST/newadmin', async() => {
 
         function createPostNewAdminTestElement() {

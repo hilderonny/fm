@@ -24,11 +24,8 @@ router.get('/export/:clientname', auth(co.permissions.ADMINISTRATION_CLIENT, 'r'
 router.post('/import', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clients), upload.single('file'), async (req, res) => {
     var zipfile = req.file;
     var label = req.query.label;
-    var withdatatypes = req.query.datatypes === "true";
-    var withcontent = req.query.content === "true";
-    var withfiles = req.query.files === "true";
     try {
-        var clientname = await eh.import(zipfile, label, withdatatypes, withcontent, withfiles);
+        var clientname = await eh.import(zipfile, label);
         res.send(clientname);
     } catch(error) {
         console.log(error);
