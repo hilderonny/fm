@@ -10,6 +10,7 @@ var fs = require("fs");
 var dh = require("../../utils/documentsHelper");
 var request = require('request');
 var unzip2 = require('unzip2');
+var eh = require("../../utils/exporthelper");
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
@@ -172,7 +173,36 @@ describe('API clients', async() => {
 
     describe("POST/import", async() => {
 
-        // th.apiTests.post.defaultNegative(co.apis.clients + "/import", co.permissions.ADMINISTRATION_CLIENT, createImportTestElementFunction, false, "portal", "portal_usergroup0", "portal_usergroup0_user0");
+        async function prepareFileForUpload() {
+            return eh.export("client0", true, true, true, "dummyprefix"); // Returns buffer
+        }
+
+        // it('responds without authentication with 403', async() => {
+        //     var testObject = createTestObject();
+        //     await th.post(`/api/${api}`).send(testObject).expect(403);
+        // });
+        // if (permission) it('responds without write permission with 403', async() => {
+        //     var testObject = createTestObject();
+        //     await th.removeWritePermission(client ? client : "client0", usergroup ? usergroup : "client0_usergroup0", permission);
+        //     var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+        //     await th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
+        // });
+        // function checkForUser(user) {
+        //     return async() => {
+        //         var moduleName = th.getModuleForApi(api);
+        //         await th.removeClientModule(client ? client : "client0", moduleName);
+        //         var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+        //         var testObject = createTestObject();
+        //         await th.post(`/api/${api}?token=${token}`).send(testObject).expect(403);
+        //     }
+        // }
+        // if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
+        // if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
+        // // Bei portalmanagement muss nix geschickt werden.
+        // if(!ignoreSendObjectTest) it('responds with 400 when not sending an object to insert', async() => {
+        //     var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
+        //     await th.post(`/api/${api}?token=${token}`).expect(400);
+        // });
 
         xit('responds with "Error" when no file was posted', async() => {
         });
