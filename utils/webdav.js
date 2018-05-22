@@ -4,6 +4,7 @@ var fs = require("fs");
 var Db = require("../utils/db").Db;
 var userManagerClass = require("../utils/webdavusermanagement").customUserManager;
 var arrangePrivilegeManager = require("../utils/webdavusermanagement").customPrivilegeManager;
+var wdfs = require("./webdavfilesystem");
 
     var dav = {
         
@@ -27,8 +28,8 @@ var arrangePrivilegeManager = require("../utils/webdavusermanagement").customPri
                 httpAuthentication: new webdav.HTTPBasicAuthentication(customUserManager),
                 https: credentials,
                 privilegeManager: privilegeManager,
-                enableLocationTag: true
-               // rootFileSystem: new  arrangeFS()
+                enableLocationTag: true,
+                rootFileSystem: new  wdfs.WebdavFilesystem()
             });
 
             //print incoming client requests
