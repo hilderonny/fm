@@ -20,8 +20,9 @@ var userListHelper = async function(){
 
 class customUserManager {
     
-        constructor() {
-            this.users = [];   
+        constructor(fileSystem) {
+            this.users = [];
+            this.fs = fileSystem;  
         }
         
         //getUsers(callback : (error : Error, users ?: IUser[]) => void)
@@ -37,10 +38,8 @@ class customUserManager {
 
         //getUserByName(name : string, callback : (error : Error, user ?: IUser) => void)
         getUserByName(name, callback){
-
-
             Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${name}';`).then((userfromdatabase) => {
-                console.log("userfromdatabase: ", userfromdatabase);
+               // console.log("userfromdatabase: ", userfromdatabase);
                 var user =  userfromdatabase.rows.map((userfromdb) => {
 
                         var newUser = new webdav.SimpleUser(userfromdb.name, userfromdb.password, false, false);
@@ -60,14 +59,16 @@ class customUserManager {
 
         //getUserByNamePassword(name : string, password : string, callback : (error : Error, user ?: IUser) => void)
         getUserByNamePassword(name, password, callback){
-        
+            var self = this;    
             this.getUserByName(name, (e, user) => {
                 if(e){
                      return callback(e);
                 }
-                  // console.log("User From DB: ", user); 
                 if(bcryptjs.compareSync(password, user.password)){
                     delete user.password;
+                    //console.log(self.fs);
+                    self.fs._setCredentials(user.clientname, name);
+                   // console.log(self.fs);
                     callback(null, user);
                 }else{
                     callback(Error);
@@ -88,7 +89,7 @@ class customUserManager {
     }
 
 
-    class arrangeUserManager extends webdav.SimpleUserManager {
+    /*class arrangeUserManager extends webdav.SimpleUserManager {
     
         //getUserByName(name : string, callback : (error : Error, user ?: IUser) => void)
         getUserByName(name, callback){
@@ -128,7 +129,7 @@ class customUserManager {
                 }
             });
         }       
-    }
+    }*/
     
     class customPrivilegeManager extends webdav.PrivilegeManager {
 
@@ -143,7 +144,7 @@ class customUserManager {
 
                             var  relevant_permission_key = []; 
                         
-                            for(i = 0; i < permissionsFromDB.length; i++){
+                            for(var i = 0; i < permissionsFromDB.length; i++){
                                 var currentPermission = permissionsFromDB[i];
                                 if(currentPermission.key == co.permissions.OFFICE_DOCUMENT){
                                     relevant_permission_key = currentPermission;
@@ -169,4 +170,5 @@ class customUserManager {
     }
     
     module.exports.customUserManager = customUserManager;
+  //module.exports.arrangeUserManager = arrangeUserManager;
     module.exports.customPrivilegeManager = customPrivilegeManager;

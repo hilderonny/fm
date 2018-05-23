@@ -13,8 +13,8 @@ class WebdavFilesystem extends webdav.FileSystem {
         this._cache = {}; // TODO: should be client dependent
         this._lm = new webdav.LocalLockManager();
         this._pm = new webdav.LocalPropertyManager();
-        this._clientname = "737e7b80437b45e5b0def70b55d022df";
-        this._username = "swriesa";
+        this._clientname = null; // "portal"; //"5a620ac917252917087cd8db"; //"737e7b80437b45e5b0def70b55d022df";
+        this._username =  null; //"admin"; //"swriesa";
     }
 
     // Dummy implementation. Gets relevant when updating files 
@@ -39,29 +39,34 @@ class WebdavFilesystem extends webdav.FileSystem {
 
     // Obtain direct child elements of a directory
     _readDir(path, ctx, callback) {
-        var self = this;
-        Db.getDynamicObject(self._clientname, "users", self._username).then(user => {
-            user.clientname = self._clientname;
-            return ph.getpermissionsforuser(user);
-        }).then(permissions => {
-            // Distinguish between root path and child paths
-            if (path.isRoot()) {
-                return doh.getrootelements(self._clientname, "folders_hierarchy", permissions);
-            } else {
-                var element = self._cache[path.toString()];
-                return doh.getchildren(self._clientname, element.datatypename, element.name, permissions, "folders_hierarchy");
+            var self = this;
+            if(self._clientname){
+                Db.getDynamicObject(self._clientname, "users", self._username).then(user => {
+                    user.clientname = self._clientname;
+                    return ph.getpermissionsforuser(user);
+                }).then(permissions => {
+                    // Distinguish between root path and child paths
+                    if (path.isRoot()) {
+                        return doh.getrootelements(self._clientname, "folders_hierarchy", permissions);
+                    } else {
+                        var element = self._cache[path.toString()];
+                        return doh.getchildren(self._clientname, element.datatypename, element.name, permissions, "folders_hierarchy");
+                    }
+                }).then(dirElements => {
+                    // Cache folders and documents for later lookup
+                    dirElements.forEach(de => {
+                        if (["folders", "documents"].indexOf(de.datatypename) < 0) return;
+                        // Displayname does not work in windows: https://stackoverflow.com/a/21636844
+                        var label = de.label ? de.label : de.name;
+                        var fullPath = path.getChildPath(label).toString();
+                        self._cache[fullPath] = de; // Label is used as path identifier, no duplicate names possible!
+                    });
+                    callback(null, dirElements.map(de => de.label ? de.label : de.name));
+                });
+            }else{
+                callback(null, null);
             }
-        }).then(dirElements => {
-            // Cache folders and documents for later lookup
-            dirElements.forEach(de => {
-                if (["folders", "documents"].indexOf(de.datatypename) < 0) return;
-                // Displayname does not work in windows: https://stackoverflow.com/a/21636844
-                var label = de.label ? de.label : de.name;
-                var fullPath = path.getChildPath(label).toString();
-                self._cache[fullPath] = de; // Label is used as path identifier, no duplicate names possible!
-            });
-            callback(null, dirElements.map(de => de.label ? de.label : de.name));
-        });
+
     }
 
     // Request for download of a file
@@ -73,6 +78,11 @@ class WebdavFilesystem extends webdav.FileSystem {
             if (error) return callback(webdav.Errors.ResourceNotFound);
             callback(null, fs.createReadStream(null, { fd: fd }));
         });
+    }
+
+    _setCredentials(clientname, username){
+        this._clientname = clientname;
+        this._username = username;
     }
 
 };

@@ -3,14 +3,16 @@ var moduleconfig = require('../config/module-config.json');
 var fs = require("fs");
 var Db = require("../utils/db").Db;
 var userManagerClass = require("../utils/webdavusermanagement").customUserManager;
+//var arrangeUserManager = require("../utils/webdavusermanagement").arrangeUserManager;
 var arrangePrivilegeManager = require("../utils/webdavusermanagement").customPrivilegeManager;
 var wdfs = require("./webdavfilesystem");
 
     var dav = {
         
         init: async()=>{
-         
-            var customUserManager = new userManagerClass();
+            
+            var customFS = new  wdfs.WebdavFilesystem();
+            var customUserManager = new userManagerClass(customFS); //  new arrangeUserManager(customFS);
             var privilegeManager = new arrangePrivilegeManager(); 
             
             // SSL für HTTPS-Server vorbereiten, siehe https://franciskim.co/2015/07/30/how-to-use-ssl-https-for-express-4-x-node-js/
@@ -29,7 +31,7 @@ var wdfs = require("./webdavfilesystem");
                 https: credentials,
                 privilegeManager: privilegeManager,
                 enableLocationTag: true,
-                rootFileSystem: new  wdfs.WebdavFilesystem()
+                rootFileSystem: customFS
             });
 
             //print incoming client requests
@@ -39,10 +41,7 @@ var wdfs = require("./webdavfilesystem");
             }); 
             
             WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
-            var fileManager = require("../utils/webdavfoldersanddocuments").davdocs.setfiles(WebDavserver);
-            
-
-           
+           // var fileManager = require("../utils/webdavfoldersanddocuments").davdocs.setfiles(WebDavserver);
 
         }
     }
