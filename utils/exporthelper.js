@@ -15,8 +15,12 @@ async function getJsonFromEntry(entry) {
         entry.pipe(through((data) => {
             content += data.toString();
         }, () => {
-            var json = JSON.parse(content);
-            resolve(json);
+            try {
+                var json = JSON.parse(content);
+                resolve(json);
+            } catch (error) {
+                resolve(undefined);
+            }
         }));
     });
 }
@@ -62,15 +66,16 @@ var eh = {
     },
 
     import: async (zipfile, label) => {
+        if (!zipfile) throw new Error("No file was sent");
         var clientname = Db.createName();
         var datatypes, datatypefields, contents = {};
         var promises = [];
         // Create client in every case
         var client = await Db.createClient(clientname, label);
+        var filePath = path.join(__dirname, '/../', zipfile.path);
         promises.push(new Promise((resolve, reject) => {
-            var filePath = path.join(__dirname, '/../', zipfile.path);
             var parser = unzip.Parse();
-            fs.createReadStream(filePath)
+            var readstream = fs.createReadStream(filePath)
                 .pipe(parser)
                 .on('entry', async (entry) => {
                     var pathparts = entry.path.split("\\");
@@ -90,42 +95,52 @@ var eh = {
                         entry.autodrain();
                     }
                 }).on('error', (error) => {
-                    throw new Error(error);
+                    readstream.destroy();
+                    resolve(); // Ignore errors but cancel processing
                 }).on('close', function () {
-                    // Delete uploaded file
-                    fs.unlinkSync(filePath);
                     // Erst antworten, wenn alles ausgepackt ist
                     resolve();
                 });
         }));
         await Promise.all(promises);
-        for (var i = 0; i < datatypes.length; i++) {
+        // Delete uploaded file in every case
+        fs.unlinkSync(filePath);
+        if (datatypes) for (var i = 0; i < datatypes.length; i++) {
             var datatype = datatypes[i];
             await Db.createDatatype(clientname, datatype.name, datatype.label, datatype.plurallabel, datatype.titlefield, datatype.icon, datatype.lists, datatype.permissionkey, datatype.modulename, datatype.canhaverelations, datatype.candefinename);
         }
-        for (var i = 0; i < datatypefields.length; i++) {
+        if (datatypes && datatypefields) for (var i = 0; i < datatypefields.length; i++) {
             var datatypefield = datatypefields[i];
-            if (datatypefield.name) continue; // Name field is created by Db.createDatatype() automatically
+            if (datatypefield.name === "name") continue; // Name field is created by Db.createDatatype() automatically
+            if (datatypefield.fieldtype === co.fieldtypes.formula && datatypefield.formula) datatypefield.formula = JSON.parse(datatypefield.formula); // In the import file the formula is stored as string but in the database we need JSON
             await Db.createDatatypeField(clientname, datatypefield.datatypename, datatypefield.name, datatypefield.label, datatypefield.fieldtype, datatypefield.isrequired, false, datatypefield.reference, datatypefield.formula, datatypefield.formulaindex, datatypefield.isnullable, datatypefield.ishidden, datatypefield.ispredefined, datatypefield.ignoremissingreference, datatypefield.rows);
         }
-        var tablenames = Object.keys(contents);
-        for (var i = 0; i < tablenames.length; i++) {
-            var tablename = tablenames[i];
-            if (tablename === co.collections.users.name) continue; // Users are handled in a special way below
-            var tablecontent = contents[tablename];
-            for (var j = 0; j < tablecontent.length; j++) {
-                await Db.insertDynamicObject(clientname, tablename, tablecontent[j]);
+        if (contents) {
+            var existingdatatypes = await Db.getdatatypes(clientname);
+            var tablenames = Object.keys(contents);
+            for (var i = 0; i < tablenames.length; i++) {
+                var tablename = tablenames[i];
+                if (!existingdatatypes[tablename]) continue; // Ignore unknown datatypes
+                if (tablename === co.collections.users.name) continue; // Users are handled in a special way below
+                var tablecontent = contents[tablename];
+                for (var j = 0; j < tablecontent.length; j++) {
+                    try {
+                        await Db.insertDynamicObject(clientname, tablename, tablecontent[j]);
+                    } catch (error) { // Ignore errornous content
+                        console.log(error, tablecontent[j]);
+                    }
+                }
             }
-        }
-        // Handle users and put them into allusers. Delete them from the users table when they exist in allusers (in another client)
-        var users = contents.users;
-        if (users) {
-            var usernamesinallusers = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM allusers;")).rows.map(r => r.name);
-            for (var i = 0; i < users.length; i++) {
-                var user = users[i];
-                if (usernamesinallusers.indexOf(user.name) < 0) {
-                    // Insert the user, it will automatically get into the allusers table
-                    await Db.insertDynamicObject(clientname, co.collections.users, user);
+            // Handle users and put them into allusers. Delete them from the users table when they exist in allusers (in another client)
+            var users = contents.users;
+            if (users) {
+                var usernamesinallusers = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM allusers;")).rows.map(r => r.name);
+                for (var i = 0; i < users.length; i++) {
+                    var user = users[i];
+                    if (usernamesinallusers.indexOf(user.name) < 0) {
+                        // Insert the user, it will automatically get into the allusers table
+                        await Db.insertDynamicObject(clientname, co.collections.users, user);
+                    }
                 }
             }
         }
