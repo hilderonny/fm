@@ -101,21 +101,24 @@ var ch = {
             var clients = (await Db.query(Db.PortalDatabaseName, "SELECT name FROM clients;")).rows;
             for (var i = 0; i < clients.length; i++) {
                 var clientname = clients[i].name;
-                // perform calculations for all datatypes beginning with all leaf elements proceeding hierarchically upwards
-                var datatypestocalculate = (await Db.query(clientname, "SELECT DISTINCT datatypename FROM datatypefields WHERE fieldtype = 'formula';")).rows.map(r => r.datatypename);
-                for (var j = 0; j < datatypestocalculate.length; j++) {
-                    var dt = datatypestocalculate[j];
-                    var query = `SELECT x.name FROM ${dt} x LEFT JOIN relations r ON r.datatype1name = '${dt}' AND r.name1 = x.name WHERE r IS NULL OR (r.relationtypename='parentchild' AND NOT r.datatype2name IN (${datatypestocalculate.map(d => `'${d}'`).join(",")}));`;
-                    var entitynames = (await Db.query(clientname, query)).rows.map(r => r.name);
-                    for (var k = 0; k < entitynames.length; k++) {
-                        await ch.calculateentityandparentsrecursively(clientname, dt, entitynames[k]);
-                    }
-                }
+                await ch.recalculateallforclient(clientname);
             }
         } catch(error) {
             console.log(error);
         }
         console.log("Recalculation finished.");
+    },
+    recalculateallforclient: async(clientname) => { // Called in app.js in line 118
+            // perform calculations for all datatypes beginning with all leaf elements proceeding hierarchically upwards
+            var datatypestocalculate = (await Db.query(clientname, "SELECT DISTINCT datatypename FROM datatypefields WHERE fieldtype = 'formula';")).rows.map(r => r.datatypename);
+            for (var j = 0; j < datatypestocalculate.length; j++) {
+                var dt = datatypestocalculate[j];
+                var query = `SELECT x.name FROM ${dt} x LEFT JOIN relations r ON r.datatype1name = '${dt}' AND r.name1 = x.name WHERE r IS NULL OR (r.relationtypename='parentchild' AND NOT r.datatype2name IN (${datatypestocalculate.map(d => `'${d}'`).join(",")}));`;
+                var entitynames = (await Db.query(clientname, query)).rows.map(r => r.name);
+                for (var k = 0; k < entitynames.length; k++) {
+                    await ch.calculateentityandparentsrecursively(clientname, dt, entitynames[k]);
+                }
+            }
     },
     // Recalculate all entites of a datatype and their parents
     recalculateforupdateddatatype: async(clientname, datatypename) => { // Called in db.js in line 154

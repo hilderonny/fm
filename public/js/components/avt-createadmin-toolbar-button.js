@@ -36,7 +36,6 @@ app.directive('avtCreateadminToolbarButton', function($compile, $http, $mdDialog
                     var newscope = scope.$new(false);
                     newscope.newclientadministrator = { name: "", password: "", clientname: scope.params.entityname };
                     var okbutton = { label: "Erstellen", ishidden: true, onclick: function() {
-                        console.log(newscope.newclientadministrator);
                         $http.post('/api/clients/newadmin', newscope.newclientadministrator).then(function(response) {
                             if (response.status !== 200) {
                                 newscope.administratorsForm.name.$setValidity('nameInUse', false);
@@ -54,7 +53,7 @@ app.directive('avtCreateadminToolbarButton', function($compile, $http, $mdDialog
                         okbutton,
                         { label: "Abbrechen" }
                     ]);
-                }
+                };
             };
         }
     }
