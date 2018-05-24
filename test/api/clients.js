@@ -177,7 +177,7 @@ describe('API clients', async() => {
 
     });
 
-    describe.only("POST/import", async() => {
+    describe("POST/import", async() => {
 
         var httpsPort = process.env.HTTPS_PORT || localconfig.httpsPort || 443;
         var url = `https://localhost:${httpsPort}/api/clients/import`;
