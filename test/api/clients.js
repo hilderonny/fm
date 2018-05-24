@@ -392,31 +392,6 @@ describe('API clients', async() => {
             assert.ok(files.length > 0);
         });
 
-        it('Deletes the uploaded ZIP file from the upload folder after correct processing', async() => {
-            var zipfilebuffer = await eh.export("client0", true, true, true, "dummyprefix");
-            var token = await th.defaults.login("portal_usergroup0_user0");
-            var uploadpath = path.join(__dirname, "..", "..", "uploads");
-            var filecountbefore = fs.readdirSync(uploadpath).length;
-            await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
-            // Wait a second so that the file can be deleted
-            setTimeout(() => {
-                var filecountafter = fs.readdirSync(uploadpath).length;
-                assert.strictEqual(filecountafter, filecountbefore);
-            }, 1000);
-        });
-
-        it('Deletes the uploaded ZIP file from the upload folder after errornous processing', async() => {
-            var token = await th.defaults.login("portal_usergroup0_user0");
-            var uploadpath = path.join(__dirname, "..", "..", "uploads");
-            var filecountbefore = fs.readdirSync(uploadpath).length;
-            await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', "invalidzipfile", null, 900000);
-            // Wait a second so that the file can be deleted
-            setTimeout(() => {
-                var filecountafter = fs.readdirSync(uploadpath).length;
-                assert.strictEqual(filecountafter, filecountbefore);
-            }, 1000);
-        });
-
     });
 
     describe('POST/newadmin', async() => {

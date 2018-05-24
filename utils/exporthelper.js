@@ -95,7 +95,6 @@ var eh = {
                         entry.autodrain();
                     }
                 }).on('error', (error) => {
-                    readstream.destroy();
                     resolve(); // Ignore errors but cancel processing
                 }).on('close', function () {
                     // Erst antworten, wenn alles ausgepackt ist
