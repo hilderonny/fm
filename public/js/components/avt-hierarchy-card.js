@@ -78,6 +78,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                 };
                 scope.onelementupdated = function(updatedelement) {
                     scope.selectedchild.label = updatedelement[scope.$root.titlefields[scope.selectedchild.datatypename]] || scope.selectedchild.name;
+                    if (updatedelement.icon) scope.selectedchild.icon = updatedelement.icon;
                 };
                 scope.loadelementsfordirectaccess = function(datatypename, entityname) {
                     return utils.getresponsedata("/api/dynamic/hierarchytoelement/" + params.listfilter + "/" + datatypename + "/" + entityname).then(function(rootelements) {

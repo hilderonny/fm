@@ -52,6 +52,7 @@ app.directive('avtListCard', function($compile, $location, utils) {
                 };
                 scope.onelementupdated = function(updatedelement) {
                     scope.selectedelement.label = updatedelement[scope.$root.titlefields[scope.selectedelement.datatypename]] || updatedelement.name;
+                    if (updatedelement.icon) scope.selectedelement.icon = updatedelement.icon;
                 };
                 scope.loadelements = function() {
                     var api = params.api ? params.api : "/api/dynamic/rootelements/" + params.listfilter;

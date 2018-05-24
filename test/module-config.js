@@ -149,6 +149,7 @@ describe('module-config.json', function() {
             'public/js/include.js',
             'public/js/include.js.map',
             'README.md',
+            'talend/',
             'temp/',
             'test/',
             'test.bat',

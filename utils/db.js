@@ -389,10 +389,12 @@ var Db = {
             fieldMap[field.name] = field;
             if (field.isrequired && (keys.indexOf(field.name) < 0 || element[field.name] === undefined)) throw new Error(`Required field '${field.name}' is missing`);
         });
+        // Filter out fields which do not exist. Can happen on client imports when the imported table contains unknown columns
+        // Also ignore formulas, they are calculated after import
+        keys = keys.filter(k => fieldMap[k] && fieldMap[k].fieldtype !== constants.fieldtypes.formula);
         var values = keys.map((k) => {
             var value = element[k];
             var field = fieldMap[k];
-            if (!field) throw new Error(`Unknown field '${k}'`);
             var result;
             switch (field.fieldtype) {
                 case constants.fieldtypes.boolean: if (value !== undefined && value !== null && typeof(value) !== "boolean") throw new Error(`Value type ${typeof(value)} not allowed for field type boolean`); result = (value === undefined || value === null) ? "null" : value; break;
