@@ -106,13 +106,13 @@ var eh = {
         fs.unlinkSync(filePath);
         if (datatypes) for (var i = 0; i < datatypes.length; i++) {
             var datatype = datatypes[i];
-            await Db.createDatatype(clientname, datatype.name, datatype.label, datatype.plurallabel, datatype.titlefield, datatype.icon, datatype.lists, datatype.permissionkey, datatype.modulename, datatype.canhaverelations, datatype.candefinename);
+            await Db.createDatatype(clientname, datatype.name, datatype.label, datatype.plurallabel, datatype.titlefield, datatype.icon, datatype.lists, datatype.permissionkey, datatype.modulename, !!datatype.canhaverelations, !!datatype.candefinename);
         }
         if (datatypes && datatypefields) for (var i = 0; i < datatypefields.length; i++) {
             var datatypefield = datatypefields[i];
             if (datatypefield.name === "name") continue; // Name field is created by Db.createDatatype() automatically
             if (datatypefield.fieldtype === co.fieldtypes.formula && datatypefield.formula) datatypefield.formula = JSON.parse(datatypefield.formula); // In the import file the formula is stored as string but in the database we need JSON
-            await Db.createDatatypeField(clientname, datatypefield.datatypename, datatypefield.name, datatypefield.label, datatypefield.fieldtype, datatypefield.isrequired, false, datatypefield.reference, datatypefield.formula, datatypefield.formulaindex, datatypefield.isnullable, datatypefield.ishidden, datatypefield.ispredefined, datatypefield.ignoremissingreference, datatypefield.rows);
+            await Db.createDatatypeField(clientname, datatypefield.datatypename, datatypefield.name, datatypefield.label, datatypefield.fieldtype, !!datatypefield.isrequired, false, datatypefield.reference, datatypefield.formula, datatypefield.formulaindex ? datatypefield.formulaindex : 0, !!datatypefield.isnullable, !!datatypefield.ishidden, !!datatypefield.ispredefined, !!datatypefield.ignoremissingreference, datatypefield.rows ? datatypefield.rows : 0);
         }
         if (contents) {
             var existingdatatypes = await Db.getdatatypes(clientname);
@@ -138,7 +138,7 @@ var eh = {
                     var user = users[i];
                     if (usernamesinallusers.indexOf(user.name) < 0) {
                         // Insert the user, it will automatically get into the allusers table
-                        await Db.insertDynamicObject(clientname, co.collections.users, user);
+                        await Db.insertDynamicObject(clientname, co.collections.users.name, user);
                     }
                 }
             }
