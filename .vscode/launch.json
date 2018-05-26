@@ -16,14 +16,14 @@
                 "--nolazy"
             ],
             "env": {
-                "NODE_ENV": "development"
+                "NODE_ENV": "development",
+                "NODE_TLS_REJECT_UNAUTHORIZED": "0"
             },
             "console": "internalConsole",
             "sourceMaps": true,
             "skipFiles": [
                 "<node_internals>/**"
-            ],
-            "outDir": null
+            ]
         },
         {
             "name":"Simulate production",
@@ -42,8 +42,7 @@
                 "NODE_ENV": "production"
             },
             "console": "internalConsole",
-            "sourceMaps": true,
-            "outDir": null
+            "sourceMaps": true
         },
         {
             "name": "Debug Client Side",
@@ -51,9 +50,6 @@
             "request": "launch",
             "url":"http://localhost",
             "webRoot":"${workspaceRoot}",
-            
-            
-            "console": "internalConsole",
             "sourceMaps": true,
             "sourceMapPathOverrides": {
                 "./*": "${workspaceRoot}/*"
@@ -75,12 +71,11 @@
             ],
             "env": {
                 "NODE_ENV": "test",
-                "MONGO_TEST_DB": "localtestdb",
+                "POSTGRESQL_TEST_DBPREFIX": "test",
                 "NODE_TLS_REJECT_UNAUTHORIZED": "0"
             },
             "console": "internalConsole",
-            "sourceMaps": false,
-            "outDir": null
+            "sourceMaps": false
         }
     ]
 }

@@ -61,13 +61,18 @@ app.config(function($translateProvider) {
       prefix: '/api/translations/',
       suffix: ''
   });
-  $translateProvider.fallbackLanguage('en');
+  $translateProvider.fallbackLanguage('de');
   $translateProvider.preferredLanguage('de');
   $translateProvider.useSanitizeValueStrategy(null); // Needed to translate HTML code, see https://github.com/angular-translate/angular-translate/issues/1131 and https://angular-translate.github.io/docs/#/guide/19_security
   // null ist notwendig, damit sowohl die Blockübersetzung in Mandantenadministrator als auch die Umlaute beim Löschbestätigendialog korrekt angezeigt werden
 });
 
+app.config(['$mdAriaProvider', function ($mdAriaProvider) {
+  $mdAriaProvider.disableWarnings();
+}]);
+
 // Provide password matching, see http://odetocode.com/blogs/scott/archive/2014/10/13/confirm-password-validation-in-angularjs.aspx
+// TODO: In separate components-Datei auslagern
 app.directive('compareTo', function() {
   return {
     require: "ngModel",
@@ -90,6 +95,7 @@ app.directive('compareTo', function() {
 
 // Für Input-Felder, die den Fokus bei Events bekommen sollen, z.B. Suchfeld
 // Siehe https://stackoverflow.com/a/14837021
+// TODO: In separate components-Datei auslagern
 app.directive('focusMe', function($timeout) {
   return {
     scope: { trigger: '=focusMe' },
@@ -106,6 +112,7 @@ app.directive('focusMe', function($timeout) {
 
 //seting the dateapicker input text field attribute to readonly 
 // See: https://stackoverflow.com/questions/46152691/md-datepicker-input-field-should-be-readonly-no-manual-date-entry-allowed
+// TODO: In separate components-Datei auslagern
 app.directive('readOnly', function(){
   return{
     restrict: 'A',
@@ -122,6 +129,7 @@ app.directive('readOnly', function(){
  *  <resize-handle></resize-handle>
  * </md-card>
  */
+// TODO: In separate components-Datei auslagern
 app.directive('resizeHandle', function() {
   return function(scope, element, attrs) {
     element.bind('mousedown', function(evt) {
@@ -142,5 +150,12 @@ app.directive('resizeHandle', function() {
     });
   }
 });
+
+app.factory('$exceptionHandler', [function($log, logErrorsToBackend) {
+  return function myExceptionHandler(exception, cause) {
+    // Ignore stupid AngularJS errors
+    if (exception.message !== "Cannot read property 'insertBefore' of null") console.error(exception, cause);
+  };
+}]);
 
 app.directUrlMappings = {};

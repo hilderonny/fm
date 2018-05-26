@@ -2,27 +2,26 @@
  * UNIT Tests for middlewares/auth
  */
 var assert = require('assert');
-var superTest = require('supertest');
-var testHelpers = require('../testhelpers');
-var db = require('../../middlewares/db');
+var th = require('../testhelpers');
 
-describe('MIDDLEWARE auth', function() {
-
-    var server = require('../../app');
+describe('MIDDLEWARE auth', () => {
     
-    beforeEach(() => {
-        return testHelpers.cleanDatabase()
-            .then(testHelpers.prepareClients)
-            .then(testHelpers.prepareClientModules)
-            .then(testHelpers.prepareUserGroups)
-            .then(testHelpers.prepareUsers)
-            .then(testHelpers.preparePermissions)
-            .then(testHelpers.prepareActivities);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
     });
 
-    it('reponds with 403 when req.user is not set', function() {
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareActivities();
+    });
+
+    it('reponds with 403 when req.user is not set', () => {
         return new Promise(function(resolve, reject) {
-            var req = { db: db };
+            var req = { };
             require('../../middlewares/auth')()(req, { sendStatus: function(statusCode) {
                 assert.equal(statusCode, 403);
                 resolve();
@@ -32,9 +31,9 @@ describe('MIDDLEWARE auth', function() {
         });
     });
 
-    it('reponds with 403 when req.user._id is not set', function() {
+    it('reponds with 403 when req.user._id is not set', () => {
         return new Promise(function(resolve, reject) {
-            var req = { user: { }, db: db };
+            var req = { user: { } };
             require('../../middlewares/auth')()(req, { sendStatus: function(statusCode) {
                 assert.equal(statusCode, 403);
                 resolve();
@@ -44,9 +43,9 @@ describe('MIDDLEWARE auth', function() {
         });
     });
 
-    it('reponds with 403 when req.user._id is invalid', function() {
+    it('reponds with 403 when req.user.name is invalid', () => {
         return new Promise(function(resolve, reject) {
-            var req = { user: { _id: 'invalidId' }, db: db };
+            var req = { user: { name: 'invalidId' } };
             require('../../middlewares/auth')()(req, { sendStatus: function(statusCode) {
                 assert.equal(statusCode, 403);
                 resolve();
@@ -56,39 +55,23 @@ describe('MIDDLEWARE auth', function() {
         });
     });
 
-    it('reponds with 403 when there is no user with the given req.user._id in the database', function() {
+    it('calls next() when the user was authenticated successfully', () => {
         return new Promise(function(resolve, reject) {
-            var req = { user: { _id: '999999999999999999999999' }, db: db };
-            require('../../middlewares/auth')()(req, { sendStatus: function(statusCode) {
-                assert.equal(statusCode, 403);
+            var req = { user: { name: "client0_usergroup0_user0" } };
+            require('../../middlewares/auth')()(req, null, function next() {
+                resolve();
+            });
+        });
+    });
+
+    it('reponds with 205 when the time in the login token is older than the last server start time', () => {
+        return new Promise(function(resolve, reject) {
+            var req = { user: { name: "client0_usergroup0_user0", tokenTime: 0 } };
+            return require('../../middlewares/auth')()(req, { sendStatus: function(statusCode) {
+                assert.equal(statusCode, 205);
                 resolve();
             } }, function next() {
                 assert.fail('next() was called');
-            });
-        });
-    });
-
-    it('calls next() when the user was authenticated successfully', function() {
-        return db.get('users').findOne({ name : '1_0_ADMIN0' }).then((userFromDatabase) => {
-            return new Promise(function(resolve, reject) {
-                var req = { user: { _id: userFromDatabase._id.toString() }, db: db };
-                require('../../middlewares/auth')()(req, null, function next() {
-                    resolve();
-                });
-            });
-        });
-    });
-
-    it('reponds with 205 when the time in the login token is older than the last server start time', function() {
-        return db.get('users').findOne({ name : '1_0_ADMIN0' }).then((userFromDatabase) => {
-            return new Promise(function(resolve, reject) {
-                var req = { user: { _id: userFromDatabase._id.toString(), tokenTime: 0 }, db: db };
-                return require('../../middlewares/auth')()(req, { sendStatus: function(statusCode) {
-                    assert.equal(statusCode, 205);
-                    resolve();
-                } }, function next() {
-                    assert.fail('next() was called');
-                });
             });
         });
     });

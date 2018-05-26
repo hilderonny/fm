@@ -11,267 +11,156 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateId = require('../middlewares/validateId');
 var validateSameClientId = require('../middlewares/validateSameClientId');
-var monk = require('monk');
 var multer  = require('multer')
 var upload = multer({ dest: 'uploads/' })
 var fs = require('fs');
 var path = require('path');
-var documentsHelper = require('../utils/documentsHelper');
+var dh = require('../utils/documentsHelper');
 var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var dah = require('../utils/dynamicAttributesHelper');
-var mime = require('send').mime;
+var mime = require("mime");
+var Db = require("../utils/db").Db;
+var request = require('request');
 
-var downloadDocument = (response, document) => {
+var downloadDocument = (response, clientname, document, forpreview) => {
+    var dispositiontype = forpreview ? 'inline' : 'attachment';
     var options = {
         headers: {
-            'Content-disposition' : 'attachment; filename=' + document.name,
-            'Content-Type' : mime.lookup(document.name)
+            'Content-disposition' : dispositiontype + '; filename=' + encodeURIComponent(document.label), // When file names contain invalid characters it comes to an error here
+            'Content-Type' : document.type
         }
     };
-    return response.sendFile(documentsHelper.getDocumentPath(document._id), options);
+    return response.sendFile(dh.getDocumentPath(clientname, document.name), options);
 };
 
 // Download a specific shared document without authentication 
-router.get('/share/:id', validateId, (req, res) => {
-    req.db.get('documents').findOne(req.params.id).then((document) => {
-        if (!document) {
-            // Document with given ID not found
-            return res.sendStatus(404);
+router.get('/share/:documentname', async(req, res) => {
+    var clientnames = (await Db.query(Db.PortalDatabaseName, `SELECT name FROM clients;`)).rows.map(c => c.name);
+    for (var i = 0; i < clientnames.length; i++) {
+        var clientname = clientnames[i];
+        var document = await Db.getDynamicObject(clientname, "documents", req.params.documentname);
+        if (document && document.isshared) {
+            downloadDocument(res, clientname, document, true);
+            return;
         }
-        if (!document.isShared) {
-            // Document is not shared
-            return res.sendStatus(403);
-        }
-        return downloadDocument(res, document);
-    });
-});
-
-/**
- * Liefert eine Liste von Dokumenten für die per URL übergebenen IDs. Die IDs müssen kommagetrennt sein.
- * Die Berechtigungen werden hier nicht per auth überprüft, da diese API für die Verknüpfungen verwendet
- * wird und da wäre es blöd, wenn ein 403 zur Neuanmeldung führte. Daher wird bei fehlender Berechtigung
- * einfach eine leere Liste zurück gegeben.
- * @example
- * $http.get('/api/documents/forIds?ids=ID1,ID2,ID3')...
- */
-router.get('/forIds', auth(false, false, 'documents'), (req, res) => {
-    // Zuerst Berechtigung prüfen
-    auth.canAccess(req.user._id, 'PERMISSION_OFFICE_DOCUMENT', 'r', 'documents', req.db).then(function(accessAllowed) {
-        if (!accessAllowed) {
-            return res.send([]);
-        }
-        if (!req.query.ids) {
-            return res.send([]);
-        }
-        var ids = req.query.ids.split(',').filter(validateId.validateId).map(function(id) { return monk.id(id); }); // Nur korrekte IDs verarbeiten
-        var clientId = req.user.clientId; // Nur die Termine des Mandanten des Benutzers raus holen.
-        req.db.get('documents').aggregate([
-            { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
-                from: 'folders',
-                startWith: '$parentFolderId',
-                connectFromField: 'parentFolderId',
-                connectToField: '_id',
-                as: 'path',
-                depthField : 'depth'
-            } },
-            { $project: { 
-                "name": 1,                    
-                "parentFolderId": 1,
-                "clientId": 1,
-                "type": 1,
-                "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
-            },
-            { $match: { // Find only relevant elements
-                _id: { $in: ids },
-                clientId: clientId
-            } },
-            { $unwind: "$path" },
-            { $sort: { "path.depth": -1 } },
-            {
-                $group:{
-                    _id: "$_id",
-                    path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
-                    doc:{"$first": "$$ROOT"}
-                }
-            },
-            {
-                $project: {
-                    "name": "$doc.name",                    
-                    "parentFolderId": "$doc.parentFolderId",
-                    "clientId": "$doc.clientId",
-                    "type": "$doc.type",
-                    "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
-                }
-            },
-            { $sort: { "_id": 1 } }
-        ]).then(function(documents) {
-            res.send(documents);
-        });
-    });
+    }
+    res.sendStatus(404);
 });
 
 // Get a specific document 
-router.get('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'r', 'documents'), validateId, validateSameClientId('documents'), (req, res) => {
-    req.db.get('documents').aggregate([
-        { $graphLookup: { // Calculate path, see https://docs.mongodb.com/manual/reference/operator/aggregation/graphLookup/
-            from: 'folders',
-            startWith: '$parentFolderId',
-            connectFromField: 'parentFolderId',
-            connectToField: '_id',
-            as: 'path',
-            depthField : 'depth'
-        } },
-        { $project: { 
-            "name": 1,                    
-            "parentFolderId": 1,
-            "clientId": 1,
-            "type": 1,
-            "path": { $cond: { if: { $eq: [ { $size:'$path' }, 0 ] }, then: [{ depth: -1 }], else: '$path' } } } // To force $unwind to handle top level elements correctly
-        },
-        { $match: { // Find only relevant elements
-            _id: monk.id(req.params.id)
-        } },
-        { $limit: 1 },
-        { $unwind: "$path" },
-        { $sort: { "path.depth": -1 } },
-        {
-            $group:{
-                _id: "$_id",
-                path : { $push: { $cond: { if: { $eq: [ "$path.depth", -1 ] }, then: null, else: "$path" } } }, // top level elements will have a path array with only one entry which is null
-                doc:{"$first": "$$ROOT"}
-            }
-        },
-        {
-            $project: {
-                "name": "$doc.name",                    
-                "parentFolderId": "$doc.parentFolderId",
-                "clientId": "$doc.clientId",
-                "type": "$doc.type",
-                "path": { "$setDifference": [ "$path", [null] ] } // https://stackoverflow.com/a/29067671
-            }
-        }
-    ]).then((matchingDocuments) => {
-        // We can assume that we have exactly one element in the array
-        var document = matchingDocuments[0];
-        // Database element is available here in every case, because validateSameClientId already checked for existence
-        // When request parameter "action=download" is given, return the document file.
-        if (req.query.action && req.query.action === 'download') {
-            return downloadDocument(res, document);
-        }
-        res.send(document);
-    });
+router.get('/download/:documentname', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), async(req, res) => {
+    var clientname = req.user.clientname;
+    var document = await Db.getDynamicObject(clientname, "documents", req.params.documentname);
+    if (!document) return res.sendStatus(404);
+    return downloadDocument(res, clientname, document);
+});
+
+// Get a specific document 
+router.get('/preview/:documentname', auth(co.permissions.OFFICE_DOCUMENT, 'r', co.modules.documents), async(req, res) => {
+    var clientname = req.user.clientname;
+    var document = await Db.getDynamicObject(clientname, "documents", req.params.documentname);
+    if (!document) return res.sendStatus(404);
+    return downloadDocument(res, clientname, document, true);
 });
 
 // Create a document via file upload
-router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), upload.single('file'), function(req, res) { // https://github.com/expressjs/multer
+router.post('/', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), upload.single('file'), async(req, res) => { // https://github.com/expressjs/multer
     var file = req.file;
-    if (!file) {
-        return res.sendStatus(400);
-    }
-    var user = req.user;
-    var clientId = user && user.clientId ? user.clientId.toString() : null;
-    var parentFolderId = req.body.parentFolderId;
-    if (!parentFolderId) {
-        parentFolderId = null; // Assign to root folder, when no parent folder ID is given
-    }
-    if (parentFolderId !== null && !validateId.validateId(parentFolderId)) {
-        return res.sendStatus(400); // ID has wrong length
-    }
-    // Create document in database and assign user, client and parentFolderId
-    var document = { 
-        name: file.originalname,
-        extension: file.originalname.substring(file.originalname.lastIndexOf('.')),
-        type: file.mimetype, 
-        clientId: clientId !== null ? monk.id(clientId) : null,
-        isExtractable: file.mimetype === 'application/x-zip-compressed' || file.mimetype === 'application/zip',
-        parentFolderId: parentFolderId !== null ? monk.id(parentFolderId) : null
+    if (!file) return res.sendStatus(400);
+    var clientname = req.user.clientname;
+    var document = {
+        name: Db.createName(),
+        label: file.originalname,
+        type: mime.getType(path.extname(file.originalname)),
+        isshared: false
     };
-    if (document.parentFolderId) { 
-        // Need to check whether the parent folder which this document is to be assigned to exists
-        req.db.get(co.collections.folders.name).findOne(document.parentFolderId).then((parentFolder) => {
-            if (!parentFolder) {
-                return res.sendStatus(400);
-            }
-            req.db.insert(co.collections.documents.name, document).then((insertedDocument) => {
-                documentsHelper.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
-                res.send({
-                    _id: insertedDocument._id,
-                    type: 'd',
-                    name: insertedDocument.name
-                });
-            });
-        });
-    } else {
-        req.db.insert(co.collections.documents.name, document).then((insertedDocument) => {
-            documentsHelper.moveToDocumentsDirectory(insertedDocument._id, path.join(__dirname, '/../', file.path));
-            res.send({
-                _id: insertedDocument._id,
-                type: 'd',
-                name: insertedDocument.name
-            });
-        });
+    await Db.insertDynamicObject(clientname, "documents", document);
+    dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', file.path));
+    var parentdatatypename = req.body.parentdatatypename;
+    var parententityname = req.body.parententityname;
+    if (parentdatatypename && parententityname) {
+        var relation = {
+            name: Db.createName(),
+            datatype1name: parentdatatypename,
+            name1: parententityname,
+            datatype2name: "documents",
+            name2: document.name,
+            relationtypename: "parentchild"
+        };
+        await Db.insertDynamicObject(clientname, "relations", relation);
     }
+    res.send(document.name);
 });
 
-// Update meta data of a document
-router.put('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), validateId, validateSameClientId('documents'), function(req, res) {
-    var document = req.body;
-    if (!document || Object.keys(document).length < 1) {
-        return res.sendStatus(400);
-    }
-    delete document._id; // When document object also contains the _id field
-    delete document.clientId; // Prevent assignment of the document to another client
-    if (document.parentFolderId) { 
-        // Need to check whether the parent folder which this document is to be assigned to exists
-        req.db.get('folders').findOne(document.parentFolderId).then((parentFolder) => {
-            if (!parentFolder) {
-                return res.sendStatus(400);
+// Create a document via upload from URL
+// Required parameter: url
+// Optional parameters: parentdatatypename, parententityname
+router.post('/urlupload', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), async(req, res) => {
+    var url = req.body.url;
+    if (!url) return res.sendStatus(400);
+    var fileRequest = request(url);
+    fileRequest.on('error', function (error) {
+        fileRequest.abort();
+        reject(error);
+    });
+    fileRequest.on('response', function (response) {
+        if (response.statusCode === 301) return res.status(301).send(response);
+        if (response.statusCode !== 200) {
+            fileRequest.abort();
+            reject(response);
+            return;
+        }
+        var contentType = response.headers['content-type'];
+        if (contentType.includes('text/html')) return res.sendStatus(400); // file URL cannot be handled by the application
+        var filename;
+        if (response.headers['content-disposition']) {
+            filename = response.headers['content-disposition'].split("=")[1]; // "attachment; filename=abc.zip"
+        } else {
+            var url_string_array = url.split("/");
+            filename = url_string_array[url_string_array.length - 1];
+        }
+        var clientname = req.user.clientname;
+        var document = {
+            name: Db.createName(),
+            label: filename,
+            type: contentType,
+            isshared: false
+        };
+        let fileStream = fs.createWriteStream(filename);
+        fileRequest.pipe(fileStream).on('finish', async() => {
+            await Db.insertDynamicObject(clientname, "documents", document);
+            dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', filename));
+            var parentdatatypename = req.body.parentdatatypename;
+            var parententityname = req.body.parententityname;
+            if (parentdatatypename && parententityname) {
+                var relation = {
+                    name: Db.createName(),
+                    datatype1name: parentdatatypename,
+                    name1: parententityname,
+                    datatype2name: "documents",
+                    name2: document.name,
+                    relationtypename: "parentchild"
+                };
+                await Db.insertDynamicObject(clientname, "relations", relation);
             }
-            document.parentFolderId = parentFolder._id;
-            req.db.update('documents', req.params.id, { $set: document }).then((updatedDocument) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-                // Database element is available here in every case, because validateSameClientId already checked for existence
-                res.send(updatedDocument);
-            });
-        });
-    } else {
-        req.db.update('documents', req.params.id, { $set: document }).then((updatedDocument) => { // https://docs.mongodb.com/manual/reference/operator/update/set/
-            // Database element is available here in every case, because validateSameClientId already checked for existence
-            res.send(updatedDocument);
-        });
-    }
-});
-
-// Delete a document
-router.delete('/:id', auth('PERMISSION_OFFICE_DOCUMENT', 'w', 'documents'), validateId, validateSameClientId('documents'), function(req, res) {
-    req.db.get('documents').findOne(req.params.id).then((document) => {
-        // Database element is available here in every case, because validateSameClientId already checked for existence
-        router.deleteDocument(req.db, document).then(() => {
-            res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
+            res.send(document.name);
         });
     });
 });
 
-// Enable cross API access for folders
-router.deleteDocument = (db, document) => {
-    return new Promise((resolve, reject) => {
-        // Remove file
-        var filePath = documentsHelper.getDocumentPath(document._id);
-        fs.unlink(filePath, (err) => {
-            // Remove relations from database
-            rh.deleteAllRelationsForEntity(co.collections.documents.name, document._id).then(() => {
-                dah.deleteAllDynamicAttributeValuesForEntity(document._id).then(() => {
-                    // Remove references in FM objects
-                    db.updateMany(co.collections.fmobjects.name, { previewImageId: document._id }, { previewImageId: null } ).then(() => {
-                        // Remove document from database
-                        db.remove(co.collections.documents.name, document._id).then(resolve);
-                    });
-                });
-            });
-        });
-    });
-} 
+// replace a file for an existing document
+router.post('/replace/:name', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), upload.single('file'), async(req, res) => { // https://github.com/expressjs/multer
+    var file = req.file;
+    var documentname = req.params.name;
+    if (!file) return res.sendStatus(400);
+    var clientname = req.user.clientname;
+    var document = await Db.getDynamicObject(clientname, "documents", documentname);
+    if (!document) return res.sendStatus(404);
+    await Db.updateDynamicObject(clientname, "documents", documentname, { type: mime.getType(path.extname(file.originalname)) });
+    dh.moveToDocumentsDirectory(clientname, document.name, path.join(__dirname, '/../', file.path));
+    res.sendStatus(200);
+});
 
 module.exports = router;

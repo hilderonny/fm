@@ -59,7 +59,7 @@
                             <h4 translate>TRK_SETTINGS_UPDATE_IN_PROGRESS</h4>
                             <p translate>TRK_SETTINGS_WAIT_FOR_UPDATE_COMPLETION</p>
                         </md-card-content>
-
+                        
                         <md-card-actions layout="row" layout-align="end center">
 
                             <md-button class="md-raised" ng-click="checkForUpdates()"><span translate>TRK_SETTINGS_CHECK_FOR_UPDATES</span></md-button>
@@ -83,7 +83,21 @@
                         <md-progress-circular md-mode="{{uploadMode}}" value="{{uploadProgress}}"></md-progress-circular>
                         <span>{{uploadProgress}} %</span>
                     </div>
-                    
+
+                    <md-input-container>
+                        <md-checkbox ng-model="settings.autoUpdateMode" ng-change="updateLocalConfig(settings.autoUpdateMode)">
+                                <span translate>TRK_SETTINGS_AUTOUPDATES</span>
+                        </md-checkbox>
+                    </md-input-container>
+
+                    <md-input-container ng-if="settings.autoUpdateMode">
+                            <label for="timeInput" translate>TRK_SETTINGS_AUTOUPDATES_PIC_TIME</label>
+                            <input type="number" ng-model="settings.updateTimerInterval"/> 
+                            <md-button class="md-raised md-accent" ng-click="saveTimeInterval()"> 
+                                <span translate> TRK_SETTINGS_SAVE_TIME_INTERVAL_CHANGES </span>
+                            </md-button>    
+                    </md-input-container>
+                   
                 </md-card-content>
             </md-tab-body>
         </md-tab>

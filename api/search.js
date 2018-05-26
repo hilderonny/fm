@@ -4,33 +4,46 @@
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var co = require('../utils/constants');
+var Db = require("../utils/db").Db;
 
-router.get('/', auth(), (req, res) => {
+router.get('/', auth(), async(req, res) => {
     var searchTerm = req.query.term;
-    if (!searchTerm || searchTerm.length < 1) {
-        res.send([]);
-        return;
-    }
-    var promises = [];
-    Object.keys(co.collections).forEach((k) => {
-        var collection = co.collections[k];
-        promises.push(req.db.get(collection.name).aggregate([
-            { $match: {
-                name: {$regex: searchTerm, $options : 'i' } , // Case insensitive search https://stackoverflow.com/a/33971033
-                clientId: req.user.clientId
-            } },
-            { $project: { // Erst mal Felder filtern und Werte suchen
-                _id: 1,
-                name: 1,
-                collection: k,
-                icon: collection.icon
-            } }
-        ]));
-    });
-    Promise.all(promises).then((results) => {
-        var elements = [].concat.apply([], results); https://stackoverflow.com/a/10865042
-        res.send(elements);
-    });
+    if (!searchTerm || searchTerm.length < 1) return res.send([]);
+    var query = `
+    DROP TABLE IF EXISTS search_result;
+    CREATE TEMP TABLE search_result (name text, title text);
+    DROP FUNCTION IF EXISTS search_in_table_column(text,text,text);
+    CREATE FUNCTION search_in_table_column(text, text, text) RETURNS json AS
+    $$
+    DECLARE
+        tablename ALIAS FOR $1;
+        columnname ALIAS FOR $2;
+        searchvalue ALIAS FOR $3;
+        retval json;
+    BEGIN
+        EXECUTE format('SELECT json_agg(row(name,%2$s)::search_result) FROM %1$s WHERE %2$s ILIKE ''%%%3$s%%'';', tablename, columnname, searchvalue) INTO retval; RETURN retval;
+    END;
+    $$ LANGUAGE plpgsql;
+    
+    SELECT dtf.datatypename, tbl.name, tbl.title
+    FROM
+        datatypefields dtf,
+        LATERAL (
+            SELECT * FROM json_to_recordset(search_in_table_column(dtf.datatypename, dtf.name, '${Db.replaceQuotes(searchTerm)}')) as v(name text, title text)
+        ) tbl,
+		datatypes dt
+    WHERE dtf.datatypename = dt.name
+	AND dt.titlefield = dtf.name
+    ORDER BY LOWER(tbl.title);
+    `;
+    var result = (await Db.query(req.user.clientname, query))[4].rows; // 0 = DROP, 1 = CREATE, 2 = DROP, 3 = CREATE, 4 = SELECT
+    var mappedResult = result.map((r) => { return {
+        _id: r.name,
+        name: r.title,
+        collection: r.datatypename,
+        icon:co.collections[r.datatypename] ? co.collections[r.datatypename].icon : null
+    }});
+    res.send(mappedResult);
 });
 
 module.exports = router;

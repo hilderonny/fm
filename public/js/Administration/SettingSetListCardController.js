@@ -9,9 +9,11 @@ app.controller('AdministrationSettingSetListCardController', function($scope,$ro
     $scope.selectSettingSetItem = function(selectedSettingSetItem) {
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission(selectedSettingSetItem.mainCard, {
-            closeCallback: closeSettingSetCardCallback
+            closeCallback: closeSettingSetCardCallback,
+            permission: selectedSettingSetItem.permission
         }, selectedSettingSetItem.permission).then(function() {
             $scope.selectedSettingSetItem = selectedSettingSetItem;
+            utils.setLocation('/settings/' + selectedSettingSetItem.title);
         });
     };
 

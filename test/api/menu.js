@@ -2,219 +2,178 @@
  * UNIT Tests for api/menu
  */
 var assert = require('assert');
-var fs = require('fs');
-var superTest = require('supertest');
 var moduleConfig = require('../../config/module-config.json'); // http://stackoverflow.com/a/14678694
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
-describe('API menu', function() {
+describe('API menu', () => {
 
-    var extractMenu = () => { // The same functionality as in API
-        var fullMenuObject = {};
-        Object.keys(moduleConfig.modules).forEach((moduleName) => {
-            var appModule = moduleConfig.modules[moduleName];
-            if (!appModule.menu) return;
-            appModule.menu.forEach((menu) => {
-                if (!fullMenuObject[menu.title]) {
-                    fullMenuObject[menu.title] = JSON.parse(JSON.stringify(menu)); // Make copy instead of reference
-                } else {
-                    Array.prototype.push.apply(fullMenuObject[menu.title].items, menu.items);
-                }
-            });
-        });
-        var fullMenuArray = Object.keys(fullMenuObject).map((key) => fullMenuObject[key]);
-        return fullMenuArray;
-    };
-
-    var compareMenuStructures = (menuFromApi, menuFromConfig) => {
-        assert.strictEqual(menuFromApi.length, menuFromConfig.length, `Number of main menu entries differ (${menuFromApi.length} from API, ${menuFromConfig.length} in configuration)`);
-        // The structure must be exactly the same, so simply iterate over it
-        for (var i = 0; i < menuFromConfig.length; i++) {
-            var mainMenuFromApi = menuFromApi[i];
-            var mainMenuFromConfig = menuFromConfig[i];
-            assert.strictEqual(mainMenuFromApi.title, mainMenuFromConfig.title, `Title of main menu #${i} differ (${mainMenuFromApi.title} from API, ${mainMenuFromConfig.title} in configuration)`);
-            assert.strictEqual(mainMenuFromApi.items.length, mainMenuFromConfig.items.length, `Number of sub menu entries of main menu #${i} differ (${mainMenuFromApi.items.length} from API, ${mainMenuFromConfig.items.length} in configuration)`);
-            for (var j = 0; j < mainMenuFromConfig.items.length; j++) {
-                var subMenuFromApi = mainMenuFromApi.items[j];
-                var subMenuFromConfig = mainMenuFromConfig.items[j];
-                assert.strictEqual(subMenuFromApi.mainCard, subMenuFromConfig.mainCard, `Main card of sub menu #${j} differ (${subMenuFromApi.mainCard} from API, ${subMenuFromConfig.mainCard} in configuration)`);
-                assert.strictEqual(subMenuFromApi.icon, subMenuFromConfig.icon, `Title of sub menu #${j} differ (${subMenuFromApi.icon} from API, ${subMenuFromConfig.icon} in configuration)`);
-                assert.strictEqual(subMenuFromApi.title, subMenuFromConfig.title, `Title of sub menu #${j} differ (${subMenuFromApi.title} from API, ${subMenuFromConfig.title} in configuration)`);
-            }
-        }
-    };
-
-    // Clear and prepare database with clients, user groups, users and client modules
-    beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareClientSettings)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
     });
 
-    it('responds to GET/ without authentication with 403', function() {
-        return th.get('/api/menu').expect(403);
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareClientSettings();
     });
 
-    it('responds to GET/ with portal admin user logged in with all menu items', function(done) {
-        th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-            th.get(`/api/menu?token=${token}`).expect(200).end(function(err, res) {
-                var menuStructureFromApi = res.body.menu;
-                var fullMenu = extractMenu();
-                compareMenuStructures(menuStructureFromApi, fullMenu);
-                done();
-            });
-        });
+    it('responds to GET/ without authentication with 403', async() => {
+        await th.get('/api/menu').expect(403);
     });
 
-    it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', async () => {
-        await th.removeAllPermissions('_0_0', co.permissions.BIM_AREAS);
-        await th.removeAllPermissions('_0_0', co.permissions.BIM_FMOBJECT);
-        await th.removeAllPermissions('_0_0', co.permissions.ADMINISTRATION_SETTINGS);
-        var token = await th.doLoginAndGetToken('_0_0', 'test');
-        var res = await th.get(`/api/menu?token=${token}`).expect(200);
-        var menuStructureFromApi = res.body.menu;
-        var userMenu = [
-            {
-                title: 'TRK_MENU_ADMINISTRATION',
-                items: [
-                    { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
-                    { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
-                ]
-            },
-            {
-                title: 'TRK_MENU_OFFICE',
-                items: [
-                    { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                    { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'},
-                    { mainCard: 'Office/NoteListCard', icon: 'Notes', title: 'TRK_MENU_OFFICE_NOTES'}                        
-                ]
-            },
-            {
-                title: 'TRK_MENU_CRM',
-                items: [
-                    { mainCard: 'CRM/BPListCard', icon: 'Business', title: 'TRK_MENU_CRM_BUSINESSPARTNERS'},
-                    { mainCard: 'CRM/PersonListCard', icon: 'Collaborator Male', title: 'TRK_MENU_CRM_PERSONS'}
-                ]
-            },
-            {
-                title: 'TRK_MENU_PORTAL',
-                items: [
-                    { mainCard: 'Administration/ClientListCard', icon: 'Briefcase', title: 'TRK_MENU_PORTAL_CLIENTS'}
-                ]
-            },
-            {
-                title: 'TRK_MENU_LICENSESERVER',
-                items: [
-                    { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
-                ]
-            }
-        ];
-        compareMenuStructures(menuStructureFromApi, userMenu);
+    it('responds to GET/ with portal admin user logged in with all portal menu items', async() => {
+        await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.ADMINISTRATION_USER);
+        await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.ADMINISTRATION_USERGROUP);
+        await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.LICENSESERVER_PORTAL);
+        var token = await th.defaults.login("portal_usergroup0_user1");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        var menu = response.menu;
+        assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
+        assert.strictEqual(menu.length, 3);
+        assert.strictEqual(menu[0].title, "TRK_MENU_ADMINISTRATION");
+        assert.ok(menu[0].items);
+        assert.strictEqual(menu[0].items.length, 3);
+        assert.strictEqual(menu[0].items[0].title, "TRK_MENU_ADMINISTRATION_SETTINGS");
+        assert.strictEqual(menu[0].items[0].icon, "/css/icons/material/Settings.svg");
+        assert.strictEqual(menu[0].items[0].mainCard, "Administration/SettingSetListCard");
+        assert.strictEqual(menu[0].items[1].title, "TRK_MENU_ADMINISTRATION_USERS");
+        assert.strictEqual(menu[0].items[1].icon, "/css/icons/material/User.svg");
+        assert.strictEqual(menu[0].items[1].mainCard, "Administration/UserlistCard");
+        assert.strictEqual(menu[0].items[2].title, "TRK_MENU_ADMINISTRATION_USERGROUPS");
+        assert.strictEqual(menu[0].items[2].icon, "/css/icons/material/User Group Man Man.svg");
+        assert.strictEqual(menu[0].items[2].mainCard, "Administration/UsergrouplistCard");
+        assert.strictEqual(menu[1].title, "TRK_MENU_PORTAL");
+        assert.ok(menu[1].items);
+        assert.strictEqual(menu[1].items.length, 1);
+        assert.strictEqual(menu[1].items[0].title, "TRK_MENU_PORTAL_CLIENTS");
+        assert.strictEqual(menu[1].items[0].icon, "/css/icons/material/Briefcase.svg");
+        assert.strictEqual(menu[1].items[0].mainCard, "Administration/ClientListCard");
+        assert.strictEqual(menu[2].title, "TRK_MENU_LICENSESERVER");
+        assert.ok(menu[2].items);
+        assert.strictEqual(menu[2].items.length, 1);
+        assert.strictEqual(menu[2].items[0].title, "TRK_MENU_LICENSESERVER_PORTALS");
+        assert.strictEqual(menu[2].items[0].icon, "/css/icons/material/Server.svg");
+        assert.strictEqual(menu[2].items[0].mainCard, "LicenseServer/PortalListCard");
     });
 
-    it('responds to GET/ with client admin user logged in with all menu items available to the users client', async function() {
-        await th.removeClientModule('0', co.modules.areas);
-        await th.removeClientModule('0', co.modules.fmobjects);
-        await th.removeClientModule('0', co.modules.clients);
-        await th.removeClientModule('0', co.modules.businesspartners);
-        await th.removeClientModule('0', co.modules.ronnyseins);
-        var token = await th.doLoginAndGetToken('0_0_ADMIN0', 'test');
-        var menuStructureFromApi = (await th.get(`/api/menu?token=${token}`).expect(200)).body.menu;
-        // Module "ronnyseins" must not be in here, because it is never available to any client.
-        var userMenu = [ // Die Sortierung wird durch th.prepareClientModules bestimmt, welches die Module alphabetisch sortiert.
-            {
-                title: 'TRK_MENU_OFFICE',
-                items: [
-                    { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'},
-                    { mainCard: 'Office/DocumentListCard', icon: 'Document', title: 'TRK_MENU_OFFICE_DOCUMENTS'},
-                    { mainCard: 'Office/NoteListCard', icon: 'Notes', title: 'TRK_MENU_OFFICE_NOTES'}
-                ]
-            },
-            {
-                title: 'TRK_MENU_ADMINISTRATION',
-                items: [
-                    { mainCard: 'Administration/SettingSetListCard', icon: 'Settings', title: 'TRK_MENU_ADMINISTRATION_SETTINGS' },
-                    { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
-                    { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
-                ]
-            },
-            {
-                title: 'TRK_MENU_LICENSESERVER',
-                items: [
-                    { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
-                ]
-            }
-        ];
-        compareMenuStructures(menuStructureFromApi, userMenu);
+    it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', async() => {
+        await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.ADMINISTRATION_USER);
+        await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.ADMINISTRATION_USERGROUP);
+        await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.LICENSESERVER_PORTAL);
+        var token = await th.defaults.login("portal_usergroup0_user0");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        var menu = response.menu;
+        assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
+        assert.strictEqual(menu.length, 2);
+        assert.strictEqual(menu[0].title, "TRK_MENU_ADMINISTRATION");
+        assert.ok(menu[0].items);
+        assert.strictEqual(menu[0].items.length, 1);
+        assert.strictEqual(menu[0].items[0].title, "TRK_MENU_ADMINISTRATION_SETTINGS");
+        assert.strictEqual(menu[0].items[0].icon, "/css/icons/material/Settings.svg");
+        assert.strictEqual(menu[0].items[0].mainCard, "Administration/SettingSetListCard");
+        assert.strictEqual(menu[1].title, "TRK_MENU_PORTAL");
+        assert.ok(menu[1].items);
+        assert.strictEqual(menu[1].items.length, 1);
+        assert.strictEqual(menu[1].items[0].title, "TRK_MENU_PORTAL_CLIENTS");
+        assert.strictEqual(menu[1].items[0].icon, "/css/icons/material/Briefcase.svg");
+        assert.strictEqual(menu[1].items[0].mainCard, "Administration/ClientListCard");
     });
 
-    it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', async function() {
-        await th.removeClientModule('0', co.modules.areas);
-        await th.removeClientModule('0', co.modules.fmobjects);
-        await th.removeClientModule('0', co.modules.clients);
-        await th.removeClientModule('0', co.modules.businesspartners);
-        await th.removeAllPermissions('0_0_0', co.permissions.OFFICE_DOCUMENT);
-        await th.removeAllPermissions('0_0_0', co.permissions.OFFICE_NOTE);
-        await th.removeAllPermissions('0_0_0', co.permissions.ADMINISTRATION_SETTINGS);
-        var token = await th.doLoginAndGetToken('0_0_0', 'test');
-        var menuStructureFromApi = (await th.get(`/api/menu?token=${token}`).expect(200)).body.menu;
-        var userMenu = [
-            {
-                title: 'TRK_MENU_OFFICE',
-                items: [
-                    { mainCard: 'Office/CalendarCard', icon: 'Planner', title: 'TRK_MENU_OFFICE_ACTIVITIES'}
-                ]
-            },
-            {
-                title: 'TRK_MENU_ADMINISTRATION',
-                items: [
-                    { mainCard: 'Administration/UserlistCard', icon: 'User', title: 'TRK_MENU_ADMINISTRATION_USERS' },
-                    { mainCard: 'Administration/UsergrouplistCard', icon: 'User Group Man Man', title: 'TRK_MENU_ADMINISTRATION_USERGROUPS' }
-                ]
-            },
-            {
-                title: 'TRK_MENU_LICENSESERVER',
-                items: [
-                    { mainCard: 'LicenseServer/PortalListCard', icon: 'Server', title: 'TRK_MENU_LICENSESERVER_PORTALS'}
-                ]
-            }
-        ];
-        compareMenuStructures(menuStructureFromApi, userMenu);
+    it('responds to GET/ with client admin user logged in with all menu items available to the users client', async() => {
+        await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
+        await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });
+        await th.removeClientModule('client0', co.modules.areas);
+        await th.removeClientModule('client0', co.modules.fmobjects);
+        await th.removeClientModule('client0', co.modules.clients);
+        await th.removeClientModule('client0', co.modules.businesspartners);
+        await th.removeClientModule('client0', co.modules.ronnyseins);
+        await th.removeClientModule('client0', co.modules.licenseserver);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USER);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USERGROUP);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.OFFICE_NOTE);
+        var token = await th.defaults.login("client0_usergroup0_user1");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        var menu = response.menu;
+        assert.strictEqual(response.logourl, "newlogourl");
+        assert.strictEqual(menu.length, 2);
+        assert.strictEqual(menu[0].title, "TRK_MENU_OFFICE");
+        assert.ok(menu[0].items);
+        assert.strictEqual(menu[0].items.length, 3);
+        assert.strictEqual(menu[0].items[0].title, "TRK_MENU_OFFICE_ACTIVITIES");
+        assert.strictEqual(menu[0].items[0].icon, "/css/icons/material/Planner.svg");
+        assert.strictEqual(menu[0].items[0].mainCard, "Office/CalendarCard");
+        assert.strictEqual(menu[0].items[1].title, "TRK_MENU_OFFICE_DOCUMENTS");
+        assert.strictEqual(menu[0].items[1].icon, "/css/icons/material/Document.svg");
+        assert.strictEqual(menu[0].items[1].mainCard, "Office/DocumentListCard");
+        assert.strictEqual(menu[0].items[2].title, "TRK_MENU_OFFICE_NOTES");
+        assert.strictEqual(menu[0].items[2].icon, "/css/icons/material/Notes.svg");
+        assert.strictEqual(menu[0].items[2].mainCard, "Office/NoteListCard");
+        assert.strictEqual(menu[1].title, "TRK_MENU_ADMINISTRATION");
+        assert.ok(menu[1].items);
+        assert.strictEqual(menu[1].items.length, 3);
+        assert.strictEqual(menu[1].items[0].title, "TRK_MENU_ADMINISTRATION_SETTINGS");
+        assert.strictEqual(menu[1].items[0].icon, "/css/icons/material/Settings.svg");
+        assert.strictEqual(menu[1].items[0].mainCard, "Administration/SettingSetListCard");
+        assert.strictEqual(menu[1].items[1].title, "TRK_MENU_ADMINISTRATION_USERS");
+        assert.strictEqual(menu[1].items[1].icon, "/css/icons/material/User.svg");
+        assert.strictEqual(menu[1].items[1].mainCard, "Administration/UserlistCard");
+        assert.strictEqual(menu[1].items[2].title, "TRK_MENU_ADMINISTRATION_USERGROUPS");
+        assert.strictEqual(menu[1].items[2].icon, "/css/icons/material/User Group Man Man.svg");
+        assert.strictEqual(menu[1].items[2].mainCard, "Administration/UsergrouplistCard");
+    });
+
+    it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', async() => {
+        await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
+        await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });
+        await th.removeClientModule('client0', co.modules.areas);
+        await th.removeClientModule('client0', co.modules.fmobjects);
+        await th.removeClientModule('client0', co.modules.clients);
+        await th.removeClientModule('client0', co.modules.businesspartners);
+        await th.removeClientModule('client0', co.modules.ronnyseins);
+        await th.removeClientModule('client0', co.modules.licenseserver);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USER);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USERGROUP);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.OFFICE_NOTE);
+        var token = await th.defaults.login("client0_usergroup0_user0");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        var menu = response.menu;
+        assert.strictEqual(response.logourl, "newlogourl");
+        assert.strictEqual(menu.length, 2);
+        assert.strictEqual(menu[0].title, "TRK_MENU_OFFICE");
+        assert.ok(menu[0].items);
+        assert.strictEqual(menu[0].items.length, 2);
+        assert.strictEqual(menu[0].items[0].title, "TRK_MENU_OFFICE_ACTIVITIES");
+        assert.strictEqual(menu[0].items[0].icon, "/css/icons/material/Planner.svg");
+        assert.strictEqual(menu[0].items[0].mainCard, "Office/CalendarCard");
+        assert.strictEqual(menu[0].items[1].title, "TRK_MENU_OFFICE_DOCUMENTS");
+        assert.strictEqual(menu[0].items[1].icon, "/css/icons/material/Document.svg");
+        assert.strictEqual(menu[0].items[1].mainCard, "Office/DocumentListCard");
+        assert.strictEqual(menu[1].title, "TRK_MENU_ADMINISTRATION");
+        assert.ok(menu[1].items);
+        assert.strictEqual(menu[1].items.length, 1);
+        assert.strictEqual(menu[1].items[0].title, "TRK_MENU_ADMINISTRATION_SETTINGS");
+        assert.strictEqual(menu[1].items[0].icon, "/css/icons/material/Settings.svg");
+        assert.strictEqual(menu[1].items[0].mainCard, "Administration/SettingSetListCard");
     });
             
     it('GET/ contains the logo URL of the client when set', async () => {
-        var loggedInUser = await th.defaults.getUser();
-        var settingsFromDatabase = await db.get(co.collections.clientsettings.name).findOne({clientId: loggedInUser.clientId });
-        var token = await th.defaults.login();
-        var menuFromApi = (await th.get(`/api/${co.apis.menu}?token=${token}`).expect(200)).body;
-        assert.strictEqual(menuFromApi.logourl, settingsFromDatabase.logourl);
+        await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
+        await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });
+        var token = await th.defaults.login("client0_usergroup0_user0");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        assert.strictEqual(response.logourl, "newlogourl");
     });
 
     it('GET/ contains the default logo URL of the client when not set', async () => {
-        var loggedInUser = await th.defaults.getUser();
-        // Eventuell vorhandene Einstellungen löschen
-        await db.get(co.collections.clientsettings.name).remove({clientId: loggedInUser.clientId });
-        var token = await th.defaults.login();
-        var menuFromApi = (await th.get(`/api/${co.apis.menu}?token=${token}`).expect(200)).body;
-        assert.strictEqual(menuFromApi.logourl, 'css/logo_avorium_komplett.svg');
-    });
-
-    it('responds to POST with 404', function() {
-        return th.post('/api/menu').expect(404);
-    });
-
-    it('responds to PUT with 404', function() {
-        return th.put('/api/menu').expect(404);
-    });
-
-    it('responds to DELETE with 404', function() {
-        return th.del('/api/menu').expect(404);
+        await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
+        var token = await th.defaults.login("client0_usergroup0_user0");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
     });
 
 });

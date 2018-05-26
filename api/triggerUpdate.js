@@ -7,7 +7,7 @@ var fs = require('fs');
 var multer  = require('multer')
 var upload = multer({ dest: 'uploads/' })
 var path = require('path');
-var unzip = require('unzip');
+var unzip = require('unzip2');
 var child_process = require('child_process');
 var lc = require('../config/localconfig.json');
 
@@ -51,8 +51,6 @@ router.post('/', upload.single('file'), function(req, res) {
         }).on('close', function() {
             // Delete uploaded file
             fs.unlinkSync(filePath);
-            // Node-Module installieren
-            child_process.exec('npm install');
             // Erst antworten, wenn alles ausgepackt ist
             res.sendStatus(200);
             // Prozess beenden und hoffen, dass er automatisch neu gestartet wird

@@ -1,4 +1,6 @@
 {
+    "TRK_SETTINGS_AUTOUPDATES" : "Update automatically",
+     "TRK_SETTINGS_AUTOUPDATES_PIC_TIME" : "Auto-update period in hours:",
     "TRK_SETTINGS_CHANGES_SAVED" : "Changes saved",
     "TRK_SETTINGS_CHECK_FOR_UPDATES" : "Check for updates",
     "TRK_SETTINGS_DOWNLOAD_AND_INSTALL_UPDATE" : "Install",
@@ -10,6 +12,7 @@
     "TRK_SETTINGS_MISSING_LICENSESERVER" : "Please input the URL of the license server",
     "TRK_SETTINGS_PORTALSETTINGS" : "Portal settings",
     "TRK_SETTINGS_SAVE" : "Save",
+    "TRK_SETTINGS_SAVE_TIME_INTERVAL_CHANGES" : "Save changes",
     "TRK_SETTINGS_UPDATE_IN_PROGRESS" : "Update in progress",
     "TRK_SETTINGS_UPDATES" : "Updates",
     "TRK_SETTINGS_UPLOAD_UPDATE" : "Upload update",

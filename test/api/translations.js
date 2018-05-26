@@ -1,6 +1,6 @@
 var assert = require('assert');
 var fs = require('fs');
-var superTest = require('supertest');
+var th = require("../testhelpers");
 var moduleConfig = require('../../config/module-config.json');
 var path = require('path');
 
@@ -61,9 +61,11 @@ function compareTranslations(translationsFromApi, translationsForClient) {
     assert.ok(errors.length === 0, '\n' + errors.join('\n'));
 }
 
-describe('API translations', function() {
+describe('API translations', () => {
 
-    var server = require('../../app');
+    before(async() => {
+        await th.waitForServer();
+    });
 
     // Collect available languages from module config
     var languageKeys = [];
@@ -77,50 +79,25 @@ describe('API translations', function() {
     // Iterate over languages
     languageKeys.forEach(function eachLanguageKey(languageKey) {
 
-        it('has no doublettes for language ' + languageKey, function checkLanguage(done) {
-            superTest(server).get(`/api/translations/${languageKey}`).expect(200).end(function(err, res) {
-                var translationsFromApi = res.body;
-                checkApiTranslationForDoublettes(translationsFromApi);
-                done();
-            });
+        it('has no doublettes for language ' + languageKey, async() => {
+            var translationsFromApi = (await th.get(`/api/translations/${languageKey}`).expect(200)).body;
+            checkApiTranslationForDoublettes(translationsFromApi);
         });
 
-        it('returns translations available to portal for language ' + languageKey, function checkLanguage(done) {
+        it('returns translations available to portal for language ' + languageKey, async() => {
             // Fetch translations from API and compare the contained keys and values
             // to the ones defined in the JSON files.
-            superTest(server).get(`/api/translations/${languageKey}`).expect(200).end(function(err, res) {
-                var translationsFromApi = res.body;
-                var moduleNames = Object.keys(moduleConfig.modules);
-                var translationsForClient = extractTranslationsForLanguage(moduleNames, languageKey);
-                compareTranslations(translationsFromApi, translationsForClient);
-                done();
-            });
+            var translationsFromApi = (await th.get(`/api/translations/${languageKey}`).expect(200)).body;
+            var moduleNames = Object.keys(moduleConfig.modules);
+            var translationsForClient = extractTranslationsForLanguage(moduleNames, languageKey);
+            compareTranslations(translationsFromApi, translationsForClient);
         });
 
     });
 
-    it('responds to GET/:languageKey with wrong language key with an empty list', function(done) {
-        superTest(server).get(`/api/translations/WRONGKEY`).expect(200).end(function(err, res) {
-            var translationsFromApi = res.body;
-            assert.strictEqual(Object.keys(translationsFromApi).length, 0, 'There were translations returned.');
-            done();
-        });
-    });
-
-    it('responds to GET/ with 404', function checkGet() {
-        return superTest(server).get('/api/translations').expect(404);
-    });
-
-    it('responds to POST with 404', function checkPost() {
-        return superTest(server).post('/api/translations').expect(404);
-    });
-
-    it('responds to PUT with 404', function checkPut() {
-        return superTest(server).put('/api/translations').expect(404);
-    });
-
-    it('responds to DELETE with 404', function checkDelete() {
-        return superTest(server).del('/api/translations').expect(404);
+    it('responds to GET/:languageKey with wrong language key with an empty list', async() => {
+        var translationsFromApi = (await th.get(`/api/translations/WRONGKEY`).expect(200)).body;
+        assert.strictEqual(Object.keys(translationsFromApi).length, 0, 'There were translations returned.');
     });
 
 });

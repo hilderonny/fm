@@ -1,307 +1,151 @@
 /**
  * UNIT Tests for api/portalmodules
  */
-
 var assert = require('assert');
-var superTest = require('supertest');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
-var fs = require('fs');
+var mc = require('../../config/module-config.json');
+var Db = require("../../utils/db").Db;
 
-describe('API portalmodules', function(){
+describe('API portalmodules', () => {
 
-    // Clear and prepare database with clients, user groups, users... 
-     beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions)
-            .then(th.prepareActivities)
-            .then(th.prepareFmObjects)
-            .then(th.prepareFolders)
-            .then(th.prepareDocuments)
-            .then(th.preparePortals)
-            .then(th.preparePortalModules);
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
     });
 
-    describe('GET/forPortal/:id', function() {
+    beforeEach(async() => {
+        await th.prepareClientModules();
+        await th.preparePortals();
+        await th.preparePortalModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+    });
 
-        var api = `${co.apis.portalmodules}/forPortal`;
+    describe('GET/forportal/:name', () => {
 
-        th.apiTests.getId.defaultNegative(api, co.permissions.LICENSESERVER_PORTAL, co.collections.portals.name);
-        th.apiTests.getId.clientDependentNegative(api, co.collections.portals.name);
+        it('responds without authentication with 403', async() => {
+            await th.get(`/api/portalmodules/forportal/portal_portal0`).expect(403);
+        });
 
-        it('responds with all portal modules where the states are correctly set', async function() {
-            var portal = await th.defaults.getPortal();
-            var token = await th.defaults.login();
-            var portalModulesFromDatabase = await db.get(co.collections.portalmodules.name).find({portalId: portal._id});
-            var portalModulesFromApi = (await th.get(`/api/${co.apis.portalmodules}/forPortal/${portal._id}?token=${token}`).expect(200)).body;
-            var keysFromDatabase = portalModulesFromDatabase.map((p) => p.key);
-            var keysFromApi = portalModulesFromApi.map((p) => p.key);
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("portal", "portal_usergroup0", co.permissions.LICENSESERVER_PORTAL);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.get(`/api/portalmodules/forportal/portal_portal0?token=${token}`).expect(403);
+        });
+
+        it('responds with not existing name with 200 and list of all modules which are not active', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var result = (await th.get(`/api/portalmodules/forportal/999999999999999999999999?token=${token}`).expect(200)).body;
+            var modulenames = Object.keys(mc.modules);
+            assert.strictEqual(result.length, modulenames.length);
+            modulenames.forEach((mn) => {
+                assert.ok(result.find(r => r.module === mn));
+            });
+        });
+
+        it('responds with all portal modules where the states are correctly set', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var portalmodulesfromdatabase = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM portalmodules WHERE portalname='portal_portal0';`)).rows;
+            var portalmodulesfromapi = (await th.get(`/api/portalmodules/forportal/portal_portal0?token=${token}`).expect(200)).body;
+            var keysFromDatabase = portalmodulesfromdatabase.map((p) => p.modulename);
+            var keysFromApi = portalmodulesfromapi.map((p) => p.module);
             keysFromDatabase.forEach((key) => {
                 assert.ok(keysFromApi.indexOf(key) >= 0, `Portal module ${key} not returned by API.`);
-            });
-            keysFromApi.forEach((key) => {
-                assert.ok(keysFromDatabase.indexOf(key) >= 0, `Portal module ${key} not prepared in database`);
+                assert.ok(portalmodulesfromapi.find(pma => pma.module === key).active);
             });
         });
 
-        it('responds with all portal modules even when some of them are not defined in database', async function() {
-            var portal = await th.defaults.getPortal();
-            var token = await th.defaults.login();
-            var moduleToCheck = co.modules.documents;
+        it('responds with all portal modules even when some of them are not defined in database', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
             // Zugriff aus Datenbank löschen
-            await db.remove(co.collections.portalmodules.name, {module:moduleToCheck});
-            var portalModulesFromApi = (await th.get(`/api/${co.apis.portalmodules}/forPortal/${portal._id}?token=${token}`).expect(200)).body;
-            var relevantPortalModule = portalModulesFromApi.find((p) => p.module === moduleToCheck);
-            assert.ok(relevantPortalModule);
-            assert.strictEqual(relevantPortalModule.active, false);
+            await Db.query(Db.PortalDatabaseName, `DELETE FROM portalmodules WHERE modulename = 'documents';`);
+            var portalmodulesfromapi = (await th.get(`/api/portalmodules/forportal/portal_portal0?token=${token}`).expect(200)).body;
+            var relevantportalmodule = portalmodulesfromapi.find((p) => p.module === "documents");
+            assert.ok(relevantportalmodule);
+            assert.ok(!relevantportalmodule.active);
         });
 
     });
 
-    describe('POST/', function() {
+    describe('POST/', () => {
 
-        it('responds without assigning any portalmodule data with 400', function(){
-            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
-                    return th.post(`/api/portalmodules?token=${token}`).send().expect(400);
-                });
-            });
+        function createTestObject() {
+            return { portalname: "portal_portal0", module: "ronnyseins" };
+        }
 
+        it('responds without authentication with 403', async() => {
+            var testObject = createTestObject();
+            await th.post(`/api/portalmodules`).send(testObject).expect(403);
         });
 
-        it('responds without assigning particular module data with 400', function(){
-            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
-                    var newModule = {
-                        portalId: portalFromDB._id
-                    };
-                    return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
-                });
-            });
+        it('responds without write permission with 403', async() => {
+            var testObject = createTestObject();
+            await th.removeWritePermission("portal", "portal_usergroup0", co.permissions.LICENSESERVER_PORTAL);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/portalmodules?token=${token}`).send(testObject).expect(403);
         });
 
-        it('responds without assigning portalId data with 400', function(){
-            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
-                    var newModule = {
-                        module: 'activities'
-                    };
-                    return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
-                });
-            });
+        it('responds with 400 when not sending an object to insert', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/portalmodules?token=${token}`).expect(400);
         });
 
-        it('responds with assigning non-existing portalId with 400', function(){
-            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token) {
-                    var newModule = {
-                        module: 'activities',
-                        portalId: '999999999999999999999999'
-                    };
-                    return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(400);
-                });
-            });
+        it('responds with 200 on success and creates the assignment', async() => {
+            var testObject = createTestObject();
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/portalmodules?token=${token}`).send(testObject).expect(200);
+            var portalmodulefromdatabase = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM portalmodules WHERE portalname='${testObject.portalname}' AND modulename='${testObject.module}';`)).rows;
+            assert.ok(portalmodulefromdatabase.length > 0);
+            assert.strictEqual(portalmodulefromdatabase[0].portalname, testObject.portalname);
+            assert.strictEqual(portalmodulefromdatabase[0].modulename, testObject.module);
         });
 
-        it('responds with valid data but without write permission with 403', function(){
-            return db.get(co.collections.portals.name).findOne({name: 'p2'}).then(function(portalFromDB){
-                return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
-                        //both module and portalId have to be provided
-                        var newModule = {
-                            module: 'activities',
-                            portalId: portalFromDB._id
-                        }
-                        return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
-                    });
-                });
-            });
+        it('responds with 200 when an assignment between a client and a module already exists', async() => {
+            var testObject = { portalname: "portal_portal0", module: "activities" };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/portalmodules?token=${token}`).send(testObject).expect(200);
+            var portalmodulefromdatabase = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM portalmodules WHERE portalname='${testObject.portalname}' AND modulename='${testObject.module}';`)).rows;
+            assert.ok(portalmodulefromdatabase.length > 0);
         });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                return th.removeClientModule('1', 'licenseserver').then(function(){
-                    return th.doLoginAndGetToken('1_1_1', 'test').then(function(token){
-                        var newModule = {portalId: portalFromDB._id,
-                                        module: 'activities'}
-                        return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                return th.removeClientModule('1', 'licenseserver').then(function(){
-                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                        var newModule = {portalId: portalFromDB._id,
-                                        module: 'activities'}
-                        return th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with correct portalmodule data with inserted portalmodule containing auto-generated _id field', function(done){
-            db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
-                    var newModule = {portalId: portalFromDB._id,
-                                    module: 'activities'}
-                    th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(200).end(function(err, res){
-                        if(err){
-                            done(err);
-                            return;
-                        }
-                        var portalModuleFromApi = res.body; 
-                        numKeysInitially = Object.keys(newModule).length;
-                        numKeysExpected  = Object.keys(portalModuleFromApi).length - 2;  //_id and cliendId fields returned in addition to all other fields of sent newModule
-                        assert.ok(portalModuleFromApi['_id'], 'inserted portal module does not contain _id field!');
-                        assert.strictEqual(numKeysInitially, numKeysExpected, `inserted portal module has unexpected number of fields: ${numKeysInitially} vs ${numKeysExpected}`);
-                        assert.strictEqual(newModule['module'], portalModuleFromApi['module'], 'module field has been changed');
-                        assert.strictEqual(newModule.portalId.toString(), portalModuleFromApi['portalId'], `portalId field has been changed: ${newModule.portalId} vs ${portalModuleFromApi['portalId']}`);
-                        done();
-                    });
-                }).catch(done);
-            });
-        });
-
-        it('responds with portalmodule data containg _id with inserted portalmodule containing auto-generated _id field', function(done){
-            //user defined _id should not be possibels
-            db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
-                    var newModule = {portalId: portalFromDB._id,
-                                    module: 'activities',
-                                    _id: '999999999999999999999999'} //send id of valid format but higly unlikely to be recreated by automated generation
-                    th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(200).end(function(err, res){
-                        if(err){
-                            done(err);
-                            return;
-                        }
-                        var portalModuleFromApi = res.body; 
-                        numKeysInitially = Object.keys(newModule).length;
-                        numKeysExpected  = Object.keys(portalModuleFromApi).length;  //_id field is always returned from API
-                        assert.notStrictEqual(portalModuleFromApi['_id'], newModule._id.toString(), 'user-defined _id field was possible');
-                        done();
-                    });
-                }).catch(done);
-            });
-        });
-
-        it('responds with portalmodule data containg _id with inserted portalmodule containing auto-generated _id field', function(done){
-            //user defined _id should not be possible
-
-            //clientId of p2 -> null
-            db.get('portals').findOne({name: 'p2'}).then(function(portalFromDB){
-                th.doLoginAndGetToken(th.defaults.portalUser, th.defaults.password).then(function(token){
-                    var newModule = {portalId: portalFromDB._id,
-                                    module: 'activities',
-                                    _id: '999999999999999999999999'} //send id of valid format but higly unlikely to be recreated by automated generation
-                    th.post(`/api/portalmodules?token=${token}`).send(newModule).expect(200).end(function(err, res){
-                        if(err){
-                            done(err);
-                            return;
-                        }
-                        var portalModuleFromApi = res.body; 
-                        numKeysInitially = Object.keys(newModule).length;
-                        numKeysExpected  = Object.keys(portalModuleFromApi).length;  //_id field is always returned from API
-                        assert.notStrictEqual(portalModuleFromApi['_id'], newModule._id.toString(), 'user-defined _id field was possible');
-                        done();
-                    });
-                }).catch(done);
-            });
-        });
-
-        it('responds with 409 when an assignment between a portal and a module already exists', function() {
-            // Create an assignment between a portal and a module
-            // Try to create another assignment between the same portal and module, must result in an error (409 conflict)
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
-                    var assignmentModule = {portalId: portalFromDB._id, module: 'activities'}
-                    return th.post(`/api/portalmodules?token=${token}`).send(assignmentModule).expect(200).then(function(){
-                        return th.post(`/api/portalmodules?token=${token}`).send(assignmentModule).expect(409);
-                    });
-                });
-            });
-        });
-
-    });
-
-    describe('DELETE/:id', function() {
-
-        it('responds with incorect id with 400', function(){
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
-                return th.del(`/api/portalmodules/IvalidId?token=${token}`);
-            });
-        });
-
-        it('responds with valid data but without write permission with 403', function(){
-            return db.get('portals').findOne({name: 'p1'}).then(function(portalFromDB){
-                return th.removeWritePermission('1_0_0', 'PERMISSION_LICENSESERVER_PORTAL').then(function(){
-                    return th.doLoginAndGetToken(th.defaults.user, th.defaults.password).then(function(token){
-                        var id = portalFromDB._id;
-                        return th.del(`/api/portalmodules/${id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', function() {
-            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
-                    return th.removeClientModule('1', 'licenseserver').then(function(){
-                        return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                            var id = portalModuleFromDB._id;
-                            return th.del(`/api/portalmodules/${id}?token=${token}`).expect(403);
-                        });
-                    });
-                });
-            });
-        });
-
-        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', function() {
-            return db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                return db.get(co.collections.portalmodules.name).findOne({portalId: portalFromDB._id}).then(function(portalModuleFromDB){
-                    return th.removeClientModule('1', 'licenseserver').then(function(){
-                        return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){ // Has isAdmin flag
-                            var id = portalModuleFromDB._id;
-                            return th.del(`/api/portalmodules/${id}?token=${token}`).expect(403);
-                        });
-                    });
-                });
-            });
-        });
-
-        it('responds with valid but non-existing id with 403', function(){
-            return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then(function(token){
-                return th.del(`/api/portalmodules/999999999999999999999999?token=${token}`).expect(403);
-            });
-        });
-
-        it('responds with correct existing id with 204', function(done){
-            db.get(co.collections.portals.name).findOne({name: 'p1'}).then(function(portalFromDB){
-                db.get(co.collections.portalmodules.name).findOne({module: 'documents', portalId: portalFromDB._id}).then(function(portalModuleFromDB){
-                    th.doLoginAndGetToken('_0_ADMIN0', 'test').then(function(token){
-                        var id = portalModuleFromDB._id;
-                        th.del(`/api/portalmodules/${id}?token=${token}`).expect(204).end(function(err,res){
-                            if(err){
-                                done(err);
-                                return;
-                            }
-                            db.get(co.collections.portalmodules.name).findOne({_id: id}).then((stillExistingPortalModule) => {
-                                assert.ok(!stillExistingPortalModule, 'portal module has not been deleted from database');
-                                done();
-                            });
-                        });
-                    }).catch(done);
-                });
-            });
-        });
-
-    });
         
+    });
+
+    describe('DELETE/:portalname/:modulename', () => {
+
+        it('responds without authentication with 403', async() => {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('portal_portalname0', 'portal_portal0', 'DAtest');`);
+            await th.del(`/api/portalmodules/portal_portal0/DAtest`).expect(403);
+        });
+
+        it('responds without write permission with 403', async() => {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('portal_portalname0', 'portal_portal0', 'DAtest');`);
+            await th.removeWritePermission("portal", "portal_usergroup0", co.permissions.LICENSESERVER_PORTAL);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/portalmodules/portal_portal0/DAtest?token=${token}`).expect(403);
+        });
+
+        it('responds with 404 when the portalname is invalid', async() => {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('portal_portalname0', 'portal_portal0', 'DAtest');`);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/portalmodules/invalidportalname/DAtest?token=${token}`).expect(404);
+        });
+
+        it('responds with 404 when the modulename is invalid', async() => {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('portal_portalname0', 'portal_portal0', 'DAtest');`);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/portalmodules/portal_portal0/invalidmodulename?token=${token}`).expect(404);
+        });
+
+        it('deletes the portalmodule and return 204', async() => {
+            await Db.query(Db.PortalDatabaseName, `INSERT INTO portalmodules (name, portalname, modulename) VALUES ('portal_portalname0', 'portal_portal0', 'DAtest');`);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/portalmodules/portal_portal0/DAtest?token=${token}`).expect(204);
+            var result = await Db.query(Db.PortalDatabaseName, "SELECT 1 FROM portalmodules WHERE portalname='portal_portal0' and modulename='DAtest';");
+            assert.ok(result.rowCount < 1);
+        });
+        
+    });
+
 });
