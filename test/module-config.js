@@ -52,14 +52,14 @@ var collectModuleConfigReferencedFiles = () => {
         if (module.menu) module.menu.forEach((menu) => {
             if (menu.mainCard) files.insert(`public/partial/${menu.mainCard}.html`);
             if (menu.icon) {
-                files.insert(`public/css/icons/material/${menu.icon}.svg`);
-                files.insert(`public/css/icons/office/${menu.icon}.svg`);
+                files.insert(`public${menu.icon}`);
+                files.insert(`public${menu.icon.replace(/\/material\//g, "/office/")}`);
             }
             if (menu.items) menu.items.forEach((item) => {
                 if (item.mainCard) files.insert(`public/partial/${item.mainCard}.html`);
                 if (item.icon) {
-                    files.insert(`public/css/icons/material/${item.icon}.svg`);
-                    files.insert(`public/css/icons/office/${item.icon}.svg`);
+                    files.insert(`public${item.icon}`);
+                    files.insert(`public${item.icon.replace(/\/material\//g, "/office/")}`);
                 }
                 if (item.docCard) files.insert(`public/partial/Doc/${item.docCard}.html`);
             });
@@ -67,7 +67,7 @@ var collectModuleConfigReferencedFiles = () => {
         if (module.doc) module.doc.forEach((doc) => {
             if (doc.docCard) files.insert(`public/partial/Doc/${doc.docCard}.html`);
             if (doc.icon) {
-                files.insert(`public/css/icons/material/${doc.icon}.svg`);
+                files.insert(`public${doc.icon}`);
             }
         });
         // Setting target cards and icons
@@ -126,10 +126,14 @@ describe('module-config.json', function() {
         var pathsToIgnore = [
             '.git/',
             '.gitignore',
+            '.nyc_output/',
             '.vscode/',
+            'api/README.md',
+            'backup/',
             'basetest.bat',
+            'config/README.md',
             'config/localconfig.json',
-            'config/module-config.json', // Is handles especially by re-creating it, so no need to reference it in itself
+            'config/module-config.json', // Is handled especially by re-creating it, so no need to reference it in itself
             'cover.bat',
             'coverage/',
             'debug.log',
@@ -141,12 +145,16 @@ describe('module-config.json', function() {
             'pub.cert',
             'public/css/local.css',
             'public/index.html',
+            'public/js/components/README.md',
             'public/js/include.js',
             'public/js/include.js.map',
+            'README.md',
+            'talend/',
             'temp/',
             'test/',
             'test.bat',
             'uploads/',
+            'utils/README.md',
             'utils/webHelper.js'
         ];
         handleDirectoriesRecursively('', errors, referencedFiles, pathsToIgnore);
@@ -176,7 +184,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('modules match with those in constants', function() {
@@ -194,7 +202,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('contains all material icons for collections defined in constants', function() {
@@ -202,13 +210,13 @@ describe('module-config.json', function() {
         Object.keys(co.collections).forEach((key) => {
             var collection = co.collections[key];
             if (!collection.canHaveAttributes) return; // Nur relevant bei dynamischen Attributen
-            var filePath = `public/css/icons/material/${collection.icon}.svg`;
-            if (!fs.existsSync(path.join(rootPath, filePath))) errors.push(`File "${filePath}" does not exist.`);
+            var filePath = path.join(rootPath, "public", collection.icon);
+            if (!fs.existsSync(filePath)) errors.push(`File "${filePath}" does not exist.`);
         });
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     it('permissions match with those in constants', function() {
@@ -246,7 +254,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
     /**
@@ -298,7 +306,7 @@ describe('module-config.json', function() {
                 var docFileName = `partial/Doc/${doc.docCard}.html`;
                 if (mod.public.indexOf(docFileName) < 0) errors.push(`File "${docFileName}" not referenced in public part of module "${k}".`);
                 if (!doc.icon) errors.push(`Fehlendes "icon" Attribut im "doc"-Abschnitt des Moduls "${k}".`);
-                var iconFileName = `css/icons/material/${doc.icon}.svg`;
+                var iconFileName = `${doc.icon}`.substring(1); // Stript first slash
                 if (mod.public.indexOf(iconFileName) < 0) errors.push(`Icon "${iconFileName}" not referenced in public part of module "${k}".`);
                 checkDocumentationImageLinks(k, mod.public, docFileName, errors);
             });
@@ -306,7 +314,7 @@ describe('module-config.json', function() {
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        return Promise.resolve();
+        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
 });

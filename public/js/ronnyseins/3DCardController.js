@@ -42,12 +42,12 @@ app.controller('ronnyseins3DCardController', function($scope, $http, $mdDialog, 
         var entity = document.createElement('a-entity');
         scene.appendChild(entity);
         var modelTypeAttributes = {
-            '.dae': 'collada-model',
-            '.obj': 'obj-model'
+            'model/vnd.collada+xml': 'collada-model',
+            'application/x-tgif': 'obj-model'
         
         };
         entity.doc = doc;
-        entity.setAttribute(modelTypeAttributes[doc.extension], '/api/documents/' + doc._id + '?action=download&token=' + $http.defaults.headers.common['x-access-token']);
+        entity.setAttribute(modelTypeAttributes[doc.type], '/api/documents/download/' + doc._id + '?token=' + $http.defaults.headers.common['x-access-token']);
         if (!doc.waypoints) doc.waypoints = [];
         doc.waypoints.forEach(window.addWayPoint);
         if (doc.description) {

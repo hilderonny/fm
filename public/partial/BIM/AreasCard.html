@@ -1,4 +1,4 @@
-<md-card ng-cloak ng-controller="BIMAreasCardController" style="background-image:url('/css/icons/office/surface.svg');" class="list-details-details">
+<md-card ng-cloak ng-controller="BIMAreasCardController" style="background-image:url('/css/icons/office/surface.svg');" class="list-details-details areas-card">
     
     <md-toolbar class="md-toolbar-tools md-accent" ng-if="currentFmObject">
         <div flex></div>
@@ -8,7 +8,7 @@
     <md-card-title flex="none">
         <md-card-title-text>
             <span class="md-headline" ng-if="!currentFmObject" translate>TRK_AREAS_AREAS</span>
-            <span class="md-headline" ng-if="currentFmObject">{{currentFmObject.element.name}}</span>
+            <span class="md-headline" ng-if="currentFmObject">{{currentFmObject.label}}</span>
             <span class="breadcrumbs" ng-if="currentFmObject" ng-bind="breadcrumbs" ></span>
         </md-card-title-text>
     </md-card-title>
@@ -31,45 +31,45 @@
                     <td ng-click="showFmObjectDetails(fmObject)">
                         <div>
                             <div class="inset" ng-repeat="inset in fmObject.inset"></div>
-                            <img ng-src="/css/icons/{{fmObject.icon}}.svg" />
-                            <span ng-bind="fmObject.name"></span>
+                            <img ng-src="{{fmObject._icon}}" />
+                            <span ng-bind="fmObject.label"></span>
                         </div>
                     </td>
-                    <td ng-bind="fmObject.bgf | number"></td>
-                    <td ng-bind="fmObject.nrf | number"></td>
-                    <td ng-bind="fmObject.kgf | number"></td>
-                    <td ng-bind="fmObject.nuf | number"></td>
-                    <td ng-bind="fmObject.tf | number"></td>
-                    <td ng-bind="fmObject.vf | number"></td>
+                    <td ng-bind="fmObject.bgf | number:2"></td>
+                    <td ng-bind="fmObject.nrf | number:2"></td>
+                    <td ng-bind="fmObject.kgf | number:2"></td>
+                    <td ng-bind="fmObject.nuf | number:2"></td>
+                    <td ng-bind="fmObject.tf | number:2"></td>
+                    <td ng-bind="fmObject.vf | number:2"></td>
                 </tr>
             </tbody>
         </table>
 
         <table class="areavalues smalldevice" ng-if="currentFmObject">
             <tbody>
-                <tr ng-if="currentFmObject.element.bgf !== undefined">
+                <tr ng-if="currentFmObject.bgf !== undefined">
                     <th translate="TRK_AREAS_BGF"></th>
-                    <td ng-bind="currentFmObject.element.bgf | number"></td>
+                    <td ng-bind="currentFmObject.bgf | number:2"></td>
                 </tr>
-                <tr ng-if="currentFmObject.element.nrf !== undefined">
+                <tr ng-if="currentFmObject.nrf !== undefined">
                     <th translate="TRK_AREAS_NRF"></th>
-                    <td ng-bind="currentFmObject.element.nrf | number"></td>
+                    <td ng-bind="currentFmObject.nrf | number:2"></td>
                 </tr>
-                <tr ng-if="currentFmObject.element.kgf !== undefined">
+                <tr ng-if="currentFmObject.kgf !== undefined">
                     <th translate="TRK_AREAS_KGF"></th>
-                    <td ng-bind="currentFmObject.element.kgf | number"></td>
+                    <td ng-bind="currentFmObject.kgf | number:2"></td>
                 </tr>
-                <tr ng-if="currentFmObject.element.nuf !== undefined">
+                <tr ng-if="currentFmObject.nuf !== undefined">
                     <th translate="TRK_AREAS_NUF"></th>
-                    <td ng-bind="currentFmObject.element.nuf | number"></td>
+                    <td ng-bind="currentFmObject.nuf | number:2"></td>
                 </tr>
-                <tr ng-if="currentFmObject.element.tf !== undefined">
+                <tr ng-if="currentFmObject.tf !== undefined">
                     <th translate="TRK_AREAS_TF"></th>
-                    <td ng-bind="currentFmObject.element.tf | number"></td>
+                    <td ng-bind="currentFmObject.tf | number:2"></td>
                 </tr>
-                <tr ng-if="currentFmObject.element.vf !== undefined">
+                <tr ng-if="currentFmObject.vf !== undefined">
                     <th translate="TRK_AREAS_VF"></th>
-                    <td ng-bind="currentFmObject.element.vf | number"></td>
+                    <td ng-bind="currentFmObject.vf | number:2"></td>
                 </tr>
             </tbody>
         </table>
@@ -82,8 +82,8 @@
                 <tr ng-repeat="fmObject in childFmObjects">
                     <td ng-click="openChildElement(fmObject)">
                         <div>
-                            <img ng-src="/css/icons/{{fmObject.element.icon}}.svg" />
-                            <span ng-bind="fmObject.element.name"></span>
+                            <img ng-src="{{fmObject._icon}}" />
+                            <span ng-bind="fmObject.label"></span>
                         </div>
                     </td>
                 </tr>

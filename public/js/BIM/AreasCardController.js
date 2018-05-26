@@ -14,93 +14,65 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
     }
 
     // Event callbacks
-    var changeFmObjectCallback = function(savedFmObject) {
+    var onchangedetails = function() {
         utils.removeCardsToTheRightOf($element);
         $scope.load();
-        closeFmObjectCallback();
+        closedetails();
     };
     
-    var closeFmObjectCallback = function() {
-        $scope.selectedFmObject = false;
-        utils.setLocation('/areas');
+    var closedetails = function() {
+        delete $scope.selectedFmObject;
+        utils.setLocation('/area');
     };
 
     $scope.openChildElement = function(fmObject) {
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('BIM/AreasCard', {
+            fmObjects: $scope.fmObjects,
             currentFmObject: fmObject
         }, 'PERMISSION_BIM_AREAS');
     };
 
     $scope.showFmObjectDetails = function(elem) {
+        // TODO: Umstellen
         utils.removeCardsToTheRightOf($element);
-        utils.addCardWithPermission('BIM/FmobjectCard', {
-            fmObjectId: elem.id,
-            createFmObjectCallback: changeFmObjectCallback,
-            saveFmObjectCallback: changeFmObjectCallback,
-            deleteFmObjectCallback: changeFmObjectCallback,
-            closeCallback: closeFmObjectCallback
+        utils.addCardWithPermission("components/DetailsCard", {
+            datatypename: elem._datatypename,
+            entityname: elem.name,
+            icon: elem._icon,
+            listfilter: "fmobjects", // For adding childs
+            onclose: closedetails,
+            oncreate: onchangedetails,
+            ondelete: onchangedetails,
+            onsave: onchangedetails
         }, 'PERMISSION_BIM_FMOBJECT').then(function() {
             $scope.selectedFmObject = elem;
         });
     };
 
     $scope.load = function() {
-        $rootScope.isLoading = true;
-        $http.get('/api/fmobjects').then(function(response) {
+        if ($scope.params.fmObjects && $scope.params.currentFmObject) { // We come here only on small devices to show additional cards
+            $scope.currentFmObject = $scope.params.currentFmObject;
+            $scope.fmObjects = $scope.params.fmObjects;
+            $scope.childFmObjects = $scope.currentFmObject._children;
+            // Fetch breadcrumbs
+            utils.loadparentlabels("areas_hierarchy", $scope.currentFmObject._datatypename, $scope.currentFmObject.name).then(function(breadcrumbs) {
+                $scope.breadcrumbs = breadcrumbs.join(' » ');
+            });
+            return;
+        }
+        $http.get('/api/areas').then(function(response) {
             $scope.fmObjects = [];
             var handleFmObject = function(fmObject, depth) {
-                var element = {
-                    id: fmObject._id,
-                    icon: 'fm/' + fmObject.type,
-                    name: fmObject.name,
-                    type: 'fmobjects',
-                    id: fmObject._id,
-                    bgf: fmObject.bgf,
-                    nrf: fmObject.nrf,
-                    nuf: fmObject.nuf,
-                    tf: fmObject.tf,
-                    vf: fmObject.vf,
-                    inset: []
-                }
-                fmObject.element = element;
-                for (var i = 0; i < depth; i++) element.inset.push(i);
-                $scope.fmObjects.push(element);
-                if (fmObject.children) fmObject.children.forEach(function(child) { handleFmObject(child, depth + 1); });
-                // Calculate areas depending on children
-                if (fmObject.type === "FMOBJECTS_TYPE_AREA") {
-                    switch(fmObject.category) {
-                        case "FMOBJECTS_CATEGORY_NUF": element.nuf = fmObject.f; break;
-                        case "FMOBJECTS_CATEGORY_TF": element.tf = fmObject.f; break;
-                        case "FMOBJECTS_CATEGORY_VF": element.vf = fmObject.f; break;
-                    }
-                    element.nrf = fmObject.f;
-                }
-                else {
-                    if (!["FMOBJECTS_TYPE_LEVEL", "FMOBJECTS_TYPE_ROOM"].includes(fmObject.type) && fmObject.children.length > 0) {
-                        element.bgf = sum(fmObject.children, 'bgf');
-                    }
-                    if (fmObject.children.length > 0) element.nrf = sum(fmObject.children, 'nrf');
-                    if (element.bgf) element.kgf = element.bgf - element.nrf;
-                    if (fmObject.children.length > 0) element.nuf = sum(fmObject.children, 'nuf');
-                    if (fmObject.children.length > 0) element.tf = sum(fmObject.children, 'tf');
-                    if (fmObject.children.length > 0) element.vf = sum(fmObject.children, 'vf');
-                }
+                fmObject.inset = [];
+                fmObject.label = fmObject[$scope.$root.titlefields[fmObject._datatypename]];
+                for (var i = 0; i < depth; i++) fmObject.inset.push(i);
+                $scope.fmObjects.push(fmObject);
+                if (fmObject._children) fmObject._children.forEach(function(child) { handleFmObject(child, depth + 1); });
             };
             response.data.forEach(function(fmObject) { handleFmObject(fmObject, 0); });
-            utils.setLocation('/areas');
-            if ($scope.params.currentFmObject) {
-                $scope.currentFmObject = $scope.params.currentFmObject;
-                $scope.childFmObjects = $scope.currentFmObject.children;
-                // Fetch details for path for breadcrumbs
-                $http.get('/api/fmobjects/' + $scope.currentFmObject._id).then(function(detailsResponse) {
-                    $scope.breadcrumbs = detailsResponse.data.path.map(function(pathElement){
-                        return pathElement.name;
-                    }).join(' » ');
-                });
-            } else {
-                $scope.childFmObjects = response.data;
-            }
+            utils.setLocation('/area');
+            $scope.childFmObjects = response.data;
             $rootScope.isLoading=false;
         });
     }

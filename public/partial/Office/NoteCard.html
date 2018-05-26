@@ -1,45 +1,6 @@
-<md-card ng-cloak ng-controller="OfficeNoteCardController"  style="background-image:url('/css/icons/office/Notes.svg');" class="list-details-details">
-    
-    <md-toolbar class="md-toolbar-tools md-accent">   
-        <ng-include ng-if="!isNewNote" src="'partial/Core/RelationsMenu.html'" ng-controller="CoreRelationsMenuController"></ng-include>
-        <div flex></div>
-        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
-    </md-toolbar>
-
-    <md-card-title flex="none">
-        <md-card-title-text>
-            <span class="md-headline" ng-if="!isNewNote"></span>
-            <span class="md-headline" ng-if="isNewNote" translate>TRK_NOTES_NEW_NOTE</span>
-        </md-card-title-text>
-    </md-card-title>
-
-    <script type ="text/ng-template" id ="NotesFormTemplate">
-        <md-card-content>
-            <form name = "notesForm" Layout ="column">
-
-                <md-input-container flex>                        
-                    <textarea name="content" ng-model="note.content" aria-label="NOTE CONTENT"></textarea>
-                </md-input-container>
-
-                <ng-include flex ng-if="!isNewClient" src="'partial/Core/DynamicAttributesTab.html'"></ng-include>   
-
-                <md-card-actions layout="row" layout-align="end center">
-                    <md-button class="md-raised md-accent" ng-click="createNote()" ng-if="isNewNote && canWriteNoteDetails"  ng-disabled="notesForm.$invalid"><span translate>TRK_NOTE_CREATE</span></md-button>
-                    <md-button class="md-raised md-accent" ng-click="saveNote()" ng-if="!isNewNote && canWriteNoteDetails"  ng-disabled="notesForm.$invalid"><span translate>TRK_NOTE_SAVE</span></md-button>
-                    <md-button class="md-raised md-warn" ng-click="deleteNote()" ng-if="!isNewNote && canWriteNoteDetails" ><span translate>TRK_NOTE_DELETE</span></md-button>
-                </md-card-actions>
-
-            </form>
-        </md-card-content>
-    </script>
-
-    <md-tabs flex ng-if="!isNewNote">
-        <md-tab>
-            <md-tab-label><span translate>TRK_NOTES_CONTENTS</span></md-tab-label>
-            <md-tab-body><ng-include src="'NotesFormTemplate'"></ng-include></md-tab-body>
-        </md-tab>
-        <ng-include src="'partial/Core/RelationsTab.html'" ng-controller="CoreRelationsTabController"></ng-include>
-    </md-tabs>    
-    <ng-include flex ng-if="isNewNote" src="'NotesFormTemplate'"></ng-include>
-    <resize-handle></resize-handle>        
-</md-card>
+<md-card
+    avt-card
+    avt-details-card
+    avt-relations
+    avt-close-toolbar-button
+></md-card>

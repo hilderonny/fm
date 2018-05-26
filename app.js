@@ -7,6 +7,8 @@ process.chdir(__dirname);
 var moduleConfig = require('./config/module-config.json');
 var localConfig = require('./config/localconfig.json');
 
+module.exports = {}; // For tests, see testhelpers
+
 /**
  * Extracts all api paths from the module config
  * usable for app.use().
@@ -28,7 +30,9 @@ var extractApisFromModuleConfig = () => {
  * die include.js einen dynamischen Nachlader, damit man vernünftig debuggen kann.
  */
 var prepareIncludes = (fs) => {
-    if (process.env.NODE_ENV === 'development') {
+    // Minification is too slow for raspberry (takes more then 10 minutes), another idea is needed, e.g. leave out minified libraries
+    // See https://medium.com/@adamhooper/make-uglifyjs-way-faster-by-using-it-sooner-c2c39a9ad27e
+    // if (process.env.NODE_ENV === 'development') {
         var incJs = '';
         var counter = 0;
         Object.keys(moduleConfig.modules).forEach((moduleName) => {
@@ -44,43 +48,77 @@ var prepareIncludes = (fs) => {
         var replacedAgain = replaced.replace('###PORTALNAME###', localConfig.portalName).replace('###PORTALLOGO###', localConfig.portalLogo);        
       
         fs.writeFileSync('./public/index.html', replacedAgain);
-    } else {
-        console.log('Minifying client JavaScript. Can take up to 15 seconds. Please wait ...');
-        var includes = [];
-        Object.keys(moduleConfig.modules).forEach((moduleName) => {
-            var appModule = moduleConfig.modules[moduleName];
-            if (appModule.include) appModule.include.forEach((include) => {
-                includes.push('./' + include);
-            });
-        });
-        var minifiedJs = require('uglify-js').minify(includes, { mangle:false, compress:false, outSourceMap:"include.js.map", output: { max_line_len: 100000 } });
-        fs.writeFileSync('./public/js/include.js', minifiedJs.code);
-        fs.writeFileSync('./public/js/include.js.map', minifiedJs.map);
-        fs.writeFileSync('./public/index.html', fs.readFileSync('./public/_index.html').toString().replace('###PORTALNAME###', localConfig.portalName).replace('###PORTALLOGO###', localConfig.portalLogo));
-    }
+    // } else {
+    //     console.log('Minifying client JavaScript. Can take up to 15 seconds. Please wait ...');
+    //     var includes = [];
+    //     Object.keys(moduleConfig.modules).forEach((moduleName) => {
+    //         var appModule = moduleConfig.modules[moduleName];
+    //         if (appModule.include) appModule.include.forEach((include) => {
+    //             includes.push('./' + include);
+    //         });
+    //     });
+    //     var minifiedJs = require('uglify-js').minify(includes, { mangle:false, compress:false, outSourceMap:"include.js.map", output: { max_line_len: 100000 } });
+    //     fs.writeFileSync('./public/js/include.js', minifiedJs.code);
+    //     fs.writeFileSync('./public/js/include.js.map', minifiedJs.map);
+    //     fs.writeFileSync('./public/index.html', fs.readFileSync('./public/_index.html').toString().replace('###PORTALNAME###', localConfig.portalName).replace('###PORTALLOGO###', localConfig.portalLogo));
+    // }
 };
 
-// Server initialization
-var init = () => {
-    // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
-    var db = require('./middlewares/db');
-    var nocache = require('./middlewares/nocache');
-    db.init().then(() => {
-        var dah = require('./utils/dynamicAttributesHelper');
-        // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
-        var promises = [];
-        Object.keys(moduleConfig.modules).forEach((moduleName) => {
-            dah.activateDynamicAttributesForClient(null, moduleName);
-        });
-    });
-    // Initialize and migrate PostgreSQL database
-    if (localConfig.migratedatabase) {
-        require("./utils/db").Db.init(localConfig.recreatedatabase).then(() => {
-            return require("./utils/migrationhelper").copydatabasefrommongodbtopostgresql();
-        });
-    }
-    // Includes minifizieren
+    var timerId; 
+    var portalUpdatesHelper = require('./utils/portalUpdatesHelper');
     var fs = require('fs');
+    module.exports.manageAutoUpdate = function(autoUpdateMode){
+        if(autoUpdateMode == true){
+            var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
+            var updateInterval = lc.updateTimerInterval * 3600000; //convert hours to milliseconds
+            if(updateInterval > 10000){ //check if the time interval is at least 1 second long
+                if(timerId != null){
+                    clearInterval(timerId); //cancel old timer befor setting a new one
+                }
+                timerId = setInterval(portalUpdatesHelper.triggerUpdate, updateInterval);
+                return;                
+            }else{
+                return;
+            }            
+        }else{ //autoUpdateMode == false
+           clearInterval(timerId);
+           return;
+        }
+    };
+
+    module.exports.changeTimeInterval = function(newTimerInterval){
+        //make changes only if an  auto-update is curremtly turned on 
+        var lc = JSON.parse(fs.readFileSync('./config/localconfig.json').toString())
+        if(lc.autoUpdateMode){
+            clearInterval(timerId); //stop timer with old update interval
+            var newTimerIntervalMS = newTimerInterval*3600000; //convert hours to milliseconds
+            timerId = setInterval(portalUpdatesHelper.triggerUpdate, newTimerIntervalMS); //start new update timer
+        }
+    };
+
+// Server initialization
+async function init() {
+    // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
+    var nocache = require('./middlewares/nocache');
+    var dah = require('./utils/dynamicAttributesHelper');
+    // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
+    var promises = [];
+    var moduleNames = Object.keys(moduleConfig.modules);
+    for (var i = 0; i < moduleNames.length; i++) {
+        await dah.activateDynamicAttributesForClient(null, moduleNames[i]);
+    }
+    var fs = require('fs');
+    // Initialize database
+    await require("./utils/db").Db.init();
+    // Run update scripts on startup
+    if (localConfig.applyupdates) {
+        await require("./utils/updateonstart")();
+        localConfig.applyupdates = false;
+        fs.writeFileSync("./config/localconfig.json", JSON.stringify(localConfig, null, 4)); // Relative to main entry point
+    }
+    // Recalculate all formulas because the definitions could have changed in module-config
+    if (localConfig.recalculateformulasonstart) await require("./utils/calculationhelper").recalculateall();
+    // Includes minifizieren
     prepareIncludes(fs);
     // Anwendung initialisieren und Handler-Reihenfolge festlegen
     var express = require('express');
@@ -89,8 +127,7 @@ var init = () => {
     //var accessLogStream = fs.createWriteStream(__dirname + '/access.log', {flags: 'a'});
     //app.use(require('morgan')('combined', {stream: accessLogStream}));
     app.use(require('compression')()); // Ausgabekompression
-    app.set('json spaces', '\t'); // Ausgabe im Response verschönern
-    app.use(db.handler); // Datenbankverbindung -> req.db
+    // app.set('json spaces', '\t'); // Ausgabe im Response verschönern
     app.use(require('./middlewares/extracttoken')); // Authentifizierung und Authorisierung -> req.user{_id}
     app.use(require('body-parser').json()); // JSON Request-Body-Parser -> req.body
     app.use(require('body-parser').urlencoded({extended:true})); // parse application/x-www-form-urlencoded
@@ -155,7 +192,7 @@ var init = () => {
 
     if (process.env.NODE_ENV === 'test') {
         // HTTP Server als Modul exportieren, damit Tests damit laufen können
-        module.exports = server;
+        module.exports.server = server;
     }
 
     // Store time of start in cached localconfig to force reload of clients after server restart
@@ -163,26 +200,25 @@ var init = () => {
     console.log(`Server started at ${localConfig.startTime}.`)
 
     //Update local 'version' and 'lastNotification' of portal 
-    var request = require('request');
-    var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-    var localVersion = packageJson.version;
-    var url =`${localConfig.licenseserverurl}/api/update/heartbeat`;
-    var key = localConfig.licensekey;
-    request.post({url: url, form:  {"licenseKey":  key, "version": localVersion}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
+    if (process.env.NODE_ENV !== 'test') { // Bei tests werden die Tabellen gelöscht. Bei denm heartbeat würde dann eine Fehlermeldung kommen
+        var request = require('request');
+        var packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
+        var localVersion = packageJson.version;
+        var url =`${localConfig.licenseserverurl}/api/update/heartbeat`;
+        var key = localConfig.licensekey;
+        request.post({url: url, form:  {"licenseKey":  key, "version": localVersion}}, function(error, response, body){}); // Keine Fehlerbehandlung, einfach ignorieren
+    }
+    //start the initial auto-update mode on server start 
+    if(localConfig.autoUpdateMode && localConfig.updateTimerInterval && localConfig.updateTimerInterval > 0) {
+        var initalUpdateInterval;
+        initalUpdateInterval = localConfig.updateTimerInterval * 3600000; //convert hours to milliseconds
+        timerId = setInterval(portalUpdatesHelper.triggerUpdate, initalUpdateInterval);
+    }
 };
 
-// Install required dependencies
-if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'development' && localConfig.npmInstallCommand) {
-    console.log('Installing dependencies with npm ...\n');
-    require('child_process').exec(localConfig.npmInstallCommand, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-        }
-        if (stdout) console.log(stdout);
-        if (stderr) console.log(stderr);
-        init();
-    });
-} else {
+// Installation of required dependencies must be done by hand when needed
+if (process.env.NODE_ENV !== 'test') {
     init();
+} else {
+    module.exports.init = init;
 }

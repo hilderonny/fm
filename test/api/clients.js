@@ -1,660 +1,483 @@
 /**
  * UNIT Tests for api/clients
- * @see http://softwareengineering.stackexchange.com/a/223376 for running async tasks in parallel
  */
 var assert = require('assert');
-var superTest = require('supertest');
-var async = require('async');
-var monk = require('monk');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
+var localconfig = require('../../config/localconfig.json');
+var fs = require("fs");
+var dh = require("../../utils/documentsHelper");
+var request = require('request');
+var unzip2 = require('unzip2');
+var eh = require("../../utils/exporthelper");
+var wh = require('../../utils/webHelper');
+var jszip = require('jszip');
+var path = require("path");
 
-describe('API clients', function() {
-    
-    // Clear and prepare database with clients, user groups and users
-    beforeEach(() => {
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions)
-            .then(th.prepareActivities)
-            .then(th.prepareFmObjects)
-            .then(th.prepareFolders)
-            .then(th.prepareDocuments)
-            .then(th.prepareRelations);
+var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
+
+describe('API clients', async() => {
+
+    beforeEach(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
+        await th.prepareFolders();
+        await th.prepareDocuments();
+        await th.prepareDocumentFiles();
+        await th.preparedatatypes();
+        await th.preparedatatypefields();
+        await th.preparedynamicobjects();
     });
 
-    describe('GET/', function() {
-
-        it('responds with 403 without authentication', function() {
-            return th.get('/api/clients').expect(403);
-        });
-
-        it('responds with 403 when the logged in user\'s (normal user) client has no access to this module', function() {
-            return th.removeClientModule('1', 'clients').then(function() {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return th.get(`/api/clients?token=${token}`).expect(403);
-                });
-            });
-        });
-
-        it('responds with 403 when the logged in user\'s (administrator) client has no access to this module', function() {
-            return th.removeClientModule('1', 'clients').then(function() {
-                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                    return th.get(`/api/clients?token=${token}`).expect(403);
-                });
-            });
-        });
-
-        it('responds with 403 without read permission', function() {
-            // Remove the corresponding permission
-            return th.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_CLIENT').then(() => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    return th.get('/api/clients?token=' + token).expect(403);
-                });
-            });
-        });
-
-        it('responds with list of all clients containing all details', function(done) {
-            db.get('clients').find().then((allClientsFromDatabase) => {
-                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    th.get(`/api/clients?token=${token}`).expect(200).end(function(err, res) {
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        var clientsFromApi = res.body;
-                        assert.strictEqual(clientsFromApi.length, allClientsFromDatabase.length, `Number of clients differ (${clientsFromApi.length} from API, ${allClientsFromDatabase.length} in database)`);
-                        allClientsFromDatabase.forEach((clientFromDatabase) => {
-                            var clientFound = false;
-                            for (var i = 0; i < clientsFromApi.length; i++) {
-                                var clientFromApi = clientsFromApi[i];
-                                if (clientFromApi._id !== clientFromDatabase._id.toString()) {
-                                    continue;
-                                }
-                                clientFound = true;
-                                Object.keys(clientFromDatabase).forEach((key) => {
-                                    var valueFromDatabase = clientFromDatabase[key].toString(); // Compare on a string basis because the API returns strings only
-                                    var valueFromApi = clientFromApi[key].toString();
-                                    assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of client ${clientFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-                                });
-                            }
-                            assert.ok(clientFound, `Client "${clientFromDatabase.name}" was not returned by API`);
-                        });
-                        done();
-                    });
-                });
-            });
-        });
-
-        it('responds with list of all clients containing only the requested fields when only specific fields are given', function(done) {
-            db.get('clients').find().then((allClientsFromDatabase) => {
-                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    var keys = ['_id', 'name']; // Include _id every time because it is returned by the API in every case!
-                    th.get(`/api/clients?token=${token}&fields=${keys.join('+')}`).expect(200).end(function(err, res) {
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        var clientsFromApi = res.body;
-                        assert.strictEqual(clientsFromApi.length, allClientsFromDatabase.length, `Number of clients differ (${clientsFromApi.length} from API, ${allClientsFromDatabase.length} in database)`);
-                        allClientsFromDatabase.forEach((clientFromDatabase) => {
-                            var clientFound = false;
-                            for (var i = 0; i < clientsFromApi.length; i++) {
-                                var clientFromApi = clientsFromApi[i];
-                                if (clientFromApi._id !== clientFromDatabase._id.toString()) {
-                                    continue;
-                                }
-                                clientFound = true;
-                                var keyCountFromApi = Object.keys(clientFromApi).length;
-                                var keyCountFromDatabase = keys.length;
-                                assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of client ${clientFromApi._id} differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                                keys.forEach((key) => {
-                                    var valueFromDatabase = clientFromDatabase[key].toString(); // Compare on a string basis because the API returns strings only
-                                    var valueFromApi = clientFromApi[key].toString();
-                                    assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of client ${clientFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-                                });
-                            }
-                            assert.ok(clientFound, `Client "${clientFromDatabase.name}" was not returned by API`);
-                        });
-                        done();
-                    });
-                });
-            });
-        });
-
+    afterEach(async() => {
+        await Db.deleteClient("testclient");
     });
 
-    describe('GET/forIds', function() {
+    describe('GET/export/:clientname', async() => {
 
-        function createTestClients() {
-            var testObjects = ['testClient1', 'testClient2', 'testClient3'].map(function(name) {
-                return {
-                    name: name
-                }
-            });
-            return Promise.resolve(testObjects);
-        }
-
-        th.apiTests.getForIds.defaultNegative(co.apis.clients, co.permissions.ADMINISTRATION_CLIENT, co.collections.clients.name, createTestClients);
-        th.apiTests.getForIds.defaultPositive(co.apis.clients, co.collections.clients.name, createTestClients);
-
-    });
-
-    describe('GET/:id', function() {
-
-        it('responds with 403 without authentication', function() {
-            // Load a valid user id so we have a valid request and do not get a 404
-            return db.get('clients').findOne({name: '0'}).then((client) => {
-                return th.get('/api/clients/' + client._id.toString()).expect(403);
-            });
-        });
-
-        it('responds with 403 when the logged in user\'s (normal user) client has no access to this module', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                var id = clientFromDatabase._id;
-                return th.removeClientModule('1', 'clients').then(function() {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        return th.get(`/api/clients/${id}?token=${token}`).expect(403);
-                    });
+        async function getFilesInPackage(url) {
+            var filesInPackage = [];
+            await new Promise(function(resolve, reject) {
+                var updateRequest = request(url);
+                updateRequest.on('error', function (error) {
+                    updateRequest.abort();
+                    reject(error);
                 });
-            }); 
-        });
-
-        it('responds with 403 when the logged in user\'s (administrator) client has no access to this module', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                var id = clientFromDatabase._id;
-                return th.removeClientModule('1', 'clients').then(function() {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        return th.get(`/api/clients/${id}?token=${token}`).expect(403);
-                    });
-                });
-            }); 
-        });
-
-        it('responds with 403 without read permission', function() {
-            return db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                // Remove the corresponding permission
-                return th.removeReadPermission('1_0_0', 'PERMISSION_ADMINISTRATION_CLIENT').then(() => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        return th.get(`/api/clients/${clientFromDatabase._id}?token=${token}`).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with 403 when id is invalid', function() {
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return th.get('/api/clients/invalidId?token=' + token).expect(400);
-            });
-        });
-
-        it('responds with 404 when no client exists for given id', function() {
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return th.get('/api/clients/999999999999999999999999?token=' + token).expect(404);
-            });
-        });
-
-        it('responds with all details of the client', function(done) {
-            db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    var keys = Object.keys(clientFromDatabase); // Include _id every time because it is returned by the API in every case!
-                    th.get(`/api/clients/${clientFromDatabase._id}?token=${token}`).expect(200).end(function(err, res) {
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        var clientFromApi = res.body;
-                        var keyCountFromApi = Object.keys(clientFromApi).length;
-                        var keyCountFromDatabase = keys.length;
-                        assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of client ${clientFromApi._id} differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                        keys.forEach((key) => {
-                            var valueFromDatabase = clientFromDatabase[key].toString(); // Compare on a string basis because the API returns strings only
-                            var valueFromApi = clientFromApi[key].toString();
-                            assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of client ${clientFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-                        });
-                        done();
-                    });
-                });
-            });
-        });
-
-        it('responds with details of client containing only the given fields when specific fields are given', function(done) {
-            db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    var keys = ['_id', 'name']; // Include _id every time because it is returned by the API in every case!
-                    th.get(`/api/clients/${clientFromDatabase._id}?token=${token}&fields=${keys.join('+')}`).expect(200).end(function(err, res) {
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        var clientFromApi = res.body;
-                        var keyCountFromApi = Object.keys(clientFromApi).length;
-                        var keyCountFromDatabase = keys.length;
-                        assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of client ${clientFromApi._id} differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                        keys.forEach((key) => {
-                            var valueFromDatabase = clientFromDatabase[key].toString(); // Compare on a string basis because the API returns strings only
-                            var valueFromApi = clientFromApi[key].toString();
-                            assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of client ${clientFromApi._id} differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-                        });
-                        done();
-                    });
-                });
-            });
-        });
-
-    });
-
-    describe('POST/', function() {
-
-        it('responds with 403 without authentication', function() {
-            return th.post('/api/clients')
-                .send({ name: 'TestClient' })
-                .expect(403);
-        });
-
-        it('responds with 403 when the logged in user\'s (normal user) client has no access to this module', function() {
-            return th.removeClientModule('1', 'clients').then(function(){
-                return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                    var newClient = {name: 'newName'};
-                    return th.post(`/api/clients?token=${token}`).send(newClient).expect(403);
-                });
-            });
-        });
-
-        it('responds with 403 when the logged in user\'s (administrator) client has no access to this module', function() {
-            return th.removeClientModule('1', 'clients').then(function(){
-                return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                    var newClient = {name: 'newName'};
-                    return th.post(`/api/clients?token=${token}`).send(newClient).expect(403);
-                });
-            });
-        });
-
-        it('responds with 403 without write permission', function() {
-            // Remove the corresponding permission
-            return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_CLIENT').then(() => {
-                return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                    var newClient = { 
-                        name: 'newClient'
-                    };
-                    return th.post('/api/clients?token=' + token).send(newClient).expect(403);
-                });
-            });
-        });
-
-        it('responds with 400 when no client is given', function() {
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return th.post('/api/clients?token=' + token).send().expect(400);
-            });
-        });
-
-        it('responds with inserted client containing an _id field', function(done) {
-            th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                var newClient = { 
-                    name: 'newClient'
-                };
-                th.post('/api/clients?token=' + token).send(newClient).expect(200).end((err, res) => {
-                    if (err) {
-                        done(err);
-                        return;
+                updateRequest.on('response', function (response) {
+                    if (response.statusCode !== 200) {
+                        updateRequest.abort();
+                        reject(response.statusCode);
                     }
-                    var clientFromApi = res.body;
-                    var keyCountFromApi = Object.keys(clientFromApi).length - 1; // _id is returned additionally
-                    var keys = Object.keys(newClient);
-                    var keyCountFromDatabase = keys.length;
-                    assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of new client differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                    keys.forEach((key) => {
-                        var valueFromDatabase = newClient[key].toString(); // Compare on a string basis because the API returns strings only
-                        var valueFromApi = clientFromApi[key].toString();
-                        assert.strictEqual(valueFromApi, valueFromDatabase, `${key} of new client differs (${valueFromApi} from API, ${valueFromDatabase} in database)`);
-                    });
-                    done();
                 });
+                updateRequest.pipe(unzip2.Parse())
+                .on('error', reject)
+                .on('entry', function(entry) {
+                    if(entry.type === 'File') {
+                        filesInPackage.push(entry.path);
+                    }
+                    entry.autodrain(); // Speicher bereinigen
+                })
+                .on('close', resolve);
             });
-        });
-
-        it('creates client module assignments for modules "base" and "doc"', async function() {
-            var token = await th.defaults.login(th.defaults.portalAdminUser);
-            var newClient = { 
-                name: 'newClient'
-            };
-            var createdClient = (await th.post(`/api/${co.apis.clients}?token=${token}`).send(newClient).expect(200)).body;
-            var createdClientModules = await db.get(co.collections.clientmodules.name).find({clientId: monk.id(createdClient._id)});
-            assert.strictEqual(createdClientModules.length, 2);
-            assert.ok(createdClientModules.find((m) => m.module === co.modules.base));
-            assert.ok(createdClientModules.find((m) => m.module === co.modules.doc));
-        });
-
-    });
-
-    describe('POST/newadmin', function() {
-
-        it('responds with 400 when no user is given', function() {
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return th.post('/api/clients/newadmin?token=' + token).send().expect(400);
-            });
-        });
-
-        it('responds with 400 when no username is given', function() {
-            return db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    var newAdmin = {
-                        pass: 'password', // No username set
-                        clientId: clientFromDatabase._id.toString()
-                    };
-                    return th.post('/api/clients/newadmin?token=' + token).send(newAdmin).expect(400);
-                });
-            });
-        });
-
-        it('responds with 409 when username is in use', function() {
-            return db.get('users').findOne({ name : '1_0_0' }).then((userFromDatabase) => {
-                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    var newAdmin = {
-                        name: userFromDatabase.name,
-                        pass: 'password',
-                        clientId: userFromDatabase.clientId
-                    };
-                    return th.post('/api/clients/newadmin?token=' + token).send(newAdmin).expect(409);
-                });
-            });
-        });
-
-        it('responds with 400 when no clientId is given', function() {
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                var newAdmin = {
-                    name: 'newAdmin',
-                    pass: 'password'
-                };
-                return th.post('/api/clients/newadmin?token=' + token).send(newAdmin).expect(400);
-            });
-        });
-
-        it('responds with 400 when clientId is invalid', function() {
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                var newAdmin = {
-                    name: 'newAdmin',
-                    pass: 'password',
-                    clientId: 'dampfhappen'
-                };
-                return th.post('/api/clients/newadmin?token=' + token).send(newAdmin).expect(400);
-            });
-        });
-
-        it('responds with 400 when there is no client with the given clientId', function() {
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                var newAdmin = {
-                    name: 'newAdmin',
-                    pass: 'password',
-                    clientId: '999999999999999999999999'
-                };
-                return th.post('/api/clients/newadmin?token=' + token).send(newAdmin).expect(400);
-            });
-        });
-
-        it('responds with 403 without authentication', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                var newAdmin = {
-                    name: 'newAdmin',
-                    pass: 'parola',
-                    clientId: clientFromDatabase._id
-                };
-                return th.post(`/api/clients/newadmin`).send(newAdmin).expect(403);
-            });
-        });
-
-        it('responds with 403 when the logged in user\'s (normal user) client has no access to this module', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                return th.removeClientModule('1', 'clients').then(function(){
-                    return th.doLoginAndGetToken('1_0_0', 'test').then(function(token){
-                        var newAdmin ={
-                            name: 'newAdmin',
-                            pass: 'parola',
-                            clientId: clientFromDatabase._id
-                        };
-                        return th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with 403 when the logged in user\'s (administrator) client has no access to this module', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                return th.removeClientModule('1', 'clients').then(function(){
-                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                        var newAdmin ={
-                            name: 'newAdmin',
-                            pass: 'parola',
-                            clientId: clientFromDatabase._id
-                        };
-                        return th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with 403 without write permission', function() {
-            return db.get('clients').findOne({name: '1'}).then(function(clientFromDatabase){
-                // Remove the corresponding permission
-                return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_CLIENT').then(() => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        var newAdmin ={
-                            name: 'newAdmin',
-                            pass: 'parola',
-                            clientId: clientFromDatabase._id
-                        };
-                        return th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with 200 and creates a new admin in a new user group with the same name as the username', function() {
-            return db.get('clients').findOne({name: '1'}).then((clientFromDatabase) => {
-                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    var newAdminName = '1_newAdmin';
-                    var newAdmin = {
-                        name: newAdminName,
-                        pass: 'password',
-                        clientId: clientFromDatabase._id.toString()
-                    };
-                    return th.post('/api/clients/newadmin?token=' + token).send(newAdmin).expect(200).then((res) => {
-                        return db.get('users').findOne({ name : newAdminName }).then((userFromDatabase) => {
-                            assert.ok(userFromDatabase, 'New admin was not created');
-                            assert.strictEqual(userFromDatabase.name, newAdminName, 'Usernames do not match');
-                            assert.strictEqual(userFromDatabase.clientId.toString(), clientFromDatabase._id.toString(), 'Client IDs do not match');
-                            assert.ok(userFromDatabase.isAdmin, 'New admin user does not have the isAdmin flag');
-                            return db.get('usergroups').findOne(userFromDatabase.userGroupId).then((userGroupFromDatabase) => {
-                                assert.ok(userGroupFromDatabase, 'Usergroup for new admin was not created');
-                                assert.strictEqual(userGroupFromDatabase.name, newAdminName, 'The name of new usergroup does not match the name of the new admin');
-                            });
-                        });
-                    });
-                });
-            });
-        });
-
-    });
-
-    describe('PUT/:id', function() {
-
-        it('responds with 403 without authentication', function() {
-            return db.get('clients').findOne({name: '0'}).then((client) => {
-                var clientId = client._id.toString();
-                return th.put('/api/clients/' + clientId)
-                    .send({ name: 'OtherClientName' })
-                    .expect(403);
-            });
-        });
-
-        it('responds with 403 when the logged in user\'s (normal user) client has no access to this module', function() {
-            return db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                return th.removeClientModule('1', 'clients').then(function() {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        var updatedClient = {
-                            name: 'newName'
-                        };
-                        return th.put(`/api/clients/${clientFromDatabase._id}?token=${token}`).send(updatedClient).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with 403 when the logged in user\'s (administrator) client has no access to this module', function() {
-            return db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                return th.removeClientModule('1', 'clients').then(function() {
-                    return th.doLoginAndGetToken('1_0_ADMIN0', 'test').then((token) => { // Has isAdmin flag
-                        var updatedClient = {
-                            name: 'newName'
-                        };
-                        return th.put(`/api/clients/${clientFromDatabase._id}?token=${token}`).send(updatedClient).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with 403 without write permission', function() {
-            return db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                // Remove the corresponding permission
-                return th.removeWritePermission('1_0_0', 'PERMISSION_ADMINISTRATION_CLIENT').then(() => {
-                    return th.doLoginAndGetToken('1_0_0', 'test').then((token) => {
-                        var updatedClient = {
-                            name: 'newName'
-                        };
-                        return th.put(`/api/clients/${clientFromDatabase._id}?token=${token}`).send(updatedClient).expect(403);
-                    });
-                });
-            });
-        });
-
-        it('responds with 400 when the id is invalid', function() {
-            var updatedClient = {
-                name: 'newName'
-            };
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return th.put('/api/clients/invalidId?token=' + token).send(updatedClient).expect(400);
-            });
-        });
-
-        it('responds with 400 when no client is given', function() {
-            return db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    return th.put(`/api/clients/${clientFromDatabase._id}?token=${token}`).send().expect(400);
-                });
-            });
-        });
-
-        it('responds with a client with the original _id when a new _id is given (_id cannot be changed)', function(done) {
-            db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    var updatedClient = {
-                        _id: '888888888888888888888888'
-                    };
-                    th.put(`/api/clients/${clientFromDatabase._id}?token=${token}`).send(updatedClient).expect(200).end((err, res) => {
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        var idFromApiResult = res.body._id;
-                        assert.strictEqual(idFromApiResult, clientFromDatabase._id.toString(), `_id of client was updated but it must not be (${idFromApiResult} from API, ${clientFromDatabase._id} originally)`);
-                        done();
-                    });
-                });
-            });
-        });
-
-        it('responds with 404 when there is no client with the given id', function() {
-            var updatedClient = {
-                name: 'newName'
-            };
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return th.put('/api/clients/999999999999999999999999?token=' + token).send(updatedClient).expect(404);
-            });
-        });
-
-        it('responds with 404 when there is no client with the given id and when only _id is given as update value', function() {
-            var updatedClient = {
-                _id: '888888888888888888888888'
-            };
-            return th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                return th.put('/api/clients/999999999999999999999999?token=' + token).send(updatedClient).expect(404);
-            });
-        });
-
-        it('responds with the updated client and its new properties', function(done) {
-            db.get('clients').findOne({ name : '1' }).then((clientFromDatabase) => {
-                th.doLoginAndGetToken('_0_ADMIN0', 'test').then((token) => {
-                    var updatedClient = {
-                        name: 'newName'
-                    };
-                    th.put(`/api/clients/${clientFromDatabase._id}?token=${token}`).send(updatedClient).expect(200).end((err, res) => {
-                        if (err) {
-                            done(err);
-                            return;
-                        }
-                        var clientFromApi = res.body;
-                        var keyCountFromApi = Object.keys(clientFromApi).length - 1; // _id is returned additionally
-                        var keys = Object.keys(updatedClient);
-                        var keyCountFromDatabase = keys.length;
-                        assert.strictEqual(keyCountFromApi, keyCountFromDatabase, `Number of returned fields of updated client differs (${keyCountFromApi} from API, ${keyCountFromDatabase} in database)`);
-                        keys.forEach((key) => {
-                            var updateValue = updatedClient[key].toString(); // Compare on a string basis because the API returns strings only
-                            var valueFromApi = clientFromApi[key].toString();
-                            assert.strictEqual(valueFromApi, updateValue, `${key} of updated client differs (${valueFromApi} from API, ${updateValue} in database)`);
-                        });
-                        done();
-                    });
-                });
-            });
-        });
-
-    });
-
-    describe('DELETE/:id', function() {
-
-        function getDeleteClientId() {
-            return db.get(co.collections.clients.name).insert({ name: 'newClient' }).then(function(client) {
-                return th.createRelationsToUser(co.collections.clients.name, client);
-            }).then(function(insertedClient) {
-                return Promise.resolve(insertedClient._id);
-            });
+            return filesInPackage;
         }
 
-        th.apiTests.delete.defaultNegative(co.apis.clients, co.permissions.ADMINISTRATION_CLIENT, getDeleteClientId);
-        th.apiTests.delete.defaultPositive(co.apis.clients, co.collections.clients.name, getDeleteClientId);
+        it('responds without authentication with 403', async() => {
+            await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true`).expect(403);
+        });
 
-        it('responds with 204 and deletes all dependent objects (activities, clientmodules, documents, fmobjects, folders, permissions, usergroups, users)', function() {
-            var clientIdToDelete;
-            return getDeleteClientId().then(function(clientId) {
-                clientIdToDelete = clientId;
-                return th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-            }).then(function(token) {
-                return th.del(`/api/${co.apis.clients}/${clientIdToDelete.toString()}?token=${token}`).expect(204);
-            }).then(function() {
-                return new Promise(function(resolve, reject) {
-                    var dependentCollections = Object.keys(co.collections).map((key) => co.collections[key].name);
-                    async.eachSeries(dependentCollections, (dependentCollection, callback) => {
-                        db.get(dependentCollection).count({ clientId: clientIdToDelete }, (err, count) => {
-                            if (err) {
-                                callback(err);
-                                return;
-                            }
-                            assert.equal(count, 0, `Not all ${dependentCollection} of the deleted client were also deleted`);
-                            callback();
-                        });
-                    }, (err) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve();
-                        }
-                    });
-                });
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.ADMINISTRATION_CLIENT);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.clients);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.clients);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            await th.get(`/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`).expect(403);
+        });
+
+        it('responds with 404 when clientname is invalid', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.get(`/api/clients/export/invalidid?datatypes=true&content=true&files=true&token=${token}`).expect(404);
+        });
+
+        it('contains datatypes when datatypes are requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            var expectedprefix = "client0_";
+            files.forEach(file => {
+                assert.strictEqual(file.indexOf(expectedprefix), 0);
             });
+            assert.ok(files.find(file => file.indexOf("\\datatypes") > 0));
+            assert.ok(files.find(file => file.indexOf("\\datatypefields") > 0));
+        });
+
+        it('does not contain datatypes when datatypes are not requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=false&content=true&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            assert.ok(!files.find(file => file.indexOf("\\datatypes") > 0));
+            assert.ok(!files.find(file => file.indexOf("\\datatypefields") > 0));
+        });
+
+        it('contains database content when content is requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            var expecteddatatypenames = (await Db.query("client0", "SELECT name FROM datatypes;")).rows.map(row => row.name);
+            expecteddatatypenames.forEach(expecteddatatypename => {
+                assert.ok(files.find(file => file.indexOf("\\content\\" + expecteddatatypename) > 0));
+            });
+        });
+
+        it('does not contain database content when content is not requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=false&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            assert.ok(!files.find(file => file.indexOf("\\content\\") > 0));
+        });
+
+        it('contains document files when files are requested', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=true&token=${token}`;
+            var files = await getFilesInPackage(url);
+            var expecteddocumentfilenames = (await Db.getDynamicObjects("client0", co.collections.documents.name)).map(document => document.name);
+            expecteddocumentfilenames.forEach(expecteddocumentfilename => {
+                assert.ok(files.find(file => file.indexOf("\\files\\" + expecteddocumentfilename) > 0));
+            });
+        });
+
+        it('ignores document file when there is no file for an existing document', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var url = `https://localhost:${process.env.HTTPS_PORT || localconfig.httpsPort || 443}/api/clients/export/client0?datatypes=true&content=true&files=false&token=${token}`;
+            var files = await getFilesInPackage(url);
+            assert.ok(!files.find(file => file.indexOf("\\files\\") > 0));
+        });
+
+    });
+
+    describe('POST/', async() => {
+
+        function createPostTestElement() {
+            return { label: "testclient" };
+        }
+
+        it("Creates the database of the client", async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var newClient = createPostTestElement();
+            var createdClientName = (await th.post(`/api/dynamic/clients?token=${token}`).send(newClient).expect(200)).text;
+            var dbname = `${process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange'}_${createdClientName}`; 
+            var result = await Db.queryDirect("postgres", `SELECT 1 FROM pg_database WHERE datname = '${dbname}';`);
+            assert.ok(result.rowCount > 0);
+        });
+
+        it('creates client module assignments for modules "base" and "doc"', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var newClient = createPostTestElement();
+            var createdClientName = (await th.post(`/api/dynamic/clients?token=${token}`).send(newClient).expect(200)).text;
+            var createdClientModules = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${createdClientName}';`)).rows;
+            assert.strictEqual(createdClientModules.length, 2);
+            assert.ok(createdClientModules.find((m) => m.modulename === co.modules.base));
+            assert.ok(createdClientModules.find((m) => m.modulename === co.modules.doc));
+        });
+
+    });
+
+    describe("POST/import", async() => {
+
+        var httpsPort = process.env.HTTPS_PORT || localconfig.httpsPort || 443;
+        var url = `https://localhost:${httpsPort}/api/clients/import`;
+
+        async function prepareFileForUpload() {
+            return eh.export("client0", false, false, false, "dummyprefix"); // Returns buffer
+        }
+
+        it('responds without authentication with 403', async() => {
+            var zipfilebuffer = await prepareFileForUpload();
+            var response = await wh.postFileToUrl(url, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 403);
+        });
+
+        it('responds without write permission with 403', async() => {
+            await th.removeWritePermission(Db.PortalDatabaseName, "portal_usergroup0", co.permissions.ADMINISTRATION_CLIENT);
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var zipfilebuffer = await prepareFileForUpload();
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 403);
+        });
+
+        it('responds with "Error" when no file was posted', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', null, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            assert.strictEqual(response.body, "Error");
+        });
+
+        it('Ignores the content when posted file was not a ZIP file', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', 'textcontent', null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            assert.notEqual(response.body, "Error");
+        });
+
+        it('Ignores the content when ZIP file has no root folder in it', async() => {
+            await Db.createDatatype("client0", "datatypesafter", "label", "labels", "name", "", "", null, null, true, false);
+            var zip = new jszip();
+            var datatypes = (await Db.query("client0", "SELECT * FROM datatypes;")).rows;
+            zip.file("datatypes", JSON.stringify(datatypes));
+            var zipfilebuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            var clientname = response.body;
+            var datatypesafterresult = await Db.query(clientname, "SELECT * FROM datatypes WHERE name='datatypesafter';");
+            assert.strictEqual(datatypesafterresult.rowCount, 0);
+        });
+
+        it('Creates a client when ZIP file has correct structure (even without content)', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var zipfilebuffer = await eh.export("client0", false, false, false, "dummyprefix");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            var clientname = response.body;
+            assert.ok(clientname !== "Error");
+            assert.ok(clientname.length > 0);
+            var clientresult = await Db.query(Db.PortalDatabaseName, `SELECT 1 FROM clients WHERE name='${Db.replaceQuotesAndRemoveSemicolon(clientname)}';`);
+            assert.strictEqual(clientresult.rowCount, 1);
+        });
+
+        it('Sets the label of the client when it was sent', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var zipfilebuffer = await eh.export("client0", false, false, false, "dummyprefix");
+            var response = await wh.postFileToUrl(`${url}?token=${token}&label=MyClient`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            var clientresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name='${Db.replaceQuotesAndRemoveSemicolon(response.body)}';`);
+            assert.strictEqual(clientresult.rows[0].label, "MyClient");
+        });
+
+        it('Creates datatypes when ZIP file contains datatype definitions', async() => {
+            await Db.createDatatype("client0", "newdatatype", "label", "labels", "name", "", "", null, null, true, false);
+            var zipfilebuffer = await eh.export("client0", true, false, false, "dummyprefix");
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            var clientname = response.body;
+            var datatypesafterresult = await Db.query(clientname, "SELECT * FROM datatypes WHERE name='newdatatype';");
+            assert.strictEqual(datatypesafterresult.rowCount, 1);
+        });
+
+        it('Creates datatype fields when ZIP file contains datatype AND datatypefield definitions', async() => {
+            await Db.createDatatype("client0", "newdatatype", "label", "labels", "name", "", "", null, null, true, false);
+            await Db.createDatatypeField("client0", "newdatatype", "newdatatypefield", "label", co.fieldtypes.text, false, false, null, null, 0, true, false, false, true, 0);
+            var zipfilebuffer = await eh.export("client0", true, false, false, "dummyprefix");
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            var clientname = response.body;
+            var datatypefieldsafterresult = await Db.query(clientname, "SELECT * FROM datatypefields WHERE name='newdatatypefield';");
+            assert.strictEqual(datatypefieldsafterresult.rowCount, 1);
+        });
+
+        it('Does not create datatype fields when datatypefields are contained but datatypes are not contained', async() => {
+            await Db.createDatatype("client0", "newdatatype", "label", "labels", "name", "", "", null, null, true, false);
+            await Db.createDatatypeField("client0", "newdatatype", "newdatatypefield", "label", co.fieldtypes.text, false, false, null, null, 0, true, false, false, true, 0);
+            var zip = new jszip();
+            var datatypefields = (await Db.query("client0", "SELECT * FROM datatypefields;")).rows;
+            zip.file("client0\\datatypefields", JSON.stringify(datatypefields));
+            var zipfilebuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            var clientname = response.body;
+            var datatypefieldsafterresult = await Db.query(clientname, "SELECT * FROM datatypefields WHERE name='newdatatypefield';");
+            assert.strictEqual(datatypefieldsafterresult.rowCount, 0);
+        });
+
+        it('Ignores datatype creation when datatypes file contains invalid content', async() => {
+            var zip = new jszip();
+            zip.file("client0\\datatypes", "invalidcontent");
+            var zipfilebuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            assert.notStrictEqual(response.body, "Error");
+        });
+
+        it('Ignores datatypefield creation when datatypefields file contains invalid content', async() => {
+            var zip = new jszip();
+            var datatypes = (await Db.query("client0", "SELECT * FROM datatypes;")).rows;
+            zip.file("client0\\datatypes", JSON.stringify(datatypes));
+            var datatypefields = (await Db.query("client0", "SELECT * FROM datatypefields;")).rows;
+            zip.file("client0\\datatypefields", "invalidcontent");
+            var zipfilebuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            assert.notStrictEqual(response.body, "Error");
+        });
+
+        it('Creates database content when content folder was included', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var zipfilebuffer = await eh.export("client0", false, true, false, "dummyprefix");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            var result = await Db.query(response.body, `SELECT * FROM documents;`);
+            assert.ok(result.rowCount > 0);
+        });
+
+        it('Ignores content tables, for which no datatype exists', async() => {
+            var zip = new jszip();
+            var documents = (await Db.query("client0", "SELECT * FROM documents;")).rows;
+            zip.file("client0\\content\\unknowndatatype", JSON.stringify(documents));
+            var zipfilebuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            assert.notStrictEqual(response.body, "Error");
+        });
+
+        it('Ignores content table fields, for which no datatype field exists', async() => {
+            await Db.createDatatypeField("client0", "documents", "newdatatypefield", "labeldingens", co.fieldtypes.text, false, false, null, null, 0, true, false, false, true, 0);
+            var zip = new jszip();
+            var documents = (await Db.query("client0", "SELECT * FROM documents;")).rows;
+            zip.file("client0\\content\\documents", JSON.stringify(documents));
+            var zipfilebuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            await Db.deleteRecordTypeField("client0", "documents", "newdatatypefield");
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            assert.notStrictEqual(response.body, "Error");
+            var result = await Db.query(response.body, `SELECT * FROM documents;`);
+            assert.ok(result.rowCount > 0);
+        });
+
+        it('Ignores invalid content (wrong attribute type)', async() => {
+            var zip = new jszip();
+            var documents = [{ name:"client0_testdoc", isshared:"mustnotbeastring" }];
+            zip.file("client0\\content\\documents", JSON.stringify(documents));
+            var zipfilebuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            assert.notStrictEqual(response.body, "Error");
+        });
+
+        it('does not insert formula values even if they are contained in the content table in the ZIP file', async() => {
+            var zip = new jszip();
+            var datatypes = (await Db.query("client0", "SELECT * FROM datatypes;")).rows;
+            zip.file("client0\\datatypes", JSON.stringify(datatypes));
+            var datatypefields = (await Db.query("client0", "SELECT * FROM datatypefields;")).rows;
+            zip.file("client0\\datatypefields", JSON.stringify(datatypefields));
+            var clientnulldatatypenull = (await Db.query("client0", "SELECT * FROM clientnulldatatypenull;")).rows;
+            clientnulldatatypenull.find(e => e.name === "clientnulldatatypenullentity0").formula0 = 12345;
+            // var documents = [{ name:"client0_testdoc", isshared:"mustnotbeastring" }];
+            zip.file("client0\\content\\clientnulldatatypenull", JSON.stringify(clientnulldatatypenull));
+            var zipfilebuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            assert.strictEqual(response.statusCode, 200);
+            var newclientname = response.body;
+            assert.notStrictEqual(newclientname, "Error");
+            var entity = await Db.getDynamicObject(newclientname, "clientnulldatatypenull", "clientnulldatatypenullentity0");
+            assert.notEqual(entity.formula0, 12345);
+        });
+
+        it('recalculates all formulas of the newly created client', async() => {
+            var zipfilebuffer = await eh.export("client0", true, true, false, "dummyprefix");
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            var newclientname = response.body;
+            var entity = await Db.getDynamicObject(newclientname, "clientnulldatatypenull", "clientnulldatatypenullentity0");
+            assert.strictEqual(entity.formula1, "234.567"); // Formula values are returned as strings
+        });
+
+        it('Extracts document files when they are contained in the "files" folder', async() => {
+            var zipfilebuffer = await eh.export("client0", false, false, true, "dummyprefix");
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            var response = await wh.postFileToUrl(`${url}?token=${token}`, 'clientpackage.zip', zipfilebuffer, null, 900000);
+            var newclientname = response.body;
+            var documentspath = dh.getDocumentPath(newclientname, "");
+            assert.ok(fs.existsSync(documentspath));
+            var files = fs.readdirSync(documentspath);
+            assert.ok(files.length > 0);
+        });
+
+    });
+
+    describe('POST/newadmin', async() => {
+
+        function createPostNewAdminTestElement() {
+            return { name: "client0_newadmin", password: 'password', clientname: "client0" };
+        }
+
+        th.apiTests.post.defaultNegative(co.apis.clients + "/newAdmin", co.permissions.ADMINISTRATION_CLIENT, createPostNewAdminTestElement, false, "portal", "portal_usergroup0", "portal_usergroup0_user0");
+
+        it('responds with 400 when no user is given', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/newadmin?token=${token}`).send().expect(400);
+        });
+
+        it('responds with 400 when no username is given', async() => {
+            var newAdmin = { password: 'password', clientname: "client0" };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(400);
+        });
+
+        it('responds with 400 when no password is given', async() => {
+            var newAdmin = { name: "client0_usergroup0_user0", clientname: "client0" };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(400);
+        });
+
+        it('responds with 409 when username is in use', async() => {
+            var newAdmin = { name: "client0_usergroup0_user0", password: 'password', clientname: "client0" };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(409);
+        });
+
+        it('responds with 400 when no clientname is given', async() => {
+            var newAdmin = { name: "client0_newadmin", password: 'password' };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(400);
+        });
+
+        it('responds with 400 when clientname is invalid', async() => {
+            var newAdmin = { name: "client0_newadmin", password: 'password', clientname: "invalidId" };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(400);
+        });
+
+        it('responds with 200 and creates a new admin in a new user group with the same name as the username', async() => {
+            var newAdmin = { name: "client0_newadmin", password: 'password', clientname: "client0" };
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.post(`/api/clients/newadmin?token=${token}`).send(newAdmin).expect(200);
+            var createdUser = await Db.getDynamicObject("client0", "users", newAdmin.name);
+            assert.ok(createdUser);
+            assert.ok(createdUser.isadmin);
+            var createdUserGroup = await Db.getDynamicObject("client0", "usergroups", createdUser.usergroupname);
+            assert.ok(createdUserGroup);
+            assert.strictEqual(createdUserGroup.label, createdUser.name);
+        });
+
+    });
+
+    describe('DELETE/:id', async() => {
+
+        it('Deletes all clientmodules', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/dynamic/clients/client0?token=${token}`).expect(204);
+            assert.ok((await Db.query(Db.PortalDatabaseName, "SELECT 1 FROM clientmodules WHERE clientname='client0';")).rowCount < 1);
+        });
+
+        it('Deletes all clientsettings', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/dynamic/clients/client0?token=${token}`).expect(204);
+            assert.ok((await Db.query(Db.PortalDatabaseName, "SELECT 1 FROM clientsettings WHERE clientname='client0';")).rowCount < 1);
+        });
+
+        it('Drops the database', async() => {
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/dynamic/clients/client0?token=${token}`).expect(204);
+            assert.ok((await Db.queryDirect("postgres", `SELECT 1 FROM pg_database WHERE datname = '${dbprefix}_client0';`)).rowCount < 1);
+        });
+
+        it('Deletes all document files', async() => {
+            var filePath = dh.getDocumentPath("client0", "");
+            assert.ok(fs.existsSync(filePath));
+            var token = await th.defaults.login("portal_usergroup0_user0");
+            await th.del(`/api/dynamic/clients/client0?token=${token}`).expect(204);
+            console.log(filePath);
+            assert.ok(!fs.existsSync(filePath));
         });
 
     });

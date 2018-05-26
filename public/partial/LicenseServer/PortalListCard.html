@@ -1,22 +1,5 @@
-<md-card ng-cloak ng-controller="LicenseServerPortalListCardController" style="background-image:url('/css/icons/office/Server.svg');">
-    
-    <md-toolbar class="md-toolbar-tools md-accent">
-        <md-button ng-click="newPortal()" aria-label="ADD PORTAL" ng-if="canWritePortals">
-            <md-tooltip md-direction="bottom"><span translate>TRK_PORTALS_CREATE_NEW_PORTAL</span></md-tooltip>
-            <md-icon md-svg-src="/css/icons/material/Plus Math.svg"></md-icon>
-            <p translate>TRK_PORTALS_PORTAL</p>
-        </md-button>
-    </md-toolbar>
-    
-    <md-card-content>
-        <md-list class="lines-beetween-items">
-            <md-list-item ng-repeat="portal in portals | orderBy: 'name'" ng-click="selectPortal(portal)" ng-class="{active:selectedPortal === portal,strikethrough:!portal.isActive}" aria-label="{{portal.name}}">
-                <md-icon md-svg-src="/css/icons/material/Server.svg"></md-icon>
-                <div class="md-list-item-text multiline"><p>{{portal.name}}</p><p>{{portal.version}} / {{getLastAccessTime(portal)}}</p></div>
-            </md-list-item>
-        </md-list>
-    </md-card-content>
-
-    <resize-handle></resize-handle>
-    
-</md-card>
+<md-card 
+    avt-card
+    avt-list-card='{"listfilter":"portals","detailscard":"LicenseServer/PortalDetailsCard"}'
+    avt-add-element-toolbar-button='{"datatypenames":["portals"]}'
+></md-card>

@@ -20,6 +20,10 @@ resize-handle:hover {
     background-color: rgba(0, 0, 0, 0.12);
 }
 
+img[src=""], img[ng-src=""] {
+    content:url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+}
+
 md-card {
     position:relative;
     width: 360px;
@@ -88,14 +92,33 @@ md-card > ng-include {
     background-color: rgba(255,255,255,0.97);
 }
 
+md-card > div.progress-panel {
+    background-color: rgba(0,0,0,0.9);
+    border-radius: 5px;
+    bottom: 10px;
+    height: 60px;
+    left: initial;
+    right: 10px;
+    top: initial;
+    width: 60px;
+}
+
 md-card.list-details-details {
     flex: 1;
     width: initial;
     min-width: initial;
 }
 
+md-card.list-details-details:last-child > resize-handle {
+    display: none;
+}
+
 md-card-content > md-grid-list {
     height:100%;
+}
+
+md-card.areas-card {
+    flex:2;
 }
 
 md-card.doc md-card-content {
@@ -169,7 +192,7 @@ md-card-title-text > span {
     text-overflow: ellipsis;
 }
 
-md-icon {
+md-icon, md-list md-list-item > md-icon {
     color: black;
     opacity: 0.6;
 }
@@ -233,6 +256,11 @@ md-list.hierarchy > md-list-item {
     padding:0;
 }
 
+md-list.hierarchy > md-list-item.highlighted > div {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
 md-list.hierarchy > md-list-item > div {
     width:100%;
     cursor: pointer;
@@ -246,10 +274,20 @@ md-list.hierarchy > md-list-item > div > md-icon {
     padding-right:4px;
 }
 
-md-list.hierarchy > md-list-item > div > img, table.areas > tbody > tr > td:first-of-type > div > img {
+.md-list-item-inner > img, md-list.hierarchy > md-list-item > div > img, table.areas > tbody > tr > td:first-of-type > div > img {
     margin:auto 4px auto 0;
     height:24px;
+    min-width: 24px;
     opacity: 0.6;
+}
+
+.md-list-item-inner > md-icon.hint {
+    height: 16px;
+    opacity: 0.3;
+}
+
+.md-list-item-inner > md-icon.hint > svg {
+    height: 16px;
 }
 
 md-list.hierarchy > md-list-item > div > p {
@@ -320,7 +358,7 @@ md-sidenav > div {
 }
 
 md-tabs {
-    background-color: rgba(255,255,255,0.9);
+    background-color: rgba(255,255,255,0.95);
 }
 md-tabs md-card-content {
     background-color: transparent;
@@ -404,14 +442,42 @@ table.areas > tbody > tr > td:first-of-type > div > .inset {
 
 table.areas > tbody > tr > td:first-of-type > div > span {
     margin: 4px;
+    white-space: initial;
 }
 
 table.areachildren > tbody > tr > td {
     padding: 4px;
 }
 
+table.areachildren.smalldevice > tbody > tr > td > div > span {
+    white-space: normal;
+}
+
 table.largedevice, table.smalldevice {
     display: table;
+}
+
+video {
+    max-width: 100%;
+}
+
+.avt-reference-select {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    font-size: 16px !important;
+    margin: 0;
+    padding: 2px 2px 1px 2px;
+    text-transform: initial;
+    width: 100%;
+}
+
+.avt-reference-select > span {
+    display: flex;
+    flex: 1;    
+}
+
+.avt-reference-select > span > span {
+    flex: 1;
+    text-align: initial;
 }
 
 .nowrap {
@@ -549,7 +615,8 @@ table.largedevice, table.smalldevice {
     height: 100%;
     width: 0;
     padding-left: 100%;
-    cursor:pointer;
+    cursor: pointer;
+    z-index: 9999;
 }
 
 .md-fab .fileupload {
@@ -860,6 +927,10 @@ table.largedevice, table.smalldevice {
         padding:0;
         top: -9px;
         right: -11px;
+    }
+
+    md-card-content > section {
+        padding-bottom: 14px;
     }
 
     md-content.list-details md-card md-toolbar button.close-card {

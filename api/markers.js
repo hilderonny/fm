@@ -1,45 +1,25 @@
 /**
  * CRUD API for MAP markers with geolocation.
  * Status: EXPERIMENTAL, NO NEED FOR TESTS!
- * 
- * marker {
- *      _id,
- *      lat,
- *      lng
- * }
  */
-var router = require('express').Router();
-var validateId = require('../middlewares/validateId');
-var monk = require('monk');
+var co = require('../utils/constants');
+var ah = require("../utils/apiHelper");
 
-router.get('/', (req, res) => {
-    var clientId = req.user.clientId;
-    req.db.get('markers').find({ clientId: clientId }, req.query.fields).then((markers) => {
-        res.send(markers);
-    });
+module.exports = ah.createApi({
+    apiname: "markers",
+    modulename: "ronnyseins",
+    mapfields: (e, user) => { return {
+        _id: e.name, 
+        clientId: user.clientname, 
+        lat: e.lat,
+        lng: e.lon
+    }},
+    mapfieldsreverse: (e) => { return {
+        name: e._id, 
+        lat: e.lat,
+        lon: e.lng
+    }},
+    getall: true,
+    post: true,
+    delete: true,
 });
-
-// Create a marker
-router.post('/', function(req, res) {
-    var marker = req.body;
-    if (!marker || Object.keys(marker).length < 1 || !marker.lat || !marker.lng) {
-        return res.sendStatus(400);
-    }
-    delete marker._id; // Ids are generated automatically
-    marker.clientId = req.user.clientId;
-    req.db.insert('markers', marker).then((insertedMarker) => {
-        res.send(insertedMarker);
-    });
-});
-
-// Delete a marker
-router.delete('/:id', validateId, function(req, res) {
-    req.db.remove('markers', req.params.id).then((result) => {
-        if (result.result.n < 1) {
-            return res.sendStatus(404);
-        }
-        res.sendStatus(204);
-    });
-});
-
-module.exports = router;

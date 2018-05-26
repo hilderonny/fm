@@ -6,25 +6,27 @@ var rimraf = require('rimraf');
 var path = require('path');
 var fs = require('fs');
 var th = require('../testhelpers');
-var db = require('../../middlewares/db');
 var co = require('../../utils/constants');
 var ap = require('../../utils/app-packager');
 var wh = require('../../utils/webHelper');
 var lc = require('../../config/localconfig.json');
 
 describe('API triggerUpdate', function() {
-    
+
     var oldProcessExit;
 
-    beforeEach(() => {
+    before(async() => {
+        await th.cleanDatabase();
+        await th.prepareClients();
+    });
+
+    beforeEach(async() => {
         oldProcessExit = process.exit;
         process.exit = (code) => { };
-        return th.cleanDatabase()
-            .then(th.prepareClients)
-            .then(th.prepareClientModules)
-            .then(th.prepareUserGroups)
-            .then(th.prepareUsers)
-            .then(th.preparePermissions);
+        await th.prepareClientModules();
+        await th.prepareUserGroups();
+        await th.prepareUsers();
+        await th.preparePermissions();
     });
 
     afterEach(() => {
@@ -68,7 +70,7 @@ describe('API triggerUpdate', function() {
                 var fullPath = path + fileName;
                 assert.ok(fs.existsSync(fullPath), `File ${fullPath} does not exist`);
             });
-            return Promise.resolve();
+            return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
         }
 
         it('responds with 401 when there is no secret given', function() {
