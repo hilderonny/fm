@@ -126,10 +126,19 @@
                 "public/js/Administration/SettingSetListCardController.js",
                 "public/js/Administration/UserSettingsCardController.js"
             ],
-            "languages" : [ "en", "de" ],
+            "languages" : [ "de" ],
             "menu": [
                 {
                     "title": "TRK_MENU_ADMINISTRATION",
+                    "apps": {
+                        "TRK_APP_ADMINISTRATION": [
+                            { "mainCard": "Administration/UserSettingsCard", "index": 100, "icon": "/css/icons/material/User.svg", "title": "TRK_SETTINGSET_USER_GENERAL", "permission" : "PERMISSION_SETTINGS_USER", "docCard" : "UserSettings", "directurls": [ "usersettings" ] },
+                            { "mainCard": "Administration/ClientSettingsCard", "index": 110, "icon": "/css/icons/material/Briefcase.svg", "title": "TRK_SETTINGSET_CLIENT", "permission" : "PERMISSION_SETTINGS_CLIENT", "docCard" : "ClientSettings", "directurls": [ "clientsettings" ] },
+                            { "mainCard": "Administration/UserlistCard", "index": 120, "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
+                            { "mainCard": "Administration/UsergrouplistCard", "index": 130, "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] },
+                            { "mainCard": "Administration/DynamicAttributesEntityListCard", "index": 140, "icon": "/css/icons/material/View Details.svg", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "permission" : "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES", "docCard" : "DynamicAttributesEntityList", "directurls": [ "dynamicattributes" ] }
+                        ]
+                    },
                     "items": [
                         { "mainCard": "Administration/SettingSetListCard", "icon": "/css/icons/material/Settings.svg", "title": "TRK_MENU_ADMINISTRATION_SETTINGS", "permission": "PERMISSION_ADMINISTRATION_SETTINGS", "docCard" : "Settings", "directurls": [ "settings" ] },
                         { "mainCard": "Administration/UserlistCard", "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
