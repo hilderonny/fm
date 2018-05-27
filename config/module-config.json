@@ -4,7 +4,7 @@
         "base": {
             "forportal": true,
             "forclients": true,
-            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "settingsets", "translations", "users" ],
+            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "translations", "users" ],
             "middlewares": [ "auth", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
@@ -69,7 +69,6 @@
                 "partial/Administration/DynamicAttributesCard.html",
                 "partial/Administration/DynamicAttributeElementCard.html",
                 "partial/Administration/DynamicAttributesEntityListCard.html",
-                "partial/Administration/SettingSetListCard.html",
                 "partial/Administration/UserCard.html",
                 "partial/Administration/UsergroupCard.html",
                 "partial/Administration/UsergrouplistCard.html",
@@ -123,7 +122,6 @@
                 "public/js/Administration/DynamicAttributeCreationFormCardController.js",
                 "public/js/Administration/DynamicAttributeElementCardController.js",
                 "public/js/Administration/DynamicAttributesEntityListCardController.js",
-                "public/js/Administration/SettingSetListCardController.js",
                 "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "de" ],
@@ -131,11 +129,11 @@
                 "TRK_APP_ADMINISTRATION": [
                     { "mainCard": "Administration/UserlistCard", "index": 110, "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
                     { "mainCard": "Administration/UsergrouplistCard", "index": 120, "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] },
-                    { "mainCard": "Administration/DynamicAttributesEntityListCard", "index": 140, "icon": "/css/icons/material/View Details.svg", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "permission" : "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES", "docCard" : "DynamicAttributesEntityList", "directurls": [ "dynamicattributes" ] }
+                    { "mainCard": "Administration/DynamicAttributesEntityListCard", "index": 140, "icon": "/css/icons/material/View Details.svg", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "permission" : "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES", "directurls": [ "dynamicattributes" ] }
                 ],
                 "TRK_APP_EINSTELLUNGEN": [
-                    { "mainCard": "Administration/UserSettingsCard", "index": 410, "icon": "/css/icons/material/User.svg", "title": "TRK_SETTINGSET_USER_GENERAL", "permission" : "PERMISSION_SETTINGS_USER", "docCard" : "UserSettings", "directurls": [ "usersettings" ] },
-                    { "mainCard": "Administration/ClientSettingsCard", "index": 420, "icon": "/css/icons/material/Briefcase.svg", "title": "TRK_SETTINGSET_CLIENT", "permission" : "PERMISSION_SETTINGS_CLIENT", "docCard" : "ClientSettings", "directurls": [ "clientsettings" ] }
+                    { "mainCard": "Administration/UserSettingsCard", "index": 410, "icon": "/css/icons/material/User.svg", "title": "TRK_SETTINGSET_USER_GENERAL", "permission" : "PERMISSION_SETTINGS_USER", "directurls": [ "usersettings" ] },
+                    { "mainCard": "Administration/ClientSettingsCard", "index": 420, "icon": "/css/icons/material/Briefcase.svg", "title": "TRK_SETTINGSET_CLIENT", "permission" : "PERMISSION_SETTINGS_CLIENT", "directurls": [ "clientsettings" ] }
                 ]
             },
             "utils": [ "apiHelper", "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "localConfigHelper", "permissionshelper", "updateonstart" ],
@@ -848,7 +846,7 @@
             "languages" : [ "de" ],
             "apps": {
                 "TRK_APP_EINSTELLUNGEN": [
-                    { "mainCard": "Administration/PortalSettingsCard", "index": 430, "icon": "/css/icons/material/Server.svg", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "permission" : "PERMISSION_SETTINGS_PORTAL", "docCard" : "PortalSettings", "directurls": [ "portalsettings" ] }
+                    { "mainCard": "Administration/PortalSettingsCard", "index": 430, "icon": "/css/icons/material/Server.svg", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "permission" : "PERMISSION_SETTINGS_PORTAL", "directurls": [ "portalsettings" ] }
                 ]
             },
             "utils" :["portalUpdatesHelper"]
@@ -883,7 +881,7 @@
             "languages" : [ "de" ],
             "apps": {
                 "TRK_APP_ADMINISTRATION": [
-                    { "mainCard": "Administration/RecordTypeListCard", "index": 130, "icon": "/css/icons/material/icons8-categorize.svg", "title": "TRK_SETTINGSET_RECORDTYPES", "permission" : "PERMISSION_SETTINGS_CLIENT_RECORDTYPES", "docCard" : "Datatypes", "directurls": [ "datatypes" ] }
+                    { "mainCard": "Administration/RecordTypeListCard", "index": 130, "icon": "/css/icons/material/icons8-categorize.svg", "title": "TRK_SETTINGSET_RECORDTYPES", "permission" : "PERMISSION_SETTINGS_CLIENT_RECORDTYPES", "directurls": [ "datatypes" ] }
                 ]
             }
         },

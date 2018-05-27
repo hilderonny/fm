@@ -34,9 +34,6 @@ var ch = {
      * Prüft, ob der gegebene Mandant überhaupt Zugriff auf eine bestimmte Berechtigung hat. Wird in der permissions-API
      * verwendet bevor für eine Benutzergruppe das Vorhandensein einer Berechtigung ermittelt wird.
      * Git ein Promise zurück, welches als Parameter true oder false liefert.
-     * @example 
-     * var configHelper = require('/utils/configHelper');
-     * configHelper.isPermissionAvailableToClient(req.user.clientId, 'PERMISSION_ADMINISTRATION_SETTINGS').then(function(permissionIsAvailable) { ... });
     */
     isPermissionAvailableToClient: async(clientname, permissionKey) => {
         var clientPermissionKeys = await ch.getAvailablePermissionKeysForClient(clientname);

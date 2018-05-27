@@ -168,7 +168,7 @@ function getTranslationFilePath(moduleName, language) {
 
 /**
  * Collects all translation keys for permission defined in the module-config
- * in menus or settingsets and stores them in the given array.
+ * in apps and stores them in the given array.
  */
 function collectPermissionTranslationKeys(translationKeys) {
     Object.keys(moduleConfig.modules).forEach(function eachModule(moduleName) {

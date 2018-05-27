@@ -1,5 +1,6 @@
 {
-    "TRK_MENU_BIM" : "FM",
+    "TRK_APP_CRM" : "CRM",
+    "TRK_APP_STAMMDATEN" : "Stammdaten",
     "TRK_MENU_BIM_ARRANGEOBJECTS" : "Arrange Objekte",
     "TRK_MODULE_fmobjects_NAME" : "FM Objekte"
 }
