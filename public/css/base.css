@@ -196,6 +196,10 @@ md-card-title-text > span {
     text-overflow: ellipsis;
 }
 
+md-divider {
+    margin: 12px 0;
+}
+
 md-icon, md-list md-list-item > md-icon {
     color: black;
     opacity: 0.6;

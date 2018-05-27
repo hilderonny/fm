@@ -6,27 +6,27 @@ var moduleConfig = require('../config/module-config.json'); // http://stackoverf
 var co = require('../utils/constants');
 
 var extractDocMenu = () => {
-    var fullMenu = [];
+    var fullMenu = {};
     var moduleNames = Object.keys(moduleConfig.modules);
     moduleNames.forEach((moduleName) => {
         var appModule = moduleConfig.modules[moduleName];
         // Entweder versteckte Dokumentationen, wie Releasenotes in eigenem Attribut ...
         if (appModule.doc) appModule.doc.forEach((docCard) => {
-            fullMenu.push(docCard);
+            fullMenu[docCard.docCard] = docCard;
         });
         // ... oder als Attribut an irgendeinem Menüeintrag
-        if (appModule.menu) appModule.menu.forEach((menu) => {
-            menu.items.forEach((item) => {
-                if (item.docCard) fullMenu.push({
+        if (appModule.apps) Object.values(appModule.apps).forEach(appmenus => {
+            appmenus.forEach((item) => {
+                if (item.docCard) fullMenu[item.docCard] = {
                     docCard: item.docCard,
                     icon: item.icon,
                     title: item.title,
                     index: 0 // Aus Menü so sortieren, wie es kommt.
-                });
+                };
             });
         });
     });
-    return fullMenu;
+    return Object.values(fullMenu);
 };
 
 /**
