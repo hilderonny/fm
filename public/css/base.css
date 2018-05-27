@@ -346,6 +346,10 @@ md-list-item.switch {
     text-align: center;
 }
 
+.md-select-menu-container {
+    z-index: 99999;
+}
+
 md-sidenav {
     display: flex;
 }

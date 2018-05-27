@@ -93,11 +93,6 @@ app.controller('OfficeCalendarCardController', function($scope, $rootScope, $htt
 
 });
 
-app.directUrlMappings.activities = {
-    mainMenu: 'TRK_MENU_OFFICE',
-    subMenu: 'TRK_MENU_OFFICE_ACTIVITIES'
-};
-
 // Special controller for defining list parameters for all list
 app.controller('OfficeCalendarCardAllController', function($scope) {
     $scope.activityListFilter = function(activity) {

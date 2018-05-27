@@ -45,10 +45,44 @@ var extractMenu = (moduleNames) => {
     return fullMenuArray;
 };
 
+function extractAppsFromModules(modulenames) {
+    var mccopy = JSON.parse(JSON.stringify(mc));
+    var apps = {};
+    modulenames.forEach((modulename) => {
+        var mcmodule = mccopy.modules[modulename];
+        if (!mcmodule || !mcmodule.apps) return;
+        Object.keys(mcmodule.apps).forEach((apptitle) => {
+            var app = mcmodule.apps[apptitle];
+            if (!apps[apptitle]) {
+                apps[apptitle] = JSON.parse(JSON.stringify(app)); // Make copy instead of reference
+            } else {
+                Array.prototype.push.apply(apps[apptitle], app); // Push multiple items with prototype.push
+            }
+        });
+    });
+    return apps;
+}
+
 /**
  * Only the menu structure available for the current user is returned.
  * When the logged in user is an admin, 
  * then the entire menu structure is returned.
+ * {
+ *  logourl: "avorium.png",
+ *  menu: [
+ *      { 
+ *          title: "sectiontitle",
+ *          items: [
+ *              { mainCard, icon, title, permission, docCard, directurls: [] }
+ *          ]
+ *      }
+ *  ],
+ *  apps: {
+ *      "Translation key for app title": [
+ *          { mainCard, index, icon, title, permission, docCard, directurls: [] }
+ *      ]
+ *  }
+ * }
  */
 router.get('/', auth(), async(req, res) => {
     var clientname = req.user.clientname;
@@ -57,24 +91,25 @@ router.get('/', auth(), async(req, res) => {
     var modulenames = clientname === Db.PortalDatabaseName
         ? allModuleKeys.filter(mk => mc.modules[mk].forportal) // Portal has only some modules allowed
         : (await Db.query(Db.PortalDatabaseName, `SELECT modulename FROM clientmodules WHERE clientname='${Db.replaceQuotes(clientname)}' AND modulename IN (${allModuleKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(",")});`)).rows.map((r) => r.modulename);
-    var fullmenu = extractMenu(modulenames); // Clone it for overwriting
+    var apps = extractAppsFromModules(modulenames);
     if (!req.user.isadmin) {
         var permissionKeys = await configHelper.getAvailablePermissionKeysForClient(clientname);
         var permissions = permissionKeys.length > 0 ? (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows : [];
-        for (var i = fullmenu.length - 1; i >= 0; i--) {
-            var mainMenu = fullmenu[i];
-            for (var j = mainMenu.items.length - 1; j >= 0; j--) {
-                if (!permissions.find((p) => p.key === mainMenu.items[j].permission)) mainMenu.items.splice(j, 1);
+        var apptitles = Object.keys(apps);
+        apptitles.forEach((apptitle) => {
+            var appmenus = apps[apptitle].filter(m => !!permissions.find(p => p.key === m.permission));
+            if (appmenus) {
+                apps[apptitle] = appmenus;
+            } else {
+                delete apps[apptitle];
             }
-            if (mainMenu.items.length < 1) {
-                fullmenu.splice(i, 1);
-            }
-        }
+        });
     }
     var result = {
         logourl: clientSettings && clientSettings.logourl ? clientSettings.logourl : 'css/logo_avorium_komplett.svg',
-        menu: fullmenu,
-    }
+        // menu: fullmenu,
+        apps: apps
+    };
     res.send(result);
 });
 
