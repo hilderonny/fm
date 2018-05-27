@@ -949,7 +949,7 @@
                     "items": [
                         { "mainCard": "ronnyseins/AugmentedRealityCard", "icon": "/css/icons/material/Virtual Reality.svg", "title": "TRK_MENU_LAB_AUGMENTEDREALITY" },
                         { "mainCard": "ronnyseins/GoogleMapsCard", "icon": "/css/icons/material/World Map.svg", "title": "TRK_MENU_LAB_GOOGLEMAPS" },
-                        { "mainCard": "ronnyseins/BlocklyCard", "icon": "/css/icons/material/icons8-blockly-green", "title": "TRK_MENU_LAB_BLOCKLY" }
+                        { "mainCard": "ronnyseins/BlocklyCard", "icon": "/css/icons/material/icons8-blockly-green.svg", "title": "TRK_MENU_LAB_BLOCKLY" }
                     ]
                 }
             ],
