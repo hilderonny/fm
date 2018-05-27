@@ -1,5 +1,9 @@
 /* Diese Datei enthält Stilvorgaben, die in local.css überschrieben werden können */
 
+canvas.fullsize {
+    flex: 1;
+}
+
 /* Allgemeine Vorgaben für Desktop und Mobil */
 button > md-progress-circular {
     margin:auto;

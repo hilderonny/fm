@@ -904,6 +904,7 @@
                 "partial/ronnyseins/mixedreality.html"
             ],
             "include" : [
+                "public/js/components/avt-babylonjs-scene.js",
                 "public/js/components/avt-viewin3d-toolbar-button.js",
                 
                 "public/js/lib/babylon.js",
@@ -913,6 +914,7 @@
                 "public/js/ronnyseins/AugmentedRealityCardController.js",
                 "public/js/ronnyseins/GoogleMapsCardController.js"
             ],
+            "languages" : [ "de" ],
             "apps": {
                 "TRK_APP_RONNY": [
                     { "mainCard": "ronnyseins/AugmentedRealityCard", "index": 810, "icon": "/css/icons/material/Virtual Reality.svg", "title": "TRK_MENU_LAB_AUGMENTEDREALITY" },
