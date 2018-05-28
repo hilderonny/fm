@@ -935,7 +935,7 @@
         "webdav" : {
             "forportal": true,
             "forclients": true,
-            "utils" :["webdav", "db", "webdavfilesystem"]
+            "utils" :["webdav", "db", "webdavfilesystem", "webdavusermanagement"]
         }
     }
 }

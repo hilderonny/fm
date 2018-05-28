@@ -287,7 +287,11 @@ module.exports.modules = {
     /**
      * Spielereien
      */
-    ronnyseins: 'ronnyseins'
+    ronnyseins: 'ronnyseins',
+    /**
+     * Modul für WebDAV
+     */
+    webdav: 'webdav'
 }
 
 /**
