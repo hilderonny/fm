@@ -1,0 +1,22 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu QR Scanner</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-content>
+
+        <p>
+            Mit dem QR Scanner werden QR Codes eingelesen. Dazu wird das Modul geöffnet, ein Vorschaufenster der Gerätekamera erscheint.
+            Nachdem die Kamera auf einen QR Code ausgerichtet wird und dieser erkannt wird, erscheint ein Dialog, welcher den Inhalt
+            des Codes anzeigt und es erlaubt, eine eventuell im QR Code enthaltene URL aufzurufen.
+        </p>
+        <p>
+            Der QR Scanner funktioniert sowohl auf PCs mit angeschlossener Webcam als auch auf Mobilgeräten. Auf letzteren wird automatisch
+            die Kamera verwendet, die nach hinten (vom Benutzer weg) zeigt.
+        </p>
+                        
+    </md-card-content>
+</md-card>

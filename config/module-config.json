@@ -853,6 +853,27 @@
             "utils" :["portalUpdatesHelper"]
         },
 
+        "qrscanner" : {
+            "forportal": false,
+            "forclients": true,
+            "public" : [
+                "css/icons/material/qrcode-avorium.svg",
+                "css/icons/office/qrcode-avorium.svg",
+                "partial/Doc/QRScanner.html",
+                "partial/qrscanner/QRScannerCard.html"
+            ],
+            "include" : [
+                "public/js/components/avt-qr-scanner.js",
+                "public/js/lib/llqrcode.js"
+            ],
+            "languages" : [ "de" ],
+            "apps": {
+                "TRK_APP_STAMMDATEN": [
+                    { "mainCard": "qrscanner/QRScannerCard", "index": 950, "icon": "/css/icons/material/qrcode-avorium.svg", "title": "TRK_MENU_QRSCANNER", "permission" : "PERMISSION_QRSCANNER", "docCard" : "QRScanner", "directurls": [ "qrscanner" ] }
+                ]
+            }
+        },
+
         "recordtypes": {
             "forportal": true,
             "forclients": true,
@@ -896,8 +917,8 @@
                 "css/icons/material/Collapse.svg",
                 "css/icons/material/Expand.svg",
                 "css/icons/material/Virtual Reality.svg",
-                "css/icons/office/Virtual Reality.svg",
                 "css/icons/material/World Map.svg",
+                "css/icons/office/Virtual Reality.svg",
                 "css/icons/office/World Map.svg",
                 "partial/ronnyseins/3DCard.html",
                 "partial/ronnyseins/AugmentedRealityCard.html",
@@ -908,9 +929,9 @@
                 "public/js/components/avt-babylonjs-scene.js",
                 "public/js/components/avt-viewin3d-toolbar-button.js",
                 
-                "public/js/lib/babylon.js",
                 "public/js/lib/aframe-v0.7.0.min.js",
                 "public/js/lib/aframe-look-at-billboard-component.min.js",
+                "public/js/lib/babylon.js",
                 "public/js/ronnyseins/3DCardController.js",
                 "public/js/ronnyseins/AugmentedRealityCardController.js",
                 "public/js/ronnyseins/GoogleMapsCardController.js"
