@@ -184,30 +184,27 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             return utils.getresponsedata('/api/dynamic/' + datatypename);
         },
 
+        /**
+         * Loads the menu and apps structure from the server and prepares the menu for the logged in user
+         */
         loadmenu: function(scope) {
             return utils.getresponsedata('/api/menu').then(function (responsedata) {
-                scope.menu = responsedata.menu;
-                scope.menu.push({
-                    "title": "TRK_MENU_LOGOUT",
-                    "icon": "/css/icons/material/Exit.svg",
-                    "action": function() {
-                        localStorage.removeItem("loginCredentials");
-                        scope.isLoggedIn = false;
-                        scope.searchResults = [];
-                        scope.searchInputVisible = false;
-                        utils.setLocation('/');
-                    }
-                });
                 scope.logourl = responsedata.logourl;
+                // Apps
+                scope.apptitles = Object.keys(responsedata.apps);
+                scope.currentapptitle = localStorage.getItem("currentapptitle");
+                if (!scope.currentapptitle) scope.currentapptitle = scope.apptitles.sort()[0];
+                scope.apps = responsedata.apps;
                 // Direct URL mappings
-                scope.menu.forEach(function(mainmenu) {
-                    if (mainmenu.items) mainmenu.items.forEach(function(submenu) {
-                        if (submenu.directurls) {
+                scope.apptitles.forEach(function(apptitle) {
+                    var appmenu = scope.apps[apptitle];
+                    appmenu.forEach(function(menu) {
+                        if (menu.directurls) {
                             if (!scope.directUrlMappings) scope.directUrlMappings = {};
-                            submenu.directurls.forEach(function(directurl) {
+                            menu.directurls.forEach(function(directurl) {
                                 scope.directUrlMappings[directurl] = {
-                                    mainMenu: mainmenu.title,
-                                    subMenu: submenu.title
+                                    apptitle: apptitle,
+                                    menutitle: menu.title
                                 };
                             });
                         }

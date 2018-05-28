@@ -23,7 +23,6 @@ describe('API permissions', () => {
 
     function getAllowedClientPermissions() {
         return [
-            co.permissions.ADMINISTRATION_SETTINGS,
             co.permissions.ADMINISTRATION_USER,
             co.permissions.ADMINISTRATION_USERGROUP,
             co.permissions.BIM_AREAS,

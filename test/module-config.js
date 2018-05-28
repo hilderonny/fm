@@ -49,33 +49,20 @@ var collectModuleConfigReferencedFiles = () => {
             files.insert(`public/lang/${moduleName}-${language}.json`);
         });
         // Menu target cards and icons
-        if (module.menu) module.menu.forEach((menu) => {
-            if (menu.mainCard) files.insert(`public/partial/${menu.mainCard}.html`);
-            if (menu.icon) {
-                files.insert(`public${menu.icon}`);
-                files.insert(`public${menu.icon.replace(/\/material\//g, "/office/")}`);
-            }
-            if (menu.items) menu.items.forEach((item) => {
-                if (item.mainCard) files.insert(`public/partial/${item.mainCard}.html`);
-                if (item.icon) {
-                    files.insert(`public${item.icon}`);
-                    files.insert(`public${item.icon.replace(/\/material\//g, "/office/")}`);
+        if (module.apps) Object.values(module.apps).forEach(appmenus => {
+            appmenus.forEach(menu => {
+                if (menu.mainCard) files.insert(`public/partial/${menu.mainCard}.html`);
+                if (menu.icon) {
+                    files.insert(`public${menu.icon}`);
+                    files.insert(`public${menu.icon.replace(/\/material\//g, "/office/")}`);
                 }
-                if (item.docCard) files.insert(`public/partial/Doc/${item.docCard}.html`);
+                if (menu.docCard) files.insert(`public/partial/Doc/${menu.docCard}.html`);
             });
         });
         if (module.doc) module.doc.forEach((doc) => {
             if (doc.docCard) files.insert(`public/partial/Doc/${doc.docCard}.html`);
             if (doc.icon) {
                 files.insert(`public${doc.icon}`);
-            }
-        });
-        // Setting target cards and icons
-        if (module.settingsets) module.settingsets.forEach((settingSet) => {
-            if (settingSet.mainCard) files.insert(`public/partial/${settingSet.mainCard}.html`);
-            if (settingSet.icon) {
-                files.insert(`public/css/icons/material/${settingSet.icon}.svg`);
-                files.insert(`public/css/icons/office/${settingSet.icon}.svg`);
             }
         });
         // Utils
@@ -222,17 +209,11 @@ describe('module-config.json', function() {
     it('permissions match with those in constants', function() {
         var permissionsFromConfig = [], errors = [];
         // Aus den Menüs holen
-        Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].menu).forEach((modMenus) => {
-            if (modMenus) modMenus.forEach(function(menu) {
-                menu.items.forEach(function(item) {
-                    if (item.permission && permissionsFromConfig.indexOf(item.permission) < 0) permissionsFromConfig.push(item.permission);
+        Object.values(moduleConfig.modules).forEach(mod => {
+            if (mod.apps) Object.values(mod.apps).forEach(appmenus => {
+                appmenus.forEach(menu => {
+                    if (menu.permission && permissionsFromConfig.indexOf(menu.permission) < 0) permissionsFromConfig.push(menu.permission);
                 });
-            });
-        });
-        // Aus den SettingSets holen
-        Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].settingsets).forEach((modSettingSets) => {
-            if (modSettingSets) modSettingSets.forEach(function(modSettingSet) {
-                if (modSettingSet.permission && permissionsFromConfig.indexOf(modSettingSet.permission) < 0) permissionsFromConfig.push(modSettingSet.permission);
             });
         });
         // Explizit defnierte Berechtigungen holen
@@ -291,8 +272,8 @@ describe('module-config.json', function() {
         Object.keys(moduleConfig.modules).forEach((k) => {
             var mod = moduleConfig.modules[k];
             // Doku-Links aus Menü holen
-            if (mod.menu) mod.menu.forEach(function(menu) {
-                menu.items.forEach(function(item) {
+            if (mod.apps) Object.values(mod.apps).forEach(appmenus => {
+                appmenus.forEach(function(item) {
                     if (item.docCard) {
                         var fileName = `partial/Doc/${item.docCard}.html`;
                         if (mod.public.indexOf(fileName) < 0) errors.push(`File "${fileName}" not referenced in public part of module "${k}".`);

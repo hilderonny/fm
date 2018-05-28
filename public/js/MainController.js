@@ -19,17 +19,13 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         rootscope.currentMenuItem = menuItem;
         var promise;
         if (menuItem) {
-            if (menuItem.action) {
-                menuItem.action();
-            } else {
-                utils.removeAllCards();
-                utils.setLocation("/"); // Clear location before switching to another module to prevent handling of element names which are invalid in new context
-                promise = utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission).then(function() {
-                    $mdSidenav('left').close();
-                    if (menuItem.directurls && menuItem.directurls.length > 0) utils.setLocation('/' + menuItem.directurls[0]); // Use first defined direct URL
-                    return Promise.resolve();
-                });
-            }
+            utils.removeAllCards();
+            utils.setLocation("/"); // Clear location before switching to another module to prevent handling of element names which are invalid in new context
+            promise = utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission).then(function() {
+                $mdSidenav('left').close();
+                if (menuItem.directurls && menuItem.directurls.length > 0) utils.setLocation('/' + menuItem.directurls[0]); // Use first defined direct URL
+                return Promise.resolve();
+            });
         } else {
             utils.removeAllCards();
             $mdSidenav('left').close();
@@ -51,14 +47,13 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
             return utils.addCardWithPermission('Doc/List', { preselection: rootscope.path[2], anchor: rootscope.path[3] });
         } else if (rootscope.directUrlMappings[path1]) {
             var mapping = rootscope.directUrlMappings[path1];
-            var mainMenu = rootscope.menu.find(function(m) { return m.title === mapping.mainMenu; });
-            if (!mainMenu) return Promise.resolve();
-            var subMenu = mainMenu.items.find(function(mi) { return mi.title === mapping.subMenu; });
-            if (!subMenu) return Promise.resolve();
-            rootscope.currentMenuItem = subMenu;
+            var menus = rootscope.apps[mapping.apptitle];
+            var menu = menus.find(function(m) { return m.title === mapping.menutitle; });
+            if (!menu) return Promise.resolve();
+            rootscope.currentMenuItem = menu;
+            rootscope.currentapptitle = mapping.apptitle;
             angular.element(document.querySelector('#cardcanvas')).empty();
-            subMenu.preselection = rootscope.path[2];
-            return utils.addCardWithPermission(subMenu.mainCard, subMenu, subMenu.permission);
+            return utils.addCardWithPermission(menu.mainCard, menu, menu.permission);
         } else {
             return Promise.resolve();
         }
@@ -90,9 +85,22 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         });
     };
 
+    $scope.logout = function() {
+        localStorage.removeItem("loginCredentials");
+        localStorage.removeItem("currentapptitle");
+        rootscope.isLoggedIn = false;
+        rootscope.searchResults = [];
+        rootscope.searchInputVisible = false;
+        utils.setLocation('/');
+    };
+
     $scope.getofficeicon = function(icon) {
         return icon.replace(/\/material\//g, '/office/');
-    }
+    };
+
+    $scope.onappselected = function() {
+        localStorage.setItem("currentapptitle", this.currentapptitle); // this refers to the child scope of the select box
+    };
 
     // Define used languages
     $scope.setLang = function(lang) {

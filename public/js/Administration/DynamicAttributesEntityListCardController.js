@@ -20,12 +20,5 @@ app.controller('AdministrationDynamicAttributesModelListCardController', functio
     // Filter for icons, but later on other attribute
     // TODO: Obsolete with dynamic objects
     $scope.models = Object.keys($scope.$root.datatypes).map(function(k) { return $scope.$root.datatypes[k]; }).filter(function(dt) { return dt.icon; });
-    utils.setLocation('/settings/TRK_SETTINGSET_DYNAMICATTRIBUTES');
-
-    // //TODo check and fix problem with confusion between folders and documents database table
-    // $http.get('/api/dynamicattributes/models').then(function(response) {
-    //     $scope.models = response.data;
-    //     utils.setLocation('/settings/TRK_SETTINGSET_DYNAMICATTRIBUTES');
-    // });
 
 });
