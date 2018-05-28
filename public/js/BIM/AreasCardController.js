@@ -80,8 +80,3 @@ app.controller('BIMAreasCardController', function($scope, $rootScope, $http, $md
     $scope.load();
 
 });
-
-app.directUrlMappings.areas = {
-    mainMenu: 'TRK_MENU_BIM',
-    subMenu: 'TRK_MENU_BIM_AREAS'
-};

@@ -117,9 +117,9 @@ module.exports.pack = (moduleNameList, version) => {
             var fullPath = `public/lang/${moduleName}-${language}.json`;
             zip.file(fullPath, fs.readFileSync('./' + fullPath));
         });
-        // Add icon files from menu and settingsets
-        if (requestedModule.menu) requestedModule.menu.forEach((menu) => {
-            menu.items.forEach((item) => {
+        // Add icon files from apps
+        if (requestedModule.apps) Object.values(requestedModule.apps).forEach(appmenus => {
+            appmenus.forEach(item => {
                 // Main card
                 var fullPath = `public/partial/${item.mainCard}.html`;
                 zip.file(fullPath, fs.readFileSync('./' + fullPath));
@@ -129,15 +129,6 @@ module.exports.pack = (moduleNameList, version) => {
                 var fullOfficePath = `public${item.icon.replace(/\/material\//g, "/office/")}`;
                 zip.file(fullOfficePath, fs.readFileSync('./' + fullOfficePath));
             });
-        });
-        // Add settingsets
-        if (requestedModule.settingsets) requestedModule.settingsets.forEach((settingSet) => {
-            var fullPath = `public/partial/${settingSet.mainCard}.html`;
-            zip.file(fullPath, fs.readFileSync('./' + fullPath));
-            var fullMaterialPath = `public/css/icons/material/${settingSet.icon}.svg`;
-            zip.file(fullMaterialPath, fs.readFileSync('./' + fullMaterialPath));
-            var fullOfficePath = `public/css/icons/office/${settingSet.icon}.svg`;
-            zip.file(fullOfficePath, fs.readFileSync('./' + fullOfficePath));
         });
     }
     return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
