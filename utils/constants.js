@@ -90,10 +90,6 @@ module.exports.apis = {
      */
     search: 'search',
     /**
-     * API for retrieving settings and setting sets
-     */
-    settingsets: 'settingsets',
-    /**
      * API for retrieving translations for several languages
      */
     translations: 'translations',
@@ -200,7 +196,6 @@ module.exports.collections = {
      * Relations between database entities
      */
     relations:{name:'relations', canHaveAttributes:false},
-    settingsets:{name:'settingsets', canHaveAttributes:false},
     /**
      * Usergroups for users
      */
@@ -305,7 +300,6 @@ module.exports.permissions = {
      * Permission to show and edit clients
      */
     ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
-    ADMINISTRATION_SETTINGS: 'PERMISSION_ADMINISTRATION_SETTINGS',
     /**
      * Permission to show and edit users
      */

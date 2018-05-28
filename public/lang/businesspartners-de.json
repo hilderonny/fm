@@ -1,9 +1,9 @@
 {   
+    "TRK_APP_CRM" :"CRM",
     "TRK_BUSINESSPARTNERS_ADDRESS_TYPE_Billaddress" : "Rechnungsadresse",
     "TRK_BUSINESSPARTNERS_ADDRESS_TYPE_Delivaryaddress" : "Lieferadresse",
     "TRK_BUSINESSPARTNERS_ADDRESS_TYPE_Postaddress" : "Postadresse", 
     "TRK_BUSINESSPARTNERS_ADDRESS_TYPE_Primaryaddress" : "Primäradresse", 
-    "TRK_MENU_CRM" :"CRM",
     "TRK_MENU_CRM_BUSINESSPARTNERS" : "Geschäftspartner",
     "TRK_MENU_CRM_PERSONS" :"Personen",
     "TRK_MODULE_businesspartners_NAME" : "Geschäftspartner"

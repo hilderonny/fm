@@ -57,7 +57,7 @@ var testAppPackager = (moduleNames, version, done) => {
                 } while(index >= 0);
             };
             if (tooMuchFiles.length > 0) {
-                    done(new Error(`Files from ZIP not found in module config. Maybe they are referenced as icons in menus or settingsets but not referenced in the public-part. Or maybe the filename has some camelcase problems. ${JSON.stringify(tooMuchFiles)}`));
+                    done(new Error(`Files from ZIP not found in module config. Maybe they are referenced as icons in apps but not referenced in the public-part. Or maybe the filename has some camelcase problems. ${JSON.stringify(tooMuchFiles)}`));
                     return;
             } else if (fileList.length > 0) {
                 done(new Error(`Module config contains ${fileList.length} more elements than the returned ZIP: ${JSON.stringify(fileList)}`));

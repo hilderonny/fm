@@ -26,7 +26,6 @@ app.controller('AdministrationClientSettingsCardController', function($scope, $r
         $http.get('/api/clientsettings/').then(function(response) {
             $scope.clientSettings = response.data;
             $scope.canWriteClientSettings = $rootScope.canWrite('PERMISSION_SETTINGS_CLIENT');
-            utils.setLocation('/settings/TRK_SETTINGSET_CLIENT');
             $rootScope.isLoading=false;
         });
     };
