@@ -1,0 +1,46 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu WEbDAV</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+    <md-card-content>
+        <p>
+            By Webdav module, documnents and files can be accessed and manipulated remotly over the internet using Windows explorer.        
+        </p>
+        <ul>
+            <li><a href="/#/doc/Webdav#setup">Setup</a></li>
+            <li><a href="/#/doc/Webdav#login">Login</a></li>
+        </ul>
+
+        <h2><a name="setup">Setup</a></h2>
+        <img src="/css/images/Webdav_Setup.png"/> 
+        <p> 
+            <ul>
+                <ol>
+                    <li>From the <b>Start Menu</b> on Windows PC go to <b>File Explore</b> and right click on <b>This PC</b>.</li>
+                    <li>Select <b>map network drive</b> from the drop list</li>
+                    <li>From the pop up window, Enter <b>\\localhost@SSL@56789\DavWWWRoot</b> in the <b>folder</b> filed.</li>
+                    <li>click <b>Finish</b></li>
+                </ol>
+            </ul>   
+        </p>
+
+        <h2><a name="login">Login</a></h2>    
+        <img src="/css/images/WebDav_login.png"/>     
+        <p> The login window will pop up after clicking on th finish button in the previous step. The user and password has to be entered in 
+            order to view all the folder and documents belongs to the loged in user credentials.                        
+        </p> <img src="/css/images/WebDavView.png"/>        
+
+        <p> <b>Attention!</b><br>Single connection is supported which means multiple connection to a server using different
+            user credentials are not allowed. However, it is possible to maka a connection with other credentials by
+            disconnecting the previous one.
+        </p>
+
+       
+         
+
+
+    </md-card-content>
+
+</md-card>
