@@ -374,7 +374,7 @@
             "languages" : [ "de" ],
             "apps": {
                 "TRK_APP_RAUMBUCH": [
-                    { "mainCard": "BIM/AreasCard", "index": 700, "icon": "/css/icons/material/surface.svg", "title": "TRK_MENU_BIM_AREAS", "permission" : "PERMISSION_BIM_AREAS", "docCard" : "Areas", "directurls": [ "area" ] }
+                    { "mainCard": "BIM/AreasCard", "index": 710, "icon": "/css/icons/material/surface.svg", "title": "TRK_MENU_BIM_AREAS", "permission" : "PERMISSION_BIM_AREAS", "docCard" : "Areas", "directurls": [ "area" ] }
                 ]
             }
         },
@@ -414,8 +414,8 @@
             "languages" : [ "de" ],
             "apps": {
                 "TRK_APP_CRM": [
-                    { "mainCard": "CRM/BPListCard", "index": 200, "icon": "/css/icons/material/Business.svg", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners", "directurls": [ "businesspartners", "partneraddresses" ] },
-                    { "mainCard": "CRM/PersonListCard", "index": 210, "icon": "/css/icons/material/Collaborator Male.svg", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons", "directurls": [ "persons", "emailcontacts", "phonecontacts" ] }
+                    { "mainCard": "CRM/BPListCard", "index": 210, "icon": "/css/icons/material/Business.svg", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners", "directurls": [ "businesspartners", "partneraddresses" ] },
+                    { "mainCard": "CRM/PersonListCard", "index": 220, "icon": "/css/icons/material/Collaborator Male.svg", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons", "directurls": [ "persons", "emailcontacts", "phonecontacts" ] }
                 ]
             },
             "clientdatatypes": [
@@ -564,7 +564,7 @@
             "utils": [ "documentsHelper" ],
             "apps": {
                 "TRK_APP_DOKUMENTE": [
-                    { "mainCard": "Office/DocumentListCard", "index": 300, "icon": "/css/icons/material/Document.svg", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents", "directurls": [ "documents", "folders" ] }
+                    { "mainCard": "Office/DocumentListCard", "index": 310, "icon": "/css/icons/material/Document.svg", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents", "directurls": [ "documents", "folders" ] }
                 ],
                 "TRK_APP_STAMMDATEN": [
                     { "mainCard": "Office/DocumentListCard", "index": 920, "icon": "/css/icons/material/Document.svg", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents", "directurls": [ "documents", "folders" ] }
