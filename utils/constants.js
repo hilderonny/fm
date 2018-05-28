@@ -285,6 +285,10 @@ module.exports.modules = {
      */
     portalbase: 'portalbase',
     /**
+     * QR Scanner
+     */
+    qrscanner: "qrscanner",
+    /**
      * Spielereien
      */
     ronnyseins: 'ronnyseins'
@@ -338,6 +342,10 @@ module.exports.permissions = {
      * Permission to show and edit notes
      */
     OFFICE_NOTE: 'PERMISSION_OFFICE_NOTE',
+    /**
+     * Persmission to access the QR scanner menu
+     */
+    QRSCANNER: "PERMISSION_QRSCANNER",
     /**
      * Permission to show and change the settings of the own client (Logo, name)
      */
