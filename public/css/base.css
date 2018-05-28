@@ -1,5 +1,9 @@
 /* Diese Datei enthält Stilvorgaben, die in local.css überschrieben werden können */
 
+canvas.fullsize {
+    flex: 1;
+}
+
 /* Allgemeine Vorgaben für Desktop und Mobil */
 button > md-progress-circular {
     margin:auto;
@@ -192,6 +196,10 @@ md-card-title-text > span {
     text-overflow: ellipsis;
 }
 
+md-divider {
+    margin: 12px 0;
+}
+
 md-icon, md-list md-list-item > md-icon {
     color: black;
     opacity: 0.6;
@@ -344,6 +352,10 @@ md-list-item.strikethrough h3, md-list-item.strikethrough h4, md-list-item.strik
 md-list-item.switch {
     display: block;
     text-align: center;
+}
+
+.md-select-menu-container {
+    z-index: 99999;
 }
 
 md-sidenav {
@@ -504,6 +516,21 @@ video {
 .searchresults md-icon {
     color:initial !important;
     fill:initial !important;
+}
+
+.standardtable {
+    border-spacing: 0 !important;
+    margin: 0 auto;
+}
+
+.standardtable ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.standardtable th, .standardtable td {
+    border-top: 1px solid rgb(224, 224, 224);
+    padding: 4px;
 }
 
 :focus {

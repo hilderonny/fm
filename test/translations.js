@@ -129,22 +129,20 @@ function findTranslationKeysForModule(moduleName) {
     // Collect dynamic translation keys (module titles, menu titles, etc.)
     addTranslationKeyIfNotExists(translationKeys, `TRK_MODULE_${moduleName}_NAME`);
     if (mod.title) addTranslationKeyIfNotExists(translationKeys, mod.title);
-    if (mod.menu) mod.menu.forEach(function eachMenu(menu) {
-        if (menu.title) addTranslationKeyIfNotExists(translationKeys, menu.title);
-        if (menu.items) {
-            menu.items.forEach(function eachMenuItem(item) {
+    if (mod.apps) {
+        var apptitles = Object.keys(mod.apps);
+        apptitles.forEach(apptitle => {
+            addTranslationKeyIfNotExists(translationKeys, apptitle);
+            mod.apps[apptitle].forEach(item => {
                 if (item.title) addTranslationKeyIfNotExists(translationKeys, item.title);
             });
-        }
-    });
+        });
+    }
     if (mod.doc) mod.doc.forEach(function (doc) {
         addTranslationKeyIfNotExists(translationKeys, doc.title);
     });
     if (mod.permissions) mod.permissions.forEach(function (permission) {
         addTranslationKeyIfNotExists(translationKeys, `TRK_${permission}`);
-    });
-    if (mod.settingsets) mod.settingsets.forEach(function eachSettingSet(settingSet) {
-        if (settingSet.title) addTranslationKeyIfNotExists(translationKeys, settingSet.title);
     });
     if (mod.doc) mod.doc.forEach((docMenu) => {
         if (docMenu.title) addTranslationKeyIfNotExists(translationKeys, docMenu.title);
@@ -170,20 +168,15 @@ function getTranslationFilePath(moduleName, language) {
 
 /**
  * Collects all translation keys for permission defined in the module-config
- * in menus or settingsets and stores them in the given array.
+ * in apps and stores them in the given array.
  */
 function collectPermissionTranslationKeys(translationKeys) {
     Object.keys(moduleConfig.modules).forEach(function eachModule(moduleName) {
         var mod = moduleConfig.modules[moduleName];
-        if (mod.menu) mod.menu.forEach(function eachMenu(menu) {
-            if (menu.items) {
-                menu.items.forEach(function eachMenuItem(item) {
-                    if (item.permission) addTranslationKeyIfNotExists(translationKeys, 'TRK_' + item.permission);
-                });
-            }
-        });
-        if (mod.settingsets) mod.settingsets.forEach(function eachSettingSet(settingSet) {
-            if (settingSet.permission) addTranslationKeyIfNotExists(translationKeys, 'TRK_' + settingSet.permission);
+        if (mod.apps) Object.values(mod.apps).forEach(appmenus => {
+            appmenus.forEach(item => {
+                if (item.permission) addTranslationKeyIfNotExists(translationKeys, 'TRK_' + item.permission);
+            });
         });
     });
 }
@@ -199,25 +192,17 @@ function findPermissionKeyInModuleConfig(permissionKey, errors, fileName) {
     Object.keys(moduleConfig.modules).forEach(function eachModule(moduleName) {
         if (found) return; // Break when found in another module
         var mod = moduleConfig.modules[moduleName];
-        if (mod.menu) mod.menu.forEach(function eachMenu(menu) {
-            if (menu.items) {
-                menu.items.forEach(function eachMenuItem(item) {
-                    if (item.permission === permissionKey) {
-                        found = true;
-                        return;
-                    }
-                });
-            }
+        if (mod.apps) Object.values(mod.apps).forEach(appmenus => {
+            appmenus.forEach(item => {
+                if (item.permission === permissionKey) {
+                    found = true;
+                    return;
+                }
+            });
         });
         if (mod.permissions && mod.permissions.indexOf(permissionKey) >= 0) {
             found = true;
         }
-        if (mod.settingsets) mod.settingsets.forEach(function eachSettingSet(settingSet) {
-            if (settingSet.permission === permissionKey) {
-                found = true;
-                return;
-            }
-        });
     });
     if (!found) errors.push(`Translation key TRK_${permissionKey} for permission defined in ${fileName} is not used in module-config`);
 }

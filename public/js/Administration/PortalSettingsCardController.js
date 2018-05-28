@@ -121,7 +121,6 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
                 updateTimerInterval: response.data.updateTimerInterval
             };
             $scope.canWritePortalSettings = $rootScope.canWrite('PERMISSION_SETTINGS_PORTAL');
-            utils.setLocation('/settings/TRK_SETTINGSET_PORTAL_GENERAL');
             $rootScope.isLoading=false;
         });
     };

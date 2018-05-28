@@ -13,8 +13,8 @@ class WebdavFilesystem extends webdav.FileSystem {
         this._cache = {}; // TODO: should be client dependent
         this._lm = new webdav.LocalLockManager();
         this._pm = new webdav.LocalPropertyManager();
-        this._clientname = null; // "portal"; //"5a620ac917252917087cd8db"; //"737e7b80437b45e5b0def70b55d022df";
-        this._username =  null; //"admin"; //"swriesa";
+        this._clientname = null; 
+        this._username =  null; 
     }
 
     // Dummy implementation. Gets relevant when updating files 
@@ -35,6 +35,11 @@ class WebdavFilesystem extends webdav.FileSystem {
         if (element.datatypename === "folders") return callback(null, webdav.ResourceType.Directory);
         if (element.datatypename === "documents") return callback(null, webdav.ResourceType.File);
         callback(null, webdav.ResourceType.NoResource);
+    }
+
+    // Request for file deletion
+    _delete(path, ctx, callback) {
+        callback(webdav.Errors.Forbidden);
     }
 
     // Obtain direct child elements of a directory
@@ -80,6 +85,7 @@ class WebdavFilesystem extends webdav.FileSystem {
         });
     }
 
+    // Save information about the logged user
     _setCredentials(clientname, username){
         this._clientname = clientname;
         this._username = username;

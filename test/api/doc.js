@@ -22,24 +22,24 @@ describe('API doc', function() {
     });
 
     function extractMenuFromConfig() {
-        var menuFromConfig = [];
+        var menuFromConfig = {};
         Object.keys(moduleConfig.modules).forEach((moduleName) => {
             var appModule = moduleConfig.modules[moduleName];
             if (appModule.doc) appModule.doc.forEach((docCard) => {
-                menuFromConfig.push(docCard);
+                menuFromConfig[docCard.docCard] = docCard;
             });
-            if (appModule.menu) appModule.menu.forEach((menu) => {
-                if (menu.items) menu.items.forEach((item) => {
-                    if (item.docCard) menuFromConfig.push({
+            if (appModule.apps) Object.values(appModule.apps).forEach(appmenus => {
+                appmenus.forEach((item) => {
+                    if (item.docCard) menuFromConfig[item.docCard] = {
                         docCard: item.docCard,
                         icon: item.icon,
                         title: item.title,
                         index: 0
-                    });
+                    };
                 });
             });
         });
-        return menuFromConfig;
+        return Object.values(menuFromConfig);
     }
 
     function checkEquality(menuFromApi, menuFromConfig) {

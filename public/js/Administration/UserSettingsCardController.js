@@ -27,6 +27,5 @@ app.controller('AdministrationUserSettingsCardController', function($scope, $roo
         });
     };
     $scope.canWriteUserDetails = $rootScope.canWrite('PERMISSION_SETTINGS_USER');
-    utils.setLocation('/settings/TRK_SETTINGSET_USER_GENERAL');
 
 });
