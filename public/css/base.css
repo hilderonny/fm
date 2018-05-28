@@ -499,6 +499,10 @@ video {
     max-width: 100%;
 }
 
+.qrpreview {
+    width: 100%;
+}
+
 .searchresults {
     position: absolute;
     top:34px;
