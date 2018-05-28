@@ -147,4 +147,26 @@ describe('API menu', () => {
         assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
     });
 
+    it('GET/ does not return empty apps when user has no permissions for menus contained in apps', async() => {
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USER);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USERGROUP);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.SETTINGS_CLIENT_RECORDTYPES);
+        var token = await th.defaults.login("client0_usergroup0_user0");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        var apps = response.apps;
+        assert.ok(!apps["TRK_APP_ADMINISTRATION"]);
+    });
+
+    it('GET/ returns no apps when the client has no permissions at all', async() => {
+        var modules = Object.values(co.modules);
+        for (var i = 0; i < modules.length; i++) {
+            await th.removeClientModule('client0', modules[i]);
+        }
+        var token = await th.defaults.login("client0_usergroup0_user0");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        var apps = response.apps;
+        assert.strictEqual(Object.keys(apps).length, 0);
+    });
+
 });

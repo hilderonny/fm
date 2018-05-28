@@ -8,43 +8,6 @@ var co = require('../utils/constants');
 var configHelper = require('../utils/configHelper');
 var Db = require("../utils/db").Db;
 
-/**
- * Extracts the menu structure from the module configuration for further processing
- * {
- *     "menu" : [
- *         {
- *             "title": "MENU_ADMINISTRATION",
- *             "items": [
- *                 { 
- *                      "mainCard": "Administration/UsergrouplistCard", 
- *                      "icon": "domain", 
- *                      "title": "MENU_ADMINISTRATION_USERGROUPS",
- *                      "permission" : "PERMISSION_ADMINISTRATION_USERGROUP"
- *                 }
- *             ]
- *         }
- *     ],
- *     "logourl" : "http://..."
- * }
- */
-var extractMenu = (moduleNames) => {
-    var moduleConfig = JSON.parse(JSON.stringify(mc));
-    var fullMenuObject = {};
-    moduleNames.forEach((moduleName) => {
-        var appModule = moduleConfig.modules[moduleName];
-        if (!appModule || !appModule.menu) return;
-        appModule.menu.forEach((menu) => {
-            if (!fullMenuObject[menu.title]) {
-                fullMenuObject[menu.title] = JSON.parse(JSON.stringify(menu)); // Make copy instead of reference
-            } else {
-                Array.prototype.push.apply(fullMenuObject[menu.title].items, menu.items);
-            }
-        });
-    });
-    var fullMenuArray = Object.keys(fullMenuObject).map((key) => fullMenuObject[key]);
-    return fullMenuArray;
-};
-
 function extractAppsFromModules(modulenames) {
     var mccopy = JSON.parse(JSON.stringify(mc));
     var apps = {};
@@ -98,7 +61,7 @@ router.get('/', auth(), async(req, res) => {
         var apptitles = Object.keys(apps);
         apptitles.forEach((apptitle) => {
             var appmenus = apps[apptitle].filter(m => !!permissions.find(p => p.key === m.permission));
-            if (appmenus) {
+            if (appmenus.length > 0) {
                 apps[apptitle] = appmenus;
             } else {
                 delete apps[apptitle];
