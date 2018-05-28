@@ -60,6 +60,7 @@
     "TRK_PERMISSION_OFFICE_ACTIVITY" : "Termine",
     "TRK_PERMISSION_OFFICE_DOCUMENT" : "Dokumente",
     "TRK_PERMISSION_OFFICE_NOTE" : "Notizen",
+    "TRK_PERMISSION_QRSCANNER" : "QR Scanner",
     "TRK_PERMISSION_SETTINGS_CLIENT" : "Mandanteneinstellungen",
     "TRK_PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" : "Dynamische Attribute pflegen",
     "TRK_PERMISSION_SETTINGS_CLIENT_RECORDTYPES" : "Dynamische Objekte pflegen",
