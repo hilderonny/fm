@@ -99,24 +99,31 @@
                         <img ng-src="{{logourl}}" ng-click="menuClick(null)" />
                     </div>
 
+                    <md-input-container flex>
+                        
+                            <label>Apps</label>
+                    
+                            <md-select ng-model="currentapptitle" ng-change="onappselected()">
+                                <md-option ng-value="apptitle" ng-repeat="apptitle in apptitles | orderBy: 'toString()' track by $index">
+                                    <span translate="{{ apptitle }}"></span>
+                                </md-option>
+                            </md-select>
+
+                    </md-input-container>
+
                     <md-list ng-cloak>
 
-                        <ng-repeat ng-repeat="menuItem in menu">
+                        <md-list-item ng-repeat="menuitem in apps[currentapptitle] | orderBy: 'index'" ng-click="menuClick(menuitem)" ng-class="{active: currentMenuItem === menuitem}" aria-label="{{ menuitem.title }}">
+                            <md-icon md-svg-src="{{menuitem.icon}}" aria-label="{{ menuitem.title }} "></md-icon>
+                            <p><span translate="{{ menuitem.title }}"></span></p>
+                        </md-list-item>
 
-                            <md-subheader class="md-no-sticky" ng-if="menuItem.items"><span translate="{{ menuItem.title }}"></span></md-subheader>
-                            <md-list-item ng-if="menuItem.items" ng-repeat="subMenuItem in menuItem.items" ng-click="menuClick(subMenuItem)" ng-class="{active: currentMenuItem === subMenuItem}" aria-label="{{ subMenuItem.title }}">
-                                <md-icon md-svg-src="{{subMenuItem.icon}}" aria-label="{{ subMenuItem.title }} "></md-icon>
-                                <p><span translate="{{ subMenuItem.title }}"></span></p>
-                            </md-list-item>
+                        <md-divider></md-divider>
 
-                            <md-list-item ng-if="!menuItem.items" ng-click="menuClick(menuItem)" ng-class="{active: currentMenuItem === menuItem}" aria-label="{{ menuItem.title }}">
-                                <md-icon md-svg-src="{{menuItem.icon}}" aria-label="{{ menuItem.title }} "></md-icon>
-                                <p><span translate="{{ menuItem.title }}"></span></p>
-                            </md-list-item>
-
-                            <md-divider></md-divider>
-                            
-                        </ng-repeat>
+                        <md-list-item ng-click="logout()">
+                            <md-icon md-svg-src="/css/icons/material/Exit.svg"></md-icon>
+                            <p><span translate="TRK_MENU_LOGOUT"></span></p>
+                        </md-list-item>
 
                     </md-list>
 
@@ -134,14 +141,12 @@
 
             <md-content flex layout="row" id="dashboard" ng-show="!currentMenuItem && !isShowingDoc">
                 <div>
-                    <ng-repeat ng-repeat="menuItem in menu">
 
-                        <md-button class="md-raised" ng-repeat="subMenuItem in menuItem.items" ng-click="menuClick(subMenuItem)" aria-label="{{ subMenuItem.title }}">
-                            <md-icon md-svg-src="{{getofficeicon(subMenuItem.icon)}}"></md-icon>
-                            <span class="md-subhead" translate="{{ subMenuItem.title }}"></span>
-                        </md-button>
+                    <md-button class="md-raised" ng-repeat="menuitem in apps[currentapptitle]" ng-click="menuClick(menuitem)" aria-label="{{ menuitem.title }}">
+                        <md-icon md-svg-src="{{getofficeicon(menuitem.icon)}}"></md-icon>
+                        <span class="md-subhead" translate="{{ menuitem.title }}"></span>
+                    </md-button>
                         
-                    </ng-repeat>
                 </div>
             </md-content>        
         </div>

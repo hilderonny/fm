@@ -32,33 +32,19 @@ describe('API menu', () => {
         await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.LICENSESERVER_PORTAL);
         var token = await th.defaults.login("portal_usergroup0_user1");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
-        var menu = response.menu;
         assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
-        assert.strictEqual(menu.length, 3);
-        assert.strictEqual(menu[0].title, "TRK_MENU_ADMINISTRATION");
-        assert.ok(menu[0].items);
-        assert.strictEqual(menu[0].items.length, 3);
-        assert.strictEqual(menu[0].items[0].title, "TRK_MENU_ADMINISTRATION_SETTINGS");
-        assert.strictEqual(menu[0].items[0].icon, "/css/icons/material/Settings.svg");
-        assert.strictEqual(menu[0].items[0].mainCard, "Administration/SettingSetListCard");
-        assert.strictEqual(menu[0].items[1].title, "TRK_MENU_ADMINISTRATION_USERS");
-        assert.strictEqual(menu[0].items[1].icon, "/css/icons/material/User.svg");
-        assert.strictEqual(menu[0].items[1].mainCard, "Administration/UserlistCard");
-        assert.strictEqual(menu[0].items[2].title, "TRK_MENU_ADMINISTRATION_USERGROUPS");
-        assert.strictEqual(menu[0].items[2].icon, "/css/icons/material/User Group Man Man.svg");
-        assert.strictEqual(menu[0].items[2].mainCard, "Administration/UsergrouplistCard");
-        assert.strictEqual(menu[1].title, "TRK_MENU_PORTAL");
-        assert.ok(menu[1].items);
-        assert.strictEqual(menu[1].items.length, 1);
-        assert.strictEqual(menu[1].items[0].title, "TRK_MENU_PORTAL_CLIENTS");
-        assert.strictEqual(menu[1].items[0].icon, "/css/icons/material/Briefcase.svg");
-        assert.strictEqual(menu[1].items[0].mainCard, "Administration/ClientListCard");
-        assert.strictEqual(menu[2].title, "TRK_MENU_LICENSESERVER");
-        assert.ok(menu[2].items);
-        assert.strictEqual(menu[2].items.length, 1);
-        assert.strictEqual(menu[2].items[0].title, "TRK_MENU_LICENSESERVER_PORTALS");
-        assert.strictEqual(menu[2].items[0].icon, "/css/icons/material/Server.svg");
-        assert.strictEqual(menu[2].items[0].mainCard, "LicenseServer/PortalListCard");
+        var apps = response.apps;
+        assert.ok(apps["TRK_APP_ADMINISTRATION"]);
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERS"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERGROUPS"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_DYNAMICATTRIBUTES"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_RECORDTYPES"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"]);
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_USER_GENERAL"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_CLIENT"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_PORTAL_GENERAL"));
+        assert.ok(apps["TRK_APP_PORTAL"]);
+        assert.ok(apps["TRK_APP_PORTAL"].find(m => m.title === "TRK_MENU_PORTAL_CLIENTS"));
     });
 
     it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', async() => {
@@ -67,21 +53,19 @@ describe('API menu', () => {
         await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.LICENSESERVER_PORTAL);
         var token = await th.defaults.login("portal_usergroup0_user0");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
-        var menu = response.menu;
         assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
-        assert.strictEqual(menu.length, 2);
-        assert.strictEqual(menu[0].title, "TRK_MENU_ADMINISTRATION");
-        assert.ok(menu[0].items);
-        assert.strictEqual(menu[0].items.length, 1);
-        assert.strictEqual(menu[0].items[0].title, "TRK_MENU_ADMINISTRATION_SETTINGS");
-        assert.strictEqual(menu[0].items[0].icon, "/css/icons/material/Settings.svg");
-        assert.strictEqual(menu[0].items[0].mainCard, "Administration/SettingSetListCard");
-        assert.strictEqual(menu[1].title, "TRK_MENU_PORTAL");
-        assert.ok(menu[1].items);
-        assert.strictEqual(menu[1].items.length, 1);
-        assert.strictEqual(menu[1].items[0].title, "TRK_MENU_PORTAL_CLIENTS");
-        assert.strictEqual(menu[1].items[0].icon, "/css/icons/material/Briefcase.svg");
-        assert.strictEqual(menu[1].items[0].mainCard, "Administration/ClientListCard");
+        var apps = response.apps;
+        assert.ok(apps["TRK_APP_ADMINISTRATION"]);
+        assert.ok(!apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERS"));
+        assert.ok(!apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERGROUPS"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_DYNAMICATTRIBUTES"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_RECORDTYPES"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"]);
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_USER_GENERAL"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_CLIENT"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_PORTAL_GENERAL"));
+        assert.ok(apps["TRK_APP_PORTAL"]);
+        assert.ok(apps["TRK_APP_PORTAL"].find(m => m.title === "TRK_MENU_PORTAL_CLIENTS"));
     });
 
     it('responds to GET/ with client admin user logged in with all menu items available to the users client', async() => {
@@ -98,33 +82,22 @@ describe('API menu', () => {
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.OFFICE_NOTE);
         var token = await th.defaults.login("client0_usergroup0_user1");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
-        var menu = response.menu;
-        assert.strictEqual(response.logourl, "newlogourl");
-        assert.strictEqual(menu.length, 2);
-        assert.strictEqual(menu[0].title, "TRK_MENU_OFFICE");
-        assert.ok(menu[0].items);
-        assert.strictEqual(menu[0].items.length, 3);
-        assert.strictEqual(menu[0].items[0].title, "TRK_MENU_OFFICE_ACTIVITIES");
-        assert.strictEqual(menu[0].items[0].icon, "/css/icons/material/Planner.svg");
-        assert.strictEqual(menu[0].items[0].mainCard, "Office/CalendarCard");
-        assert.strictEqual(menu[0].items[1].title, "TRK_MENU_OFFICE_DOCUMENTS");
-        assert.strictEqual(menu[0].items[1].icon, "/css/icons/material/Document.svg");
-        assert.strictEqual(menu[0].items[1].mainCard, "Office/DocumentListCard");
-        assert.strictEqual(menu[0].items[2].title, "TRK_MENU_OFFICE_NOTES");
-        assert.strictEqual(menu[0].items[2].icon, "/css/icons/material/Notes.svg");
-        assert.strictEqual(menu[0].items[2].mainCard, "Office/NoteListCard");
-        assert.strictEqual(menu[1].title, "TRK_MENU_ADMINISTRATION");
-        assert.ok(menu[1].items);
-        assert.strictEqual(menu[1].items.length, 3);
-        assert.strictEqual(menu[1].items[0].title, "TRK_MENU_ADMINISTRATION_SETTINGS");
-        assert.strictEqual(menu[1].items[0].icon, "/css/icons/material/Settings.svg");
-        assert.strictEqual(menu[1].items[0].mainCard, "Administration/SettingSetListCard");
-        assert.strictEqual(menu[1].items[1].title, "TRK_MENU_ADMINISTRATION_USERS");
-        assert.strictEqual(menu[1].items[1].icon, "/css/icons/material/User.svg");
-        assert.strictEqual(menu[1].items[1].mainCard, "Administration/UserlistCard");
-        assert.strictEqual(menu[1].items[2].title, "TRK_MENU_ADMINISTRATION_USERGROUPS");
-        assert.strictEqual(menu[1].items[2].icon, "/css/icons/material/User Group Man Man.svg");
-        assert.strictEqual(menu[1].items[2].mainCard, "Administration/UsergrouplistCard");
+        var apps = response.apps;
+        assert.ok(apps["TRK_APP_ADMINISTRATION"]);
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERS"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERGROUPS"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_DYNAMICATTRIBUTES"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_RECORDTYPES"));
+        assert.ok(apps["TRK_APP_DOKUMENTE"]);
+        assert.ok(apps["TRK_APP_DOKUMENTE"].find(m => m.title === "TRK_MENU_OFFICE_DOCUMENTS"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"]);
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_USER_GENERAL"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_CLIENT"));
+        assert.ok(!apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_PORTAL_GENERAL"));
+        assert.ok(apps["TRK_APP_STAMMDATEN"]);
+        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_ACTIVITIES"));
+        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_DOCUMENTS"));
+        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_NOTES"));
     });
 
     it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', async() => {
@@ -141,24 +114,22 @@ describe('API menu', () => {
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.OFFICE_NOTE);
         var token = await th.defaults.login("client0_usergroup0_user0");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
-        var menu = response.menu;
-        assert.strictEqual(response.logourl, "newlogourl");
-        assert.strictEqual(menu.length, 2);
-        assert.strictEqual(menu[0].title, "TRK_MENU_OFFICE");
-        assert.ok(menu[0].items);
-        assert.strictEqual(menu[0].items.length, 2);
-        assert.strictEqual(menu[0].items[0].title, "TRK_MENU_OFFICE_ACTIVITIES");
-        assert.strictEqual(menu[0].items[0].icon, "/css/icons/material/Planner.svg");
-        assert.strictEqual(menu[0].items[0].mainCard, "Office/CalendarCard");
-        assert.strictEqual(menu[0].items[1].title, "TRK_MENU_OFFICE_DOCUMENTS");
-        assert.strictEqual(menu[0].items[1].icon, "/css/icons/material/Document.svg");
-        assert.strictEqual(menu[0].items[1].mainCard, "Office/DocumentListCard");
-        assert.strictEqual(menu[1].title, "TRK_MENU_ADMINISTRATION");
-        assert.ok(menu[1].items);
-        assert.strictEqual(menu[1].items.length, 1);
-        assert.strictEqual(menu[1].items[0].title, "TRK_MENU_ADMINISTRATION_SETTINGS");
-        assert.strictEqual(menu[1].items[0].icon, "/css/icons/material/Settings.svg");
-        assert.strictEqual(menu[1].items[0].mainCard, "Administration/SettingSetListCard");
+        var apps = response.apps;
+        assert.ok(apps["TRK_APP_ADMINISTRATION"]);
+        assert.ok(!apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERS"));
+        assert.ok(!apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERGROUPS"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_DYNAMICATTRIBUTES"));
+        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_RECORDTYPES"));
+        assert.ok(apps["TRK_APP_DOKUMENTE"]);
+        assert.ok(apps["TRK_APP_DOKUMENTE"].find(m => m.title === "TRK_MENU_OFFICE_DOCUMENTS"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"]);
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_USER_GENERAL"));
+        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_CLIENT"));
+        assert.ok(!apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_PORTAL_GENERAL"));
+        assert.ok(apps["TRK_APP_STAMMDATEN"]);
+        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_ACTIVITIES"));
+        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_DOCUMENTS"));
+        assert.ok(!apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_NOTES"));
     });
             
     it('GET/ contains the logo URL of the client when set', async () => {
@@ -174,6 +145,28 @@ describe('API menu', () => {
         var token = await th.defaults.login("client0_usergroup0_user0");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
         assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
+    });
+
+    it('GET/ does not return empty apps when user has no permissions for menus contained in apps', async() => {
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USER);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USERGROUP);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES);
+        await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.SETTINGS_CLIENT_RECORDTYPES);
+        var token = await th.defaults.login("client0_usergroup0_user0");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        var apps = response.apps;
+        assert.ok(!apps["TRK_APP_ADMINISTRATION"]);
+    });
+
+    it('GET/ returns no apps when the client has no permissions at all', async() => {
+        var modules = Object.values(co.modules);
+        for (var i = 0; i < modules.length; i++) {
+            await th.removeClientModule('client0', modules[i]);
+        }
+        var token = await th.defaults.login("client0_usergroup0_user0");
+        var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
+        var apps = response.apps;
+        assert.strictEqual(Object.keys(apps).length, 0);
     });
 
 });

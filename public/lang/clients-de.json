@@ -1,6 +1,6 @@
 {
+    "TRK_APP_PORTAL" : "Portalverwaltung",
     "TRK_MENU_PORTAL_CLIENTS" : "Mandanten",
-    "TRK_MENU_PORTAL" : "Portal",
     "TRK_MODEL_clients": "Mandanten",
     "TRK_MODULE_clients_NAME" : "Mandantenverwaltung"
 }
