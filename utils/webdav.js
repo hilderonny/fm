@@ -20,8 +20,7 @@ var wdfs = require("./webdavfilesystem");
                 key: fs.existsSync('./priv.key') ? fs.readFileSync('./priv.key', 'utf8') : null, 
                 cert: fs.existsSync('./pub.cert') ? fs.readFileSync('./pub.cert', 'utf8') : null
             };
-            
-            var arrangeFS = require("../utils/webdavfoldersanddocuments").arrangeFS;
+        
             const WebDavserver = new webdav.WebDAVServer({
                 port: 56789, //avoid default port, which might be already in use
                 hostname: '127.0.0.1', //localhost
