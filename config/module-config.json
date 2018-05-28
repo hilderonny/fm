@@ -901,15 +901,18 @@
                 "partial/ronnyseins/3DCard.html",
                 "partial/ronnyseins/AugmentedRealityCard.html",
                 "partial/ronnyseins/GoogleMapsCard.html",
-                "partial/ronnyseins/mixedreality.html"
+                "partial/ronnyseins/mixedreality.html",
+                "webqr.html"
             ],
             "include" : [
                 "public/js/components/avt-babylonjs-scene.js",
                 "public/js/components/avt-viewin3d-toolbar-button.js",
                 
-                "public/js/lib/babylon.js",
                 "public/js/lib/aframe-v0.7.0.min.js",
                 "public/js/lib/aframe-look-at-billboard-component.min.js",
+                "public/js/lib/babylon.js",
+                "public/js/lib/webqr.js",
+                "public/js/lib/qr.js",
                 "public/js/ronnyseins/3DCardController.js",
                 "public/js/ronnyseins/AugmentedRealityCardController.js",
                 "public/js/ronnyseins/GoogleMapsCardController.js"

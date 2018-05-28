@@ -27,8 +27,9 @@ function captureToCanvas() {
 function setwebcam()
 {
     navigator.mediaDevices.enumerateDevices().then(function(devices) {
-        var cam = devices.find(function(d) { return d.label.toLowerCase().indexOf("back") >= 0; });
-        var options = { deviceId: { exact: cam.deviceId }, facingMode: "environment" };
+        var cameras = devices.filter(d => d.kind === "videoinput");
+        var cam = cameras.find(d => d.label.indexOf("back") >= 0) || cameras[0];
+        var options = { deviceId: { exact: cam.deviceId } };
         navigator.getUserMedia({video: options, audio: false}, function(stream) {
             preview.src = window.URL.createObjectURL(stream);
             setTimeout(captureToCanvas, 500);
