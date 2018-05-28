@@ -936,6 +936,12 @@
         "webdav" : {
             "forportal": true,
             "forclients": true,
+            "public" : [
+                "css/images/WebDavView.png",
+                "css/images/WebDav_login.png",
+                "css/images/Webdav_Setup.png",
+                "partial/Doc/Webdav.html"
+            ],
             "utils" :["webdav", "db", "webdavfilesystem", "webdavusermanagement"]
         }
     }
