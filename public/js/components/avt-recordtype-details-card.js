@@ -83,6 +83,10 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                             $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
                             return;
                         }
+                        if (response.status !== 200) {
+                            $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
+                            return;
+                        }
                         if (scope.params.oncreate) {
                             scope.params.oncreate(scope.recordtype.name);
                         }
@@ -93,7 +97,11 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                 scope.delete = function() {
                     utils.showdialog(scope.$new(true), "<p>Soll der Datentyp wirklich gelöscht werden?</p>", [
                         { label: "Ja", onclick: function() {
-                            $http.delete("/api/recordtypes/" + scope.recordtype.name).then(function() { 
+                            $http.delete("/api/recordtypes/" + scope.recordtype.name).then(function(response) { 
+                                if (response.status !== 200) {
+                                    $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
+                                    return;
+                                }
                                 if (scope.params.ondelete) scope.params.ondelete();
                                 utils.removeCardsToTheRightOf(element);
                                 utils.removeCard(element);
@@ -143,7 +151,11 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     });
                 };
                 scope.save = function() {
-                    return $http.put("/api/recordtypes/" + scope.recordtype.name, scope.recordtype).then(function() {
+                    return $http.put("/api/recordtypes/" + scope.recordtype.name, scope.recordtype).then(function(response) {
+                        if (response.status !== 200) {
+                            $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
+                            return;
+                        }
                         $mdToast.show($mdToast.simple().textContent("Änderungen gespeichert").hideDelay(1000).position("bottom right"));
                         if (scope.params.onsave) {
                             scope.params.onsave(scope.recordtype);

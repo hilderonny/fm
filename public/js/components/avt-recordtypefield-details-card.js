@@ -70,6 +70,10 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
                             $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
                             return;
                         }
+                        if (response.status !== 200) {
+                            $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
+                            return;
+                        }
                         if (scope.params.oncreate) {
                             scope.params.oncreate(scope.datatypefield);
                         }
@@ -80,7 +84,11 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
                 scope.delete = function() {
                     utils.showdialog(scope.$new(true), "<p>Soll das Feld wirklich gelöscht werden?</p>", [
                         { label: "Ja", onclick: function() {
-                            $http.delete("/api/recordtypes/field/" + scope.params.datatypename + "/" + scope.params.entityname).then(function() { 
+                            $http.delete("/api/recordtypes/field/" + scope.params.datatypename + "/" + scope.params.entityname).then(function(response) { 
+                                if (response.status !== 200) {
+                                    $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
+                                    return;
+                                }
                                 if (scope.params.ondelete) scope.params.ondelete();
                                 utils.removeCardsToTheRightOf(element);
                                 utils.removeCard(element);
@@ -125,12 +133,15 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
                     ];
                     if (fieldname) utils.getresponsedata('/api/recordtypes/field/' + datatypename + "/" + fieldname).then(function(field) {
                         scope.datatypefield = field;
-                        console.log(field);
                         scope.canwrite = scope.$root.canWrite(scope.params.permission);
                     });
                 };
                 scope.save = function() {
-                    return $http.put("/api/recordtypes/field/" + scope.params.datatypename + "/" + scope.params.entityname, scope.datatypefield).then(function() {
+                    return $http.put("/api/recordtypes/field/" + scope.params.datatypename + "/" + scope.params.entityname, scope.datatypefield).then(function(response) {
+                        if (response.status !== 200) {
+                            $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
+                            return;
+                        }
                         $mdToast.show($mdToast.simple().textContent("Änderungen gespeichert").hideDelay(1000).position("bottom right"));
                         if (scope.params.onsave) {
                             scope.params.onsave(scope.datatypefield);
