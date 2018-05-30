@@ -1,0 +1,52 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zur Administration</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-content>
+
+        <ul>
+            <li><a href="/#/doc/Administration#dynamicobjects">Dynamische Objekte</a></li>
+        </ul>
+
+        <h2><a name="dynamicobjects"/>Dynamische Objekte</h2>
+
+        <h3>Formeln</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Formelname</th>
+                    <th>Struktur / Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>childsum</td>
+                    <td>
+                        <pre>{ "childsum" : "fieldname" }</pre>
+                        <p>
+                            Berechnet die Summe aller Felder mit dem Namen "fieldname" (ersetzbar durch beliebigen Feldnamen)
+                            aller verknüpften Kindelemente (Verknüpfungsart "parentchild"). Besitzt ein Kind dieses Feld nicht,
+                            wird es ignoriert. Das Feld muss vom Typ "Zahl" sein.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>concat</td>
+                </tr>
+                <tr>
+                    <td>ifthenelse</td>
+                </tr>
+                <tr>
+                    <td>sum</td>
+                </tr>
+            </tbody>
+        </table>
+
+        
+    </md-card-content>
+</md-card>
