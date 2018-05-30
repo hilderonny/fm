@@ -274,6 +274,7 @@
                 { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "/css/icons/material/Design.svg", "index": 98 },
                 { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "/css/icons/material/News.svg", "index": 99 },
                 { "docCard": "Webdav", "title" : "TRK_DOC_WebDav", "icon": "/css/icons/material/News.svg", "index": 100 }
+               
             ],
             "include" : [
                 "public/js/Doc/ListController.js",
@@ -293,10 +294,15 @@
                 "css/images/Search_searchresults.png",
                 "css/images/Search_toolbar.png",
                 "css/images/Settings_dynamicattributes_values.png",
+                "css/images/Webdav_Setup.png",
+                "css/images/WebDav_login.png",
+                "css/images/WebDavView.png",
+                "css/icons/material/News.svg",
                 "partial/Doc/Concepts.html",
                 "partial/Doc/List.html",
                 "partial/Doc/ReleaseNotes.html",
-                "partial/Doc/Terms.html"
+                "partial/Doc/Terms.html",
+                "partial/Doc/Webdav.html"
             ]
         },
 
@@ -957,12 +963,6 @@
         "webdav" : {
             "forportal": true,
             "forclients": true,
-            "public" : [
-                "css/images/WebDavView.png",
-                "css/images/WebDav_login.png",
-                "css/images/Webdav_Setup.png",
-                "partial/Doc/Webdav.html"
-            ],
             "utils" :["webdav", "db", "webdavfilesystem", "webdavusermanagement"]
         }
     }
