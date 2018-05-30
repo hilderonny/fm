@@ -214,9 +214,6 @@
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups", "isrequired": true }
                 ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true },
 
-                { "mainCard": "Administration/UserlistCard", "index": 110, "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
-
-
                 { "name": "views", "label": "Sicht", "titlefield": "label", "fields": [
                     { "name": "docCard", "type": "text", "ishidden": true },
                     { "name": "directurls", "type": "text", "ishidden": true },
