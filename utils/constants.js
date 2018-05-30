@@ -304,10 +304,6 @@ module.exports.modules = {
  */
 module.exports.permissions = {
     /**
-     * View and edit apps
-     */
-    ADMINISTRATION_APPS: 'PERMISSION_ADMINISTRATION_APPS',
-    /**
      * Permission to show and edit clients
      */
     ADMINISTRATION_CLIENT: 'PERMISSION_ADMINISTRATION_CLIENT',
@@ -316,10 +312,6 @@ module.exports.permissions = {
      */
     ADMINISTRATION_USER: 'PERMISSION_ADMINISTRATION_USER',
     ADMINISTRATION_USERGROUP: 'PERMISSION_ADMINISTRATION_USERGROUP',
-    /**
-     * View and edit views
-     */
-    ADMINISTRATION_VIEWS: 'PERMISSION_ADMINISTRATION_VIEWS',
     /**
      * Permission to analyze FM object area analyzes
      */

@@ -75,8 +75,8 @@
                 "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
                 "partial/components/DetailsCard.html",
-                "partial/Core/Administration.html",
                 "partial/Core/DynamicAttributesTab.html",
+                "partial/Doc/Administration.html",
                 "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
                 "partial/Doc/UserGroups.html",
@@ -150,7 +150,7 @@
                     { "name": "einstellungen", "label": "Einstellungen" },
                     { "name": "raumbuch", "label": "Raumbuch" },
                     { "name": "stammdaten", "label": "Stammdaten" }
-                ], "permissionkey": "PERMISSION_ADMINISTRATION_APPS", "canhaverelations" : true },
+                ], "canhaverelations" : true },
 
                 { "name": "dynamicattributetypes", "label": "Attributart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
@@ -227,7 +227,7 @@
                     { "name": "benutzergruppenverwaltung", "label": "Benutzergruppenverwaltung", "docCard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "mainCard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
                     { "name": "benutzerverwaltung", "label": "Benutzerverwaltung", "docCard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "mainCard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" },
                     { "name": "dynamischeattribute", "label": "Dynamische Attribute", "docCard": "Settings", "directurls": "dynamicattributes", "icon": "/css/icons/material/View Details.svg", "index": 140, "mainCard": "Administration/DynamicAttributesEntityListCard", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" }
-                ], "permissionkey": "PERMISSION_ADMINISTRATION_VIEWS", "canhaverelations" : true }
+                ], "canhaverelations" : true }
 
             ],
 
