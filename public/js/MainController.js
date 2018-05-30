@@ -47,11 +47,12 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
             return utils.addCardWithPermission('Doc/List', { preselection: rootscope.path[2], anchor: rootscope.path[3] });
         } else if (rootscope.directUrlMappings[path1]) {
             var mapping = rootscope.directUrlMappings[path1];
+            // TODO: Handle direct URLs
             var menus = rootscope.apps[mapping.apptitle];
             var menu = menus.find(function(m) { return m.title === mapping.menutitle; });
             if (!menu) return Promise.resolve();
             rootscope.currentMenuItem = menu;
-            rootscope.currentapptitle = mapping.apptitle;
+            rootscope.currentappname = mapping.apptitle;
             angular.element(document.querySelector('#cardcanvas')).empty();
             return utils.addCardWithPermission(menu.mainCard, menu, menu.permission);
         } else {
@@ -87,7 +88,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
 
     $scope.logout = function() {
         localStorage.removeItem("loginCredentials");
-        localStorage.removeItem("currentapptitle");
+        localStorage.removeItem("currentappname");
         rootscope.isLoggedIn = false;
         rootscope.searchResults = [];
         rootscope.searchInputVisible = false;
@@ -99,7 +100,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     };
 
     $scope.onappselected = function() {
-        localStorage.setItem("currentapptitle", this.currentapptitle); // this refers to the child scope of the select box
+        localStorage.setItem("currentappname", this.currentappname); // this refers to the child scope of the select box
     };
 
     // Define used languages

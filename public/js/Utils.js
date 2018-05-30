@@ -191,10 +191,9 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             return utils.getresponsedata('/api/menu').then(function (responsedata) {
                 scope.logourl = responsedata.logourl;
                 // Apps
-                scope.apptitles = Object.keys(responsedata.apps);
-                scope.currentapptitle = localStorage.getItem("currentapptitle");
-                if (!scope.currentapptitle) scope.currentapptitle = scope.apptitles.sort()[0];
-                scope.apps = responsedata.apps;
+                scope.apps = Object.values(responsedata.apps);
+                scope.currentappname = localStorage.getItem("currentapptitle");
+                if (!scope.currentappname) scope.currentappname = scope.apps.sort()[0];
                 // Direct URL mappings
                 scope.apptitles.forEach(function(apptitle) {
                     var appmenu = scope.apps[apptitle];
