@@ -125,17 +125,6 @@
                 "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_ADMINISTRATION": [
-                    { "mainCard": "Administration/UserlistCard", "index": 110, "icon": "/css/icons/material/User.svg", "title": "TRK_MENU_ADMINISTRATION_USERS", "permission" : "PERMISSION_ADMINISTRATION_USER", "docCard" : "Users", "directurls": [ "users" ] },
-                    { "mainCard": "Administration/UsergrouplistCard", "index": 120, "icon": "/css/icons/material/User Group Man Man.svg", "title": "TRK_MENU_ADMINISTRATION_USERGROUPS", "permission" : "PERMISSION_ADMINISTRATION_USERGROUP", "docCard" : "UserGroups", "directurls": [ "usergroups" ] },
-                    { "mainCard": "Administration/DynamicAttributesEntityListCard", "index": 140, "icon": "/css/icons/material/View Details.svg", "title": "TRK_SETTINGSET_DYNAMICATTRIBUTES", "permission" : "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES", "directurls": [ "dynamicattributes" ] }
-                ],
-                "TRK_APP_EINSTELLUNGEN": [
-                    { "mainCard": "Administration/UserSettingsCard", "index": 410, "icon": "/css/icons/material/User.svg", "title": "TRK_SETTINGSET_USER_GENERAL", "permission" : "PERMISSION_SETTINGS_USER", "directurls": [ "usersettings" ] },
-                    { "mainCard": "Administration/ClientSettingsCard", "index": 420, "icon": "/css/icons/material/Briefcase.svg", "title": "TRK_SETTINGSET_CLIENT", "permission" : "PERMISSION_SETTINGS_CLIENT", "directurls": [ "clientsettings" ] }
-                ]
-            },
             "utils": [ "apiHelper", "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "relationsHelper", "db", "localConfigHelper", "permissionshelper", "updateonstart" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "clientdatatypes": [
@@ -214,18 +203,18 @@
                 ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true },
 
                 { "name": "views", "label": "Sicht", "titlefield": "label", "fields": [
-                    { "name": "docCard", "type": "text", "ishidden": true },
+                    { "name": "doccard", "type": "text", "ishidden": true },
                     { "name": "directurls", "type": "text", "ishidden": true },
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "icon", "label": "Symbol", "type": "text" },
                     { "name": "index", "label": "Sortier-Index", "type": "decimal" },
-                    { "name": "mainCard", "type": "text", "ishidden": true },
+                    { "name": "maincard", "type": "text", "ishidden": true },
                     { "name": "permission", "type": "text", "ishidden": true }
                 ], "values": [
-                    { "name": "benutzereinstellungen", "label": "Benutzereinstellungen", "docCard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "mainCard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
-                    { "name": "benutzergruppenverwaltung", "label": "Benutzergruppenverwaltung", "docCard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "mainCard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
-                    { "name": "benutzerverwaltung", "label": "Benutzerverwaltung", "docCard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "mainCard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" },
-                    { "name": "dynamischeattribute", "label": "Dynamische Attribute", "docCard": "Settings", "directurls": "dynamicattributes", "icon": "/css/icons/material/View Details.svg", "index": 140, "mainCard": "Administration/DynamicAttributesEntityListCard", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" }
+                    { "name": "benutzereinstellungen", "label": "Benutzereinstellungen", "doccard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "maincard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
+                    { "name": "benutzergruppenverwaltung", "label": "Benutzergruppenverwaltung", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "maincard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
+                    { "name": "benutzerverwaltung", "label": "Benutzerverwaltung", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "maincard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" },
+                    { "name": "dynamischeattribute", "label": "Dynamische Attribute", "doccard": "Settings", "directurls": "dynamicattributes", "icon": "/css/icons/material/View Details.svg", "index": 140, "maincard": "Administration/DynamicAttributesEntityListCard", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" }
                 ], "canhaverelations" : true }
 
             ],
@@ -236,7 +225,7 @@
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "values": [
                     { "name": "portal", "label": "Portal" }
-                ], "permissionkey": "PERMISSION_ADMINISTRATION_APPS", "canhaverelations" : true },
+                ], "canhaverelations" : true },
 
                 { "name": "clientsettings", "label": "Mandanteneinstellung", "plurallabel": "Mandanteneinstellungen", "fields": [
                     { "name": "logourl", "label": "Logo URL", "type": "text" },
@@ -305,12 +294,18 @@
                 ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true },
 
                 { "name": "views", "label": "Sicht", "titlefield": "label", "fields": [
-                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                    { "name": "doccard", "type": "text", "ishidden": true },
+                    { "name": "directurls", "type": "text", "ishidden": true },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "icon", "label": "Symbol", "type": "text" },
+                    { "name": "index", "label": "Sortier-Index", "type": "decimal" },
+                    { "name": "maincard", "type": "text", "ishidden": true },
+                    { "name": "permission", "type": "text", "ishidden": true }
                 ], "values": [
-                    { "name": "benutzereinstellungen", "label": "Benutzereinstellungen", "docCard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "mainCard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
-                    { "name": "benutzergruppenverwaltung", "label": "Benutzergruppenverwaltung", "docCard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "mainCard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
-                    { "name": "benutzerverwaltung", "label": "Benutzerverwaltung", "docCard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "mainCard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" }
-                ], "permissionkey": "PERMISSION_ADMINISTRATION_VIEWS", "canhaverelations" : true }
+                    { "name": "benutzereinstellungen", "label": "Benutzereinstellungen", "doccard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "maincard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
+                    { "name": "benutzergruppenverwaltung", "label": "Benutzergruppenverwaltung", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "maincard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
+                    { "name": "benutzerverwaltung", "label": "Benutzerverwaltung", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "maincard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" }
+                ], "canhaverelations" : true }
 
             ]
         },
@@ -320,9 +315,9 @@
             "forclients": true,
             "api" : [ "doc" ],
             "doc" : [
-                { "docCard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "/css/icons/material/Dictionary.svg", "index": 97 },
-                { "docCard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "/css/icons/material/Design.svg", "index": 98 },
-                { "docCard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "/css/icons/material/News.svg", "index": 99 }
+                { "doccard": "Terms", "title" : "TRK_DOC_TERMS", "icon": "/css/icons/material/Dictionary.svg", "index": 97 },
+                { "doccard": "Concepts", "title" : "TRK_DOC_CONCEPTS", "icon": "/css/icons/material/Design.svg", "index": 98 },
+                { "doccard": "ReleaseNotes", "title" : "TRK_DOC_RELEASENOTES", "icon": "/css/icons/material/News.svg", "index": 99 }
             ],
             "include" : [
                 "public/js/Doc/ListController.js",
@@ -368,11 +363,6 @@
                 "public/js/Office/CalendarCardController.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_STAMMDATEN": [
-                    { "mainCard": "Office/CalendarCard", "index": 940, "icon": "/css/icons/material/Planner.svg", "title": "TRK_MENU_OFFICE_ACTIVITIES", "permission" : "PERMISSION_OFFICE_ACTIVITY", "docCard" : "Activities", "directurls": [ "activities" ] }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "activitytypes", "label": "Terminart", "titlefield": "label", "fields": [
@@ -400,7 +390,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "termine", "label": "Termine", "docCard": "Activities", "directurls": "activities", "icon": "/css/icons/material/Planner.svg", "index": 940, "mainCard": "Office/CalendarCard", "permission": "PERMISSION_OFFICE_ACTIVITY" }
+                    { "name": "termine", "label": "Termine", "doccard": "Activities", "directurls": "activities", "icon": "/css/icons/material/Planner.svg", "index": 940, "maincard": "Office/CalendarCard", "permission": "PERMISSION_OFFICE_ACTIVITY" }
                 ] }
 
             ]
@@ -430,11 +420,6 @@
                 "public/js/BIM/AreasCardController.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_RAUMBUCH": [
-                    { "mainCard": "BIM/AreasCard", "index": 710, "icon": "/css/icons/material/surface.svg", "title": "TRK_MENU_BIM_AREAS", "permission" : "PERMISSION_BIM_AREAS", "docCard" : "Areas", "directurls": [ "area" ] }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "relations", "values": [
@@ -442,7 +427,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "flaechen", "label": "Flächen", "docCard": "Areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "mainCard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" }
+                    { "name": "flaechen", "label": "Flächen", "doccard": "Areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "maincard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" }
                 ] }
 
             ]
@@ -481,12 +466,6 @@
                 "partial/Doc/Persons.html"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_CRM": [
-                    { "mainCard": "CRM/BPListCard", "index": 210, "icon": "/css/icons/material/Business.svg", "title": "TRK_MENU_CRM_BUSINESSPARTNERS", "permission" : "PERMISSION_CRM_BUSINESSPARTNERS", "docCard" : "BusinessPartners", "directurls": [ "businesspartners", "partneraddresses" ] },
-                    { "mainCard": "CRM/PersonListCard", "index": 220, "icon": "/css/icons/material/Collaborator Male.svg", "title": "TRK_MENU_CRM_PERSONS", "permission" : "PERMISSION_CRM_PERSONS", "docCard" : "Persons", "directurls": [ "persons", "emailcontacts", "phonecontacts" ] }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "businesspartners", "label": "Geschäftspartner", "plurallabel": "Geschäftspartner", "titlefield": "label", "icon": "/css/icons/material/Business.svg", "fields": [
@@ -556,8 +535,8 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "geschaeftspartner", "label": "Geschäftspartner", "docCard": "BusinessPartners", "directurls": "businesspartners,partneraddresses", "icon": "/css/icons/material/Business.svg", "index": 210, "mainCard": "CRM/BPListCard", "permission": "PERMISSION_CRM_BUSINESSPARTNERS" },
-                    { "name": "personen", "label": "Personen", "docCard": "Persons", "directurls": "persons,emailcontacts,phonecontacts", "icon": "/css/icons/material/Collaborator Male.svg", "index": 220, "mainCard": "CRM/PersonListCard", "permission": "PERMISSION_CRM_PERSONS" }
+                    { "name": "geschaeftspartner", "label": "Geschäftspartner", "doccard": "BusinessPartners", "directurls": "businesspartners,partneraddresses", "icon": "/css/icons/material/Business.svg", "index": 210, "maincard": "CRM/BPListCard", "permission": "PERMISSION_CRM_BUSINESSPARTNERS" },
+                    { "name": "personen", "label": "Personen", "doccard": "Persons", "directurls": "persons,emailcontacts,phonecontacts", "icon": "/css/icons/material/Collaborator Male.svg", "index": 220, "maincard": "CRM/PersonListCard", "permission": "PERMISSION_CRM_PERSONS" }
                 ] }
             ]
         },
@@ -592,11 +571,6 @@
                 "public/js/components/avt-createadmin-toolbar-button.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_PORTAL": [
-                    { "mainCard": "Administration/ClientListCard", "index": 600, "icon": "/css/icons/material/Briefcase.svg", "title": "TRK_MENU_PORTAL_CLIENTS", "permission" : "PERMISSION_ADMINISTRATION_CLIENT", "docCard" : "Clients", "directurls": [ "clients" ] }
-                ]
-            },
             "utils": [ "exporthelper" ],
             "portaldatatypes": [
 
@@ -609,7 +583,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "mandantenverwaltung", "label": "Mandantenverwaltung", "docCard": "Clients", "directurls": "clients", "icon": "/css/icons/material/Briefcase.svg", "index": 600, "mainCard": "Administration/ClientListCard", "permission": "PERMISSION_ADMINISTRATION_CLIENT" }
+                    { "name": "mandantenverwaltung", "label": "Mandantenverwaltung", "doccard": "Clients", "directurls": "clients", "icon": "/css/icons/material/Briefcase.svg", "index": 600, "maincard": "Administration/ClientListCard", "permission": "PERMISSION_ADMINISTRATION_CLIENT" }
                 ] }
                 
             ]
@@ -649,14 +623,6 @@
             ],
             "languages" : [ "de" ],
             "utils": [ "documentsHelper" ],
-            "apps": {
-                "TRK_APP_DOKUMENTE": [
-                    { "mainCard": "Office/DocumentListCard", "index": 310, "icon": "/css/icons/material/Document.svg", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents", "directurls": [ "documents", "folders" ] }
-                ],
-                "TRK_APP_STAMMDATEN": [
-                    { "mainCard": "Office/DocumentListCard", "index": 920, "icon": "/css/icons/material/Document.svg", "title": "TRK_MENU_OFFICE_DOCUMENTS", "permission" : "PERMISSION_OFFICE_DOCUMENT", "docCard" : "Documents", "directurls": [ "documents", "folders" ] }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "folders", "label": "Verzeichnis", "plurallabel": "Verzeichnisse", "titlefield": "label", "icon": "/css/icons/material/Folder.svg", "fields": [
@@ -677,7 +643,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "dokumente", "label": "Dokumente", "docCard": "Documents", "directurls": "documents,folders", "icon": "/css/icons/material/Document.svg", "index": 920, "mainCard": "Office/DocumentListCard", "permission": "PERMISSION_OFFICE_DOCUMENT" }
+                    { "name": "dokumente", "label": "Dokumente", "doccard": "Documents", "directurls": "documents,folders", "icon": "/css/icons/material/Document.svg", "index": 920, "maincard": "Office/DocumentListCard", "permission": "PERMISSION_OFFICE_DOCUMENT" }
                 ] }
 
             ]
@@ -709,14 +675,6 @@
                 "partial/Doc/FmObjects.html"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_CRM": [
-                    { "mainCard": "BIM/FmObjectsHierarchyCard", "index": 230, "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_ARRANGEOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
-                ],
-                "TRK_APP_STAMMDATEN": [
-                    { "mainCard": "BIM/FmObjectsHierarchyCard", "index": 910, "icon": "/css/icons/material/Cottage.svg", "title": "TRK_MENU_BIM_ARRANGEOBJECTS", "permission" : "PERMISSION_BIM_FMOBJECT", "docCard" : "FmObjects", "directurls": [ "fmobjects", "inventories", "areas", "rooms", "levels", "buildings", "properties", "projects" ] }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "projects", "label": "Projekt", "plurallabel": "Projekte", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg", "fields": [
@@ -851,7 +809,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "arrangeobjekte", "label": "Arrange Objekte", "docCard": "FmObjects", "directurls": "fmobjects,inventories,areas,rooms,levels,buildings,properties,projects", "icon": "/css/icons/material/Cottage.svg", "index": 910, "mainCard": "BIM/FmObjectsHierarchyCard", "permission": "PERMISSION_BIM_FMOBJECT" }
+                    { "name": "arrangeobjekte", "label": "Arrange Objekte", "doccard": "FmObjects", "directurls": "fmobjects,inventories,areas,rooms,levels,buildings,properties,projects", "icon": "/css/icons/material/Cottage.svg", "index": 910, "maincard": "BIM/FmObjectsHierarchyCard", "permission": "PERMISSION_BIM_FMOBJECT" }
                 ] }
 
             ]
@@ -882,11 +840,6 @@
                 "public/js/components/avt-portalmodules-tab.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_LIZENZSERVER": [
-                    { "mainCard": "LicenseServer/PortalListCard", "index": 510, "icon": "/css/icons/material/Server.svg", "title": "TRK_MENU_LICENSESERVER_PORTALS", "permission" : "PERMISSION_LICENSESERVER_PORTAL", "docCard" : "Portals", "directurls": [ "portals" ] }
-                ]
-            },
             "utils": [ "app-packager" ],
             "portaldatatypes": [
 
@@ -910,7 +863,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "portalverwaltung", "label": "Portalverwaltung", "docCard": "Portals", "directurls": "portals", "icon": "/css/icons/material/Server.svg", "index": 510, "mainCard": "LicenseServer/PortalListCard", "permission": "PERMISSION_LICENSESERVER_PORTAL" }
+                    { "name": "portalverwaltung", "label": "Portalverwaltung", "doccard": "Portals", "directurls": "portals", "icon": "/css/icons/material/Server.svg", "index": 510, "maincard": "LicenseServer/PortalListCard", "permission": "PERMISSION_LICENSESERVER_PORTAL" }
                 ] }
                 
             ]
@@ -930,11 +883,6 @@
                 "partial/Doc/Notes.html"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_STAMMDATEN": [
-                    { "mainCard": "Office/NoteListCard", "index": 930, "icon": "/css/icons/material/Notes.svg", "title": "TRK_MENU_OFFICE_NOTES", "permission" : "PERMISSION_OFFICE_NOTE", "docCard" : "Notes", "directurls": [ "notes" ] }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "notes", "label": "Notiz", "plurallabel": "Notizen", "titlefield": "content", "icon": "/css/icons/material/Notes.svg", "fields": [
@@ -946,7 +894,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "notizen", "label": "Notizen", "docCard": "Notes", "directurls": "notes", "icon": "/css/icons/material/Notes.svg", "index": 930, "mainCard": "Office/NoteListCard", "permission": "PERMISSION_OFFICE_NOTE" }
+                    { "name": "notizen", "label": "Notizen", "doccard": "Notes", "directurls": "notes", "icon": "/css/icons/material/Notes.svg", "index": 930, "maincard": "Office/NoteListCard", "permission": "PERMISSION_OFFICE_NOTE" }
                 ] }
 
             ]
@@ -965,11 +913,6 @@
                 "public/js/Administration/PortalSettingsCardController.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_EINSTELLUNGEN": [
-                    { "mainCard": "Administration/PortalSettingsCard", "index": 430, "icon": "/css/icons/material/Server.svg", "title": "TRK_SETTINGSET_PORTAL_GENERAL", "permission" : "PERMISSION_SETTINGS_PORTAL", "directurls": [ "portalsettings" ] }
-                ]
-            },
             "utils" :["portalUpdatesHelper"],
             "portaldatatypes": [
 
@@ -978,7 +921,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "portaleinstellungen", "label": "Portaleinstellungen", "docCard": "Settings", "directurls": "portalsettings", "icon": "/css/icons/material/Server.svg", "index": 430, "mainCard": "Administration/PortalSettingsCard", "permission": "PERMISSION_SETTINGS_PORTAL" }
+                    { "name": "portaleinstellungen", "label": "Portaleinstellungen", "doccard": "Settings", "directurls": "portalsettings", "icon": "/css/icons/material/Server.svg", "index": 430, "maincard": "Administration/PortalSettingsCard", "permission": "PERMISSION_SETTINGS_PORTAL" }
                 ] }
                 
             ]
@@ -998,11 +941,6 @@
                 "public/js/lib/llqrcode.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_STAMMDATEN": [
-                    { "mainCard": "qrscanner/QRScannerCard", "index": 950, "icon": "/css/icons/material/qrcode-avorium.svg", "title": "TRK_MENU_QRSCANNER", "permission" : "PERMISSION_QRSCANNER", "docCard" : "QRScanner", "directurls": [ "qrscanner" ] }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "relations", "values": [
@@ -1010,7 +948,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "qrscanner", "label": "QR Scanner", "docCard": "QRScanner", "directurls": "qrscanner", "icon": "/css/icons/material/qrcode-avorium.svg", "index": 950, "mainCard": "qrscanner/QRScannerCard", "permission": "PERMISSION_QRSCANNER" }
+                    { "name": "qrscanner", "label": "QR Scanner", "doccard": "QRScanner", "directurls": "qrscanner", "icon": "/css/icons/material/qrcode-avorium.svg", "index": 950, "maincard": "qrscanner/QRScannerCard", "permission": "PERMISSION_QRSCANNER" }
                 ] }
 
             ]
@@ -1044,11 +982,6 @@
                 "public/js/components/avt-recordtypevalues.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_ADMINISTRATION": [
-                    { "mainCard": "Administration/RecordTypeListCard", "index": 130, "icon": "/css/icons/material/icons8-categorize.svg", "title": "TRK_SETTINGSET_RECORDTYPES", "permission" : "PERMISSION_SETTINGS_CLIENT_RECORDTYPES", "docCard": "Administration", "directurls": [ "datatypes" ] }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "relations", "values": [
@@ -1056,7 +989,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "dynamischeobjekte", "label": "Dynamische Objekte", "docCard": "Administration", "directurls": "datatypes", "icon": "/css/icons/material/icons8-categorize.svg", "index": 130, "mainCard": "Administration/RecordTypeListCard", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES" }
+                    { "name": "dynamischeobjekte", "label": "Dynamische Objekte", "doccard": "Administration", "directurls": "datatypes", "icon": "/css/icons/material/icons8-categorize.svg", "index": 130, "maincard": "Administration/RecordTypeListCard", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES" }
                 ] }
                 
             ],
@@ -1067,7 +1000,7 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "dynamischeobjekte", "label": "Dynamische Objekte", "docCard": "Administration", "directurls": "datatypes", "icon": "/css/icons/material/icons8-categorize.svg", "index": 130, "mainCard": "Administration/RecordTypeListCard", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES" }
+                    { "name": "dynamischeobjekte", "label": "Dynamische Objekte", "doccard": "Administration", "directurls": "datatypes", "icon": "/css/icons/material/icons8-categorize.svg", "index": 130, "maincard": "Administration/RecordTypeListCard", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES" }
                 ] }
                 
             ]
@@ -1102,12 +1035,6 @@
                 "public/js/ronnyseins/GoogleMapsCardController.js"
             ],
             "languages" : [ "de" ],
-            "apps": {
-                "TRK_APP_RONNY": [
-                    { "mainCard": "ronnyseins/AugmentedRealityCard", "index": 810, "icon": "/css/icons/material/Virtual Reality.svg", "title": "TRK_MENU_LAB_AUGMENTEDREALITY" },
-                    { "mainCard": "ronnyseins/GoogleMapsCard", "index": 820, "icon": "/css/icons/material/World Map.svg", "title": "TRK_MENU_LAB_GOOGLEMAPS" }
-                ]
-            },
             "clientdatatypes": [
 
                 { "name": "apps", "values": [
@@ -1126,8 +1053,8 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "name": "augmentedreality", "label": "Augmented Reality", "icon": "/css/icons/material/Virtual Reality.svg", "index": 810, "mainCard": "ronnyseins/AugmentedRealityCard" },
-                    { "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "mainCard": "ronnyseins/GoogleMapsCard" }
+                    { "name": "augmentedreality", "label": "Augmented Reality", "icon": "/css/icons/material/Virtual Reality.svg", "index": 810, "maincard": "ronnyseins/AugmentedRealityCard" },
+                    { "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "maincard": "ronnyseins/GoogleMapsCard" }
                 ] }
 
             ]

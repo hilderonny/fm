@@ -15,15 +15,15 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     }
 
     // Handle click on sidenav menu item
-    rootscope.menuClick = function(menuItem) {
-        rootscope.currentMenuItem = menuItem;
+    rootscope.menuClick = async(view) => {
+        rootscope.currentview = view;
         var promise;
-        if (menuItem) {
+        if (view) {
             utils.removeAllCards();
             utils.setLocation("/"); // Clear location before switching to another module to prevent handling of element names which are invalid in new context
-            promise = utils.addCardWithPermission(menuItem.mainCard, menuItem, menuItem.permission).then(function() {
+            promise = utils.addCardWithPermission(view.maincard, view, view.permission).then(() => {
                 $mdSidenav('left').close();
-                if (menuItem.directurls && menuItem.directurls.length > 0) utils.setLocation('/' + menuItem.directurls[0]); // Use first defined direct URL
+                if (view.directurls && view.directurls.length > 0) utils.setLocation('/' + view.directurls.split(",")[0]); // Use first defined direct URL
                 return Promise.resolve();
             });
         } else {
@@ -47,14 +47,11 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
             return utils.addCardWithPermission('Doc/List', { preselection: rootscope.path[2], anchor: rootscope.path[3] });
         } else if (rootscope.directUrlMappings[path1]) {
             var mapping = rootscope.directUrlMappings[path1];
-            // TODO: Handle direct URLs
-            var menus = rootscope.apps[mapping.apptitle];
-            var menu = menus.find(function(m) { return m.title === mapping.menutitle; });
-            if (!menu) return Promise.resolve();
-            rootscope.currentMenuItem = menu;
-            rootscope.currentappname = mapping.apptitle;
+            if (!mapping) return Promise.resolve();
+            rootscope.currentview = mapping.view;
+            rootscope.currentapp = mapping.app;
             angular.element(document.querySelector('#cardcanvas')).empty();
-            return utils.addCardWithPermission(menu.mainCard, menu, menu.permission);
+            return utils.addCardWithPermission(mapping.view.maincard, mapping.view, mapping.view.permission);
         } else {
             return Promise.resolve();
         }
@@ -100,7 +97,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     };
 
     $scope.onappselected = function() {
-        localStorage.setItem("currentappname", this.currentappname); // this refers to the child scope of the select box
+        localStorage.setItem("currentappname", this.currentapp.app.name); // this refers to the child scope of the select box
     };
 
     // Define used languages

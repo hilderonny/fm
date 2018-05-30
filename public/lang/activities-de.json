@@ -31,8 +31,6 @@
     "TRK_ACTIVITIES_TYPE_NONE" : "",
     "TRK_ACTIVITIES_TYPE_WARRANTY" : "Gewährleistung",
     "TRK_ACTIVITIES_VIEWABLE_BY_ALL_USERS" : "Sichtbar für alle Benutzer",
-    "TRK_APP_STAMMDATEN" : "Stammdaten",
-    "TRK_MENU_OFFICE_ACTIVITIES" : "Termine",
     "TRK_MODEL_activities": "Termine",
     "TRK_MODULE_activities_NAME" : "Termine",
     "TRK_NO" : "Nein",

@@ -12,21 +12,17 @@ var ch = {
      * var configHelper = require('/utils/configHelper');
      * configHelper.getAvailablePermissionKeysForClient(req.user.clientId).then(function(permissionKeys) { ... });
      */
-     getAvailablePermissionKeysForClient: async(clientname) => {
-        var modules = await ch.getAvailableModulesForClient(clientname);
+    getAvailablePermissionKeysForClient: async(clientname) => {
         var permissionKeys = [];
-        modules.forEach((mod) => {
-            // Handle menu entries
-            if (mod.apps) Object.values(mod.apps).forEach(appmenus => {
-                appmenus.forEach(menu => {
-                    if (menu.permission && permissionKeys.indexOf(menu.permission) < 0) {
-                        permissionKeys.push(menu.permission);
-                    }
-                });
-            });
+        // Permissions aus views heraus holen
+        var views = await Db.getDynamicObjects(clientname, co.collections.views.name);
+        views.forEach(view => {
+            if (view.permission && permissionKeys.indexOf(view.permission) < 0) {
+                permissionKeys.push(view.permission);
+            }
         });
         // Special handle permission for relations, aber nur, wenn für den Mandanten Module freigeschaltet sind
-        if (modules.length > 0) permissionKeys.push(co.permissions.CORE_RELATIONS);
+        if (views.length > 0) permissionKeys.push(co.permissions.CORE_RELATIONS);
         return permissionKeys;
     },
 
