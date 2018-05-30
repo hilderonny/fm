@@ -76,7 +76,6 @@
                 "partial/Administration/UserSettingsCard.html",
                 "partial/components/DetailsCard.html",
                 "partial/Core/DynamicAttributesTab.html",
-                "partial/Doc/Administration.html",
                 "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
                 "partial/Doc/UserGroups.html",
@@ -1034,7 +1033,8 @@
                 "css/icons/office/icons8-categorize.svg",
                 "partial/Administration/RecordTypeDetailsCard.html",
                 "partial/Administration/RecordTypeFieldDetailsCard.html",
-                "partial/Administration/RecordTypeListCard.html"
+                "partial/Administration/RecordTypeListCard.html",
+                "partial/Doc/Administration.html"
             ],
             "include" : [
                 "public/js/components/avt-recordtype-details-card.js",

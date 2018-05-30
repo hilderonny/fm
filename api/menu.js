@@ -49,6 +49,7 @@ function extractAppsFromModules(modulenames) {
  */
 router.get('/', auth(), async(req, res) => {
     var clientname = req.user.clientname;
+    var usergroupname = Db.replaceQuotes(req.user.usergroupname);
     var clientSettings = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: clientname });
     var allModuleKeys = Object.keys(mc.modules);
     var modulenames = clientname === Db.PortalDatabaseName
@@ -57,7 +58,7 @@ router.get('/', auth(), async(req, res) => {
     var apps = extractAppsFromModules(modulenames);
     if (!req.user.isadmin) {
         var permissionKeys = await configHelper.getAvailablePermissionKeysForClient(clientname);
-        var permissions = permissionKeys.length > 0 ? (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${Db.replaceQuotes(req.user.usergroupname)}' AND key IN (${permissionKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows : [];
+        var permissions = permissionKeys.length > 0 ? (await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname = '${usergroupname}' AND key IN (${permissionKeys.map((k) => `'${Db.replaceQuotes(k)}'`).join(',')});`)).rows : [];
         var apptitles = Object.keys(apps);
         apptitles.forEach((apptitle) => {
             var appmenus = apps[apptitle].filter(m => !!permissions.find(p => p.key === m.permission));
@@ -68,6 +69,18 @@ router.get('/', auth(), async(req, res) => {
             }
         });
     }
+    var appsfromdatabase = await Db.getDynamicObjects(clientname, co.collections.apps.name);
+    var viewsfromdatabase = (await Db.query(clientname, `
+        SELECT DISTINCT a.name appname, v.*
+        FROM apps a
+        JOIN relations r ON r.datatype1name='apps' AND r.name1=a.name AND r.datatype2name='views' AND r.relationtypename='parentchild'
+        JOIN views v ON r.name2=v.name
+        JOIN users u ON 1=1
+        JOIN permissions p ON p.usergroupname=u.usergroupname
+        WHERE u.name='${Db.replaceQuotes(req.user.name)}' AND (u.isadmin=true OR p.key=v.permission)
+        ORDER BY v.index
+        ;`)).rows;
+        console.log(appsfromdatabase, viewsfromdatabase);
     var result = {
         logourl: clientSettings && clientSettings.logourl ? clientSettings.logourl : 'css/logo_avorium_komplett.svg',
         // menu: fullmenu,
