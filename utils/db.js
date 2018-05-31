@@ -12,6 +12,8 @@ var uuidv4 = require("uuid").v4;
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
+var debugdbquery = true; // Set this to true to print out all queries in the console
+
 var Db = {
 
     PortalDatabaseName: "portal",
@@ -488,7 +490,7 @@ var Db = {
     },
 
     queryDirect: async(databasename, query) => {
-        // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
+        if (debugdbquery) console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
         var pool = Db.getPool(Db.replaceQuotesAndRemoveSemicolon(databasename)); // Sicher ist sicher
         var client = await pool.connect();
         var result = undefined;

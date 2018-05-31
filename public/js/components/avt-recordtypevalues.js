@@ -48,7 +48,6 @@ app.directive('avtRecordtypevalues', function($rootScope, $compile, $mdDialog, $
                 // Tab part
                 scope.tabselectvalue = function(value) {
                     utils.removeCardsToTheRightOf(element);
-                    console.log(scope.recordtype.name, value.name, newscope.detailscard);
                     utils.adddetailscard(newscope, scope.recordtype.name, value.name, scope.params.permission).then(function() {
                         scope.selectedrecordtypevalue = value;
                     });
