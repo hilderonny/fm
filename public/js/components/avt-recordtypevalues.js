@@ -8,7 +8,7 @@ app.directive('avtRecordtypevalues', function($rootScope, $compile, $mdDialog, $
         '       <md-card-content>' +
         '           <md-list class="lines-beetween-items">' +
         '               <md-list-item ng-repeat="value in recordtypevalues | orderBy:\'label\'" ng-click="tabselectvalue(value)" ng-class="selectedrecordtypevalue === value ? \'active\' : false">' +
-        '                  <img ng-src="{{recordtype.icon}}"/>' +
+        '                  <img ng-src="{{value.icon}}"/>' +
         '                  <p>{{value.label}}</p>' +
         '               </md-list-item>' +
         '           </md-list>' +

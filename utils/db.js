@@ -660,19 +660,19 @@ var Db = {
         for (var i = 0; i < recordtypes.length; i++) {
             var recordtype = recordtypes[i];
             var recordtypefromdatabase = recordtypesfromdatabase.find(rt => rt.name === recordtype.name);
+            var keys = Object.keys(recordtype);
             if (recordtypefromdatabase) {
                 // Update existing record type definition
                 var updateset = [];
-                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`label=${recordtype.label ? "'" + Db.replaceQuotes(recordtype.label) + "'" : "null"}`);
-                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`plurallabel=${recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null"}`);
-                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`icon=${recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null"}`);
-                updateset.push(`lists=${recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'"}`);
+                if (keys.indexOf("label") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`label=${recordtype.label ? "'" + Db.replaceQuotes(recordtype.label) + "'" : "null"}`);
+                if (keys.indexOf("plurallabel") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`plurallabel=${recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null"}`);
+                if (keys.indexOf("icon") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`icon=${recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null"}`);
+                if (keys.indexOf("") >= 0) updateset.push(`lists=${recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'"}`);
                 updateset.push(`ispredefined=true`);
-                updateset.push(`permissionkey=${recordtype.permissionkey ? "'" + Db.replaceQuotes(recordtype.permissionkey) + "'" : "null"}`);
-                updateset.push(`modulename=${recordtype.modulename ? "'" + Db.replaceQuotes(recordtype.modulename) + "'" : "null"}`);
-                updateset.push(`canhaverelations=${!!recordtype.canhaverelations}`);
-                updateset.push(`candefinename=${!!recordtype.candefinename}`);
-                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`titlefield=${recordtype.titlefield ? "'" + Db.replaceQuotes(recordtype.titlefield) + "'" : "null"}`);
+                if (keys.indexOf("permissionkey") >= 0) updateset.push(`permissionkey=${recordtype.permissionkey ? "'" + Db.replaceQuotes(recordtype.permissionkey) + "'" : "null"}`);
+                if (keys.indexOf("canhaverelations") >= 0) updateset.push(`canhaverelations=${!!recordtype.canhaverelations}`);
+                if (keys.indexOf("candefinename") >= 0) updateset.push(`candefinename=${!!recordtype.candefinename}`);
+                if (keys.indexOf("titlefield") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`titlefield=${recordtype.titlefield ? "'" + Db.replaceQuotes(recordtype.titlefield) + "'" : "null"}`);
                 var query = `UPDATE datatypes SET ${updateset.join(",")} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
                 await Db.query(databasename, query);
                 // Force update of cache in the next request

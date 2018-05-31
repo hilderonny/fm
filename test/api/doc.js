@@ -7,7 +7,7 @@ var moduleConfig = require('../../config/module-config.json'); // http://stackov
 var th = require('../testhelpers');
 var co = require('../../utils/constants');
 
-describe('API doc', function() {
+describe('API doc', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -21,77 +21,46 @@ describe('API doc', function() {
         await th.preparePermissions();
     });
 
-    function extractMenuFromConfig() {
-        var menuFromConfig = {};
-        Object.keys(moduleConfig.modules).forEach((moduleName) => {
-            var appModule = moduleConfig.modules[moduleName];
-            if (appModule.doc) appModule.doc.forEach((docCard) => {
-                menuFromConfig[docCard.docCard] = docCard;
-            });
-            if (appModule.apps) Object.values(appModule.apps).forEach(appmenus => {
-                appmenus.forEach((item) => {
-                    if (item.docCard) menuFromConfig[item.docCard] = {
-                        docCard: item.docCard,
-                        icon: item.icon,
-                        title: item.title,
-                        index: 0
-                    };
-                });
-            });
-        });
-        return Object.values(menuFromConfig);
-    }
-
-    function checkEquality(menuFromApi, menuFromConfig) {
-        assert.strictEqual(menuFromApi.length, menuFromConfig.length);
-        for (var i = 0; i < menuFromApi.length; i++) {
-            var menuItemFromApi = menuFromApi[i];
-            var menuItemFromConfig = menuFromConfig[i];
-            assert.strictEqual(menuItemFromApi.title, menuItemFromConfig.title);
-            assert.strictEqual(menuItemFromApi.docCard, menuItemFromConfig.docCard);
-            assert.strictEqual(menuItemFromApi.icon, menuItemFromConfig.icon);
-            assert.strictEqual(menuItemFromApi.index, menuItemFromConfig.index);
-        }
-    }
-
-    it('responds to GET/ for portal admin with all documentation menu entries defined in module-config', async function() {
-        var menuFromConfig = extractMenuFromConfig();
-        var token = await th.doLoginAndGetToken(th.defaults.portalAdminUser, th.defaults.password);
+    it('responds to GET/ for portal user with all documentation menu entries defined in module-config', async () => {
+        var token = await th.defaults.login("portal_usergroup0_user0");
         var menuFromApi = (await th.get(`/api/${co.apis.doc}?token=${token}`).expect(200)).body;
-        checkEquality(menuFromApi, menuFromConfig);
+        assert.ok(menuFromApi.find(m => m.docCard === 'Settings'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'UserGroups'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Users'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Clients'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Portals'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Activities'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Areas'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'BusinessPartners'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Persons'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Documents'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'FmObjects'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Notes'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'QRScanner'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Terms'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Concepts'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'ReleaseNotes'));
     });
 
-    it('responds to GET/ for portal user with all documentation menu entries defined in module-config', async function() {
-        var menuFromConfig = extractMenuFromConfig();
-        var token = await th.doLoginAndGetToken(th.defaults.portalUser, th.defaults.password);
+    it('responds to GET/ for client user with all documentation menu entries defined in module-config', async () => {
+        var token = await th.defaults.login("client0_usergroup0_user0");
         var menuFromApi = (await th.get(`/api/${co.apis.doc}?token=${token}`).expect(200)).body;
-        checkEquality(menuFromApi, menuFromConfig);
-    });
-
-    it('responds to GET/ for client admin with all documentation menu entries defined in module-config', async function() {
-        var menuFromConfig = extractMenuFromConfig();
-        var token = await th.doLoginAndGetToken(th.defaults.adminUser, th.defaults.password);
-        var menuFromApi = (await th.get(`/api/${co.apis.doc}?token=${token}`).expect(200)).body;
-        checkEquality(menuFromApi, menuFromConfig);
-    });
-
-    it('responds to GET/ for client user with all documentation menu entries defined in module-config', async function() {
-        var menuFromConfig = extractMenuFromConfig();
-        var token = await th.doLoginAndGetToken(th.defaults.user, th.defaults.password);
-        var menuFromApi = (await th.get(`/api/${co.apis.doc}?token=${token}`).expect(200)).body;
-        checkEquality(menuFromApi, menuFromConfig);
-    });
-
-    it('responds to POST with 404', function() {
-        return th.post('/api/doc').expect(404);
-    });
-
-    it('responds to PUT with 404', function() {
-        return th.put('/api/doc').expect(404);
-    });
-
-    it('responds to DELETE with 404', function() {
-        return th.del('/api/doc').expect(404);
+        assert.ok(menuFromApi.find(m => m.docCard === 'Settings'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'UserGroups'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Users'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Clients'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Portals'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Activities'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Areas'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'BusinessPartners'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Persons'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Documents'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'FmObjects'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Notes'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'QRScanner'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Terms'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Concepts'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'ReleaseNotes'));
     });
 
 });

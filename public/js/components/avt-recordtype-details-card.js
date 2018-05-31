@@ -71,7 +71,6 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     var recordtypetosend = {
                         name: scope.recordtype.name,
                         label: scope.recordtype.label,
-                        plurallabel: scope.recordtype.plurallabel,
                         lists: scope.recordtype.lists,
                         icon: scope.recordtype.icon,
                         permissionkey: scope.recordtype.permissionkey,
@@ -116,13 +115,12 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     scope.recordtypetitlefields = [];
                     var recordtypepermissions = [];
                     var recordtypelists = [];
-                    scope.recordtype = { titlefield: "name", label: "", plurallabel: "", lists: [], fields: [], icon: "", permissionkey: "", canhaverelations: true, candefinename: false };
+                    scope.recordtype = { titlefield: "name", label: "", lists: [], fields: [], icon: "", permissionkey: "", canhaverelations: true, candefinename: false };
                     var recordtypename = scope.params.entityname;
                     if (!recordtypename) scope.isnew = true; // For add element toolbar button
                     scope.recordtypeattributes = [
                         { name: "name", label: "Name", fieldtype: "text", iseditable: false, isrequired: true, isreadonlywhenpredefined: true, tooltip: "API Name des Datentyps, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden", pattern:/^[a-z]*$/ },
                         { name: "label", label: "Bezeichnung (Einzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Einzahl zur Anzeige in Überschriften und Listen" },
-                        { name: "plurallabel", label: "Bezeichnung (Mehrzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Mehrzahl zur Anzeige in Überschriften und Listen" },
                         { name: "lists", label: "Enthaltende Listen", fieldtype: "multipicklist", options: recordtypelists, iseditable: true, tooltip: "Listen und Hierarchien, in denen der Datentyp aufgeführt wird" },
                         { name: "titlefield", label: "Titelfeld", fieldtype: "picklist", options: scope.recordtypetitlefields, iseditable: true, tooltip: "Feld, welches den Titel des Datensatzes darstellt" },
                         { name: "icon", label: "Symbol", fieldtype: "text", iseditable: true, tooltip: "URL des Symbols des Datentyps" },

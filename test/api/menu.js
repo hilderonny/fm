@@ -34,17 +34,14 @@ describe('API menu', () => {
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
         assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
         var apps = response.apps;
-        assert.ok(apps["TRK_APP_ADMINISTRATION"]);
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERS"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERGROUPS"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_DYNAMICATTRIBUTES"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_RECORDTYPES"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"]);
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_USER_GENERAL"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_CLIENT"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_PORTAL_GENERAL"));
-        assert.ok(apps["TRK_APP_PORTAL"]);
-        assert.ok(apps["TRK_APP_PORTAL"].find(m => m.title === "TRK_MENU_PORTAL_CLIENTS"));
+        assert.ok(apps.portal);
+        assert.ok(apps.portal.views.find(v => v.name === "benutzereinstellungen"));
+        assert.ok(apps.portal.views.find(v => v.name === "benutzergruppenverwaltung"));
+        assert.ok(apps.portal.views.find(v => v.name === "benutzerverwaltung"));
+        assert.ok(apps.portal.views.find(v => v.name === "dynamischeobjekte"));
+        assert.ok(apps.portal.views.find(v => v.name === "mandantenverwaltung"));
+        assert.ok(apps.portal.views.find(v => v.name === "portaleinstellungen"));
+        assert.ok(apps.portal.views.find(v => v.name === "portalverwaltung"));
     });
 
     it('responds to GET/ with normal portal user logged in with all menu items the user has permissions to', async() => {
@@ -55,17 +52,14 @@ describe('API menu', () => {
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
         assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
         var apps = response.apps;
-        assert.ok(apps["TRK_APP_ADMINISTRATION"]);
-        assert.ok(!apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERS"));
-        assert.ok(!apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERGROUPS"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_DYNAMICATTRIBUTES"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_RECORDTYPES"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"]);
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_USER_GENERAL"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_CLIENT"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_PORTAL_GENERAL"));
-        assert.ok(apps["TRK_APP_PORTAL"]);
-        assert.ok(apps["TRK_APP_PORTAL"].find(m => m.title === "TRK_MENU_PORTAL_CLIENTS"));
+        assert.ok(apps.portal);
+        assert.ok(apps.portal.views.find(v => v.name === "benutzereinstellungen"));
+        assert.ok(!apps.portal.views.find(v => v.name === "benutzergruppenverwaltung"));
+        assert.ok(!apps.portal.views.find(v => v.name === "benutzerverwaltung"));
+        assert.ok(apps.portal.views.find(v => v.name === "dynamischeobjekte"));
+        assert.ok(apps.portal.views.find(v => v.name === "mandantenverwaltung"));
+        assert.ok(apps.portal.views.find(v => v.name === "portaleinstellungen"));
+        assert.ok(!apps.portal.views.find(v => v.name === "portalverwaltung"));
     });
 
     it('responds to GET/ with client admin user logged in with all menu items available to the users client', async() => {
@@ -76,28 +70,30 @@ describe('API menu', () => {
         await th.removeClientModule('client0', co.modules.clients);
         await th.removeClientModule('client0', co.modules.businesspartners);
         await th.removeClientModule('client0', co.modules.ronnyseins);
-        await th.removeClientModule('client0', co.modules.licenseserver);
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USER);
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USERGROUP);
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.OFFICE_NOTE);
         var token = await th.defaults.login("client0_usergroup0_user1");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
         var apps = response.apps;
-        assert.ok(apps["TRK_APP_ADMINISTRATION"]);
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERS"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERGROUPS"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_DYNAMICATTRIBUTES"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_RECORDTYPES"));
-        assert.ok(apps["TRK_APP_DOKUMENTE"]);
-        assert.ok(apps["TRK_APP_DOKUMENTE"].find(m => m.title === "TRK_MENU_OFFICE_DOCUMENTS"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"]);
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_USER_GENERAL"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_CLIENT"));
-        assert.ok(!apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_PORTAL_GENERAL"));
-        assert.ok(apps["TRK_APP_STAMMDATEN"]);
-        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_ACTIVITIES"));
-        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_DOCUMENTS"));
-        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_NOTES"));
+        assert.ok(apps.administration);
+        assert.ok(apps.administration.views.find(v => v.name === "benutzergruppenverwaltung"));
+        assert.ok(apps.administration.views.find(v => v.name === "benutzerverwaltung"));
+        assert.ok(apps.administration.views.find(v => v.name === "dynamischeattribute"));
+        assert.ok(apps.administration.views.find(v => v.name === "dynamischeobjekte"));
+        assert.ok(!apps.crm);
+        assert.ok(apps.dokumente);
+        assert.ok(apps.dokumente.views.find(v => v.name === "dokumente"));
+        assert.ok(apps.einstellungen);
+        assert.ok(apps.einstellungen.views.find(v => v.name === "benutzereinstellungen"));
+        assert.ok(apps.einstellungen.views.find(v => v.name === "mandanteneinstellungen"));
+        assert.ok(!apps.raumbuch);
+        assert.ok(apps.stammdaten);
+        assert.ok(!apps.stammdaten.views.find(v => v.name === "arrangeobjekte"));
+        assert.ok(apps.stammdaten.views.find(v => v.name === "dokumente"));
+        assert.ok(apps.stammdaten.views.find(v => v.name === "notizen"));
+        assert.ok(apps.stammdaten.views.find(v => v.name === "qrscanner"));
+        assert.ok(apps.stammdaten.views.find(v => v.name === "termine"));
     });
 
     it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', async() => {
@@ -105,31 +101,32 @@ describe('API menu', () => {
         await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });
         await th.removeClientModule('client0', co.modules.areas);
         await th.removeClientModule('client0', co.modules.fmobjects);
-        await th.removeClientModule('client0', co.modules.clients);
         await th.removeClientModule('client0', co.modules.businesspartners);
         await th.removeClientModule('client0', co.modules.ronnyseins);
-        await th.removeClientModule('client0', co.modules.licenseserver);
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USER);
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USERGROUP);
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.OFFICE_NOTE);
         var token = await th.defaults.login("client0_usergroup0_user0");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
         var apps = response.apps;
-        assert.ok(apps["TRK_APP_ADMINISTRATION"]);
-        assert.ok(!apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERS"));
-        assert.ok(!apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_MENU_ADMINISTRATION_USERGROUPS"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_DYNAMICATTRIBUTES"));
-        assert.ok(apps["TRK_APP_ADMINISTRATION"].find(m => m.title === "TRK_SETTINGSET_RECORDTYPES"));
-        assert.ok(apps["TRK_APP_DOKUMENTE"]);
-        assert.ok(apps["TRK_APP_DOKUMENTE"].find(m => m.title === "TRK_MENU_OFFICE_DOCUMENTS"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"]);
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_USER_GENERAL"));
-        assert.ok(apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_CLIENT"));
-        assert.ok(!apps["TRK_APP_EINSTELLUNGEN"].find(m => m.title === "TRK_SETTINGSET_PORTAL_GENERAL"));
-        assert.ok(apps["TRK_APP_STAMMDATEN"]);
-        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_ACTIVITIES"));
-        assert.ok(apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_DOCUMENTS"));
-        assert.ok(!apps["TRK_APP_STAMMDATEN"].find(m => m.title === "TRK_MENU_OFFICE_NOTES"));
+        assert.ok(apps.administration);
+        assert.ok(!apps.administration.views.find(v => v.name === "benutzergruppenverwaltung"));
+        assert.ok(!apps.administration.views.find(v => v.name === "benutzerverwaltung"));
+        assert.ok(apps.administration.views.find(v => v.name === "dynamischeattribute"));
+        assert.ok(apps.administration.views.find(v => v.name === "dynamischeobjekte"));
+        assert.ok(!apps.crm);
+        assert.ok(apps.dokumente);
+        assert.ok(apps.dokumente.views.find(v => v.name === "dokumente"));
+        assert.ok(apps.einstellungen);
+        assert.ok(apps.einstellungen.views.find(v => v.name === "benutzereinstellungen"));
+        assert.ok(apps.einstellungen.views.find(v => v.name === "mandanteneinstellungen"));
+        assert.ok(!apps.raumbuch);
+        assert.ok(apps.stammdaten);
+        assert.ok(!apps.stammdaten.views.find(v => v.name === "arrangeobjekte"));
+        assert.ok(apps.stammdaten.views.find(v => v.name === "dokumente"));
+        assert.ok(!apps.stammdaten.views.find(v => v.name === "notizen"));
+        assert.ok(apps.stammdaten.views.find(v => v.name === "qrscanner"));
+        assert.ok(apps.stammdaten.views.find(v => v.name === "termine"));
     });
             
     it('GET/ contains the logo URL of the client when set', async () => {
@@ -155,7 +152,7 @@ describe('API menu', () => {
         var token = await th.defaults.login("client0_usergroup0_user0");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
         var apps = response.apps;
-        assert.ok(!apps["TRK_APP_ADMINISTRATION"]);
+        assert.ok(!apps.administration);
     });
 
     it('GET/ returns no apps when the client has no permissions at all', async() => {

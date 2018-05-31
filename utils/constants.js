@@ -107,6 +107,9 @@ module.exports.apis = {
     users: 'users'
 };
 
+/**
+ * Eralubte Formelarten
+ */
 module.exports.formulatypes = {
     childsum: "childsum",
     concat: "concat",
@@ -122,6 +125,7 @@ module.exports.formulatypes = {
  */
 module.exports.collections = {
     activities:{name:'activities', icon:'/css/icons/material/Planner.svg', canHaveAttributes:true},
+    apps: {name:'apps'},
     /**
      * Geschäftspartner
      */
@@ -203,7 +207,8 @@ module.exports.collections = {
     /**
      * Users which can login to the system
      */
-    users:{name:'users', icon:'/css/icons/material/User.svg', canHaveAttributes: true}
+    users:{name:'users', icon:'/css/icons/material/User.svg', canHaveAttributes: true},
+    views:{name:'views'}
 };
 
 module.exports.fieldtypes = {

@@ -78,15 +78,15 @@ var eh = {
             var readstream = fs.createReadStream(filePath)
                 .pipe(parser)
                 .on('entry', async (entry) => {
-                    var pathparts = entry.path.split("\\");
+                    var pathparts = entry.path.replace(/\\/g, "/").split("/"); // Depending on where the zip comes from we can have slashes or backslashes
                     if (pathparts.length < 2) entry.autodrain(); // Ignore errornous content
                     if (pathparts.length === 2 && pathparts[1] === "datatypes") {
                         promises.push(getJsonFromEntry(entry).then((json) => { datatypes = json; }));
                     } else if (pathparts.length === 2 && pathparts[1] === "datatypefields") {
                         promises.push(getJsonFromEntry(entry).then((json) => { datatypefields = json; }));
-                    } else if (pathparts.length === 3 && pathparts[1] === "content") {
+                    } else if (pathparts.length === 3 && pathparts[1] === "content" && pathparts[2] !== "") {
                         promises.push(getJsonFromEntry(entry).then((json) => { contents[pathparts[2]] = json; }));
-                    } else if (pathparts.length === 3 && pathparts[1] === "files") {
+                    } else if (pathparts.length === 3 && pathparts[1] === "files" && pathparts[2] !== "") {
                         var documentname = pathparts[2];
                         var documentPath = dh.getDocumentPath(clientname, documentname);
                         dh.createPath(path.dirname(documentPath));
