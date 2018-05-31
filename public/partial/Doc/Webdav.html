@@ -6,16 +6,23 @@
     </md-toolbar>
     <md-card-content>
         <p>
-            By Webdav module, documnents and files can be accessed and manipulated remotly over the internet using Windows explorer.        
+           Webdav can used for file browsing and document retrieval remotly over the internet using Windows explorer.     
+           
         </p>
         <ul>
-            <li><a href="/#/doc/Webdav#setup">Setup</a></li>
-            <li><a href="/#/doc/Webdav#login">Login</a></li>
+            <li><a href="/#/doc/Webdav#login">Login (user authentication)</a></li>
+            <li><a href="/#/doc/Webdav#specifics">Specifics</a></li>
+            <li><a href="/#/doc/Webdav#limitations">Limitations</a></li>
+            <li><a href="/#/doc/Webdav#further_readings">Further Readings</a></li>
         </ul>
 
-        <h2><a name="setup">Setup</a></h2>
+        <h2><a name="login">Login</a></h2> 
         <img src="/css/images/Webdav_Setup.png"/> 
         <p> 
+             First of all the user has to make a connection to Webdav server using Windows File Explorer by specifying the webdav
+             server Url wich is <b>\\localhost@SSL@56789\DavWWWRoot</b> in the windows explorer. After the connection is
+             done successfully, the user cradintial must be entered to browse and retrieve files and documents. The procedures is 
+             explanied as below in details.            
             <ul>
                 <ol>
                     <li>From the <b>Start Menu</b> on Windows PC go to <b>File Explore</b> and right click on <b>This PC</b>.</li>
@@ -24,20 +31,78 @@
                     <li>click <b>Finish</b></li>
                 </ol>
             </ul>   
-        </p>
-
-        <h2><a name="login">Login</a></h2>    
+        </p>           
         <img src="/css/images/WebDav_login.png"/>     
-        <p> The login window will pop up after clicking on th finish button in the previous step. The user and password has to be entered in 
-            order to view all the folder and documents belongs to the loged in user credentials.                        
+        <p> The login window will pop up after clicking on th finish button in the previous step.The user and password has to be entered in 
+            order to view all the folder and documents belong to the loged in user credentials. Keep in mind that sometimes the login window
+            takes a couple of times to get opened.                        
         </p> <img src="/css/images/WebDavView.png"/>        
 
         <p> <b>Attention!</b><br>Single connection is supported which means multiple connection to a server using different
             user credentials are not allowed. However, it is possible to maka a connection with other credentials by
             disconnecting the previous one.
+        </p><br><br><br>
+
+        <p>To <b>logout</b> means to disconnect to the WevDav server. The following steps explain how to logout: 
+        <ul>
+            <ol>
+                <li>From the <b>Tree View</b> in Windows Explorer go to the WebDav url name and right click on it.</li>
+                <li>From the drop list select <b>Disconnect</b>.</li>
+                <li>Click <b>Ok</b> to confirm the disconnection otherwise click on <b>Cancel</b>.</li>
+                <li>Click <b>Finish</b></li>
+                <li>Refresh the browser to see the changes</li>
+            </ol>
+        </ul> 
+        </p><img src="/css/images/Webdav_logout.png"/>
+        
+        <p> <b>Change credentials</b> mean that the user can login with different credentials. However, after disconneting the previous connection to webdav.
+        The same login procedures as explained above must be followed but with one more step which is checking on <b>connect using different credentials</b>.
+        </p><img src="/css/images/change_credential.png"/>
+
+
+        <h2><a name="specifics">Specifics</a></h2> 
+        <p>Some specifics are provided in this system such as nested/ring hierarchy,relevant functionality,update on-demand.
+            <ul>
+                <ol>
+                    <li><b>Nested Hirarchy:</b> a same folder or document with a same name can be appeared several times at the same or different folder list in the browser 
+                    depends on its dependency. it is crucial, to know that this document or folder is not a copy of the original one but the it is the orignal itself. Therefore, any updates made 
+                    in one of them will be made to othere one of the same folder or document</li>
+                    <li><b>Update on-Demand:</b>when any changes are made in the web application after login to webdav, will not get the last updates in webdav unless 
+                    the browser is refreshed. For example if an image is deleted in the web application and the user forgot to refresh the browser, as a sequence
+                    the image in webdav won't be deleted and displayed as well. <b>Refresh the browser regularly!</b> </li> 
+                </ol>
+            </ul> 
         </p>
 
+
+        <h2><a name="limitation">Limitations</a></h2> 
+        <p>Deleting,creating,and renaming a folder/document are not supported. Regarding the deletion, the user can delete a folder or a file but this is not a real deletion 
+        because the deleted file or folder will be shown again in the borwser since it has been refreshed or the user logged in again. This occured because the deletion
+        does not effect the database. 
+        Error messges is appered when trying to creat or rename a folder or a document.This messages has to be ignored.        
+        </p>
+
+        <h2><a name="further_readings">Further Readings</a></h2>  
+
+        <p> Potential limitations caused by Windows security measurements:
+
+            <ul>
+                <ol>
+                    <li> https://support.microsoft.com/en-us/help/938120/error-message-when-you-use-user-credentials-to-connect-to-a-network-sh.</li>
+                    <li>https://support.microsoft.com/en-us/help/900900/folder-copy-error-message-when-downloading-a-file-that-is-larger-than.</li>
+                
+                </ol>
+            </ul>           
+    
+            
+            </p>
+
+
+
+
        
+      
+    
          
 
 
