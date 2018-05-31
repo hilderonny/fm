@@ -586,12 +586,12 @@ var Db = {
     updaterecordtype: async(clientname, recordtypename, recordtype) => {
         var updateset = [];
         var keys = Object.keys(recordtype);
-        if (["undefined", "string"].indexOf(typeof(recordtype.label)) < 0) throw new Error("label must be a string!");
-        if (["undefined", "string"].indexOf(typeof(recordtype.plurallabel)) < 0) throw new Error("plurallabel must be a string!");
-        if (["undefined", "string"].indexOf(typeof(recordtype.titlefield)) < 0) throw new Error("titlefield must be a string!");
+        if (recordtype.label !== null && ["undefined", "string"].indexOf(typeof(recordtype.label)) < 0) throw new Error("label must be a string!");
+        if (recordtype.plurallabel !== null && ["undefined", "string"].indexOf(typeof(recordtype.plurallabel)) < 0) throw new Error("plurallabel must be a string!");
+        if (recordtype.titlefield !== null && ["undefined", "string"].indexOf(typeof(recordtype.titlefield)) < 0) throw new Error("titlefield must be a string!");
         if (typeof(recordtype.lists) !== "undefined" && (!Array.isArray(recordtype.lists) || recordtype.lists.find(l => typeof(l) !== "string"))) throw new Error("lists must be an array of strings!");
-        if (["undefined", "string"].indexOf(typeof(recordtype.icon)) < 0) throw new Error("icon must be a string!");
-        if (["undefined", "string"].indexOf(typeof(recordtype.permissionkey)) < 0) throw new Error("permissionkey must be a string!");
+        if (recordtype.icon !== null && ["undefined", "string"].indexOf(typeof(recordtype.icon)) < 0) throw new Error("icon must be a string!");
+        if (recordtype.permissionkey !== null && ["undefined", "string"].indexOf(typeof(recordtype.permissionkey)) < 0) throw new Error("permissionkey must be a string!");
         if (["undefined", "boolean"].indexOf(typeof(recordtype.canhaverelations)) < 0) throw new Error("canhaverelations must be a boolean!");
         if (["undefined", "boolean"].indexOf(typeof(recordtype.candefinename)) < 0) throw new Error("candefinename must be a boolean!");
         if (["undefined", "boolean"].indexOf(typeof(recordtype.ishidden)) < 0) throw new Error("ishidden must be a boolean!");
@@ -618,18 +618,18 @@ var Db = {
         if (!existingdatatype) throw new Error("Datatype does not exist");
         var existingfield = existingdatatype.fields[fieldname];
         if (!existingfield) throw new Error("Field does not exist");
-        if (["undefined", "string"].indexOf(typeof(field.label)) < 0) throw new Error("label must be a string!");
-        if (["undefined", "boolean"].indexOf(typeof(field.ishidden)) < 0) throw new Error("ishidden must be a boolean!");
-        if (["undefined", "number"].indexOf(typeof(field.formulaindex)) < 0) throw new Error("formulaindex must be an int!");
-        if (["undefined", "number"].indexOf(typeof(field.rows)) < 0) throw new Error("rows must be an int!");
+        if (field.label !== null && ["undefined", "string"].indexOf(typeof(field.label)) < 0) throw new Error("label must be a string!");
+        if (field.ishidden !== null && ["undefined", "boolean"].indexOf(typeof(field.ishidden)) < 0) throw new Error("ishidden must be a boolean!");
+        if (field.formulaindex !== null && ["undefined", "number"].indexOf(typeof(field.formulaindex)) < 0) throw new Error("formulaindex must be an int!");
+        if (field.rows !== null && ["undefined", "number"].indexOf(typeof(field.rows)) < 0) throw new Error("rows must be an int!");
         if (existingfield.fieldtype === constants.fieldtypes.formula && field.formula && !Db.isformulavalid(field.formula)) throw new Error("Formula is invalid!");
         var updateset = [];
         var keys = Object.keys(field);
         if (keys.indexOf("label") >= 0) updateset.push(`label='${Db.replaceQuotes(field.label)}'`);
         if (keys.indexOf("formula") >= 0) updateset.push(`formula='${Db.replaceQuotes(JSON.stringify(field.formula))}'`);
-        if (keys.indexOf("formulaindex") >= 0) updateset.push(`formulaindex=${parseInt(field.formulaindex)}`);
+        if (keys.indexOf("formulaindex") >= 0) updateset.push(`formulaindex=${parseInt(field.formulaindex ? field.formulaindex : 0)}`);
         if (keys.indexOf("ishidden") >= 0) updateset.push(`ishidden=${!!field.ishidden}`);
-        if (keys.indexOf("rows") >= 0) updateset.push(`rows=${parseInt(field.rows)}`);
+        if (keys.indexOf("rows") >= 0) updateset.push(`rows=${parseInt(field.rows ? field.rows : 0)}`);
         if (updateset.length < 1) return;
         var query = `UPDATE datatypefields SET ${updateset.join(",")}, ismanuallyupdated=true WHERE datatypename='${Db.replaceQuotes(datatypename)}' AND name='${Db.replaceQuotes(fieldname)}';`;
         await Db.query(clientname, query);
@@ -660,19 +660,19 @@ var Db = {
         for (var i = 0; i < recordtypes.length; i++) {
             var recordtype = recordtypes[i];
             var recordtypefromdatabase = recordtypesfromdatabase.find(rt => rt.name === recordtype.name);
+            var keys = Object.keys(recordtype);
             if (recordtypefromdatabase) {
                 // Update existing record type definition
                 var updateset = [];
-                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`label=${recordtype.label ? "'" + Db.replaceQuotes(recordtype.label) + "'" : "null"}`);
-                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`plurallabel=${recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null"}`);
-                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`icon=${recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null"}`);
-                updateset.push(`lists=${recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'"}`);
+                if (keys.indexOf("label") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`label=${recordtype.label ? "'" + Db.replaceQuotes(recordtype.label) + "'" : "null"}`);
+                if (keys.indexOf("plurallabel") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`plurallabel=${recordtype.plurallabel ? "'" + Db.replaceQuotes(recordtype.plurallabel) + "'" : "null"}`);
+                if (keys.indexOf("icon") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`icon=${recordtype.icon ? "'" + Db.replaceQuotes(recordtype.icon) + "'" : "null"}`);
+                if (keys.indexOf("") >= 0) updateset.push(`lists=${recordtype.lists ? "'{" + recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",") + "}'" : "'{}'"}`);
                 updateset.push(`ispredefined=true`);
-                updateset.push(`permissionkey=${recordtype.permissionkey ? "'" + Db.replaceQuotes(recordtype.permissionkey) + "'" : "null"}`);
-                updateset.push(`modulename=${recordtype.modulename ? "'" + Db.replaceQuotes(recordtype.modulename) + "'" : "null"}`);
-                updateset.push(`canhaverelations=${!!recordtype.canhaverelations}`);
-                updateset.push(`candefinename=${!!recordtype.candefinename}`);
-                if (!recordtypefromdatabase.ismanuallyupdated) updateset.push(`titlefield=${recordtype.titlefield ? "'" + Db.replaceQuotes(recordtype.titlefield) + "'" : "null"}`);
+                if (keys.indexOf("permissionkey") >= 0) updateset.push(`permissionkey=${recordtype.permissionkey ? "'" + Db.replaceQuotes(recordtype.permissionkey) + "'" : "null"}`);
+                if (keys.indexOf("canhaverelations") >= 0) updateset.push(`canhaverelations=${!!recordtype.canhaverelations}`);
+                if (keys.indexOf("candefinename") >= 0) updateset.push(`candefinename=${!!recordtype.candefinename}`);
+                if (keys.indexOf("titlefield") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`titlefield=${recordtype.titlefield ? "'" + Db.replaceQuotes(recordtype.titlefield) + "'" : "null"}`);
                 var query = `UPDATE datatypes SET ${updateset.join(",")} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
                 await Db.query(databasename, query);
                 // Force update of cache in the next request

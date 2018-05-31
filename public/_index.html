@@ -103,9 +103,9 @@
                         
                             <label>Apps</label>
                     
-                            <md-select ng-model="currentapptitle" ng-change="onappselected()">
-                                <md-option ng-value="apptitle" ng-repeat="apptitle in apptitles | orderBy: 'toString()' track by $index">
-                                    <span translate="{{ apptitle }}"></span>
+                            <md-select ng-model="currentapp" ng-change="onappselected()">
+                                <md-option ng-value="app" ng-repeat="app in apps track by $index">
+                                    <span translate="{{ app.app.label }}"></span>
                                 </md-option>
                             </md-select>
 
@@ -113,9 +113,9 @@
 
                     <md-list ng-cloak>
 
-                        <md-list-item ng-repeat="menuitem in apps[currentapptitle] | orderBy: 'index'" ng-click="menuClick(menuitem)" ng-class="{active: currentMenuItem === menuitem}" aria-label="{{ menuitem.title }}">
-                            <md-icon md-svg-src="{{menuitem.icon}}" aria-label="{{ menuitem.title }} "></md-icon>
-                            <p><span translate="{{ menuitem.title }}"></span></p>
+                        <md-list-item ng-repeat="view in currentapp.views" ng-click="menuClick(view)" ng-class="{active: currentview === view}">
+                            <md-icon md-svg-src="{{view.icon}}"></md-icon>
+                            <p>{{ view.label }}</p>
                         </md-list-item>
 
                         <md-divider></md-divider>
@@ -132,19 +132,19 @@
                 <div translate="TRK_LOGIN_LOGGED_IN_AS" translate-value-username="{{username}}"></div>
             </md-sidenav>
 
-            <md-content flex layout="row" id="cardcanvas" ng-show="currentMenuItem || isShowingDoc">
+            <md-content flex layout="row" id="cardcanvas" ng-show="currentview || isShowingDoc">
             </md-content>
 
             <div class="progress-panel" ng-if="$root.isLoading && false">
                 <md-progress-circular md-mode="indeterminate"></md-progress-circular>
             </div> 
 
-            <md-content flex layout="row" id="dashboard" ng-show="!currentMenuItem && !isShowingDoc">
+            <md-content flex layout="row" id="dashboard" ng-show="!currentview && !isShowingDoc">
                 <div>
 
-                    <md-button class="md-raised" ng-repeat="menuitem in apps[currentapptitle]" ng-click="menuClick(menuitem)" aria-label="{{ menuitem.title }}">
-                        <md-icon md-svg-src="{{getofficeicon(menuitem.icon)}}"></md-icon>
-                        <span class="md-subhead" translate="{{ menuitem.title }}"></span>
+                    <md-button class="md-raised" ng-repeat="view in currentapp.views" ng-click="menuClick(view)">
+                        <md-icon md-svg-src="{{getofficeicon(view.icon)}}"></md-icon>
+                        <span class="md-subhead">{{ view.label }}</span>
                     </md-button>
                         
                 </div>
