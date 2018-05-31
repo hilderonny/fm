@@ -191,20 +191,21 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             return utils.getresponsedata('/api/menu').then(function (responsedata) {
                 scope.logourl = responsedata.logourl;
                 // Apps
-                scope.apptitles = Object.keys(responsedata.apps);
-                scope.currentapptitle = localStorage.getItem("currentapptitle");
-                if (!scope.currentapptitle) scope.currentapptitle = scope.apptitles.sort()[0];
-                scope.apps = responsedata.apps;
+                scope.apps = Object.values(responsedata.apps);
+                scope.apps.sort((a, b) => a.app.label.localeCompare(b.app.label));
+                scope.currentapp = scope.apps.find(a => a.app.name === localStorage.getItem("currentappname"));
+                if (!scope.currentapp) scope.currentapp = scope.apps[0];
                 // Direct URL mappings
-                scope.apptitles.forEach(function(apptitle) {
-                    var appmenu = scope.apps[apptitle];
-                    appmenu.forEach(function(menu) {
-                        if (menu.directurls) {
+                scope.apps.forEach(app => {
+                    var views = app.views;
+                    views.sort((a, b) => a.index - b.index);
+                    views.forEach(function(view) {
+                        if (view.directurls) {
                             if (!scope.directUrlMappings) scope.directUrlMappings = {};
-                            menu.directurls.forEach(function(directurl) {
+                            view.directurls.split(",").forEach(function(directurl) {
                                 scope.directUrlMappings[directurl] = {
-                                    apptitle: apptitle,
-                                    menutitle: menu.title
+                                    app: app,
+                                    view: view
                                 };
                             });
                         }

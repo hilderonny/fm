@@ -192,6 +192,21 @@ function findPermissionKeyInModuleConfig(permissionKey, errors, fileName) {
     Object.keys(moduleConfig.modules).forEach(function eachModule(moduleName) {
         if (found) return; // Break when found in another module
         var mod = moduleConfig.modules[moduleName];
+        // Collect from views
+        if (mod.clientdatatypes) mod.clientdatatypes.forEach(dt => {
+            if (found || dt.name !== "views" || !dt.values) return;
+            dt.values.forEach(v => {
+                if (found) return;
+                if (v.permission === permissionKey) found = true;
+            });
+        });
+        if (mod.portaldatatypes) mod.portaldatatypes.forEach(dt => {
+            if (found || dt.name !== "views" || !dt.values) return;
+            dt.values.forEach(v => {
+                if (found) return;
+                if (v.permission === permissionKey) found = true;
+            });
+        });
         if (mod.apps) Object.values(mod.apps).forEach(appmenus => {
             appmenus.forEach(item => {
                 if (item.permission === permissionKey) {

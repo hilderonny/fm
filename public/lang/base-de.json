@@ -1,6 +1,4 @@
 {   
-    "TRK_APP_ADMINISTRATION" : "Administration",
-    "TRK_APP_EINSTELLUNGEN" : "Einstellungen",
     "TRK_DATATYPES_DATATYPE" : "Datentyp",
     "TRK_DETAILS_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_DETAILS_CREATE" : "Erstellen",
@@ -41,8 +39,6 @@
     "TRK_LOGIN_LOGIN" : "Anmelden",
     "TRK_LOGIN_PASSWORD" : "Passwort",
     "TRK_LOGIN_USERNAME" : "Benutzername",
-    "TRK_MENU_ADMINISTRATION_USERS" : "Benutzer",
-    "TRK_MENU_ADMINISTRATION_USERGROUPS" : "Benutzergruppen",    
     "TRK_MENU_LOGOUT" : "Abmelden",
     "TRK_MODEL_usergroups": "Benutzergruppen",
     "TRK_MODEL_users": "Benutzer",

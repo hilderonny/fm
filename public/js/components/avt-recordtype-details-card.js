@@ -71,7 +71,6 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     var recordtypetosend = {
                         name: scope.recordtype.name,
                         label: scope.recordtype.label,
-                        plurallabel: scope.recordtype.plurallabel,
                         lists: scope.recordtype.lists,
                         icon: scope.recordtype.icon,
                         permissionkey: scope.recordtype.permissionkey,
@@ -81,6 +80,10 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     $http.post("/api/recordtypes", recordtypetosend).then(function(response) {
                         if (response.status === 409) {
                             $mdDialog.show($mdDialog.alert().title("Der Name ist bereits vergeben und kann nicht verwendet werden.").ok("OK"));
+                            return;
+                        }
+                        if (response.status !== 200) {
+                            $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
                             return;
                         }
                         if (scope.params.oncreate) {
@@ -93,7 +96,11 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                 scope.delete = function() {
                     utils.showdialog(scope.$new(true), "<p>Soll der Datentyp wirklich gelöscht werden?</p>", [
                         { label: "Ja", onclick: function() {
-                            $http.delete("/api/recordtypes/" + scope.recordtype.name).then(function() { 
+                            $http.delete("/api/recordtypes/" + scope.recordtype.name).then(function(response) { 
+                                if (response.status !== 200) {
+                                    $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
+                                    return;
+                                }
                                 if (scope.params.ondelete) scope.params.ondelete();
                                 utils.removeCardsToTheRightOf(element);
                                 utils.removeCard(element);
@@ -108,13 +115,12 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     scope.recordtypetitlefields = [];
                     var recordtypepermissions = [];
                     var recordtypelists = [];
-                    scope.recordtype = { titlefield: "name", label: "", plurallabel: "", lists: [], fields: [], icon: "", permissionkey: "", canhaverelations: true, candefinename: false };
+                    scope.recordtype = { titlefield: "name", label: "", lists: [], fields: [], icon: "", permissionkey: "", canhaverelations: true, candefinename: false };
                     var recordtypename = scope.params.entityname;
                     if (!recordtypename) scope.isnew = true; // For add element toolbar button
                     scope.recordtypeattributes = [
                         { name: "name", label: "Name", fieldtype: "text", iseditable: false, isrequired: true, isreadonlywhenpredefined: true, tooltip: "API Name des Datentyps, kann nur beim Erstellen definiert aber anschließend nicht mehr geändert werden", pattern:/^[a-z]*$/ },
                         { name: "label", label: "Bezeichnung (Einzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Einzahl zur Anzeige in Überschriften und Listen" },
-                        { name: "plurallabel", label: "Bezeichnung (Mehrzahl)", fieldtype: "text", iseditable: true, tooltip: "Bezeichnung in der Mehrzahl zur Anzeige in Überschriften und Listen" },
                         { name: "lists", label: "Enthaltende Listen", fieldtype: "multipicklist", options: recordtypelists, iseditable: true, tooltip: "Listen und Hierarchien, in denen der Datentyp aufgeführt wird" },
                         { name: "titlefield", label: "Titelfeld", fieldtype: "picklist", options: scope.recordtypetitlefields, iseditable: true, tooltip: "Feld, welches den Titel des Datensatzes darstellt" },
                         { name: "icon", label: "Symbol", fieldtype: "text", iseditable: true, tooltip: "URL des Symbols des Datentyps" },
@@ -143,7 +149,11 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     });
                 };
                 scope.save = function() {
-                    return $http.put("/api/recordtypes/" + scope.recordtype.name, scope.recordtype).then(function() {
+                    return $http.put("/api/recordtypes/" + scope.recordtype.name, scope.recordtype).then(function(response) {
+                        if (response.status !== 200) {
+                            $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
+                            return;
+                        }
                         $mdToast.show($mdToast.simple().textContent("Änderungen gespeichert").hideDelay(1000).position("bottom right"));
                         if (scope.params.onsave) {
                             scope.params.onsave(scope.recordtype);

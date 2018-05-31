@@ -70,7 +70,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.module
         !recordtype.name.match(/^[a-z]*$/) || 
         (recordtype.lists && !Array.isArray(recordtype.lists)) ||
         co.forbiddendatatypenames.indexOf(recordtype.name) >= 0) {
-        return res.sendStatus(400);
+        return res.status(400).send("Error in request data format");
     }
     var clientname = req.user.clientname;
     if ((await Db.getdatatypes(clientname))[recordtype.name]) return res.sendStatus(409);
@@ -80,7 +80,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.module
         await Db.createDatatype(clientname, recordtype.name, recordtype.label || "", recordtype.plurallabel || "", "name", recordtype.icon || "", recordtype.lists, recordtype.permissionkey || "", null, recordtype.canhaverelations, recordtype.candefinename);
         res.sendStatus(200);
     } catch(error) {
-        res.sendStatus(400); // Invalid attribute types and so
+        res.status(400).send(error.message); // Invalid attribute types and so
     }
 });
 
@@ -90,7 +90,7 @@ router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTY
     var clientname = req.user.clientname;
     var datatypename = Db.replaceQuotes(req.params.datatypename);
     if (!field || !field.name || !field.name.match(/^[a-z]*$/)) {
-        return res.sendStatus(400);
+        return res.status(400).send("Invalid field name")
     }
     var existingdatatype = (await Db.getdatatypes(clientname))[datatypename];
     if (!existingdatatype) return res.sendStatus(404);
@@ -103,7 +103,7 @@ router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTY
         }
         res.sendStatus(200);
     } catch(error) {
-        res.sendStatus(400); // Invalid formula and so
+        res.status(400).send(error.message); // Invalid formula and so
     }
 });
 
@@ -123,7 +123,7 @@ router.put('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIEN
     if (!existingfield.ispredefined && keys.indexOf("formulaindex") >= 0) updateset.formulaindex = field.formulaindex;
     if (keys.indexOf("ishidden") >= 0) updateset.ishidden = field.ishidden;
     if (keys.indexOf("rows") >= 0) updateset.rows = field.rows;
-    if (Object.keys(updateset).length < 1) return res.sendStatus(400);
+    if (Object.keys(updateset).length < 1) return res.status(400).send("Update set does not contain valid information");
     try {
         await Db.updaterecordtypefield(clientname, datatypename, fieldname, updateset);
         // Force update of cache in the next request
@@ -134,7 +134,7 @@ router.put('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CLIEN
         }
         res.sendStatus(200);
     } catch(error) {
-        res.sendStatus(400);
+        res.status(400).send(error.message);
     }
 });
 
@@ -154,14 +154,14 @@ router.put('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co.mo
     if (!existing.ispredefined && keys.indexOf("permissionkey") >= 0) updateset.permissionkey = recordtype.permissionkey;
     if (!existing.ispredefined && keys.indexOf("canhaverelations") >= 0) updateset.canhaverelations = recordtype.canhaverelations;
     if (!existing.ispredefined && keys.indexOf("candefinename") >= 0) updateset.candefinename = recordtype.candefinename;
-    if (Object.keys(updateset).length < 1) return res.sendStatus(400);
+    if (Object.keys(updateset).length < 1) return res.status(400).send("Update set does not contain valid information");
     try {
         await Db.updaterecordtype(clientname, recordtypename, updateset);
         // Force update of cache in the next request
         delete Db.datatypes;
         res.sendStatus(200);
     } catch(error) {
-        res.sendStatus(400);
+        res.status(400).send(error.message);
     }
 });
 
@@ -173,7 +173,7 @@ router.delete('/field/:datatypename/:fieldname', auth(co.permissions.SETTINGS_CL
     if (!existingdatatype) return res.sendStatus(404);
     var existingfield = existingdatatype.fields[fieldname];
     if (!existingfield) return res.sendStatus(404);
-    if (existingfield.ispredefined || existingdatatype.titlefield === fieldname) return res.sendStatus(400);
+    if (existingfield.ispredefined || existingdatatype.titlefield === fieldname) return res.status(400).send("Field is either predefined or set as title field and so cannot be deleted.");
     await Db.deleteRecordTypeField(clientname, datatypename, fieldname);
     if (existingfield.fieldtype === co.fieldtypes.formula) {
         await ch.recalculateforupdateddatatype(clientname, datatypename);
@@ -186,11 +186,11 @@ router.delete('/:name', auth(co.permissions.SETTINGS_CLIENT_RECORDTYPES, 'w', co
     var datatypename = Db.replaceQuotes(req.params.name);
     var existing = (await Db.getdatatypes(clientname))[datatypename];
     if (!existing) return res.sendStatus(404);
-    if (existing.ispredefined) return res.sendStatus(400);
+    if (existing.ispredefined) return res.status(400).send("Datatype is predefined");
     var referencingfields = await Db.query(clientname, `SELECT 1 FROM datatypefields WHERE fieldtype='reference' AND reference='${datatypename}';`);
-    if (referencingfields.rowCount > 0) return res.sendStatus(400);
+    if (referencingfields.rowCount > 0) return res.status(400).send("Datatype is still referenced by other datatypes");
     var existingrelationstootherdatatypes = await Db.query(clientname, `SELECT 1 FROM relations WHERE (datatype1name='${datatypename}' AND NOT datatype2name='${datatypename}') OR (datatype2name='${datatypename}' AND NOT datatype1name='${datatypename}');`);
-    if (existingrelationstootherdatatypes.rowCount > 0) return res.sendStatus(400);
+    if (existingrelationstootherdatatypes.rowCount > 0) return res.status(400).send("There exist relations to this datatype");
     await Db.deleteRecordType(clientname, datatypename);
     res.sendStatus(204);
 });
