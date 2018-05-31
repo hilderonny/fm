@@ -206,38 +206,6 @@ describe('module-config.json', function() {
         return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
     });
 
-    it('permissions match with those in constants', function() {
-        var permissionsFromConfig = [], errors = [];
-        // Aus den Menüs holen
-        Object.values(moduleConfig.modules).forEach(mod => {
-            if (mod.apps) Object.values(mod.apps).forEach(appmenus => {
-                appmenus.forEach(menu => {
-                    if (menu.permission && permissionsFromConfig.indexOf(menu.permission) < 0) permissionsFromConfig.push(menu.permission);
-                });
-            });
-        });
-        // Explizit defnierte Berechtigungen holen
-        Object.keys(moduleConfig.modules).map((k) => moduleConfig.modules[k].permissions).forEach((permissions) => {
-            if (permissions) permissions.forEach(function(permission) {
-                if (permissionsFromConfig.indexOf(permission) < 0) permissionsFromConfig.push(permission);
-            });
-        });
-        // Alle in der config definierten Zugriffsrechte müssen als Konstanten vorhanden sein
-        permissionsFromConfig.forEach(function(permission) {
-            var permissionName = permission.substring(11);
-            if (!co.permissions[permissionName]) errors.push(`Permission ${permission} is not defined in constants`);
-        });
-        // Alle als Konstanten definierten Zugriffsrechte müssen irgendwo in config enthalten sein
-        Object.keys(co.permissions).forEach(function(key) {
-            var permission = co.permissions[key];
-            if (permissionsFromConfig.indexOf(permission) < 0) errors.push(`Permission ${permission} is not defined in module-config`);
-        });
-        if (errors.length > 0) {
-            throw new Error(errors.join('\n'));
-        }
-        return Promise.resolve(); // No need for this? https://javascript.info/promise-chaining
-    });
-
     /**
      * Sucht in der gegebenen HTML-Datei alle Verweise auf Bilder und prüft, ob diese
      * (wenn sie lokal verwiesen sind) auch im public-Part des Moduls verwiesen sind.

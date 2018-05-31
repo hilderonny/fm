@@ -4,26 +4,26 @@
 var router = require('express').Router();
 var moduleConfig = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
 var co = require('../utils/constants');
+var Db = require("../utils/db").Db;
+var auth = require('../middlewares/auth');
 
-var extractDocMenu = () => {
+var extractDocMenu = async(clientname) => {
     var fullMenu = {};
+    var views = await Db.getDynamicObjects(clientname, co.collections.views.name);
+    views.forEach(view => {
+        if (view.doccard) fullMenu[view.doccard] = {
+            docCard: view.doccard,
+            icon: view.icon,
+            title: view.label,
+            index: 0 // Aus Menü so sortieren, wie es kommt.
+        };
+    });
+    // Versteckte Dokumentationseinträge (Release Notes)
     var moduleNames = Object.keys(moduleConfig.modules);
     moduleNames.forEach((moduleName) => {
         var appModule = moduleConfig.modules[moduleName];
-        // Entweder versteckte Dokumentationen, wie Releasenotes in eigenem Attribut ...
         if (appModule.doc) appModule.doc.forEach((docCard) => {
             fullMenu[docCard.docCard] = docCard;
-        });
-        // ... oder als Attribut an irgendeinem Menüeintrag
-        if (appModule.apps) Object.values(appModule.apps).forEach(appmenus => {
-            appmenus.forEach((item) => {
-                if (item.docCard) fullMenu[item.docCard] = {
-                    docCard: item.docCard,
-                    icon: item.icon,
-                    title: item.title,
-                    index: 0 // Aus Menü so sortieren, wie es kommt.
-                };
-            });
         });
     });
     return Object.values(fullMenu);
@@ -34,8 +34,9 @@ var extractDocMenu = () => {
  * When the logged in user is an admin, 
  * then the entire menu structure is returned.
  */
-router.get('/', (req, res) => {
-    res.send(extractDocMenu());
+router.get('/', auth(), async(req, res) => {
+    var doc = await extractDocMenu(req.user.clientname);
+    res.send(doc);
 });
 
 module.exports = router;
