@@ -22,46 +22,6 @@ describe('API users', () => {
         await th.prepareRelations();
     });
 
-    function compareElement(actual, expected) {
-        ["_id", "name", "userGroupId", "isAdmin"].forEach((f) => {
-            assert.ok(typeof(actual[f]) !== "undefined");
-            assert.strictEqual(actual[f], expected[f]);
-        });
-    }
-
-    function compareElements(actual, expected) {
-        assert.strictEqual(actual.length, expected.length);
-        actual.sort((a, b) => { return a._id.localeCompare(b._id); });
-        expected.sort((a, b) => { return a._id.localeCompare(b._id); });
-        for (var i = 0; i < actual.length; i++) compareElement(actual[i], expected[i]);
-    }
-
-    function mapFields(e) {
-        return {
-            _id: e.name,
-            clientId: "client0",
-            name: e.name, // label cannot be used and is obsolete
-            userGroupId: e.usergroupname,
-            isAdmin: e.isadmin
-        }
-    }
-
-    describe('GET/forUserGroup', () => {
-    
-        var api = "users/forUserGroup";
-        th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USER, "usergroups");
-        th.apiTests.getId.clientDependentNegative(api, "usergroups");
-        
-        it(`returns all users for the given usergroup`, async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            var filter = { usergroupname: "client0_usergroup0" };
-            var elementsFromDatabase = (await Db.getDynamicObjects("client0", "users", filter)).map((e) => { return mapFields(e); });
-            var elementsFromApi = (await th.get(`/api/${api}/client0_usergroup0?token=${token}`).expect(200)).body;
-            compareElements(elementsFromApi, elementsFromDatabase);
-        });
-        
-    });
-
     describe('POST/newpassword', () => {
 
         function createPostPassword() {
