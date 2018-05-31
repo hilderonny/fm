@@ -5,10 +5,6 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
 
     var rootscope = $scope.$root;
 
-    window.onbeforeunload = function(e) { // Shows up dialog to leave the site
-        //return false;
-    };
-
     // Handle Sidenav toggle button click
     $scope.toggleLeftSidenav = function() { // http://jsfiddle.net/qo1gmrrr/
         $mdSidenav('left').toggle();
@@ -50,6 +46,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
             if (!mapping) return Promise.resolve();
             rootscope.currentview = mapping.view;
             rootscope.currentapp = mapping.app;
+            localStorage.setItem("currentappname", rootscope.currentapp.app.name);
             angular.element(document.querySelector('#cardcanvas')).empty();
             return utils.addCardWithPermission(mapping.view.maincard, mapping.view, mapping.view.permission);
         } else {
@@ -89,7 +86,9 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         rootscope.isLoggedIn = false;
         rootscope.searchResults = [];
         rootscope.searchInputVisible = false;
-        utils.setLocation('/');
+        delete rootscope.currentview;
+        delete rootscope.currentapp;
+    utils.setLocation('/');
     };
 
     $scope.getofficeicon = function(icon) {
