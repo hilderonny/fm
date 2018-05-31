@@ -38,7 +38,7 @@ var wdfs = require("./webdavfilesystem");
                 next();
             }); 
 
-            WebDavserver.start((httpServer) => console.log('Server started with success on the port: ' + httpServer.address().port));
+            WebDavserver.start((httpServer) => console.log('Webdav server started with success on the port: ' + httpServer.address().port));
 
         }
     }

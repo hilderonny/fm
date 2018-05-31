@@ -37,6 +37,28 @@ class WebdavFilesystem extends webdav.FileSystem {
         callback(null, webdav.ResourceType.NoResource);
     }
 
+    //MOVE request
+    _move(pathFrom, pathTo, contextAndOverwriteFlag, callback) {
+        var self = this;
+        var lastElementIndex = pathFrom.paths.length - 1;
+        if(pathTo.paths.includes(pathFrom.paths[lastElementIndex])){ //request to reallocate file/folder
+             callback(webdav.Errors.Forbidden); //action is prohibited
+        }else{ //request to rename file/folder
+            var newLabel = pathTo.paths[pathTo.paths.length -1];
+            var clientname = contextAndOverwriteFlag.context.user.clientname;
+            var element = this._cache[pathFrom.toString()];
+            Db.updateDynamicObject(clientname, element.datatypename, element.name, {label: newLabel}).then(function(){
+                var updatedElement = element;
+                updatedElement.label  = newLabel;
+                var updateCash = function(){
+                    self._cache[pathTo.toString()] = updatedElement;
+                    delete self._cache[pathFrom.toString()];
+                }
+                callback(updateCash());
+            });
+        }
+    }
+
     // Request for file deletion
     _delete(path, ctx, callback) {
         callback(webdav.Errors.Forbidden);
