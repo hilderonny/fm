@@ -1076,7 +1076,20 @@
         "webdav" : {
             "forportal": true,
             "forclients": true,
-            "utils" :["webdav", "db", "webdavfilesystem", "webdavusermanagement"]
+            "doc" : [
+                { "docCard": "Webdav", "title" : "TRK_DOC_WebDav", "icon": "/css/icons/material/News.svg", "index": 90 }
+            ],
+            "languages" : [ "de" ],
+            "public" : [
+                "css/images/Webdav_Setup.png",
+                "css/images/WebDav_login.png",
+                "css/images/WebDavView.png",
+                "css/images/change_credential.png",
+                "css/images/Webdav_logout.png",
+                "css/icons/material/News.svg",
+                "partial/Doc/Webdav.html"
+            ],
+            "utils" :["webdav"]
         }
     }
 }
