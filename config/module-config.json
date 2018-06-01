@@ -1077,7 +1077,7 @@
             "forportal": true,
             "forclients": true,
             "doc" : [
-                { "docCard": "Webdav", "title" : "TRK_DOC_WebDav", "icon": "/css/icons/material/News.svg", "index": 90 }
+                { "docCard": "Webdav", "title" : "TRK_DOC_WebDav", "icon": "/css/icons/material/icons8-network-drive.svg", "index": 90 }
             ],
             "languages" : [ "de" ],
             "public" : [
