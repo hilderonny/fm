@@ -438,6 +438,12 @@ table.areas > tbody > tr > td {
     text-align: right;
 }
 
+table.areas > tfoot > tr > td {
+    font-weight: bold;
+    padding: 0 4px;
+    text-align: right;
+}
+
 table.areas > tbody > tr > td:first-of-type {
     cursor: pointer;
     text-align: left;

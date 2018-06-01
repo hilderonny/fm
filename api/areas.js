@@ -7,6 +7,9 @@ var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var Db = require("../utils/db").Db;
 
+/**
+ * Flächenübersicht mit summierter Grundfläche
+ */
 router.get('/', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {
     var clientname = req.user.clientname;
     // Only those datatypes which are relevant for list "areas_hierarchy"
@@ -34,6 +37,14 @@ router.get('/', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req
         parententity._children.push(fmo);
     });
     res.send(toplevelobjects);
+});
+
+/**
+ * Flächen nach Nutzungsart DIN277 (AVTFM-158)
+ */
+router.get('/din277/:areatypename', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {
+    var areatypename = Db.replaceQuotes(req.params.areatypename);
+
 });
 
 module.exports = router;

@@ -12,7 +12,7 @@ var uuidv4 = require("uuid").v4;
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
-var debugdbquery = true; // Set this to true to print out all queries in the console
+var debugdbquery = false; // Set this to true to print out all queries in the console
 
 var Db = {
 

@@ -40,8 +40,8 @@ async function convertareatypes(clientname) {
     } catch(error) {}
     // Formeln berechnen lassen
     await ch.recalculateforupdateddatatype(clientname, "areatypes");
-    // Titelfeld noch umbiegen
-    await Db.query(clientname, "UPDATE datatypes SET titlefield='displayname' WHERE name='areatypes';");
+    // Titelfeld noch umbiegen und Verknüpfungen erlauben
+    await Db.query(clientname, "UPDATE datatypes SET titlefield='displayname', canhaverelations=true WHERE name='areatypes';");
 }
 
 // 31.05.2018: AVTFM-158 - Erweiterung von Flächenarten
