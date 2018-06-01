@@ -1086,7 +1086,7 @@
                 "css/images/WebDavView.png",
                 "css/images/change_credential.png",
                 "css/images/Webdav_logout.png",
-                "css/icons/material/News.svg",
+                "css/icons/material/icons8-network-drive.svg",
                 "partial/Doc/Webdav.html"
             ],
             "utils" :["webdav"]
