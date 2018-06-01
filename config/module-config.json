@@ -771,7 +771,7 @@
                 ] }, 
 
                 { "name": "areacategories", "label": "Kategorie", "titlefield": "label", "fields": [
-                    { "name": "label", "type": "text" }
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "values": [
                     { "name": "FMOBJECTS_CATEGORY_NUF", "label": "Nutzungsfläche" },
                     { "name": "FMOBJECTS_CATEGORY_TF", "label": "Technikfläche" },
