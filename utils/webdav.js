@@ -140,7 +140,7 @@ class customUserManager {
             return user[0]
         }).then(function (user) {
             if (!user) {
-                callback(Error, null);
+                callback(webdav.Errors.BadAuthentication, null);
             } else {
                 callback(null, user);
             }
@@ -162,7 +162,7 @@ class customUserManager {
                 // console.log(self.fs);
                 callback(null, user);
             } else {
-                callback(Error);
+                callback(webdav.Errors.BadAuthentication);
             }
         });
     }
