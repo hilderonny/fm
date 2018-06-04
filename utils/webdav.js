@@ -119,35 +119,11 @@ class WebdavFilesystem extends webdav.FileSystem {
 
 };
 
-var userListHelper = async function () {
-    return new Promise(resolve => {
-        Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers;`).then((usersfromdatabase) => {
-            var users = usersfromdatabase.rows.map((userfromdb) => {
-
-                var newUser = new webdav.SimpleUser(userfromdb.name, "test", true, false)
-                return newUser;
-            });
-            resolve(users);
-        });
-    });
-}
-
 class customUserManager {
 
     constructor(fileSystem) {
         this.users = [];
         this.fs = fileSystem;
-    }
-
-    //getUsers(callback : (error : Error, users ?: IUser[]) => void)
-    getUsers(callback) {
-        var error = null;
-        // console.log("getUsers: ",  this.users);
-        callback(error, this.users);
-    }
-
-    async setUsers() {
-        this.users = await (userListHelper());
     }
 
     //getUserByName(name : string, callback : (error : Error, user ?: IUser) => void)
