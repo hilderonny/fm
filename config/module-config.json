@@ -431,9 +431,25 @@
             "languages" : [ "de" ],
             "clientdatatypes": [
 
+                { "name": "areatypes", "label": "Flächenart", "titlefield": "displayname", "fields": [
+                    { "name": "areacategoryname", "type": "reference", "reference": "areacategories" },
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "number", "label": "DIN 277 - Identifizierer", "type": "text" },
+                    { "name": "displayname", "label": "Anzeigename", "ishidden": true, "type": "formula", "formula": { "concat" : ["@number", " :: ", "@label"] }, "formulaindex": 0 }
+                ], "values": [
+                    { "name": "nf11", "number": "NF 1.1", "label": "Wohnräume", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf12", "number": "NF 1.2", "label": "Gemeinschaftsräume", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf21", "number": "NF 2.1", "label": "Büroräume", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf22", "number": "NF 2.2", "label": "Grossraumbüros", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" }
+                ] }, 
+
                 { "name": "relations", "values": [
                     { "name": "raumbuchflaechen", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flaechen", "relationtypename": "parentchild" },
-                    { "name": "raumbuchdin277", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "din277", "relationtypename": "parentchild" }
+                    { "name": "raumbuchdin277", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "din277", "relationtypename": "parentchild" },
+                    { "name": "areatypesnf1nf11", "datatype1name": "areatypes", "name1": "nf1", "datatype2name": "areatypes", "name2": "nf11", "relationtypename": "parentchild" },
+                    { "name": "areatypesnf1nf12", "datatype1name": "areatypes", "name1": "nf1", "datatype2name": "areatypes", "name2": "nf12", "relationtypename": "parentchild" },
+                    { "name": "areatypesnf2nf21", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf21", "relationtypename": "parentchild" },
+                    { "name": "areatypesnf2nf22", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf22", "relationtypename": "parentchild" }
                 ] },
 
                 { "name": "views", "values": [
@@ -784,15 +800,15 @@
                     { "name": "number", "label": "DIN 277 - Identifizierer", "type": "text" },
                     { "name": "displayname", "label": "Anzeigename", "ishidden": true, "type": "formula", "formula": { "concat" : ["@number", " :: ", "@label"] }, "formulaindex": 0 }
                 ], "values": [
-                    { "name": "nf1", "number": "NF 1", "label": "Wohnen und Aufenthalt", "areacategoryname": "Nutzungsfläche" },
-                    { "name": "nf2", "number": "NF 2", "label": "Büroarbeit", "areacategoryname": "Nutzungsfläche" },
-                    { "name": "nf3", "number": "NF 3", "label": "Produktion, Hand- und Maschinenarbeit, Experimente", "areacategoryname": "Nutzungsfläche" },
-                    { "name": "nf4", "number": "NF 4", "label": "Lagern, Verteilen und Verkaufen", "areacategoryname": "Nutzungsfläche" },
-                    { "name": "nf5", "number": "NF 5", "label": "Bildung, Unterricht und Kultur", "areacategoryname": "Nutzungsfläche" },
-                    { "name": "nf6", "number": "NF 6", "label": "Heilen und Pflegen", "areacategoryname": "Nutzungsfläche" },
-                    { "name": "nf7", "number": "NF 7", "label": "Sonstige Nutzung", "areacategoryname": "Nutzungsfläche" },
-                    { "name": "tf8", "number": "TF 8", "label": "Technische Anlagen", "areacategoryname": "Technikfläche" },
-                    { "name": "vf9", "number": "VF 9", "label": "Verkehrserschließung und -sicherung", "areacategoryname": "Verkehrsfläche" }
+                    { "name": "nf1", "number": "NF 1", "label": "Wohnen und Aufenthalt", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf2", "number": "NF 2", "label": "Büroarbeit", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf3", "number": "NF 3", "label": "Produktion, Hand- und Maschinenarbeit, Experimente", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf4", "number": "NF 4", "label": "Lagern, Verteilen und Verkaufen", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf5", "number": "NF 5", "label": "Bildung, Unterricht und Kultur", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf6", "number": "NF 6", "label": "Heilen und Pflegen", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "nf7", "number": "NF 7", "label": "Sonstige Nutzung", "areacategoryname": "FMOBJECTS_CATEGORY_NUF" },
+                    { "name": "tf8", "number": "TF 8", "label": "Technische Anlagen", "areacategoryname": "FMOBJECTS_CATEGORY_TF" },
+                    { "name": "vf9", "number": "VF 9", "label": "Verkehrserschließung und -sicherung", "areacategoryname": "FMOBJECTS_CATEGORY_VF" }
                 ], "lists": [ "areatypes" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" }, 
 
                 { "name": "areausagestates", "label": "Nutzungsstatus", "titlefield": "name", "values": [

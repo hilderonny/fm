@@ -7,15 +7,18 @@ app.directive('avtBimDin277Card', function ($compile, utils) {
         '   <table class="areas">' +
         '       <thead><tr>' +
         '           <th>Name</th>' +
+        '           <th>Flächenart</th>' +
         '           <th>Fläche (m²)</th>' +
         '       </tr></thead>' +
         '       <tfoot><tr>' +
         '           <td></td>' +
+        '           <td></td>' +
         '           <td ng-bind="areasum | number:2"></td>' +
         '       </tr></tfoot>' +
         '       <tbody>' +
-        '           <tr ng-repeat="area in areas" ng-class="{active:selectedarea===area}">' +
+        '           <tr ng-repeat="area in areas | orderBy: \'areatypenumber\'" ng-class="{active:selectedarea===area}">' +
         '               <td ng-click="showareadetails(area)" ng-bind="area[datatype.titlefield] || area.name"></td>' +
+        '               <td class="left" ng-bind="area.areatypenumber"></td>' +
         '               <td ng-bind="area.f | number:2"></td>' +
         '           </tr>' +
         '       </tbody>' +
@@ -55,7 +58,7 @@ app.directive('avtBimDin277Card', function ($compile, utils) {
                     var datatypename = scope.params.datatypename;
                     scope.datatype = scope.$root.datatypes.areas;
                     var entityname = scope.params.entityname;
-                    scope.areas = await utils.getresponsedata("/api/dynamic/areas?areatypename=" + entityname);
+                    scope.areas = await utils.getresponsedata("/api/areas/din277/" + entityname);
                     scope.areasum = 0;
                     scope.areas.forEach(a => { scope.areasum += a.f });
                 };

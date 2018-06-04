@@ -438,6 +438,10 @@ table.areas > tbody > tr > td {
     text-align: right;
 }
 
+table.areas > tbody > tr > td.left {
+    text-align: left;
+}
+
 table.areas > tfoot > tr > td {
     font-weight: bold;
     padding: 0 4px;
