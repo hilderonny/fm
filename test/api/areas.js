@@ -6,7 +6,7 @@ var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 
-describe.only('API areas', () =>{
+describe('API areas', () =>{
 
     before(async() => {
         await th.cleanDatabase();
@@ -24,6 +24,15 @@ describe.only('API areas', () =>{
     describe('GET/', () => {
 
         th.apiTests.get.defaultNegative(co.apis.areas, co.permissions.BIM_AREAS);
+
+        xit('Responds with FM structure with correct category calculation', async() => {
+        });
+
+        xit('', async() => {
+        });
+
+        xit('', async() => {
+        });
 
         xit('', async() => {
         });
@@ -64,6 +73,18 @@ describe.only('API areas', () =>{
             var token = await th.defaults.login("client0_usergroup0_user0");
             var result = await th.get(`/api/areas/din277/client1_areatype1?token=${token}`).expect(200);
             assert.strictEqual(result.body.length, 0);
+        });
+
+        xit('Contains all areas of the requersted type and its subtypes recursively', async() => {
+        });
+
+        xit('', async() => {
+        });
+
+        xit('', async() => {
+        });
+
+        xit('', async() => {
         });
 
         xit('', async() => {
