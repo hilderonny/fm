@@ -586,8 +586,8 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "modulename": "areas", "name": "flaechen", "label": "Flächen Übersicht", "doccard": "Areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "maincard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" },
-                    { "modulename": "areas", "name": "din277", "label": "DIN 277", "doccard": "Areas", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "maincard": "BIM/Din277HierarchyCard", "permission": "PERMISSION_BIM_AREAS" }
+                    { "modulename": "areas", "name": "flaechen", "label": "Flächen Übersicht", "doccard": "Areas#areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "maincard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" },
+                    { "modulename": "areas", "name": "din277", "label": "DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "maincard": "BIM/Din277HierarchyCard", "permission": "PERMISSION_BIM_AREAS" }
                 ] }
 
             ]

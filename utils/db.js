@@ -687,6 +687,9 @@ var Db = {
             await Db.updateRecordTypeFieldsForDatabase(databasename, recordtype);
             // Handle predefined values
             if (recordtype.values) for (var j = 0; j < recordtype.values.length; j++) {
+                var value = recordtype.values[j];
+                var existingentity = await Db.getDynamicObject(databasename, recordtype.name, value.name);
+                if (existingentity) await Db.deleteDynamicObject(databasename, recordtype.name, value.name); // Delete any existing element to make it predefined with updated values from config.
                 await Db.insertDynamicObject(databasename, recordtype.name, recordtype.values[j]); // Try to insert. When it already exists, nothing happens
             }
         }
