@@ -103,19 +103,39 @@ describe('API areas', () =>{
             assert.strictEqual(result.body.length, 0);
         });
 
-        xit('Contains all areas of the requersted type and its subtypes recursively', async() => {
+        it('Contains all areas of the requested type and its subtypes recursively', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var areas = (await th.get(`/api/areas/din277/client0_areatype1?token=${token}`).expect(200)).body;
+            assert.strictEqual(areas.length, 5);
+            areas.sort((a, b) => a.name.localeCompare(b.name)); // Cannot be sure, in which order the API provides the elements
+            assert.strictEqual(areas[0].name, "client0_area1");
+            assert.strictEqual(areas[0].label, "Area1");
+            assert.strictEqual(areas[0].areatypenumber, "N1");
+            assert.strictEqual(areas[0].f, 200);
+            assert.strictEqual(areas[1].name, "client0_area11");
+            assert.strictEqual(areas[1].label, "Area11");
+            assert.strictEqual(areas[1].areatypenumber, "N11");
+            assert.strictEqual(areas[1].f, 210);
+            assert.strictEqual(areas[2].name, "client0_area111");
+            assert.strictEqual(areas[2].label, "Area111");
+            assert.strictEqual(areas[2].areatypenumber, "N111");
+            assert.strictEqual(areas[2].f, 211);
+            assert.strictEqual(areas[3].name, "client0_area112");
+            assert.strictEqual(areas[3].label, "Area112");
+            assert.strictEqual(areas[3].areatypenumber, "N112");
+            assert.strictEqual(areas[3].f, 212);
+            assert.strictEqual(areas[4].name, "client0_area12");
+            assert.strictEqual(areas[4].label, "Area12");
+            assert.strictEqual(areas[4].areatypenumber, "N12");
+            assert.strictEqual(areas[4].f, 220);
         });
 
-        xit('', async() => {
-        });
-
-        xit('', async() => {
-        });
-
-        xit('', async() => {
-        });
-
-        xit('', async() => {
+        it('returns the name of the area when the area has no label set', async() => {
+            await Db.updateDynamicObject("client0", "areas", "client0_area1", { label: null });
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var areas = (await th.get(`/api/areas/din277/client0_areatype1?token=${token}`).expect(200)).body;
+            var area = areas.find(a => a.name === "client0_area1");
+            assert.strictEqual(area.label, area.name);
         });
         
     });

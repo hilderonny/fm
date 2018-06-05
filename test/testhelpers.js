@@ -252,12 +252,12 @@ th.prepareAreas = async() => {
     await th.cleanTable("areas", false, true);
     await th.cleanTable("relations", false, true);
     // Area types
-    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype1", number: "1", label: "One" });
-    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype11", number: "11", label: "OneOne" });
-    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype12", number: "12", label: "OneTwo" });
-    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype111", number: "111", label: "OneOneOne" });
-    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype112", number: "112", label: "OneOneTwo" });
-    await Db.insertDynamicObject("client1", "areatypes", { name: "client1_areatype1", number: "1", label: "One" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype1", number: "N1", label: "One" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype11", number: "N11", label: "OneOne" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype12", number: "N12", label: "OneTwo" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype111", number: "N111", label: "OneOneOne" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype112", number: "N112", label: "OneOneTwo" });
+    await Db.insertDynamicObject("client1", "areatypes", { name: "client1_areatype1", number: "N1", label: "One" });
     // Relations between area types
     th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype11", "parentchild");
     th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype12", "parentchild");
@@ -269,11 +269,11 @@ th.prepareAreas = async() => {
     await Db.insertDynamicObject("client0", "areas", { name: "client0_area03", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 30, label: "Area03" });
     await Db.insertDynamicObject("client0", "areas", { name: "client0_area04", areacategoryname: "FMOBJECTS_CATEGORY_TF", f: 40, label: "Area04" });
     await Db.insertDynamicObject("client0", "areas", { name: "client0_area05", areacategoryname: "FMOBJECTS_CATEGORY_VF", f: 50, label: "Area05" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area1", areatypename: "client0_areatype1", f: 200 });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area11", areatypename: "client0_areatype11", f: 210 });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area12", areatypename: "client0_areatype12", f: 220 });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area111", areatypename: "client0_areatype111", f: 211 });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area112", areatypename: "client0_areatype112", f: 212 });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area1", areatypename: "client0_areatype1", f: 200, label: "Area1" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area11", areatypename: "client0_areatype11", f: 210, label: "Area11" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area12", areatypename: "client0_areatype12", f: 220, label: "Area12" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area111", areatypename: "client0_areatype111", f: 211, label: "Area111" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area112", areatypename: "client0_areatype112", f: 212, label: "Area112" });
     // Rooms
     await Db.insertDynamicObject("client0", "rooms", { name: "client0_room0", label: "Room0" });
     await Db.insertDynamicObject("client0", "rooms", { name: "client0_room1", label: "Room1" });
