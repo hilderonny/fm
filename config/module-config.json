@@ -752,7 +752,7 @@
         "documents": {
             "forportal": false,
             "forclients": true,
-            "api" : [ "documents", "extractdocument", "folders" ],
+            "api" : [ "documents", "extractdocument" ],
             "public" : [
                 "css/icons/material/Add Folder.svg",
                 "css/icons/material/Document.svg",
