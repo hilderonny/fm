@@ -243,7 +243,11 @@ th.prepareDocumentFiles = () => {
 
 th.removeDocumentFiles = () => {
     var filePath = documentsHelper.getDocumentPath("client0", "");
-    fs.readdirSync(filePath).forEach((f) => fs.unlinkSync(path.join(filePath, f)) );
+    try {
+        fs.readdirSync(filePath).forEach((f) => fs.unlinkSync(path.join(filePath, f)) );
+    } catch (err) {
+        console.log(err); // Ignore errors, cleanup is done in next run (hope so)
+    }
 };
 
 th.prepareAreas = async() => {
