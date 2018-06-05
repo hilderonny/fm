@@ -11,6 +11,7 @@ var fs = require('fs');
 var path = require('path');
 var localConfig = require('../config/localconfig.json'); // http://stackoverflow.com/a/14678694
 var documentsHelper = require('../utils/documentsHelper');
+var ch = require('../utils/calculationhelper');
 var moduleConfig = require('../config/module-config.json');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
@@ -244,6 +245,59 @@ th.removeDocumentFiles = () => {
     var filePath = documentsHelper.getDocumentPath("client0", "");
     fs.readdirSync(filePath).forEach((f) => fs.unlinkSync(path.join(filePath, f)) );
 };
+
+th.prepareAreas = async() => {
+    // Cleaning
+    await th.cleanTable("areatypes", false, true);
+    await th.cleanTable("areas", false, true);
+    await th.cleanTable("relations", false, true);
+    // Area types
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype1", number: "1", label: "One" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype11", number: "11", label: "OneOne" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype12", number: "12", label: "OneTwo" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype111", number: "111", label: "OneOneOne" });
+    await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype112", number: "112", label: "OneOneTwo" });
+    await Db.insertDynamicObject("client1", "areatypes", { name: "client1_areatype1", number: "1", label: "One" });
+    // Relations between area types
+    th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype11", "parentchild");
+    th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype12", "parentchild");
+    th.createRelation("areatypes", "client0_areatype11", "areatypes", "client0_areatype111", "parentchild");
+    th.createRelation("areatypes", "client0_areatype11", "areatypes", "client0_areatype112", "parentchild");
+    // Areas
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area01", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 10, label: "Area01" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area02", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 20, label: "Area02" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area03", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 30, label: "Area03" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area04", areacategoryname: "FMOBJECTS_CATEGORY_TF", f: 40, label: "Area04" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area05", areacategoryname: "FMOBJECTS_CATEGORY_VF", f: 50, label: "Area05" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area1", areatypename: "client0_areatype1", f: 200 });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area11", areatypename: "client0_areatype11", f: 210 });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area12", areatypename: "client0_areatype12", f: 220 });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area111", areatypename: "client0_areatype111", f: 211 });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area112", areatypename: "client0_areatype112", f: 212 });
+    // Rooms
+    await Db.insertDynamicObject("client0", "rooms", { name: "client0_room0", label: "Room0" });
+    await Db.insertDynamicObject("client0", "rooms", { name: "client0_room1", label: "Room1" });
+    // Levels
+    await Db.insertDynamicObject("client0", "levels", { name: "client0_level0", label: "Level0" });
+    // Relations between areas, rooms, levels
+    th.createRelation("levels", "client0_level0", "rooms", "client0_room0", "parentchild");
+    th.createRelation("rooms", "client0_room0", "areas", "client0_area01", "parentchild");
+    th.createRelation("rooms", "client0_room0", "areas", "client0_area02", "parentchild");
+    th.createRelation("rooms", "client0_room1", "areas", "client0_area03", "parentchild");
+    th.createRelation("rooms", "client0_room1", "areas", "client0_area04", "parentchild");
+    th.createRelation("rooms", "client0_room1", "areas", "client0_area05", "parentchild");
+    // Trigger calculation
+    await ch.calculateformula("client0", "areatypes", "client0_areatype1");
+    await ch.calculateformula("client0", "areatypes", "client0_areatype11");
+    await ch.calculateformula("client0", "areatypes", "client0_areatype12");
+    await ch.calculateformula("client0", "areatypes", "client0_areatype111");
+    await ch.calculateformula("client0", "areatypes", "client0_areatype112");
+    await ch.calculateentityandparentsrecursively("client0", "areas", "client0_area01");
+    await ch.calculateentityandparentsrecursively("client0", "areas", "client0_area02");
+    await ch.calculateentityandparentsrecursively("client0", "areas", "client0_area03");
+    await ch.calculateentityandparentsrecursively("client0", "areas", "client0_area04");
+    await ch.calculateentityandparentsrecursively("client0", "areas", "client0_area05");
+}
 
 th.prepareDocuments = async() => {
     await th.cleanTable("documents", false, true);
