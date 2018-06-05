@@ -2,30 +2,33 @@ var Db = require("./db").Db;
 var co = require("./constants");
 
 var ch = {
-    calculate_childsum: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
+    calculate_childsum: async(clientname, datatypename, entityname, datatypefield, formuladef, db) => {
+        if (!db) db = Db;
         if (typeof(formuladef) !== 'string') throw new Error(`childsum must be reference to fieldname, not ${datatypefield.formula}`);
-        var parent = await Db.getDynamicObject(clientname, datatypename, entityname);
-        var childrelations = (await Db.query(clientname, `SELECT datatype2name, name2 FROM relations WHERE relationtypename='parentchild' AND datatype1name='${Db.replaceQuotes(datatypename)}' AND name1='${Db.replaceQuotes(entityname)}';`)).rows;
+        var parent = await db.getDynamicObject(clientname, datatypename, entityname);
+        var childrelations = (await db.query(clientname, `SELECT datatype2name, name2 FROM relations WHERE relationtypename='parentchild' AND datatype1name='${db.replaceQuotes(datatypename)}' AND name1='${db.replaceQuotes(entityname)}';`)).rows;
         var sum = 0;
         for (var i = 0; i < childrelations.length; i++) {
             var childrelation = childrelations[i];
-            var child = await Db.getDynamicObject(clientname, childrelation.datatype2name, childrelation.name2);
+            var child = await db.getDynamicObject(clientname, childrelation.datatype2name, childrelation.name2);
             if (child[formuladef]) sum += parseFloat(child[formuladef]);
         }
         var value = typeof(sum) === "number" ? parseFloat(sum) : null; // Prevent NaN
-        await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
+        await db.query(clientname, `UPDATE ${db.replaceQuotes(datatypename)} SET ${db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${db.replaceQuotes(entityname)}';`);
     },
-    calculate_ifthenelse: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
+    calculate_ifthenelse: async(clientname, datatypename, entityname, datatypefield, formuladef, db) => {
+        if (!db) db = Db;
         if (formuladef.length !== 4) throw new Error(`ifthenelse must be array of 4 elements, not ${datatypefield.formula}`);
-        var entity = await Db.getDynamicObject(clientname, datatypename, entityname);
+        var entity = await db.getDynamicObject(clientname, datatypename, entityname);
         var elsedef = formuladef[3];
         var value = (entity[formuladef[0]] === formuladef[1]) ? entity[formuladef[2]] : (typeof(elsedef) === 'string' ? entity[elsedef] : elsedef);
         value = typeof(value) === "number" ? parseFloat(value) : null; // Prevent NaN
-        await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
+        await db.query(clientname, `UPDATE ${db.replaceQuotes(datatypename)} SET ${db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${db.replaceQuotes(entityname)}';`);
     },
-    calculate_sum: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
+    calculate_sum: async(clientname, datatypename, entityname, datatypefield, formuladef, db) => {
+        if (!db) db = Db;
         if (formuladef.length < 1) throw new Error(`sum must be array of at least 1 element, not ${datatypefield.formula}`);
-        var entity = await Db.getDynamicObject(clientname, datatypename, entityname);
+        var entity = await db.getDynamicObject(clientname, datatypename, entityname);
         var sum = 0;
         for (var i = 0; i < formuladef.length; i++) {
             var fieldname = formuladef[i];
@@ -37,11 +40,12 @@ var ch = {
             if (entity[fieldname]) sum += minus ? -parseFloat(entity[fieldname]) : parseFloat(entity[fieldname]);
         }
         var value = typeof(sum) === "number" ? parseFloat(sum) : null; // Prevent NaN
-        await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${Db.replaceQuotes(entityname)}';`);
+        await db.query(clientname, `UPDATE ${db.replaceQuotes(datatypename)} SET ${db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}=${value} WHERE name='${db.replaceQuotes(entityname)}';`);
     },
-    calculate_concat: async(clientname, datatypename, entityname, datatypefield, formuladef) => {
+    calculate_concat: async(clientname, datatypename, entityname, datatypefield, formuladef, db) => {
+        if (!db) db = Db;
         if (formuladef.length < 1) throw new Error(`concat must be array of at least 1 element, not ${datatypefield.formula}`);
-        var entity = await Db.getDynamicObject(clientname, datatypename, entityname);
+        var entity = await db.getDynamicObject(clientname, datatypename, entityname);
         var concattedstring = "";
         for (var i = 0; i < formuladef.length; i++) {
             var part = formuladef[i];
@@ -54,15 +58,16 @@ var ch = {
                 concattedstring += part;
             }
         }
-        await Db.query(clientname, `UPDATE ${Db.replaceQuotes(datatypename)} SET ${Db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}='${Db.replaceQuotes(concattedstring)}' WHERE name='${Db.replaceQuotes(entityname)}';`);
+        await db.query(clientname, `UPDATE ${db.replaceQuotes(datatypename)} SET ${db.replaceQuotesAndRemoveSemicolon(datatypefield.name)}='${db.replaceQuotes(concattedstring)}' WHERE name='${db.replaceQuotes(entityname)}';`);
     },
     // Recalculates an antity and all of its parents recursively
-    calculateentityandparentsrecursively: async(clientname, datatypename, entityname) => {
+    calculateentityandparentsrecursively: async(clientname, datatypename, entityname, db) => {
+        if (!db) db = Db;
         // Fetch parent structure
-        var parents = (await Db.getparentrelationstructure(clientname, datatypename, entityname)).sort((a, b) => a.depth - b.depth);
+        var parents = (await db.getparentrelationstructure(clientname, datatypename, entityname)).sort((a, b) => a.depth - b.depth);
         // Calculate the entity itself
         try {
-            await ch.calculateformula(clientname, datatypename, entityname);
+            await ch.calculateformula(clientname, datatypename, entityname, db);
         } catch(error) {
             console.log(error);
         } // Ignore calculation errors for invalid formulas
@@ -70,13 +75,14 @@ var ch = {
         for (var i = 0; i < parents.length; i++) {
             var parent = parents[i];
             try {
-                await ch.calculateformula(clientname, parent.datatype1name, parent.name1);
+                await ch.calculateformula(clientname, parent.datatype1name, parent.name1, db);
             } catch(error) { } // Ignore calculation errors for invalid formulas
         }
     },
     // Calculates all formulas for a specific entity
-    calculateformula: async(clientname, datatypename, entityname) => {
-        var fieldref = (await Db.getdatatypes(clientname))[datatypename].fields;
+    calculateformula: async(clientname, datatypename, entityname, db) => {
+        if (!db) db = Db;
+        var fieldref = (await db.getdatatypes(clientname))[datatypename].fields;
         var datatypefields = Object.keys(fieldref).map(k => fieldref[k]).filter(f => f.fieldtype === co.fieldtypes.formula).sort((a,b) => a.formulaindex - b.formulaindex);
         for (var i = 0; i < datatypefields.length; i++) {
             var dtf = datatypefields[i];
@@ -87,10 +93,10 @@ var ch = {
             var key = keys[0];
             var formuladef = formula[key];
             switch (key) {
-                case co.formulatypes.childsum: await ch.calculate_childsum(clientname, datatypename, entityname, dtf, formuladef); break;
-                case co.formulatypes.ifthenelse: await ch.calculate_ifthenelse(clientname, datatypename, entityname, dtf, formuladef); break;
-                case co.formulatypes.sum: await ch.calculate_sum(clientname, datatypename, entityname, dtf, formuladef); break;
-                case co.formulatypes.concat: await ch.calculate_concat(clientname, datatypename, entityname, dtf, formuladef); break;
+                case co.formulatypes.childsum: await ch.calculate_childsum(clientname, datatypename, entityname, dtf, formuladef, db); break;
+                case co.formulatypes.ifthenelse: await ch.calculate_ifthenelse(clientname, datatypename, entityname, dtf, formuladef, db); break;
+                case co.formulatypes.sum: await ch.calculate_sum(clientname, datatypename, entityname, dtf, formuladef, db); break;
+                case co.formulatypes.concat: await ch.calculate_concat(clientname, datatypename, entityname, dtf, formuladef, db); break;
                 default: throw new Error(`Unknown formula type "${key}"`);
             }
         }
@@ -121,7 +127,7 @@ var ch = {
             }
     },
     // Recalculate all entites of a datatype and their parents
-    recalculateforupdateddatatype: async(clientname, datatypename) => { // Called in db.js in line 154
+    recalculateforupdateddatatype: async(clientname, datatypename) => {
         try {
             // perform calculations beginning with all leaf elements proceeding hierarchically upwards
             var entitynames = (await Db.query(clientname, `SELECT x.name FROM ${datatypename} x LEFT JOIN relations r ON r.datatype1name = '${datatypename}' AND r.name1 = x.name WHERE r IS NULL;`)).rows.map(r => r.name);

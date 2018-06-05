@@ -149,9 +149,10 @@ md-card.doc md-card-content > img:nth-of-type(odd) {
     margin-left: 10px;
 }
 
-md-card.doc md-card-content h1, md-card-content h2 {
+md-card.doc md-card-content h1, md-card-content h2, md-card-content h3 {
     clear: both;
     background-color: rgb(240,240,240);
+    padding: 4px;
 }
 
 md-card.doc md-card-content li {

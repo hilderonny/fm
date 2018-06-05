@@ -22,7 +22,8 @@ app.controller('DocListController', function($scope, $rootScope, $http, $mdDialo
             $scope.menu = response.data;
             // Check preselection
             if ($scope.params.preselection) {
-                var elementToSelect = $scope.menu.find(function(e) { return e.docCard === $scope.params.preselection; });
+                console.log($scope.menu, $scope.params.preselection);
+                var elementToSelect = $scope.menu.find(function(e) { return e.docCard.split("#")[0] === $scope.params.preselection; });
                 if (elementToSelect) $scope.selectMenuItem(elementToSelect, true);
             } else {
                 utils.setLocation('/doc/');

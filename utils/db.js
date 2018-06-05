@@ -9,6 +9,7 @@ var JSZip = require("jszip");
 var rimraf = require("rimraf");
 var decompress = require("decompress");
 var uuidv4 = require("uuid").v4;
+var ch = require("./calculationhelper");
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
@@ -691,6 +692,8 @@ var Db = {
                 var existingentity = await Db.getDynamicObject(databasename, recordtype.name, value.name);
                 if (existingentity) await Db.deleteDynamicObject(databasename, recordtype.name, value.name); // Delete any existing element to make it predefined with updated values from config.
                 await Db.insertDynamicObject(databasename, recordtype.name, recordtype.values[j]); // Try to insert. When it already exists, nothing happens
+                // Need to recalculate the element and its parents for the case of update from config
+                await ch.calculateentityandparentsrecursively(databasename, recordtype.name, value.name, Db);
             }
         }
     },
