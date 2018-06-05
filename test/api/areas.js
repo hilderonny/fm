@@ -25,16 +25,44 @@ describe('API areas', () =>{
 
         th.apiTests.get.defaultNegative(co.apis.areas, co.permissions.BIM_AREAS);
 
-        xit('Responds with FM structure with correct category calculation', async() => {
+        it('Responds with FM structure with correct category calculation', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var areas = (await th.get(`/api/areas?token=${token}`).expect(200)).body;
+            var level0 = areas.find(e => e.name==="client0_level0");
+            assert.ok(level0);
+            assert.strictEqual(level0.nrf, "150");
+            assert.strictEqual(level0.nuf, "60");
+            assert.strictEqual(level0.tf, "40");
+            assert.strictEqual(level0.vf, "50");
+            assert.ok(level0._children);
+            var room0 = level0._children.find(e => e.name==="client0_room0");
+            assert.ok(room0);
+            assert.strictEqual(room0.nrf, "30");
+            assert.strictEqual(room0.nuf, "30");
+            assert.strictEqual(room0.tf, "0");
+            assert.strictEqual(room0.vf, "0");
+            assert.ok(room0._children);
+            assert.ok(room0._children.find(e => e.name==="client0_area01"));
+            assert.ok(room0._children.find(e => e.name==="client0_area02"));
+            var room1 = level0._children.find(e => e.name==="client0_room1");
+            assert.ok(room1);
+            assert.strictEqual(room1.nrf, "120");
+            assert.strictEqual(room1.nuf, "30");
+            assert.strictEqual(room1.tf, "40");
+            assert.strictEqual(room1.vf, "50");
+            assert.ok(room1._children);
+            assert.ok(room1._children.find(e => e.name==="client0_area03"));
+            assert.ok(room1._children.find(e => e.name==="client0_area04"));
+            assert.ok(room1._children.find(e => e.name==="client0_area05"));
         });
 
-        xit('', async() => {
-        });
-
-        xit('', async() => {
-        });
-
-        xit('', async() => {
+        it('ignores parent relations when the relations table contains corrupt data (not existing parents)', async() => {
+            // Create corrupt relation
+            await th.createRelation("levels", "invalidlevel", "rooms", "client0_room0", "parentchild");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var areas = (await th.get(`/api/areas?token=${token}`).expect(200)).body;
+            var level0 = areas.find(e => e.name==="client0_level0");
+            assert.ok(level0);
         });
         
     });

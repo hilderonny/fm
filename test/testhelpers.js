@@ -281,6 +281,7 @@ th.prepareAreas = async() => {
     await Db.insertDynamicObject("client0", "levels", { name: "client0_level0", label: "Level0" });
     // Relations between areas, rooms, levels
     th.createRelation("levels", "client0_level0", "rooms", "client0_room0", "parentchild");
+    th.createRelation("levels", "client0_level0", "rooms", "client0_room1", "parentchild");
     th.createRelation("rooms", "client0_room0", "areas", "client0_area01", "parentchild");
     th.createRelation("rooms", "client0_room0", "areas", "client0_area02", "parentchild");
     th.createRelation("rooms", "client0_room1", "areas", "client0_area03", "parentchild");
