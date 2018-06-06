@@ -9,7 +9,7 @@ app.directive('avtReferenceSelect', function($compile, utils) {
         '                <md-icon ng-click="child.isopen=false" ng-if="child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>' +
         '                <md-icon ng-if="!child.haschildren"></md-icon>' +
         '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" ng-if="child.icon" />' +
-        '                <p class="nowrap" ng-bind="child.label" ng-click="selectchild(child)"></p>' +
+        '                <p class="nowrap" ng-click="selectchild(child)">{{child[titlefield] || child.name}}</p>' +
         '                <md-icon></md-icon>' +
         '            </div>' +
         '            <ng-include flex src="\'hierarchylist\'" ng-if="child.isopen"></ng-include>' +
@@ -30,7 +30,8 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                     if (scope.datatypefield.fieldtype !== "reference") return iElement.remove();
                     iElement.parent().addClass("md-input-has-value"); // For styling label
                     iElement.addClass("avt-reference-select");
-                    var buttoncontent = angular.element('<span ng-click="openselectiondialog()"><span>{{selectedreference.label}}</span><md-icon md-svg-src="/css/icons/material/icons8-more.svg"></md-icon></span>');
+                    scope.titlefield = scope.$root.titlefields[scope.datatypefield.reference];
+                    var buttoncontent = angular.element('<span ng-click="openselectiondialog()"><span>{{selectedreference[titlefield] || selectedreference.name}}</span><md-icon md-svg-src="/css/icons/material/icons8-more.svg"></md-icon></span>');
                     iElement.append(buttoncontent);
                     $compile(buttoncontent)(scope);
                     scope.selectchild = function(child) {
@@ -47,12 +48,12 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                                 }
                                 if (child.children) child.children.forEach(function(c) {
                                     c.parent = child;
-                                    if (!c.label) c.label = c[scope.$root.titlefields[c.datatypename]];
                                     setparentofchildrenrecursively(c);
                                 });
                             };
                             setparentofchildrenrecursively(scope.child);
                             var newscope = scope.$new(false);
+                            newscope.titlefield = scope.titlefield;
                             newscope.selectedchild = scope.selectedreference;
                             var okbutton = { label: "OK", ishidden: true, onclick: function() {
                                 scope.selectedreference = newscope.selectedchild;

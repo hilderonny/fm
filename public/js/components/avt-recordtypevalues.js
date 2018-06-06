@@ -7,9 +7,9 @@ app.directive('avtRecordtypevalues', function($rootScope, $compile, $mdDialog, $
         '   <md-tab-body>' +
         '       <md-card-content>' +
         '           <md-list class="lines-beetween-items">' +
-        '               <md-list-item ng-repeat="value in recordtypevalues | orderBy:\'label\'" ng-click="tabselectvalue(value)" ng-class="selectedrecordtypevalue === value ? \'active\' : false">' +
-        '                  <img ng-src="{{value.icon}}"/>' +
-        '                  <p>{{value.label}}</p>' +
+        '               <md-list-item ng-repeat="value in recordtypevalues" ng-click="tabselectvalue(value)" ng-class="selectedrecordtypevalue === value ? \'active\' : false">' +
+        '                  <img ng-src="{{value.icon}}" ng-if="value.icon"/>' +
+        '                  <p>{{value[recordtype.titlefield] || value.name}}</p>' +
         '               </md-list-item>' +
         '           </md-list>' +
         '       </md-card-content>' +
@@ -48,7 +48,6 @@ app.directive('avtRecordtypevalues', function($rootScope, $compile, $mdDialog, $
                 // Tab part
                 scope.tabselectvalue = function(value) {
                     utils.removeCardsToTheRightOf(element);
-                    console.log(scope.recordtype.name, value.name, newscope.detailscard);
                     utils.adddetailscard(newscope, scope.recordtype.name, value.name, scope.params.permission).then(function() {
                         scope.selectedrecordtypevalue = value;
                     });
@@ -59,6 +58,9 @@ app.directive('avtRecordtypevalues', function($rootScope, $compile, $mdDialog, $
                             if (!v.label) v.label = v.name;
                         });
                         scope.recordtypevalues = values;
+                        scope.recordtypevalues.sort((a, b) => {
+                            return (a[scope.recordtype.titlefield] || a.name).localeCompare(b[scope.recordtype.titlefield] || ab.name);
+                        })
                     });
                 };
                 newscope.onelementcreated = function(datatype, createdelementname) {

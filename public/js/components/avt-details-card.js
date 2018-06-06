@@ -138,10 +138,6 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                             scope.isactionpending = true;
                             utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name).then(function() { showsuccess("Das Element wurde gelöscht"); });
                         } },
-                        // Erst implementieren, wenn die Berechtigungsthematik mit den Unterelementen gelärt ist
-                        // { label: "Ja, mit Kindelementen", onclick: function() {
-                        //     utils.deletedynamicobject(scope.datatype.name, scope.dynamicobject.name, true).then(function() { showsuccess("Das Element und alle Kindelemente wurden gelöscht"); });
-                        // } },
                         { label: "Nein" }
                     ]);
                 },

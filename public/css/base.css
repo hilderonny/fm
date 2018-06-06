@@ -149,9 +149,10 @@ md-card.doc md-card-content > img:nth-of-type(odd) {
     margin-left: 10px;
 }
 
-md-card.doc md-card-content h1, md-card-content h2 {
+md-card.doc md-card-content h1, md-card-content h2, md-card-content h3 {
     clear: both;
     background-color: rgb(240,240,240);
+    padding: 4px;
 }
 
 md-card.doc md-card-content li {
@@ -434,6 +435,16 @@ table.areas > tbody > tr:hover {
 }
 
 table.areas > tbody > tr > td {
+    padding: 0 4px;
+    text-align: right;
+}
+
+table.areas > tbody > tr > td.left {
+    text-align: left;
+}
+
+table.areas > tfoot > tr > td {
+    font-weight: bold;
     padding: 0 4px;
     text-align: right;
 }
