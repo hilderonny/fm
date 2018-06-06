@@ -7,6 +7,9 @@ var co = require('../utils/constants');
 var rh = require('../utils/relationsHelper');
 var Db = require("../utils/db").Db;
 
+/**
+ * Flächenübersicht mit summierter Grundfläche
+ */
 router.get('/', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {
     var clientname = req.user.clientname;
     // Only those datatypes which are relevant for list "areas_hierarchy"
@@ -34,6 +37,51 @@ router.get('/', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req
         parententity._children.push(fmo);
     });
     res.send(toplevelobjects);
+});
+
+/**
+ * Flächen nach Nutzungsart DIN277 (AVTFM-158)
+ */
+router.get('/din277/:areatypename', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {
+    var clientname = req.user.clientname;
+    var areatypename = Db.replaceQuotes(req.params.areatypename);
+    var query = `
+        WITH RECURSIVE get_path(name, depth) AS (
+            (SELECT name, 0 FROM areatypes WHERE name='${areatypename}')
+            UNION
+            (SELECT
+                relations.name2,
+                get_path.depth + 1 
+            FROM relations 
+            JOIN get_path 
+            ON relations.name1 = get_path.name
+            WHERE relations.relationtypename = 'parentchild'
+            AND relations.datatype2name='areatypes'
+            AND get_path.depth < 64
+            )
+        )
+        SELECT DISTINCT
+        areas.*
+        FROM get_path
+        JOIN areas ON areas.areatypename = get_path.name
+        ;
+    `;
+    var areas = (await Db.query(clientname, query)).rows;
+    if (areas.length < 1) return res.send([]);
+    var areasdefinition = (await Db.getdatatypes(clientname))["areas"];
+    var areatypes = {};
+    (await Db.getDynamicObjects(clientname, "areatypes")).forEach(atd => {
+        areatypes[atd.name] = atd;
+    });
+    var result = areas.map(a => {
+        return {
+            name: a.name,
+            label: a[areasdefinition.titlefield] || a.name,
+            areatypenumber: areatypes[a.areatypename].number,
+            f: a.f
+        }
+    });
+    res.send(result);
 });
 
 module.exports = router;

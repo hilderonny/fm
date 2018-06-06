@@ -17,7 +17,7 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
         '<md-input-container flex ng-show="createdialogtargetdatatype">' +
         '    <label>{{createdialogtargetdatatype.label}}</label>' +
         '    <md-select ng-model="createdialogtargetelement" ng-change="createdialogupdateokbuttonvisibility()">' +
-        '        <md-option ng-value="element" ng-repeat="element in createdialogtargetelements | orderBy: \'label\'" ng-bind="element.label"></md-option>' +
+        '        <md-option ng-value="element" ng-repeat="element in createdialogtargetelements" ng-bind="element[createdialogtargetdatatype.titlefield] || element.name"></md-option>' +
         '    </md-select>' +
         '</md-input-container>';
     var tabtemplate = 
@@ -29,8 +29,8 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
         '               <md-subheader class="md-no-sticky">{{relationsection.label}}</md-subheader>' +
         '               <md-list class="lines-beetween-items">' +
         '                   <md-list-item ng-repeat="entity in relationsection.entities | orderBy:\'label\'" ng-click="$parent.tabselectrelation(entity.relation)">' +
-        '                       <md-icon md-svg-src="{{entity.datatype.icon}}"></md-icon>' +
-        '                       <div class="md-list-item-text multiline"><p>{{entity.label}}</p><p>{{entity.datatype.label}}</p></div>' +
+        '                       <md-icon ng-if="entity.datatype.icon" md-svg-src="{{entity.datatype.icon}}"></md-icon>' +
+        '                       <div class="md-list-item-text multiline"><p>{{entity[entity.datatype.titlefield] || entity.label}}</p><p>{{entity.datatype.label}}</p></div>' +
         '                       <md-button ng-if="$parent.canwriterelations" class="md-icon-button md-accent"><md-icon ng-click="$parent.tabdeleterelation(entity.relation)" md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>' +
         '                   </md-list-item>' +
         '               </md-list>' +
@@ -72,12 +72,8 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
                         dialogscope.createdialogupdateokbuttonvisibility();
                         utils.loaddynamicobjects(dialogscope.createdialogtargetdatatype.name).then(function(elements) {
                             dialogscope.createdialogtargetelements = elements;
-                            elements.forEach(function(e) {
-                                if (!e.label) {
-                                    var titlefield = dialogscope.createdialogtargetdatatype.titlefield ? dialogscope.createdialogtargetdatatype.titlefield : "name";
-                                    e.label = e[titlefield].substring(0, 100);
-                                }
-                            });
+                            var titlefield = dialogscope.createdialogtargetdatatype.titlefield;
+                            elements.sort((a, b) => (a[titlefield] || a.name).localeCompare(b[titlefield] || b.name));
                         });
                     };
                     dialogscope.createdialogupdateokbuttonvisibility = function() {
@@ -143,12 +139,9 @@ app.directive('avtRelations', function($rootScope, $compile, $mdDialog, $transla
                                     e.datatype = scope.$root.datatypes[k];
                                     var mapper = entitiestofetchfordatatype[e.name];
                                     e.relation = mapper.relation;
-                                    if (!e.label) {
-                                        var titlefield = e.datatype.titlefield ? e.datatype.titlefield : "name";
-                                        e.label = e[titlefield].substring(0, 100);
-                                    }
                                     mapper.section.entities.push(e);
                                 });
+                                Object.values(entitiestofetchfordatatype).forEach(m => m.section.entities.sort((a, b) => (a[a.datatype.titlefield] || a.name).localeCompare(b[b.datatype.titlefield] || b.name)));
                             });
                         });
                         return Promise.all(fetchpromises);

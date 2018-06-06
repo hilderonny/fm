@@ -11,7 +11,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
         '                <md-icon ng-click="openchild(child)" ng-if="!child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Right.svg"></md-icon>' +
         '                <md-icon ng-click="child.isopen=false" ng-if="child.isopen && child.haschildren" md-svg-src="/css/icons/material/Sort Down.svg"></md-icon>' +
         '                <md-icon ng-if="!child.haschildren"></md-icon>' +
-        '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" />' +
+        '                <img ng-click="selectchild(child)" ng-src="{{child.icon}}" ng-if="!params.hideicons" />' +
         '                <p class="nowrap" ng-bind="child.label" ng-click="selectchild(child)"></p>' +
         '            </div>' +
         '            <ng-include flex src="\'hierarchylist\'" ng-if="child.isopen"></ng-include>' +
@@ -40,6 +40,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
             element.append(element[0].cardcontent);
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
+                scope.params = params;
                 scope.detailscard = params.detailscard;
                 scope.ondetailscardclosed = function() {
                     if (!scope.selectedchild) return; // when new element card is open
