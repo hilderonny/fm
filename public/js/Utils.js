@@ -22,7 +22,10 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
             if (!$rootScope.canRead(requiredPermission)) return Promise.resolve();
             utils.cardsToAdd.push(cardToAdd);
-            return $http.get('/partial/' + cardTemplateUrl + '.html', { cache: true}).then(function(response) {
+            var urlparts = cardTemplateUrl.split("#"); // Can be with a hash
+            var url = '/partial/' + urlparts[0] + '.html';
+            if (urlparts.length > 0) url += "#" + urlparts[1];
+            return $http.get(url, { cache: true}).then(function(response) {
                 // Check whether the card should still be shown. When the dummy object is no longer
                 // in the array, the request tooks too long and the user has done something other meanwhile
                 if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return Promise.resolve(); // So simply ignore the response

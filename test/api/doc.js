@@ -30,7 +30,8 @@ describe('API doc', () => {
         assert.ok(menuFromApi.find(m => m.docCard === 'Clients'));
         assert.ok(menuFromApi.find(m => m.docCard === 'Portals'));
         assert.ok(!menuFromApi.find(m => m.docCard === 'Activities'));
-        assert.ok(!menuFromApi.find(m => m.docCard === 'Areas'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Areas#areas'));
+        assert.ok(!menuFromApi.find(m => m.docCard === 'Areas#din277'));
         assert.ok(!menuFromApi.find(m => m.docCard === 'BusinessPartners'));
         assert.ok(!menuFromApi.find(m => m.docCard === 'Persons'));
         assert.ok(!menuFromApi.find(m => m.docCard === 'Documents'));
@@ -51,7 +52,8 @@ describe('API doc', () => {
         assert.ok(!menuFromApi.find(m => m.docCard === 'Clients'));
         assert.ok(!menuFromApi.find(m => m.docCard === 'Portals'));
         assert.ok(menuFromApi.find(m => m.docCard === 'Activities'));
-        assert.ok(menuFromApi.find(m => m.docCard === 'Areas'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Areas#areas'));
+        assert.ok(menuFromApi.find(m => m.docCard === 'Areas#din277'));
         assert.ok(menuFromApi.find(m => m.docCard === 'BusinessPartners'));
         assert.ok(menuFromApi.find(m => m.docCard === 'Persons'));
         assert.ok(menuFromApi.find(m => m.docCard === 'Documents'));

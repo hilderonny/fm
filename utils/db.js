@@ -12,6 +12,8 @@ var uuidv4 = require("uuid").v4;
 
 var dbprefix = process.env.POSTGRESQL_TEST_DBPREFIX  || localconfig.dbprefix || 'arrange' ; 
 
+var debugdbquery = false; // Set this to true to print out all queries in the console
+
 var Db = {
 
     PortalDatabaseName: "portal",
@@ -488,7 +490,7 @@ var Db = {
     },
 
     queryDirect: async(databasename, query) => {
-        // console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
+        if (debugdbquery) console.log("\x1b[1:36m%s\x1b[0m", databasename + ": " + query); // Color: https://stackoverflow.com/a/41407246, http://bluesock.org/~willkg/dev/ansi.html
         var pool = Db.getPool(Db.replaceQuotesAndRemoveSemicolon(databasename)); // Sicher ist sicher
         var client = await pool.connect();
         var result = undefined;
@@ -685,7 +687,13 @@ var Db = {
             await Db.updateRecordTypeFieldsForDatabase(databasename, recordtype);
             // Handle predefined values
             if (recordtype.values) for (var j = 0; j < recordtype.values.length; j++) {
-                await Db.insertDynamicObject(databasename, recordtype.name, recordtype.values[j]); // Try to insert. When it already exists, nothing happens
+                var value = recordtype.values[j];
+                var existingentity = await Db.getDynamicObject(databasename, recordtype.name, value.name);
+                if (existingentity) {
+                    await Db.updateDynamicObject(databasename, recordtype.name, value.name, value); // Update existing elements
+                } else {
+                    await Db.insertDynamicObject(databasename, recordtype.name, recordtype.values[j]); // Try to insert. When it already exists, nothing happens
+                }
             }
         }
     },

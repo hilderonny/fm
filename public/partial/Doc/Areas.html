@@ -9,7 +9,18 @@
     <md-card-content>
 
         <p>
-            Im Flächenmodul werden Flächendaten über die FM-Objekthierarchie hinweg aufsummiert und ausgewertet. Eine korrekte Berechnung
+            Das Flächenmodul bietet Auswertungen von Grundflächen nach verschiedenen Kriterien.
+        </p>
+
+        <ul>
+            <li><a href="/#/doc/Areas#areas">Flächen Übersicht</a></li>
+            <li><a href="/#/doc/Areas#din277">Flächen nach DIN 277</a></li>
+        </ul>
+    
+        <h2><a name="areas"/>Flächen Übersicht</h2>
+
+        <p>
+            In der Übersicht werden Flächendaten über die FM-Objekthierarchie hinweg aufsummiert und ausgewertet. Eine korrekte Berechnung
             setzt voraus, dass eine FM Hierarchie in der Form Gebäude - Etage - Raum - Fläche vorhanden ist und dass die Flächeninformationen
             korrekt gepflegt wurden.
         </p>
@@ -28,7 +39,7 @@
             letztere eine Differenz aus Brutto-Geschossfläche und Netto-Raum-Fläche ist.
         </p>
 
-        <h2>Berechnungslogik</h2>
+        <h3>Berechnungslogik</h3>
         <p>
             Zum Einen kann man die FM-Struktur bis zur Raumebene modellieren. Man lässt dabei die einzelnen Flächen außer Acht und gibt 
             die Maße direkt am Raum ein. Dann werden diese Daten über die Hierarchie hinweg nach oben zur Berechnung verwendet.
@@ -42,7 +53,7 @@
             automatisch aktualisiert. Nur in der Flächenauswertung werden die berechneten Werte der Flächen angezeigt.
         </p>
 
-        <h2>Desktop-Anzeige</h2>
+        <h3>Desktop-Anzeige</h3>
         <img src="/css/images/Areas_desktop.png"/>
         <p>
             Auf Dektop-Geräten mit großem Bildschirm wird die gesamte Hierarchie und die zugehörigen Kennzahlen tabellarisch angezeigt,
@@ -52,11 +63,22 @@
             Ein Klick auf ein Hierarchieelement öffnet die Detailkarte des entsprechenden Elementes.
         </p>
 
-        <h2>Mobile Anzeige</h2>
+        <h3>Mobile Anzeige</h3>
         <img src="/css/images/Areas_mobile.png"/>
         <p>
             Auf Mobilgeräten wird stets nur eine Hierarchieebene mit dessen Kennzahlen angezeigt. Darunter wird eine Liste mit Kindelementen
             angezeigt, welche beim Darauf-Klicken das jeweilige Kindelement mit dessen Kennzahlen anzeigt.
+        </p>
+
+        <h2><a name="din277"/>Flächen nach DIN 277</h2>
+        <img src="/css/images/Areas_din277.png" style="min-width:99%"/>
+        <p>
+            In dieser Sicht werden alle Flächen des Mandanten gegliedert nach <a href="https://www.akbw.de/fileadmin/download/dokumenten_datenbank/AKBW_Merkblaetter/Planung_und_Berufspraxis/Merkblatt687-DIN277neu.pdf" target="_blank">DIN 277</a>
+            aufgeführt. Dabei werden sowohl die Flächen, die der entsprechenden Flächenart direkt zugeordnet sind, als auch diejenigen Flächen,
+            die einer Unterart zugeordnet sind, aufgelistet.
+        </p>
+        <p>
+            Ein Klick auf den Namen einer Fläche öffnet deren Detailansicht.
         </p>
                         
     </md-card-content>

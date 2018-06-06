@@ -49,10 +49,6 @@ module.exports.apis = {
      */
     extractdocument: 'extractdocument',
     /**
-     * API for edititing folders
-     */
-    folders: 'folders',
-    /**
      * API for logging in users
      */
     login: 'login',
