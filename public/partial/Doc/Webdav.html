@@ -7,7 +7,7 @@
     <md-card-content>
         <p>
            WebDav can be used for file browsing and document retrieval remotly over the internet using Windows file explorer. 
-           This module provides an alternative visulaization of the content of the documents module, but suppurts only a subset 
+           This module provides an alternative visulaization of the content of the documents module, but supports only a subset 
            of possible interactions. Documents and folders <b>can be viewed, renamed and retrieved</b>, but they cannot be deleted or reallocated. 
            The creation of new documetns and folders is currently also not supported.     
            
@@ -26,7 +26,7 @@
             First of all, the user has to make a connection to WebDav server using the Windows <i> map network drive</i> interface.
             This is done by specifying the <b>webdav server Url</b>, which has the following format: <b>\\hostName@SSL@portNumber\DavWWWRoot</b>.
             In the particular case, the hostName is perovided by the user</b> and the portNumber is <b> 56789 </b>. After the connection is done successfully, 
-            the user cradintial must be entered. The full login procedure is explanied in details below. <br>          
+            the user credentials must be entered. The full login procedure is explanied in details below. <br>          
             <ul>
                 <ol>
                     <li>From the <b>Start Menu</b> on Windows PC go to <b>File Explore</b> and right click on <b>This PC</b>.</li>
@@ -70,12 +70,19 @@
             <ul>
                 <ol>
                     <li><b>Nested Hirarchy:</b> the same folder or document with the same name can appear repeatedly at different locations in the hierarchy.
-                        This design is different than the typical Windows file system, which most users are familiar with.  
+                        This design is different than the typical Windows file system, which most users are familiar with. In addition, this nested dependencies are 
+                        limited in Windows because Windows uses path which has a maximum length limitation.
                     </li>
                     <li><b>Update on-Demand:</b>when any changes are made in the web application after login to WebDav, these will not automatically appear in the WebDav 
                         folder. The updated become visible only after the user manually refreshes the file browser.
                         For example if an image is deleted in the web application but the user forgot to refresh the file browser, an attempt to open this deleted image
-                        will result in a error message or a low quality cashed preview. <b>Please, refresh the browser regularly!</b> </li> 
+                        will result in a error message or a low quality cashed preview. <b>Please, refresh the browser regularly!</b>
+                     </li> 
+                    <li><b>Naming Convention:</b> Both the web application and WebDav has no rules for naming documents and folders. The document or folder name can consist of 
+                        any characters without any exception in contrast to Windows. In Windows the following characters inside the curly brackets {&lt,>,:,/,\, |,?,*} are reserved 
+                        and can't be used to create file or document valid names. Therfore, when the user tries to copy a document or a folder which consist one of the reserved 
+                        characters from WebDav to Windows, an error message will display.                         
+                    </li>
                 </ol>
             </ul> 
         </p>
@@ -86,7 +93,7 @@
             Regarding the deletion, due to the automatic bahviour of the Windows WebDav cleint, the user may try to delete a folder or a document and get misleading visual feedback. 
             It will look as if the deletion has been completed, although in reallity this action is prohibited by the server. Afer refreshing the file browser, the temporarily "deleted"
             data item will reapear again. 
-            Additionally, error messges will apper when the user tries to creat or reallocate a folder or a document. Such messages should be ignored.        
+            Additionally, error messges will appear when the user tries to create or reallocate a folder or a document. Such messages should be ignored.        
         </p>
 
         <h2><a name="further_readings">Further Readings</a></h2>  
