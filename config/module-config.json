@@ -413,8 +413,10 @@
                 "css/icons/fm/FMOBJECTS_TYPE_PROJECT.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg",
+                "css/icons/material/icons8-carpet.svg",
                 "css/icons/material/icons8-hierarchy.svg",
                 "css/icons/material/surface.svg",
+                "css/icons/office/icons8-carpet.svg",
                 "css/icons/office/icons8-hierarchy.svg",
                 "css/icons/office/surface.svg",
                 "css/images/Areas_desktop.png",
@@ -423,7 +425,8 @@
                 "partial/Doc/Areas.html",
                 "partial/BIM/AreasCard.html",
                 "partial/BIM/Din277AreaListCard.html",
-                "partial/BIM/Din277HierarchyCard.html"
+                "partial/BIM/Din277HierarchyCard.html",
+                "partial/BIM/FlooringEditorListCard.html"
             ],
             "include" : [
                 "public/js/components/avt-bim-din277-card.js",
@@ -431,6 +434,11 @@
             ],
             "languages" : [ "de" ],
             "clientdatatypes": [
+
+                { "name": "areafloorings", "label": "Belagart",  "titlefield": "label", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "averagecost", "label": "Durchschnittliche Kosten pro m²", "type": "decimal" }
+                ], "lists": [ "areafloorings" ] },
 
                 { "name": "areatypes", "label": "Flächenart", "titlefield": "displayname", "fields": [
                     { "name": "areacategoryname", "type": "reference", "reference": "areacategories" },
@@ -581,14 +589,15 @@
                     { "name": "areatypesvf9vf93", "datatype1name": "areatypes", "name1": "vf9", "datatype2name": "areatypes", "name2": "vf93", "relationtypename": "parentchild" },
                     { "name": "areatypesvf9vf94", "datatype1name": "areatypes", "name1": "vf9", "datatype2name": "areatypes", "name2": "vf94", "relationtypename": "parentchild" },
                     { "name": "areatypesvf9vf99", "datatype1name": "areatypes", "name1": "vf9", "datatype2name": "areatypes", "name2": "vf99", "relationtypename": "parentchild" },
-
                     { "name": "areatypesnf2nf21", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf21", "relationtypename": "parentchild" },
-                    { "name": "areatypesnf2nf22", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf22", "relationtypename": "parentchild" }
+                    { "name": "areatypesnf2nf22", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf22", "relationtypename": "parentchild" },
+                    { "name": "raumbuchflooringeditor", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flooringeditor", "relationtypename": "parentchild" }
                 ] },
 
                 { "name": "views", "values": [
                     { "modulename": "areas", "name": "flaechen", "label": "Flächen Übersicht", "doccard": "Areas#areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "maincard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" },
-                    { "modulename": "areas", "name": "din277", "label": "Flächen nach DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "maincard": "BIM/Din277HierarchyCard", "permission": "PERMISSION_BIM_AREAS" }
+                    { "modulename": "areas", "name": "din277", "label": "Flächen nach DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "maincard": "BIM/Din277HierarchyCard", "permission": "PERMISSION_BIM_AREAS" },
+                    { "modulename": "areas", "name": "flooringeditor", "label": "Belagarten", "doccard": "Areas#flooringeditor", "directurls": "flooringeditor", "icon": "/css/icons/material/icons8-carpet.svg", "index": 730, "maincard": "BIM/FlooringEditorListCard",  "permission": "PERMISSION_BIM_AREAS" }
                 ] }
 
             ]
@@ -900,7 +909,8 @@
                     { "name": "f", "label": "Flächeninhalt (m²)", "type": "decimal" },
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_NUF", "f", null] }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_TF", "f", null] }, "formulaindex": 1 },
-                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_VF", "f", null] }, "formulaindex": 2 }
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_VF", "f", null] }, "formulaindex": 2 },
+                    { "name": "areaflooringname", "label": "Belagart", "type": "reference", "reference": "areafloorings" }
                 ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg", "fields": [
