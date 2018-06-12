@@ -82,7 +82,7 @@ describe('API extractdocument', () => {
 
     // Delete temporary documents
     afterEach(() => {
-        return th.removeDocumentFiles();
+        // return th.removeDocumentFiles();
     });
 
     describe('GET/:id', () => {
