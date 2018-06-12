@@ -435,10 +435,10 @@
             "languages" : [ "de" ],
             "clientdatatypes": [
 
-                { "name": "areaflooring", "label": "Belagart",  "titlefield": "label", "fields": [
+                { "name": "areafloorings", "label": "Belagart",  "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "averagecost", "label": "Durchschnittliche Kosten pro m²", "type": "decimal" }
-                ], "lists": [ "areaflooring" ] },
+                ], "lists": [ "areafloorings" ] },
 
                 { "name": "areatypes", "label": "Flächenart", "titlefield": "displayname", "fields": [
                     { "name": "areacategoryname", "type": "reference", "reference": "areacategories" },
@@ -909,7 +909,8 @@
                     { "name": "f", "label": "Flächeninhalt (m²)", "type": "decimal" },
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_NUF", "f", null] }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_TF", "f", null] }, "formulaindex": 1 },
-                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_VF", "f", null] }, "formulaindex": 2 }
+                    { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "ifthenelse" : ["areacategoryname", "FMOBJECTS_CATEGORY_VF", "f", null] }, "formulaindex": 2 },
+                    { "name": "areaflooringname", "label": "Belagart", "type": "reference", "reference": "areafloorings" }
                 ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "inventories", "label": "Inventar", "plurallabel": "Inventare", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_INVENTORY.svg", "fields": [
