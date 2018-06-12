@@ -57,21 +57,8 @@ describe('API extractdocument', () => {
         var zipFileBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
         // ZIP-Datei erstellen und als Dokumentendatei speichern
         var filePath = dh.getDocumentPath("client0", testdocument.name);
-        return new Promise((resolve, reject) => {
-            var tries = 10;
-            function tryWrite() {
-                if (tries < 0) reject(new Error("Cannot write file"));
-                tries--;
-                try {
-                    th.createPath(path.dirname(filePath));
-                    fs.writeFileSync(filePath, zipFileBuffer);    
-                    resolve();
-                } catch(error) {
-                    setTimeout(tryWrite, 1000);
-                }
-            }
-            tryWrite();
-        });
+        th.createPath(path.dirname(filePath));
+        fs.writeFileSync(filePath, zipFileBuffer);
     }
 
     before(async() => {
@@ -95,7 +82,7 @@ describe('API extractdocument', () => {
 
     // Delete temporary documents
     afterEach(() => {
-        return th.removeDocumentFiles();
+        // return th.removeDocumentFiles();
     });
 
     describe('GET/:id', () => {
