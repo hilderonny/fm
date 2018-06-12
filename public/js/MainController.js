@@ -40,7 +40,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         } else if (path1 === 'doc') { // Sonderbehandlung für Online-Dokumentation
             rootscope.isShowingDoc = true;
             angular.element(document.querySelector('#cardcanvas')).empty();
-            return utils.addCardWithPermission('Doc/List', { preselection: rootscope.path[2], anchor: rootscope.path[3] });
+            return utils.addCardWithPermission('Doc/List', { preselection: rootscope.path[2], anchor: rootscope.hash });
         } else if (rootscope.directUrlMappings[path1]) {
             var mapping = rootscope.directUrlMappings[path1];
             if (!mapping) return Promise.resolve();
