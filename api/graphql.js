@@ -106,7 +106,7 @@ var middleware = graphqlHTTP(options);
 // zu verwenden, damit auch abhängig von der Anmeldung unterschiedliche Schemata zurück gegeben
 // werden können
 
-console.log(options.schema);
+// console.log(options.schema);
 setTimeout(() => {
     options.schema = buildSchema(`
     type Query {
@@ -114,7 +114,7 @@ setTimeout(() => {
         husten: String
     }
     `);
-    console.log(options.schema);
+    // console.log(options.schema);
 }, 10000);
 
 module.exports = middleware;

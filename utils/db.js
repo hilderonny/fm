@@ -178,6 +178,11 @@ var Db = {
         // Also delete documents of client
         var documentpath = path.join(__dirname, '..', localconfig.documentspath ? localconfig.documentspath : 'documents');
         rimraf.sync(path.join(documentpath, clientname));
+        // And remove all users of the client from the user cache
+        var usercache = require("../middlewares/auth").usercache;
+        Object.values(usercache).forEach(u => {
+            if (u.clientname === clientname) delete usercache[u.name];
+        });
         return true;
     },
 
@@ -185,6 +190,7 @@ var Db = {
         // Special handling of users
         if (datatypename === 'users') {
             await Db.query(Db.PortalDatabaseName, `DELETE FROM allusers WHERE name='${Db.replaceQuotes(elementname)}';`);
+            delete require("../middlewares/auth").usercache[elementname]; // Remove the user from the cache
         }
         var filterstring = filter ? " AND " + Db.getFilterString(filter) : "";
         return Db.query(clientname, `DELETE FROM ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} WHERE name='${Db.replaceQuotes(elementname)}'${filterstring};`);
@@ -529,6 +535,10 @@ var Db = {
         // Special handling of passwords for users
         if (datatypename === 'users' && element.password && element.password.length) {
             await Db.query(Db.PortalDatabaseName, `UPDATE allusers SET password = '${Db.replaceQuotes(bcryptjs.hashSync(element.password))}' WHERE name = '${Db.replaceQuotes(elementname)}';`);
+        }
+        // Special handle users and remove it from user cache to force it to be refetched from database
+        if (datatypename === 'users') {
+            delete require("../middlewares/auth").usercache[elementname];
         }
         var statement = `UPDATE ${Db.replaceQuotesAndRemoveSemicolon(datatypename)} SET ${values.join(',')} WHERE name='${Db.replaceQuotes(elementname)}'${filterstring};`;
         return Db.query(clientname, statement);

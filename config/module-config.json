@@ -5,7 +5,7 @@
             "forportal": true,
             "forclients": true,
             "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "graphql", "login", "menu", "permissions", "relations", "search", "translations", "users" ],
-            "middlewares": [ "auth", "extracttoken", "nocache", "validateSameClientId" ],
+            "middlewares": [ "auth", "extracttoken", "graphql", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
                 "css/base.css",
