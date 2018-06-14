@@ -34,6 +34,30 @@ module.exports = function(permissionKey, readWrite, moduleName) {
     };
 };
 
+/**
+ * Use this when you only want to check whether the user authenticated or not.
+ * When the user cannot be authenticated, req.user will be undefined after auth,
+ * when an authentication was successful, req.user will contain detailed information
+ * about the user.
+ * Mainly used in graphQL API
+ */
+module.exports.try = function(permissionKey, readWrite, moduleName) {
+    return async(req, res, next) => {
+        var user = req.user;
+        // First clear the user for all possible authentication failures;
+        req.user = undefined;
+        // Check whether credentials are given
+        if (!user || !user.name) return next();
+        // Check whether token time is older than server start
+        if(localConfig.startTime > user.tokenTime) return next();
+        var userInDatabase = await module.exports.canAccess(user.name, permissionKey, readWrite, moduleName);
+        if (!userInDatabase) return next();
+        // User was authenticated successfully, so store it in the request
+        req.user = userInDatabase;
+        next();
+    };
+}
+
 module.exports.dynamic = function(datatypeparametername, readwrite) {
     return async(req, res, next) => {
         var user = req.user;
@@ -106,7 +130,7 @@ async function getCachedUser(username) {
             if (dt.permissionkey && usermodulenames[dt.modulename]) allpermissions.push(dt.permissionkey);
         });
         // Add constant permission keys
-        Object.keys(co.permissions).forEach(p => allpermissions.push(p));
+        Object.values(co.permissions).forEach(p => allpermissions.push(p));
         // Define write permissions for user result
         allpermissions.forEach(p => {
             result.permissions[p] = "w"; // Admins can write in every case
@@ -143,41 +167,4 @@ module.exports.canAccess = async(username, permissionKey, readWrite, moduleName,
     if (!permission || (readWrite.indexOf('w') >= 0 && permission !== "w")) return false;
     // All good here, user has access
     return user;
-
-    // // Check user against database
-    // var userresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${Db.replaceQuotes(username)}';`);
-    // var userInAllUsers = userresult.rowCount > 0 ? userresult.rows[0] : undefined;
-    // if (!userInAllUsers) return false;
-    // var userInDatabase = await Db.getDynamicObject(userInAllUsers.clientname ? userInAllUsers.clientname : Db.PortalDatabaseName, "users", userInAllUsers.name);
-    // userInDatabase.clientname = userInAllUsers.clientname; // Relevant for APIs
-    // if (datatypename) { // Dynamic APIS do not provide permission keys directly but through datatypenames
-    //     var datatype = (await Db.getdatatypes(userInAllUsers.clientname))[datatypename];
-    //     if (!datatype) return false;
-    //     permissionKey = datatype.permissionkey; // Use this one!
-    //     moduleName = datatype.modulename; // Use this one!
-    // }
-    // // Check whether module is available for the client of the user, ignore portal users
-    // if (userInAllUsers.clientname && userInAllUsers.clientname !== Db.PortalDatabaseName && moduleName) {
-    //     var clientmoduleresult = await Db.query(Db.PortalDatabaseName, `SELECT * FROM clientmodules WHERE clientname='${Db.replaceQuotes(userInAllUsers.clientname)}' AND modulename='${Db.replaceQuotes(moduleName)}';`);
-    //     if (clientmoduleresult.rowCount < 1) return false;
-    //     var userHasAccess = await checkUser(userInAllUsers.clientname, userInDatabase, permissionKey, readWrite);
-    //     if (!userHasAccess) return false;
-    //     return userInDatabase;
-    // } else {
-    //     var userHasAccess = await checkUser(userInAllUsers.clientname, userInDatabase, permissionKey, readWrite);
-    //     if (!userHasAccess) return false;
-    //     return userInDatabase;
-    // }
 };
-
-// async function checkUser(clientname, userInDatabase, permissionKey, readWrite) {
-//     // Check permission when not administrator
-//     if (!userInDatabase.isadmin && permissionKey && readWrite) { // in menu API no key and no readwrite is given
-//         // Extract the permission for the requested permission key
-//         var writecondition = readWrite.indexOf('w') >= 0 ? " AND canwrite=true" : "";
-//         var permissionresult = await Db.query(clientname, `SELECT * FROM permissions WHERE usergroupname='${Db.replaceQuotes(userInDatabase.usergroupname)}' AND key='${Db.replaceQuotes(permissionKey)}'${writecondition};`);
-//         return permissionresult.rowCount > 0;
-//     } else {
-//         return true;
-//     }
-// };
