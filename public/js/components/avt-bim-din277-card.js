@@ -32,7 +32,7 @@ app.directive('avtBimDin277Card', function ($compile, utils) {
         compile: (element, attrs) => {
             var params = attrs.avtBimDin277Card ? JSON.parse(attrs.avtBimDin277Card) : {};
             element.removeAttr("avt-bim-din277-card");
-            element.attr("class", "areas-card");
+            element.attr("class", "flex2-card");
             var resizehandle = element[0].querySelector("resize-handle");
             element[0].toolbar = angular.element(toolbartemplate);
             element[0].cardtitle = angular.element(cardtitletemplate);

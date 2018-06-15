@@ -49,6 +49,10 @@ module.exports.apis = {
      */
     extractdocument: 'extractdocument',
     /**
+     * API for GraphQL access
+     */
+    graphql: 'graphql',
+    /**
      * API for logging in users
      */
     login: 'login',

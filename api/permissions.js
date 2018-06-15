@@ -47,7 +47,7 @@ router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r
     res.send(mappedPermissions);
 });
 
-// Create a permission
+// Create, delete or change a permission
 router.post('/', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var permission = req.body;
@@ -55,15 +55,21 @@ router.post('/', auth(co.permissions.ADMINISTRATION_USERGROUP, 'w', co.modules.b
     var permissionKeyForUser = await configHelper.getAvailablePermissionKeysForClient(clientname);
     if (permissionKeyForUser.indexOf(permission.key) < 0) return res.sendStatus(400);
     if (!(await Db.getDynamicObject(clientname, co.collections.usergroups.name, permission.usergroupname))) return res.sendStatus(400);
+    var usergroupname = Db.replaceQuotes(permission.usergroupname);
     if (!!!permission.canread) {
-        await Db.query(clientname, `DELETE FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.usergroupname)}';`);
+        await Db.query(clientname, `DELETE FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${usergroupname}';`);
     } else {
-        if ((await Db.query(clientname, `SELECT 1 FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.usergroupname)}';`)).rowCount > 0) {
-            await Db.query(clientname, `UPDATE permissions SET canwrite = ${!!permission.canwrite} WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${Db.replaceQuotes(permission.usergroupname)}';`);
+        if ((await Db.query(clientname, `SELECT 1 FROM permissions WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${usergroupname}';`)).rowCount > 0) {
+            await Db.query(clientname, `UPDATE permissions SET canwrite = ${!!permission.canwrite} WHERE key = '${Db.replaceQuotes(permission.key)}' AND usergroupname = '${usergroupname}';`);
         } else {
-            await Db.query(clientname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${Db.replaceQuotes(permission.usergroupname)}', '${Db.replaceQuotes(permission.key)}', ${!!permission.canwrite});`);
+            await Db.query(clientname, `INSERT INTO permissions (usergroupname, key, canwrite) VALUES('${usergroupname}', '${Db.replaceQuotes(permission.key)}', ${!!permission.canwrite});`);
         }
     }
+    // Force update of user cache for relevant users
+    var usercache = require("../middlewares/auth").usercache;
+    (await Db.query(clientname, `SELECT name FROM users WHERE usergroupname='${usergroupname}';`)).rows.forEach(u => {
+        delete usercache[u.name];
+    });
     res.send(permission);
 });
 
