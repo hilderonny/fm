@@ -106,6 +106,8 @@ th.prepareUserGroups = async() => {
 };
 
 th.prepareUsers = async() => {
+    // Delete user cache from auth middleware to force it to reconstruct itself
+    require("../middlewares/auth").usercache = {};
     await th.cleanTable("users", true, true);
     await th.cleanTable("allusers", true, false);
     var hashedPassword = '$2a$10$mH67nsfTbmAFqhNo85Mz4.SuQ3kyZbiYslNdRDHhaSO8FbMuNH75S'; // Encrypted version of 'test'. Because bryptjs is very slow in tests.
