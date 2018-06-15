@@ -17,7 +17,10 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         if (view) {
             utils.removeAllCards();
             utils.setLocation("/"); // Clear location before switching to another module to prevent handling of element names which are invalid in new context
-            promise = utils.addCardWithPermission(view.maincard, view, view.permission).then(() => {
+            promise = (view.viewcardname ? 
+                utils.addcardforview(view): // Otherwise use the card definition from the database
+                utils.addCardWithPermission(view.maincard, view, view.permission) // When maincard is set, use the old fashioned way to retrieve the HTML template
+            ).then(() => {
                 $mdSidenav('left').close();
                 if (view.directurls && view.directurls.length > 0) utils.setLocation('/' + view.directurls.split(",")[0]); // Use first defined direct URL
                 return Promise.resolve();

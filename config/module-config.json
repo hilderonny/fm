@@ -20,6 +20,7 @@
                 "css/icons/material/Forward.svg",
                 "css/icons/material/Help.svg",
                 "css/icons/material/icons8-more.svg",
+                "css/icons/material/icons8-web-design.svg",
                 "css/icons/material/List.svg",
                 "css/icons/material/Menu.svg",
                 "css/icons/material/Menu2.svg",
@@ -37,6 +38,7 @@
                 "css/icons/office/Delete.svg",
                 "css/icons/office/Edit.svg",
                 "css/icons/office/Exit.svg",
+                "css/icons/office/icons8-web-design.svg",
                 "css/icons/office/Menu.svg",
                 "css/icons/office/Plus Math.svg",
                 "css/icons/office/User.svg",
@@ -201,15 +203,21 @@
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups", "isrequired": true }
                 ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true },
 
+                { "name": "viewcards", "label": "Karte für Sichten", "plurallabel": "Karten für Sichten", "titlefield": "label", "icon": "/css/icons/material/icons8-web-design.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
+                ], "lists": [ "viewcards" ], "canhaverelations" : true },
+
                 { "name": "views", "label": "Sicht", "titlefield": "label", "fields": [
                     { "name": "doccard", "label": "Hilfeseite", "type": "text", "ishidden": false },
                     { "name": "directurls", "label": "Direkt-Einstiegs-URLs", "type": "text", "ishidden": false },
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "icon", "label": "Symbol", "type": "text" },
                     { "name": "index", "label": "Sortier-Index", "type": "decimal" },
-                    { "name": "maincard", "label": "Zu öffnende Karte", "type": "text", "ishidden": false },
+                    { "name": "maincard", "label": "Kartenvorlage (HTML)", "type": "text", "ishidden": false },
                     { "name": "permission", "label": "Notwendige Berechtigung", "type": "text", "ishidden": false },
-                    { "name": "modulename", "label": "Zugehöriges Modul", "type": "text", "ishidden": false }
+                    { "name": "modulename", "label": "Zugehöriges Modul", "type": "text", "ishidden": false },
+                    { "name": "viewcardname", "label": "Karte", "type": "reference", "reference": "viewcards", "isrequired": false }
                 ], "values": [
                     { "modulename": "base", "name": "benutzereinstellungen", "label": "Mein Profil", "doccard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "maincard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
                     { "modulename": "base", "name": "mandanteneinstellungen", "label": "Mandanteneinstellungen", "doccard": "Settings", "directurls": "clientsettings", "icon": "/css/icons/material/Briefcase.svg", "index": 420, "maincard": "Administration/ClientSettingsCard", "permission": "PERMISSION_SETTINGS_CLIENT" },
@@ -1064,8 +1072,12 @@
                     { "name": "stammdatennotizen", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "notizen", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "officenotelistcard", "label": "Kalender", "content": "<md-card\n    avt-card\n    avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscard\":\"Office/NoteCard\"}'\n    avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"label\":\"Notiz\",\"tooltip\":\"Neue Notiz\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'\n></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "notes", "name": "notizen", "label": "Notizen", "doccard": "Notes", "directurls": "notes", "icon": "/css/icons/material/Notes.svg", "index": 930, "maincard": "Office/NoteListCard", "permission": "PERMISSION_OFFICE_NOTE" }
+                    { "modulename": "notes", "name": "notizen", "label": "Notizen", "doccard": "Notes", "directurls": "notes", "icon": "/css/icons/material/Notes.svg", "index": 930, "viewcardname": "officenotelistcard", "permission": "PERMISSION_OFFICE_NOTE" }
                 ] }
 
             ]
