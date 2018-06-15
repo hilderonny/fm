@@ -53,6 +53,8 @@ app.controller('OfficeCalendarCardController', function($scope, $rootScope, $htt
     $scope.selectActivity = function(selectedActivity, event) {
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Office/ActivityCard', {
+            datatypename: "activities",
+            entityname: selectedActivity._id,
             activityId: selectedActivity._id,
             saveActivityCallback: saveActivityCallback,
             deleteActivityCallback: deleteActivityCallback,
@@ -67,6 +69,7 @@ app.controller('OfficeCalendarCardController', function($scope, $rootScope, $htt
         $scope.selectedActivity = null;
         utils.removeCardsToTheRightOf($element);
         utils.addCardWithPermission('Office/ActivityCard', {
+            datatypename: "activities",
             createActivityCallback: createActivityCallback,
             closeCallback: closeActivityCardCallback
         }, 'PERMISSION_OFFICE_ACTIVITY');

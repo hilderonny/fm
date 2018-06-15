@@ -371,8 +371,8 @@
 
                 { "name": "activitytypes", "label": "Terminart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
-                ], "values": [
-                    { "name": "ACTIVITIES_TYPE_NONE", "label": "" },
+                ], "lists": [ "activitytypes" ], "values": [
+                    { "name": "ACTIVITIES_TYPE_NONE", "label": "- keine Angabe -" },
                     { "name": "ACTIVITIES_TYPE_CALL_ON_CUSTOMERS", "label": "Kundenbesuch" },
                     { "name": "ACTIVITIES_TYPE_MAINTENANCE", "label": "Wartung" },
                     { "name": "ACTIVITIES_TYPE_WARRANTY", "label": "Gewährleistung" }
@@ -387,7 +387,7 @@
                     { "name": "comment", "label": "Kommentar", "type": "text" },
                     { "name": "createdbyusername", "label": "Ersteller", "type": "reference", "reference": "users" },
                     { "name": "isforallusers", "label": "Sichtbar für alle Benutzer", "type": "boolean" }
-                ], "canhaverelations" : true },
+                ], "lists": [ "activities" ], "canhaverelations" : true },
 
                 { "name": "relations", "values": [
                     { "name": "stammdatentermine", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "termine", "relationtypename": "parentchild" }

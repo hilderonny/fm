@@ -685,6 +685,7 @@ var Db = {
                 if (keys.indexOf("canhaverelations") >= 0) updateset.push(`canhaverelations=${!!recordtype.canhaverelations}`);
                 if (keys.indexOf("candefinename") >= 0) updateset.push(`candefinename=${!!recordtype.candefinename}`);
                 if (keys.indexOf("titlefield") >= 0 && !recordtypefromdatabase.ismanuallyupdated) updateset.push(`titlefield=${recordtype.titlefield ? "'" + Db.replaceQuotes(recordtype.titlefield) + "'" : "null"}`);
+                if (keys.indexOf("lists") >= 0) updateset.push(`lists='{${recordtype.lists.map(li => `"${Db.replaceQuotes(li)}"`).join(",")}}'`);
                 var query = `UPDATE datatypes SET ${updateset.join(",")} WHERE name = '${Db.replaceQuotes(recordtype.name)}';`;
                 await Db.query(databasename, query);
                 // Force update of cache in the next request
