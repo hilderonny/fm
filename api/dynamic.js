@@ -153,7 +153,7 @@ router.get("/rootelements/:forlist", auth(false, false, co.modules.base), async(
 });
 
 // Get list of all dynamic objects of given record type
-// TODO: Wird das benutzt?
+// Wird benutzt, um Referenzdatentypen zu laden, etwa in Terminliste (Kalender)
 router.get("/:recordtypename", auth.dynamic("recordtypename", "r"), async(req, res) => {
     var filter = req.query;
     delete filter.token;
