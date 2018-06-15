@@ -4,7 +4,7 @@
         "base": {
             "forportal": true,
             "forclients": true,
-            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "login", "menu", "permissions", "relations", "search", "translations", "users" ],
+            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "graphql", "login", "menu", "permissions", "relations", "search", "translations", "users" ],
             "middlewares": [ "auth", "extracttoken", "nocache", "validateSameClientId" ],
             "public" : [
                 "css/angular-material.min.css",
@@ -111,8 +111,6 @@
                 "public/js/components/avt-progress-spinner.js",
                 "public/js/components/avt-reference-select.js",
                 "public/js/components/avt-relations.js",
-                "public/js/components/avt-relations-tab.js",
-                "public/js/components/avt-relations-toolbar-button.js",
                 "public/js/components/avt-toolbar.js",
                 "public/js/components/avt-toolbar-button.js",
                 "public/js/components/avt-users-tab.js",
@@ -204,14 +202,14 @@
                 ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true },
 
                 { "name": "views", "label": "Sicht", "titlefield": "label", "fields": [
-                    { "name": "doccard", "type": "text", "ishidden": true },
-                    { "name": "directurls", "type": "text", "ishidden": true },
+                    { "name": "doccard", "label": "Hilfeseite", "type": "text", "ishidden": false },
+                    { "name": "directurls", "label": "Direkt-Einstiegs-URLs", "type": "text", "ishidden": false },
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "icon", "label": "Symbol", "type": "text" },
                     { "name": "index", "label": "Sortier-Index", "type": "decimal" },
-                    { "name": "maincard", "type": "text", "ishidden": true },
-                    { "name": "permission", "type": "text", "ishidden": true },
-                    { "name": "modulename", "type": "text", "ishidden": true }
+                    { "name": "maincard", "label": "Zu öffnende Karte", "type": "text", "ishidden": false },
+                    { "name": "permission", "label": "Notwendige Berechtigung", "type": "text", "ishidden": false },
+                    { "name": "modulename", "label": "Zugehöriges Modul", "type": "text", "ishidden": false }
                 ], "values": [
                     { "modulename": "base", "name": "benutzereinstellungen", "label": "Mein Profil", "doccard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "maincard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
                     { "modulename": "base", "name": "mandanteneinstellungen", "label": "Mandanteneinstellungen", "doccard": "Settings", "directurls": "clientsettings", "icon": "/css/icons/material/Briefcase.svg", "index": 420, "maincard": "Administration/ClientSettingsCard", "permission": "PERMISSION_SETTINGS_CLIENT" },
@@ -372,16 +370,15 @@
                 "partial/Office/CalendarCard.html"
             ],
             "include" : [
-                "public/js/Office/ActivityCardController.js",
-                "public/js/Office/CalendarCardController.js"
+                "public/js/components/avt-calendar-card.js"
             ],
             "languages" : [ "de" ],
             "clientdatatypes": [
 
                 { "name": "activitytypes", "label": "Terminart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
-                ], "values": [
-                    { "name": "ACTIVITIES_TYPE_NONE", "label": "" },
+                ], "lists": [ "activitytypes" ], "values": [
+                    { "name": "ACTIVITIES_TYPE_NONE", "label": "- keine Angabe -" },
                     { "name": "ACTIVITIES_TYPE_CALL_ON_CUSTOMERS", "label": "Kundenbesuch" },
                     { "name": "ACTIVITIES_TYPE_MAINTENANCE", "label": "Wartung" },
                     { "name": "ACTIVITIES_TYPE_WARRANTY", "label": "Gewährleistung" }
@@ -396,7 +393,7 @@
                     { "name": "comment", "label": "Kommentar", "type": "text" },
                     { "name": "createdbyusername", "label": "Ersteller", "type": "reference", "reference": "users" },
                     { "name": "isforallusers", "label": "Sichtbar für alle Benutzer", "type": "boolean" }
-                ], "canhaverelations" : true },
+                ], "lists": [ "activities" ], "canhaverelations" : true },
 
                 { "name": "relations", "values": [
                     { "name": "stammdatentermine", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "termine", "relationtypename": "parentchild" }

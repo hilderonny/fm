@@ -33,6 +33,11 @@ router.post('/', auth(co.permissions.ADMINISTRATION_CLIENT, 'w', co.modules.clie
         await Db.query(Db.PortalDatabaseName, `INSERT INTO clientmodules (clientname, modulename) VALUES ('${Db.replaceQuotes(clientModule.clientname)}', '${Db.replaceQuotes(clientModule.module)}');`);
         await dah.activateDynamicAttributesForClient(clientModule.clientname, clientModule.module);
     }
+    // And remove all users of the client from the user cache to force the reload of permissions
+    var usercache = require("../middlewares/auth").usercache;
+    Object.values(usercache).forEach(u => {
+        if (u.clientname === clientModule.clientname) delete usercache[u.name];
+    });
     res.sendStatus(200);
 });
 
@@ -47,6 +52,11 @@ router.delete('/:clientname/:modulename', auth(co.permissions.ADMINISTRATION_CLI
     if (result.rowCount < 1) return res.sendStatus(404);
     await dah.deactivateDynamicAttributesForClient(clientname, modulename);
     await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE clientname='${clientname}' AND modulename = '${modulename}';`);
+    // And remove all users of the client from the user cache to force the reload of permissions
+    var usercache = require("../middlewares/auth").usercache;
+    Object.values(usercache).forEach(u => {
+        if (u.clientname === clientname) delete usercache[u.name];
+    });
     res.sendStatus(204); // https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7, https://tools.ietf.org/html/rfc7231#section-6.3.5
 });
 

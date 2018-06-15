@@ -74,14 +74,14 @@ class WebdavFilesystem extends webdav.FileSystem {
         if (self._clientname) {
             Db.getDynamicObject(self._clientname, "users", self._username).then(user => {
                 user.clientname = self._clientname;
-                return ph.getpermissionsforuser(user);
-            }).then(permissions => {
+                return require("../middlewares/auth").getCachedUser(user.name);
+            }).then(cacheduser => {
                 // Distinguish between root path and child paths
                 if (path.isRoot()) {
-                    return doh.getrootelements(self._clientname, "folders_hierarchy", permissions);
+                    return doh.getrootelements(self._clientname, "folders_hierarchy", cacheduser.permissions);
                 } else {
                     var element = self._cache[path.toString()];
-                    return doh.getchildren(self._clientname, element.datatypename, element.name, permissions, "folders_hierarchy");
+                    return doh.getchildren(self._clientname, element.datatypename, element.name, cacheduser.permissions, "folders_hierarchy");
                 }
             }).then(dirElements => {
                 // Cache folders and documents for later lookup
