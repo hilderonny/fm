@@ -302,6 +302,11 @@
                     { "name": "usergroupname", "label": "Benutzergruppe", "type": "reference", "reference": "usergroups", "isrequired": true }
                 ], "lists": [ "users" ], "permissionkey": "PERMISSION_ADMINISTRATION_USER", "canhaverelations" : true, "candefinename" : true },
 
+                { "name": "viewcards", "label": "Karte für Sichten", "plurallabel": "Karten für Sichten", "titlefield": "label", "icon": "/css/icons/material/icons8-web-design.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
+                ], "lists": [ "viewcards" ], "canhaverelations" : true },
+
                 { "name": "views", "label": "Sicht", "titlefield": "label", "fields": [
                     { "name": "doccard", "type": "text", "ishidden": true },
                     { "name": "directurls", "type": "text", "ishidden": true },
@@ -761,6 +766,19 @@
                     { "modulename": "clients", "name": "mandantenverwaltung", "label": "Mandantenverwaltung", "doccard": "Clients", "directurls": "clients", "icon": "/css/icons/material/Briefcase.svg", "index": 600, "maincard": "Administration/ClientListCard", "permission": "PERMISSION_ADMINISTRATION_CLIENT" }
                 ] }
                 
+            ]
+        },
+
+        "crm": {
+            "forportal": true,
+            "forclients": true,
+            "languages" : [ "de" ],
+            "clientdatatypes": [
+
+                { "name": "viewcards", "values": [
+                    // TODO: Hier weiter machen, ist nur reinkopiert, aber noch nicht angepasst
+                    { "name": "officenotelistcard", "label": "Kalender", "content": "<md-card\n    avt-card\n    avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscard\":\"Office/NoteCard\"}'\n    avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"label\":\"Notiz\",\"tooltip\":\"Neue Notiz\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'\n></md-card>" }
+                ] },
             ]
         },
 

@@ -264,6 +264,10 @@ module.exports.modules = {
      */
     clients: 'clients',
     /**
+     * Modul für Content Management (Apps, Views, Cards)
+     */
+    crm: "crm",
+    /**
      * Online Dokumentation
      */
     doc: 'doc',
