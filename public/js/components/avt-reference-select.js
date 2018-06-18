@@ -31,7 +31,7 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                     iElement.parent().addClass("md-input-has-value"); // For styling label
                     iElement.addClass("avt-reference-select");
                     scope.titlefield = scope.$root.titlefields[scope.datatypefield.reference];
-                    var buttoncontent = angular.element('<span ng-click="openselectiondialog()"><span>{{selectedreference[titlefield] || selectedreference.name}}</span><md-icon md-svg-src="/css/icons/material/icons8-more.svg"></md-icon></span>');
+                    var buttoncontent = angular.element('<span><span>{{selectedreference[titlefield] || selectedreference.name}}</span><md-icon md-svg-src="/css/icons/material/icons8-more.svg"></md-icon></span>');
                     iElement.bind("click", function() {
                         scope.openselectiondialog();
                     });

@@ -266,7 +266,7 @@ module.exports.modules = {
     /**
      * Modul für Content Management (Apps, Views, Cards)
      */
-    crm: "crm",
+    cms: "cms",
     /**
      * Online Dokumentation
      */

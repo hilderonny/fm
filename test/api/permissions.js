@@ -30,6 +30,8 @@ describe('API permissions', () => {
             co.permissions.CORE_RELATIONS,
             co.permissions.CRM_BUSINESSPARTNERS,
             co.permissions.CRM_PERSONS,
+            co.permissions.CMS_APPS,
+            co.permissions.CMS_CARDS,
             co.permissions.OFFICE_ACTIVITY,
             co.permissions.OFFICE_DOCUMENT,
             co.permissions.OFFICE_NOTE,
