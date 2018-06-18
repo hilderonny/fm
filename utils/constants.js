@@ -327,6 +327,14 @@ module.exports.permissions = {
      */
     BIM_FMOBJECT: 'PERMISSION_BIM_FMOBJECT',
     /**
+     * Sichteneditor
+     */
+    CMS_APPS: 'PERMISSION_CMS_APPS',
+    /**
+     * Karteneditor
+     */
+    CMS_CARDS: 'PERMISSION_CMS_CARDS',
+    /**
      * Dynamische Verknüpfungen erstellen und ansehen
      */
     CORE_RELATIONS: 'PERMISSION_CORE_RELATIONS',

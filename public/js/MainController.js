@@ -51,7 +51,9 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
             rootscope.currentapp = mapping.app;
             localStorage.setItem("currentappname", rootscope.currentapp.app.name);
             angular.element(document.querySelector('#cardcanvas')).empty();
-            return utils.addCardWithPermission(mapping.view.maincard, mapping.view, mapping.view.permission);
+            return mapping.view.viewcardname ? 
+                utils.addcardforview(mapping.view) : 
+                utils.addCardWithPermission(mapping.view.maincard, mapping.view, mapping.view.permission);
         } else {
             return Promise.resolve();
         }

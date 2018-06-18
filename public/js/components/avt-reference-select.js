@@ -32,6 +32,9 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                     iElement.addClass("avt-reference-select");
                     scope.titlefield = scope.$root.titlefields[scope.datatypefield.reference];
                     var buttoncontent = angular.element('<span ng-click="openselectiondialog()"><span>{{selectedreference[titlefield] || selectedreference.name}}</span><md-icon md-svg-src="/css/icons/material/icons8-more.svg"></md-icon></span>');
+                    iElement.bind("click", function() {
+                        scope.openselectiondialog();
+                    });
                     iElement.append(buttoncontent);
                     $compile(buttoncontent)(scope);
                     scope.selectchild = function(child) {

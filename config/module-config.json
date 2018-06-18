@@ -129,7 +129,7 @@
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "clientdatatypes": [
 
-                { "name": "apps", "label": "Apps", "titlefield": "label", "fields": [
+                { "name": "apps", "label": "App", "plurallabel": "Apps", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "values": [
                     { "name": "administration", "label": "Administration" },
@@ -138,7 +138,7 @@
                     { "name": "einstellungen", "label": "Einstellungen" },
                     { "name": "raumbuch", "label": "Raumbuch" },
                     { "name": "stammdaten", "label": "Stammdaten" }
-                ], "canhaverelations" : true },
+                ], "lists": [ "appsandviews" ], "canhaverelations" : true },
 
                 { "name": "dynamicattributetypes", "label": "Attributart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
@@ -208,7 +208,7 @@
                     { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
                 ], "lists": [ "viewcards" ], "canhaverelations" : true },
 
-                { "name": "views", "label": "Sicht", "titlefield": "label", "fields": [
+                { "name": "views", "label": "Sicht", "plurallabel": "Sichten", "titlefield": "label", "fields": [
                     { "name": "doccard", "label": "Hilfeseite", "type": "text", "ishidden": false },
                     { "name": "directurls", "label": "Direkt-Einstiegs-URLs", "type": "text", "ishidden": false },
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -224,17 +224,17 @@
                     { "modulename": "base", "name": "benutzergruppenverwaltung", "label": "Benutzergruppen", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "maincard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
                     { "modulename": "base", "name": "benutzerverwaltung", "label": "Benutzer", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "maincard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" },
                     { "modulename": "base", "name": "dynamischeattribute", "label": "Dynamische Attribute", "doccard": "Settings", "directurls": "dynamicattributes", "icon": "/css/icons/material/View Details.svg", "index": 140, "maincard": "Administration/DynamicAttributesEntityListCard", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" }
-                ], "canhaverelations" : true }
+                ], "lists": [ "appsandviews" ], "canhaverelations" : true }
 
             ],
 
             "portaldatatypes": [
 
-                { "name": "apps", "label": "Apps", "titlefield": "label", "fields": [
+                { "name": "apps", "label": "App", "plurallabel": "Apps", "titlefield": "label", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "values": [
                     { "name": "portal", "label": "Portal" }
-                ], "canhaverelations" : true },
+                ], "lists": [ "appsandviews" ], "canhaverelations" : true },
 
                 { "name": "clientsettings", "label": "Mandanteneinstellung", "plurallabel": "Mandanteneinstellungen", "fields": [
                     { "name": "logourl", "label": "Logo URL", "type": "text" },
@@ -307,20 +307,21 @@
                     { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
                 ], "lists": [ "viewcards" ], "canhaverelations" : true },
 
-                { "name": "views", "label": "Sicht", "titlefield": "label", "fields": [
-                    { "name": "doccard", "type": "text", "ishidden": true },
-                    { "name": "directurls", "type": "text", "ishidden": true },
+                { "name": "views", "label": "Sicht", "plurallabel": "Sichten", "titlefield": "label", "fields": [
+                    { "name": "doccard", "label": "Hilfeseite", "type": "text", "ishidden": false },
+                    { "name": "directurls", "label": "Direkt-Einstiegs-URLs", "type": "text", "ishidden": false },
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "icon", "label": "Symbol", "type": "text" },
                     { "name": "index", "label": "Sortier-Index", "type": "decimal" },
-                    { "name": "maincard", "type": "text", "ishidden": true },
-                    { "name": "permission", "type": "text", "ishidden": true },
-                    { "name": "modulename", "type": "text", "ishidden": true }
+                    { "name": "maincard", "label": "Kartenvorlage (HTML)", "type": "text", "ishidden": false },
+                    { "name": "permission", "label": "Notwendige Berechtigung", "type": "text", "ishidden": false },
+                    { "name": "modulename", "label": "Zugehöriges Modul", "type": "text", "ishidden": false },
+                    { "name": "viewcardname", "label": "Karte", "type": "reference", "reference": "viewcards", "isrequired": false }
                 ], "values": [
                     { "modulename": "base", "name": "benutzereinstellungen", "label": "Mein Profil", "doccard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "maincard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
                     { "modulename": "base", "name": "benutzergruppenverwaltung", "label": "Benutzergruppen", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "maincard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
                     { "modulename": "base", "name": "benutzerverwaltung", "label": "Benutzer", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "maincard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" }
-                ], "canhaverelations" : true }
+                ], "lists": [ "appsandviews" ], "canhaverelations" : true }
 
             ]
         },
@@ -769,16 +770,57 @@
             ]
         },
 
-        "crm": {
+        "cms": {
             "forportal": true,
             "forclients": true,
+            "public" : [
+                "css/icons/material/icons8-web-design.svg",
+                "css/icons/material/icons8-website.svg",
+                "css/icons/office/icons8-web-design.svg",
+                "css/icons/office/icons8-website.svg",
+                "partial/Doc/AppsAndViews.html",
+                "partial/Doc/ViewCards.html"
+            ],
             "languages" : [ "de" ],
             "clientdatatypes": [
 
-                { "name": "viewcards", "values": [
-                    // TODO: Hier weiter machen, ist nur reinkopiert, aber noch nicht angepasst
-                    { "name": "officenotelistcard", "label": "Kalender", "content": "<md-card\n    avt-card\n    avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscard\":\"Office/NoteCard\"}'\n    avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"label\":\"Notiz\",\"tooltip\":\"Neue Notiz\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'\n></md-card>" }
+                { "name": "apps", "values": [
+                    { "name": "cms", "label": "Content Management" }
                 ] },
+
+                { "name": "relations", "values": [
+                    { "name": "cmskarteneditor", "datatype1name": "apps", "name1": "cms", "datatype2name": "views", "name2": "karteneditor", "relationtypename": "parentchild" },
+                    { "name": "cmssichteneditor", "datatype1name": "apps", "name1": "cms", "datatype2name": "views", "name2": "sichteneditor", "relationtypename": "parentchild" }
+                ] },
+
+                { "name": "viewcards", "values": [
+                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Neue Karte\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'></md-card>" },
+                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"Neue App oder Sicht\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'></md-card>" }
+                ] },
+
+                { "name": "views", "values": [
+                    { "modulename": "cms", "name": "karteneditor", "label": "Karteneditor", "doccard": "ViewCards", "directurls": "viewcards", "icon": "/css/icons/material/icons8-web-design.svg", "index": 500, "viewcardname": "cmsviewcardlistcard", "permission": "PERMISSION_CMS_CARDS" },
+                    { "modulename": "cms", "name": "sichteneditor", "label": "Apps und Sichten", "doccard": "AppsAndViews", "directurls": "apps,views", "icon": "/css/icons/material/icons8-website.svg", "index": 600, "viewcardname": "cmsappsandviewslistcard", "permission": "PERMISSION_CMS_APPS" }
+                ] }
+
+            ],
+            "portaldatatypes": [
+
+                { "name": "relations", "values": [
+                    { "name": "cmskarteneditor", "datatype1name": "apps", "name1": "portal", "datatype2name": "views", "name2": "karteneditor", "relationtypename": "parentchild" },
+                    { "name": "cmssichteneditor", "datatype1name": "apps", "name1": "portal", "datatype2name": "views", "name2": "sichteneditor", "relationtypename": "parentchild" }
+                ] },
+
+                { "name": "viewcards", "values": [
+                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Neue Karte\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'></md-card>" },
+                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"Neue App oder Sicht\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'></md-card>" }
+                ] },
+
+                { "name": "views", "values": [
+                    { "modulename": "cms", "name": "karteneditor", "label": "Karten", "doccard": "ViewCards", "directurls": "viewcards", "icon": "/css/icons/material/icons8-web-design.svg", "index": 500, "viewcardname": "cmsviewcardlistcard", "permission": "PERMISSION_CMS_CARDS" },
+                    { "modulename": "cms", "name": "sichteneditor", "label": "Apps und Sichten", "doccard": "AppsAndViews", "directurls": "apps,views", "icon": "/css/icons/material/icons8-website.svg", "index": 600, "viewcardname": "cmsappsandviewslistcard", "permission": "PERMISSION_CMS_APPS" }
+                ] }
+
             ]
         },
 
