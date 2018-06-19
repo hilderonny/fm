@@ -14,6 +14,14 @@
 
         <h2><a name="dynamicobjects"/>Dynamische Objekte</h2>
 
+        <h3>Video-Tutorials</h3>
+
+        <p>Einführung zu dynamischen Objekten</p>
+
+        <video width="600" height="300" controls="controls" poster="https://video.avorium.de/images/media/7l.jpg">
+            <source src="https://video.avorium.de/files/5-arrange-verschieben-von-dokumenten-und-verzeichnis.mp4" type="video/mp4">
+        </video>
+        
         <h3>"icon" - Feld</h3>
 
         <p>
@@ -45,12 +53,15 @@
                 </tr>
                 <tr>
                     <td>concat</td>
-                </tr>
-                <tr>
-                    <td>ifthenelse</td>
-                </tr>
-                <tr>
-                    <td>sum</td>
+                    <td>
+                        <pre>{ "concat" : [ "@fieldname", "static text", ... ] }</pre>
+                        <p>
+                            Setzt eine Zeichenkette aus anderen Zeichenketten zusammen. Als Wert wird ein Feld von beliebig vielen
+                            Textteilen angegeben. Enthält ein Feldelement zu Beginn ein "@"-Zeichen, wird der darauf folgende Text
+                            als Name eines anderen Feldes interpretiert und der Inhalt dieses Feldes verwendet. Ohne den Klammeraffen
+                            wird der Text als solches zur Zusammensetzung verwendet.
+                        </p>
+                    </td>
                 </tr>
             </tbody>
         </table>
