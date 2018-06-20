@@ -425,9 +425,11 @@
                 "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg",
                 "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg",
                 "css/icons/material/icons8-carpet.svg",
+                "css/icons/material/icons8-chart.svg",
                 "css/icons/material/icons8-hierarchy.svg",
                 "css/icons/material/surface.svg",
                 "css/icons/office/icons8-carpet.svg",
+                "css/icons/office/icons8-chart.svg",
                 "css/icons/office/icons8-hierarchy.svg",
                 "css/icons/office/surface.svg",
                 "css/images/Areas_desktop.png",
@@ -450,6 +452,14 @@
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "averagecost", "label": "Durchschnittliche Kosten pro m²", "type": "decimal" }
                 ], "lists": [ "areafloorings" ] },
+
+                { "name": "areausagestates", "label": "Flächennutzungsstatus", "titlefield": "label", "icon": "/css/icons/material/icons8-chart.svg", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                ], "values": [
+                    { "name": "eigennutzung", "label": "Eigennutzung" },
+                    { "name": "fremdnutzung", "label": "Fremdnutzung" },
+                    { "name": "leerstand", "label": "Leerstand" }
+                ] }, 
 
                 { "name": "areatypes", "label": "Flächenart", "titlefield": "displayname", "fields": [
                     { "name": "areacategoryname", "type": "reference", "reference": "areacategories" },
@@ -531,6 +541,7 @@
                 { "name": "relations", "values": [
                     { "name": "raumbuchflaechen", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flaechen", "relationtypename": "parentchild" },
                     { "name": "raumbuchdin277", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "din277", "relationtypename": "parentchild" },
+                    { "name": "raumbuchflechennachnutzungsstatus", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flechennachnutzungsstatus", "relationtypename": "parentchild" },
                     { "name": "areatypesnf1nf11", "datatype1name": "areatypes", "name1": "nf1", "datatype2name": "areatypes", "name2": "nf11", "relationtypename": "parentchild" },
                     { "name": "areatypesnf1nf12", "datatype1name": "areatypes", "name1": "nf1", "datatype2name": "areatypes", "name2": "nf12", "relationtypename": "parentchild" },
                     { "name": "areatypesnf1nf13", "datatype1name": "areatypes", "name1": "nf1", "datatype2name": "areatypes", "name2": "nf13", "relationtypename": "parentchild" },
@@ -605,9 +616,17 @@
                     { "name": "raumbuchflooringeditor", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flooringeditor", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { 
+                        "name": "flechennachnutzungsstatushierarchycard", 
+                        "label": "Flächen nach Nutzungsstatus Hierarchie", 
+                        "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"flechennachnutzungsstatus\",\"detailscardname\":\"flechennachnutzungsstatusdetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
                     { "modulename": "areas", "name": "flaechen", "label": "Flächen Übersicht", "doccard": "Areas#areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "maincard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" },
                     { "modulename": "areas", "name": "din277", "label": "Flächen nach DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "maincard": "BIM/Din277HierarchyCard", "permission": "PERMISSION_BIM_AREAS" },
+                    { "modulename": "areas", "name": "flechennachnutzungsstatus", "label": "Flächen nach Nutzungsstatus", "doccard": "Areas#nutzungsstatus", "directurls": "flechennachnutzungsstatus", "icon": "/css/icons/material/icons8-chart.svg", "index": 723, "viewcardname": "flechennachnutzungsstatushierarchycard", "permission": "PERMISSION_BIM_AREAS" },
                     { "modulename": "areas", "name": "flooringeditor", "label": "Belagarten", "doccard": "Areas#flooringeditor", "directurls": "flooringeditor", "icon": "/css/icons/material/icons8-carpet.svg", "index": 730, "maincard": "BIM/FlooringEditorListCard",  "permission": "PERMISSION_BIM_AREAS" }
                 ] }
 
@@ -1020,7 +1039,9 @@
                     { "name": "vf9", "number": "VF 9", "label": "Verkehrserschließung und -sicherung", "areacategoryname": "FMOBJECTS_CATEGORY_VF" }
                 ], "lists": [ "areatypes" ], "permissionkey": "PERMISSION_BIM_FMOBJECT" }, 
 
-                { "name": "areausagestates", "label": "Nutzungsstatus", "titlefield": "name", "values": [
+                { "name": "areausagestates", "label": "Flächennutzungsstatus", "titlefield": "label", "fields": [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                ], "values": [
                     { "name": "Ungenutzt" },
                     { "name": "Eigengenutzt" },
                     { "name": "Vermietet" },
