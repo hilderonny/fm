@@ -52,6 +52,7 @@
     "nyc": "^11.4.1",
     "really-need": "^1.9.2",
     "rimraf": "^2.6.2",
-    "supertest": "^2.0.1"
+    "supertest": "^2.0.1",
+    "webdav-client": "^1.4.2"
   }
 }
