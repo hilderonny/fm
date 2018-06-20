@@ -47,13 +47,11 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
-        addcardforview: function(view) {
+        addcardbyname: function(cardname, params) {
             var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
             var card, cardCanvas, domCard;
-            // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
-            if (!$rootScope.canRead(view.permission)) return Promise.resolve();
             utils.cardsToAdd.push(cardToAdd);
-            return utils.loaddynamicobject("viewcards", view.viewcardname).then(function(viewcard) {
+            return utils.loaddynamicobject("viewcards", cardname).then(function(viewcard) {
                 // Check whether the card should still be shown. When the dummy object is no longer
                 // in the array, the request tooks too long and the user has done something other meanwhile
                 if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return Promise.resolve(); // So simply ignore the response
@@ -62,8 +60,8 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 domCard = card[0];
                 cardCanvas.append(card);
                 var newScope = $rootScope.$new(true);
-                newScope.params = view; // Pass paremters to the scope to have access to it in the controller instance
-                newScope.requiredPermission = view.viewcardname; // For permission handling in details pages
+                newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
+                newScope.requiredPermission = cardname; // For permission handling in details pages
                 // Compile (render) the new card and attach its new controller
                 $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
                 window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
@@ -73,6 +71,12 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 if (domCard && cardCanvas) return utils.scrollToAnchor(domCard, cardCanvas, 50).then(function() { return Promise.resolve(card); }); // Try it up to 5 seconds, then abort
                 return Promise.resolve(card);
             });
+        },
+
+        addcardforview: function(view) {
+            // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
+            if (!$rootScope.canRead(view.permission)) return Promise.resolve();
+            return utils.addcardbyname(view.viewcardname, view);
         },
 
         adddetailscard: function(scope, datatypename, entityname, permission, parentdatatypename, parententityname, listfilter) {
