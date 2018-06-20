@@ -213,12 +213,16 @@ th.prepareFmObjects = async() => {
 
 th.prepareFolders = async() => {
     await th.cleanTable("folders", false, true);
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder0", parentfoldername: null, label: "folder0" });
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder1", parentfoldername: null, label: "folder1" });
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder00", parentfoldername: "client0_folder0", label: "folder00" });
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder01", parentfoldername: "client0_folder0", label: "folder01" });
-    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder000", parentfoldername: "client0_folder00", label: "folder000" });
-    await Db.insertDynamicObject("client1", "folders", { name: "client1_folder0", parentfoldername: null, label: "folder0" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder0", label: "folder0" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder1", label: "folder1" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder00", label: "folder00" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder01", label: "folder01" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder000", label: "folder000" });
+    await Db.insertDynamicObject("client1", "folders", { name: "client1_folder0", label: "folder0" });
+    // Relations between folders
+    await th.createRelation("folders", "client0_folder0", "folders", "client0_folder00", "parentchild");
+    await th.createRelation("folders", "client0_folder0", "folders", "client0_folder01", "parentchild");
+    await th.createRelation("folders", "client0_folder00", "folders", "client0_folder000", "parentchild");
 };
 
 th.createPath = (pathToCreate) => {
@@ -265,10 +269,10 @@ th.prepareAreas = async() => {
     await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype112", number: "N112", label: "OneOneTwo" });
     await Db.insertDynamicObject("client1", "areatypes", { name: "client1_areatype1", number: "N1", label: "One" });
     // Relations between area types
-    th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype11", "parentchild");
-    th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype12", "parentchild");
-    th.createRelation("areatypes", "client0_areatype11", "areatypes", "client0_areatype111", "parentchild");
-    th.createRelation("areatypes", "client0_areatype11", "areatypes", "client0_areatype112", "parentchild");
+    await th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype11", "parentchild");
+    await th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype12", "parentchild");
+    await th.createRelation("areatypes", "client0_areatype11", "areatypes", "client0_areatype111", "parentchild");
+    await th.createRelation("areatypes", "client0_areatype11", "areatypes", "client0_areatype112", "parentchild");
     // Areas
     await Db.insertDynamicObject("client0", "areas", { name: "client0_area01", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 10, label: "Area01" });
     await Db.insertDynamicObject("client0", "areas", { name: "client0_area02", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 20, label: "Area02" });
@@ -286,13 +290,13 @@ th.prepareAreas = async() => {
     // Levels
     await Db.insertDynamicObject("client0", "levels", { name: "client0_level0", label: "Level0" });
     // Relations between areas, rooms, levels
-    th.createRelation("levels", "client0_level0", "rooms", "client0_room0", "parentchild");
-    th.createRelation("levels", "client0_level0", "rooms", "client0_room1", "parentchild");
-    th.createRelation("rooms", "client0_room0", "areas", "client0_area01", "parentchild");
-    th.createRelation("rooms", "client0_room0", "areas", "client0_area02", "parentchild");
-    th.createRelation("rooms", "client0_room1", "areas", "client0_area03", "parentchild");
-    th.createRelation("rooms", "client0_room1", "areas", "client0_area04", "parentchild");
-    th.createRelation("rooms", "client0_room1", "areas", "client0_area05", "parentchild");
+    await th.createRelation("levels", "client0_level0", "rooms", "client0_room0", "parentchild");
+    await th.createRelation("levels", "client0_level0", "rooms", "client0_room1", "parentchild");
+    await th.createRelation("rooms", "client0_room0", "areas", "client0_area01", "parentchild");
+    await th.createRelation("rooms", "client0_room0", "areas", "client0_area02", "parentchild");
+    await th.createRelation("rooms", "client0_room1", "areas", "client0_area03", "parentchild");
+    await th.createRelation("rooms", "client0_room1", "areas", "client0_area04", "parentchild");
+    await th.createRelation("rooms", "client0_room1", "areas", "client0_area05", "parentchild");
     // Trigger calculation
     await ch.calculateformula("client0", "areatypes", "client0_areatype1");
     await ch.calculateformula("client0", "areatypes", "client0_areatype11");
@@ -308,10 +312,14 @@ th.prepareAreas = async() => {
 
 th.prepareDocuments = async() => {
     await th.cleanTable("documents", false, true);
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document0", parentfoldername: null, label: "document0", type: "image/gif", isshared: false });
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document00", parentfoldername: "client0_folder0", label: "document00", type: "type", isshared: false });
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document01", parentfoldername: "client0_folder0", label: "document01", type: "image/png", isshared: false });
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document000", parentfoldername: "client0_folder00", label: "document000", type: "type", isshared: true });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document0", label: "document0", type: "image/gif", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document00", label: "document00", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document01", label: "document01", type: "image/png", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document000", label: "document000", type: "type", isshared: true });
+    // Relations between folders and documents
+    await th.createRelation("folders", "client0_folder0", "documents", "client0_document00", "parentchild");
+    await th.createRelation("folders", "client0_folder0", "documents", "client0_document01", "parentchild");
+    await th.createRelation("folders", "client0_folder00", "documents", "client0_document000", "parentchild");
 };
 
 th.preparedatatypes = async() => {
@@ -361,15 +369,15 @@ th.preparedynamicobjects = async() => {
 th.preparerelations = async() => {
     // Only for client0
     await th.cleanTable("relations", false, true);
-    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypeone", "clientnulldatatypeoneentity0", "parentchild");
-    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity1", "dependency");
-    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity2", "parentchild");
-    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypetwo", "clientnulldatatypetwoentity0", "parentchild");
-    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity3", "parentchild");
-    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity2", "clientnulldatatypenull", "clientnulldatatypenullentity4", "parentchild");
-    th.createRelation("clientnulldatatypetwo", "clientnulldatatypetwoentity0", "clientnulldatatypetwo", "clientnulldatatypetwoentity1", "parentchild");
-    th.createRelation("clientnulldatatypetwo", "clientnulldatatypetwoentity0", "clientnulldatatypenull", "clientnulldatatypenullentity5", "parentchild");
-    th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity5", "clientnulldatatypenull", "clientnulldatatypenullentity6", "parentchild");
+    await th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypeone", "clientnulldatatypeoneentity0", "parentchild");
+    await th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity1", "dependency");
+    await th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity2", "parentchild");
+    await th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypetwo", "clientnulldatatypetwoentity0", "parentchild");
+    await th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "clientnulldatatypenullentity3", "parentchild");
+    await th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity2", "clientnulldatatypenull", "clientnulldatatypenullentity4", "parentchild");
+    await th.createRelation("clientnulldatatypetwo", "clientnulldatatypetwoentity0", "clientnulldatatypetwo", "clientnulldatatypetwoentity1", "parentchild");
+    await th.createRelation("clientnulldatatypetwo", "clientnulldatatypetwoentity0", "clientnulldatatypenull", "clientnulldatatypenullentity5", "parentchild");
+    await th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity5", "clientnulldatatypenull", "clientnulldatatypenullentity6", "parentchild");
 };
 
 th.prepareRelations = async() => {
