@@ -128,7 +128,6 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
                         { name: "formulaindex", label: "Formelindex", type: "decimal", iseditable: true, isreadonlywhenpredefined: true, tooltip: "Index des Formelfeldes. Bestimmt die Reihenfolge der Formelberechnung", showonlywhentypeis: "formula" },
                         { name: "reference", label: "Verwiesener Datentyp", type: "picklist", options: datatypes, iseditable: false, tooltip: "Datentyp, auf den der Verweis zeigt", showonlywhentypeis: "reference" },
                         { name: "ishidden", label: "Versteckt", type: "boolean", iseditable: true, tooltip: "Gibt an, ob das Feld in Detailseiten angezeigt wird" },
-                        { name: "isnullable", label: "Nullwerte zulassen", type: "boolean", iseditable: false, tooltip: "Gibt an, ob NULL als Wert zugelassen ist" },
                         { name: "isrequired", label: "Erforderlich", type: "boolean", iseditable: false, tooltip: "Gibt an, ob eine Eingabe für das Feld zwingend erforderlich ist" }
                     ];
                     if (fieldname) utils.getresponsedata('/api/recordtypes/field/' + datatypename + "/" + fieldname).then(function(field) {

@@ -17,7 +17,7 @@
                 </md-list-item>
                 <md-list-item aria-label="HELP" ng-href="/#/doc/{{parentScope.currentMenuItem.docCard}}" ng-click="parentScope.moreMenuPanel.close();">
                     <md-icon md-svg-src="/css/icons/material/Help.svg"></md-icon>
-                    <p translate>TRK_HELP</p>
+                    <p translate>Hilfe</p>
                 </md-list-item>
             </md-list>
         </script>
@@ -30,7 +30,7 @@
             <span flex ng-if="!searchInputVisible"></span>
             <md-input-container flex ng-if="searchInputVisible">
                 <label>&nbsp;</label>
-                <input ng-model="searchTerm" focus-me="searchInputVisible" ng-keyup="handleSearchInput($event)" placeholder="{{ 'TRK_ENTER_SEARCH_TERM' | translate }}">
+                <input ng-model="searchTerm" focus-me="searchInputVisible" ng-keyup="handleSearchInput($event)" placeholder="Suchbegriff eingeben">
                 <md-panel class="searchresults" ng-if="searchResults.length > 0">
                     <md-list class="context-menu" role="list">
                         <md-list-item ng-repeat="searchResult in searchResults" ng-click="onSearchResultClick(searchResult)" aria-label="{{searchResult.name}}">
@@ -45,7 +45,7 @@
                 <md-icon ng-if="searchInputVisible" md-svg-src="/css/icons/material/Delete.svg"></md-icon>
             </md-button>
             <md-button aria-label="HELP" ng-href="/#/doc/{{currentview.doccard}}" class="md-icon-button largedevice">
-                <md-tooltip md-direction="bottom"><span translate>TRK_HELP</span></md-tooltip>
+                <md-tooltip md-direction="bottom"><span translate>Hilfe</span></md-tooltip>
                 <md-icon md-svg-src="/css/icons/material/Help.svg"></md-icon>
             </md-button>
             <md-button ng-if="isLoggedIn" class="md-icon-button smalldevice" aria-label="MORE" ng-click="openMoreMenu($event);">
@@ -65,19 +65,19 @@
                     <h1>###PORTALNAME###</h1>
 
                     <md-input-container>
-                        <label translate="TRK_LOGIN_USERNAME"></label>
+                        <label translate="Benutzername"></label>
                         <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ng-model="username" tabindex="1" autofocus />
                     </md-input-container>
 
                     <md-input-container>
-                        <label translate="TRK_LOGIN_PASSWORD"></label>
+                        <label translate="Passwort"></label>
                         <input type="password" ng-model="password" tabindex="2" />
                     </md-input-container>
 
                     <div layout="row" layout-align="center right">
                         <md-button type="submit" class="md-raised md-primary" tabindex="3" ng-click="doLogin()" ng-disabled="isLoggingIn">
                             <md-progress-circular ng-if="isLoggingIn" class="md-primary" md-diameter="20px"></md-progress-circular>
-                            <span ng-hide="isLoggingIn" translate>TRK_LOGIN_LOGIN</span>
+                            <span ng-hide="isLoggingIn" translate>Anmelden</span>
                         </md-button>
                     </div>
 
@@ -122,14 +122,14 @@
 
                         <md-list-item ng-click="logout()">
                             <md-icon md-svg-src="/css/icons/material/Exit.svg"></md-icon>
-                            <p><span translate="TRK_MENU_LOGOUT"></span></p>
+                            <p><span translate="Abmelden"></span></p>
                         </md-list-item>
 
                     </md-list>
 
                 </md-content>
 
-                <div translate="TRK_LOGIN_LOGGED_IN_AS" translate-value-username="{{username}}"></div>
+                <div>Angemeldet als {{username}}</div>
             </md-sidenav>
 
             <md-content flex layout="row" id="cardcanvas" ng-show="currentview || isShowingDoc">
