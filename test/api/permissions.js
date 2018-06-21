@@ -4,7 +4,6 @@
 var assert = require('assert');
 var th = require('../testhelpers');
 var co = require('../../utils/constants');
-var ch = require('../../utils/configHelper');
 var Db = require("../../utils/db").Db;
 
 describe('API permissions', () => {
@@ -91,9 +90,6 @@ describe('API permissions', () => {
     describe('GET/forUserGroup/:id', async() => {
 
         var api = `${co.apis.permissions}/forUserGroup`;
-
-        th.apiTests.getId.defaultNegative(api, co.permissions.ADMINISTRATION_USERGROUP, co.collections.usergroups.name);
-        th.apiTests.getId.clientDependentNegative(api, co.collections.usergroups.name);
 
         it('responds with all permissions of the usergroup where the states are correctly set', async() => {
             await th.cleanTable("permissions", true, true);

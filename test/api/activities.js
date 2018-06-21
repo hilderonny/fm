@@ -2,7 +2,6 @@
  * UNIT Tests for api/activities
  */
 var assert = require('assert');
-var fs = require('fs');
 var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
@@ -149,12 +148,12 @@ describe('API activities', () => {
         th.apiTests.put.defaultNegative(co.apis.activities, co.permissions.OFFICE_ACTIVITY, createPutTestActivity);
         th.apiTests.put.clientDependentNegative(co.apis.activities, createPutTestActivity);
         
-        it('responds with 403 when the user is not the creator', async() => {
+        it('responds with 404 when the user is not the creator', async() => {
             var activity = { name: "client0_testactivity", date: (new Date()).getTime(), label: "client0_activity0", task: null, isdone: true, activitytypename: "ACTIVITIES_TYPE_NONE", comment: "comment", createdbyusername: "client0_usergroup0_user1", isforallusers: false };
             await Db.insertDynamicObject("client0", "activities", activity);
             var token = await th.defaults.login("client0_usergroup0_user0"); // Other user
             var activityupdate = { type: 'ACTIVITIES_TYPE_CALL_ON_CUSTOMERS' };
-            await th.put(`/api/${co.apis.activities}/${activity.name}?token=${token}`).send(activityupdate).expect(403);
+            await th.put(`/api/${co.apis.activities}/${activity.name}?token=${token}`).send(activityupdate).expect(404); // Finding algorithm cannot find an activity where the logged in user is the creator -> not found
         });
 
         it('responds with a correct activity with the updated activity and its new properties', async() => {
@@ -180,11 +179,11 @@ describe('API activities', () => {
         th.apiTests.delete.clientDependentNegative(co.apis.activities, getDeleteActivityId);
         th.apiTests.delete.defaultPositive(co.apis.activities, co.collections.activities.name, getDeleteActivityId);
     
-        it('returns 403 when the user is not the creator of the activity', async () => {
+        it('returns 404 when the user is not the creator of the activity', async () => {
             var activity = { name: "client0_testactivity", date: (new Date()).getTime(), label: "client0_activity0", task: null, isdone: true, activitytypename: "ACTIVITIES_TYPE_NONE", comment: "comment", createdbyusername: "client0_usergroup0_user1", isforallusers: false };
             await Db.insertDynamicObject("client0", "activities", activity);
             var token = await th.defaults.login("client0_usergroup0_user0"); // Other user
-            await th.del(`/api/${co.apis.activities}/${activity.name}?token=${token}`).expect(403);
+            await th.del(`/api/${co.apis.activities}/${activity.name}?token=${token}`).expect(404); // Finding algorithm cannot find an activity where the logged in user is the creator -> not found
         });
     });
 });

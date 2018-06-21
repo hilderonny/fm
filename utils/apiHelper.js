@@ -1,5 +1,4 @@
 var auth = require('../middlewares/auth');
-var validateSameClientId = require('../middlewares/validateSameClientId');
 var Db = require("./db").Db;
 var rh = require('./relationsHelper');
 var dah = require('./dynamicAttributesHelper');
@@ -37,7 +36,7 @@ var ah = {
             res.send(mapFields(elements, req.user));
         });
         
-        if (config.parent) router.get(`/${config.parent.apisuffix}/:id`, auth(config.permission, 'r', config.modulename), validateSameClientId(config.parent.datatypename), async(req, res) => {
+        if (config.parent) router.get(`/${config.parent.apisuffix}/:id`, auth(config.permission, 'r', config.modulename), async(req, res) => {
             var filter = [];
             filter[config.parent.parentfield] = req.params.id;
             var elements = await Db.getDynamicObjects(req.user.clientname, config.apiname, filter);
@@ -59,8 +58,9 @@ var ah = {
             res.send(mapFields(elements, req.user));
         });
         
-        if (config.getid) router.get('/:id', auth(config.permission, 'r', config.modulename), validateSameClientId(config.apiname), async(req, res) => {
+        if (config.getid) router.get('/:id', auth(config.permission, 'r', config.modulename), async(req, res) => {
             var element = await Db.getDynamicObject(req.user.clientname, config.apiname, req.params.id);
+            if (!element) return res.sendStatus(404); // Element does not exist (in this client)
             if (config.getid !== true && !(await config.getid(element, req, res))) return; // Callback can handle errors and returns false in this case
             res.send(config.mapfields(element, req.user));
         });
@@ -82,7 +82,7 @@ var ah = {
             res.send(config.mapfields(element, req.user));
         });
 
-        if (config.put) router.put('/:id' , auth(config.permission, 'w', config.modulename), validateSameClientId(config.apiname), async(req,res) => {
+        if (config.put) router.put('/:id' , auth(config.permission, 'w', config.modulename), async(req,res) => {
             var element = req.body;
             var keys = Object.keys(element);
             if(!element || keys.length < 1) {
@@ -98,17 +98,17 @@ var ah = {
             });
             var filter = (config.put !== true) ? await config.put(req) : undefined;
             var result = await Db.updateDynamicObject(req.user.clientname, config.apiname, req.params.id, elementtoupdate, filter);
-            if (result.rowCount < 1) return res.sendStatus(403); // Error in update, maybe filters do not match like in activities?
+            if (result.rowCount < 1) return res.sendStatus(404); // Error in update, maybe filters do not match like in activities?
             res.send(elementtoupdate);
         });
         
-        if (config.delete) router.delete('/:id', auth(config.permission, 'w', config.modulename), validateSameClientId(config.apiname), async(req,res) => {
+        if (config.delete) router.delete('/:id', auth(config.permission, 'w', config.modulename), async(req,res) => {
             var id = req.params.id;
             var clientname = req.user.clientname;
 
             var filter = (config.delete !== true) ? await config.delete(req) : undefined;
             var result = await Db.deleteDynamicObject(clientname, config.apiname, id, filter);
-            if (result.rowCount < 1) return res.sendStatus(403); // Error in deletion, maybe filters do not match like in activities?
+            if (result.rowCount < 1) return res.sendStatus(404); // Error in deletion, maybe filters do not match like in activities?
             if (config.children) for (var i = 0; i < config.children.length; i++) {
                 var child = config.children[i];
                 var childfilter = {};

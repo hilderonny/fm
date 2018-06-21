@@ -803,8 +803,6 @@ th.apiTests = {
             if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
             if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
             if (!ignoreNotExistingId) it('responds with not existing id with 404', async() => {
-                // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
-                // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
                 await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.get(`/api/${api}/999999999999999999999999?token=${token}`).expect(404);
@@ -815,7 +813,7 @@ th.apiTests = {
             it('responds with 404 when the object with the given ID does not belong to the client of the logged in user', async() => {
                 await Db.insertDynamicObject("client1", datatypename, testObject);
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
-                await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(404); // From validateSameClientId()
+                await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(404);
             });
         }
     },

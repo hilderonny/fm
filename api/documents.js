@@ -11,15 +11,12 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateSameClientId = require('../middlewares/validateSameClientId');
 var multer  = require('multer')
 var upload = multer({ dest: 'uploads/' })
 var fs = require('fs');
 var path = require('path');
 var dh = require('../utils/documentsHelper');
 var co = require('../utils/constants');
-var rh = require('../utils/relationsHelper');
-var dah = require('../utils/dynamicAttributesHelper');
 var mime = require("mime");
 var Db = require("../utils/db").Db;
 var request = require('request');
