@@ -48,7 +48,7 @@ describe('API recordtypes', () => {
             assert.strictEqual(rt0.fields.boolean0.formulaindex, 0);
             assert.strictEqual(rt0.fields.boolean0.ishidden, false);
             assert.strictEqual(rt0.fields.boolean0.ismanuallyupdated, false);
-            assert.strictEqual(rt0.fields.boolean0.isnullable, false);
+            assert.strictEqual(rt0.fields.boolean0.isnullable, true); // Is allways true
             assert.strictEqual(rt0.fields.boolean0.ispredefined, false);
             assert.strictEqual(rt0.fields.boolean0.isrequired, true);
             assert.strictEqual(rt0.fields.boolean0.label, "Boolean0");
@@ -141,7 +141,7 @@ describe('API recordtypes', () => {
             assert.strictEqual(field.formulaindex, 0);
             assert.strictEqual(field.ishidden, false);
             assert.strictEqual(field.ismanuallyupdated, false);
-            assert.strictEqual(field.isnullable, false);
+            assert.strictEqual(field.isnullable, true); // Is allways true
             assert.strictEqual(field.ispredefined, false);
             assert.strictEqual(field.isrequired, true);
             assert.strictEqual(field.label, "Boolean0");
@@ -240,7 +240,7 @@ describe('API recordtypes', () => {
             assert.strictEqual(booleanfield.formulaindex, 0);
             assert.strictEqual(booleanfield.ishidden, false);
             assert.strictEqual(booleanfield.ismanuallyupdated, false);
-            assert.strictEqual(booleanfield.isnullable, false);
+            assert.strictEqual(booleanfield.isnullable, true); // Is allways true
             assert.strictEqual(booleanfield.ispredefined, false);
             assert.strictEqual(booleanfield.isrequired, true);
             assert.strictEqual(booleanfield.label, "Boolean0");
@@ -486,7 +486,6 @@ describe('API recordtypes', () => {
                 label: "testrecordtypefieldlabel",
                 fieldtype: "text",
                 isrequired: true,
-                isnullable: true,
                 ishidden: true
             };
         }
@@ -557,13 +556,6 @@ describe('API recordtypes', () => {
             return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
         });
 
-        it('responds with 400 when isnullable is not of type boolean', async() => {
-            var token = await th.defaults.login("client0_usergroup0_user0");
-            var fieldtosend = createPostTestRecordtypefield();
-            fieldtosend.isnullable = "notboolean";
-            return th.post(`/api/recordtypes/field/clientnulldatatypenull?token=${token}`).send(fieldtosend).expect(400);
-        });
-
         it('responds with 400 when ishidden is not of type boolean', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var fieldtosend = createPostTestRecordtypefield();
@@ -617,7 +609,6 @@ describe('API recordtypes', () => {
             assert.strictEqual(fieldfromdatabase.formulaindex, 0);
             assert.strictEqual(fieldfromdatabase.ishidden, fieldtosend.ishidden);
             assert.strictEqual(fieldfromdatabase.ismanuallyupdated, false);
-            assert.strictEqual(fieldfromdatabase.isnullable, fieldtosend.isnullable);
             assert.strictEqual(fieldfromdatabase.ispredefined, false);
             assert.strictEqual(fieldfromdatabase.isrequired, fieldtosend.isrequired);
             assert.strictEqual(fieldfromdatabase.label, fieldtosend.label);

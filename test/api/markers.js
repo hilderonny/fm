@@ -2,7 +2,6 @@
  * UNIT Tests for api/markers
  */
 var th = require('../testhelpers');
-var co = require('../../utils/constants');
 
 th.createApiTests({
     apiname: "markers",

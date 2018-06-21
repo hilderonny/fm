@@ -84,4 +84,54 @@ router.get('/din277/:areatypename', auth(co.permissions.BIM_AREAS, 'r', co.modul
     res.send(result);
 });
 
+/**
+ * Flächen nach Nutzungsstatus (AVTFM-197)
+ * Summiert rekursiv alle Flächen, die irgendwo als Kindelemente an dem
+ * Element mit dem gegebenen Namen hängen und gruppiert nach Nutzungsstatus.
+ * Zurück kommt label, f
+ */
+router.get('/usagestate/:name', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {
+    var clientname = req.user.clientname;
+    var name = Db.replaceQuotes(req.params.name);
+    var query = `
+        WITH RECURSIVE get_path(datatype1name, name1, datatype2name, name2, f, areausagestatename, depth) AS (
+            (
+                SELECT 
+                    r.datatype1name,
+                    r.name1,
+                    'areas' datatypename, 
+                    a.name, 
+                    a.f, 
+                    a.areausagestatename,
+                    0 depth
+                FROM areas a
+                LEFT JOIN relations r ON r.datatype2name = 'areas' AND r.name2 = a.name
+            ) UNION (
+                SELECT
+                    r.datatype1name,
+                    r.name1, 
+                    p.datatype2name, 
+                    p.name2, 
+                    p.f,
+                    p.areausagestatename,
+                    p.depth + 1
+                FROM relations r
+                JOIN get_path p ON p.name1 = r.name2 
+                WHERE r.relationtypename = 'parentchild'
+                AND p.depth < 64
+            )
+        )
+        SELECT
+            s.label,
+            sum(p.f) f
+        FROM get_path p
+        JOIN areausagestates s ON s.name = p.areausagestatename
+        WHERE p.name1='${name}'
+        GROUP BY p.name1, s.name, s.label
+        ;
+    `;
+    var result = (await Db.query(clientname, query)).rows;
+    res.send(result);
+});
+
 module.exports = router;

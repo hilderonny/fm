@@ -5,10 +5,12 @@ app.directive('avtCard', function($compile, utils) {
         scope: true,
         terminal: true, // see https://stackoverflow.com/a/19228302
         priority: 1000,
-        compile: function compile(element, attrs) {
+        compile: function compile(element) {
             element.attr('ng-cloak', 'ng-cloak');
             element[0].classList.add("ng-cloak");
-            element.append(angular.element("<resize-handle></resize-handle>"));
+            var resizehandle = angular.element("<resize-handle></resize-handle>");
+            element[0].resizehandle = resizehandle;
+            element.append(resizehandle);
             element.removeAttr("avt-card"); //remove the attribute to avoid indefinite loop
             return function link(scope) {
                 scope.canread = scope.$root.canRead(scope.params.permission);

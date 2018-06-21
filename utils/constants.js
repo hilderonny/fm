@@ -264,6 +264,10 @@ module.exports.modules = {
      */
     clients: 'clients',
     /**
+     * Modul für Content Management (Apps, Views, Cards)
+     */
+    cms: "cms",
+    /**
      * Online Dokumentation
      */
     doc: 'doc',
@@ -326,6 +330,14 @@ module.exports.permissions = {
      * Permission to show and edit FM objects
      */
     BIM_FMOBJECT: 'PERMISSION_BIM_FMOBJECT',
+    /**
+     * Sichteneditor
+     */
+    CMS_APPS: 'PERMISSION_CMS_APPS',
+    /**
+     * Karteneditor
+     */
+    CMS_CARDS: 'PERMISSION_CMS_CARDS',
     /**
      * Dynamische Verknüpfungen erstellen und ansehen
      */
