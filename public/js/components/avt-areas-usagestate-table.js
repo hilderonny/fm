@@ -1,4 +1,4 @@
-app.directive('avtAreasUsagestateTable', function ($compile, utils) {
+app.directive('avtAreasUsagestateTable', function (utils) {
     var tabletemplate = 
         '<table class="usagestate">' +
         '    <thead><tr>' +
@@ -30,11 +30,16 @@ app.directive('avtAreasUsagestateTable', function ($compile, utils) {
             element[0].cardcontent.append(tableelement);
             return (scope) => {
                 scope.load = async() => {
-                    var entityname = scope.params.entityname;
-                    scope.usagestates = await utils.getresponsedata("/api/areas/usagestate/" + entityname);
-                    scope.areasum = 0;
-                    scope.usagestates.forEach(s => { scope.areasum += s.f }); // Calculate sum
-                    scope.usagestates.forEach(s => { s.percent = s.f * 100 / scope.areasum }); // Calculate percentage
+                    // When the usage state was loaded by another component, use this one
+                    if (!scope.usagestates) {
+                        var entityname = scope.params.entityname;
+                        scope.usagestates = await utils.getresponsedata("/api/areas/usagestate/" + entityname);
+                    }
+                    if (!scope.areasum) {
+                        scope.areasum = 0;
+                        scope.usagestates.forEach(s => { scope.areasum += s.f }); // Calculate sum
+                        scope.usagestates.forEach(s => { s.percent = s.f * 100 / scope.areasum }); // Calculate percentage
+                    }
                 };
                 scope.load();
             }

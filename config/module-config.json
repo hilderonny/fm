@@ -444,9 +444,11 @@
                 "partial/BIM/FlooringEditorListCard.html"
             ],
             "include" : [
+                "public/js/components/avt-areas-usagestate-diagram.js",
                 "public/js/components/avt-areas-usagestate-table.js",
                 "public/js/components/avt-bim-din277-card.js",
-                "public/js/BIM/AreasCardController.js"
+                "public/js/BIM/AreasCardController.js",
+                "public/js/lib/chart.min.js"
             ],
             "languages" : [ "de" ],
             "clientdatatypes": [
