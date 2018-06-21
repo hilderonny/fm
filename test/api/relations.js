@@ -127,7 +127,6 @@ describe('API relations', () => {
             return "client0_activities_client0_activity0_activities_client0_activity0";
         }
 
-        th.apiTests.delete.defaultNegative(co.apis.relations, undefined, getDeleteRelationId);
         th.apiTests.delete.defaultPositive(co.apis.relations, co.collections.relations.name, getDeleteRelationId, true); // skip relations test
 
     });

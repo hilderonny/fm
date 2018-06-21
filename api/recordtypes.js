@@ -96,7 +96,7 @@ router.post('/field/:datatypename', auth(co.permissions.SETTINGS_CLIENT_RECORDTY
     if (!existingdatatype) return res.sendStatus(404);
     if (existingdatatype.fields[field.name]) return res.sendStatus(409);
     try {
-        await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula ? JSON.parse(field.formula) : undefined, field.formulaindex, field.isnullable, field.ishidden, false, false, field.rows);
+        await Db.createDatatypeField(clientname, existingdatatype.name, field.name, field.label, field.fieldtype, field.isrequired, false, field.reference, field.formula ? JSON.parse(field.formula) : undefined, field.formulaindex, true /* fields are allways nullable */, field.ishidden, false, false, field.rows);
         // Recalculate all entities of the datatype when a formula field was added
         if (field.fieldtype === co.fieldtypes.formula) {
             await ch.recalculateforupdateddatatype(clientname, datatypename);

@@ -3,8 +3,6 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateSameClientId = require('../middlewares/validateSameClientId');
-var apiHelper = require('../utils/apiHelper');
 var co = require('../utils/constants');
 var configHelper = require('../utils/configHelper');
 var Db = require("../utils/db").Db;
@@ -25,12 +23,11 @@ router.get("/forclient", auth(), async(req, res) => {
  * Verweismenü zu filtern.
  */
 router.get('/forLoggedInUser', auth(), async(req, res) => {
-    var clientname = req.user.clientname;
     var permissions = await ph.getpermissionsforuser(req.user);
     res.send(permissions);
 });
 
-router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r', co.modules.base), validateSameClientId(co.collections.usergroups.name), async(req, res) => {
+router.get('/forUserGroup/:id', auth(co.permissions.ADMINISTRATION_USERGROUP, 'r', co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var usergroupname = req.params.id;
     var permissionKeysForClient = await configHelper.getAvailablePermissionKeysForClient(clientname);

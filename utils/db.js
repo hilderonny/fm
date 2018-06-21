@@ -134,7 +134,7 @@ var Db = {
         var formulatoinsert = formula ? "'" + Db.replaceQuotes(JSON.stringify(formula)) + "'" : "null";
         var formulaindextoinsert = formulaindex ? parseInt(formulaindex) : 0;
         var rowstoinsert = rows ? parseInt(rows) : 0;
-        await Db.query(databasename, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, isrequired, reference, formula, formulaindex, isnullable, ishidden, ispredefined, ismanuallyupdated, rows) VALUES ('${fn}', ${labeltoinsert}, '${dtn}', '${Db.replaceQuotes(fieldtype)}', ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert}, ${!!isnullable}, ${!!ishidden}, ${!!ispredefined}, false, ${rowstoinsert});`);
+        await Db.query(databasename, `INSERT INTO datatypefields (name, label, datatypename, fieldtype, isrequired, reference, formula, formulaindex, isnullable, ishidden, ispredefined, ismanuallyupdated, rows) VALUES ('${fn}', ${labeltoinsert}, '${dtn}', '${Db.replaceQuotes(fieldtype)}', ${!!isrequired}, ${referencetoinsert}, ${formulatoinsert}, ${formulaindextoinsert}, true, ${!!ishidden}, ${!!ispredefined}, false, ${rowstoinsert});`);
         var columntype;
         switch(fieldtype) {
             case constants.fieldtypes.boolean: columntype = "BOOLEAN"; break;

@@ -47,6 +47,38 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
+        addcardbyname: function(cardname, params) {
+            var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
+            var card, cardCanvas, domCard;
+            utils.cardsToAdd.push(cardToAdd);
+            return utils.loaddynamicobject("viewcards", cardname).then(function(viewcard) {
+                // Check whether the card should still be shown. When the dummy object is no longer
+                // in the array, the request tooks too long and the user has done something other meanwhile
+                if (utils.cardsToAdd.indexOf(cardToAdd) < 0) return Promise.resolve(); // So simply ignore the response
+                cardCanvas = angular.element(document.querySelector('#cardcanvas'));
+                card = angular.element(viewcard.content);
+                domCard = card[0];
+                cardCanvas.append(card);
+                var newScope = $rootScope.$new(true);
+                newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
+                newScope.requiredPermission = cardname; // For permission handling in details pages
+                // Compile (render) the new card and attach its new controller
+                $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
+                window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
+                // Scroll card in view, but wait until the card is put into the dom
+                return utils.waitForOffsetAndScroll(domCard, cardCanvas, 50); // Try it up to 5 seconds, then abort
+            }).then(function() {
+                if (domCard && cardCanvas) return utils.scrollToAnchor(domCard, cardCanvas, 50).then(function() { return Promise.resolve(card); }); // Try it up to 5 seconds, then abort
+                return Promise.resolve(card);
+            });
+        },
+
+        addcardforview: function(view) {
+            // Prüfen, ob der Benutzer überhaupt die benötigten Rechte hat
+            if (!$rootScope.canRead(view.permission)) return Promise.resolve();
+            return utils.addcardbyname(view.viewcardname, view);
+        },
+
         adddetailscard: function(scope, datatypename, entityname, permission, parentdatatypename, parententityname, listfilter) {
             return utils.addCardWithPermission(scope.detailscard, {
                 datatypename: datatypename,
