@@ -6,7 +6,7 @@ var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 
-describe('API areas', () =>{
+describe.only('API areas', () =>{
 
     before(async() => {
         await th.cleanDatabase();
@@ -138,6 +138,59 @@ describe('API areas', () =>{
             assert.strictEqual(area.label, area.name);
         });
         
+    });
+
+    describe('GET/usagestate/:name', () => {
+
+        it('responds without authentication with 403', async() => {
+            await th.get(`/api/areas/usagestate/client0_level0`).expect(403);
+        });
+
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.BIM_AREAS);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.get(`/api/areas/usagestate/client0_level0?token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.areas);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.get(`/api/areas/usagestate/client0_level0?token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.areas);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            await th.get(`/api/areas/usagestate/client0_level0?token=${token}`).expect(403);
+        });
+        
+        it('responds with not existing name with empty list', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = await th.get(`/api/areas/usagestate/999999999999999999999999?token=${token}`).expect(200);
+            assert.strictEqual(result.body.length, 0);
+        });
+
+        it('responds with empty list when the object with the given name exists but does not belong to the client of the logged in user', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = await th.get(`/api/areas/usagestate/client1_level0?token=${token}`).expect(200);
+            assert.strictEqual(result.body.length, 0);
+        });
+
+        it('returns a list of usagetypes on success', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = await th.get(`/api/areas/usagestate/client0_level0?token=${token}`).expect(200);
+            var list = result.body;
+            assert.ok(list.length > 1);
+            assert.ok(list.find(r => r.label === 'UsageState1' && r.f === 90 ));
+            assert.ok(list.find(r => r.label === 'UsageState2' && r.f === 60 ));
+        });
+
+        it('does not return unused usagetypes', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = await th.get(`/api/areas/usagestate/client0_level0?token=${token}`).expect(200);
+            assert.ok(!result.body.find(r => r.label === 'UsageState3' ));
+        });
+
     });
 
 });
