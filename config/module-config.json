@@ -105,6 +105,7 @@
 
                 "public/js/components/avt-add-element-toolbar-button.js",
                 "public/js/components/avt-card.js",
+                "public/js/components/avt-card-title.js",
                 "public/js/components/avt-close-toolbar-button.js",
                 "public/js/components/avt-details-card.js",
                 "public/js/components/avt-empty-card.js",
@@ -443,6 +444,7 @@
                 "partial/BIM/FlooringEditorListCard.html"
             ],
             "include" : [
+                "public/js/components/avt-areas-usagestate-table.js",
                 "public/js/components/avt-bim-din277-card.js",
                 "public/js/BIM/AreasCardController.js"
             ],
@@ -622,7 +624,7 @@
                     { 
                         "name": "flechennachnutzungsstatusdetailscard", 
                         "label": "Flächen nach Nutzungsstatus Detailansicht", 
-                        "content": "<md-card class=\"flex2-card\" avt-card avt-empty-card avt-areas-usagestate-table avt-areas-usagestate-diagram avt-close-toolbar-button></md-card>"
+                        "content": "<md-card class=\"flex2-card\" avt-card avt-empty-card avt-card-title='{\"title\":\"Nutzungsstatus\",\"showentitylabel\":true}' avt-close-toolbar-button avt-areas-usagestate-table avt-areas-usagestate-diagram></md-card>"
                     }
                 ] },
 

@@ -97,7 +97,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     };
 
     $scope.getofficeicon = function(icon) {
-        return icon.replace(/\/material\//g, '/office/');
+        return icon ? icon.replace(/\/material\//g, '/office/') : null;
     };
 
     $scope.onappselected = function() {

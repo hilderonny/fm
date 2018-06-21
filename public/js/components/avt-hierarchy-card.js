@@ -138,7 +138,12 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                             scope.selectedchild = child;
                         });
                     } else if (scope.detailscardname) {
-                        utils.addcardbyname(scope.detailscardname);
+                        utils.addcardbyname(scope.detailscardname, {
+                            datatypename: child.datatypename,
+                            entityname: child.name
+                        }).then(function() {
+                            scope.selectedchild = child;
+                        });
                     }
                 };
                 $compile(iElement)(scope);
