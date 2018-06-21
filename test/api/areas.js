@@ -6,7 +6,7 @@ var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 
-describe.only('API areas', () =>{
+describe('API areas', () =>{
 
     before(async() => {
         await th.cleanDatabase();
