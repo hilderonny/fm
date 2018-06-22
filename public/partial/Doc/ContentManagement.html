@@ -1,0 +1,43 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Content Management</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD"><md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon></md-button>
+    </md-toolbar>
+
+    <md-card-content>
+        <p>
+            Die App "Content Management" bietet Funktionen zum Verwalten von Apps, Sichten und Karten
+        </p>
+
+        <ul>
+            <li><a href="/#/doc/ContentManagement#appsviews">Apps und Sichten</a></li>
+            <li><a href="/#/doc/ContentManagement#karteneditor">Karteneditor</a></li>
+        </ul>
+
+        <h2><a name="appsviews"/>Apps und Sichten</h2>
+
+        <p>
+            Das Hauptmenü enthält Menüeintrage, die "Sichten" bzw. "Views" genannt werden. Zur besseren Übersicht
+            werden diese Sichten in sogenannte "Apps" geuppiert, die über ein Auswahlfeld im Menü gewählt werden
+            können. Apps und Sichten können vom Mandanten selbst bearbeitet und erstellt werden.
+            Die Vorgehensweise dazu zeigt der folgende Screencast.
+        </p>
+        <video width="600" height="300" controls="controls" poster="https://video.avorium.de/images/media/10l.jpg">
+            <source src="https://video.avorium.de/files/9-arrange-apps-und-sichten.mp4" type="video/mp4">
+        </video>
+
+        <h2><a name="karteneditor"/>Karteneditor</h2>
+
+        <p>
+            Der Karteneditor dient zum Erstellen und Bearbeiten von Karten, die als Einstiegspunkte für Sichten 
+            verwendet werden können. Die Verwendung des Karteneditors veranschaulicht der folgende Screencast.
+        </p>
+        <video width="600" height="300" controls="controls" poster="https://video.avorium.de/images/media/11l.jpg">
+            <source src="https://video.avorium.de/files/10-arrange-karteneditor.mp4" type="video/mp4">
+        </video>
+
+                        
+    </md-card-content>
+</md-card>
