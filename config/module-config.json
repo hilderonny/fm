@@ -5,7 +5,7 @@
             "forportal": true,
             "forclients": true,
             "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "graphql", "login", "menu", "permissions", "relations", "search", "translations", "users" ],
-            "middlewares": [ "auth", "extracttoken", "nocache" ],
+            "middlewares": [ "auth", "extracttoken" ],
             "public" : [
                 "css/angular-material.min.css",
                 "css/base.css",
@@ -814,8 +814,7 @@
                 "css/icons/material/icons8-website.svg",
                 "css/icons/office/icons8-web-design.svg",
                 "css/icons/office/icons8-website.svg",
-                "partial/Doc/AppsAndViews.html",
-                "partial/Doc/ViewCards.html"
+                "partial/Doc/ContentManagement.html"
             ],
             "languages" : [ "de" ],
             "clientdatatypes": [
@@ -835,8 +834,8 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "modulename": "cms", "name": "karteneditor", "label": "Karteneditor", "doccard": "ViewCards", "directurls": "viewcards", "icon": "/css/icons/material/icons8-web-design.svg", "index": 500, "viewcardname": "cmsviewcardlistcard", "permission": "PERMISSION_CMS_CARDS" },
-                    { "modulename": "cms", "name": "sichteneditor", "label": "Apps und Sichten", "doccard": "AppsAndViews", "directurls": "apps,views", "icon": "/css/icons/material/icons8-website.svg", "index": 600, "viewcardname": "cmsappsandviewslistcard", "permission": "PERMISSION_CMS_APPS" }
+                    { "modulename": "cms", "name": "karteneditor", "label": "Karteneditor", "doccard": "ContentManagement#karteneditor", "directurls": "viewcards", "icon": "/css/icons/material/icons8-web-design.svg", "index": 500, "viewcardname": "cmsviewcardlistcard", "permission": "PERMISSION_CMS_CARDS" },
+                    { "modulename": "cms", "name": "sichteneditor", "label": "Apps und Sichten", "doccard": "ContentManagement#appsviews", "directurls": "apps,views", "icon": "/css/icons/material/icons8-website.svg", "index": 600, "viewcardname": "cmsappsandviewslistcard", "permission": "PERMISSION_CMS_APPS" }
                 ] }
 
             ],
@@ -853,8 +852,8 @@
                 ] },
 
                 { "name": "views", "values": [
-                    { "modulename": "cms", "name": "karteneditor", "label": "Karten", "doccard": "ViewCards", "directurls": "viewcards", "icon": "/css/icons/material/icons8-web-design.svg", "index": 500, "viewcardname": "cmsviewcardlistcard", "permission": "PERMISSION_CMS_CARDS" },
-                    { "modulename": "cms", "name": "sichteneditor", "label": "Apps und Sichten", "doccard": "AppsAndViews", "directurls": "apps,views", "icon": "/css/icons/material/icons8-website.svg", "index": 600, "viewcardname": "cmsappsandviewslistcard", "permission": "PERMISSION_CMS_APPS" }
+                    { "modulename": "cms", "name": "karteneditor", "label": "Karten", "doccard": "ContentManagement#karteneditor", "directurls": "viewcards", "icon": "/css/icons/material/icons8-web-design.svg", "index": 500, "viewcardname": "cmsviewcardlistcard", "permission": "PERMISSION_CMS_CARDS" },
+                    { "modulename": "cms", "name": "sichteneditor", "label": "Apps und Sichten", "doccard": "ContentManagement#appsviews", "directurls": "apps,views", "icon": "/css/icons/material/icons8-website.svg", "index": 600, "viewcardname": "cmsappsandviewslistcard", "permission": "PERMISSION_CMS_APPS" }
                 ] }
 
             ]

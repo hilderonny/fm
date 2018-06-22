@@ -99,7 +99,7 @@ var prepareIncludes = (fs) => {
 // Server initialization
 async function init() {
     // Datenbank initialisieren und ggf. Admin anlegen (admin/admin)
-    var nocache = require('./middlewares/nocache');
+    var nocache = require('@avorium/npm-express-middleware-nocache');
     var dah = require('./utils/dynamicAttributesHelper');
     // Vorgegebene dynamische Attribute für Portal erstellen bzw. aktivieren
     var promises = [];
