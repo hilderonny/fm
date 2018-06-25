@@ -13,6 +13,7 @@ var dh = require("../../utils/documentsHelper");
 
 
 
+
 describe('UTILS webdav', () => {
 
     var WebdavCleintConnection = () => {
@@ -55,8 +56,8 @@ describe('UTILS webdav', () => {
 
     //customPrivilegeManager:   
     describe('_can', () => {
-        xit('Function invocation made with non-existing clientName of the simpleUser retruns Permission denied ');
-        xit('Function invocation made with non-exist user returns Permission denied ');
+        xit('Function invocation made with non-existing clientName of the simpleUser retruns Permission denied');
+        xit('Function invocation made with non-exist user returns Permission denied');
         xit('Function invocation made for valid read-only user with ‘canRead’ privilege query returns true');
         xit('Function invocation made for valid read-only user with ‘canWrite’ privilege query returns false');
         xit('Function invocation made for valid read-write user with ‘canWrite’ privilege query returns true');
@@ -86,34 +87,117 @@ describe('UTILS webdav', () => {
     });
 
     describe('_delete', () => {
-        xit('Valid delettion request returns error.forbidden');
+        it('Valid delettion request returns error.forbidden', async()=>{
+            return new Promise((resolve, reject)=>{
+                var conn = WebdavCleintConnection(); 
+                conn.readdir("/", (e,content)=>{            
+                    conn.delete("/folder1", (error)=>{
+                        //console.log(error);
+                        resolve();
+                    });
+                });    
+            });
+        });          
     });
 
     describe('_readDir', () => {
-        xit('Function invocation with path to non-existing source => Errors.ResourceNotFound');
-        xit('Function invocation made without authorized user => Error.Frobidden');
-        it.only('Function invocation made with valid root path returns correct data retrieval', async () => {
-            // await webDav.dav.init();
+        it('Function invocation with path to non-existing source returns Errors.ResourceNotFound', async()=>{
             return new Promise((resolve, reject) => {
-                var conn = WebdavCleintConnection();
-             
+                var conn = WebdavCleintConnection();         
                 console.log(conn);
                 conn.readdir("/", (e, content) => {   
-                    console.log(e, content);
+                    //console.log(e, content);
+                    conn.readdir("/folder10", (err, deeperContent) =>{
+                        console.log(err, deeperContent);                
+                        resolve();                      
+                    });                                         
+                }); 
+            });
+        });
+
+        it('Function invocation made without authorized user returns Error.Frobidden',async()=>{
+            return new Promise((resolve, reject) => {
+                var conn = new webdavClient.Connection({
+                    url: 'https://localhost:56789',
+                    authenticator: new webdavClient.BasicAuthenticator(),
+                    username: 'client1_usergroup0_user0',
+                    password: 'test'
+                });        
+                conn.readdir("/", (e, content) => {   
                     conn.readdir("/folder0", (err, deeperContent) =>{
-                        console.log(err, deeperContent);
-                        resolve();
-                    });                            
+                        console.log(err, deeperContent);                
+                        resolve();             
+                    });                                         
                 });
             });
         });
 
-        xit('Function invocation made with valid non-root path returns correct data retrieval');
-        xit('Function invocation made as user without read rights => initial login should fail');
+        it('Function invocation made with valid root path returns correct data retrieval', async () => {
+            // await webDav.dav.init();
+            return new Promise((resolve, reject) => {
+                var conn = WebdavCleintConnection();             
+               // console.log(conn);
+                conn.readdir("/", (e, content) => {   
+                    //console.log(e, content);                   
+                    console.log(e, content);
+                    resolve();                                 
+                });
+            });
+        });
+
+        it('Function invocation made with valid non-root path returns correct data retrieval', async () =>{
+            return new Promise((resolve, reject) => {
+                var conn = WebdavCleintConnection();                 
+                conn.readdir("/", (e, content) => {  
+                    conn.readdir("/folder0", (err, deeperContent) =>{
+                        //console.log(err, deeperContent);                
+                        resolve();                 
+                    });                                         
+                });
+            });        
+        });
+
+        xit('Function invocation made as user without read rights returns initial login should fail');
     });
 
     describe('_openReadStream', () => {
-        xit('Function invocation made path to non-existing source => Errors.ResourceNotFound');
+        it('Function invocation made path to existing source returns the data', async() =>{
+            return new Promise((resolve,reject)=>{
+                var conn = WebdavCleintConnection();
+                conn.readdir("/", (error,contents)=>{
+                    conn.prepareForStreaming((error)=> {//https://github.com/OpenMarshal/npm-WebDAV-Client/blob/76392d8a72624c86679ab7f4d8694fe46588eb68/test/test.js
+                        var readstream =conn.get("/document0");
+                        let data = '';                        
+                        readstream.on('data', (chunk) => {
+                            data += chunk.toString();
+                            console.log("data",data);
+                            resolve();                         
+                        });
+                        readstream.on('end',()=>{
+                            console.log("Done data and contents",data);
+                            resolve();
+                        });                       
+                      
+                    });
+                });                
+            });        
+
+        });
+
+        it('Function invocation made path to non-existing source returns Errors.ResourceNotFound', async() => {
+            /**return new Promise((resolve,reject)=>{
+                var conn = WebdavCleintConnection();
+                conn.readdir("/", (error,contents)=>{                    
+                    conn.get("/document1" , (err, contents) =>{
+                        console.log(err,contents);
+                        resolve();
+                    });                       
+                   
+                });                
+            });**/            
+        });   
+
+
         xit('Function invocation made when this._clientname  == null => Error.Forbidden');
     });
 
