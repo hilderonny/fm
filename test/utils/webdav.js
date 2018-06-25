@@ -15,6 +15,17 @@ var dh = require("../../utils/documentsHelper");
 
 describe('UTILS webdav', () => {
 
+    var WebdavCleintConnection = () => {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        var conn = new webdavClient.Connection({
+            url: 'https://localhost:56789',
+            authenticator: new webdavClient.BasicAuthenticator(),
+            username: 'client0_usergroup0_user0',
+            password: 'test'
+        });
+        return conn;
+    };
+
     before(async () => {
         await th.cleanDatabase();
         await th.prepareClients();
@@ -29,6 +40,7 @@ describe('UTILS webdav', () => {
         await th.prepareDocuments();
         await th.prepareDocumentFiles();
     });
+
     //custom User Manager
     describe('getUserByName', () => {
         it('Function invocation made with non-existing username returns Error.BadAuthentication', async () => {  });
@@ -83,16 +95,9 @@ describe('UTILS webdav', () => {
         it.only('Function invocation made with valid root path returns correct data retrieval', async () => {
             // await webDav.dav.init();
             return new Promise((resolve, reject) => {
-                process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-                var conn = new webdavClient.Connection({
-                    url: 'https://localhost:56789',
-                    authenticator: new webdavClient.BasicAuthenticator(),
-                    username: 'client0_usergroup0_user0',
-                    password: 'test'
-                });
+                var conn = WebdavCleintConnection();
              
                 console.log(conn);
-                
                 conn.readdir("/", (e, content) => {   
                     console.log(e, content);
                     conn.readdir("/folder0", (err, deeperContent) =>{
