@@ -31,14 +31,8 @@ describe('UTILS webdav', () => {
     });
     //custom User Manager
     describe('getUserByName', () => {
-        xit('Function invocation made with non-existing username returns Error.BadAuthentication', async () => {
-
-        });
-
+        it('Function invocation made with non-existing username returns Error.BadAuthentication', async () => {  });
         xit('Function invocation made with valid username returns deliver correct user data', async () => {
-
-
-
         });
     });
 
@@ -96,18 +90,21 @@ describe('UTILS webdav', () => {
                     username: 'client0_usergroup0_user0',
                     password: 'test'
                 });
-
+             
                 console.log(conn);
-
-                conn.readdir("/", (e, content) => {
+                
+                conn.readdir("/", (e, content) => {   
                     console.log(e, content);
-                    resolve();
+                    conn.readdir("/folder0", (err, deeperContent) =>{
+                        console.log(err, deeperContent);
+                        resolve();
+                    });                            
                 });
             });
         });
 
-        xit('Function invocation made with valid non-root path => correct data retrieval');
-        xit('Function invocation made as user without read rights => initial login should fail ');
+        xit('Function invocation made with valid non-root path returns correct data retrieval');
+        xit('Function invocation made as user without read rights => initial login should fail');
     });
 
     describe('_openReadStream', () => {
