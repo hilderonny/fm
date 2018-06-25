@@ -3,7 +3,6 @@
  */
 var assert = require('assert');
 var th = require('../testhelpers');
-var bcryptjs =  require('bcryptjs');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 
@@ -130,11 +129,6 @@ describe('API dynamicattributes', () => {
 
     describe('GET/options/:id', () => {
 
-        var optionsApi = `${co.apis.dynamicattributes}/options`;
-
-        th.apiTests.getId.defaultNegative(optionsApi, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, co.collections.dynamicattributes.name);
-        th.apiTests.getId.clientDependentNegative(optionsApi, co.collections.dynamicattributes.name);
-
         it('responds with a list of all options and their details of the dynamic attribute', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             var daos = (await th.get(`/api/${co.apis.dynamicattributes}/options/client0_da1?token=${token}`).expect(200)).body;
@@ -153,11 +147,6 @@ describe('API dynamicattributes', () => {
     });
 
     describe('GET/values/:modelName/:id', () => {
-
-        var api = co.apis.dynamicattributes + '/values/users';
-
-        th.apiTests.getId.defaultNegative(api, false, co.collections.users.name, false, false, false, false, false, { name: "testobject", usergroupname: "client0_usergroup0" });
-        th.apiTests.getId.clientDependentNegative(api, co.collections.users.name, false, false, false, { name: "testobject", usergroupname: "client0_usergroup0" });
         
         it('responds without giving a model name and entity id with 404', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
@@ -174,9 +163,10 @@ describe('API dynamicattributes', () => {
             await th.get(`/api/${co.apis.dynamicattributes}/values/invalidModelName/client0_usergroup0_user0?token=${token}`).expect(404);
         });
 
-        it('responds with invalid entity id with 404', async() => {
+        it('responds with invalid entity id with empty list', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.get(`/api/${co.apis.dynamicattributes}/values/users/invalidId?token=${token}`).expect(404);
+            var valuesFromApi = (await th.get(`/api/${co.apis.dynamicattributes}/values/users/invalidId?token=${token}`).expect(200)).body;
+            assert.strictEqual(valuesFromApi.length, 0);
         });
 
         it('responds where no dynamic attribute values exist for the given entity id with a value list where the values are null', async() => {
@@ -639,14 +629,6 @@ describe('API dynamicattributes', () => {
 
     describe('DELETE/values/:modelName/:id', () => {
 
-        async function createDeleteTestId() {
-            return "client0_usergroup0_user0";
-        }
-
-        var api = `${co.apis.dynamicattributes}/values/users`;
-
-        th.apiTests.delete.defaultNegative(api, co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, createDeleteTestId);
-
         it('responds without giving a model name and entity id with 404', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
             await th.del(`/api/${co.apis.dynamicattributes}/values/?token=${token}`).expect(404);
@@ -657,14 +639,14 @@ describe('API dynamicattributes', () => {
             await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/?token=${token}`).expect(404);
         });
         
-        it('responds with invalid modelName with 404', async() => {
+        it('responds with invalid modelName with 204', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.del(`/api/${co.apis.dynamicattributes}/values/invalidModelName/client0_usergroup0_user0?token=${token}`).expect(404);
+            await th.del(`/api/${co.apis.dynamicattributes}/values/invalidModelName/client0_usergroup0_user0?token=${token}`).expect(204);
         });
         
-        it('responds with invalid entity id with 404', async() => {
+        it('responds with invalid entity id with 204', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/invalidId?token=${token}`).expect(404);
+            await th.del(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/invalidId?token=${token}`).expect(204);
         });
 
         it('responds with correct modelName and id with 204 and deletes all dynamic attribute values for the entity from the database', async() => {

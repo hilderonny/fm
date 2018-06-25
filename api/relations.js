@@ -4,7 +4,6 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateSameClientId = require('../middlewares/validateSameClientId');
 var co = require('../utils/constants');
 var dah = require('../utils/dynamicAttributesHelper');
 var Db = require("../utils/db").Db;
@@ -60,7 +59,7 @@ router.post('/', auth(false, false, co.modules.base), async(req, res) => {
 /**
  * Löscht eine Verknüpfung mit einer bestimmten ID
  */  
-router.delete('/:id', auth(false, false, co.modules.base), validateSameClientId(co.collections.relations.name), async(req, res) => {
+router.delete('/:id', auth(false, false, co.modules.base), async(req, res) => {
     await Db.deleteDynamicObject(req.user.clientname, co.collections.relations.name, req.params.id);
     await dah.deleteAllDynamicAttributeValuesForEntity(req.user.clientname, req.params.id);
     res.sendStatus(204);

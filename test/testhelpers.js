@@ -268,27 +268,34 @@ th.prepareAreas = async() => {
     await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype111", number: "N111", label: "OneOneOne" });
     await Db.insertDynamicObject("client0", "areatypes", { name: "client0_areatype112", number: "N112", label: "OneOneTwo" });
     await Db.insertDynamicObject("client1", "areatypes", { name: "client1_areatype1", number: "N1", label: "One" });
+    // Usage states
+    await Db.insertDynamicObject("client0", "areausagestates", { name: "client0_areausagestate1", label: "UsageState1" });
+    await Db.insertDynamicObject("client0", "areausagestates", { name: "client0_areausagestate2", label: "UsageState2" });
+    await Db.insertDynamicObject("client0", "areausagestates", { name: "client0_areausagestate3", label: "UsageState3" });
     // Relations between area types
     await th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype11", "parentchild");
     await th.createRelation("areatypes", "client0_areatype1", "areatypes", "client0_areatype12", "parentchild");
     await th.createRelation("areatypes", "client0_areatype11", "areatypes", "client0_areatype111", "parentchild");
     await th.createRelation("areatypes", "client0_areatype11", "areatypes", "client0_areatype112", "parentchild");
     // Areas
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area01", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 10, label: "Area01" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area02", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 20, label: "Area02" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area03", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 30, label: "Area03" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area04", areacategoryname: "FMOBJECTS_CATEGORY_TF", f: 40, label: "Area04" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area05", areacategoryname: "FMOBJECTS_CATEGORY_VF", f: 50, label: "Area05" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area1", areatypename: "client0_areatype1", f: 200, label: "Area1" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area11", areatypename: "client0_areatype11", f: 210, label: "Area11" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area12", areatypename: "client0_areatype12", f: 220, label: "Area12" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area111", areatypename: "client0_areatype111", f: 211, label: "Area111" });
-    await Db.insertDynamicObject("client0", "areas", { name: "client0_area112", areatypename: "client0_areatype112", f: 212, label: "Area112" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area01", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 10, label: "Area01", areausagestatename: "client0_areausagestate1" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area02", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 20, label: "Area02", areausagestatename: "client0_areausagestate2" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area03", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 30, label: "Area03", areausagestatename: "client0_areausagestate1" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area04", areacategoryname: "FMOBJECTS_CATEGORY_TF", f: 40, label: "Area04", areausagestatename: "client0_areausagestate2" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area05", areacategoryname: "FMOBJECTS_CATEGORY_VF", f: 50, label: "Area05", areausagestatename: "client0_areausagestate1" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area1", areatypename: "client0_areatype1", f: 200, label: "Area1", areausagestatename: "client0_areausagestate2" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area11", areatypename: "client0_areatype11", f: 210, label: "Area11", areausagestatename: "client0_areausagestate1" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area12", areatypename: "client0_areatype12", f: 220, label: "Area12", areausagestatename: "client0_areausagestate2" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area111", areatypename: "client0_areatype111", f: 211, label: "Area111", areausagestatename: "client0_areausagestate1" });
+    await Db.insertDynamicObject("client0", "areas", { name: "client0_area112", areatypename: "client0_areatype112", f: 212, label: "Area112", areausagestatename: "client0_areausagestate2" });
+    await Db.insertDynamicObject("client1", "areas", { name: "client1_area01", areacategoryname: "FMOBJECTS_CATEGORY_NUF", f: 10, label: "Area01", areausagestatename: "client0_areausagestate1" });
     // Rooms
     await Db.insertDynamicObject("client0", "rooms", { name: "client0_room0", label: "Room0" });
     await Db.insertDynamicObject("client0", "rooms", { name: "client0_room1", label: "Room1" });
+    await Db.insertDynamicObject("client1", "rooms", { name: "client1_room0", label: "Room0" });
     // Levels
     await Db.insertDynamicObject("client0", "levels", { name: "client0_level0", label: "Level0" });
+    await Db.insertDynamicObject("client1", "levels", { name: "client1_level0", label: "Level0" });
     // Relations between areas, rooms, levels
     await th.createRelation("levels", "client0_level0", "rooms", "client0_room0", "parentchild");
     await th.createRelation("levels", "client0_level0", "rooms", "client0_room1", "parentchild");
@@ -297,6 +304,8 @@ th.prepareAreas = async() => {
     await th.createRelation("rooms", "client0_room1", "areas", "client0_area03", "parentchild");
     await th.createRelation("rooms", "client0_room1", "areas", "client0_area04", "parentchild");
     await th.createRelation("rooms", "client0_room1", "areas", "client0_area05", "parentchild");
+    await th.createRelation("levels", "client1_level0", "rooms", "client1_room0", "parentchild");
+    await th.createRelation("rooms", "client1_room0", "areas", "client1_area01", "parentchild");
     // Trigger calculation
     await ch.calculateformula("client0", "areatypes", "client0_areatype1");
     await ch.calculateformula("client0", "areatypes", "client0_areatype11");
@@ -308,6 +317,7 @@ th.prepareAreas = async() => {
     await ch.calculateentityandparentsrecursively("client0", "areas", "client0_area03");
     await ch.calculateentityandparentsrecursively("client0", "areas", "client0_area04");
     await ch.calculateentityandparentsrecursively("client0", "areas", "client0_area05");
+    await ch.calculateentityandparentsrecursively("client1", "areas", "client1_area01");
 }
 
 th.prepareDocuments = async() => {
@@ -811,8 +821,6 @@ th.apiTests = {
             if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', checkForUser(user ? user : "client0_usergroup0_user0"));
             if (!client || client !== Db.PortalDatabaseName) it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', checkForUser(adminuser ? adminuser : "client0_usergroup0_user1"));
             if (!ignoreNotExistingId) it('responds with not existing id with 404', async() => {
-                // Here the validateSameClientId comes into the game and returns a 403 because the requested element is
-                // in the same client as the logged in user (it is in no client but this is Krümelkackerei)
                 await Db.insertDynamicObject(client ? client : "client0", datatypename, testObject);
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
                 await th.get(`/api/${api}/999999999999999999999999?token=${token}`).expect(404);
@@ -823,7 +831,7 @@ th.apiTests = {
             it('responds with 404 when the object with the given ID does not belong to the client of the logged in user', async() => {
                 await Db.insertDynamicObject("client1", datatypename, testObject);
                 var token = await th.defaults.login(user ? user : "client0_usergroup0_user0");
-                await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(404); // From validateSameClientId()
+                await th.get(`/api/${api}/${testObject.name}?token=${token}`).expect(404);
             });
         }
     },

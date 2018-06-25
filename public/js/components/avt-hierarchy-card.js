@@ -42,13 +42,14 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
             return function link(scope, iElement) {
                 scope.params = params;
                 scope.detailscard = params.detailscard;
+                scope.detailscardname = params.detailscardname;
                 scope.ondetailscardclosed = function() {
                     if (!scope.selectedchild) return; // when new element card is open
                     var datatypename = scope.selectedchild.datatypename;
                     delete scope.selectedchild;
                     utils.setLocation('/' + datatypename);
                 };
-                scope.onbeforecreateelement = function($event) {
+                scope.onbeforecreateelement = function() {
                     delete scope.selectedchild;
                 };
                 scope.onelementcreated = function(datatype, createdelementname) {
@@ -131,11 +132,19 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                     });
                 };
                 scope.selectchild = function(child) {
-                    if (!scope.detailscard) return;
                     utils.removeCardsToTheRightOf(element);
-                    utils.adddetailscard(scope, child.datatypename, child.name, scope.params.permission, undefined, undefined, params.listfilter).then(function() {
-                        scope.selectedchild = child;
-                    });
+                    if (scope.detailscard) {
+                        utils.adddetailscard(scope, child.datatypename, child.name, scope.params.permission, undefined, undefined, params.listfilter).then(function() {
+                            scope.selectedchild = child;
+                        });
+                    } else if (scope.detailscardname) {
+                        utils.addcardbyname(scope.detailscardname, {
+                            datatypename: child.datatypename,
+                            entityname: child.name
+                        }).then(function() {
+                            scope.selectedchild = child;
+                        });
+                    }
                 };
                 $compile(iElement)(scope);
                 // Distinguish direct URLs between general menu clicks (without id)  and direct entity calls (with id)

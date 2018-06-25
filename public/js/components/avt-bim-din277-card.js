@@ -41,7 +41,7 @@ app.directive('avtBimDin277Card', function ($compile, utils) {
             element.append(element[0].cardtitle);
             element.append(cardelement);
             if (resizehandle) element.append(resizehandle);
-            return (scope, iElement) => {
+            return (scope) => {
                 scope.detailscard = params.detailscard;
                 scope.ondetailscardclosed = () => {
                     delete scope.selectedarea;
@@ -55,7 +55,6 @@ app.directive('avtBimDin277Card', function ($compile, utils) {
                     scope.selectedarea = scope.areas.find(a => a.name === scope.selectedarea.name);
                 };
                 scope.load = async() => {
-                    var datatypename = scope.params.datatypename;
                     scope.datatype = scope.$root.datatypes.areas;
                     var entityname = scope.params.entityname;
                     scope.areas = await utils.getresponsedata("/api/areas/din277/" + entityname);
@@ -65,7 +64,6 @@ app.directive('avtBimDin277Card', function ($compile, utils) {
                 scope.showareadetails = async(area) => {
                     if (!scope.detailscard) return;
                     utils.removeCardsToTheRightOf(element);
-                    console.log(area.name, scope.params.permission);
                     await utils.adddetailscard(scope, "areas", area.name, scope.params.permission, undefined, undefined, "areas");
                     scope.selectedarea = area;
                 };

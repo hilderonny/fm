@@ -409,7 +409,7 @@ md-toolbar md-input-container input {
 }
 
 
-table.areas {
+table.areas, table.usagestate {
     min-width: 100%;
 }
 
@@ -421,7 +421,7 @@ table.areavalues th, table.areavalues td {
     text-align: right;
 }
 
-table.areas, table.areas th, table.areas td {
+table.areas, table.areas th, table.areas td, table.usagestate, table.usagestate th, table.usagestate td {
     border: 1px solid rgba(0, 0, 0, 0.2);
     border-collapse: collapse;
 }
@@ -430,20 +430,20 @@ table.areas > tbody > tr.active {
     background-color: lightgray;
 }
 
-table.areas > tbody > tr:hover {
+table.areas > tbody > tr:hover, table.usagestate > tbody > tr:usagestate {
     background-color: rgba(0, 0, 0, 0.12);
 }
 
-table.areas > tbody > tr > td {
+table.areas > tbody > tr > td, table.usagestate > tbody > tr > td {
     padding: 0 4px;
     text-align: right;
 }
 
-table.areas > tbody > tr > td.left {
+table.areas > tbody > tr > td.left, table.usagestate > tbody > tr > td.left {
     text-align: left;
 }
 
-table.areas > tfoot > tr > td {
+table.areas > tfoot > tr > td, table.usagestate > tfoot > tr > td {
     font-weight: bold;
     padding: 0 4px;
     text-align: right;
@@ -474,6 +474,11 @@ table.areachildren > tbody > tr > td {
 
 table.areachildren.smalldevice > tbody > tr > td > div > span {
     white-space: normal;
+}
+
+table.usagestate > tbody > tr > td:first-of-type {
+    text-align: left;
+    white-space: nowrap;
 }
 
 table.largedevice, table.smalldevice {

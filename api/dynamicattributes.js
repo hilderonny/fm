@@ -27,8 +27,6 @@
  */
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
-var validateSameClientId = require('../middlewares/validateSameClientId');
-var apiHelper = require('../utils/apiHelper');
 var dynamicAttributesHelper = require('../utils/dynamicAttributesHelper');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
@@ -79,7 +77,7 @@ router.get('/model/:modelName', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRI
 /**
  * Returns the concrete option with the given _id.
  */
-router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributeoptions.name), async(req, res) => {
+router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), async(req, res) => {
     var option = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributeoptions.name, req.params.id);
     if (!option) return res.sendStatus(404);
     res.send(mapDynamicAttributeOptionField(option, req.user.clientname));
@@ -88,7 +86,7 @@ router.get('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
 /**
  * Returns a list of options for a dynamic attribute with the given _id. The type of the dynamic attribute must be picklist.
  */
-router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
+router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), async(req, res) => {
     var options = await Db.getDynamicObjects(req.user.clientname, co.collections.dynamicattributeoptions.name, { dynamicattributename: req.params.id });
     res.send(options.map(option => { return mapDynamicAttributeOptionField(option, req.user.clientname); }));
 });
@@ -111,7 +109,7 @@ router.get('/options/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES
  *  ]
  * }
  */
-router.get('/values/:modelName/:id', auth(false, false, co.modules.base), validateSameClientId(), async(req, res) => {
+router.get('/values/:modelName/:id', auth(false, false, co.modules.base), async(req, res) => {
     var modelname = Db.replaceQuotesAndRemoveSemicolon(req.params.modelName);
     // https://dba.stackexchange.com/a/72139, https://dba.stackexchange.com/a/69658/145998
     var query = `
@@ -140,8 +138,12 @@ router.get('/values/:modelName/:id', auth(false, false, co.modules.base), valida
     GROUP BY b.type::jsonb, dav.value
     ORDER BY type::jsonb->>'name_en'
     `;
-    var values = (await Db.query(req.user.clientname, query)).rows;
-    res.send(values); // Kein mapping, das kommt schon richtig aus der Datenbank
+    try {
+        var values = (await Db.query(req.user.clientname, query)).rows;
+        res.send(values); // Kein mapping, das kommt schon richtig aus der Datenbank
+    } catch(error) {
+        res.sendStatus(404); // Invalid model name
+    }
 });
 
 /**
@@ -155,7 +157,7 @@ router.get('/models', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r'
 /**
  * Returns a dynamic attribute with the given _id
  */
-router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
+router.get('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'r', co.modules.base), async(req, res) => {
     var da = await Db.getDynamicObject(req.user.clientname, co.collections.dynamicattributes.name, req.params.id);
     if (!da) return res.sendStatus(404);
     res.send(mapDynamicAttributeFields(da, req.user.clientname));
@@ -179,11 +181,11 @@ router.post('/option', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w
 /**
  * Creates a new set of values for dynamic attributes for an entity of type MODELNAME and with the given _id.
  */
-router.post('/values/:modelName/:id', auth(false, false, co.modules.base), validateModelName, validateSameClientId(), async(req, res) => {
+router.post('/values/:modelName/:id', auth(false, false, co.modules.base), validateModelName, async(req, res) => {
     var clientname = req.user.clientname;
     var modelName = req.params.modelName;
     var entity = await Db.getDynamicObject(clientname, modelName, req.params.id);
-    if (!entity) return res.sendStatus(400);
+    if (!entity) return res.sendStatus(404);
     var dynamicAttributeValues = req.body;
     if (!Array.isArray(dynamicAttributeValues)) return res.sendStatus(400); 
     if (dynamicAttributeValues.find(v => !v.dynamicAttributeId)) return res.sendStatus(400);
@@ -233,7 +235,7 @@ router.post('/', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.
  * Updates an option with the given _id for a dynamic attibute.
  * The dynamicattributeid of the option cannot be changed.
  */
-router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributeoptions.name), async(req, res) => {
+router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var dynamicAttributeOption = req.body;
     var attribute = await Db.getDynamicObject(clientname, co.collections.dynamicattributes.name, dynamicAttributeOption.dynamicAttributeId);
@@ -246,7 +248,8 @@ router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
     if (dynamicAttributeOption.text_en) updateset.label = dynamicAttributeOption.text_en;
     if (dynamicAttributeOption.text_de) updateset.label = dynamicAttributeOption.text_de;
     if (dynamicAttributeOption.value) updateset.value = dynamicAttributeOption.value;
-    await Db.updateDynamicObject(clientname, co.collections.dynamicattributeoptions.name, req.params.id, updateset);
+    var result = await Db.updateDynamicObject(clientname, co.collections.dynamicattributeoptions.name, req.params.id, updateset);
+    if (result.rowCount < 1) return res.sendStatus(404); // Id errornous?
     res.send(dynamicAttributeOption);
 });
 
@@ -255,7 +258,7 @@ router.put('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
  * For this case the attribute needs to be deleted and a new one is to be created.
  * Also changing the model is not supported. Only the name_* properties can be updated.
  */
-router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
+router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var dynamicAttribute = req.body;
     delete dynamicAttribute._id;
@@ -267,7 +270,8 @@ router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', c
     var updateset = { }
     if (dynamicAttribute.name_en) updateset.label = dynamicAttribute.name_en;
     if (dynamicAttribute.name_de) updateset.label = dynamicAttribute.name_de;
-    await Db.updateDynamicObject(clientname, co.collections.dynamicattributes.name, req.params.id, updateset);
+    var result = await Db.updateDynamicObject(clientname, co.collections.dynamicattributes.name, req.params.id, updateset);
+    if (result.rowCount < 1) return res.sendStatus(404); // Id errornous?
     res.send(dynamicAttribute);
 });
 
@@ -276,9 +280,10 @@ router.put('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', c
  * Also deletes all existing dynamicattributevalues of the corresponding dynamic 
  * attribute where this option is the value.
  */
-router.delete('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributeoptions.name), async(req, res) => {
+router.delete('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var existing = await Db.getDynamicObject(clientname, co.collections.dynamicattributeoptions.name, req.params.id);
+    if (!existing) return res.sendStatus(404);
     if (existing.value) return res.sendStatus(405);
     await Db.deleteDynamicObject(clientname, co.collections.dynamicattributeoptions.name, req.params.id);
     await Db.deleteDynamicObjects(clientname, co.collections.dynamicattributevalues.name, { value: req.params.id });
@@ -288,7 +293,7 @@ router.delete('/option/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUT
 /**
  * Deletes all dynamic attribute values for an entity of type MODELNAME and the given _id.
  */
-router.delete('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(), async(req, res) => {
+router.delete('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), async(req, res) => {
     await Db.deleteDynamicObjects(req.user.clientname, co.collections.dynamicattributevalues.name, { entityname: req.params.id });
     return res.sendStatus(204);
 });
@@ -298,9 +303,10 @@ router.delete('/values/:modelName/:id', auth(co.permissions.SETTINGS_CLIENT_DYNA
  * All existing dynamicattributevalues which exist for the attribute are also deleted.
  * When the dynamic attribute is of type picklist, all of its options are also deleted.
  */
-router.delete('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), validateSameClientId(co.collections.dynamicattributes.name), async(req, res) => {
+router.delete('/:id', auth(co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES, 'w', co.modules.base), async(req, res) => {
     var clientname = req.user.clientname;
     var existing = await Db.getDynamicObject(clientname, co.collections.dynamicattributes.name, req.params.id);
+    if (!existing) return res.sendStatus(404);
     if (existing.identifier) return res.sendStatus(405);
     await Db.deleteDynamicObject(clientname, co.collections.dynamicattributes.name, req.params.id);
     await Db.deleteDynamicObjects(clientname, co.collections.dynamicattributeoptions.name, { dynamicattributename: req.params.id });

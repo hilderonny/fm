@@ -11,7 +11,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         '       <span class="breadcrumbs" ng-show="breadcrumbs" ng-bind="breadcrumbs">BC</span>' +
         '   </md-card-title-text>' +
         '</md-card-title>';
-        var tabstemplate = 
+    var tabstemplate = 
         '<md-tabs flex>' +
         '   <md-tab>' +
         '       <md-tab-label><span translate>TRK_DETAILS_DETAILS</span></md-tab-label>' +
@@ -68,7 +68,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
         terminal: true,
         scope: true,
         priority: 900,
-        compile: function compile(element, attrs) {
+        compile: function compile(element) {
             element.removeAttr("avt-details-card");
             element.attr("class", "list-details-details");
             var resizehandle = element[0].querySelector("resize-handle");
