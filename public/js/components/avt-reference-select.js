@@ -83,7 +83,7 @@ app.directive('avtReferenceSelect', function($compile, utils) {
                     scope.$watch("dynamicobject", function(dynamicobject) {
                         if (!dynamicobject || Object.keys(dynamicobject).length < 1) return;
                         var datatypefield = scope.datatypefield;
-                        if (dynamicobject[datatypefield.name]) utils.getresponsedata("/api/dynamic/" + datatypefield.reference + "/" + dynamicobject[datatypefield.name]).then(function(selectedreference) {
+                        if (dynamicobject[datatypefield.name]) utils.getresponsedata("/api/dynamic/" + datatypefield.reference + "/" + dynamicobject[datatypefield.name] + "#ignore403").then(function(selectedreference) {
                             if (!selectedreference.label) selectedreference.label = selectedreference[scope.$root.titlefields[datatypefield.reference]];
                             scope.selectedreference = selectedreference;
                         });

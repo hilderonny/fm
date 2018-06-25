@@ -168,7 +168,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                         var promises = scope.datatypefields.filter(function(f) { return f.fieldtype === "reference"; }).map(function(f) {
                             // Special handle preview images
                             var filter = (f.name === "previewimagedocumentname") ? "?type=image%2F%25" : "";
-                            return utils.getresponsedata("/api/dynamic/" + f.reference + filter).then(function(references) {
+                            return utils.getresponsedata("/api/dynamic/" + f.reference + filter + "#ignore403").then(function(references) { // Ignore inaccessible datatypes
                                 if (f.isnullable) references.push({ name: null, label: "" }); // Nullable references like preview images
                                 scope.references[f.reference] = references;
                             });
