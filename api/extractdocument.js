@@ -9,7 +9,7 @@ var path = require('path');
 var documentsHelper = require('../utils/documentsHelper');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
-var unzipper = require("unzipper");
+var unzipper = require("@avorium/unzipper"); // Needed to implement CP850 decoding to unzipper library
 
 async function extractDocument(zipdocument, clientname) {
     var folders = {};
@@ -17,13 +17,11 @@ async function extractDocument(zipdocument, clientname) {
     var filePath = documentsHelper.getDocumentPath(clientname, zipdocument.name);
     var parentrelations = await Db.getDynamicObjects(clientname, "relations", { datatype2name: "documents", name2: zipdocument.name });
     var readstream = fs.createReadStream(filePath);
-    await readstream.pipe(unzipper.Parse().on('entry', entry => {
+    await readstream.pipe(unzipper.Parse({encoding: "cp850"}).on('entry', entry => {
         if (entry.type === "Directory") {
             folders[entry.path] = { name: Db.createName(), label: path.basename(entry.path) };
             entry.autodrain();
         } else {
-            var lastslash = entry.path.lastIndexOf("/") + 1;
-            var parentpath = path.dirname(entry.path) + "/";
             var filename = path.basename(entry.path);
             var mimetype = mime.getType(path.extname(filename));
             var document = { name: Db.createName(), label: filename, type: mimetype };
