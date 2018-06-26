@@ -814,11 +814,15 @@
             "forportal": true,
             "forclients": true,
             "public" : [
+                "css/icons/material/icons8-file-preview.svg",
                 "css/icons/material/icons8-web-design.svg",
                 "css/icons/material/icons8-website.svg",
                 "css/icons/office/icons8-web-design.svg",
                 "css/icons/office/icons8-website.svg",
                 "partial/Doc/ContentManagement.html"
+            ],
+            "include" : [
+                "public/js/components/avt-card-preview.js"
             ],
             "languages" : [ "de" ],
             "clientdatatypes": [
@@ -833,7 +837,8 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Karte erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" },
+                    { "name": "cmsviewcarddetailscard", "label": "Kartendetails", "content": "<md-card avt-card avt-details-card avt-card-preview avt-relations avt-close-toolbar-button></md-card>" },
+                    { "name": "cmsviewcardlistcard", "label": "Kartenliste", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscardname\":\"cmsviewcarddetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Karte erstellen\",\"detailscardname\":\"cmsviewcarddetailscard\"}'></md-card>" },
                     { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"App oder Sicht erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" }
                 ] },
 
