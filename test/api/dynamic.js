@@ -6,7 +6,7 @@ var ch = require("../../utils/calculationhelper");
 var dh = require("../../utils/documentsHelper");
 var Db = require("../../utils/db").Db;
 
-describe.only('API dynamic', () => {
+describe('API dynamic', () => {
 
     before(async() => {
         await th.cleanDatabase();
