@@ -24,6 +24,11 @@ var child = new (forever.Monitor)('app.js', {
   errFile: logpath + 'errFile'
 });
 
+// Trigger npm install on windows machine. Especially for IPROCLOUD
+child.on("watch:restart", () => {
+  require("child-process").spawn("c:\\nodejs\\npm.cmd", ["install"], { cwd: "c:\\iprocloud\\www" });
+});
+
 child.on('restart', () => {
   console.log('Restarted.');
 });
