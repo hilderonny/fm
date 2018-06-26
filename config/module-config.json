@@ -1298,9 +1298,12 @@
                 "css/icons/material/World Map.svg",
                 "css/icons/office/Virtual Reality.svg",
                 "css/icons/office/World Map.svg",
+                "css/icons/material/icons8-blockly-green.svg",
+                "css/icons/office/icons8-blockly-green.svg",
                 "partial/ronnyseins/3DCard.html",
                 "partial/ronnyseins/AugmentedRealityCard.html",
                 "partial/ronnyseins/GoogleMapsCard.html",
+                "partial/ronnyseins/BlocklyCard.html",
                 "partial/ronnyseins/mixedreality.html"
             ],
             "include" : [
@@ -1309,10 +1312,15 @@
                 
                 "public/js/lib/aframe-v0.7.0.min.js",
                 "public/js/lib/aframe-look-at-billboard-component.min.js",
+                "public/js/lib/blockly_compressed.js",
+                "public/js/lib/javascript_compressed.js",
+                "public/js/lib/blocks_compressed.js",
+                "public/js/lib/msg/js/de.js",
                 "public/js/lib/babylon.js",
                 "public/js/ronnyseins/3DCardController.js",
                 "public/js/ronnyseins/AugmentedRealityCardController.js",
-                "public/js/ronnyseins/GoogleMapsCardController.js"
+                "public/js/ronnyseins/GoogleMapsCardController.js",
+                "public/js/ronnyseins/BlocklyCardController.js"
             ],
             "languages" : [ "de" ],
             "clientdatatypes": [
@@ -1329,12 +1337,14 @@
 
                 { "name": "relations", "values": [
                     { "name": "ronnyaugmentedreality", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "augmentedreality", "relationtypename": "parentchild" },
-                    { "name": "ronnymaps", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "maps", "relationtypename": "parentchild" }
+                    { "name": "ronnymaps", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "maps", "relationtypename": "parentchild" },
+                    { "name": "ronnyblockly", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "blockly", "relationtypename": "parentchild" }
                 ] },
 
                 { "name": "views", "values": [
                     { "modulename": "ronnyseins", "name": "augmentedreality", "label": "Augmented Reality", "icon": "/css/icons/material/Virtual Reality.svg", "index": 810, "maincard": "ronnyseins/AugmentedRealityCard" },
-                    { "modulename": "ronnyseins", "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "maincard": "ronnyseins/GoogleMapsCard" }
+                    { "modulename": "ronnyseins", "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "maincard": "ronnyseins/GoogleMapsCard" },
+                    { "modulename": "ronnyseins", "name": "blockly", "label": "Blockly", "icon": "/css/icons/material/icons8-blockly-green.svg", "index": 830, "maincard": "ronnyseins/BlocklyCard" }
                 ] }
 
             ]
