@@ -4,6 +4,7 @@
 var assert = require('assert');
 var webDav = require('../../utils/webdav');
 const webdavClient = require('webdav-client');
+const wdSurver = require('webdav-server').v2;
 var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
@@ -14,15 +15,15 @@ var dh = require("../../utils/documentsHelper");
 
 
 
-describe.only('UTILS webdav', () => {
+describe('UTILS webdav', () => {
 
     var WebdavCleintConnection = (usernameInput, passwordInput) => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         var conn = new webdavClient.Connection({
             url: 'https://localhost:56789',
             authenticator: new webdavClient.BasicAuthenticator(),
-            username: usernameInput, //'client0_usergroup0_user0',
-            password: passwordInput //'test'
+            username: usernameInput, 
+            password: passwordInput
         });
         return conn;
     };
@@ -44,14 +45,31 @@ describe.only('UTILS webdav', () => {
 
     //custom User Manager
     describe('getUserByName', () => {
-        it('Function invocation made with non-existing username returns Error.BadAuthentication', async () => {  });
+        xit('Function invocation made with non-existing username returns Error.BadAuthentication', async () => {  });
         xit('Function invocation made with valid username returns deliver correct user data', async () => {
         });
     });
 
     describe('getUserByNamePassword', () => {
-        xit('Function invocation made with correct username but wrong password returns Error.BadAuthentication');
-        xit('Function invocation made with correct username and correct password returns correct user data is retrieved ');
+        it('Function invocation made with correct username but wrong password returns Error.BadAuthentication', async () =>{
+            return new Promise(function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'wrong_password');
+                client.readdir("/", (e,content)=>{            
+                    console.log(e);
+                    resolve();
+                });
+            });
+        });
+
+        it('Function invocation made with correct username and correct password returns correct user data is retrieved', async () =>{
+            return new Promise(function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/", (e,content)=>{            
+                    console.log(e);
+                    resolve();
+                });
+            });
+        });
     });
 
     //customPrivilegeManager:   
@@ -68,8 +86,20 @@ describe.only('UTILS webdav', () => {
     });
     //WebDav Filesystem
     describe('type', () => {
-        xit('Function invocation made with path to non-existing source returns Errors ResourceNotFound 404');
-        xit('Function invocation made with path to element that has no type returns webdav.ResourceType.NoResource');
+        it('Function invocation made with path to non-existing source returns Errors ResourceNotFound 404', async()=>{
+            return new Promise (function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/non_exsisting_file", (e,content)=>{
+                    console.log(e);
+                    resolve();
+                });
+            });
+        });
+
+        it('Function invocation made with path to element that has no type returns webdav.ResourceType.NoResource', async()=>{
+
+        });
+
         xit('Function invocation made with path to element that has type different than folder or document returns webdav.ResourceType.NoResource');
         xit('Function invocation made with path to the root returns webdav.ResourceType.Directory');
 
@@ -77,13 +107,78 @@ describe.only('UTILS webdav', () => {
 
     describe('_move', () => {
 
-        xit('Try to reallocate file returns Error.Forbidden ');
-        xit('Function invocation made with path(pathFrom) to non-existing source returns Errors.ResourceNotFound');
-        xit('Function invocation made with same source and destination path (pathTo == pathFrom) returns file/folder name stays the same');
-        xit('Function invocation made with valid parameters  returns correctly updated name');
-        xit('Request rename as user without write rights returns Error.Forbidden');
+        it('Try to reallocate file returns Error.Forbidden', async () => {
+            return new Promise (function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/", (e,content)=>{ 
+                    client.move('/folder0', '/folder1/folder0', function(err){
+                        //console.log(err);
+                        //console.log('wdS: ', wdSurver.Errors.Forbidden);
+                        assert(err);
+                        resolve();
+                    });
+                });
+            });
+        });
+        it('Function invocation made with path(pathFrom) to non-existing source returns Errors.ResourceNotFound', async()=>{
+            return new Promise (function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/", (e,content)=>{ 
+                    client.move('/non_existing_data', '/irrelevant_rename', function(err){
+                        console.log(err);
+                        assert(err);
+                        resolve();
+                    })
+                });
+            });
+        });
+
+        it('Function invocation made with same source and destination path (pathTo == pathFrom) returns file/folder name stays the same', async()=>{
+            return new Promise (function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/", (e,content)=>{ 
+                    client.move('/folder0', '/folder0', function(err){
+                        console.log(err);
+                        assert(err);
+                        resolve();
+                    })
+                });
+            });
+        });
+
+        it('Function invocation made with valid parameters  returns correctly updated name', async () =>{
+            return new Promise (function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/", (e,content)=>{ 
+                    client.move('/folder0', '/folder_renamed', function(err){
+                        if(err){
+                            resolve(assert.fail(err));
+                        }else{
+                            client.readdir('/folder_renamed', function(err, new_content){
+                                console.log(new_content);
+                                resolve();
+                            })
+                        }
+                    })
+                });
+            });
+        });
+
+        it('Request rename as user without write rights returns Error.Forbidden', async()=>{
+            return new Promise (function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test'); //TODO change user
+                client.readdir("/", (e,content)=>{ 
+                    client.move('/folder0', '/folder_renamed', function(err){
+                        console.log(err);
+                        resolve();
+                    })
+                });
+            });
+        });
+
+
         //currently the rename functionality can lead to problems with multiple same-name files/folders 
-        xit('Rename one of several items (folder or document) with the same name and path returns correctly update the selected item ');
+        //xit('Rename one of several items (folder or document) with the same name and path returns correctly update the selected item ');
     });
 
     describe('_delete', () => {
@@ -117,12 +212,7 @@ describe.only('UTILS webdav', () => {
 
         it('Function invocation made without authorized user returns Error.Frobidden',async()=>{
             return new Promise((resolve, reject) => {
-                var conn = WebdavCleintConnection('client1_usergroup0_user0', 'test'); /*new webdavClient.Connection({
-                    url: 'https://localhost:56789',
-                    authenticator: new webdavClient.BasicAuthenticator(),
-                    username: 'client1_usergroup0_user0',
-                    password: 'test'
-                });  */      
+                var conn = WebdavCleintConnection('client1_usergroup0_user0', 'test');
                 conn.readdir("/", (e, content) => {   
                     conn.readdir("/folder0", (err, deeperContent) =>{
                         console.log(err, deeperContent);                
