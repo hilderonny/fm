@@ -5,10 +5,6 @@
  */
 module.exports.apis = {
     /**
-     * API for managing activities
-     */
-    activities: 'activities',
-    /**
      * API for showing areas
      */
     areas: 'areas',

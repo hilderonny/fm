@@ -122,7 +122,7 @@
                 "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "de" ],
-            "utils": [ "apiHelper", "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "loginHelper", "relationsHelper", "db", "localConfigHelper", "permissionshelper", "updateonstart" ],
+            "utils": [ "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "loginHelper", "relationsHelper", "db", "localConfigHelper", "permissionshelper", "updateonstart" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "clientdatatypes": [
 
@@ -372,16 +372,13 @@
         "activities": {
             "forportal": false,
             "forclients": true,
-            "api" : [ "activities" ],
             "public" : [
                 "css/icons/material/Planner.svg",
                 "css/icons/office/Planner.svg",
                 "css/images/Activities_add.png",
                 "css/images/Activities_calendar.png",
                 "css/images/Activities_new.png",
-                "partial/Doc/Activities.html",
-                "partial/Office/ActivityCard.html",
-                "partial/Office/CalendarCard.html"
+                "partial/Doc/Activities.html"
             ],
             "include" : [
                 "public/js/components/avt-calendar-card.js"
@@ -413,8 +410,13 @@
                     { "name": "stammdatentermine", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "termine", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "activitiesactivitydetailscard", "label": "Termindetails", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
+                    { "name": "activitiescalendarcard", "label": "Terminkalender", "content": "<md-card class=\"list-details-details flex2-card\" avt-card avt-calendar-card avt-add-element-toolbar-button='{\"datatypenames\":[\"activities\"],\"label\":\"Termin\",\"tooltip\":\"Neuer Termin\",\"icon\":\"/css/icons/material/Plus Math.svg\",\"detailscardname\":\"basedetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "activities", "name": "termine", "label": "Termine", "doccard": "Activities", "directurls": "activities", "icon": "/css/icons/material/Planner.svg", "index": 940, "maincard": "Office/CalendarCard", "permission": "PERMISSION_OFFICE_ACTIVITY" }
+                    { "modulename": "activities", "name": "termine", "label": "Termine", "doccard": "Activities", "directurls": "activities", "icon": "/css/icons/material/Planner.svg", "index": 940, "viewcardname": "activitiescalendarcard", "permission": "PERMISSION_OFFICE_ACTIVITY" }
                 ] }
 
             ]
@@ -1314,7 +1316,6 @@
         "ronnyseins" : {
             "forportal": false,
             "forclients": true,
-            "api" : [ "markers" ],
             "public" : [
                 "css/icons/userlocation.png",
                 "css/icons/material/Collapse.svg",
@@ -1343,7 +1344,6 @@
                 "public/js/lib/msg/js/de.js",
                 "public/js/lib/babylon.js",
                 "public/js/ronnyseins/3DCardController.js",
-                "public/js/ronnyseins/AugmentedRealityCardController.js",
                 "public/js/ronnyseins/GoogleMapsCardController.js",
                 "public/js/ronnyseins/BlocklyCardController.js"
             ],
