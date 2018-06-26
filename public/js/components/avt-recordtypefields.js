@@ -76,6 +76,10 @@ app.directive('avtRecordtypefields', function($rootScope, $compile, $mdDialog, $
                         });
                     }
                 };
+                scope.ondetailscardclosed = function() {
+                    if (!scope.selectedrecordtypefield) return;
+                    delete scope.selectedrecordtypefield;
+                };
                 scope.onelementcreated = function(createdfield) {
                     scope.recordtype.fields.push(createdfield);
                     scope.tabselectfield(createdfield);

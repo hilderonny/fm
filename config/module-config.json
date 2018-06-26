@@ -72,7 +72,6 @@
                 "partial/Administration/DynamicAttributeElementCard.html",
                 "partial/Administration/DynamicAttributesEntityListCard.html",
                 "partial/Administration/UserSettingsCard.html",
-                "partial/components/DetailsCard.html",
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
@@ -205,6 +204,7 @@
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
                 ], "values": [
+                    { "name": "basedetailscard", "label": "Detailansicht (Standard)", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
                     { "name": "baseusergroupdetailscard", "label": "Benutzergruppendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-users-tab avt-permissions-tab avt-close-toolbar-button></md-card>" },
                     { "name": "baseusergrouplistcard", "label": "Benutzergruppenliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"usergroups\",\"detailscardname\":\"baseusergroupdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"usergroups\"],\"detailscardname\":\"baseusergroupdetailscard\"}'></md-card>" },
                     { "name": "baseuserdetailscard", "label": "Benutzerdetails", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
@@ -309,6 +309,7 @@
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
                 ], "values": [
+                    { "name": "basedetailscard", "label": "Detailansicht (Standard)", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
                     { "name": "baseusergroupdetailscard", "label": "Benutzergruppendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-users-tab avt-permissions-tab avt-close-toolbar-button></md-card>" },
                     { "name": "baseusergrouplistcard", "label": "Benutzergruppenliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"usergroups\",\"detailscardname\":\"baseusergroupdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"usergroups\"],\"detailscardname\":\"baseusergroupdetailscard\"}'></md-card>" },
                     { "name": "baseuserdetailscard", "label": "Benutzerdetails", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
@@ -624,7 +625,7 @@
                 { "name": "viewcards", "values": [
                     { "name": "areasdin277arealistcard", "label": "DIN277 Flächenübersicht", "content": "<md-card avt-card avt-bim-din277-card='{\"detailscardname\":\"fmobjectsarrangeobjectsdetailscard\"}' avt-close-toolbar-button></md-card>" },
                     { "name": "areasdin277areatypehierarchycard", "label": "DIN277 Flächentypenhierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"areatypes\",\"detailscardname\":\"areasdin277arealistcard\",\"hideicons\":true}'></md-card>" },
-                    { "name": "areasflooringeditorlistcard", "label": "Belagartenliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"areafloorings\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"areafloorings\"],\"detailscard\":\"components/DetailsCard\"}'></md-card>" },
+                    { "name": "areasflooringeditorlistcard", "label": "Belagartenliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"areafloorings\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"areafloorings\"],\"detailscardname\":\"basedetailscard\"}'></md-card>" },
                     { 
                         "name": "flechennachnutzungsstatushierarchycard", 
                         "label": "Flächen nach Nutzungsstatus Hierarchie", 
@@ -672,10 +673,6 @@
                 "css/images/Persons_commlist.png",
                 "css/images/Persons_edit.png",
                 "css/images/Persons_list.png",
-                "partial/CRM/BPCard.html",
-                "partial/CRM/BPListCard.html",
-                "partial/CRM/PersonCard.html",
-                "partial/CRM/PersonListCard.html",
                 "partial/Doc/BusinessPartners.html",
                 "partial/Doc/Persons.html"
             ],
@@ -748,9 +745,16 @@
                     { "name": "crmpersonen", "datatype1name": "apps", "name1": "crm", "datatype2name": "views", "name2": "personen", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "businesspartnersbusinesspartnerdetailscard", "label": "Geschäftspartnerdetails", "content": "<md-card avt-card avt-details-card avt-relations avt-add-element-toolbar-button='{\"datatypenames\":[\"partneraddresses\"],\"detailscardname\":\"basedetailscard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "businesspartnersbusinesspartnerlistcard", "label": "Geschäftspartnerliste", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"businesspartners_hierarchy\",\"detailscardname\":\"businesspartnersbusinesspartnerdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"businesspartners\"],\"detailscardname\":\"businesspartnersbusinesspartnerdetailscard\"}'></md-card>" },
+                    { "name": "businesspartnerspersondetailscard", "label": "Personendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-add-element-toolbar-button='{\"datatypenamelist\":\"persons_children\",\"detailscardname\":\"basedetailscard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "businesspartnerspersonlistcard", "label": "Personenliste", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"persons_hierarchy\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"persons\"],\"detailscardname\":\"businesspartnerspersondetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "businesspartners", "name": "geschaeftspartner", "label": "Geschäftspartner", "doccard": "BusinessPartners", "directurls": "businesspartners,partneraddresses", "icon": "/css/icons/material/Business.svg", "index": 210, "maincard": "CRM/BPListCard", "permission": "PERMISSION_CRM_BUSINESSPARTNERS" },
-                    { "modulename": "businesspartners", "name": "personen", "label": "Personen", "doccard": "Persons", "directurls": "persons,emailcontacts,phonecontacts", "icon": "/css/icons/material/Collaborator Male.svg", "index": 220, "maincard": "CRM/PersonListCard", "permission": "PERMISSION_CRM_PERSONS" }
+                    { "modulename": "businesspartners", "name": "geschaeftspartner", "label": "Geschäftspartner", "doccard": "BusinessPartners", "directurls": "businesspartners,partneraddresses", "icon": "/css/icons/material/Business.svg", "index": 210, "viewcardname": "businesspartnersbusinesspartnerlistcard", "permission": "PERMISSION_CRM_BUSINESSPARTNERS" },
+                    { "modulename": "businesspartners", "name": "personen", "label": "Personen", "doccard": "Persons", "directurls": "persons,emailcontacts,phonecontacts", "icon": "/css/icons/material/Collaborator Male.svg", "index": 220, "viewcardname": "businesspartnerspersonlistcard", "permission": "PERMISSION_CRM_PERSONS" }
                 ] }
             ]
         },
@@ -829,8 +833,8 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Karte erstellen\",\"detailscard\":\"components/DetailsCard\"}'></md-card>" },
-                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"App oder Sicht erstellen\",\"detailscard\":\"components/DetailsCard\"}'></md-card>" }
+                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Karte erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" },
+                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"App oder Sicht erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" }
                 ] },
 
                 { "name": "views", "values": [
@@ -847,8 +851,8 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Karte erstellen\",\"detailscard\":\"components/DetailsCard\"}'></md-card>" },
-                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"App oder Sicht erstellen\",\"detailscard\":\"components/DetailsCard\"}'></md-card>" }
+                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Karte erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" },
+                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"App oder Sicht erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" }
                 ] },
 
                 { "name": "views", "values": [
@@ -879,9 +883,7 @@
                 "css/images/Documents_hierarchy.png",
                 "css/images/Documents_upload.png",
                 "css/images/Documents_uploadmobile.png",
-                "partial/Doc/Documents.html",
-                "partial/Office/DocumentDetailsCard.html",
-                "partial/Office/DocumentListCard.html"
+                "partial/Doc/Documents.html"
             ],
             "include" : [
                 "public/js/components/avt-document-share-link.js",
@@ -912,8 +914,13 @@
                     { "name": "stammdatendokumente", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "dokumente", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "documentddocumentdetailscard", "label": "Dokumentendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-document-share-link avt-progress-spinner avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"availableondatatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Unterverzeichnis erstellen\",\"detailscardname\":\"documentddocumentdetailscard\",\"icon\":\"/css/icons/material/Add Folder.svg\"}' avt-upload-document-toolbar-button avt-download-document-toolbar-button avt-extract-document-toolbar-button avt-replace-document-toolbar-button avt-viewin3d-toolbar-button avt-close-toolbar-button></md-card>" },
+                    { "name": "documentddocumenthierarchycard", "label": "Dokumentenhierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"folders_hierarchy\",\"detailscardname\":\"documentddocumentdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Verzeichnis im Stamm erstellen\",\"icon\":\"/css/icons/material/Add Folder.svg\",\"detailscardname\":\"documentddocumentdetailscard\"}' avt-progress-spinner avt-upload-document-toolbar-button avt-drag-drop-document></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "documents", "name": "dokumente", "label": "Dokumente", "doccard": "Documents", "directurls": "documents,folders", "icon": "/css/icons/material/Document.svg", "index": 920, "maincard": "Office/DocumentListCard", "permission": "PERMISSION_OFFICE_DOCUMENT" }
+                    { "modulename": "documents", "name": "dokumente", "label": "Dokumente", "doccard": "Documents", "directurls": "documents,folders", "icon": "/css/icons/material/Document.svg", "index": 920, "viewcardname": "documentddocumenthierarchycard", "permission": "PERMISSION_OFFICE_DOCUMENT" }
                 ] }
 
             ]
@@ -1109,9 +1116,7 @@
                 "css/images/Portals_edit.png",
                 "css/images/Portals_list.png",
                 "css/images/Portals_modules.png",
-                "partial/Doc/Portals.html",
-                "partial/LicenseServer/PortalDetailsCard.html",
-                "partial/LicenseServer/PortalListCard.html"
+                "partial/Doc/Portals.html"
             ],
             "include" : [
                 "public/js/components/avt-downloadportalpackage-toolbar-button.js",
@@ -1141,8 +1146,13 @@
                     { "name": "portalportalverwaltung", "datatype1name": "apps", "name1": "portal", "datatype2name": "views", "name2": "portalverwaltung", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "licenseserverportaldetailscard", "label": "Portaldetails", "content": "<md-card avt-card avt-details-card avt-relations avt-portalmodules-tab avt-generatelicensekey-button avt-downloadportalpackage-toolbar-button avt-close-toolbar-button></md-card>" },
+                    { "name": "licenseserverportallistcard", "label": "Portalliste", "content": "<md-card  avt-card avt-list-card='{\"listfilter\":\"portals\",\"detailscardname\":\"licenseserverportaldetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"portals\"],\"detailscardname\":\"licenseserverportaldetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "licenseserver", "name": "portalverwaltung", "label": "Portalverwaltung", "doccard": "Portals", "directurls": "portals", "icon": "/css/icons/material/Server.svg", "index": 510, "maincard": "LicenseServer/PortalListCard", "permission": "PERMISSION_LICENSESERVER_PORTAL" }
+                    { "modulename": "licenseserver", "name": "portalverwaltung", "label": "Portalverwaltung", "doccard": "Portals", "directurls": "portals", "icon": "/css/icons/material/Server.svg", "index": 510, "viewcardname": "licenseserverportallistcard", "permission": "PERMISSION_LICENSESERVER_PORTAL" }
                 ] }
                 
             ]
@@ -1157,8 +1167,6 @@
                 "css/images/Notes_editnote.png",
                 "css/images/Notes_list.png",
                 "css/icons/office/Notes.svg",
-                "partial/Office/NoteCard.html",
-                "partial/Office/NoteListCard.html",
                 "partial/Doc/Notes.html"
             ],
             "languages" : [ "de" ],
@@ -1173,7 +1181,7 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "officenotelistcard", "label": "Kalender", "content": "<md-card\n    avt-card\n    avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscard\":\"Office/NoteCard\"}'\n    avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"detailscard\":\"Office/NoteCard\"}'\n></md-card>" }
+                    { "name": "officenotelistcard", "label": "Kalender", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"detailscardname\":\"basedetailscard\"}'></md-card>" }
                 ] },
 
                 { "name": "views", "values": [
@@ -1269,7 +1277,7 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "recordtypesrecordtypedetailscard", "label": "Dynamische Objekte - Detailansicht", "content": "<md-card avt-card avt-recordtype-details-card avt-recordtypefields='{\"detailscardname\":\"recordtypesrecordtypefielddetailscard\"}' avt-recordtypevalues='{\"detailscard\":\"components/DetailsCard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "recordtypesrecordtypedetailscard", "label": "Dynamische Objekte - Detailansicht", "content": "<md-card avt-card avt-recordtype-details-card avt-recordtypefields='{\"detailscardname\":\"recordtypesrecordtypefielddetailscard\"}' avt-recordtypevalues='{\"detailscardname\":\"basedetailscard\"}' avt-close-toolbar-button></md-card>" },
                     { "name": "recordtypesrecordtypefielddetailscard", "label": "Dynamische Objekte - Felddetailansicht", "content": "<md-card avt-card avt-recordtypefield-details-card avt-close-toolbar-button></md-card>" },
                     { "name": "recordtypesrecordtypelistcard", "label": "Dynamische Objekte - Liste", "content": "<md-card avt-card avt-recordtype-list-card='{\"detailscardname\":\"recordtypesrecordtypedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"recordtypes\"],\"label\":\"Datentyp\",\"tooltip\":\"Datentyp erstellen\",\"detailscardname\":\"recordtypesrecordtypedetailscard\"}'></md-card>" }
                 ] },
@@ -1286,7 +1294,7 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "recordtypesrecordtypedetailscard", "label": "Dynamische Objekte - Detailansicht", "content": "<md-card avt-card avt-recordtype-details-card avt-recordtypefields='{\"detailscardname\":\"recordtypesrecordtypefielddetailscard\"}' avt-recordtypevalues='{\"detailscard\":\"components/DetailsCard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "recordtypesrecordtypedetailscard", "label": "Dynamische Objekte - Detailansicht", "content": "<md-card avt-card avt-recordtype-details-card avt-recordtypefields='{\"detailscardname\":\"recordtypesrecordtypefielddetailscard\"}' avt-recordtypevalues='{\"detailscardname\":\"basedetailscard\"}' avt-close-toolbar-button></md-card>" },
                     { "name": "recordtypesrecordtypefielddetailscard", "label": "Dynamische Objekte - Felddetailansicht", "content": "<md-card avt-card avt-recordtypefield-details-card avt-close-toolbar-button></md-card>" },
                     { "name": "recordtypesrecordtypelistcard", "label": "Dynamische Objekte - Liste", "content": "<md-card avt-card avt-recordtype-list-card='{\"detailscardname\":\"recordtypesrecordtypedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"recordtypes\"],\"label\":\"Datentyp\",\"tooltip\":\"Datentyp erstellen\",\"detailscardname\":\"recordtypesrecordtypedetailscard\"}'></md-card>" }
                 ] },
