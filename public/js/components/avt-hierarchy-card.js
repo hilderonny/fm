@@ -40,7 +40,6 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
             element.append(element[0].cardcontent);
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
-                scope.params = params;
                 scope.detailscard = params.detailscard;
                 scope.detailscardname = params.detailscardname;
                 scope.ondetailscardclosed = function() {
@@ -140,7 +139,12 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                     } else if (scope.detailscardname) {
                         utils.addcardbyname(scope.detailscardname, {
                             datatypename: child.datatypename,
-                            entityname: child.name
+                            entityname: child.name,
+                            permission: scope.params.permission,
+                            onclose: scope.ondetailscardclosed,
+                            oncreate: scope.onelementcreated,
+                            ondelete: scope.onelementdeleted,
+                            onsave: scope.onelementupdated
                         }).then(function() {
                             scope.selectedchild = child;
                         });
