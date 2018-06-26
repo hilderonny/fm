@@ -25,6 +25,7 @@ async function getchildren(clientname, recordtypename, entityname, permissionsof
         // In custom datatypes there currently are no permissions defined
         if (rr.permissionkey && !permissionsofuser[rr.permissionkey]) continue; // No permission to access specific datatype entities
         var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
+        if (!child) continue; // Can happen when there is an invalid relation in the database
         child.datatypename = rr.datatype2name;
         if (!child.icon) child.icon = rr.icon; // Set the icon to the one of the datatype when the object itself has no icon
         child.haschildren = rr.haschildren;

@@ -6,7 +6,7 @@ var ch = require("../../utils/calculationhelper");
 var dh = require("../../utils/documentsHelper");
 var Db = require("../../utils/db").Db;
 
-describe('API dynamic', () => {
+describe.only('API dynamic', () => {
 
     before(async() => {
         await th.cleanDatabase();
@@ -265,6 +265,13 @@ describe('API dynamic', () => {
             var result = (await th.get(`/api/dynamic/children/list0/clientnulldatatypetwo/clientnulldatatypetwoentity0?token=${token}`).expect(200)).body;
             var entity1 = result.find(r => r.name === "clientnulldatatypetwoentity1");
             assert.strictEqual(entity1.icon, "icon2");
+        });
+
+        it('Does not return child entries when there is a relation in the database which targets a non existing child', async() => {
+            th.createRelation("clientnulldatatypenull", "clientnulldatatypenullentity0", "clientnulldatatypenull", "invalidelementname", "parentchild");
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = (await th.get(`/api/dynamic/children/list0/clientnulldatatypenull/clientnulldatatypenullentity0?token=${token}`).expect(200)).body;
+            assert.ok(!result.find(r => r.name === "invalidelementname"));
         });
 
     });
