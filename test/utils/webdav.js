@@ -14,15 +14,15 @@ var dh = require("../../utils/documentsHelper");
 
 
 
-describe('UTILS webdav', () => {
+describe.only('UTILS webdav', () => {
 
-    var WebdavCleintConnection = () => {
+    var WebdavCleintConnection = (usernameInput, passwordInput) => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         var conn = new webdavClient.Connection({
             url: 'https://localhost:56789',
             authenticator: new webdavClient.BasicAuthenticator(),
-            username: 'client0_usergroup0_user0',
-            password: 'test'
+            username: usernameInput, //'client0_usergroup0_user0',
+            password: passwordInput //'test'
         });
         return conn;
     };
@@ -89,7 +89,7 @@ describe('UTILS webdav', () => {
     describe('_delete', () => {
         it('Valid delettion request returns error.forbidden', async()=>{
             return new Promise((resolve, reject)=>{
-                var conn = WebdavCleintConnection(); 
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test'); 
                 conn.readdir("/", (e,content)=>{            
                     conn.delete("/folder1", (error)=>{
                         //console.log(error);
@@ -103,7 +103,7 @@ describe('UTILS webdav', () => {
     describe('_readDir', () => {
         it('Function invocation with path to non-existing source returns Errors.ResourceNotFound', async()=>{
             return new Promise((resolve, reject) => {
-                var conn = WebdavCleintConnection();         
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');         
                 console.log(conn);
                 conn.readdir("/", (e, content) => {   
                     //console.log(e, content);
@@ -117,12 +117,12 @@ describe('UTILS webdav', () => {
 
         it('Function invocation made without authorized user returns Error.Frobidden',async()=>{
             return new Promise((resolve, reject) => {
-                var conn = new webdavClient.Connection({
+                var conn = WebdavCleintConnection('client1_usergroup0_user0', 'test'); /*new webdavClient.Connection({
                     url: 'https://localhost:56789',
                     authenticator: new webdavClient.BasicAuthenticator(),
                     username: 'client1_usergroup0_user0',
                     password: 'test'
-                });        
+                });  */      
                 conn.readdir("/", (e, content) => {   
                     conn.readdir("/folder0", (err, deeperContent) =>{
                         console.log(err, deeperContent);                
@@ -135,7 +135,7 @@ describe('UTILS webdav', () => {
         it('Function invocation made with valid root path returns correct data retrieval', async () => {
             // await webDav.dav.init();
             return new Promise((resolve, reject) => {
-                var conn = WebdavCleintConnection();             
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');             
                // console.log(conn);
                 conn.readdir("/", (e, content) => {   
                     //console.log(e, content);                   
@@ -147,7 +147,7 @@ describe('UTILS webdav', () => {
 
         it('Function invocation made with valid non-root path returns correct data retrieval', async () =>{
             return new Promise((resolve, reject) => {
-                var conn = WebdavCleintConnection();                 
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');                 
                 conn.readdir("/", (e, content) => {  
                     conn.readdir("/folder0", (err, deeperContent) =>{
                         //console.log(err, deeperContent);                
@@ -163,7 +163,7 @@ describe('UTILS webdav', () => {
     describe('_openReadStream', () => {
         it('Function invocation made path to existing source returns the data', async() =>{
             return new Promise((resolve,reject)=>{
-                var conn = WebdavCleintConnection();
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');
                 conn.readdir("/", (error,contents)=>{
                     conn.prepareForStreaming((error)=> {//https://github.com/OpenMarshal/npm-WebDAV-Client/blob/76392d8a72624c86679ab7f4d8694fe46588eb68/test/test.js
                         var readstream =conn.get("/document0");
@@ -186,7 +186,7 @@ describe('UTILS webdav', () => {
 
         it('Function invocation made path to non-existing source returns Errors.ResourceNotFound', async() => {
             /**return new Promise((resolve,reject)=>{
-                var conn = WebdavCleintConnection();
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');
                 conn.readdir("/", (error,contents)=>{                    
                     conn.get("/document1" , (err, contents) =>{
                         console.log(err,contents);
