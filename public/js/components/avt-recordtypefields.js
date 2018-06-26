@@ -36,18 +36,45 @@ app.directive('avtRecordtypefields', function($rootScope, $compile, $mdDialog, $
             }
             return function link(scope) {
                 scope.detailscard = params.detailscard;
+                scope.detailscardname = params.detailscardname;
                 // Toolbar button part
                 scope.createrecordtypefield = function() {
                     delete scope.selectedrecordtypefield;
                     utils.removeCardsToTheRightOf(element);
-                    utils.adddetailscard(scope, scope.recordtype.name, undefined, scope.params.permission);
+                    if (scope.detailscard) {
+                        utils.adddetailscard(scope, scope.recordtype.name, undefined, scope.params.permission);
+                    } else if (scope.detailscardname) {
+                        utils.addcardbyname(scope.detailscardname, {
+                            datatypename: scope.recordtype.name,
+                            permission: scope.params.permission,
+                            onclose: scope.ondetailscardclosed,
+                            oncreate: scope.onelementcreated,
+                            ondelete: scope.onelementdeleted,
+                            onsave: scope.onelementupdated
+                        });
+                    }
                 };
                 // Tab part
                 scope.tabselectfield = function(field) {
+                    if (!field || !(scope.detailscard || scope.detailscardname)) return;
                     utils.removeCardsToTheRightOf(element);
-                    utils.adddetailscard(scope, scope.recordtype.name, field.name, scope.params.permission).then(function() {
-                        scope.selectedrecordtypefield = field;
-                    });
+                    if (scope.detailscard) {
+                        utils.adddetailscard(scope, scope.recordtype.name, field.name, scope.params.permission).then(function() {
+                            scope.selectedrecordtypefield = field;
+                        });
+                    } else if (scope.detailscardname) {
+                        utils.addcardbyname(scope.detailscardname, {
+                            datatypename: scope.recordtype.name,
+                            entityname: field.name,
+                            permission: scope.params.permission,
+                            onclose: scope.ondetailscardclosed,
+                            oncreate: scope.onelementcreated,
+                            ondelete: scope.onelementdeleted,
+                            onsave: scope.onelementupdated
+                        }).then(function() {
+                            scope.selectedrecordtypefield = field;
+                        });
+                    }
                 };
                 scope.onelementcreated = function(createdfield) {
                     scope.recordtype.fields.push(createdfield);
