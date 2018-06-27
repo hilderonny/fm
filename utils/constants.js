@@ -53,10 +53,6 @@ module.exports.apis = {
      */
     login: 'login',
     /**
-     * API for managing geographical map markers
-     */
-    markers: 'markers',
-    /**
      * API für retrieving menu structure
      */
     menu: 'menu',
