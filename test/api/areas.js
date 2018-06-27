@@ -67,45 +67,57 @@ describe('API areas', () =>{
         
     });
 
-    describe('GET/din277/:areatypename', () => {
+    describe('GET/din277/:entityname/:areatypename', () => {
 
         it('responds without authentication with 403', async() => {
-            await th.get(`/api/areas/din277/client0_areatype1`).expect(403);
+            await th.get(`/api/areas/din277/client0_level0/client0_areatype1`).expect(403);
         });
 
         it('responds without read permission with 403', async() => {
             await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.BIM_AREAS);
             var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.get(`/api/areas/din277/client0_areatype1?token=${token}`).expect(403);
+            await th.get(`/api/areas/din277/client0_level0/client0_areatype1?token=${token}`).expect(403);
         });
 
         it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
             await th.removeClientModule("client0", co.modules.areas);
             var token = await th.defaults.login("client0_usergroup0_user0");
-            await th.get(`/api/areas/din277/client0_areatype1?token=${token}`).expect(403);
+            await th.get(`/api/areas/din277/client0_level0/client0_areatype1?token=${token}`).expect(403);
         });
 
         it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
             await th.removeClientModule("client0", co.modules.areas);
             var token = await th.defaults.login("client0_usergroup0_user1");
-            await th.get(`/api/areas/din277/client0_areatype1?token=${token}`).expect(403);
+            await th.get(`/api/areas/din277/client0_level0/client0_areatype1?token=${token}`).expect(403);
         });
         
-        it('responds with not existing id with empty list', async() => {
+        it('responds with not existing areatypename with empty list', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var result = await th.get(`/api/areas/din277/999999999999999999999999?token=${token}`).expect(200);
+            var result = await th.get(`/api/areas/din277/client0_level0/999999999999999999999999?token=${token}`).expect(200);
+            assert.strictEqual(result.body.length, 0);
+        });
+        
+        it('responds with not existing entityname with empty list', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = await th.get(`/api/areas/din277/999999999999999999999999/client0_areatype1?token=${token}`).expect(200);
             assert.strictEqual(result.body.length, 0);
         });
 
-        it('responds with empty list when the object with the given ID does not belong to the client of the logged in user', async() => {
+        it('responds with empty list when the area type with the given name does not belong to the client of the logged in user', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var result = await th.get(`/api/areas/din277/client1_areatype1?token=${token}`).expect(200);
+            var result = await th.get(`/api/areas/din277/client0_level0/client1_areatype1?token=${token}`).expect(200);
+            assert.strictEqual(result.body.length, 0);
+        });
+
+        it('responds with empty list when the entity with the given name does not belong to the client of the logged in user', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = await th.get(`/api/areas/din277/client1_level0/client0_areatype1?token=${token}`).expect(200);
             assert.strictEqual(result.body.length, 0);
         });
 
         it('Contains all areas of the requested type and its subtypes recursively', async() => {
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var areas = (await th.get(`/api/areas/din277/client0_areatype1?token=${token}`).expect(200)).body;
+            var areas = (await th.get(`/api/areas/din277/client0_level0/client0_areatype1?token=${token}`).expect(200)).body;
             assert.strictEqual(areas.length, 5);
             areas.sort((a, b) => a.name.localeCompare(b.name)); // Cannot be sure, in which order the API provides the elements
             assert.strictEqual(areas[0].name, "client0_area1");
@@ -130,10 +142,19 @@ describe('API areas', () =>{
             assert.strictEqual(areas[4].f, 220);
         });
 
+        it('Contains only those areas which are direct or indirect childs of the given entity', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var areas = (await th.get(`/api/areas/din277/client0_room0/client0_areatype1?token=${token}`).expect(200)).body;
+            assert.strictEqual(areas.length, 2);
+            assert.ok(areas.find(a => a.name === "client0_area1"));
+            assert.ok(areas.find(a => a.name === "client0_area11"));
+        });
+
+
         it('returns the name of the area when the area has no label set', async() => {
             await Db.updateDynamicObject("client0", "areas", "client0_area1", { label: null });
             var token = await th.defaults.login("client0_usergroup0_user0");
-            var areas = (await th.get(`/api/areas/din277/client0_areatype1?token=${token}`).expect(200)).body;
+            var areas = (await th.get(`/api/areas/din277/client0_level0/client0_areatype1?token=${token}`).expect(200)).body;
             var area = areas.find(a => a.name === "client0_area1");
             assert.strictEqual(area.label, area.name);
         });
@@ -181,8 +202,8 @@ describe('API areas', () =>{
             var result = await th.get(`/api/areas/usagestate/client0_level0?token=${token}`).expect(200);
             var list = result.body;
             assert.ok(list.length > 1);
-            assert.ok(list.find(r => r.label === 'UsageState1' && r.f === 90 ));
-            assert.ok(list.find(r => r.label === 'UsageState2' && r.f === 60 ));
+            assert.ok(list.find(r => r.label === 'UsageState1' && r.f === 511 ));
+            assert.ok(list.find(r => r.label === 'UsageState2' && r.f === 692 ));
         });
 
         it('does not return unused usagetypes', async() => {

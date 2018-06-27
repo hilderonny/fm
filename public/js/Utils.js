@@ -47,7 +47,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             });
         },
 
-        addcardbyname: function(cardname, params) {
+        addcardbyname: function(cardname, params, parentscope) {
             var cardToAdd = {}; // Dummy object for remembering that the card is to be loaded
             var card, cardCanvas, domCard;
             utils.cardsToAdd.push(cardToAdd);
@@ -60,6 +60,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 domCard = card[0];
                 cardCanvas.append(card);
                 var newScope = $rootScope.$new(true);
+                if (parentscope) newScope.parentscope = parentscope; // Parentscope is used in DIN277 Hierarchy
                 newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
                 // Either the required permission is given as parameter (generic ones) or the cardname is used
                 newScope.requiredPermission = newScope.params.permission || cardname; // For permission handling in details pages

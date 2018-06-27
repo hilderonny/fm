@@ -627,6 +627,7 @@
                 { "name": "viewcards", "values": [
                     { "name": "areasdin277arealistcard", "label": "DIN277 Flächenübersicht", "content": "<md-card avt-card avt-bim-din277-card='{\"detailscardname\":\"fmobjectsarrangeobjectsdetailscard\"}' avt-close-toolbar-button></md-card>" },
                     { "name": "areasdin277areatypehierarchycard", "label": "DIN277 Flächentypenhierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"areatypes\",\"detailscardname\":\"areasdin277arealistcard\",\"hideicons\":true}'></md-card>" },
+                    { "name": "areasdin277hierarchycard", "label": "DIN277 - Objekthierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"fmobjects_hierarchy\",\"detailscardname\":\"areasdin277areatypehierarchycard\"}'></md-card>" },
                     { "name": "areasflooringeditorlistcard", "label": "Belagartenliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"areafloorings\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"areafloorings\"],\"detailscardname\":\"basedetailscard\"}'></md-card>" },
                     { 
                         "name": "flechennachnutzungsstatushierarchycard", 
@@ -642,7 +643,7 @@
 
                 { "name": "views", "values": [
                     { "modulename": "areas", "name": "flaechen", "label": "Flächen Übersicht", "doccard": "Areas#areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "maincard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" },
-                    { "modulename": "areas", "name": "din277", "label": "Flächen nach DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "viewcardname": "areasdin277areatypehierarchycard", "permission": "PERMISSION_BIM_AREAS" },
+                    { "modulename": "areas", "name": "din277", "label": "Flächen nach DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "viewcardname": "areasdin277hierarchycard", "permission": "PERMISSION_BIM_AREAS" },
                     { "modulename": "areas", "name": "flechennachnutzungsstatus", "label": "Flächen nach Nutzungsstatus", "doccard": "Areas#nutzungsstatus", "directurls": "flechennachnutzungsstatus", "icon": "/css/icons/material/icons8-chart.svg", "index": 723, "viewcardname": "flechennachnutzungsstatushierarchycard", "permission": "PERMISSION_BIM_AREAS" },
                     { "modulename": "areas", "name": "flooringeditor", "label": "Belagarten", "doccard": "Areas#flooringeditor", "directurls": "flooringeditor", "icon": "/css/icons/material/icons8-carpet.svg", "index": 730, "viewcardname": "areasflooringeditorlistcard",  "permission": "PERMISSION_BIM_AREAS" }
                 ] }

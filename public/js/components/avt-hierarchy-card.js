@@ -145,7 +145,7 @@ app.directive('avtHierarchyCard', function($compile, $http, $location, utils) {
                             oncreate: scope.onelementcreated,
                             ondelete: scope.onelementdeleted,
                             onsave: scope.onelementupdated
-                        }).then(function() {
+                        }, scope).then(function() {
                             scope.selectedchild = child;
                         });
                     }

@@ -302,6 +302,11 @@ th.prepareAreas = async() => {
     th.createRelation("rooms", "client0_room1", "areas", "client0_area05", "parentchild");
     th.createRelation("levels", "client1_level0", "rooms", "client1_room0", "parentchild");
     th.createRelation("rooms", "client1_room0", "areas", "client1_area01", "parentchild");
+    th.createRelation("rooms", "client0_room0", "areas", "client0_area1", "parentchild");
+    th.createRelation("rooms", "client0_room0", "areas", "client0_area11", "parentchild");
+    th.createRelation("rooms", "client0_room1", "areas", "client0_area12", "parentchild");
+    th.createRelation("rooms", "client0_room1", "areas", "client0_area111", "parentchild");
+    th.createRelation("rooms", "client0_room1", "areas", "client0_area112", "parentchild");
     // Trigger calculation
     await ch.calculateformula("client0", "areatypes", "client0_areatype1");
     await ch.calculateformula("client0", "areatypes", "client0_areatype11");
