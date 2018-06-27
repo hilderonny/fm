@@ -330,6 +330,8 @@ th.prepareDocuments = async() => {
     await th.createRelation("folders", "client0_folder0", "documents", "client0_document00", "parentchild");
     await th.createRelation("folders", "client0_folder0", "documents", "client0_document01", "parentchild");
     await th.createRelation("folders", "client0_folder00", "documents", "client0_document000", "parentchild");
+      //relation relevant for WebDav testing
+    await th.createRelation("documents", "client0_document0", "notes", "client0_note0", "parentchild");
 };
 
 th.preparedatatypes = async() => {

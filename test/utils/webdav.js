@@ -40,22 +40,23 @@ describe('UTILS webdav', () => {
         await th.preparePermissions();
         await th.prepareFolders();
         await th.prepareDocuments();
+        await th.prepareNotes();
         await th.prepareDocumentFiles();
     });
 
     //custom User Manager
-    describe('getUserByName', () => {
+   /* describe('getUserByName', () => {
         xit('Function invocation made with non-existing username returns Error.BadAuthentication', async () => {  });
         xit('Function invocation made with valid username returns deliver correct user data', async () => {
         });
-    });
+    });*/
 
     describe('getUserByNamePassword', () => {
         it('Function invocation made with correct username but wrong password returns Error.BadAuthentication', async () =>{
             return new Promise(function(resolve, reject){
                 var client = WebdavCleintConnection('client0_usergroup0_user0', 'wrong_password');
                 client.readdir("/", (e,content)=>{            
-                    console.log(e);
+                    assert(e);
                     resolve();
                 });
             });
@@ -96,12 +97,31 @@ describe('UTILS webdav', () => {
             });
         });
 
-        it('Function invocation made with path to element that has no type returns webdav.ResourceType.NoResource', async()=>{
-
+        it('Function invocation made with path to element that has type different than folder or document returns Error NotFound', async function(){
+            return new Promise (function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/", (e,content)=>{
+                    client.readdir("/document0", (err,innerContent)=>{
+                        console.log(err, innerContent);
+                        client.readdir("/document0/client0_note0", (err2,innerContent2)=>{
+                            assert(err2);
+                            resolve();
+                        });
+                    });
+                });
+            });
         });
 
-        xit('Function invocation made with path to element that has type different than folder or document returns webdav.ResourceType.NoResource');
-        xit('Function invocation made with path to the root returns webdav.ResourceType.Directory');
+        it('Function invocation made with path to the root returns webdav.ResourceType.Directory', async function(){
+            return new Promise (function(resolve, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/", (e,content)=>{
+                    console.log(e, content);
+                    assert(content);
+                    resolve();
+                });
+            });
+        });
 
     });
 
@@ -188,6 +208,7 @@ describe('UTILS webdav', () => {
                 conn.readdir("/", (e,content)=>{            
                     conn.delete("/folder1", (error)=>{
                         //console.log(error);
+                        assert(error);
                         resolve();
                     });
                 });    
@@ -275,27 +296,24 @@ describe('UTILS webdav', () => {
         });
 
         it('Function invocation made path to non-existing source returns Errors.ResourceNotFound', async() => {
-            /**return new Promise((resolve,reject)=>{
-                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');
-                conn.readdir("/", (error,contents)=>{                    
-                    conn.get("/document1" , (err, contents) =>{
-                        console.log(err,contents);
-                        resolve();
-                    });                       
-                   
+            return new Promise((resolve,reject)=>{
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');            
+                conn.get("/fake_file" , (err, contents) =>{
+                    assert(err);
+                    resolve();
                 });                
-            });**/            
+            });       
         });   
 
 
         xit('Function invocation made when this._clientname  == null => Error.Forbidden');
     });
 
-    describe('__setCredentials', () => {
+   /* describe('__setCredentials', () => {
         xit('Function invocation made with valid client name => correctly set _clientName');
         xit('unction invocation made with valid user name => correctly set _userName');
         xit('Function invocation made with client name different than the client name of the user with the given user name => Error.BadAuthentication');
-    });
+    });*/
 
 });
 
