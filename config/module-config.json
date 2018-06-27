@@ -1231,8 +1231,7 @@
             "public" : [
                 "css/icons/material/qrcode-avorium.svg",
                 "css/icons/office/qrcode-avorium.svg",
-                "partial/Doc/QRScanner.html",
-                "partial/qrscanner/QRScannerCard.html"
+                "partial/Doc/QRScanner.html"
             ],
             "include" : [
                 "public/js/components/avt-qr-scanner.js",
@@ -1245,8 +1244,12 @@
                     { "name": "stammdatenqrscanner", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "qrscanner", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "qrscannerscannercardcard", "label": "QR Scanner", "content": "<md-card avt-card avt-qr-scanner avt-close-toolbar-button></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "qrscanner", "name": "qrscanner", "label": "QR Scanner", "doccard": "QRScanner", "directurls": "qrscanner", "icon": "/css/icons/material/qrcode-avorium.svg", "index": 950, "maincard": "qrscanner/QRScannerCard", "permission": "PERMISSION_QRSCANNER" }
+                    { "modulename": "qrscanner", "name": "qrscanner", "label": "QR Scanner", "doccard": "QRScanner", "directurls": "qrscanner", "icon": "/css/icons/material/qrcode-avorium.svg", "index": 950, "viewcardname": "qrscannerscannercardcard", "permission": "PERMISSION_QRSCANNER" }
                 ] }
 
             ]
@@ -1327,8 +1330,6 @@
                 "css/icons/material/icons8-blockly-green.svg",
                 "css/icons/office/icons8-blockly-green.svg",
                 "partial/ronnyseins/3DCard.html",
-                "partial/ronnyseins/AugmentedRealityCard.html",
-                "partial/ronnyseins/GoogleMapsCard.html",
                 "partial/ronnyseins/BlocklyCard.html",
                 "partial/ronnyseins/mixedreality.html"
             ],
@@ -1366,9 +1367,14 @@
                     { "name": "ronnyblockly", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "blockly", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "ronnyseinsaugmentedrealitycard", "label": "Augmented Reality", "content": "<md-card class=\"fullwidth\" avt-card avt-babylonjs-scene avt-close-toolbar-button></md-card>" },
+                    { "name": "ronnyseinsgooglemapscard", "label": "Google Maps", "content": "<md-card id=\"map\" class=\"fullwidth\" ng-cloak ng-controller=\"ronnyseinsGoogleMapsCardController\"></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "ronnyseins", "name": "augmentedreality", "label": "Augmented Reality", "icon": "/css/icons/material/Virtual Reality.svg", "index": 810, "maincard": "ronnyseins/AugmentedRealityCard" },
-                    { "modulename": "ronnyseins", "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "maincard": "ronnyseins/GoogleMapsCard" },
+                    { "modulename": "ronnyseins", "name": "augmentedreality", "label": "Augmented Reality", "icon": "/css/icons/material/Virtual Reality.svg", "index": 810, "viewcardname": "ronnyseinsaugmentedrealitycard" },
+                    { "modulename": "ronnyseins", "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "viewcardname": "ronnyseinsgooglemapscard" },
                     { "modulename": "ronnyseins", "name": "blockly", "label": "Blockly", "icon": "/css/icons/material/icons8-blockly-green.svg", "index": 830, "maincard": "ronnyseins/BlocklyCard" }
                 ] }
 
