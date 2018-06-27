@@ -85,7 +85,7 @@ app.directive('avtRecordtypefieldDetailsCard', function($rootScope, $compile, $h
                     utils.showdialog(scope.$new(true), "<p>Soll das Feld wirklich gelöscht werden?</p>", [
                         { label: "Ja", onclick: function() {
                             $http.delete("/api/recordtypes/field/" + scope.params.datatypename + "/" + scope.params.entityname).then(function(response) { 
-                                if (response.status !== 200) {
+                                if (response.status !== 204) {
                                     $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
                                     return;
                                 }

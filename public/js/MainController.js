@@ -68,8 +68,9 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     }
 
     // User clicked on login button
-    $scope.doLogin = function(hideErrorMessage) {
+    $scope.doLogin = function() {
         rootscope.title = null;
+        rootscope.currentapp = null;
         return utils.login(rootscope, $scope.username, $scope.password).then(function() {
             $scope.$root.isLoading = true;
             return Promise.all([
@@ -92,7 +93,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         rootscope.searchResults = [];
         rootscope.searchInputVisible = false;
         delete rootscope.currentview;
-        delete rootscope.currentapp;
+        rootscope.currentapp = null;
     utils.setLocation('/');
     };
 
