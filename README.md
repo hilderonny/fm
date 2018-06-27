@@ -1,3 +1,5 @@
+![](https://teamcity.avorium.de/app/rest/builds/aggregated/strob:(buildType:(project:(id:AVT_FacilityManagement)))/statusIcon.svg)
+
 # Installation
 
 ## Als Dienst unter Linux
