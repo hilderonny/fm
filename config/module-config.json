@@ -71,12 +71,7 @@
                 "partial/Administration/DynamicAttributesCard.html",
                 "partial/Administration/DynamicAttributeElementCard.html",
                 "partial/Administration/DynamicAttributesEntityListCard.html",
-                "partial/Administration/UserCard.html",
-                "partial/Administration/UsergroupCard.html",
-                "partial/Administration/UsergrouplistCard.html",
-                "partial/Administration/UserlistCard.html",
                 "partial/Administration/UserSettingsCard.html",
-                "partial/components/DetailsCard.html",
                 "partial/Core/DynamicAttributesTab.html",
                 "partial/Doc/Settings.html",
                 "partial/Doc/Users.html",
@@ -127,7 +122,7 @@
                 "public/js/Administration/UserSettingsCardController.js"
             ],
             "languages" : [ "de" ],
-            "utils": [ "apiHelper", "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "dynamicobjecthelper", "loginHelper", "relationsHelper", "db", "localConfigHelper", "permissionshelper", "updateonstart" ],
+            "utils": [ "calculationhelper", "configHelper", "constants", "dynamicAttributesHelper", "dynamicobjecthelper", "loginHelper", "relationsHelper", "db", "localConfigHelper", "permissionshelper", "updateonstart" ],
             "permissions" : [ "PERMISSION_CORE_RELATIONS" ],
             "clientdatatypes": [
 
@@ -208,6 +203,12 @@
                 { "name": "viewcards", "label": "Karte für Sichten", "plurallabel": "Karten für Sichten", "titlefield": "label", "icon": "/css/icons/material/icons8-web-design.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
+                ], "values": [
+                    { "name": "basedetailscard", "label": "Detailansicht (Standard)", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
+                    { "name": "baseusergroupdetailscard", "label": "Benutzergruppendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-users-tab avt-permissions-tab avt-close-toolbar-button></md-card>" },
+                    { "name": "baseusergrouplistcard", "label": "Benutzergruppenliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"usergroups\",\"detailscardname\":\"baseusergroupdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"usergroups\"],\"detailscardname\":\"baseusergroupdetailscard\"}'></md-card>" },
+                    { "name": "baseuserdetailscard", "label": "Benutzerdetails", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
+                    { "name": "baseuserlistcard", "label": "Benutzerliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"users\",\"detailscardname\":\"baseuserdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"users\"],\"detailscardname\":\"baseuserdetailscard\"}'></md-card>" }
                 ], "lists": [ "viewcards" ], "canhaverelations" : true },
 
                 { "name": "views", "label": "Sicht", "plurallabel": "Sichten", "titlefield": "label", "fields": [
@@ -223,8 +224,8 @@
                 ], "values": [
                     { "modulename": "base", "name": "benutzereinstellungen", "label": "Mein Profil", "doccard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "maincard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
                     { "modulename": "base", "name": "mandanteneinstellungen", "label": "Mandanteneinstellungen", "doccard": "Settings", "directurls": "clientsettings", "icon": "/css/icons/material/Briefcase.svg", "index": 420, "maincard": "Administration/ClientSettingsCard", "permission": "PERMISSION_SETTINGS_CLIENT" },
-                    { "modulename": "base", "name": "benutzergruppenverwaltung", "label": "Benutzergruppen", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "maincard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
-                    { "modulename": "base", "name": "benutzerverwaltung", "label": "Benutzer", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "maincard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" },
+                    { "modulename": "base", "name": "benutzergruppenverwaltung", "label": "Benutzergruppen", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "viewcardname": "baseusergrouplistcard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
+                    { "modulename": "base", "name": "benutzerverwaltung", "label": "Benutzer", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "viewcardname": "baseuserlistcard", "permission": "PERMISSION_ADMINISTRATION_USER" },
                     { "modulename": "base", "name": "dynamischeattribute", "label": "Dynamische Attribute", "doccard": "Settings", "directurls": "dynamicattributes", "icon": "/css/icons/material/View Details.svg", "index": 140, "maincard": "Administration/DynamicAttributesEntityListCard", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" }
                 ], "lists": [ "appsandviews" ], "canhaverelations" : true }
 
@@ -307,6 +308,12 @@
                 { "name": "viewcards", "label": "Karte für Sichten", "plurallabel": "Karten für Sichten", "titlefield": "label", "icon": "/css/icons/material/icons8-web-design.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
                     { "name": "content", "label": "Inhalt", "type": "text", "rows": 10 }
+                ], "values": [
+                    { "name": "basedetailscard", "label": "Detailansicht (Standard)", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
+                    { "name": "baseusergroupdetailscard", "label": "Benutzergruppendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-users-tab avt-permissions-tab avt-close-toolbar-button></md-card>" },
+                    { "name": "baseusergrouplistcard", "label": "Benutzergruppenliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"usergroups\",\"detailscardname\":\"baseusergroupdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"usergroups\"],\"detailscardname\":\"baseusergroupdetailscard\"}'></md-card>" },
+                    { "name": "baseuserdetailscard", "label": "Benutzerdetails", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
+                    { "name": "baseuserlistcard", "label": "Benutzerliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"users\",\"detailscardname\":\"baseuserdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"users\"],\"detailscardname\":\"baseuserdetailscard\"}'></md-card>" }
                 ], "lists": [ "viewcards" ], "canhaverelations" : true },
 
                 { "name": "views", "label": "Sicht", "plurallabel": "Sichten", "titlefield": "label", "fields": [
@@ -321,8 +328,8 @@
                     { "name": "viewcardname", "label": "Karte", "type": "reference", "reference": "viewcards", "isrequired": false }
                 ], "values": [
                     { "modulename": "base", "name": "benutzereinstellungen", "label": "Mein Profil", "doccard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "maincard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
-                    { "modulename": "base", "name": "benutzergruppenverwaltung", "label": "Benutzergruppen", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "maincard": "Administration/UsergrouplistCard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
-                    { "modulename": "base", "name": "benutzerverwaltung", "label": "Benutzer", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "maincard": "Administration/UserlistCard", "permission": "PERMISSION_ADMINISTRATION_USER" }
+                    { "modulename": "base", "name": "benutzergruppenverwaltung", "label": "Benutzergruppen", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "viewcardname": "baseusergrouplistcard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
+                    { "modulename": "base", "name": "benutzerverwaltung", "label": "Benutzer", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "viewcardname": "baseuserlistcard", "permission": "PERMISSION_ADMINISTRATION_USER" }
                 ], "lists": [ "appsandviews" ], "canhaverelations" : true }
 
             ]
@@ -374,16 +381,13 @@
         "activities": {
             "forportal": false,
             "forclients": true,
-            "api" : [ "activities" ],
             "public" : [
                 "css/icons/material/Planner.svg",
                 "css/icons/office/Planner.svg",
                 "css/images/Activities_add.png",
                 "css/images/Activities_calendar.png",
                 "css/images/Activities_new.png",
-                "partial/Doc/Activities.html",
-                "partial/Office/ActivityCard.html",
-                "partial/Office/CalendarCard.html"
+                "partial/Doc/Activities.html"
             ],
             "include" : [
                 "public/js/components/avt-calendar-card.js"
@@ -415,8 +419,13 @@
                     { "name": "stammdatentermine", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "termine", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "activitiesactivitydetailscard", "label": "Termindetails", "content": "<md-card avt-card avt-details-card avt-relations avt-close-toolbar-button></md-card>" },
+                    { "name": "activitiescalendarcard", "label": "Terminkalender", "content": "<md-card class=\"list-details-details flex2-card\" avt-card avt-calendar-card avt-add-element-toolbar-button='{\"datatypenames\":[\"activities\"],\"label\":\"Termin\",\"tooltip\":\"Neuer Termin\",\"icon\":\"/css/icons/material/Plus Math.svg\",\"detailscardname\":\"basedetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "activities", "name": "termine", "label": "Termine", "doccard": "Activities", "directurls": "activities", "icon": "/css/icons/material/Planner.svg", "index": 940, "maincard": "Office/CalendarCard", "permission": "PERMISSION_OFFICE_ACTIVITY" }
+                    { "modulename": "activities", "name": "termine", "label": "Termine", "doccard": "Activities", "directurls": "activities", "icon": "/css/icons/material/Planner.svg", "index": 940, "viewcardname": "activitiescalendarcard", "permission": "PERMISSION_OFFICE_ACTIVITY" }
                 ] }
 
             ]
@@ -448,10 +457,7 @@
                 "css/images/Areas_mobile.png",
                 "css/images/Areas_nutzungsstatus.png",
                 "partial/Doc/Areas.html",
-                "partial/BIM/AreasCard.html",
-                "partial/BIM/Din277AreaListCard.html",
-                "partial/BIM/Din277HierarchyCard.html",
-                "partial/BIM/FlooringEditorListCard.html"
+                "partial/BIM/AreasCard.html"
             ],
             "include" : [
                 "public/js/components/avt-areas-usagestate-diagram.js",
@@ -628,6 +634,10 @@
                 ] },
 
                 { "name": "viewcards", "values": [
+                    { "name": "areasdin277arealistcard", "label": "DIN277 Flächenübersicht", "content": "<md-card avt-card avt-bim-din277-card='{\"detailscardname\":\"fmobjectsarrangeobjectsdetailscard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "areasdin277areatypehierarchycard", "label": "DIN277 Flächentypenhierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"areatypes\",\"detailscardname\":\"areasdin277arealistcard\",\"hideicons\":true}'></md-card>" },
+                    { "name": "areasdin277hierarchycard", "label": "DIN277 - Objekthierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"fmobjects_hierarchy\",\"detailscardname\":\"areasdin277areatypehierarchycard\"}'></md-card>" },
+                    { "name": "areasflooringeditorlistcard", "label": "Belagartenliste", "content": "<md-card avt-card avt-list-card='{\"listfilter\":\"areafloorings\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"areafloorings\"],\"detailscardname\":\"basedetailscard\"}'></md-card>" },
                     { 
                         "name": "flechennachnutzungsstatushierarchycard", 
                         "label": "Flächen nach Nutzungsstatus Hierarchie", 
@@ -642,9 +652,9 @@
 
                 { "name": "views", "values": [
                     { "modulename": "areas", "name": "flaechen", "label": "Flächen Übersicht", "doccard": "Areas#areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "maincard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" },
-                    { "modulename": "areas", "name": "din277", "label": "Flächen nach DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "maincard": "BIM/Din277HierarchyCard", "permission": "PERMISSION_BIM_AREAS" },
+                    { "modulename": "areas", "name": "din277", "label": "Flächen nach DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "viewcardname": "areasdin277hierarchycard", "permission": "PERMISSION_BIM_AREAS" },
                     { "modulename": "areas", "name": "flechennachnutzungsstatus", "label": "Flächen nach Nutzungsstatus", "doccard": "Areas#nutzungsstatus", "directurls": "flechennachnutzungsstatus", "icon": "/css/icons/material/icons8-chart.svg", "index": 723, "viewcardname": "flechennachnutzungsstatushierarchycard", "permission": "PERMISSION_BIM_AREAS" },
-                    { "modulename": "areas", "name": "flooringeditor", "label": "Belagarten", "doccard": "Areas#flooringeditor", "directurls": "flooringeditor", "icon": "/css/icons/material/icons8-carpet.svg", "index": 730, "maincard": "BIM/FlooringEditorListCard",  "permission": "PERMISSION_BIM_AREAS" }
+                    { "modulename": "areas", "name": "flooringeditor", "label": "Belagarten", "doccard": "Areas#flooringeditor", "directurls": "flooringeditor", "icon": "/css/icons/material/icons8-carpet.svg", "index": 730, "viewcardname": "areasflooringeditorlistcard",  "permission": "PERMISSION_BIM_AREAS" }
                 ] }
 
             ]
@@ -675,10 +685,6 @@
                 "css/images/Persons_commlist.png",
                 "css/images/Persons_edit.png",
                 "css/images/Persons_list.png",
-                "partial/CRM/BPCard.html",
-                "partial/CRM/BPListCard.html",
-                "partial/CRM/PersonCard.html",
-                "partial/CRM/PersonListCard.html",
                 "partial/Doc/BusinessPartners.html",
                 "partial/Doc/Persons.html"
             ],
@@ -751,9 +757,16 @@
                     { "name": "crmpersonen", "datatype1name": "apps", "name1": "crm", "datatype2name": "views", "name2": "personen", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "businesspartnersbusinesspartnerdetailscard", "label": "Geschäftspartnerdetails", "content": "<md-card avt-card avt-details-card avt-relations avt-add-element-toolbar-button='{\"datatypenames\":[\"partneraddresses\"],\"detailscardname\":\"basedetailscard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "businesspartnersbusinesspartnerlistcard", "label": "Geschäftspartnerliste", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"businesspartners_hierarchy\",\"detailscardname\":\"businesspartnersbusinesspartnerdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"businesspartners\"],\"detailscardname\":\"businesspartnersbusinesspartnerdetailscard\"}'></md-card>" },
+                    { "name": "businesspartnerspersondetailscard", "label": "Personendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-add-element-toolbar-button='{\"datatypenamelist\":\"persons_children\",\"detailscardname\":\"basedetailscard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "businesspartnerspersonlistcard", "label": "Personenliste", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"persons_hierarchy\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"persons\"],\"detailscardname\":\"businesspartnerspersondetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "businesspartners", "name": "geschaeftspartner", "label": "Geschäftspartner", "doccard": "BusinessPartners", "directurls": "businesspartners,partneraddresses", "icon": "/css/icons/material/Business.svg", "index": 210, "maincard": "CRM/BPListCard", "permission": "PERMISSION_CRM_BUSINESSPARTNERS" },
-                    { "modulename": "businesspartners", "name": "personen", "label": "Personen", "doccard": "Persons", "directurls": "persons,emailcontacts,phonecontacts", "icon": "/css/icons/material/Collaborator Male.svg", "index": 220, "maincard": "CRM/PersonListCard", "permission": "PERMISSION_CRM_PERSONS" }
+                    { "modulename": "businesspartners", "name": "geschaeftspartner", "label": "Geschäftspartner", "doccard": "BusinessPartners", "directurls": "businesspartners,partneraddresses", "icon": "/css/icons/material/Business.svg", "index": 210, "viewcardname": "businesspartnersbusinesspartnerlistcard", "permission": "PERMISSION_CRM_BUSINESSPARTNERS" },
+                    { "modulename": "businesspartners", "name": "personen", "label": "Personen", "doccard": "Persons", "directurls": "persons,emailcontacts,phonecontacts", "icon": "/css/icons/material/Collaborator Male.svg", "index": 220, "viewcardname": "businesspartnerspersonlistcard", "permission": "PERMISSION_CRM_PERSONS" }
                 ] }
             ]
         },
@@ -777,8 +790,6 @@
                 "css/images/Clients_editclient.png",
                 "css/images/Clients_list.png",
                 "css/images/Clients_modules.png",
-                "partial/Administration/ClientDetailsCard.html",
-                "partial/Administration/ClientListCard.html",
                 "partial/Doc/Clients.html"
             ],
             "include" : [
@@ -799,8 +810,13 @@
                     { "name": "portalmandantenverwaltung", "datatype1name": "apps", "name1": "portal", "datatype2name": "views", "name2": "mandantenverwaltung", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "clientsclientdetailscard", "label": "Mandantendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-clientmodules-tab avt-createadmin-toolbar-button avt-clientexport-toolbar-button avt-close-toolbar-button></md-card>" },
+                    { "name": "clientsclientlistcard", "label": "Mandantenliste", "content": "<md-card avt-card avt-progress-spinner avt-list-card='{\"listfilter\":\"clients\",\"detailscardname\":\"clientsclientdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"clients\"],\"detailscardname\":\"clientsclientdetailscard\"}' avt-clientimport-toolbar-button></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "clients", "name": "mandantenverwaltung", "label": "Mandantenverwaltung", "doccard": "Clients", "directurls": "clients", "icon": "/css/icons/material/Briefcase.svg", "index": 600, "maincard": "Administration/ClientListCard", "permission": "PERMISSION_ADMINISTRATION_CLIENT" }
+                    { "modulename": "clients", "name": "mandantenverwaltung", "label": "Mandantenverwaltung", "doccard": "Clients", "directurls": "clients", "icon": "/css/icons/material/Briefcase.svg", "index": 600, "viewcardname": "clientsclientlistcard", "permission": "PERMISSION_ADMINISTRATION_CLIENT" }
                 ] }
                 
             ]
@@ -810,11 +826,15 @@
             "forportal": true,
             "forclients": true,
             "public" : [
+                "css/icons/material/icons8-file-preview.svg",
                 "css/icons/material/icons8-web-design.svg",
                 "css/icons/material/icons8-website.svg",
                 "css/icons/office/icons8-web-design.svg",
                 "css/icons/office/icons8-website.svg",
                 "partial/Doc/ContentManagement.html"
+            ],
+            "include" : [
+                "public/js/components/avt-card-preview.js"
             ],
             "languages" : [ "de" ],
             "clientdatatypes": [
@@ -829,8 +849,9 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Neue Karte\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'></md-card>" },
-                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"Neue App oder Sicht\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'></md-card>" }
+                    { "name": "cmsviewcarddetailscard", "label": "Kartendetails", "content": "<md-card avt-card avt-details-card avt-card-preview avt-relations avt-close-toolbar-button></md-card>" },
+                    { "name": "cmsviewcardlistcard", "label": "Kartenliste", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscardname\":\"cmsviewcarddetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Karte erstellen\",\"detailscardname\":\"cmsviewcarddetailscard\"}'></md-card>" },
+                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"App oder Sicht erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" }
                 ] },
 
                 { "name": "views", "values": [
@@ -847,8 +868,8 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Neue Karte\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'></md-card>" },
-                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscard\":\"components/DetailsCard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"Neue App oder Sicht\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'></md-card>" }
+                    { "name": "cmsviewcardlistcard", "label": "Karten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"viewcards\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"viewcards\"],\"label\":\"Karte\",\"tooltip\":\"Karte erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" },
+                    { "name": "cmsappsandviewslistcard", "label": "Apps und Sichten", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"appsandviews\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"apps\", \"views\"],\"label\":\"App/Sicht\",\"tooltip\":\"App oder Sicht erstellen\",\"detailscardname\":\"basedetailscard\"}'></md-card>" }
                 ] },
 
                 { "name": "views", "values": [
@@ -879,9 +900,7 @@
                 "css/images/Documents_hierarchy.png",
                 "css/images/Documents_upload.png",
                 "css/images/Documents_uploadmobile.png",
-                "partial/Doc/Documents.html",
-                "partial/Office/DocumentDetailsCard.html",
-                "partial/Office/DocumentListCard.html"
+                "partial/Doc/Documents.html"
             ],
             "include" : [
                 "public/js/components/avt-document-share-link.js",
@@ -912,8 +931,13 @@
                     { "name": "stammdatendokumente", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "dokumente", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "documentddocumentdetailscard", "label": "Dokumentendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-document-share-link avt-progress-spinner avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"availableondatatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Unterverzeichnis erstellen\",\"detailscardname\":\"documentddocumentdetailscard\",\"icon\":\"/css/icons/material/Add Folder.svg\"}' avt-upload-document-toolbar-button avt-download-document-toolbar-button avt-extract-document-toolbar-button avt-replace-document-toolbar-button avt-viewin3d-toolbar-button avt-close-toolbar-button></md-card>" },
+                    { "name": "documentddocumenthierarchycard", "label": "Dokumentenhierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"folders_hierarchy\",\"detailscardname\":\"documentddocumentdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Verzeichnis im Stamm erstellen\",\"icon\":\"/css/icons/material/Add Folder.svg\",\"detailscardname\":\"documentddocumentdetailscard\"}' avt-progress-spinner avt-upload-document-toolbar-button avt-drag-drop-document></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "documents", "name": "dokumente", "label": "Dokumente", "doccard": "Documents", "directurls": "documents,folders", "icon": "/css/icons/material/Document.svg", "index": 920, "maincard": "Office/DocumentListCard", "permission": "PERMISSION_OFFICE_DOCUMENT" }
+                    { "modulename": "documents", "name": "dokumente", "label": "Dokumente", "doccard": "Documents", "directurls": "documents,folders", "icon": "/css/icons/material/Document.svg", "index": 920, "viewcardname": "documentddocumenthierarchycard", "permission": "PERMISSION_OFFICE_DOCUMENT" }
                 ] }
 
             ]
@@ -940,8 +964,6 @@
                 "css/images/FM_addsub.png",
                 "css/images/FM_edit.png",
                 "css/images/FM_hierarchy.png",
-                "partial/BIM/FmObjectsDetailsCard.html",
-                "partial/BIM/FmObjectsHierarchyCard.html",
                 "partial/Doc/FmObjects.html"
             ],
             "languages" : [ "de" ],
@@ -1084,8 +1106,13 @@
                     { "name": "stammdatenarrangeobjekte", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "arrangeobjekte", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "fmobjectsarrangeobjectsdetailscard", "label": "Arrange Objekt - Detailansicht", "content": "<md-card avt-card avt-details-card avt-relations avt-add-element-toolbar-button='{\"datatypenamelist\":\"fmobjects_hierarchy\",\"detailscardname\":\"fmobjectsarrangeobjectsdetailscard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "fmobjectsarrangeobjectshierarchycard", "label": "Arrange Objekte - Hierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"fmobjects_hierarchy\",\"detailscardname\":\"fmobjectsarrangeobjectsdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenamelist\":\"fmobjects_hierarchy\",\"detailscardname\":\"fmobjectsarrangeobjectsdetailscard\"}' ></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "fmobjects", "name": "arrangeobjekte", "label": "Arrange Objekte", "doccard": "FmObjects", "directurls": "fmobjects,inventories,areas,rooms,levels,buildings,properties,projects", "icon": "/css/icons/material/Cottage.svg", "index": 910, "maincard": "BIM/FmObjectsHierarchyCard", "permission": "PERMISSION_BIM_FMOBJECT" }
+                    { "modulename": "fmobjects", "name": "arrangeobjekte", "label": "Arrange Objekte", "doccard": "FmObjects", "directurls": "fmobjects,inventories,areas,rooms,levels,buildings,properties,projects", "icon": "/css/icons/material/Cottage.svg", "index": 910, "viewcardname": "fmobjectsarrangeobjectshierarchycard", "permission": "PERMISSION_BIM_FMOBJECT" }
                 ] }
 
             ]
@@ -1106,9 +1133,7 @@
                 "css/images/Portals_edit.png",
                 "css/images/Portals_list.png",
                 "css/images/Portals_modules.png",
-                "partial/Doc/Portals.html",
-                "partial/LicenseServer/PortalDetailsCard.html",
-                "partial/LicenseServer/PortalListCard.html"
+                "partial/Doc/Portals.html"
             ],
             "include" : [
                 "public/js/components/avt-downloadportalpackage-toolbar-button.js",
@@ -1138,8 +1163,13 @@
                     { "name": "portalportalverwaltung", "datatype1name": "apps", "name1": "portal", "datatype2name": "views", "name2": "portalverwaltung", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "licenseserverportaldetailscard", "label": "Portaldetails", "content": "<md-card avt-card avt-details-card avt-relations avt-portalmodules-tab avt-generatelicensekey-button avt-downloadportalpackage-toolbar-button avt-close-toolbar-button></md-card>" },
+                    { "name": "licenseserverportallistcard", "label": "Portalliste", "content": "<md-card  avt-card avt-list-card='{\"listfilter\":\"portals\",\"detailscardname\":\"licenseserverportaldetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"portals\"],\"detailscardname\":\"licenseserverportaldetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "licenseserver", "name": "portalverwaltung", "label": "Portalverwaltung", "doccard": "Portals", "directurls": "portals", "icon": "/css/icons/material/Server.svg", "index": 510, "maincard": "LicenseServer/PortalListCard", "permission": "PERMISSION_LICENSESERVER_PORTAL" }
+                    { "modulename": "licenseserver", "name": "portalverwaltung", "label": "Portalverwaltung", "doccard": "Portals", "directurls": "portals", "icon": "/css/icons/material/Server.svg", "index": 510, "viewcardname": "licenseserverportallistcard", "permission": "PERMISSION_LICENSESERVER_PORTAL" }
                 ] }
                 
             ]
@@ -1154,8 +1184,6 @@
                 "css/images/Notes_editnote.png",
                 "css/images/Notes_list.png",
                 "css/icons/office/Notes.svg",
-                "partial/Office/NoteCard.html",
-                "partial/Office/NoteListCard.html",
                 "partial/Doc/Notes.html"
             ],
             "languages" : [ "de" ],
@@ -1170,7 +1198,7 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "officenotelistcard", "label": "Kalender", "content": "<md-card\n    avt-card\n    avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscard\":\"Office/NoteCard\"}'\n    avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"label\":\"Notiz\",\"tooltip\":\"Neue Notiz\",\"icon\":\"/css/icons/material/Plus Math.svg\"}'\n></md-card>" }
+                    { "name": "officenotelistcard", "label": "Kalender", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"detailscardname\":\"basedetailscard\"}'></md-card>" }
                 ] },
 
                 { "name": "views", "values": [
@@ -1213,8 +1241,7 @@
             "public" : [
                 "css/icons/material/qrcode-avorium.svg",
                 "css/icons/office/qrcode-avorium.svg",
-                "partial/Doc/QRScanner.html",
-                "partial/qrscanner/QRScannerCard.html"
+                "partial/Doc/QRScanner.html"
             ],
             "include" : [
                 "public/js/components/avt-qr-scanner.js",
@@ -1227,8 +1254,12 @@
                     { "name": "stammdatenqrscanner", "datatype1name": "apps", "name1": "stammdaten", "datatype2name": "views", "name2": "qrscanner", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "qrscannerscannercardcard", "label": "QR Scanner", "content": "<md-card avt-card avt-qr-scanner avt-close-toolbar-button></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "qrscanner", "name": "qrscanner", "label": "QR Scanner", "doccard": "QRScanner", "directurls": "qrscanner", "icon": "/css/icons/material/qrcode-avorium.svg", "index": 950, "maincard": "qrscanner/QRScannerCard", "permission": "PERMISSION_QRSCANNER" }
+                    { "modulename": "qrscanner", "name": "qrscanner", "label": "QR Scanner", "doccard": "QRScanner", "directurls": "qrscanner", "icon": "/css/icons/material/qrcode-avorium.svg", "index": 950, "viewcardname": "qrscannerscannercardcard", "permission": "PERMISSION_QRSCANNER" }
                 ] }
 
             ]
@@ -1249,9 +1280,6 @@
                 "css/icons/material/icons8-categorize.svg",
                 "css/icons/material/icons8-lock.svg",
                 "css/icons/office/icons8-categorize.svg",
-                "partial/Administration/RecordTypeDetailsCard.html",
-                "partial/Administration/RecordTypeFieldDetailsCard.html",
-                "partial/Administration/RecordTypeListCard.html",
                 "partial/Doc/Administration.html"
             ],
             "include" : [
@@ -1268,8 +1296,14 @@
                     { "name": "administrationdynamischeobjekte", "datatype1name": "apps", "name1": "administration", "datatype2name": "views", "name2": "dynamischeobjekte", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "recordtypesrecordtypedetailscard", "label": "Dynamische Objekte - Detailansicht", "content": "<md-card avt-card avt-recordtype-details-card avt-recordtypefields='{\"detailscardname\":\"recordtypesrecordtypefielddetailscard\"}' avt-recordtypevalues='{\"detailscardname\":\"basedetailscard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "recordtypesrecordtypefielddetailscard", "label": "Dynamische Objekte - Felddetailansicht", "content": "<md-card avt-card avt-recordtypefield-details-card avt-close-toolbar-button></md-card>" },
+                    { "name": "recordtypesrecordtypelistcard", "label": "Dynamische Objekte - Liste", "content": "<md-card avt-card avt-recordtype-list-card='{\"detailscardname\":\"recordtypesrecordtypedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"recordtypes\"],\"label\":\"Datentyp\",\"tooltip\":\"Datentyp erstellen\",\"detailscardname\":\"recordtypesrecordtypedetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "recordtypes", "name": "dynamischeobjekte", "label": "Dynamische Objekte", "doccard": "Administration", "directurls": "datatypes", "icon": "/css/icons/material/icons8-categorize.svg", "index": 130, "maincard": "Administration/RecordTypeListCard", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES" }
+                    { "modulename": "recordtypes", "name": "dynamischeobjekte", "label": "Dynamische Objekte", "doccard": "Administration", "directurls": "datatypes", "icon": "/css/icons/material/icons8-categorize.svg", "index": 130, "viewcardname": "recordtypesrecordtypelistcard", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES" }
                 ] }
                 
             ],
@@ -1279,8 +1313,14 @@
                     { "name": "portaldynamischeobjekte", "datatype1name": "apps", "name1": "portal", "datatype2name": "views", "name2": "dynamischeobjekte", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "recordtypesrecordtypedetailscard", "label": "Dynamische Objekte - Detailansicht", "content": "<md-card avt-card avt-recordtype-details-card avt-recordtypefields='{\"detailscardname\":\"recordtypesrecordtypefielddetailscard\"}' avt-recordtypevalues='{\"detailscardname\":\"basedetailscard\"}' avt-close-toolbar-button></md-card>" },
+                    { "name": "recordtypesrecordtypefielddetailscard", "label": "Dynamische Objekte - Felddetailansicht", "content": "<md-card avt-card avt-recordtypefield-details-card avt-close-toolbar-button></md-card>" },
+                    { "name": "recordtypesrecordtypelistcard", "label": "Dynamische Objekte - Liste", "content": "<md-card avt-card avt-recordtype-list-card='{\"detailscardname\":\"recordtypesrecordtypedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"recordtypes\"],\"label\":\"Datentyp\",\"tooltip\":\"Datentyp erstellen\",\"detailscardname\":\"recordtypesrecordtypedetailscard\"}'></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "recordtypes", "name": "dynamischeobjekte", "label": "Dynamische Objekte", "doccard": "Administration", "directurls": "datatypes", "icon": "/css/icons/material/icons8-categorize.svg", "index": 130, "maincard": "Administration/RecordTypeListCard", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES" }
+                    { "modulename": "recordtypes", "name": "dynamischeobjekte", "label": "Dynamische Objekte", "doccard": "Administration", "directurls": "datatypes", "icon": "/css/icons/material/icons8-categorize.svg", "index": 130, "viewcardname": "recordtypesrecordtypelistcard", "permission": "PERMISSION_SETTINGS_CLIENT_RECORDTYPES" }
                 ] }
                 
             ]
@@ -1289,7 +1329,6 @@
         "ronnyseins" : {
             "forportal": false,
             "forclients": true,
-            "api" : [ "markers" ],
             "public" : [
                 "css/icons/userlocation.png",
                 "css/icons/material/Collapse.svg",
@@ -1301,8 +1340,6 @@
                 "css/icons/material/icons8-blockly-green.svg",
                 "css/icons/office/icons8-blockly-green.svg",
                 "partial/ronnyseins/3DCard.html",
-                "partial/ronnyseins/AugmentedRealityCard.html",
-                "partial/ronnyseins/GoogleMapsCard.html",
                 "partial/ronnyseins/BlocklyCard.html",
                 "partial/ronnyseins/mixedreality.html"
             ],
@@ -1318,7 +1355,6 @@
                 "public/js/lib/msg/js/de.js",
                 "public/js/lib/babylon.js",
                 "public/js/ronnyseins/3DCardController.js",
-                "public/js/ronnyseins/AugmentedRealityCardController.js",
                 "public/js/ronnyseins/GoogleMapsCardController.js",
                 "public/js/ronnyseins/BlocklyCardController.js"
             ],
@@ -1341,9 +1377,14 @@
                     { "name": "ronnyblockly", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "blockly", "relationtypename": "parentchild" }
                 ] },
 
+                { "name": "viewcards", "values": [
+                    { "name": "ronnyseinsaugmentedrealitycard", "label": "Augmented Reality", "content": "<md-card class=\"fullwidth\" avt-card avt-babylonjs-scene avt-close-toolbar-button></md-card>" },
+                    { "name": "ronnyseinsgooglemapscard", "label": "Google Maps", "content": "<md-card id=\"map\" class=\"fullwidth\" ng-cloak ng-controller=\"ronnyseinsGoogleMapsCardController\"></md-card>" }
+                ] },
+
                 { "name": "views", "values": [
-                    { "modulename": "ronnyseins", "name": "augmentedreality", "label": "Augmented Reality", "icon": "/css/icons/material/Virtual Reality.svg", "index": 810, "maincard": "ronnyseins/AugmentedRealityCard" },
-                    { "modulename": "ronnyseins", "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "maincard": "ronnyseins/GoogleMapsCard" },
+                    { "modulename": "ronnyseins", "name": "augmentedreality", "label": "Augmented Reality", "icon": "/css/icons/material/Virtual Reality.svg", "index": 810, "viewcardname": "ronnyseinsaugmentedrealitycard" },
+                    { "modulename": "ronnyseins", "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "viewcardname": "ronnyseinsgooglemapscard" },
                     { "modulename": "ronnyseins", "name": "blockly", "label": "Blockly", "icon": "/css/icons/material/icons8-blockly-green.svg", "index": 830, "maincard": "ronnyseins/BlocklyCard" }
                 ] }
 

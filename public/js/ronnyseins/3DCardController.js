@@ -1,4 +1,4 @@
-app.controller('ronnyseins3DCardController', function($scope, $http, $mdDialog, $element, $compile, $mdConstant, $timeout, $translate, utils) {
+app.controller('ronnyseins3DCardController', function($scope, $http, $element, utils) {
 
     window.addWayPoint = function(waypoint) {
         var scene = document.querySelector('a-scene');
@@ -47,7 +47,7 @@ app.controller('ronnyseins3DCardController', function($scope, $http, $mdDialog, 
         
         };
         entity.doc = doc;
-        entity.setAttribute(modelTypeAttributes[doc.type], '/api/documents/download/' + doc._id + '?token=' + $http.defaults.headers.common['x-access-token']);
+        entity.setAttribute(modelTypeAttributes[doc.type], '/api/documents/preview/' + doc.name + '?token=' + $http.defaults.headers.common['x-access-token']);
         if (!doc.waypoints) doc.waypoints = [];
         doc.waypoints.forEach(window.addWayPoint);
         if (doc.description) {
@@ -76,38 +76,25 @@ app.controller('ronnyseins3DCardController', function($scope, $http, $mdDialog, 
         }
     };
 
-    $http.get('/api/documents/' + $scope.params.documentId).then(function(response) {
+    utils.loaddynamicobject("documents", $scope.params.documentId).then(async(doc) => {
         var documentId = $scope.params.documentId;
         window.currentScope = $scope;
         window.utils = utils;
-        $scope.document = response.data;
-        $scope.loadDocument($scope.document);
+        $scope.document = doc;
+        $scope.loadDocument(doc);
         if ($scope.document.waypoints.length > 0) {
             var camera = document.querySelector('a-camera');
             $scope.setCameraPosition($scope.document.waypoints[0], true);
         }
-
-        $http.get('/api/relations/documents/' + documentId).then(function(response) {
-            var relations = response.data;
-            var relationIdsToLoad = [];
-            relations.forEach(function(relation) {
-                if (relation.id1 === documentId) {
-                    if (relation.type2 !== 'documents') return;
-                    relationIdsToLoad.push(relation.id2);
-                } else {
-                    if (relation.type1 !== 'documents') return;
-                    relationIdsToLoad.push(relation.id1);
-                }
-            });
-            $http.get('/api/documents/forIds?ids=' + relationIdsToLoad.join(',')).then(function(response) {
-                response.data.forEach(function(doc) {
-                    if (doc.extension === '.dae' || doc.extension === '.obj') {
-                        $scope.loadDocument(doc);
-                    }
-                })
-            });
+        var relations = await utils.loadrelations("documents", $scope.params.documentId);
+        Object.values(relations).forEach(async(relation) => {
+            var isfirst = relation.datatype1name === "documents" && relation.name1 === $scope.params.documentId;
+            var datatypename = isfirst ? relation.datatype2name : relation.datatype1name;
+            var name = isfirst ? relation.name2 : relation.name1;
+            if (!datatypename || !name || datatypename !== "documents") return;
+            var element = await utils.loaddynamicobject(datatypename, name);
+            $scope.loadDocument(element);
         });
-
 
     });
 

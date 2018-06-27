@@ -9,7 +9,7 @@ app.directive('avtRecordtypevalues', function($rootScope, $compile, $mdDialog, $
         '           <md-list class="lines-beetween-items">' +
         '               <md-list-item ng-repeat="value in recordtypevalues" ng-click="tabselectvalue(value)" ng-class="selectedrecordtypevalue === value ? \'active\' : false">' +
         '                  <img ng-src="{{value.icon}}" ng-if="value.icon"/>' +
-        '                  <p>{{value[recordtype.titlefield] || value.name}}</p>' +
+        '                  <p ng-bind="value.label"></p>' +
         '               </md-list-item>' +
         '           </md-list>' +
         '       </md-card-content>' +
@@ -39,29 +39,60 @@ app.directive('avtRecordtypevalues', function($rootScope, $compile, $mdDialog, $
                 var newscope = scope.$new(true);
                 newscope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
                 newscope.detailscard = params.detailscard;
+                newscope.detailscardname = params.detailscardname;
                 // Toolbar button part
                 scope.createrecordtypevalue = function() {
                     delete scope.selectedrecordtypevalue;
                     utils.removeCardsToTheRightOf(element);
-                    utils.adddetailscard(newscope, scope.recordtype.name, undefined, scope.params.permission);
+                    if (scope.detailscard) {
+                        utils.adddetailscard(newscope, scope.recordtype.name, undefined, scope.params.permission);
+                    } else if (scope.detailscardname) {
+                        utils.addcardbyname(newscope.detailscardname, {
+                            datatypename: scope.recordtype.name,
+                            permission: scope.params.permission,
+                            onclose: newscope.ondetailscardclosed,
+                            oncreate: newscope.onelementcreated,
+                            ondelete: newscope.onelementdeleted,
+                            onsave: newscope.onelementupdated
+                        });
+                    }
                 };
                 // Tab part
                 scope.tabselectvalue = function(value) {
+                    if (!value || !(newscope.detailscard || newscope.detailscardname)) return;
                     utils.removeCardsToTheRightOf(element);
-                    utils.adddetailscard(newscope, scope.recordtype.name, value.name, scope.params.permission).then(function() {
-                        scope.selectedrecordtypevalue = value;
-                    });
+                    if (newscope.detailscard) {
+                        utils.adddetailscard(newscope, scope.recordtype.name, value.name, scope.params.permission).then(function() {
+                            scope.selectedrecordtypevalue = value;
+                        });
+                    } else if (newscope.detailscardname) {
+                        utils.addcardbyname(newscope.detailscardname, {
+                            datatypename: scope.recordtype.name,
+                            entityname: value.name,
+                            permission: scope.params.permission,
+                            onclose: newscope.ondetailscardclosed,
+                            oncreate: newscope.onelementcreated,
+                            ondelete: newscope.onelementdeleted,
+                            onsave: newscope.onelementupdated
+                        }).then(function() {
+                            scope.selectedrecordtypevalue = value;
+                        });
+                    }
                 };
                 scope.loadrecordtypevalues = function() {
                     utils.getresponsedata("/api/dynamic/" + scope.recordtype.name).then(function(values) {
                         values.forEach(function(v) {
-                            if (!v.label) v.label = v.name;
+                            if (!v.label) v.label = v[scope.recordtype.titlefield] || v.name;
                         });
                         scope.recordtypevalues = values;
                         scope.recordtypevalues.sort((a, b) => {
                             return (a[scope.recordtype.titlefield] || a.name).localeCompare(b[scope.recordtype.titlefield] || ab.name);
                         })
                     });
+                };
+                newscope.ondetailscardclosed = function() {
+                    if (!scope.selectedrecordtypevalue) return;
+                    delete scope.selectedrecordtypevalue;
                 };
                 newscope.onelementcreated = function(datatype, createdelementname) {
                     utils.loaddynamicobject(datatype.name, createdelementname).then(function(newelement) {
@@ -77,7 +108,8 @@ app.directive('avtRecordtypevalues', function($rootScope, $compile, $mdDialog, $
                     delete scope.selectedrecordtypevalue;
                 };
                 newscope.onelementupdated = function(updatedelement) {
-                    scope.selectedrecordtypevalue.label = updatedelement[scope.$root.titlefields[scope.recordtype.name]] || updatedelement.name;
+                    scope.selectedrecordtypevalue.label = updatedelement[scope.recordtype.titlefield] || updatedelement.name;
+                    if (updatedelement.icon) scope.selectedrecordtypevalue.icon = updatedelement.icon;
                 };
             };
         }

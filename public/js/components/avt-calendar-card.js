@@ -38,7 +38,6 @@ app.directive('avtCalendarCard', function($compile, $location, utils) {
             element.append(element[0].cardcontent);
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
-                scope.detailscard = 'Office/ActivityCard';
                 scope.selectedtab = 0;
                 var now = new Date();
                 var urknall = new Date(-8000000000000000);
@@ -130,9 +129,17 @@ app.directive('avtCalendarCard', function($compile, $location, utils) {
                     });
                 };
                 scope.selectelement = function(e) {
-                    if (!e || !scope.detailscard) return;
+                    if (!e) return;
                     utils.removeCardsToTheRightOf(element);
-                    utils.adddetailscard(scope, e.datatypename, e.name, "PERMISSION_OFFICE_ACTIVITY").then(function() {
+                    utils.addcardbyname("basedetailscard", {
+                        datatypename: e.datatypename,
+                        entityname: e.name,
+                        permission: "PERMISSION_OFFICE_ACTIVITY",
+                        onclose: scope.ondetailscardclosed,
+                        oncreate: scope.onelementcreated,
+                        ondelete: scope.onelementdeleted,
+                        onsave: scope.onelementupdated
+                    }).then(function() {
                         scope.selectedelement = e;
                     });
                 };

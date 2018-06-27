@@ -28,7 +28,8 @@ app.directive('avtListCard', function($compile, $location, utils) {
             if (resizehandle) element.append(resizehandle);
             return function link(scope, iElement) {
                 scope.detailscard = params.detailscard;
-                scope.onbeforecreateelement = function($event) {
+                scope.detailscardname = params.detailscardname;
+                scope.onbeforecreateelement = function() {
                     delete scope.selectedelement;
                 };
                 scope.ondetailscardclosed = function() {
@@ -66,11 +67,25 @@ app.directive('avtListCard', function($compile, $location, utils) {
                     });
                 };
                 scope.selectelement = function(e) {
-                    if (!e || !scope.detailscard) return;
+                    if (!e || !(scope.detailscard || scope.detailscardname)) return;
                     utils.removeCardsToTheRightOf(element);
-                    utils.adddetailscard(scope, e.datatypename, e.name, scope.params.permission).then(function() {
-                        scope.selectedelement = e;
-                    });
+                    if (scope.detailscard) {
+                        utils.adddetailscard(scope, e.datatypename, e.name, scope.params.permission).then(function() {
+                            scope.selectedelement = e;
+                        });
+                    } else if (scope.detailscardname) {
+                        utils.addcardbyname(scope.detailscardname, {
+                            datatypename: e.datatypename,
+                            entityname: e.name,
+                            permission: scope.params.permission,
+                            onclose: scope.ondetailscardclosed,
+                            oncreate: scope.onelementcreated,
+                            ondelete: scope.onelementdeleted,
+                            onsave: scope.onelementupdated
+                        }).then(function() {
+                            scope.selectedelement = e;
+                        });
+                    }
                 };
                 $compile(iElement)(scope);
                 scope.loadelements();

@@ -5,10 +5,6 @@
  */
 module.exports.apis = {
     /**
-     * API for managing activities
-     */
-    activities: 'activities',
-    /**
      * API for showing areas
      */
     areas: 'areas',
@@ -56,10 +52,6 @@ module.exports.apis = {
      * API for logging in users
      */
     login: 'login',
-    /**
-     * API for managing geographical map markers
-     */
-    markers: 'markers',
     /**
      * API für retrieving menu structure
      */

@@ -461,14 +461,10 @@ describe('API dynamicattributes', () => {
             await th.post(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/client0_usergroup0_user0?token=${token}`).send(valuesToSend).expect(200);
             var valuesFromDatabase = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, { entityname: 'client0_usergroup0_user0' });
             assert.strictEqual(valuesFromDatabase.length, 4);
-            assert.strictEqual(valuesFromDatabase[0].dynamicattributename, "client0_da0");
-            assert.strictEqual(valuesFromDatabase[0].value, "60");
-            assert.strictEqual(valuesFromDatabase[1].dynamicattributename, "client0_da1");
-            assert.strictEqual(valuesFromDatabase[1].value, "client0_dao1");
-            assert.strictEqual(valuesFromDatabase[2].dynamicattributename, "client0_da2");
-            assert.strictEqual(valuesFromDatabase[2].value, "170");
-            assert.strictEqual(valuesFromDatabase[3].dynamicattributename, "client0_da3");
-            assert.strictEqual(valuesFromDatabase[3].value, "client0_dao2");
+            assert.ok(valuesFromDatabase.find(v => v.dynamicattributename === "client0_da0" && v.value === "60"));
+            assert.ok(valuesFromDatabase.find(v => v.dynamicattributename === "client0_da1" && v.value === "client0_dao1"));
+            assert.ok(valuesFromDatabase.find(v => v.dynamicattributename === "client0_da2" && v.value === "170"));
+            assert.ok(valuesFromDatabase.find(v => v.dynamicattributename === "client0_da3" && v.value === "client0_dao2"));
         });
 
         it('updates only sent values', async() => {
@@ -480,14 +476,10 @@ describe('API dynamicattributes', () => {
             await th.post(`/api/${co.apis.dynamicattributes}/values/${co.collections.users.name}/client0_usergroup0_user0?token=${token}`).send(valuesToSend).expect(200);
             var valuesFromDatabase = await Db.getDynamicObjects("client0", co.collections.dynamicattributevalues.name, { entityname: 'client0_usergroup0_user0' });
             assert.strictEqual(valuesFromDatabase.length, 4);
-            assert.strictEqual(valuesFromDatabase[0].dynamicattributename, "client0_da0");
-            assert.strictEqual(valuesFromDatabase[0].value, "60");
-            assert.strictEqual(valuesFromDatabase[1].dynamicattributename, "client0_da1");
-            assert.strictEqual(valuesFromDatabase[1].value, "client0_dao1");
-            assert.strictEqual(valuesFromDatabase[2].dynamicattributename, "client0_da2");
-            assert.strictEqual(valuesFromDatabase[2].value, "110");
-            assert.strictEqual(valuesFromDatabase[3].dynamicattributename, "client0_da3");
-            assert.strictEqual(valuesFromDatabase[3].value, "client0_dao3");
+            assert.ok(valuesFromDatabase.find(v => v.dynamicattributename === "client0_da0" && v.value === "60"));
+            assert.ok(valuesFromDatabase.find(v => v.dynamicattributename === "client0_da1" && v.value === "client0_dao1"));
+            assert.ok(valuesFromDatabase.find(v => v.dynamicattributename === "client0_da2" && v.value === "110"));
+            assert.ok(valuesFromDatabase.find(v => v.dynamicattributename === "client0_da3" && v.value === "client0_dao3"));
         });
 
     });

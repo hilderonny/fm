@@ -97,7 +97,7 @@ app.directive('avtRecordtypeDetailsCard', function($compile, $http, $mdToast, $t
                     utils.showdialog(scope.$new(true), "<p>Soll der Datentyp wirklich gelöscht werden?</p>", [
                         { label: "Ja", onclick: function() {
                             $http.delete("/api/recordtypes/" + scope.recordtype.name).then(function(response) { 
-                                if (response.status !== 200) {
+                                if (response.status !== 204) {
                                     $mdDialog.show($mdDialog.alert().title(response.data).ok("OK"));
                                     return;
                                 }

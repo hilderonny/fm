@@ -42,7 +42,8 @@ app.directive('avtBimDin277Card', function ($compile, utils) {
             element.append(cardelement);
             if (resizehandle) element.append(resizehandle);
             return (scope) => {
-                scope.detailscard = params.detailscard;
+                scope.detailscardname = params.detailscardname;
+                scope.datatype = scope.$root.datatypes.areas;
                 scope.ondetailscardclosed = () => {
                     delete scope.selectedarea;
                 };
@@ -55,17 +56,27 @@ app.directive('avtBimDin277Card', function ($compile, utils) {
                     scope.selectedarea = scope.areas.find(a => a.name === scope.selectedarea.name);
                 };
                 scope.load = async() => {
-                    scope.datatype = scope.$root.datatypes.areas;
-                    var entityname = scope.params.entityname;
-                    scope.areas = await utils.getresponsedata("/api/areas/din277/" + entityname);
+                    // Fetch the selected hierarchy element from the topmost hierarchy
+                    var selectedelement = scope.parentscope.parentscope.selectedchild;
+                    var areatypename = scope.params.entityname;
+                    scope.areas = await utils.getresponsedata("/api/areas/din277/" + selectedelement.name + "/" + areatypename);
                     scope.areasum = 0;
                     scope.areas.forEach(a => { scope.areasum += a.f });
                 };
                 scope.showareadetails = async(area) => {
-                    if (!scope.detailscard) return;
+                    if (!scope.detailscardname) return;
                     utils.removeCardsToTheRightOf(element);
-                    await utils.adddetailscard(scope, "areas", area.name, scope.params.permission, undefined, undefined, "areas");
-                    scope.selectedarea = area;
+                    utils.addcardbyname(scope.detailscardname, {
+                        datatypename: "areas",
+                        entityname: area.name,
+                        permission: scope.params.permission,
+                        onclose: scope.ondetailscardclosed,
+                        oncreate: scope.onelementcreated,
+                        ondelete: scope.onelementdeleted,
+                        onsave: scope.onelementupdated
+                    }).then(function() {
+                        scope.selectedarea = area;
+                    });
                 };
                 $compile(element)(scope);
                 scope.load();
