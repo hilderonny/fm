@@ -15,7 +15,7 @@ var dh = require("../../utils/documentsHelper");
 
 
 
-describe.only('UTILS webdav', () => {
+describe('UTILS webdav', () => {
 
     var WebdavCleintConnection = (usernameInput, passwordInput) => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -80,7 +80,7 @@ describe.only('UTILS webdav', () => {
     describe('_can', () => {
         xit('Function invocation made with non-existing clientName of the simpleUser retruns Permission denied');
         xit('Function invocation made with non-exist user returns Permission denied');
-        it.only('Function invocation made for valid user with non-privilege query returns Unauthorized ', async ()=>{
+        it('Function invocation made for valid user with non-privilege query returns Unauthorized ', async ()=>{
            return new Promise(function(resolve, reject){
                try{
                    resolve (await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.PERMISSION_OFFICE_DOCUMENT));
