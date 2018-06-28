@@ -15,7 +15,7 @@ var dh = require("../../utils/documentsHelper");
 
 
 
-describe('UTILS webdav', () => {
+describe.only('UTILS webdav', () => {
 
     var WebdavCleintConnection = (usernameInput, passwordInput) => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -98,12 +98,13 @@ describe('UTILS webdav', () => {
         });
 
         it('Function invocation made with path to element that has type different than folder or document returns Error NotFound', async function(){
-            return new Promise (function(resolve, reject){
+            return new Promise ( async function(resolve, reject){
+                //relation relevant for WebDav testing
+                await th.createRelation("folders", "client0_folder0", "notes", "client0_note0", "parentchild");           
                 var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
                 client.readdir("/", (e,content)=>{
-                    client.readdir("/document0", (err,innerContent)=>{
-                        console.log(err, innerContent);
-                        client.readdir("/document0/client0_note0", (err2,innerContent2)=>{
+                    client.readdir("/folder0", (err,innerContent)=>{
+                        client.readdir("/folder0/client0_note0", (err2, innerContent2)=>{
                             assert(err2);
                             resolve();
                         });
@@ -132,8 +133,6 @@ describe('UTILS webdav', () => {
                 var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
                 client.readdir("/", (e,content)=>{ 
                     client.move('/folder0', '/folder1/folder0', function(err){
-                        //console.log(err);
-                        //console.log('wdS: ', wdSurver.Errors.Forbidden);
                         assert(err);
                         resolve();
                     });
