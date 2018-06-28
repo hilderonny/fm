@@ -40,31 +40,38 @@ router.get('/', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req
 });
 
 /**
- * Flächen nach Nutzungsart DIN277 (AVTFM-158)
+ * Flächen nach Nutzungsart DIN277 (AVTFM-158, AVTFM-207)
  */
-router.get('/din277/:areatypename', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {
+router.get('/din277/:entityname/:areatypename', auth(co.permissions.BIM_AREAS, 'r', co.modules.areas), async(req, res) => {
     var clientname = req.user.clientname;
+    var entityname = Db.replaceQuotes(req.params.entityname);
     var areatypename = Db.replaceQuotes(req.params.areatypename);
     var query = `
-        WITH RECURSIVE get_path(name, depth) AS (
+        WITH RECURSIVE get_areatype_path(name, depth) AS (
             (SELECT name, 0 FROM areatypes WHERE name='${areatypename}')
             UNION
             (SELECT
                 relations.name2,
-                get_path.depth + 1 
+                get_areatype_path.depth + 1 
             FROM relations 
-            JOIN get_path 
-            ON relations.name1 = get_path.name
+            JOIN get_areatype_path 
+            ON relations.name1 = get_areatype_path.name
             WHERE relations.relationtypename = 'parentchild'
             AND relations.datatype2name='areatypes'
-            AND get_path.depth < 64
+            AND get_areatype_path.depth < 64
             )
+        ),
+        get_child_areas(datatype1name, name1, datatype2name, name2, f, areausagestatename, depth) AS (
+            (SELECT r.datatype1name, r.name1, 'areas' datatypename,  a.name, a.f, a.areausagestatename, 0 depth FROM areas a LEFT JOIN relations r ON r.datatype2name = 'areas' AND r.name2 = a.name) 
+            UNION
+            (SELECT r.datatype1name, r.name1,  p.datatype2name,  p.name2, p.f, p.areausagestatename, p.depth + 1 FROM relations r JOIN get_child_areas p ON p.name1 = r.name2 WHERE r.relationtypename = 'parentchild' AND p.depth < 64)
         )
         SELECT DISTINCT
-        areas.*
-        FROM get_path
-        JOIN areas ON areas.areatypename = get_path.name
-        ;
+            a.*
+        FROM get_areatype_path tp
+        JOIN areas a ON a.areatypename = tp.name
+        JOIN get_child_areas cp ON cp.name2 = a.name
+        WHERE cp.name1='${entityname}';
     `;
     var areas = (await Db.query(clientname, query)).rows;
     if (areas.length < 1) return res.send([]);
