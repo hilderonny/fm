@@ -76,39 +76,18 @@ describe('UTILS webdav', () => {
      
     });
 
-    //customPrivilegeManager:   
+    //customPrivilegeManager:  
+
     describe('_can', () => {
-        xit('Function invocation made with non-existing clientName of the simpleUser retruns Permission denied');
-        xit('Function invocation made with non-exist user returns Permission denied');
-        it.only('Function invocation made for valid user with non-privilege query returns Unauthorized ', async ()=>{
-           return new Promise(function(resolve, reject){
-               try{
-                   resolve (await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.PERMISSION_OFFICE_DOCUMENT));
-                   var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
-                    client.readdir("/", (e,content)=>{            
-                    console.log(e,content);
-                    resolve();
-                });
-               }catch(e){ reject(e);}
-           
-
-               /**resolve(th.removeReadPermission("client0", "client0_usergroup0", co.permissions.PERMISSION_OFFICE_DOCUMENT));
-            }).then(function(resolve2, reject){
+        it('Function invocation made for valid user with non-privilege query returns Unauthorized ', async ()=>{
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.OFFICE_DOCUMENT);
+            return new Promise(function(resolve, reject){            
                 var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
-                client.readdir("/", (e,content)=>{            
-                    console.log(e,content);
-                    resolve2();
-                });**/
-            });
-        });
-        xit('Function invocation made for valid read-only user with ‘canRead’ privilege query returns true');
-        xit('Function invocation made for valid read-only user with ‘canWrite’ privilege query returns false', async ()=>{
-
-        });
-        xit('Function invocation made for valid read-write user with ‘canWrite’ privilege query returns true');
-        xit('Function invocation made for valid admin user with ‘canWrite’ privilege query returns true');
-        xit('Function invocation made for valid non-authorized user with ‘canRead’ privilege query returns false');
-        xit('Function invocation made for valid non-authorized user with ‘canWrite’ privilege query returns false');      
+                client.readdir("/", (e,content)=>{          
+                resolve();
+                });            
+             });
+        });   
     });
     //WebDav Filesystem
     describe('type', () => {
@@ -249,7 +228,8 @@ describe('UTILS webdav', () => {
                 conn.readdir("/", (e, content) => {   
                     //console.log(e, content);
                     conn.readdir("/folder10", (err, deeperContent) =>{
-                        console.log(err, deeperContent);                
+                        //console.log(err, deeperContent); 
+                        assert(err);
                         resolve();                      
                     });                                         
                 }); 
@@ -261,7 +241,8 @@ describe('UTILS webdav', () => {
                 var conn = WebdavCleintConnection('client1_usergroup0_user0', 'test');
                 conn.readdir("/", (e, content) => {   
                     conn.readdir("/folder0", (err, deeperContent) =>{
-                        console.log(err, deeperContent);                
+                        //console.log(err, deeperContent); 
+                        assert(err);
                         resolve();             
                     });                                         
                 });
@@ -273,9 +254,9 @@ describe('UTILS webdav', () => {
             return new Promise((resolve, reject) => {
                 var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');             
                // console.log(conn);
-                conn.readdir("/", (e, content) => {   
-                    //console.log(e, content);                   
+                conn.readdir("/", (e, content) => {                 
                     console.log(e, content);
+                    assert(content);
                     resolve();                                 
                 });
             });
@@ -286,7 +267,8 @@ describe('UTILS webdav', () => {
                 var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');                 
                 conn.readdir("/", (e, content) => {  
                     conn.readdir("/folder0", (err, deeperContent) =>{
-                        //console.log(err, deeperContent);                
+                        //console.log(err, deeperContent);
+                        assert(content);
                         resolve();                 
                     });                                         
                 });
@@ -297,14 +279,15 @@ describe('UTILS webdav', () => {
             return new Promise(function(resolve, reject){
                 var client = WebdavCleintConnection(null, 'test');
                 client.readdir("/", (e,content)=>{            
-                    console.log(e,content);
+                   // console.log(e,content);
+                    assert(e)
                     resolve();
                 });
             });
 
         });   
 
-        xit('Function invocation made as user without read rights returns initial login should fail');
+       // xit('Function invocation made as user without read rights returns initial login should fail');
     });
 
     describe('_openReadStream', () => {
@@ -344,13 +327,6 @@ describe('UTILS webdav', () => {
 
         xit('Function invocation made when this._clientname  == null => Error.Forbidden');
     });
-
-   /* describe('__setCredentials', () => {
-        xit('Function invocation made with valid client name => correctly set _clientName');
-        xit('unction invocation made with valid user name => correctly set _userName');
-        xit('Function invocation made with client name different than the client name of the user with the given user name => Error.BadAuthentication');
-    });*/
-
 });
 
 
