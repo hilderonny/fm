@@ -15,7 +15,7 @@ var dh = require("../../utils/documentsHelper");
 
 
 
-describe.only('UTILS webdav', () => {
+describe('UTILS webdav', () => {
 
     var WebdavCleintConnection = (usernameInput, passwordInput) => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
