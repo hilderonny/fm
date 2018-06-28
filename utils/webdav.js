@@ -76,42 +76,37 @@ class WebdavFilesystem extends webdav.FileSystem {
     // Obtain direct child elements of a directory
     _readDir(path, ctx, callback) {
         var self = this;
-        if (self._clientname) {
-            Db.getDynamicObject(self._clientname, "users", self._username).then(user => {
-                user.clientname = self._clientname;
-                return require("../middlewares/auth").getCachedUser(user.name);
-            }).then(cacheduser => {
-                // Distinguish between root path and child paths
-                if (path.isRoot()) {
-                    return doh.getrootelements(self._clientname, "folders_hierarchy", cacheduser.permissions);
-                } else {
-                    var element = self._cache[path.toString()];
-                    return doh.getchildren(self._clientname, element.datatypename, element.name, cacheduser.permissions, "folders_hierarchy");
-                }
-            }).then(dirElements => {
-                // Cache folders and documents for later lookup
-                dirElements.forEach(de => {
-                    console.log(de);
-                   //NO elements with types different than folders/documents can be retrieved, as long as such are not added to the "folders_hierarchy"- list in mofule-config
-                   // if (["folders", "documents"].indexOf(de.datatypename) < 0) return;
+        Db.getDynamicObject(self._clientname, "users", self._username).then(user => {
+            user.clientname = self._clientname;
+            return require("../middlewares/auth").getCachedUser(user.name);
+        }).then(cacheduser => {
+            // Distinguish between root path and child paths
+            if (path.isRoot()) {
+                return doh.getrootelements(self._clientname, "folders_hierarchy", cacheduser.permissions);
+            } else {
+                var element = self._cache[path.toString()];
+                return doh.getchildren(self._clientname, element.datatypename, element.name, cacheduser.permissions, "folders_hierarchy");
+            }
+        }).then(dirElements => {
+            // Cache folders and documents for later lookup
+            dirElements.forEach(de => {
+                //NO elements with types different than folders/documents can be retrieved, as long as such are not added to the "folders_hierarchy"- list in mofule-config
+                // if (["folders", "documents"].indexOf(de.datatypename) < 0) return;
 
-                    // Displayname does not work in windows: https://stackoverflow.com/a/21636844
-                    var label = de.label ? de.label : de.name;
-                    var fullPath = path.getChildPath(label).toString();
-                    self._cache[fullPath] = de; // Label is used as path identifier, no duplicate names possible!
-                });
-                callback(null, dirElements.map(de => de.label ? de.label : de.name));
+                // Displayname does not work in windows: https://stackoverflow.com/a/21636844
+                var label = de.label ? de.label : de.name;
+                var fullPath = path.getChildPath(label).toString();
+                self._cache[fullPath] = de; // Label is used as path identifier, no duplicate names possible!
             });
-        } else {
-            callback(null, null);
-        }
-
+            callback(null, dirElements.map(de => de.label ? de.label : de.name));
+        });
     }
 
     // Request for download of a file
     _openReadStream(path, ctx, callback) {
         var element = this._cache[path.toString()];
-        if (!element) return callback(webdav.Errors.ResourceNotFound);
+        // the existance of the ellement is checked already in the _type function
+        //if (!element) return callback(webdav.Errors.ResourceNotFound);
         var path = dh.getDocumentPath(this._clientname, element.name);
         fs.open(path, 'r', function (error, fd) {
             if (error) return callback(webdav.Errors.ResourceNotFound);
@@ -137,7 +132,6 @@ class customUserManager {
     //getUserByName(name : string, callback : (error : Error, user ?: IUser) => void)
     getUserByName(name, callback) {
         Db.query(Db.PortalDatabaseName, `SELECT * FROM allusers WHERE name='${name}';`).then((userfromdatabase) => {
-            // console.log("userfromdatabase: ", userfromdatabase);
             var user = userfromdatabase.rows.map((userfromdb) => {
 
                 var newUser = new webdav.SimpleUser(userfromdb.name, userfromdb.password, false, false);
@@ -165,9 +159,7 @@ class customUserManager {
             }
             if (bcryptjs.compareSync(password, user.password)) {
                 delete user.password;
-                //console.log(self.fs);
                 self.fs._setCredentials(user.clientname, name);
-                // console.log(self.fs);
                 callback(null, user);
             } else {
                 callback(webdav.Errors.BadAuthentication);
