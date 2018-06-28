@@ -28,6 +28,7 @@ describe.only('UTILS webdav', () => {
         return conn;
     };
 
+
     before(async () => {
         await th.cleanDatabase();
         await th.prepareClients();
@@ -45,6 +46,7 @@ describe.only('UTILS webdav', () => {
     });
 
     //custom User Manager
+
    /* describe('getUserByName', () => {
         xit('Function invocation made with non-existing username returns Error.BadAuthentication', async () => {  });
         xit('Function invocation made with valid username returns deliver correct user data', async () => {
@@ -71,19 +73,42 @@ describe.only('UTILS webdav', () => {
                 });
             });
         });
+     
     });
 
     //customPrivilegeManager:   
     describe('_can', () => {
         xit('Function invocation made with non-existing clientName of the simpleUser retruns Permission denied');
         xit('Function invocation made with non-exist user returns Permission denied');
+        it.only('Function invocation made for valid user with non-privilege query returns Unauthorized ', async ()=>{
+           return new Promise(function(resolve, reject){
+               try{
+                   resolve (await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.PERMISSION_OFFICE_DOCUMENT));
+                   var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                    client.readdir("/", (e,content)=>{            
+                    console.log(e,content);
+                    resolve();
+                });
+               }catch(e){ reject(e);}
+           
+
+               /**resolve(th.removeReadPermission("client0", "client0_usergroup0", co.permissions.PERMISSION_OFFICE_DOCUMENT));
+            }).then(function(resolve2, reject){
+                var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
+                client.readdir("/", (e,content)=>{            
+                    console.log(e,content);
+                    resolve2();
+                });**/
+            });
+        });
         xit('Function invocation made for valid read-only user with ‘canRead’ privilege query returns true');
-        xit('Function invocation made for valid read-only user with ‘canWrite’ privilege query returns false');
+        xit('Function invocation made for valid read-only user with ‘canWrite’ privilege query returns false', async ()=>{
+
+        });
         xit('Function invocation made for valid read-write user with ‘canWrite’ privilege query returns true');
         xit('Function invocation made for valid admin user with ‘canWrite’ privilege query returns true');
         xit('Function invocation made for valid non-authorized user with ‘canRead’ privilege query returns false');
-        xit('Function invocation made for valid non-authorized user with ‘canWrite’ privilege query returns false');
-
+        xit('Function invocation made for valid non-authorized user with ‘canWrite’ privilege query returns false');      
     });
     //WebDav Filesystem
     describe('type', () => {
@@ -266,6 +291,17 @@ describe.only('UTILS webdav', () => {
                 });
             });        
         });
+
+        it('Function invocation made with empty clientname and correct password returns unauthrized', async () =>{
+            return new Promise(function(resolve, reject){
+                var client = WebdavCleintConnection(null, 'test');
+                client.readdir("/", (e,content)=>{            
+                    console.log(e,content);
+                    resolve();
+                });
+            });
+
+        });   
 
         xit('Function invocation made as user without read rights returns initial login should fail');
     });
