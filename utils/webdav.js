@@ -38,7 +38,7 @@ class WebdavFilesystem extends webdav.FileSystem {
         if (!element) return callback(webdav.Errors.ResourceNotFound);
         if (element.datatypename === "folders") return callback(null, webdav.ResourceType.Directory);
         if (element.datatypename === "documents") return callback(null, webdav.ResourceType.File);
-        callback(null, webdav.ResourceType.NoResource);
+        callback(null, webdav.ResourceType.NoResource); //currently, no element of type different than documents / folders can be added to the _cash
     }
 
     //MOVE request
@@ -91,7 +91,10 @@ class WebdavFilesystem extends webdav.FileSystem {
             }).then(dirElements => {
                 // Cache folders and documents for later lookup
                 dirElements.forEach(de => {
-                    if (["folders", "documents"].indexOf(de.datatypename) < 0) return;
+                    console.log(de);
+                   //NO elements with types different than folders/documents can be retrieved, as long as such are not added to the "folders_hierarchy"- list in mofule-config
+                   // if (["folders", "documents"].indexOf(de.datatypename) < 0) return;
+
                     // Displayname does not work in windows: https://stackoverflow.com/a/21636844
                     var label = de.label ? de.label : de.name;
                     var fullPath = path.getChildPath(label).toString();
