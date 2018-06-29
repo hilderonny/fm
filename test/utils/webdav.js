@@ -5,6 +5,7 @@ var assert = require('assert');
 const webdavClient = require('webdav-client');
 var th = require('../testhelpers');
 var co = require('../../utils/constants');
+var Db = require("../../utils/db").Db;
 
 describe.only('UTILS webdav', () => {
 
@@ -87,18 +88,16 @@ describe.only('UTILS webdav', () => {
             });
         });
 
-        it('Function invocation made with path to element that has type different than folder or document returns Error NotFound', async function(){
+        it.only('Function invocation made with path to element that has type different than folder or document returns Error NotFound', async function(){
             return new Promise ( async function(resolve, reject){
-                //relation relevant for WebDav testing
+                // Update the folders_hierarchy list for notes
+                await Db.updaterecordtype("client0", "notes", [ "notes_hierarchy", "folders_hierarchy" ]);
+                // Create parent-child relation between a folder and a note
                 await th.createRelation("folders", "client0_folder0", "notes", "client0_note0", "parentchild");           
                 var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
-                client.readdir("/", (e,content)=>{
-                    client.readdir("/folder0", (err,innerContent)=>{
-                        client.readdir("/folder0/client0_note0", (err2, innerContent2)=>{
-                            assert(err2);
-                            resolve();
-                        });
-                    });
+                client.readdir("/folder0/client0_note0", (err2, innerContent2)=>{
+                    assert(err2);
+                    resolve();
                 });
             });
         });
