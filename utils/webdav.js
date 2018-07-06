@@ -14,7 +14,7 @@ class WebdavFilesystem extends webdav.FileSystem {
 
     constructor() {
         super();
-      //  this._cache = {}; // TODO: should be client dependent
+        this._cache = {}; // TODO: should be client dependent
         this._lm = new webdav.LocalLockManager();
         this._pm = new webdav.LocalPropertyManager();
         this._clientname = null;
@@ -31,14 +31,83 @@ class WebdavFilesystem extends webdav.FileSystem {
         callback(null, this._pm);
     }
 
+    //helper function 
+    retriveElements (path, traverseDeeply){ 
+        var self = this;
+        var cacheduser;
+        return Db.getDynamicObject(self._clientname, "users", self._username).then(user => {
+            user.clientname = self._clientname;
+          //  console.log("user ", user);
+            return require("../middlewares/auth").getCachedUser(user.name);
+        }).then(cachedUser => {
+           // console.log("cachedUser", cachedUser);
+            cacheduser =  cachedUser;
+            return doh.getrootelements(self._clientname, "folders_hierarchy", cacheduser.permissions);
+        }).then( async function(rootElements){
+           /* if(rootElements){
+                console.log("OK rootElements");
+            }*/
+            // Distinguish between root path and child paths
+            if (path.isRoot()) {
+                return rootElements;
+            } else {
+                //var element = self._cache[path.toString()];
+        
+                var counter = 1; //skip empty entry before the root
+                var subPathsArr = path.toString().split("/");              
+                var currentRootElements = rootElements;
+               // console.log("currentRootElements", currentRootElements);
+                var currentParentElement = [];
+                var depth;
+                //make distinction between ...TODO
+                if(traverseDeeply){
+                    depth = subPathsArr.length;
+                } else{
+                   depth =  subPathsArr.length -1;
+                }
+                while(counter < depth){
+                    currentParentElement = currentRootElements.find(function(crrentElement){return crrentElement.label == subPathsArr[counter];});
+                    if (!currentParentElement){
+                        console.log("No parent element for entry", subPathsArr[counter]); //, "for ref: ", currentRootElements);
+                        return [];
+                    }else{ 
+                       // console.log("currentParentElement", currentParentElement); 
+                        currentRootElements = await doh.getchildren(self._clientname, currentParentElement.datatypename,
+                                                                    currentParentElement.name, cacheduser.permissions, "folders_hierarchy");
+                    }
+                    //console.log("ERROR currentRootElements:", currentRootElements);
+                    counter++;
+                }
+              //  console.log("Message from Helper: ", path/*,  currentRootElements*/);
+                if(typeof(currentRootElements) == 'undefined'){
+                  //  console.log("No valid input: ", currentRootElements);
+                }else{
+                     return currentRootElements;//doh.getchildren(self._clientname, element.datatypename, element.name, cacheduser.permissions, "folders_hierarchy");
+                }
+               
+            }
+        });
+   }
+
     // Return correct type of entry by asking the internal cache
     _type(path, ctx, callback) {
-        if (path.isRoot()) return callback(null, webdav.ResourceType.Directory);
-        var element = this._cache[path.toString()];
-        if (!element) return callback(webdav.Errors.ResourceNotFound);
-        if (element.datatypename === "folders") return callback(null, webdav.ResourceType.Directory);
-        if (element.datatypename === "documents") return callback(null, webdav.ResourceType.File);
-        callback(null, webdav.ResourceType.NoResource); //currently, no element of type different than documents / folders can be added to the _cash
+        var self = this;
+        return  self.retriveElements(path, false).then(function(allElements){
+            if (path.isRoot()) return callback(null, webdav.ResourceType.Directory);
+            if(allElements.length < 1) return callback(null, webdav.ResourceType.NoResource);
+            //console.log("allElements", allElements);
+            //console.log("parent path", path.getParent().paths);
+            //var element = self._cache[path.toString()];
+            var subPaths = path.toString().split("/");
+            // console.log("subPaths[subPaths.length - 1]: ", subPaths[subPaths.length - 1]);
+            // console.log("allElements: ", allElements);
+            var element = allElements.find(function(curentElemet){return curentElemet.label == subPaths[subPaths.length - 1]});
+            //console.log("EL: ", element);
+            if (!element) return callback(webdav.Errors.ResourceNotFound);
+            if (element.datatypename === "folders") return callback(null, webdav.ResourceType.Directory);
+            if (element.datatypename === "documents") return callback(null, webdav.ResourceType.File);
+            callback(null, webdav.ResourceType.NoResource); //currently, no element of type different than documents / folders can be added to the _cash
+        });     
     }
 
     //MOVE request
@@ -95,17 +164,17 @@ class WebdavFilesystem extends webdav.FileSystem {
                 var subPathsArr = path.toString().split("/");              
                 var currentRootElements = rootElements;
                 var currentParentElement;
-                console.log("subPathsArr: ", subPathsArr);
+
                 while(counter < subPathsArr.length){
-                   
-                  //  console.log("currentRootElements: ", currentRootElements);
                     currentParentElement = currentRootElements.find(function(crrentElement){return crrentElement.label == subPathsArr[counter];});
-                    /*console.log("counter: ", counter);
-                    console.log("subPathsArr[counter]: ", subPathsArr[counter]);
-                    console.log("currentParentElement: ", currentParentElement);*/
-                    //console.log(currentParentElement); 
-                    currentRootElements = await doh.getchildren(self._clientname, currentParentElement.datatypename, currentParentElement.name, cacheduser.permissions, "folders_hierarchy");
-                    console.log("currentRootElements.length", currentRootElements.length);
+                    if(currentParentElement){
+                            currentRootElements = await doh.getchildren(self._clientname, currentParentElement.datatypename,
+                                                                        currentParentElement.name, cacheduser.permissions, "folders_hierarchy");
+                    }else{
+                        // handle inccorrect file path
+                        return [];
+                    }
+                    
                     counter++;
                 }
                 return currentRootElements;//doh.getchildren(self._clientname, element.datatypename, element.name, cacheduser.permissions, "folders_hierarchy");
@@ -119,7 +188,7 @@ class WebdavFilesystem extends webdav.FileSystem {
                 // Displayname does not work in windows: https://stackoverflow.com/a/21636844
                 var label = de.label ? de.label : de.name;
                 var fullPath = path.getChildPath(label).toString();
-               // self._cache[fullPath] = de; // Label is used as path identifier, no duplicate names possible!
+                self._cache[fullPath] = de; // Label is used as path identifier, no duplicate names possible!
             });
             callback(null, dirElements.map(de => de.label ? de.label : de.name));
         });
