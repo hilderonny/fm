@@ -146,40 +146,7 @@ class WebdavFilesystem extends webdav.FileSystem {
     _readDir(path, ctx, callback) {
         var self = this;
         var cacheduser;
-        Db.getDynamicObject(self._clientname, "users", self._username).then(user => {
-            user.clientname = self._clientname;
-            return require("../middlewares/auth").getCachedUser(user.name);
-        }).then(cachedUser => {
-            cacheduser =  cachedUser;
-            return doh.getrootelements(self._clientname, "folders_hierarchy", cacheduser.permissions);
-        }).then( async function(rootElements){
-
-            // Distinguish between root path and child paths
-            if (path.isRoot()) {
-                return rootElements;
-            } else {
-                //var element = self._cache[path.toString()];
-        
-                var counter = 1; //skip empty entry before the root
-                var subPathsArr = path.toString().split("/");              
-                var currentRootElements = rootElements;
-                var currentParentElement;
-
-                while(counter < subPathsArr.length){
-                    currentParentElement = currentRootElements.find(function(crrentElement){return crrentElement.label == subPathsArr[counter];});
-                    if(currentParentElement){
-                            currentRootElements = await doh.getchildren(self._clientname, currentParentElement.datatypename,
-                                                                        currentParentElement.name, cacheduser.permissions, "folders_hierarchy");
-                    }else{
-                        // handle inccorrect file path
-                        return [];
-                    }
-                    
-                    counter++;
-                }
-                return currentRootElements;//doh.getchildren(self._clientname, element.datatypename, element.name, cacheduser.permissions, "folders_hierarchy");
-            }
-        }).then(dirElements => {
+        self.retriveElements(path, true).then(dirElements => {
             // Cache folders and documents for later lookup
             dirElements.forEach(de => {
                 //NO elements with types different than folders/documents can be retrieved, as long as such are not added to the "folders_hierarchy"- list in mofule-config
