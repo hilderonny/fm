@@ -50,9 +50,7 @@ class WebdavFilesystem extends webdav.FileSystem {
             // Distinguish between root path and child paths
             if (path.isRoot()) {
                 return rootElements;
-            } else {
-                //var element = self._cache[path.toString()];
-        
+            } else {      
                 var counter = 1; //skip empty entry before the root
                 var subPathsArr = path.toString().split("/");              
                 var currentRootElements = rootElements;
@@ -97,7 +95,6 @@ class WebdavFilesystem extends webdav.FileSystem {
             if(allElements.length < 1) return callback(null, webdav.ResourceType.NoResource);
             //console.log("allElements", allElements);
             //console.log("parent path", path.getParent().paths);
-            //var element = self._cache[path.toString()];
             var subPaths = path.toString().split("/");
             // console.log("subPaths[subPaths.length - 1]: ", subPaths[subPaths.length - 1]);
             // console.log("allElements: ", allElements);
