@@ -88,7 +88,7 @@ describe.only('UTILS webdav', () => {
             });
         });
 
-        it.only('Function invocation made with path to element that has type different than folder or document returns Error NotFound', async function(){
+        it('Function invocation made with path to element that has type different than folder or document returns Error NotFound', async function(){
             return new Promise ( async function(resolve, reject){
                 // Update the folders_hierarchy list for notes
                 await Db.updaterecordtype("client0", "notes", [ "notes_hierarchy", "folders_hierarchy" ]);
@@ -156,16 +156,16 @@ describe.only('UTILS webdav', () => {
         it('Function invocation made with valid parameters  returns correctly updated name', async () =>{
             return new Promise (function(resolve, reject){
                 var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
-                client.readdir("/", (e,content)=>{ 
+                client.readdir("/folder0", (e, content)=>{ 
                     client.move('/folder0', '/folder_renamed', function(err){
                         if(err){
                             resolve(assert.fail(err));
                         }else{
-                            client.readdir('/folder_renamed', function(err, new_content){
+                            client.readdir('/folder_renamed', function(err, contentAfterRename){
                                 assert.ifError(err);
-                                assert(new_content);
+                                assert.equal(content.length, contentAfterRename.length);
                                 resolve();
-                            })
+                            });
                         }
                     })
                 });
