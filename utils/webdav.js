@@ -36,10 +36,8 @@ class WebdavFilesystem extends webdav.FileSystem {
         var cacheduser;
         return Db.getDynamicObject(self._clientname, "users", self._username).then(user => {
             user.clientname = self._clientname;
-          //  console.log("user ", user);
             return require("../middlewares/auth").getCachedUser(user.name);
         }).then(cachedUser => {
-           // console.log("cachedUser", cachedUser);
             cacheduser =  cachedUser;
             return doh.getrootelements(self._clientname, "folders_hierarchy", cacheduser.permissions);
         }).then( async function(rootElements){
@@ -53,7 +51,6 @@ class WebdavFilesystem extends webdav.FileSystem {
                 var counter = 1; //skip empty entry before the root
                 var subPathsArr = path.toString().split("/");              
                 var currentRootElements = rootElements;
-                //console.log("currentRootElements", currentRootElements);
                 var currentParentElement = [];
                 var depth;
                 //make distinction between ...TODO
@@ -72,16 +69,9 @@ class WebdavFilesystem extends webdav.FileSystem {
                         currentRootElements = await doh.getchildren(self._clientname, currentParentElement.datatypename,
                                                                     currentParentElement.name, cacheduser.permissions, "folders_hierarchy");
                     }
-                    //console.log("ERROR currentRootElements:", currentRootElements);
                     counter++;
                 }
-              //  console.log("Message from Helper: ", path/*,  currentRootElements*/);
-                if(typeof(currentRootElements) == 'undefined'){
-                  //  console.log("No valid input: ", currentRootElements);
-                }else{
-                     return currentRootElements;//doh.getchildren(self._clientname, element.datatypename, element.name, cacheduser.permissions, "folders_hierarchy");
-                }
-               
+                return currentRootElements;//doh.getchildren(self._clientname, element.datatypename, element.name, cacheduser.permissions, "folders_hierarchy");               
             }
         });
    }
@@ -91,13 +81,12 @@ class WebdavFilesystem extends webdav.FileSystem {
         var self = this;
         return  self.retriveElements(path, false).then(function(allElements){
             if (path.isRoot()) return callback(null, webdav.ResourceType.Directory);
-            if(allElements.length < 1) return callback(null, webdav.ResourceType.NoResource);
             var subPaths = path.toString().split("/");
             var element = allElements.find(function(curentElemet){return curentElemet.label == subPaths[subPaths.length - 1]});
             if (!element) return callback(webdav.Errors.ResourceNotFound);
             if (element.datatypename === "folders") return callback(null, webdav.ResourceType.Directory);
             if (element.datatypename === "documents") return callback(null, webdav.ResourceType.File);
-            callback(null, webdav.ResourceType.NoResource); //currently, no element of type different than documents / folders can be added to the _cash
+            callback(null, webdav.ResourceType.NoResource);
         });     
     }
 
@@ -118,7 +107,6 @@ class WebdavFilesystem extends webdav.FileSystem {
                        callback();
                     });
                 } else {
-                   // console.log("NOOOO ELEMET");
                     callback(webdav.Errors.ResourceNotFound);
                 }
             })
