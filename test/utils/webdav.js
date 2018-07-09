@@ -278,25 +278,11 @@ describe('UTILS webdav', () => {
     describe('_openReadStream', () => {
         it('Function invocation made path to existing source returns the data', async() =>{
             return new Promise((resolve,reject)=>{
-                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');
-                conn.readdir("/", (error,contents)=>{
-                    conn.prepareForStreaming((error)=> {//https://github.com/OpenMarshal/npm-WebDAV-Client/blob/76392d8a72624c86679ab7f4d8694fe46588eb68/test/test.js
-                        var readstream =conn.get("/document0");
-                        let data = '';                        
-                        readstream.on('data', (chunk) => {
-                            data += chunk.toString();
-                            assert(data);
-                            resolve();                         
-                        });
-                        readstream.on('end',()=>{
-                           assert(data);
-                            resolve();
-                        });                       
-                      
-                    });
-                });                
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');               
+                var readstream =conn.get("//document0", function(err, content){
+                    resolve();
+                });       
             });        
-
         });
 
         it('Function invocation made path to non-existing source returns Errors.ResourceNotFound', async() => {
@@ -312,18 +298,13 @@ describe('UTILS webdav', () => {
             });      
         });   
 
-        it('Function invocation made path to a source exisit in db only returns Errors.ResourceNotFound', async() => {
+        it('Function invocation made path to source exisit in db only returns Errors.ResourceNotFound', async() => {
             return new Promise((resolve,reject)=>{
-                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');               
-                return new Promise((resolve,reject)=>{
-                    conn.readdir("/", (error,contents)=>{
-                        var readstream =conn.get("/document2", function(err, content){
-                            console.log(err);
-                            resolve();
-                        });
-    
-                    });                
-                });               
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');                          
+                    var readstream =conn.get("/document2", function(err, content){
+                        assert(err);
+                        resolve();
+                    });         
             });      
         });
         
