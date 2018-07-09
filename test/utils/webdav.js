@@ -7,7 +7,7 @@ var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
 
-describe.only('UTILS webdav', () => {
+describe('UTILS webdav', () => {
 
     var WebdavCleintConnection = (usernameInput, passwordInput) => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -152,7 +152,6 @@ describe.only('UTILS webdav', () => {
                 });
             });
         });
-
         it('Function invocation made with valid parameters  returns correctly updated name', async () =>{
             return new Promise (function(resolve, reject){
                 var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
@@ -258,7 +257,7 @@ describe.only('UTILS webdav', () => {
 
         }); 
         
-        it.only('Function invocation made with a path to non-labeled source', async()=>{
+        it('Function invocation made with a path to non-labeled source', async()=>{
             return new Promise((resolve, reject) => {
                 var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test'); 
                 conn.readdir("/", (e, content)=>{
@@ -276,7 +275,7 @@ describe.only('UTILS webdav', () => {
 
     });
 
-    describe.only('_openReadStream', () => {
+    describe('_openReadStream', () => {
         it('Function invocation made path to existing source returns the data', async() =>{
             return new Promise((resolve,reject)=>{
                 var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');
@@ -313,7 +312,7 @@ describe.only('UTILS webdav', () => {
             });      
         });   
 
-        it.only('Function invocation made path to a source exisit in db only returns Errors.ResourceNotFound', async() => {
+        it('Function invocation made path to a source exisit in db only returns Errors.ResourceNotFound', async() => {
             return new Promise((resolve,reject)=>{
                 var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');               
                 return new Promise((resolve,reject)=>{
