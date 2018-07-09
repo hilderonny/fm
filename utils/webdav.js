@@ -14,7 +14,6 @@ class WebdavFilesystem extends webdav.FileSystem {
 
     constructor() {
         super();
-        this._cache = {}; // TODO: should be client dependent
         this._lm = new webdav.LocalLockManager();
         this._pm = new webdav.LocalPropertyManager();
         this._clientname = null;
@@ -54,7 +53,7 @@ class WebdavFilesystem extends webdav.FileSystem {
                 var counter = 1; //skip empty entry before the root
                 var subPathsArr = path.toString().split("/");              
                 var currentRootElements = rootElements;
-               // console.log("currentRootElements", currentRootElements);
+                //console.log("currentRootElements", currentRootElements);
                 var currentParentElement = [];
                 var depth;
                 //make distinction between ...TODO
@@ -66,7 +65,7 @@ class WebdavFilesystem extends webdav.FileSystem {
                 while(counter < depth){
                     currentParentElement = currentRootElements.find(function(crrentElement){return crrentElement.label == subPathsArr[counter];});
                     if (!currentParentElement){
-                        console.log("No parent element for entry", subPathsArr[counter]); //, "for ref: ", currentRootElements);
+                       // console.log("No parent element for entry", subPathsArr[counter]); //, "for ref: ", currentRootElements);
                         return [];
                     }else{ 
                        // console.log("currentParentElement", currentParentElement); 
@@ -93,13 +92,8 @@ class WebdavFilesystem extends webdav.FileSystem {
         return  self.retriveElements(path, false).then(function(allElements){
             if (path.isRoot()) return callback(null, webdav.ResourceType.Directory);
             if(allElements.length < 1) return callback(null, webdav.ResourceType.NoResource);
-            //console.log("allElements", allElements);
-            //console.log("parent path", path.getParent().paths);
             var subPaths = path.toString().split("/");
-            // console.log("subPaths[subPaths.length - 1]: ", subPaths[subPaths.length - 1]);
-            // console.log("allElements: ", allElements);
             var element = allElements.find(function(curentElemet){return curentElemet.label == subPaths[subPaths.length - 1]});
-            //console.log("EL: ", element);
             if (!element) return callback(webdav.Errors.ResourceNotFound);
             if (element.datatypename === "folders") return callback(null, webdav.ResourceType.Directory);
             if (element.datatypename === "documents") return callback(null, webdav.ResourceType.File);
@@ -116,21 +110,18 @@ class WebdavFilesystem extends webdav.FileSystem {
         } else { //request to rename file/folder
             var newLabel = pathTo.paths[pathTo.paths.length - 1];
             var clientname = contextAndOverwriteFlag.context.user.clientname;
-            var element = this._cache[pathFrom.toString()];
-            if(element){
-                Db.updateDynamicObject(clientname, element.datatypename, element.name, { label: newLabel }).then(function () {
-                    var updatedElement = element;
-                    updatedElement.label = newLabel;
-                    var updateCash = function () {
-                        self._cache[pathTo.toString()] = updatedElement;
-                        delete self._cache[pathFrom.toString()];
-                    }
-                    callback(updateCash());
-                });
-            } else {
-                callback(webdav.Errors.ResourceNotFound);
-            }
-
+            self.retriveElements(pathFrom, false).then(function(allElements){
+                var subPaths = pathFrom.toString().split("/");
+                var element = allElements.find(function(curentElemet){return curentElemet.label == subPaths[subPaths.length - 1]});
+                if(element){
+                    Db.updateDynamicObject(clientname, element.datatypename, element.name, { label: newLabel }).then(function () {
+                       callback();
+                    });
+                } else {
+                   // console.log("NOOOO ELEMET");
+                    callback(webdav.Errors.ResourceNotFound);
+                }
+            })
         }
     }
 
@@ -152,7 +143,7 @@ class WebdavFilesystem extends webdav.FileSystem {
                 // Displayname does not work in windows: https://stackoverflow.com/a/21636844
                 var label = de.label ? de.label : de.name;
                 var fullPath = path.getChildPath(label).toString();
-                self._cache[fullPath] = de; // Label is used as path identifier, no duplicate names possible!
+                // Label is used as path identifier, no duplicate names possible!
             });
             callback(null, dirElements.map(de => de.label ? de.label : de.name));
         });
@@ -160,13 +151,18 @@ class WebdavFilesystem extends webdav.FileSystem {
 
     // Request for download of a file
     _openReadStream(path, ctx, callback) {
-        var element = this._cache[path.toString()];
-        // the existance of the ellement is checked already in the _type function
-        //if (!element) return callback(webdav.Errors.ResourceNotFound);
-        var path = dh.getDocumentPath(this._clientname, element.name);
-        fs.open(path, 'r', function (error, fd) {
-            if (error) return callback(webdav.Errors.ResourceNotFound);
-            callback(null, fs.createReadStream(null, { fd: fd }));
+        var Path = path;
+        var self = this;
+        self.retriveElements(Path, false).then(function(allElements){
+            // the existance of the ellement is checked already in the _type function
+            //if (!element) return callback(webdav.Errors.ResourceNotFound);
+            var subPaths = Path.toString().split("/");
+            var element = allElements.find(function(curentElemet){return curentElemet.label == subPaths[subPaths.length - 1]});
+            var path = dh.getDocumentPath(self._clientname, element.name);
+            fs.open(path, 'r', function (error, fd) {
+                if (error) return callback(webdav.Errors.ResourceNotFound);
+                callback(null, fs.createReadStream(null, { fd: fd }));
+            });
         });
     }
 
