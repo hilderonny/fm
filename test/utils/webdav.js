@@ -95,8 +95,10 @@ describe.only('UTILS webdav', () => {
                 // Create parent-child relation between a folder and a note
                 await th.createRelation("folders", "client0_folder0", "notes", "client0_note0", "parentchild");           
                 var client = WebdavCleintConnection('client0_usergroup0_user0', 'test');
-                client.readdir("/folder0/client0_note0", (err2, innerContent2)=>{
-                    assert(err2);
+                client.readdir("/folder0", (err2, innerContent2)=>{
+                    console.log("!!!!!! innerContent2" , innerContent2);
+                    console.log("err2", err2);
+                    //assert(err2);
                     resolve();
                 });
             });
@@ -254,10 +256,27 @@ describe.only('UTILS webdav', () => {
                 });
             });
 
-        });   
+        }); 
+        
+        it.only('Function invocation made with a path to non-labeled source', async()=>{
+            return new Promise((resolve, reject) => {
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test'); 
+                conn.readdir("/", (e, content)=>{
+                    var elementWithoutLabel = content.indexOf("client0_folder2");
+                    if(elementWithoutLabel < 0){
+                        reject();
+                    } else {
+                        resolve();
+                   }
+                    
+                });
+            
+            });
+        });
+
     });
 
-    describe('_openReadStream', () => {
+    describe.only('_openReadStream', () => {
         it('Function invocation made path to existing source returns the data', async() =>{
             return new Promise((resolve,reject)=>{
                 var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');
@@ -293,6 +312,22 @@ describe.only('UTILS webdav', () => {
                 });                
             });      
         });   
+
+        it.only('Function invocation made path to a source exisit in db only returns Errors.ResourceNotFound', async() => {
+            return new Promise((resolve,reject)=>{
+                var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');               
+                return new Promise((resolve,reject)=>{
+                    conn.readdir("/", (error,contents)=>{
+                        var readstream =conn.get("/document2", function(err, content){
+                            console.log(err);
+                            resolve();
+                        });
+    
+                    });                
+                });               
+            });      
+        });
+        
     });
 });
 

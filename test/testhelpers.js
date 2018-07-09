@@ -218,11 +218,14 @@ th.prepareFolders = async() => {
     await Db.insertDynamicObject("client0", "folders", { name: "client0_folder00", label: "folder00" });
     await Db.insertDynamicObject("client0", "folders", { name: "client0_folder01", label: "folder01" });
     await Db.insertDynamicObject("client0", "folders", { name: "client0_folder000", label: "folder000" });
+    await Db.insertDynamicObject("client0", "folders", { name: "client0_folder2"});
     await Db.insertDynamicObject("client1", "folders", { name: "client1_folder0", label: "folder0" });
+   
     // Relations between folders
     await th.createRelation("folders", "client0_folder0", "folders", "client0_folder00", "parentchild");
     await th.createRelation("folders", "client0_folder0", "folders", "client0_folder01", "parentchild");
     await th.createRelation("folders", "client0_folder00", "folders", "client0_folder000", "parentchild");
+   
 };
 
 th.createPath = (pathToCreate) => {
@@ -331,6 +334,7 @@ th.prepareDocuments = async() => {
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document00", label: "document00", type: "type", isshared: false });
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document01", label: "document01", type: "image/png", isshared: false });
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document000", label: "document000", type: "type", isshared: true });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document2", label: "document2", type: "type", isshared: false });
     // Relations between folders and documents
     await th.createRelation("folders", "client0_folder0", "documents", "client0_document00", "parentchild");
     await th.createRelation("folders", "client0_folder0", "documents", "client0_document01", "parentchild");
