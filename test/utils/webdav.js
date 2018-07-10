@@ -301,7 +301,7 @@ describe.only('UTILS webdav', () => {
         it('Function invocation made path to source exisiting only as metadata in db returns Errors.ResourceNotFound', async() => {
             return new Promise((resolve,reject)=>{
                 var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');                          
-                    var readstream =conn.get("/document2", function(err, content){
+                    var readstream =conn.get("/documentWithoutContent", function(err, content){
                         assert(err);
                         resolve();
                     });         

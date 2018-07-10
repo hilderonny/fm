@@ -334,7 +334,7 @@ th.prepareDocuments = async() => {
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document00", label: "document00", type: "type", isshared: false });
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document01", label: "document01", type: "image/png", isshared: false });
     await Db.insertDynamicObject("client0", "documents", { name: "client0_document000", label: "document000", type: "type", isshared: true });
-    await Db.insertDynamicObject("client0", "documents", { name: "client0_document2", label: "document2", type: "type", isshared: false });
+    await Db.insertDynamicObject("client0", "documents", { name: "client0_document2", label: "documentWithoutContent", type: "type", isshared: false });
     // Relations between folders and documents
     await th.createRelation("folders", "client0_folder0", "documents", "client0_document00", "parentchild");
     await th.createRelation("folders", "client0_folder0", "documents", "client0_document01", "parentchild");
