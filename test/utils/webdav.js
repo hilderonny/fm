@@ -301,7 +301,7 @@ describe('UTILS webdav', () => {
         it('Function invocation made path to source exisit in db only returns Errors.ResourceNotFound', async() => {
             return new Promise((resolve,reject)=>{
                 var conn = WebdavCleintConnection('client0_usergroup0_user0', 'test');                          
-                    var readstream =conn.get("/document2", function(err, content){
+                    var readstream =conn.get("/documentWithoutContent", function(err, content){
                         assert(err);
                         resolve();
                     });         
