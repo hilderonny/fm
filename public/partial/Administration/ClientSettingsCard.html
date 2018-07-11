@@ -16,8 +16,13 @@
         <form name="clientSettingsForm" layout="column">
 
             <md-input-container flex>
+                    <label translate>TRK_SETTINGSET_CLIENT_NAME</label>
+                    <input ng-model="clientSettings.clientlabel" name="clientname" readonly="readonly">
+            </md-input-container>
+
+            <md-input-container flex>
                 <label translate>TRK_SETTINGSET_CLIENT_LOGO_URL</label>
-                <input ng-model="clientSettings.logourl" name="logourl">
+                <input ng-model="clientSettings.logourl" name="logour">
             </md-input-container>
 
             <md-input-container flex>

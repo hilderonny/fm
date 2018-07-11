@@ -19,7 +19,10 @@ function mapFields(e) {
  */
 router.get('/', auth(co.permissions.SETTINGS_CLIENT, 'r', co.modules.base), async(req, res) => {
     var clientsettings = await Db.getDynamicObjects(Db.PortalDatabaseName, "clientsettings", { clientname: req.user.clientname });
+    console.log(clientsettings);
+    var client=(await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(req.params.name)}';`)).rows;
     var result = clientsettings.length > 0 ? clientsettings[0] : { name: null, clientname: req.user.clientname, logourl: "css/logo_avorium_komplett.svg" };
+    console.log(result);
     res.send(mapFields(result));
 });
 

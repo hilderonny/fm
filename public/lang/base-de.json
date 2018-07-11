@@ -65,6 +65,7 @@
     "TRK_SETTINGSET_CLIENT" : "Mandanteneinstellungen",
     "TRK_SETTINGSET_CLIENT_CHANGES_SAVED" : "Änderungen gespeichert",
     "TRK_SETTINGSET_CLIENT_LOGO_URL" : "URL des Logos",
+    "TRK_SETTINGSET_CLIENT_NAME": "Mandanten Name",
     "TRK_SETTINGSET_DYNAMICATTRIBUTES":"Dynamische Attribute",
     "TRK_SETTINGSET_TYPE_CLIENT" : "Mandant",
     "TRK_SETTINGSET_TYPE_PORTAL" : "Portal",

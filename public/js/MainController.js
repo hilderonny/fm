@@ -71,8 +71,8 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     $scope.doLogin = function() {
         rootscope.title = null;
         rootscope.currentapp = null;
-        return utils.login(rootscope, $scope.username, $scope.password).then(function() {
-            $scope.$root.isLoading = true;
+        return utils.login(rootscope, $scope.username, $scope.password).then(function() {        
+            $scope.$root.isLoading = true;            
             return Promise.all([
                 utils.loadmenu(rootscope),
                 utils.loadpermissions(rootscope),
@@ -210,6 +210,7 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         $scope.searchResults = [];
         $scope.searchInputVisible = false;
         var loginCredentials = JSON.parse(localStorage.getItem("loginCredentials"));
+        console.log("loginCredentials", loginCredentials);
         $scope.username = loginCredentials.username;
         $scope.password = loginCredentials.password;
         setTimeout(function() { // Give the translation some time
