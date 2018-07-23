@@ -23,5 +23,6 @@
     "tokensecret": "Passphrase to use to encrypt the user tokens, e.g. 'mysupersecretpassphrase'",
     "updateExtractPath": "Path where downloaded updates should be extracted to. Normally this is the root directory of the app where the app.js lies, e.g. './'",
     "useHTTP": "Set to true to enable normal HTTP requests to the app",
-    "useHTTPS": "Set to true to enable secure HTTPS requests to the app"
+    "useHTTPS": "Set to true to enable secure HTTPS requests to the app",
+    "webdavport": "Port of the WebDav server as number"
 }
