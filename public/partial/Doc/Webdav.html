@@ -1,0 +1,157 @@
+<md-card ng-cloak class="list-details-details doc" ng-controller="DocCardController">
+    <md-toolbar class="md-toolbar-tools md-accent">
+        <span class="md-headline">Hilfe zu WebDAV</span>
+        <div flex></div>
+        <md-button class="close-card md-icon-button" ng-click="closeCard()" aria-label="CLOSE CARD">
+            <md-icon md-svg-src="/css/icons/material/Delete.svg"></md-icon>
+        </md-button>
+    </md-toolbar>
+    <md-card-content>
+        <p>
+            WebDAV ist eine Technologie, mit deren Hilfe mit dem Windows Explorer auf die Verzeichnisse und Dokumente im System zugegriffen
+            werden können. Damit ist es möglich, mit bekannten Tools auf die Inhalte des Systems zuzugreifen. Die Funktionen
+            sind dabei auf das Ansehen, Umbenennen und Herunterladen von Dokumenten und Verzeichnissen beschränkt. Löschen
+            und Verschieben sowie das Anlegen neuer Verzeichnisse und Dokumente sind nicht möglich.
+        </p>
+        <ul>
+            <li>
+                <a href="/#/doc/Webdav#login">Anmeldung (Benutzerauthentifizierung)</a>
+            </li>
+            <li>
+                <a href="/#/doc/Webdav#specifics">Systembesonderheiten</a>
+            </li>
+            <li>
+                <a href="/#/doc/Webdav#limitations">Einschränkungen</a>
+            </li>
+            <li>
+                <a href="/#/doc/Webdav#further_readings">Weiterführende Literatur</a>
+            </li>
+        </ul>
+
+        <h2>
+            <a name="login">Anmeldung (Benutzerauthentifizierung)</a>
+        </h2>
+        <img src="/css/images/Webdav_Setup.png" />
+        <p>
+            Zu Beginn wird eine
+            <i>Netzwerkverbindung</i> zum Server hergestellt, wobei die URL das Format
+            <b>\\<i>servername</i>@SSL@<i>portnummer</i>\DavWWWRoot</b> haben muss. Der
+            <i>servername</i> ist die Adresse des Portals und als
+            <i>portnummer</i> ist standardmäßig 56789 vorgegeben, kann sich aber von Portal zu Portal unterscheiden.
+        </p>
+        <img src="/css/images/WebDav_login.png" />
+        <p>
+            Wie bei der Webanwendung erfolgt beim erstmaligen Zugriff per WebDAV eine Abfrage nach Benutzernamen und Kennwort. Hier werden
+            dieselben Benutzerdaten eingegeben, die man auch in der Webanwendung verwenden würde. Der Anmeldevorgang kann
+            unter Umständen ein paar Sekunden dauern, in denen das Dialogfeld keinerlei Reaktionen zeigt. Dies ist aber normal.
+        </p>
+        <img src="/css/images/WebDavView.png" />
+        <p>
+            <b>Achtung!</b>
+        </p>
+        <p>
+            Die Windows-Sicherheitbestimmungen erlauben keine mehrfachen WebDAV-Verbindungen mit demselben Server mit unterschiedlichen
+            Anmeldedaten. Es ist also nicht möglich, sich mit demselben Portal mit unterschiedlichen Benutzern gleichzeitig
+            anzumelden und Daten zwischen diesen Netzwerkverbindungen auszutauchen. Um sich mit einem anderen Benutzernamen
+            anzumelden, muss die aktuelle Verbindung getrennt und neu aufgebaut werden, wodurch wieder der Anmeldedialog
+            erscheint.
+        </p>
+        <img src="/css/images/Webdav_logout.png" />
+        <p>
+            In dem Verbindungsdialog muss die Checkbox
+            <i>Verbindung mit anderen Anmeldedaten herstellen</i> ausgewählt sein, andernfalls würde Windows versuchen, die
+            Verbindung mit den zuvor verwendeten Benutzernamen und Kennwort wieder herzustellen.
+        </p>
+        <img src="/css/images/change_credential.png" />
+
+
+        <h2>
+            <a name="specifics">Systembesonderheiten</a>
+        </h2>
+        <p>
+            Da Dateisysteme und das systeminterne Dokumentenhandling unterschiedliche Konzepte haben, sind diese in einigen Punkten inkompatibel.
+            Folgende Besonderheiten müssen dabei beachtet werden:
+            <ul>
+                <ol>
+                    <li>
+                        <b>Verschachtelte Hierarchie:</b>
+                        Dadurch, dass Verzeichnisse und Dokumente in beliebigen Eltern-Kind-Beziehungen zu einander stehen können, können diese in
+                        der Hierarchie mehrfach auftauchen. Das bedeutet, dass ein Verzeichnis A ein Verzeichnis B enthalten
+                        kann, welches wiederum Verzeichnis A enthält. Das kann im Windows-Explorer verwirrend wirken, zumal
+                        man diese Verzeichnisstruktur theoretisch unendlich tief aufklappen kann. Windows hat allerdings
+                        eine Beschränkung auf Pfadnamenlängen, wodurch irgendwann Fehler im Explorer auftreten können.
+                    </li>
+                    <li>
+                        <b>Keine automatische Aktualisierung:</b>
+                        Betrachtet man ein WebDAV-Verzeichnis im Windows Explorer und jemand anderes ändert die Struktur des Verzeichnisses in der
+                        Webanwendung (z.B. es wird gelöscht), wird diese Änderung nicht automatisch im Explorer angezeigt.
+                        Versucht man nun, dieses gelöschte Verzeichnis zu öffnen, wird im Explorer eine Fehlermeldung angezeigt.
+                        Aktualisiert man den Windows-Explorer mit F5, verschwindet auch das gelöschte Verzeichnis.
+                    </li>
+                    <li>
+                        <b>Namenskonvention:</b>
+                        In der Webanwendung gibt es keinerlei Beschränkungen, welche Zeichen für den Namen von Dokumenten oder Verzeichnissen verwendet
+                        werden dürfen. Der Windows Explorer jedoch hat solche Beschränkungen. Soll auf die Verzeichnis- und
+                        Dokumentenstruktur per Windows-Explorer zugegriffen werden können, dürfen die folgenden Zeichen nicht
+                        als Namen in den Dokumenten und Verzeichnissen enthalten sein. Andernfalls kann sich der Windows-Explorer
+                        eigenartig verhalten oder Fehlermeldungen anzeigen:
+                        <b>&lt;</b>,
+                        <b>&gt;</b>,
+                        <b>:</b>,
+                        <b>/</b>,
+                        <b>\</b>,
+                        <b>|</b>,
+                        <b>?</b>,
+                        <b>*</b>
+                    </li>
+                </ol>
+            </ul>
+        </p>
+
+        <h2>
+            <a name="limitation">Einschränkungen</a>
+        </h2>
+        <p>
+            Das Löschen, Erstellen, Hochladen und Verschieben von Dokumenten und Verzeichnissen ist nicht möglich. Da der Windows-Explorer
+            das Löschen an sich zulässt und davon ausgeht, dass der Server schon richtig reagiert, kann man im Explorer trotzdem
+            versuchen, ein Verzeichnis oder Dokument zu löschen. Es wird dann auch nicht mehr im Explorer angezeigt, bleibt
+            aber auf dem Server vorhanden. Aktualisiert man anschließend den Explorer, taucht das gelöschte Element auf magische
+            Weise wieder auf. Beim Versuch, Elemente zu verschieben oder zu Erstellen, werden (teilweise nichtssagende) Fehlermeldungen
+            angezeigt, die darauf hinweisen, dass eben diese Funktionen nicht möglich sind.
+        </p>
+
+        <h2>
+            <a name="further_readings">Weiterführende Literatur</a>
+        </h2>
+
+        <p>Weitere mögliche Einschränkungen, die durch Windows-Sicherheitsbestimmungen verursahct werden können, können hier
+            nachgeschlagen werden:
+
+            <ul>
+                <ol>
+                    <li>
+                        <a target="_blank" href="https://support.microsoft.com/en-us/help/938120/error-message-when-you-use-user-credentials-to-connect-to-a-network-sh">Mehrfache Verbindungen mit unterschiedlichen Benutzern</a>.
+                    </li>
+
+                    <li>
+                        <a target="_blank" href="https://support.microsoft.com/en-us/help/900900/folder-copy-error-message-when-downloading-a-file-that-is-larger-than">Maximale Dateigrößen</a>
+                    </li>
+
+                </ol>
+            </ul>
+
+
+        </p>
+
+
+
+
+
+
+
+
+
+
+    </md-card-content>
+
+</md-card>

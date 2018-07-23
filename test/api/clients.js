@@ -137,7 +137,9 @@ describe('API clients', async() => {
             var files = await getFilesInPackage(url);
             var expecteddocumentfilenames = (await Db.getDynamicObjects("client0", co.collections.documents.name)).map(document => document.name);
             expecteddocumentfilenames.forEach(expecteddocumentfilename => {
-                assert.ok(files.find(file => file.indexOf("\\files\\" + expecteddocumentfilename) > 0));
+                if(expecteddocumentfilename != "client0_document2"){ //skip document without content, which is used for other tests
+                    assert.ok(files.find(file => file.indexOf("\\files\\" + expecteddocumentfilename) > 0));
+                }
             });
         });
 

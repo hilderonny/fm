@@ -14,3 +14,6 @@ npm-debug.log
 debug.log
 public/js/include.js*
 log/
+package-lock.json
+package-lock.json
+package.json
