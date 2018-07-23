@@ -20,6 +20,7 @@ var doh = {
             // In custom datatypes there currently are no permissions defined
             if (rr.permissionkey && !permissionsofuser[rr.permissionkey]) continue; // No permission to access specific datatype entities
             var child = await Db.getDynamicObject(clientname, rr.datatype2name, rr.name2);
+            if (!child) continue; // Sometimes the relation in the database is corrupt and does not target a correct child. So ignore such entries.
             child.datatypename = rr.datatype2name;
             if (!child.icon) child.icon = rr.icon; // Set the icon to the one of the datatype when the object itself has no icon
             child.haschildren = rr.haschildren;
