@@ -43,8 +43,8 @@ app.controller('ronnyseins3DCardController', function($scope, $http, $element, u
         scene.appendChild(entity);
         var modelTypeAttributes = {
             'model/vnd.collada+xml': 'collada-model',
-            'application/x-tgif': 'obj-model'
-        
+            'application/x-tgif': 'obj-model',
+            'model/gltf+json': 'gltf-model',
         };
         entity.doc = doc;
         entity.setAttribute(modelTypeAttributes[doc.type], '/api/documents/preview/' + doc.name + '?token=' + $http.defaults.headers.common['x-access-token']);
