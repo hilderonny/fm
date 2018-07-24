@@ -8,6 +8,8 @@ var co = require("../utils/constants");
 var ph = require('../utils/permissionshelper');
 var doh = require("./dynamicobjecthelper");
 var dh = require("./documentsHelper");
+var mime = require("mime");
+var pathModule = require('path');
 
 
 class WebdavFilesystem extends webdav.FileSystem {
@@ -151,6 +153,66 @@ class WebdavFilesystem extends webdav.FileSystem {
                 callback(null, fs.createReadStream(null, { fd: fd }));
             });
         });
+    }
+
+    // Request for file upload
+    _openWriteStream(path, dataTransferObject, callback) {
+        var self = this;
+        var ctx = dataTransferObject.context;
+        var estimatedSize = dataTransferObject.estimatedSize;
+        var targetSource = dataTransferObject.targetSource;
+        var mode = dataTransferObject.mode;
+        console.log("path form _openWriteStream: ", path);
+       /* console.log("estimatedSize: ", estimatedSize);
+        console.log("targetSource: ", targetSource);
+        console.log("mode: ", mode);*/
+        var lastIndex = path.paths.length - 1; 
+        var fileName = path.paths[lastIndex];
+        var stream = fs.createWriteStream(fileName);
+       // if(type.isFile){ //TODO
+            var document = {
+                name: Db.createName(),
+                label: fileName,
+                type: mime.getType(pathModule.extname(fileName)),
+                isshared: false
+            }
+            return Db.insertDynamicObject(self._clientname, "documents", document).then(function(){
+                console.log("Hi1");
+                dh.moveToDocumentsDirectory(self._clientname, document.name, pathModule.join(__dirname, '/../', fileName));
+                callback(null, stream);
+            });       
+    }
+
+    // TODO 
+    _create(path, contextAndTypeObject, callback){
+        var self = this;
+        console.log("path form _create: ", path);
+        var type = contextAndTypeObject.type;
+        console.log("type: ", type.isFile);
+        console.log("ctx: ", contextAndTypeObject.context);
+        var type = contextAndTypeObject.type;
+        var fileStream;
+        var lastIndex = path.paths.length - 1; 
+        var fileName = path.paths[lastIndex];
+        if(type.isFile){
+           /* var document = {
+                name: Db.createName(),
+                label: fileName,
+                type: mime.getType(pathModule.extname(fileName)),
+                isshared: false
+            }*/
+         //  Db.insertDynamicObject(self._clientname, "documents", document);
+            //var dir = "c:\Users\mariya\Desktop";
+            //var originalFilePath  = pathModule.join(dir, '/../', path.toString());
+          // console.log(originalFilePath);
+            //dh.moveToDocumentsDirectory(self._clientname, document.name, );
+           // fileStream = fs.createWriteStream(fileName);
+        } else if(type.isDirectory){
+            callback("TODO");
+        } else{
+            callback("Source not found");
+        }
+        callback(null);
     }
 
     // Save information about the logged user
