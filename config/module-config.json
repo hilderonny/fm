@@ -1198,7 +1198,7 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "officenotelistcard", "label": "Kalender", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"detailscardname\":\"basedetailscard\"}'></md-card>" }
+                    { "name": "officenotelistcard", "label": "Notizenliste", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"notes_hierarchy\",\"detailscardname\":\"basedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"notes\"],\"detailscardname\":\"basedetailscard\"}'></md-card>" }
                 ] },
 
                 { "name": "views", "values": [
@@ -1346,8 +1346,10 @@
                 "public/js/components/avt-babylonjs-scene.js",
                 "public/js/components/avt-viewin3d-card.js",
                 "public/js/components/avt-viewin3d-toolbar-button.js",
+                "public/js/components/avt-vrscene.js",
                 
-                "public/js/lib/aframe-v0.7.0.min.js",
+                "public/js/lib/aframe-v0.8.0.min.js",
+                "public/js/lib/aframe-environment-component.min.js",
                 "public/js/lib/aframe-look-at-billboard-component.min.js",
                 "public/js/lib/blockly_compressed.js",
                 "public/js/lib/javascript_compressed.js",
@@ -1359,6 +1361,11 @@
             ],
             "languages" : [ "de" ],
             "clientdatatypes": [
+
+                { "name": "vrscene", "label": "VR Szene", "plurallabel": "VR Szenen", "titlefield": "label", "icon": "/css/icons/material/Virtual Reality.svg", "fields" : [
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "content", "label": "Inhalt", "type": "text", "rows": 4 }
+                ], "lists": [ "vrscenes" ], "canhaverelations" : true },
 
                 { "name": "apps", "values": [
                     { "name": "ronny", "label": "Ronny seins" }
@@ -1373,19 +1380,23 @@
                 { "name": "relations", "values": [
                     { "name": "ronnyaugmentedreality", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "augmentedreality", "relationtypename": "parentchild" },
                     { "name": "ronnymaps", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "maps", "relationtypename": "parentchild" },
-                    { "name": "ronnyblockly", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "blockly", "relationtypename": "parentchild" }
+                    { "name": "ronnyblockly", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "blockly", "relationtypename": "parentchild" },
+                    { "name": "ronnyvrscenes", "datatype1name": "apps", "name1": "ronny", "datatype2name": "views", "name2": "vrscenes", "relationtypename": "parentchild" }
                 ] },
 
                 { "name": "viewcards", "values": [
                     { "name": "ronnyseinsaugmentedrealitycard", "label": "Augmented Reality", "content": "<md-card class=\"fullwidth\" avt-card avt-babylonjs-scene avt-close-toolbar-button></md-card>" },
                     { "name": "ronnyseinsgooglemapscard", "label": "Google Maps", "content": "<md-card id=\"map\" class=\"fullwidth\" ng-cloak ng-controller=\"ronnyseinsGoogleMapsCardController\"></md-card>" },
-                    { "name": "ronnyseinsviewin3dcard", "content": "<md-card class=\"fullsize\" avt-card avt-viewin3d-card avt-close-toolbar-button></md-card>" }
+                    { "name": "ronnyseinsviewin3dcard", "content": "<md-card class=\"fullsize\" avt-card avt-viewin3d-card avt-close-toolbar-button></md-card>" },
+                    { "name": "ronnyseinsvrscenedetailscard", "label": "VR Szene", "content": "<md-card class=\"fullwidth\" avt-card avt-details-card avt-vrscene avt-close-toolbar-button></md-card>" },
+                    { "name": "ronnyseinsvrscenelistcard", "label": "VR Szenenliste", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"vrscenes\",\"detailscardname\":\"ronnyseinsvrscenedetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"vrscene\"],\"detailscardname\":\"ronnyseinsvrscenedetailscard\",\"permission\":null}'></md-card>" }
                 ] },
 
                 { "name": "views", "values": [
                     { "modulename": "ronnyseins", "name": "augmentedreality", "label": "Augmented Reality", "icon": "/css/icons/material/Virtual Reality.svg", "index": 810, "viewcardname": "ronnyseinsaugmentedrealitycard" },
                     { "modulename": "ronnyseins", "name": "maps", "label": "Karten", "icon": "/css/icons/material/World Map.svg", "index": 820, "viewcardname": "ronnyseinsgooglemapscard" },
-                    { "modulename": "ronnyseins", "name": "blockly", "label": "Blockly", "icon": "/css/icons/material/icons8-blockly-green.svg", "index": 830, "maincard": "ronnyseins/BlocklyCard" }
+                    { "modulename": "ronnyseins", "name": "blockly", "label": "Blockly", "icon": "/css/icons/material/icons8-blockly-green.svg", "index": 830, "maincard": "ronnyseins/BlocklyCard" },
+                    { "modulename": "ronnyseins", "name": "vrscenes", "label": "VR Szenen", "directurls": "vrscene", "icon": "/css/icons/material/Virtual Reality.svg", "index": 840, "viewcardname": "ronnyseinsvrscenelistcard" }
                 ] }
 
             ]

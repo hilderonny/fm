@@ -145,7 +145,7 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     scope.dynamicobject = {}; // For new
                     scope.references = {};
                     scope.token = $http.defaults.headers.common["x-access-token"]; // For preview image downloads
-                    scope.candelete = true; // For deletio prevention of extensions like usergroups
+                    scope.candelete = true; // For deletion prevention of extensions like usergroups
                     var datatypename = scope.params.datatypename;
                     var entityname = scope.params.entityname;
                     if (!entityname) scope.isnew = true; // For add element toolbar button
@@ -177,6 +177,9 @@ app.directive('avtDetailsCard', function($compile, $http, $mdToast, $translate, 
                     }).then(function() {
                         scope.canwrite = scope.$root.canWrite(scope.requiredPermission);
                         utils.setLocation("/" + datatypename + (entityname ? "/" + entityname : ""), false);
+                        if (scope.params.onload) { // For events that need to be called after the document was loaded.
+                            scope.params.onload(scope.dynamicobject);
+                        }
                         scope.isactionpending = false;
                     });
                 };
