@@ -164,12 +164,12 @@ class WebdavFilesystem extends webdav.FileSystem {
         var mode = dataTransferObject.mode;
         console.log("path form _openWriteStream: ", path);
        /* console.log("estimatedSize: ", estimatedSize);
-        console.log("targetSource: ", targetSource);
-        console.log("mode: ", mode);*/
+        console.log("targetSource: ", targetSource);*/
+        console.log("MODE: ", mode);
         var lastIndex = path.paths.length - 1; 
         var fileName = path.paths[lastIndex];
         var stream = fs.createWriteStream(fileName);
-       // if(type.isFile){ //TODO
+      //  if(mode == "mustCreate"){ //
             var document = {
                 name: Db.createName(),
                 label: fileName,
@@ -177,38 +177,39 @@ class WebdavFilesystem extends webdav.FileSystem {
                 isshared: false
             }
             return Db.insertDynamicObject(self._clientname, "documents", document).then(function(){
-                console.log("Hi1");
+                console.log("A file was added to the DB!!! Just now! ");
                 dh.moveToDocumentsDirectory(self._clientname, document.name, pathModule.join(__dirname, '/../', fileName));
                 callback(null, stream);
-            });       
+            });
+        /*} else { // avoid duplicate upload
+           // mode = "mustExist"
+            callback("Alreday created");
+        }*/
     }
 
     // TODO 
     _create(path, contextAndTypeObject, callback){
         var self = this;
-        console.log("path form _create: ", path);
+        //console.log("path form _create: ", path);
         var type = contextAndTypeObject.type;
-        console.log("type: ", type.isFile);
-        console.log("ctx: ", contextAndTypeObject.context);
+        console.log("type File: ", type.isFile);
+        //console.log("ctx: ", contextAndTypeObject.context);
         var type = contextAndTypeObject.type;
         var fileStream;
         var lastIndex = path.paths.length - 1; 
         var fileName = path.paths[lastIndex];
         if(type.isFile){
-           /* var document = {
-                name: Db.createName(),
-                label: fileName,
-                type: mime.getType(pathModule.extname(fileName)),
-                isshared: false
-            }*/
-         //  Db.insertDynamicObject(self._clientname, "documents", document);
-            //var dir = "c:\Users\mariya\Desktop";
-            //var originalFilePath  = pathModule.join(dir, '/../', path.toString());
-          // console.log(originalFilePath);
-            //dh.moveToDocumentsDirectory(self._clientname, document.name, );
-           // fileStream = fs.createWriteStream(fileName);
+            console.log("NB! I should create a file named: ", fileName);
+
         } else if(type.isDirectory){
-            callback("TODO");
+            var folder = {
+                name: Db.createName(),
+                label: fileName
+            }
+            console.log("Attention! Need a folder named: ", fileName);
+            return Db.insertDynamicObject(self._clientname, "folders", folder).then(function(){
+                callback(null);
+            });
         } else{
             callback("Source not found");
         }
