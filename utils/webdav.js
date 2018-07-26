@@ -162,77 +162,57 @@ class WebdavFilesystem extends webdav.FileSystem {
         var estimatedSize = dataTransferObject.estimatedSize;
         var targetSource = dataTransferObject.targetSource;
         var mode = dataTransferObject.mode;
-        console.log("path form _openWriteStream: ", path);
-       /* console.log("estimatedSize: ", estimatedSize);
-        console.log("targetSource: ", targetSource);*/
-        console.log("MODE: ", mode);
+       // console.log("MODE: ", mode);
         var lastIndex = path.paths.length - 1; 
         var fileName = path.paths[lastIndex];
         var stream = fs.createWriteStream(fileName);
-        var document = {
-            name: Db.createName(),
-            label: fileName,
-            type: mime.getType(pathModule.extname(fileName)),
-            isshared: false
-        }
-        return Db.insertDynamicObject(self._clientname, "documents", document).then(function(){
-            if(lastIndex > 0){
-                var parentElementName = path.parentName(); //path.paths[lastIndex - 1];
-                console.log("parentElementName: ", parentElementName);
-                var parentElement;
-                var parentPath = path. getParent();
-                console.log("parentPath", parentPath);
-                return self.retriveElements(parentPath, false).then(function(allElements){
-                    parentElement =  allElements.find(function(curentElemet){
+        return self.retriveElements(path, false).then(function(allElements){
+                         var newlyCreatedElement = allElements.find(function(curentElemet){
                                                                 var  label = curentElemet.label ? curentElemet.label : curentElemet.name;
-                                                                return label == parentElementName});
-                    if(!parentElement){
-                        callback(webdav.Errors.ResourceNotFound);
-                    }else{
-                        var relation = {
-                            name: Db.createName(),
-                            datatype1name: parentElement.datatypename,
-                            name1: parentElement.name,
-                            datatype2name: "documents",
-                            name2: document.name,
-                            relationtypename: "parentchild"
-                        };
-                        return Db.insertDynamicObject(self._clientname, "relations", relation).then(function(){
-                            console.log("A file was added to the DB!!! Just now! ");
-                            dh.moveToDocumentsDirectory(self._clientname, document.name, pathModule.join(__dirname, '/../', fileName));
-                            callback(null, stream);
-                        });
-                    }
-                });
-            } else{
-                console.log("A file was added to the DB!!! Just now! ");
-                dh.moveToDocumentsDirectory(self._clientname, document.name, pathModule.join(__dirname, '/../', fileName));
+                                                                return label == fileName});
+            if(!newlyCreatedElement){
+                //console.log("Ami sega?");
+                callback(webdav.Errors.ResourceNotFound);
+            }else{
+                dh.moveToDocumentsDirectory(self._clientname, newlyCreatedElement.name, pathModule.join(__dirname, '/../', fileName));
                 callback(null, stream);
-            }          
+            }
+
         });
     }
 
-    // TODO 
+    // Prepare new data (make entry in Db) as part of the upload functionality 
     _create(path, contextAndTypeObject, callback){
         var self = this;
-        //console.log("path form _create: ", path);
         var type = contextAndTypeObject.type;
-        //console.log("type File: ", type.isFile);
-        console.log("ctx: ", contextAndTypeObject.context);
         var type = contextAndTypeObject.type;
         var fileStream;
         var lastIndex = path.paths.length - 1; 
         var fileName = path.paths[lastIndex];
+        var newData;
+        var typeString;
         if(type.isFile){
-            console.log("NB! I should create a file named: ", fileName);
+            var document = {
+                name: Db.createName(),
+                label: fileName,
+                type: mime.getType(pathModule.extname(fileName)),
+                isshared: false
+            }
+            newData = document;
+            typeString = "documents";
+           // console.log("NB! I should create a file named: ", fileName);
 
         } else if(type.isDirectory){
             var folder = {
                 name: Db.createName(),
                 label: fileName
             }
-            console.log("Attention! Need a folder named: ", fileName);
-            return Db.insertDynamicObject(self._clientname, "folders", folder).then(function(){
+            newData = folder;
+            typeString =  "folders";
+        } else{
+            callback(webdav.Errors.ExpectedAFileResourceType);
+        }
+        return Db.insertDynamicObject(self._clientname, typeString, newData).then(function(){
                 if(path.hasParent()){
                     var parentPath = path.getParent();
                     var parentElementName = path.parentName();
@@ -248,22 +228,19 @@ class WebdavFilesystem extends webdav.FileSystem {
                                 name: Db.createName(),
                                 datatype1name: parentElement.datatypename,
                                 name1: parentElement.name,
-                                datatype2name: "folders",
-                                name2: folder.name,
+                                datatype2name: typeString,
+                                name2: newData.name,
                                 relationtypename: "parentchild"
                             }
-                            return Db.insertDynamicObject(self._clientname, "relations", relation).then(function(){
-                                callback(null);
+                            return Db.insertDynamicObject(self._clientname, "relations", relation).then( async function(){
+                               // console.log("!!!!! type.isFile !!!!! ", type.isFile);
+                                callback(null);                                
                             });
                         }
                     }); 
                 }
                 callback(null);
             });
-        } else{
-            callback("Source not found");
-        }
-        callback(null);
     }
 
     // Save information about the logged user
