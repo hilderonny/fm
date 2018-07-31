@@ -140,6 +140,8 @@ async function getCachedUser(username) {
     return result;
 }
 
+module.exports.getCachedUser = getCachedUser;
+
 /**
  * Hilfsfunktion zum prüfen, ob ein Benutzer bestimmte Zugriffsrechte hat. Wird für Verknüpfungen
  * direkt verwendet, da dort auth() nicht als Middleware eingesetzt werden kann.
