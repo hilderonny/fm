@@ -227,6 +227,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         loadmenu: function(scope) {
             return utils.getresponsedata('/api/menu').then(function (responsedata) {
                 scope.logourl = responsedata.logourl;
+                scope.clientlabel = responsedata.clientlabel;
                 // Apps
                 scope.apps = Object.values(responsedata.apps);
                 scope.apps.sort((a, b) => a.app.label.localeCompare(b.app.label));
@@ -303,12 +304,10 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
             var user = { username: username, password: password };
             return $http.post('/api/login', user).then(function(response) {
                 if (response.status !== 200) throw new Error(response.status); // Caught below
-                console.log("response",response);
                 // Set the token for all requests
                 $http.defaults.headers.common['x-access-token'] = response.data.token;
                 scope.isLoggedIn = true;
-                scope.isPortal = response.data.clientId === "portal";
-                $rootScope.clientlabel=response.data.clientlabel;                             
+                scope.isPortal = response.data.clientId === "portal";                             
                 if (scope.isPortal) scope.title = 'Portalverwaltung';
                 // Save login credentials in browser for future access
                 localStorage.setItem("loginCredentials", JSON.stringify(user));

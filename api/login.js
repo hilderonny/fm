@@ -9,9 +9,7 @@ router.post('/', async(req, res) => {
     var client=(await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${loginresult.clientname}';`)).rows;
     res.send({
         token: loginresult.token, 
-        clientId: loginresult.clientname, // Used to distinguish between portal and client users to color the toolbar
-        clientlabel:client[0].label
-       
+        clientId: loginresult.clientname // Used to distinguish between portal and client users to color the toolbar       
     });
 });
 

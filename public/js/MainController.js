@@ -210,7 +210,6 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         $scope.searchResults = [];
         $scope.searchInputVisible = false;
         var loginCredentials = JSON.parse(localStorage.getItem("loginCredentials"));
-        console.log("loginCredentials", loginCredentials);
         $scope.username = loginCredentials.username;
         $scope.password = loginCredentials.password;
         setTimeout(function() { // Give the translation some time
