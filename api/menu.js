@@ -59,7 +59,7 @@ router.get('/', auth(), async(req, res) => {
     });
     var result = {
         logourl: clientSettings && clientSettings.logourl ? clientSettings.logourl : 'css/logo_avorium_komplett.svg',
-        clientlabel: client[0].label,
+        clientlabel: client.length > 0?client[0].label:"",
         apps: apps
     };
     res.send(result);
