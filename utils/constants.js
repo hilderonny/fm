@@ -16,10 +16,7 @@ module.exports.apis = {
      * API for edititing clients
      */
     clients: 'clients',
-    /**
-     * API für Mandanteneinstellungen
-     */
-    clientsettings: 'clientsettings',
+    
     /**
      * API zur Abfrage von Datentypen
      */
@@ -126,10 +123,7 @@ module.exports.collections = {
      * Modulzuordnungen für Mandanten
      */
     clientmodules:{name: 'clientmodules', canHaveAttributes:false},
-    /**
-     * Einstellungen für Mandanten
-     */
-    clientsettings:{name: 'clientsettings', canHaveAttributes:false},
+    
     /**
      * Mandanten
      */

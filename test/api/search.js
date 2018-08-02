@@ -23,7 +23,6 @@ describe('API search', () => {
         await th.prepareActivities();
         await th.prepareBusinessPartners();
         await th.preparePersons();
-        await th.prepareClientSettings();
         await th.prepareDocumentFiles();
         await th.prepareFmObjects();
         await th.prepareMarkers();

@@ -461,12 +461,6 @@ describe('API clients', async() => {
             assert.ok((await Db.query(Db.PortalDatabaseName, "SELECT 1 FROM clientmodules WHERE clientname='client0';")).rowCount < 1);
         });
 
-        it('Deletes all clientsettings', async() => {
-            var token = await th.defaults.login("portal_usergroup0_user0");
-            await th.del(`/api/dynamic/clients/client0?token=${token}`).expect(204);
-            assert.ok((await Db.query(Db.PortalDatabaseName, "SELECT 1 FROM clientsettings WHERE clientname='client0';")).rowCount < 1);
-        });
-
         it('Drops the database', async() => {
             var token = await th.defaults.login("portal_usergroup0_user0");
             await th.del(`/api/dynamic/clients/client0?token=${token}`).expect(204);

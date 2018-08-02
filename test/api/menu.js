@@ -19,7 +19,6 @@ describe('API menu', () => {
         await th.prepareUserGroups();
         await th.prepareUsers();
         await th.preparePermissions();
-        await th.prepareClientSettings();
     });
 
     it('responds to GET/ without authentication with 403', async() => {
@@ -63,8 +62,8 @@ describe('API menu', () => {
     });
 
     it('responds to GET/ with client admin user logged in with all menu items available to the users client', async() => {
-        await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
-        await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });
+       /** await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
+        await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });**/
         await th.removeClientModule('client0', co.modules.areas);
         await th.removeClientModule('client0', co.modules.fmobjects);
         await th.removeClientModule('client0', co.modules.clients);
@@ -97,8 +96,8 @@ describe('API menu', () => {
     });
 
     it('responds to GET/ with normal client user logged in with all menu items the user has permissions to and which are available to the client', async() => {
-        await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
-        await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });
+       /** await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
+        await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });**/
         await th.removeClientModule('client0', co.modules.areas);
         await th.removeClientModule('client0', co.modules.fmobjects);
         await th.removeClientModule('client0', co.modules.businesspartners);
@@ -129,7 +128,7 @@ describe('API menu', () => {
         assert.ok(apps.stammdaten.views.find(v => v.name === "termine"));
     });
             
-    it('GET/ contains the logo URL of the client when set', async () => {
+   /** it('GET/ contains the logo URL of the client when set', async () => {
         await Db.deleteDynamicObjects(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: "client0" });
         await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { name: "client0setting", clientname: "client0", logourl: "newlogourl" });
         var token = await th.defaults.login("client0_usergroup0_user0");
@@ -142,7 +141,7 @@ describe('API menu', () => {
         var token = await th.defaults.login("client0_usergroup0_user0");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
         assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
-    });
+    });**/
 
     it('GET/ does not return empty apps when user has no permissions for menus contained in apps', async() => {
         await th.removeReadPermission("client0", 'client0_usergroup0', co.permissions.ADMINISTRATION_USER);

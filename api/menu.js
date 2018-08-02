@@ -32,7 +32,6 @@ var Db = require("../utils/db").Db;
 router.get('/', auth(), async(req, res) => {
     var clientname = req.user.clientname;
     var usergroupname = Db.replaceQuotes(req.user.usergroupname);
-    var clientSettings = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: clientname });
     var client=(await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(clientname)}';`)).rows;
     var allModuleKeys = Object.keys(mc.modules);
     var modulenames = clientname === Db.PortalDatabaseName
@@ -58,7 +57,7 @@ router.get('/', auth(), async(req, res) => {
         if (apps[k].views.length < 1) delete apps[k];
     });
     var result = {
-        logourl: clientSettings && clientSettings.logourl ? clientSettings.logourl : 'css/logo_avorium_komplett.svg',
+        logourl: client && client.logourl ? client.logourl : 'css/logo_avorium_komplett.svg',
         clientlabel: client.length > 0?client[0].label:"",
         apps: apps
     };
