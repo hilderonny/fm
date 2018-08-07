@@ -354,10 +354,6 @@ module.exports.permissions = {
      */
     QRSCANNER: "PERMISSION_QRSCANNER",
     /**
-     * Permission to show and change the settings of the own client (Logo, name)
-     */
-    SETTINGS_CLIENT: 'PERMISSION_SETTINGS_CLIENT',
-    /**
      * Permission to view and edit dynamic attribute definitions and picklist options
      */
     SETTINGS_CLIENT_DYNAMICATTRIBUTES: 'PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES', // Erstellung von dynamischen Attributen

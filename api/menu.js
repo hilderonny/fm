@@ -56,8 +56,12 @@ router.get('/', auth(), async(req, res) => {
     Object.keys(apps).forEach(k => {
         if (apps[k].views.length < 1) delete apps[k];
     });
+    var logo;
+    if(client.length>0) {logo = client[0].logourl ? client[0].logourl : 'css/logo_avorium_komplett.svg';}
+    else logo = 'css/logo_avorium_komplett.svg';
+    
     var result = {
-        logourl: client && client.logourl ? client.logourl : 'css/logo_avorium_komplett.svg',
+        logourl: logo,
         clientlabel: client.length > 0?client[0].label:"",
         apps: apps
     };

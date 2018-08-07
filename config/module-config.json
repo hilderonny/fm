@@ -174,8 +174,7 @@
                     { "name": "administrationbenutzerverwaltung", "datatype1name": "apps", "name1": "administration", "datatype2name": "views", "name2": "benutzerverwaltung", "relationtypename": "parentchild" },
                     { "name": "administrationbenutzergruppenverwaltung", "datatype1name": "apps", "name1": "administration", "datatype2name": "views", "name2": "benutzergruppenverwaltung", "relationtypename": "parentchild" },
                     { "name": "administrationdynamischeattribute", "datatype1name": "apps", "name1": "administration", "datatype2name": "views", "name2": "dynamischeattribute", "relationtypename": "parentchild" },
-                    { "name": "einstellungenbenutzereinstellungen", "datatype1name": "apps", "name1": "einstellungen", "datatype2name": "views", "name2": "benutzereinstellungen", "relationtypename": "parentchild" },
-                    { "name": "einstellungenmandanteneinstellungen", "datatype1name": "apps", "name1": "einstellungen", "datatype2name": "views", "name2": "mandanteneinstellungen", "relationtypename": "parentchild" }
+                    { "name": "einstellungenbenutzereinstellungen", "datatype1name": "apps", "name1": "einstellungen", "datatype2name": "views", "name2": "benutzereinstellungen", "relationtypename": "parentchild" }
                 ] },
 
                 { "name": "relationtypes", "label": "Verknüpfungsart", "plurallabel": "Verknüpfungsarten", "titlefield": "label", "fields": [
