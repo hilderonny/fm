@@ -5,8 +5,6 @@ app.directive('avtViewin3dCard', function ($compile, $http, utils) {
         '   <a-sky color="#ECECFF"></a-sky>' +
         '   <a-camera mouse-wheel></a-camera>' +
         '   <a-entity look-at="src: a-camera" material="depthTest:false" id="info-plane" position="-1 1.5 -3" rotation="0 45 0">' +
-        '       <a-plane material="color:#004;opacity:0.4;depthTest:false"></a-plane>' +
-        '       <a-entity material="depthTest:false" position="0 0.45 0.001" id="info-plane-text" text="anchor: center; baseline:top; width: .95; wrapCount: 20; color: white; value: Lorem ipsum dolor sit\namet, consetetur\nsadipscing elitr, sed diam\nnonumy eirmod tempor\ninvidunt ut labore et\ndolore magna aliquyam\nerat, sed diam voluptua.\nAt vero eos et accusam\net justo duo dolores et ea\nrebum. Stet clita kasd"></a-entity>' +
         '   </a-entity>' +
         '</a-scene>';
     return {
@@ -28,6 +26,7 @@ app.directive('avtViewin3dCard', function ($compile, $http, utils) {
                 utils.loaddynamicobject("documents", scope.params.documentname).then(function(doc) {
                     var scene = document.querySelector('a-scene');
                     var entity = document.createElement('a-entity');
+                    entity.setAttribute("position", "0 -.3 0");
                     scene.appendChild(entity);
                     var modelTypeAttributes = {
                         'model/vnd.collada+xml': 'collada-model',
