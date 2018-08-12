@@ -63,7 +63,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 if (parentscope) newScope.parentscope = parentscope; // Parentscope is used in DIN277 Hierarchy
                 newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
                 // Either the required permission is given as parameter (generic ones) or the cardname is used
-                newScope.requiredPermission = newScope.params.permission || cardname; // For permission handling in details pages
+                newScope.requiredPermission = Object.keys(newScope.params).indexOf("permission") >= 0 ? newScope.params.permission : cardname; // For permission handling in details pages
                 // Compile (render) the new card and attach its new controller
                 $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
                 window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
