@@ -17,15 +17,19 @@ async function convertClientsettingsToClients() {
         var query = `UPDATE clients SET logourl=clientsettings.logourl FROM clientsettings WHERE clients.name = clientsettings.clientname`;
         await Db.queryDirect("arrange_portal", query);
         await Db.queryDirect("arrange_portal", "DROP TABLE clientsettings;");
+    }   
+}
+
+/**Remove client settings from each clients
+ * by removing if from the views and relations 
+ */
+async function deleteClientsettingsfromClients(){
+    var clientsresult = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients;`)).rows;
+    for(i=0; i<clientsresult.length; i++ )
+    {
+        Db.query(clientsresult[i].name, "DELETE FROM views WHERE name = 'mandanteneinstellungen';");
+        Db.query(clientsresult[i].name, "DELETE FROM relations WHERE name = 'einstellungenmandanteneinstellungen';");
     }
-
-
-
-    
-
-
-   // var existingdatabasenames = (await Db.queryDirect("postgres", `SELECT * FROM pg_database WHERE datname like '${Db.replaceQuotes(dbprefix)}_%';`)).rows.map(d => d.datname);
-    
 }
 
 /**
@@ -34,5 +38,6 @@ async function convertClientsettingsToClients() {
 module.exports = async() => {
     console.log("UPDATING ON START ...");
     await convertClientsettingsToClients();
+    await deleteClientsettingsfromClients();
     console.log("UPDATE FINISHED.");
 };
