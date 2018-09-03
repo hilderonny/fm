@@ -37,14 +37,15 @@ app.directive('avtAddElementToolbarButton', function($rootScope, utils) {
                         if (scope.detailscard) {
                             utils.adddetailscard(scope, datatypename, undefined, scope.params.permission, scope.params.datatypename, scope.params.entityname); // Forward actual element to parents of child creation card
                         } else if (scope.detailscardname) {
-                            utils.addcardbyname(scope.detailscardname, {
+                            var config = {
                                 datatypename: datatypename,
-                                permission: scope.params.permission,
                                 onclose: scope.ondetailscardclosed,
                                 oncreate: scope.onelementcreated,
                                 ondelete: scope.onelementdeleted,
                                 onsave: scope.onelementupdated
-                            });
+                            };
+                            if (Object.keys(params).indexOf("permission") >= 0) config.permission = params.permission;
+                            utils.addcardbyname(scope.detailscardname, config);
                         }
                     }
                     if (params.datatypenamelist) {

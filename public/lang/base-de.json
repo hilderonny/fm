@@ -41,7 +41,7 @@
     "TRK_PERMISSION_ADMINISTRATION_USER" : "Benutzerverwaltung",
     "TRK_PERMISSION_ADMINISTRATION_USERGROUP" : "Benutzergruppenverwaltung",
     "TRK_PERMISSION_BIM_AREAS" : "Flächen",
-    "TRK_PERMISSION_BIM_FMOBJECT" : "Arrange Objects",
+    "TRK_PERMISSION_BIM_FMOBJECT" : "Arrange Objekte",
     "TRK_PERMISSION_CORE_RELATIONS" : "Verknüpfungen pflegen",
     "TRK_PERMISSION_CRM_BUSINESSPARTNERS":"Geschäftspartner",
     "TRK_PERMISSION_CRM_PERSONS":"Personen",
