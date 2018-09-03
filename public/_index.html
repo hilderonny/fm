@@ -96,18 +96,20 @@
                 <md-content flex>
 
                     <div class="sidenav-logo">
-                        <img ng-src="{{logourl}}" ng-click="menuClick(null)" />
+                        <img ng-src="{{logourl}}" ng-click="menuClick(null)" />                       
                     </div>
 
+                    <label> {{clientlabel}} </label>
+                   
                     <md-input-container flex>
                         
-                            <label>Apps</label>
-                    
-                            <md-select ng-model="currentapp" ng-change="onappselected()">
-                                <md-option ng-value="app" ng-repeat="app in apps track by $index">
-                                    <span translate="{{ app.app.label }}"></span>
-                                </md-option>
-                            </md-select>
+                        <label>Apps</label>
+                
+                        <md-select ng-model="currentapp" ng-change="onappselected()">
+                            <md-option ng-value="app" ng-repeat="app in apps track by $index">
+                                <span translate="{{ app.app.label }}"></span>
+                            </md-option>
+                        </md-select>
 
                     </md-input-container>
 

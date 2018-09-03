@@ -32,7 +32,7 @@ var Db = require("../utils/db").Db;
 router.get('/', auth(), async(req, res) => {
     var clientname = req.user.clientname;
     var usergroupname = Db.replaceQuotes(req.user.usergroupname);
-    var clientSettings = await Db.getDynamicObject(Db.PortalDatabaseName, co.collections.clientsettings.name, { clientname: clientname });
+    var client=(await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients WHERE name = '${Db.replaceQuotes(clientname)}';`)).rows;
     var allModuleKeys = Object.keys(mc.modules);
     var modulenames = clientname === Db.PortalDatabaseName
         ? allModuleKeys.filter(mk => mc.modules[mk].forportal) // Portal has only some modules allowed
@@ -56,8 +56,13 @@ router.get('/', auth(), async(req, res) => {
     Object.keys(apps).forEach(k => {
         if (apps[k].views.length < 1) delete apps[k];
     });
+    var logo;
+    if(client.length>0) {logo = client[0].logourl ? client[0].logourl : 'css/logo_avorium_komplett.svg';}
+    else logo = 'css/logo_avorium_komplett.svg';
+    
     var result = {
-        logourl: clientSettings && clientSettings.logourl ? clientSettings.logourl : 'css/logo_avorium_komplett.svg',
+        logourl: logo,
+        clientlabel: client.length > 0?client[0].label:"",
         apps: apps
     };
     res.send(result);

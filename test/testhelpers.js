@@ -87,11 +87,6 @@ th.prepareClientModules = async() => {
     }
 };
 
-th.prepareClientSettings = async() => {
-    await th.cleanTable("clientsettings", true, false);
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "clientsettings", { name: "clientsetting0", logourl: "logourl0", clientname: "client0" });
-    await Db.insertDynamicObject(Db.PortalDatabaseName, "clientsettings", { name: "clientsetting1", logourl: "logourl1", clientname: "client1" });
-};
 
 th.removeClientModule = async(clientname, modulename) => {
     await Db.query(Db.PortalDatabaseName, `DELETE FROM clientmodules WHERE clientname='${clientname}' AND modulename='${modulename}';`);
@@ -403,7 +398,6 @@ th.prepareRelations = async() => {
     var map = {
         activities:"client0_activity0",
         businesspartners:"client0_businesspartner0",
-        clientsettings:"clientsetting0",
         clients:"client0",
         communications:"client0_communication0",
         documents:"client0_document0",

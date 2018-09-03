@@ -63,7 +63,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 if (parentscope) newScope.parentscope = parentscope; // Parentscope is used in DIN277 Hierarchy
                 newScope.params = params || {}; // Pass paremters to the scope to have access to it in the controller instance
                 // Either the required permission is given as parameter (generic ones) or the cardname is used
-                newScope.requiredPermission = newScope.params.permission || cardname; // For permission handling in details pages
+                newScope.requiredPermission = Object.keys(newScope.params).indexOf("permission") >= 0 ? newScope.params.permission : cardname; // For permission handling in details pages
                 // Compile (render) the new card and attach its new controller
                 $compile(card)(newScope); // http://stackoverflow.com/a/29444176, http://stackoverflow.com/a/15560832
                 window.getComputedStyle(domCard).borderColor; // https://timtaubert.de/blog/2012/09/css-transitions-for-dynamically-created-dom-elements/
@@ -227,6 +227,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         loadmenu: function(scope) {
             return utils.getresponsedata('/api/menu').then(function (responsedata) {
                 scope.logourl = responsedata.logourl;
+                scope.clientlabel = responsedata.clientlabel;
                 // Apps
                 scope.apps = Object.values(responsedata.apps);
                 scope.apps.sort((a, b) => a.app.label.localeCompare(b.app.label));
@@ -306,7 +307,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 // Set the token for all requests
                 $http.defaults.headers.common['x-access-token'] = response.data.token;
                 scope.isLoggedIn = true;
-                scope.isPortal = response.data.clientId === "portal";
+                scope.isPortal = response.data.clientId === "portal";                             
                 if (scope.isPortal) scope.title = 'Portalverwaltung';
                 // Save login credentials in browser for future access
                 localStorage.setItem("loginCredentials", JSON.stringify(user));

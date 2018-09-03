@@ -71,8 +71,8 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
     $scope.doLogin = function() {
         rootscope.title = null;
         rootscope.currentapp = null;
-        return utils.login(rootscope, $scope.username, $scope.password).then(function() {
-            $scope.$root.isLoading = true;
+        return utils.login(rootscope, $scope.username, $scope.password).then(function() {        
+            $scope.$root.isLoading = true;            
             return Promise.all([
                 utils.loadmenu(rootscope),
                 utils.loadpermissions(rootscope),
