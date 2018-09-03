@@ -35,7 +35,6 @@ describe('API permissions', () => {
             co.permissions.OFFICE_DOCUMENT,
             co.permissions.OFFICE_NOTE,
             co.permissions.QRSCANNER,
-            co.permissions.SETTINGS_CLIENT,
             co.permissions.SETTINGS_CLIENT_DYNAMICATTRIBUTES,
             co.permissions.SETTINGS_CLIENT_RECORDTYPES,
             co.permissions.SETTINGS_USER

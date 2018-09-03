@@ -227,6 +227,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
         loadmenu: function(scope) {
             return utils.getresponsedata('/api/menu').then(function (responsedata) {
                 scope.logourl = responsedata.logourl;
+                scope.clientlabel = responsedata.clientlabel;
                 // Apps
                 scope.apps = Object.values(responsedata.apps);
                 scope.apps.sort((a, b) => a.app.label.localeCompare(b.app.label));
@@ -306,7 +307,7 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
                 // Set the token for all requests
                 $http.defaults.headers.common['x-access-token'] = response.data.token;
                 scope.isLoggedIn = true;
-                scope.isPortal = response.data.clientId === "portal";
+                scope.isPortal = response.data.clientId === "portal";                             
                 if (scope.isPortal) scope.title = 'Portalverwaltung';
                 // Save login credentials in browser for future access
                 localStorage.setItem("loginCredentials", JSON.stringify(user));

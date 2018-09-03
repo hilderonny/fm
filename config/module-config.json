@@ -4,7 +4,7 @@
         "base": {
             "forportal": true,
             "forclients": true,
-            "api" : [ "datatypes", "dynamic", "dynamicattributes", "clientsettings", "graphql", "login", "menu", "permissions", "relations", "search", "translations", "users" ],
+            "api" : [ "datatypes", "dynamic", "dynamicattributes", "graphql", "login", "menu", "permissions", "relations", "search", "translations", "users" ],
             "middlewares": [ "auth", "extracttoken" ],
             "public" : [
                 "css/angular-material.min.css",
@@ -65,8 +65,7 @@
                 "css/images/Usergroups_add.png",
                 "css/images/Usergroups_editdetails.png",
                 "css/images/Usergroups_list.png",
-                "css/images/Usergroups_permissions.png",
-                "partial/Administration/ClientSettingsCard.html",
+                "css/images/Usergroups_permissions.png",        
                 "partial/Administration/DynamicAttributeCreationFormCard.html",
                 "partial/Administration/DynamicAttributesCard.html",
                 "partial/Administration/DynamicAttributeElementCard.html",
@@ -114,7 +113,7 @@
                 "public/js/components/avt-toolbar-button.js",
                 "public/js/components/avt-users-tab.js",
 
-                "public/js/Administration/ClientSettingsCardController.js",
+                
                 "public/js/Administration/DynamicAttributesCardController.js",
                 "public/js/Administration/DynamicAttributeCreationFormCardController.js",
                 "public/js/Administration/DynamicAttributeElementCardController.js",
@@ -175,8 +174,7 @@
                     { "name": "administrationbenutzerverwaltung", "datatype1name": "apps", "name1": "administration", "datatype2name": "views", "name2": "benutzerverwaltung", "relationtypename": "parentchild" },
                     { "name": "administrationbenutzergruppenverwaltung", "datatype1name": "apps", "name1": "administration", "datatype2name": "views", "name2": "benutzergruppenverwaltung", "relationtypename": "parentchild" },
                     { "name": "administrationdynamischeattribute", "datatype1name": "apps", "name1": "administration", "datatype2name": "views", "name2": "dynamischeattribute", "relationtypename": "parentchild" },
-                    { "name": "einstellungenbenutzereinstellungen", "datatype1name": "apps", "name1": "einstellungen", "datatype2name": "views", "name2": "benutzereinstellungen", "relationtypename": "parentchild" },
-                    { "name": "einstellungenmandanteneinstellungen", "datatype1name": "apps", "name1": "einstellungen", "datatype2name": "views", "name2": "mandanteneinstellungen", "relationtypename": "parentchild" }
+                    { "name": "einstellungenbenutzereinstellungen", "datatype1name": "apps", "name1": "einstellungen", "datatype2name": "views", "name2": "benutzereinstellungen", "relationtypename": "parentchild" }
                 ] },
 
                 { "name": "relationtypes", "label": "Verknüpfungsart", "plurallabel": "Verknüpfungsarten", "titlefield": "label", "fields": [
@@ -223,7 +221,6 @@
                     { "name": "viewcardname", "label": "Karte", "type": "reference", "reference": "viewcards", "isrequired": false }
                 ], "values": [
                     { "modulename": "base", "name": "benutzereinstellungen", "label": "Mein Profil", "doccard": "Settings", "directurls": "usersettings", "icon": "/css/icons/material/User.svg", "index": 410, "maincard": "Administration/UserSettingsCard", "permission": "PERMISSION_SETTINGS_USER" },
-                    { "modulename": "base", "name": "mandanteneinstellungen", "label": "Mandanteneinstellungen", "doccard": "Settings", "directurls": "clientsettings", "icon": "/css/icons/material/Briefcase.svg", "index": 420, "maincard": "Administration/ClientSettingsCard", "permission": "PERMISSION_SETTINGS_CLIENT" },
                     { "modulename": "base", "name": "benutzergruppenverwaltung", "label": "Benutzergruppen", "doccard": "UserGroups", "directurls": "usergroups", "icon": "/css/icons/material/User Group Man Man.svg", "index": 120, "viewcardname": "baseusergrouplistcard", "permission": "PERMISSION_ADMINISTRATION_USERGROUP" },
                     { "modulename": "base", "name": "benutzerverwaltung", "label": "Benutzer", "doccard": "Users", "directurls": "users", "icon": "/css/icons/material/User.svg", "index": 110, "viewcardname": "baseuserlistcard", "permission": "PERMISSION_ADMINISTRATION_USER" },
                     { "modulename": "base", "name": "dynamischeattribute", "label": "Dynamische Attribute", "doccard": "Settings", "directurls": "dynamicattributes", "icon": "/css/icons/material/View Details.svg", "index": 140, "maincard": "Administration/DynamicAttributesEntityListCard", "permission": "PERMISSION_SETTINGS_CLIENT_DYNAMICATTRIBUTES" }
@@ -237,12 +234,7 @@
                     { "name": "label", "label": "Bezeichnung", "type": "text" }
                 ], "values": [
                     { "name": "portal", "label": "Portal" }
-                ], "lists": [ "appsandviews" ], "canhaverelations" : true },
-
-                { "name": "clientsettings", "label": "Mandanteneinstellung", "plurallabel": "Mandanteneinstellungen", "fields": [
-                    { "name": "logourl", "label": "Logo URL", "type": "text" },
-                    { "name": "clientname", "label": "Mandant", "type": "reference", "reference": "clients" }
-                ] },
+                ], "lists": [ "appsandviews" ], "canhaverelations" : true },           
 
                 { "name": "dynamicattributetypes", "label": "Attributart", "titlefield": "label", "fields": [
                     { "name": "label", "type": "text" }
@@ -803,7 +795,8 @@
             "portaldatatypes": [
 
                 { "name": "clients", "label": "Mandant", "plurallabel": "Mandanten", "titlefield": "label", "icon": "/css/icons/material/Briefcase.svg", "fields": [
-                    { "name": "label", "label": "Bezeichnung", "type": "text" }
+                    { "name": "label", "label": "Bezeichnung", "type": "text" },
+                    { "name": "logourl", "label": "Logo URL", "type": "text" }
                 ], "lists": [ "clients" ], "permissionkey": "PERMISSION_ADMINISTRATION_CLIENT", "canhaverelations" : true },
 
                 { "name": "relations", "values": [
