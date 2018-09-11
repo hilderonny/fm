@@ -25,6 +25,13 @@ var LocalConfig = {
                 localConfig.updateTimerInterval = portalSettings.updateTimerInterval;
             }
                 writeFileSync('./config/localconfig.json', JSON.stringify(localConfig, null, 4));
+    },
+
+    retrieveportalLogo:()=>{
+        var localConfig = JSON.parse(readFileSync('./config/localconfig.json').toString());
+        return localConfig.portalLogo;
     }
+
+   
 }
 module.exports.LocalConfig = LocalConfig;
