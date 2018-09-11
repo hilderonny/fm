@@ -8,6 +8,8 @@ var LocalConfig = {
 
     updateContent: (portalSettings) => {
             var localConfig = JSON.parse(readFileSync('./config/localconfig.json').toString());
+            localConfig.portalName = portalSettings.portalName;
+            localConfig.portalLogo = portalSettings.portalLogo;
             if(portalSettings.licenseserverurl && portalSettings.licensekey){
                 localConfig.licenseserverurl = portalSettings.licenseserverurl;
                 localConfig.licensekey = portalSettings.licensekey;
