@@ -170,12 +170,12 @@ app.factory('utils', function($compile, $rootScope, $http, $translate, $location
 
         // Loads all datatypes and their field definitions on page load (keyed object)
         loaddatatypes: function(scope) {
-            return utils.getresponsedata('/api/datatypes').then(function(datatypes) {
+           return utils.getresponsedata('/api/datatypes').then(function(datatypes) {
                 scope.datatypes = datatypes;
                 scope.titlefields = {};
                 Object.keys(datatypes).forEach(function(k) {
-                    var dt = datatypes[k];
-                    scope.titlefields[k] = dt.titlefield ? dt.titlefield : "name";
+                    var dt = datatypes[k];                
+                    scope.titlefields[k] = dt.titlefield ? dt.titlefield : "name";                  
                 });
                 scope.titlefields["recordtypes"] = "label"; // Special handling for record type administration
                 return Promise.resolve();
