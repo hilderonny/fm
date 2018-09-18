@@ -35,6 +35,7 @@ app.config(['$httpProvider', function($httpProvider) {
               // Das wird z.B. bei der Benutzerliste für Benutzergruppen verwendet, wenn
               // man zwar die Benutzergruppe aber keine Benutzer sehen darf.
               if (rejection.status === 403 && rejection.config.url.startsWith('/api/') && !rejection.config.url.endsWith('#ignore403')) {
+                localStorage.setItem("loginCredentials", JSON.stringify({error:true}));
                 location.reload();
               }
               return rejection;

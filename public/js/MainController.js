@@ -210,10 +210,18 @@ app.controller('MainController', function($scope, $mdMedia, $mdSidenav, $http, $
         $scope.searchResults = [];
         $scope.searchInputVisible = false;
         var loginCredentials = JSON.parse(localStorage.getItem("loginCredentials"));
+        if(!loginCredentials.error) {
         $scope.username = loginCredentials.username;
         $scope.password = loginCredentials.password;
         setTimeout(function() { // Give the translation some time
             $scope.doLogin(true);
-        }, 300);
+        }, 300);} else{
+            localStorage.removeItem("loginCredentials");
+            $mdDialog.show($mdDialog.alert()
+            .clickOutsideToClose(true)
+            .title("Anmeldung fehlgeschlagen")
+            .textContent("Es gibt ein Problem bezüglich Ihrer Anmeldedaten. Bitte kontaktieren Sie Ihren Administrator!")
+            .ok("Ok")
+        );}
     } catch(e) {}
 });
