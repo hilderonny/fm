@@ -14,7 +14,9 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
         $rootScope.isLoading=true;
         var settingsToSend = { 
             licenseserverurl: $scope.settings.licenseServer, 
-            licensekey: $scope.settings.licenseKey 
+            licensekey: $scope.settings.licenseKey,
+            portalName: $scope.settings.portalName,
+            portalLogo: $scope.settings.portalLogo
         };
         $http.put('/api/portalmanagement/', settingsToSend).then(function(response) {
             $translate(['TRK_SETTINGS_CHANGES_SAVED']).then(function(translations) {
@@ -118,7 +120,9 @@ app.controller('AdministrationPortalSettingsCardController', function($scope, $r
                 licenseServer: response.data.licenseserverurl, 
                 licenseKey: response.data.licensekey,
                 autoUpdateMode: response.data.autoUpdateMode,
-                updateTimerInterval: response.data.updateTimerInterval
+                updateTimerInterval: response.data.updateTimerInterval,
+                portalName: response.data.portalName,
+                portalLogo: response.data.portalLogo
             };
             $scope.canWritePortalSettings = $rootScope.canWrite('PERMISSION_SETTINGS_PORTAL');
             $rootScope.isLoading=false;

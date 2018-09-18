@@ -65,10 +65,10 @@ describe('API portalmanagement', () => {
             var token = await th.defaults.login("portal_usergroup0_user0");
             var result = (await th.get(`/api/${co.apis.portalmanagement}?token=${token}`).expect(200)).body;
             if(result.updateTimerInterval){
-                assert.strictEqual(Object.keys(result).length, 4); //updateTimerInterval is also expected when autoUpdateMode == True
+                assert.strictEqual(Object.keys(result).length, 6); //updateTimerInterval is also expected when autoUpdateMode == True
                 assert.strictEqual(result.updateTimerInterval, lc.updateTimerInterval);
             }else{
-                assert.strictEqual(Object.keys(result).length, 3);
+                assert.strictEqual(Object.keys(result).length, 5);
             }
             assert.strictEqual(result.autoUpdateMode, lc.autoUpdateMode);
             assert.ok(result.licensekey);

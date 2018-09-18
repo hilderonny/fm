@@ -8,6 +8,8 @@ var LocalConfig = {
 
     updateContent: (portalSettings) => {
             var localConfig = JSON.parse(readFileSync('./config/localconfig.json').toString());
+            localConfig.portalName = portalSettings.portalName;
+            localConfig.portalLogo = portalSettings.portalLogo;
             if(portalSettings.licenseserverurl && portalSettings.licensekey){
                 localConfig.licenseserverurl = portalSettings.licenseserverurl;
                 localConfig.licensekey = portalSettings.licensekey;
@@ -23,6 +25,13 @@ var LocalConfig = {
                 localConfig.updateTimerInterval = portalSettings.updateTimerInterval;
             }
                 writeFileSync('./config/localconfig.json', JSON.stringify(localConfig, null, 4));
+    },
+
+    retrieveportalLogo:()=>{
+        var localConfig = JSON.parse(readFileSync('./config/localconfig.json').toString());
+        return localConfig.portalLogo;
     }
+
+   
 }
 module.exports.LocalConfig = LocalConfig;

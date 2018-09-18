@@ -13,11 +13,21 @@
 
     <md-tabs flex>
         <md-tab>
-            <md-tab-label><span translate>TRK_SETTINGS_LICENSE</span></md-tab-label>
+            <md-tab-label><span translate>TRK_SETTINGS_GENERAL</span></md-tab-label>
             <md-tab-body>
                 <form name="portalSettingsLicenseForm">
 
                     <md-card-content layout="column">
+
+                         <md-input-container flex>
+                            <label translate>TRK_SETTINGS_PORTAL_NAME</label>
+                            <input ng-model="settings.portalName" name="portalName" >                
+                        </md-input-container>
+
+                        <md-input-container flex>
+                            <label translate>TRK_SETTINGS_PORTAL_LOGO</label>
+                            <input type="url" ng-model="settings.portalLogo" name="portalLogo" >                
+                        </md-input-container>
 
                         <md-input-container flex>
                             <label translate>TRK_SETTINGS_LICENSESERVER</label>
@@ -30,7 +40,7 @@
                         <md-input-container flex>
                             <label translate>TRK_SETTINGS_LICENSEKEY</label>
                             <textarea ng-model="settings.licenseKey" rows="5"></textarea>
-                        </md-input-container>
+                        </md-input-container>                  
 
                     </md-card-content>
 

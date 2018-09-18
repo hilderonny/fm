@@ -6,6 +6,7 @@ var moduleConfig = require('../../config/module-config.json'); // http://stackov
 var th = require('../testhelpers');
 var co = require('../../utils/constants');
 var Db = require("../../utils/db").Db;
+var localConfigHelper = require('../../utils/localConfigHelper');
 
 describe('API menu', () => {
 
@@ -21,6 +22,8 @@ describe('API menu', () => {
         await th.preparePermissions();
     });
 
+    var portalLogo = localConfigHelper.LocalConfig.retrieveportalLogo();
+
     it('responds to GET/ without authentication with 403', async() => {
         await th.get('/api/menu').expect(403);
     });
@@ -31,7 +34,7 @@ describe('API menu', () => {
         await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.LICENSESERVER_PORTAL);
         var token = await th.defaults.login("portal_usergroup0_user1");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
-        assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
+        assert.strictEqual(response.logourl, portalLogo);
         var apps = response.apps;
         assert.ok(apps.portal);
         assert.ok(apps.portal.views.find(v => v.name === "benutzereinstellungen"));
@@ -49,7 +52,8 @@ describe('API menu', () => {
         await th.removeReadPermission(Db.PortalDatabaseName, 'portal_usergroup0', co.permissions.LICENSESERVER_PORTAL);
         var token = await th.defaults.login("portal_usergroup0_user0");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
-        assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
+        console.log(response);
+        assert.strictEqual(response.logourl, portalLogo);
         var apps = response.apps;
         assert.ok(apps.portal);
         assert.ok(apps.portal.views.find(v => v.name === "benutzereinstellungen"));
@@ -135,7 +139,7 @@ describe('API menu', () => {
         await Db.insertDynamicObject(Db.PortalDatabaseName, co.collections.clients.name, { name: "client0", label:"client0"});
         var token = await th.defaults.login("client0_usergroup0_user0");
         var response = (await th.get(`/api/menu?token=${token}`).expect(200)).body;
-        assert.strictEqual(response.logourl, "css/logo_avorium_komplett.svg");
+        assert.strictEqual(response.logourl, portalLogo); // the portal logo considered as a default logo
     });
 
     it('GET/ contains no client name when login as portal admin set', async () => {

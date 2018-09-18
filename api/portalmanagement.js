@@ -45,7 +45,9 @@ router.get('/', auth(co.permissions.ADMINISTRATION_SETTINGS, 'r', co.modules.por
     var portalSettings = { // Extract only relevant data from localConfig
         licenseserverurl : localConfig.licenseserverurl,
         licensekey : localConfig.licensekey,
-        autoUpdateMode : localConfig.autoUpdateMode
+        autoUpdateMode : localConfig.autoUpdateMode,
+        portalName : localConfig.portalName,
+        portalLogo : localConfig.portalLogo
     };
     if(localConfig.updateTimerInterval){ //no updateTimerInterval value when autoUpdateMode == False
         portalSettings.updateTimerInterval = localConfig.updateTimerInterval;

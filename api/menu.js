@@ -6,6 +6,7 @@ var auth = require('../middlewares/auth');
 var mc = require('../config/module-config.json'); // http://stackoverflow.com/a/14678694
 var co = require('../utils/constants');
 var configHelper = require('../utils/configHelper');
+var localConfigHelper = require('../utils/localConfigHelper');
 var Db = require("../utils/db").Db;
 
 /**
@@ -57,9 +58,10 @@ router.get('/', auth(), async(req, res) => {
         if (apps[k].views.length < 1) delete apps[k];
     });
     var logo;
-    if(client.length>0) {logo = client[0].logourl ? client[0].logourl : 'css/logo_avorium_komplett.svg';}
-    else logo = 'css/logo_avorium_komplett.svg';
-    
+    var portalLogo = localConfigHelper.LocalConfig.retrieveportalLogo();
+    if(client.length>0) {logo = client[0].logourl ? client[0].logourl : portalLogo;}
+    else logo = portalLogo;
+        
     var result = {
         logourl: logo,
         clientlabel: client.length > 0?client[0].label:"",
