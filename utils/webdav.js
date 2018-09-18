@@ -8,6 +8,8 @@ var co = require("../utils/constants");
 var ph = require('../utils/permissionshelper');
 var doh = require("./dynamicobjecthelper");
 var dh = require("./documentsHelper");
+var mime = require("mime");
+var pathModule = require('path');
 
 
 class WebdavFilesystem extends webdav.FileSystem {
@@ -151,6 +153,97 @@ class WebdavFilesystem extends webdav.FileSystem {
                 callback(null, fs.createReadStream(null, { fd: fd }));
             });
         });
+    }
+
+    // Request for file upload (perform the actual data coping to the new file location)
+    _openWriteStream(path, dataTransferObject, callback) {
+        var self = this;
+
+        // the "dataTransferObject" contains the following 4 properties: 
+        var ctx = dataTransferObject.context;
+        var estimatedSize = dataTransferObject.estimatedSize;
+        var targetSource = dataTransferObject.targetSource;
+        var mode = dataTransferObject.mode; // on Upload request _openWriteStream is called two times with two different mode values
+                                            // mode = "mustCreate" and mode = "canCreate"
+      
+        var lastIndex = path.paths.length - 1; 
+        var fileName = path.paths[lastIndex]; //last entry in the path array contains the name of the file that should be uploaded
+        var stream = fs.createWriteStream(fileName);
+        return self.retriveElements(path, false).then(function(allElements){
+                         var newlyCreatedElement = allElements.find(function(curentElemet){
+                                                                var  label = curentElemet.label ? curentElemet.label : curentElemet.name;
+                                                                return label == fileName});
+            if(!newlyCreatedElement){
+                callback(webdav.Errors.ResourceNotFound);
+            }else{
+                dh.moveToDocumentsDirectory(self._clientname, newlyCreatedElement.name, pathModule.join(__dirname, '/../', fileName));
+                callback(null, stream);
+            }
+
+        });
+    }
+
+    // Prepare new data (make entry in Db) as part of the file/folder upload functionality
+    _create(path, contextAndTypeObject, callback){
+        var self = this;
+
+        //the "contextAndTypeObject" contains 2 properties: request CONTEXT & TYPE of the entity that has to be created
+        var type = contextAndTypeObject.type; 
+
+        var lastIndex = path.paths.length - 1; 
+        var fileName = path.paths[lastIndex];//name of the file / folder that should be created
+
+        
+        var newData;//var. used to contain the new DynamicObject (either document or folder)
+        var typeString; //var. used to contain the datatypename of the new DynamicObject
+
+        if(type.isFile){ //request for new file
+            var document = {
+                name: Db.createName(),
+                label: fileName,
+                type: mime.getType(pathModule.extname(fileName)),
+                isshared: false
+            }
+            newData = document;
+            typeString = "documents";
+        } else if(type.isDirectory){ //request for new folder
+            var folder = {
+                name: Db.createName(),
+                label: fileName
+            }
+            newData = folder;
+            typeString =  "folders";
+        } else{
+            callback(webdav.Errors.ExpectedAFileResourceType);
+        }
+        return Db.insertDynamicObject(self._clientname, typeString, newData).then(function(){
+                if(path.hasParent()){ //files/folders which are NOT directly located under root
+                    var parentPath = path.getParent();
+                    var parentElementName = path.parentName();
+                    var parentElement; 
+                    return self.retriveElements(parentPath, false).then(function(allElements){
+                        parentElement = allElements.find(function(curentElemet){
+                                                                var  label = curentElemet.label ? curentElemet.label : curentElemet.name;
+                                                                return label == parentElementName});
+                        if(!parentElement){
+                            callback(webdav.Errors.ResourceNotFound);
+                        }else{
+                            var relation = {
+                                name: Db.createName(),
+                                datatype1name: parentElement.datatypename,
+                                name1: parentElement.name,
+                                datatype2name: typeString,
+                                name2: newData.name,
+                                relationtypename: "parentchild"
+                            }
+                            return Db.insertDynamicObject(self._clientname, "relations", relation).then( async function(){
+                                callback(null);                                
+                            });
+                        }
+                    }); 
+                }
+                callback(null);
+            });
     }
 
     // Save information about the logged user
