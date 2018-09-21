@@ -42,7 +42,8 @@ app.directive('avtAddElementToolbarButton', function($rootScope, utils) {
                                 onclose: scope.ondetailscardclosed,
                                 oncreate: scope.onelementcreated,
                                 ondelete: scope.onelementdeleted,
-                                onsave: scope.onelementupdated
+                                onsave: scope.onelementupdated,
+                                permission: scope.params.permission
                             };
                             if (Object.keys(params).indexOf("permission") >= 0) config.permission = params.permission;
                             utils.addcardbyname(scope.detailscardname, config);
