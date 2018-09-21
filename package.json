@@ -1,6 +1,6 @@
 {
   "name": "avt-fm",
-  "version": "1.2.5",
+  "version": "2.2.0",
   "description": "Avorium FM",
   "main": "app.js",
   "scripts": {
