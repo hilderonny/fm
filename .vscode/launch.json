@@ -1,7 +1,13 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "IFC Parser",
+            "cwd": "${workspaceRoot}/ifcparser",
+            "program": "${workspaceFolder}/ifcparser/ifcparser.js"
+        },
         {
             "name": "Debug Server Side",
             "type": "node",
