@@ -6,7 +6,7 @@
             "request": "launch",
             "name": "IFC Parser",
             "cwd": "${workspaceRoot}/ifcparser",
-            "program": "${workspaceFolder}/ifcparser/ifcparser.js"
+            "program": "${workspaceFolder}/ifcparser/test.js"
         },
         {
             "name": "Debug Server Side",

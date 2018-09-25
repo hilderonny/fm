@@ -1,23 +1,37 @@
-var STEP = require("node-step");
-var SCHEMA = require("./readExpressSchema");
+const readline = require('readline');
+const fs = require('fs');
 
-SCHEMA.readSchema("IFC2X3_TC1.exp").then((grammar) => {
+// RegExp tester: https://regexr.com/
 
-    console.log(grammar);
-    
-    var reader = new STEP.StepReader();
+function trim(str) { return str.replace(/^\s+/g, '').replace(/\s+$/g, ''); }
 
-    reader.read("1948_IPRO.ifc",function(err) {
-         if (err) {
-           console.log("failure :" + err);
-           return;
-         }
-         var walls = reader.getObjects("IFCWALL");
-         //reader.dumpStatistics();
+function readIfcFile(filename) {
     
-         var types = reader.indexer.types;
-         console.log(walls, types);
+    return new Promise((resolve, reject) => {
+
+        var entities = { byId:{}, byName: {} };
     
+        readline.createInterface({
+            input: fs.createReadStream(filename),
+            crlfDelay: Infinity
+        }).on('line', (line) => {
+            line = trim(line);
+            var match = (/^\#([0-9]+)\=\s*([a-zA-Z_]+)*/g).exec(line);
+            if (!match) return;
+            var entity = {
+                id: match[1],
+                name: match[2],
+                def:  match.input.substr(match[0].length)
+            };
+            entities.byId[entity.id] = entity;
+            if (!entities.byName[entity.name]) entities.byName[entity.name] = [];
+            entities.byName[entity.name].push(entity);
+        }).on('close', () => {
+            resolve(entities);
+        });
+
     });
 
-});
+}
+
+exports.readIfcFile = readIfcFile;
