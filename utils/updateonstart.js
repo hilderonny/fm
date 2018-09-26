@@ -14,6 +14,6 @@ var fs = require("fs");
  */
 module.exports = async() => {
     console.log("UPDATING ON START ...");
-    await deleteOldDatatypes();    
+     
     console.log("UPDATE FINISHED.");
 };
