@@ -7,6 +7,17 @@ var path = require("path");
 var fs = require("fs");
 
 
+async function deleteBelagartenfromRaumbuch(){    
+    /**get all clients
+     * remove the relation between raumbauch app and flooringeditor view
+     */
+        var clientsresult = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients;`)).rows;
+        for(i=0; i<clientsresult.length; i++ )
+        {
+            await Db.query(clientsresult[i].name, "DELETE FROM relations WHERE name = 'raumbuchflooringeditor';");
+        }       
+}
+
 
 
 /**
@@ -14,6 +25,8 @@ var fs = require("fs");
  */
 module.exports = async() => {
     console.log("UPDATING ON START ...");
+
+    await deleteBelagartenfromRaumbuch();
      
     console.log("UPDATE FINISHED.");
 };

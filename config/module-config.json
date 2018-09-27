@@ -624,8 +624,9 @@
                     { "name": "areatypesvf9vf99", "datatype1name": "areatypes", "name1": "vf9", "datatype2name": "areatypes", "name2": "vf99", "relationtypename": "parentchild" },
                     { "name": "areatypesnf2nf21", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf21", "relationtypename": "parentchild" },
                     { "name": "areatypesnf2nf22", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf22", "relationtypename": "parentchild" },
-                    { "name": "raumbuchflooringeditor", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flooringeditor", "relationtypename": "parentchild" },
-                    { "name": "raumbuchflechennachbelagarten", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flechennachbelagarten", "relationtypename": "parentchild"  }
+                    { "name": "cmsflooringeditor", "datatype1name": "apps", "name1": "cms", "datatype2name": "views", "name2": "flooringeditor", "relationtypename": "parentchild" },
+                    { "name": "raumbuchflechennachbelagarten", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flechennachbelagarten", "relationtypename": "parentchild"}
+                 
                 ] },
 
                 { "name": "viewcards", "values": [
@@ -854,6 +855,7 @@
                 { "name": "relations", "values": [
                     { "name": "cmskarteneditor", "datatype1name": "apps", "name1": "cms", "datatype2name": "views", "name2": "karteneditor", "relationtypename": "parentchild" },
                     { "name": "cmssichteneditor", "datatype1name": "apps", "name1": "cms", "datatype2name": "views", "name2": "sichteneditor", "relationtypename": "parentchild" }
+                    
                 ] },
 
                 { "name": "viewcards", "values": [
