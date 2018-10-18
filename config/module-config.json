@@ -894,7 +894,7 @@
         "documents": {
             "forportal": false,
             "forclients": true,
-            "api" : [ "documents", "extractdocument" ],
+            "api" : [ "documents", "extractdocument", "csvimport" ],
             "public" : [
                 "css/icons/material/Add Folder.svg",
                 "css/icons/material/Document.svg",
@@ -917,6 +917,7 @@
                 "public/js/components/avt-document-share-link.js",
                 "public/js/components/avt-download-document-toolbar-button.js",
                 "public/js/components/avt-drag-drop-document.js",
+                "public/js/components/avt-csv-import-document-toolbar-button.js",
                 "public/js/components/avt-extract-document-toolbar-button.js",
                 "public/js/components/avt-replace-document-toolbar-button.js",
                 "public/js/components/avt-upload-document-toolbar-button.js"
@@ -943,7 +944,7 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "documentddocumentdetailscard", "label": "Dokumentendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-document-share-link avt-progress-spinner avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"availableondatatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Unterverzeichnis erstellen\",\"detailscardname\":\"documentddocumentdetailscard\",\"icon\":\"/css/icons/material/Add Folder.svg\"}' avt-upload-document-toolbar-button avt-download-document-toolbar-button avt-extract-document-toolbar-button avt-replace-document-toolbar-button avt-viewin3d-toolbar-button avt-close-toolbar-button></md-card>" },
+                    { "name": "documentddocumentdetailscard", "label": "Dokumentendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-document-share-link avt-progress-spinner avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"availableondatatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Unterverzeichnis erstellen\",\"detailscardname\":\"documentddocumentdetailscard\",\"icon\":\"/css/icons/material/Add Folder.svg\"}' avt-upload-document-toolbar-button avt-download-document-toolbar-button avt-extract-document-toolbar-button avt-csv-import-document-toolbar-button avt-replace-document-toolbar-button avt-viewin3d-toolbar-button avt-close-toolbar-button></md-card>" },
                     { "name": "documentddocumenthierarchycard", "label": "Dokumentenhierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"folders_hierarchy\",\"detailscardname\":\"documentddocumentdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Verzeichnis im Stamm erstellen\",\"icon\":\"/css/icons/material/Add Folder.svg\",\"detailscardname\":\"documentddocumentdetailscard\"}' avt-progress-spinner avt-upload-document-toolbar-button avt-drag-drop-document></md-card>" }
                 ] },
 
