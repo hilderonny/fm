@@ -36,13 +36,15 @@ app.directive('avtCsvImportDocumentToolbarButton', function($compile, $translate
                     };
                     var createdialogokbutton = { label: "OK", ishidden: true , onclick: function() {
                      console.log("ok is clicked");
-                     $http.get('/api/csvimport/' + scope.dynamicobject.name).then(function(response) {
+                     console.log("target",dialogscope.createdialogtargetdatatype.name);
+                     $http.get('/api/csvimport/' + scope.dynamicobject.name + '/' + dialogscope.createdialogtargetdatatype.name).then(function(response) {
+                         console.log(response);
                         scope.isinprogress = false;
                         if (scope.params.oncreate) {
                             scope.params.oncreate(); // Without parameters to force entire reload
                         }
-                        $translate(['TRK_DOCUMENTS_FILE_EXTRACTED']).then(function(translations) {
-                            $mdToast.show($mdToast.simple().textContent(translations.TRK_DOCUMENTS_FILE_EXTRACTED).hideDelay(1000).position('bottom right'));
+                        $translate(['TRK_DOCUMENTS_CSV_FILE_IMPORTED']).then(function(translations) {
+                            $mdToast.show($mdToast.simple().textContent(translations.TRK_DOCUMENTS_CSV_FILE_IMPORTED).hideDelay(1000).position('bottom right'));
                         });
                     })
 

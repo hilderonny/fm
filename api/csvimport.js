@@ -12,71 +12,100 @@ var documentsHelper = require('../utils/documentsHelper');
 var co = require('../utils/constants');
 var Db = require("../utils/db").Db;
 
-async function importDocument(csvdocument, clientname){
+async function importDocument(csvdocument, clientname, targetdatatypename){
     var filePath = documentsHelper.getDocumentPath(clientname, csvdocument.name);
-    var counter = 0;
    // var readstream = fs.createReadStream(filePath);
     console.log(filePath);
+    console.log("target data ",targetdatatypename);
+    console.log("clientname", clientname);
    // console.log(readstream);
+   var contents={};
    
-    fs.readFile(filePath, 'utf8',(err, data) => {
-        if (err) throw err;
-        console.log(data, data.length);
-        //var array =  CSVtoArray(data);
-        var array =csvtoJSON(data);
-        console.log(array);
-        //console.log(data, data.length);
-        
-           /**  var index = data.indexOf('\n');
-            var header = data.substring(0, index);
-            console.log(index);
-            console.log(header, header[2]);**/
-           /** var array = data.split("\n");
-            var str = array[0];
-            console.log(array, str);
-            var headtitls; var head=null;
-            for(i=0; i<=str.length; i++){
-                if(str[i]!== ",")
-                 head= head+str[i];                
-                else{
-                   // console.log(head);                   
-                    headtitls [counter]= head;
-                    counter=counter+1;
-                    head="";                                      
-                }               
-               
+    var columnnames = (await Db.query(clientname, `SELECT column_name FROM information_schema.columns WHERE table_name= '${targetdatatypename}';`)).rows;
+    
+    console.log("columnnames", columnnames);
+    console.log("columnnames_name", columnnames[0].column_name);
+    var data = fs.readFileSync(filePath, 'utf8');
+    console.log(data, data.length);  
+    var array =csvtoJSON(data);
+    console.log("received array", array)
+    var lastarr=[];
+    //console.log(array[0]);
+    //console.log(array[0].label);
+    //console.log(array[0].Name);        
+    for (var i = 0; i < array.length-1; i++) {
+        var object = array[i];
+        for (var property in object) {
+           console.log('item ' + i + ': ' + property + '=' + object[property]);
+            for(var j=0; j<columnnames.length;j++){
+                
+               var clean_property=property.toLowerCase().replace(/\s/g, '').split('\r\n');
+               var cleaned_values= object[property].replace(/\s/g, '').replace(/\'/g, "\"").split('\r\n');            
+                if(clean_property==columnnames[j].column_name){                      
+                   //contents = Object.assign({[columnnames[j].column_name]: object[property]},contents);
+                   contents = Object.assign({[columnnames[j].column_name]: cleaned_values},contents);          
+                    break;
+                }
             }
+        } 
+        lastarr.push(contents);
+        contents={};
+    }  
+    var lastdata={};
+    console.log("last lastarr",lastarr);  
+    var fieldMap = {}; 
+    
+    var fields = (await Db.query(clientname, `SELECT * FROM datatypefields WHERE datatypename = '${Db.replaceQuotes(targetdatatypename)}';`)).rows;
+    for(var k=0; k < lastarr.length; k++)
+    {
+        lastdata= lastarr[k];   
+        console.log("last dataaaaaaa",lastdata);
+        var keys = Object.keys(lastdata);
+        var values = Object.keys(lastdata).map(e => lastdata[e]);
+        console.log("keysssssssss", keys);
+        console.log("valueeeeeees", values);
 
-            console.log("headtitls",headtitls);**/
-            
-         
-      });    
-}
-
-
-/*("([^"]|"")*")
-"[^"\\]*(?:\\[\S\s][^"\\]*)*" 
-"(?:[^]>|"")*")? */
-/** function CSVtoArray(text) {  
-    var re_valid = /^\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|"[^]>|"")*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*(?:,\s*(?:'[^'\\]*(?:\\[\S\s][^'\\]*)*'|"[^"\\]*(?:\\[\S\s][^"\\]*)*"|"[^]>|"")*"|[^,'"\s\\]*(?:\s+[^,'"\s\\]+)*)\s*)*$/;
-    var re_value = /(?!\s*$)\s*(?:'([^'\\]*(?:\\[\S\s][^'\\]*)*)'|"([^"\\]*(?:\\[\S\s][^"\\]*)*)"|("([^"]|"")*")|([^,'"\s\\]*(?:\s+[^,'"\s\\]+)*))\s*(?:,|$)/g;
-    // Return NULL if input string is not well formed CSV string.
-    if (!re_valid.test(text)) return null;
-    var a = [];                     // Initialize array to receive values.
-    text.replace(re_value, // "Walk" the string using replace with callback.
-        function(m0, m1, m2, m3, m4) {
-            // Remove backslash from \' in single quoted values.
-            if      (m1 !== undefined) a.push(m1.replace(/\\'/g, "'"));
-            // Remove backslash from \" in double quoted values.
-            else if (m2 !== undefined) a.push(m2.replace(/\\"/g, '"'));
-            else if(m3 !== undefined) a.push(m3.replace(/"""/g, '"'));
-            else if (m3 !== undefined) a.push(m4);
-            return ''; // Return empty string.
+        fields.forEach((field) => { 
+            fieldMap[field.name] = field;
+            if (field.isrequired && (keys.indexOf(field.name) < 0 || lastdata[field.name] === undefined)) throw new Error(`Required field '${field.name}' is missing`);
         });
-    // Handle special case of empty last value.
-    if (/,\s*$/.test(text)) a.push('');
-    return a;
-};**/
+        console.log(fieldMap);
+
+        keys = keys.filter(k => fieldMap[k]);
+
+        var val= keys.map((k) => {
+            var value = lastdata[k];
+            var field = fieldMap[k];
+            var result;
+            console.log("typeof" , typeof(value[0]));
+           console.log(/^\d+\.\d+$/.test(value[0]));
+            switch (field.fieldtype) {
+                case co.fieldtypes.boolean: if (value !== undefined && value !== null && typeof(value) !== "boolean") throw new Error(`Value type ${typeof(value)} not allowed for field type boolean`); result = (value === undefined || value === null) ? "null" : value; break;
+                case co.fieldtypes.datetime: if (value !== undefined && value !== null && typeof(value) !== "number") throw new Error(`Value type ${typeof(value)} not allowed for field type datetime`); result = (value === undefined || value === null) ? "null" : value; break;
+                case co.fieldtypes.decimal: if (value !== undefined && value !== null && typeof(value) !== "number") throw new Error(`Value type ${typeof(value)} not allowed for field type decimal`); result = (value === undefined || value === null) ? "null" : value; break;
+                case co.fieldtypes.formula: var isnumber= (/^\d+\.\d+$/.test(value[0])); result = (value === undefined || value === null || isnumber===false) ? "null" : `'${Db.replaceQuotes(value)}'`; break;
+                case co.fieldtypes.password: result = (value === undefined || value === null) ? "null" : `'${Db.replaceQuotes(bcryptjs.hashSync(value))}'`; break;
+                case co.fieldtypes.reference: result = (value === undefined || value === null) ? "null" : `'${Db.replaceQuotes(value)}'`; break;
+                case co.fieldtypes.text: result = (value === undefined || value === null) ? "null" : `'${Db.replaceQuotes(value)}'`; break;
+                default: throw new Error(`Unknown field type '${field.fieldtype}'`);
+            }
+            return result;
+        });
+
+
+       /** var query = `INSERT INTO ${targetdatatypename} (${keys}) VALUES ('${values.join('\',\'')}') ON CONFLICT (name) DO UPDATE SET (${keys}) = ('${values.join('\',\'')}');`;
+        var query1 = `INSERT INTO ${targetdatatypename} (${keys}) VALUES ('${val.join('\',\'')}') ON CONFLICT (name) DO UPDATE SET (${keys}) = ('${val.join('\',\'')}');`;
+        var query2 = `INSERT INTO ${targetdatatypename} (${keys}) VALUES ('${val.join(',')}') ON CONFLICT (name) DO UPDATE SET (${keys}) = ('${val.join(',')}');`;**/
+
+        var query = `INSERT INTO ${targetdatatypename} (${keys.map(k => Db.replaceQuotesAndRemoveSemicolon(k)).join(',')}) VALUES (${val.join(',')}) ON CONFLICT (name) DO UPDATE SET (${keys.map(k => Db.replaceQuotesAndRemoveSemicolon(k)).join(',')}) = (${val.join(',')});`;
+        await Db.query(clientname, query);
+        //await Db.query(clientname, query);
+    }
+   
+     
+        
+}//the end of the function 
+
 
 function CSVToArray(strData, strDelimiter) {
     // Check to see if the delimiter is defined. If not,
@@ -141,46 +170,24 @@ function csvtoJSON(csv) {
         }
     }
 
-    var json = JSON.stringify(objArray);
+    var json = JSON.stringify(objArray);//JavaScript object and transforms it into a JSON string.
     var str = json.replace(/},/g, "},\r\n");
+    console.log("Json parsing str",JSON.parse(str));
 
-    return str;
+    return objArray;
 }
 
-/**function csvtoJSON(csv){
-
-    var lines=csv.split('\r');
-for(let i = 0; i<lines.length; i++){
-lines[i] = lines[i].replace(/\s/,'')//delete all blanks
-}
-
-var result = [];
-
-var headers=lines[0].split(",");
-
-for(var i=1;i<lines.length;i++){
-
-  var obj = {};
-  var currentline=lines[i].split(",");
-  for(var j=0;j<headers.length;j++){
-  obj[headers[j].toString()] = currentline[j];
-  }
-  result.push(obj);
-}
-return result; //JavaScript object
-//return JSON.stringify(result); //JSON
-}**/
 
 
 
 // import a specific CSV document 
-router.get('/:id', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), async(req, res) => {
+router.get('/:id/:targetname', auth(co.permissions.OFFICE_DOCUMENT, 'w', co.modules.documents), async(req, res) => {
     var clientname = req.user.clientname;
     var document = await Db.getDynamicObject(clientname, co.collections.documents.name, req.params.id);
-    console.log(document);
+    console.log(document, req.params.targetname);
     if (!document) return res.sendStatus(404);
     if (document.type !== 'text/csv') return res.sendStatus(400);
-    importDocument(document, clientname).then((result) => {
+    importDocument(document, clientname, req.params.targetname).then((result) => {
         res.sendStatus(200);
     }, (error) => {
         // Error parsing file
