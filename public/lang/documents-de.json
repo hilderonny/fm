@@ -1,4 +1,5 @@
 {
+    "TRK_DATATYPES_DATATYPE" : "Datentyp",
     "TRK_DOCUMENTS_FILE_EXTRACTED" : "Datei entpackt",
     "TRK_DOCUMENTS_CSV_FILE_IMPORTED": " \"{{rows}}\" Datei importieren",
     "TRK_FOLDERS_DOCUMENT_UPLOADED" : "Das Dokument wurde hochgeladen",
