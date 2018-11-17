@@ -17,6 +17,12 @@ module.exports.apis = {
      */
     clients: 'clients',
     
+     /**
+     * API for importing csv documents 
+     */
+    csvimport: 'csvimport',
+    /**
+    
     /**
      * API zur Abfrage von Datentypen
      */

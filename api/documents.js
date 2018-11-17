@@ -12,7 +12,10 @@
 var router = require('express').Router();
 var auth = require('../middlewares/auth');
 var multer  = require('multer')
-var upload = multer({ dest: 'uploads/' })
+var upload = multer({ dest: 'uploads/', limits: {
+    fieldSize: 32 * 1024 * 1024 * 1024, // 32GB,
+    fileSize: 32 * 1024 * 1024 * 1024, // 32GB,
+} });
 var fs = require('fs');
 var path = require('path');
 var dh = require('../utils/documentsHelper');
