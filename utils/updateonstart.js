@@ -7,25 +7,26 @@ var path = require("path");
 var fs = require("fs");
 
 
-async function deleteOldDatatypes(){    
-    var recordtypes=["communicationmediums", "communications","communicationtypes","fmobjects","fmobjecttypes"];
-    for(type=0; type<recordtypes.length; type++){
-        //first delete the recordtype from portal
-        await Db.deleteRecordType(Db.PortalDatabaseName, recordtypes[type]);
-        //Then delete it from all clients
+async function deleteBelagartenfromRaumbuch(){    
+    /**get all clients
+     * remove the relation between raumbauch app and flooringeditor view
+     */
         var clientsresult = (await Db.query(Db.PortalDatabaseName, `SELECT * FROM clients;`)).rows;
         for(i=0; i<clientsresult.length; i++ )
         {
-            await Db.deleteRecordType(clientsresult[i].name, recordtypes[type]);
-        }        
-    }
+            await Db.query(clientsresult[i].name, "DELETE FROM relations WHERE name = 'raumbuchflooringeditor';");
+        }       
 }
+
+
 
 /**
  * Update scripts which are run at system startup, when the localconfig flag "applyupdates" is set to true
  */
 module.exports = async() => {
     console.log("UPDATING ON START ...");
-    await deleteOldDatatypes();    
+
+    await deleteBelagartenfromRaumbuch();
+     
     console.log("UPDATE FINISHED.");
 };

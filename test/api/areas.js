@@ -214,4 +214,41 @@ describe('API areas', () =>{
 
     });
 
+    describe('GET/belagarten/:name', () => {
+        it('responds without authentication with 403', async() => {
+            await th.get(`/api/areas/belagarten/client0_level0`).expect(403);
+        });
+
+        it('responds without read permission with 403', async() => {
+            await th.removeReadPermission("client0", "client0_usergroup0", co.permissions.BIM_AREAS);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.get(`/api/areas/belagarten/client0_level0?token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (normal user) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.areas);
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            await th.get(`/api/areas/belagarten/client0_level0?token=${token}`).expect(403);
+        });
+
+        it('responds when the logged in user\'s (administrator) client has no access to this module, with 403', async() => {
+            await th.removeClientModule("client0", co.modules.areas);
+            var token = await th.defaults.login("client0_usergroup0_user1");
+            await th.get(`/api/areas/belagarten/client0_level0?token=${token}`).expect(403);
+        });
+
+        it('responds with not existing name with empty list', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = await th.get(`/api/areas/belagarten/999999999999999999999999?token=${token}`).expect(200);
+            assert.strictEqual(result.body.length, 0);
+        });
+
+        it('responds with empty list when the object with the given name exists but does not belong to the client of the logged in user', async() => {
+            var token = await th.defaults.login("client0_usergroup0_user0");
+            var result = await th.get(`/api/areas/belagarten/client1_level0?token=${token}`).expect(200);
+            assert.strictEqual(result.body.length, 0);
+        });
+
+    });
+
 });

@@ -444,6 +444,7 @@
                 "css/icons/office/icons8-chart.svg",
                 "css/icons/office/icons8-hierarchy.svg",
                 "css/icons/office/surface.svg",
+                "css/images/Areas_belagarten.png",
                 "css/images/Areas_desktop.png",
                 "css/images/Areas_din277.png",
                 "css/images/Areas_mobile.png",
@@ -452,6 +453,8 @@
                 "partial/BIM/AreasCard.html"
             ],
             "include" : [
+                "public/js/components/avt-areas-belagarten-diagram.js",
+                "public/js/components/avt-areas-belagarten-table.js",
                 "public/js/components/avt-areas-usagestate-diagram.js",
                 "public/js/components/avt-areas-usagestate-table.js",
                 "public/js/components/avt-bim-din277-card.js",
@@ -622,7 +625,9 @@
                     { "name": "areatypesvf9vf99", "datatype1name": "areatypes", "name1": "vf9", "datatype2name": "areatypes", "name2": "vf99", "relationtypename": "parentchild" },
                     { "name": "areatypesnf2nf21", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf21", "relationtypename": "parentchild" },
                     { "name": "areatypesnf2nf22", "datatype1name": "areatypes", "name1": "nf2", "datatype2name": "areatypes", "name2": "nf22", "relationtypename": "parentchild" },
-                    { "name": "raumbuchflooringeditor", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flooringeditor", "relationtypename": "parentchild" }
+                    { "name": "cmsflooringeditor", "datatype1name": "apps", "name1": "cms", "datatype2name": "views", "name2": "flooringeditor", "relationtypename": "parentchild" },
+                    { "name": "raumbuchflechennachbelagarten", "datatype1name": "apps", "name1": "raumbuch", "datatype2name": "views", "name2": "flechennachbelagarten", "relationtypename": "parentchild"}
+                 
                 ] },
 
                 { "name": "viewcards", "values": [
@@ -639,14 +644,26 @@
                         "name": "flechennachnutzungsstatusdetailscard", 
                         "label": "Flächen nach Nutzungsstatus Detailansicht", 
                         "content": "<md-card class=\"flex2-card\" avt-card avt-empty-card avt-card-title='{\"title\":\"Nutzungsstatus\",\"showentitylabel\":true}' avt-close-toolbar-button avt-areas-usagestate-table avt-areas-usagestate-diagram></md-card>"
+                    },
+                    { 
+                        "name": "flechennachbelagartenhierarchycard", 
+                        "label": "Flächen nach Belagarten Hierarchie", 
+                        "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"flechennachbelagart\",\"detailscardname\":\"flechennachbelagartendetailscard\"}'></md-card>"
+                    },
+                    { 
+                        "name": "flechennachbelagartendetailscard", 
+                        "label": "Flächen nach Belagarten Detailansicht", 
+                        "content": "<md-card class=\"flex2-card\" avt-card avt-empty-card avt-card-title='{\"title\":\"Belagarten\",\"showentitylabel\":true}' avt-close-toolbar-button avt-areas-belagarten-table avt-areas-belagarten-diagram></md-card>"
                     }
+
                 ] },
 
                 { "name": "views", "values": [
                     { "modulename": "areas", "name": "flaechen", "label": "Flächen Übersicht", "doccard": "Areas#areas", "directurls": "area", "icon": "/css/icons/material/surface.svg", "index": 710, "maincard": "BIM/AreasCard", "permission": "PERMISSION_BIM_AREAS" },
                     { "modulename": "areas", "name": "din277", "label": "Flächen nach DIN 277", "doccard": "Areas#din277", "directurls": "din277", "icon": "/css/icons/material/icons8-hierarchy.svg", "index": 720, "viewcardname": "areasdin277hierarchycard", "permission": "PERMISSION_BIM_AREAS" },
                     { "modulename": "areas", "name": "flechennachnutzungsstatus", "label": "Flächen nach Nutzungsstatus", "doccard": "Areas#nutzungsstatus", "directurls": "flechennachnutzungsstatus", "icon": "/css/icons/material/icons8-chart.svg", "index": 723, "viewcardname": "flechennachnutzungsstatushierarchycard", "permission": "PERMISSION_BIM_AREAS" },
-                    { "modulename": "areas", "name": "flooringeditor", "label": "Belagarten", "doccard": "Areas#flooringeditor", "directurls": "flooringeditor", "icon": "/css/icons/material/icons8-carpet.svg", "index": 730, "viewcardname": "areasflooringeditorlistcard",  "permission": "PERMISSION_BIM_AREAS" }
+                    { "modulename": "areas", "name": "flooringeditor", "label": "Belagarten", "doccard": "Areas#flooringeditor", "directurls": "flooringeditor", "icon": "/css/icons/material/icons8-carpet.svg", "index": 730, "viewcardname": "areasflooringeditorlistcard",  "permission": "PERMISSION_BIM_AREAS" },
+                    { "modulename": "areas", "name": "flechennachbelagarten", "label":"Flächen nach Belagarten", "doccard": "Areas#flooring", "directurls": "flechennachbelagarten", "icon": "/css/icons/material/icons8-carpet.svg", "index":740, "viewcardname": "flechennachbelagartenhierarchycard", "permission": "PERMISSION_BIM_AREAS"}
                 ] }
 
             ]
@@ -839,6 +856,7 @@
                 { "name": "relations", "values": [
                     { "name": "cmskarteneditor", "datatype1name": "apps", "name1": "cms", "datatype2name": "views", "name2": "karteneditor", "relationtypename": "parentchild" },
                     { "name": "cmssichteneditor", "datatype1name": "apps", "name1": "cms", "datatype2name": "views", "name2": "sichteneditor", "relationtypename": "parentchild" }
+                    
                 ] },
 
                 { "name": "viewcards", "values": [
@@ -876,7 +894,7 @@
         "documents": {
             "forportal": false,
             "forclients": true,
-            "api" : [ "documents", "extractdocument" ],
+            "api" : [ "documents", "extractdocument", "csvimport" ],
             "public" : [
                 "css/icons/material/Add Folder.svg",
                 "css/icons/material/Document.svg",
@@ -899,6 +917,7 @@
                 "public/js/components/avt-document-share-link.js",
                 "public/js/components/avt-download-document-toolbar-button.js",
                 "public/js/components/avt-drag-drop-document.js",
+                "public/js/components/avt-csv-import-document-toolbar-button.js",
                 "public/js/components/avt-extract-document-toolbar-button.js",
                 "public/js/components/avt-replace-document-toolbar-button.js",
                 "public/js/components/avt-upload-document-toolbar-button.js"
@@ -925,7 +944,7 @@
                 ] },
 
                 { "name": "viewcards", "values": [
-                    { "name": "documentddocumentdetailscard", "label": "Dokumentendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-document-share-link avt-progress-spinner avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"availableondatatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Unterverzeichnis erstellen\",\"detailscardname\":\"documentddocumentdetailscard\",\"icon\":\"/css/icons/material/Add Folder.svg\"}' avt-upload-document-toolbar-button avt-download-document-toolbar-button avt-extract-document-toolbar-button avt-replace-document-toolbar-button avt-viewin3d-toolbar-button avt-close-toolbar-button></md-card>" },
+                    { "name": "documentddocumentdetailscard", "label": "Dokumentendetails", "content": "<md-card avt-card avt-details-card avt-relations avt-document-share-link avt-progress-spinner avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"availableondatatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Unterverzeichnis erstellen\",\"detailscardname\":\"documentddocumentdetailscard\",\"icon\":\"/css/icons/material/Add Folder.svg\"}' avt-upload-document-toolbar-button avt-download-document-toolbar-button avt-extract-document-toolbar-button avt-csv-import-document-toolbar-button avt-replace-document-toolbar-button avt-viewin3d-toolbar-button avt-close-toolbar-button></md-card>" },
                     { "name": "documentddocumenthierarchycard", "label": "Dokumentenhierarchie", "content": "<md-card avt-card avt-hierarchy-card='{\"listfilter\":\"folders_hierarchy\",\"detailscardname\":\"documentddocumentdetailscard\"}' avt-add-element-toolbar-button='{\"datatypenames\":[\"folders\"],\"label\":\"Verzeichnis\",\"tooltip\":\"Verzeichnis im Stamm erstellen\",\"icon\":\"/css/icons/material/Add Folder.svg\",\"detailscardname\":\"documentddocumentdetailscard\"}' avt-progress-spinner avt-upload-document-toolbar-button avt-drag-drop-document></md-card>" }
                 ] },
 
@@ -971,7 +990,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
-                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus", "flechennachbelagart" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "properties", "label": "Liegenschaft", "plurallabel": "Liegenschaften", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_PROPERTY.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -982,7 +1001,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
-                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus", "flechennachbelagart" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "buildings", "label": "Gebäude", "plurallabel": "Gebäude", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_BUILDING.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -993,7 +1012,7 @@
                     { "name": "nuf", "label": "Nutzungsfläche (NUF)", "type": "formula", "formula": { "childsum" : "nuf" }, "formulaindex": 0 },
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 }
-                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus", "flechennachbelagart" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "levels", "label": "Etage", "plurallabel": "Etagen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_LEVEL.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -1004,7 +1023,7 @@
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
                     { "name": "kgf", "label": "Konstruktions-Grundfläche (KGF)", "type": "formula", "formula": { "sum" : ["bgf", "-nrf"] }, "formulaindex": 3 }
-                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus", "flechennachbelagart" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "rooms", "label": "Raum", "plurallabel": "Räume", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_ROOM.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
@@ -1013,7 +1032,7 @@
                     { "name": "tf", "label": "Technische Funktionsfläche (TF)", "type": "formula", "formula": { "childsum" : "tf" }, "formulaindex": 1 },
                     { "name": "vf", "label": "Verkehrsfläche (VF)", "type": "formula", "formula": { "childsum" : "vf" }, "formulaindex": 2 },
                     { "name": "nrf", "label": "Netto-Raumfläche (NRF, berechnet)", "type": "formula", "formula": { "sum" : ["nuf", "tf", "vf"] }, "formulaindex": 3 }
-                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
+                ], "lists": [ "fmobjects_hierarchy", "areas_hierarchy", "flechennachnutzungsstatus", "flechennachbelagart" ], "permissionkey": "PERMISSION_BIM_FMOBJECT", "canhaverelations" : true },
 
                 { "name": "areas", "label": "Fläche", "plurallabel": "Flächen", "titlefield": "label", "icon": "css/icons/fm/FMOBJECTS_TYPE_AREA.svg", "fields": [
                     { "name": "label", "label": "Bezeichnung", "type": "text" },
